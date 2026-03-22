@@ -19,14 +19,14 @@ const AiStar = ({ size = 28, className, label, animate = true }: AiStarProps) =>
           viewBox="0 0 36 36"
           fill="none"
         >
-          {/* Large sparkle */}
+          {/* Large sparkle — softer curves */}
           <path
-            d="M18 2 C19 12 24 17 34 18 C24 19 19 24 18 34 C17 24 12 19 2 18 C12 17 17 12 18 2Z"
+            d="M18 3 Q18.6 11.5 24.5 15 Q19 18.6 18 33 Q17 18.6 11.5 15 Q17.4 11.5 18 3Z"
             fill={`url(#${id}-big)`}
           />
-          {/* Small sparkle — offset top-right */}
+          {/* Small sparkle — softer curves */}
           <path
-            d="M28 1 C28.4 5 30.5 7.2 34.5 7.5 C30.5 7.8 28.4 10 28 14 C27.6 10 25.5 7.8 21.5 7.5 C25.5 7.2 27.6 5 28 1Z"
+            d="M28 2 Q28.3 5.5 31 7.5 Q28.3 9.5 28 13 Q27.7 9.5 25 7.5 Q27.7 5.5 28 2Z"
             fill={`url(#${id}-small)`}
           />
           <defs>
