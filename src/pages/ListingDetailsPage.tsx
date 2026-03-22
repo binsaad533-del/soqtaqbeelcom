@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { MapPin, Calendar, FileText, ShieldCheck, AlertTriangle, TrendingUp, Lightbulb, ArrowRight, MessageCircle, ChevronDown, ChevronUp, Building2 } from "lucide-react";
+import { MapPin, FileText, ShieldCheck, AlertTriangle, TrendingUp, Lightbulb, MessageCircle, ChevronDown, ChevronUp, Building2, BarChart3 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
