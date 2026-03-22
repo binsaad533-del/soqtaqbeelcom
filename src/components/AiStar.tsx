@@ -8,6 +8,8 @@ interface AiStarProps {
 }
 
 const AiStar = ({ size = 28, className, label, animate = true }: AiStarProps) => {
+  const id = `ai-star-${Math.random().toString(36).slice(2, 8)}`;
+
   return (
     <div className={cn("inline-flex items-center gap-2", className)}>
       <div className={cn("relative", animate && "ai-star-pulse")}>
@@ -17,24 +19,29 @@ const AiStar = ({ size = 28, className, label, animate = true }: AiStarProps) =>
           viewBox="0 0 32 32"
           fill="none"
           className={cn(animate && "ai-star-rotate")}
-          style={{ animationDuration: "20s" }}
+          style={{ animationDuration: "16s" }}
         >
+          {/* 4-pointed sparkle shape */}
           <path
-            d="M16 2 L18.5 12 L28 10 L20 16 L28 22 L18.5 20 L16 30 L13.5 20 L4 22 L12 16 L4 10 L13.5 12 Z"
-            stroke="url(#ai-grad)"
-            strokeWidth="1.2"
-            fill="url(#ai-grad-fill)"
-            strokeLinejoin="round"
+            d="M16 0 C16.8 10 22 15.2 32 16 C22 16.8 16.8 22 16 32 C15.2 22 10 16.8 0 16 C10 15.2 15.2 10 16 0Z"
+            fill={`url(#${id}-fill)`}
+          />
+          {/* Smaller inner sparkle for depth */}
+          <path
+            d="M16 6 C16.5 12 20 15.5 26 16 C20 16.5 16.5 20 16 26 C15.5 20 12 16.5 6 16 C12 15.5 15.5 12 16 6Z"
+            fill={`url(#${id}-inner)`}
+            opacity="0.6"
           />
           <defs>
-            <linearGradient id="ai-grad" x1="0" y1="0" x2="32" y2="32">
-              <stop offset="0%" stopColor="hsl(210 100% 52%)" />
-              <stop offset="100%" stopColor="hsl(200 90% 58%)" />
-            </linearGradient>
-            <linearGradient id="ai-grad-fill" x1="0" y1="0" x2="32" y2="32">
-              <stop offset="0%" stopColor="hsl(210 100% 52% / 0.15)" />
-              <stop offset="100%" stopColor="hsl(200 90% 58% / 0.08)" />
-            </linearGradient>
+            <radialGradient id={`${id}-fill`} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="hsl(210 100% 65%)" />
+              <stop offset="60%" stopColor="hsl(210 100% 52%)" />
+              <stop offset="100%" stopColor="hsl(210 90% 45%)" />
+            </radialGradient>
+            <radialGradient id={`${id}-inner`} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="hsl(0 0% 100%)" />
+              <stop offset="100%" stopColor="hsl(210 100% 80%)" />
+            </radialGradient>
           </defs>
         </svg>
       </div>
