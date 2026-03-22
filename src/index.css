@@ -120,8 +120,8 @@
 
 /* AI Star Animation */
 @keyframes ai-pulse {
-  0%, 100% { opacity: 0.9; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.08); }
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.12); }
 }
 
 @keyframes ai-rotate {
@@ -130,16 +130,16 @@
 }
 
 @keyframes ai-glow {
-  0%, 100% { filter: drop-shadow(0 0 6px hsla(210, 100%, 52%, 0.3)); }
-  50% { filter: drop-shadow(0 0 14px hsla(210, 100%, 52%, 0.5)); }
+  0%, 100% { filter: drop-shadow(0 0 8px hsla(210, 100%, 52%, 0.35)); }
+  50% { filter: drop-shadow(0 0 18px hsla(210, 100%, 60%, 0.55)); }
 }
 
 .ai-star-pulse {
-  animation: ai-pulse 3s ease-in-out infinite, ai-glow 3s ease-in-out infinite;
+  animation: ai-pulse 2.8s ease-in-out infinite, ai-glow 2.8s ease-in-out infinite;
 }
 
 .ai-star-rotate {
-  animation: ai-rotate 20s linear infinite;
+  animation: ai-rotate 16s linear infinite;
 }
 
 /* Scroll reveal */
