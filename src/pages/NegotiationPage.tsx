@@ -354,6 +354,23 @@ const NegotiationPage = () => {
                 </Button>
               </div>
             )}
+
+            {/* Commission Payment Panel for seller */}
+            {commission && (deal.status === "completed" || deal.status === "finalized") && (
+              <CommissionPaymentPanel
+                commission={commission}
+                isSeller={user?.id === deal.seller_id}
+                onUpdate={loadData}
+              />
+            )}
+
+            {/* Buyer Review Form after deal completion */}
+            {isBuyer && (deal.status === "completed" || deal.status === "finalized") && deal.seller_id && (
+              <SellerReviewForm
+                dealId={deal.id}
+                sellerId={deal.seller_id}
+              />
+            )}
           </div>
         </div>
       </div>
