@@ -239,10 +239,10 @@ const AiAssistant = () => {
                   <p className="text-[10px] text-muted-foreground">{role}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] text-emerald-600">نشط</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                  <span className="text-[10px] text-success">نشط</span>
                 </div>
                 <button onClick={() => setOpen(false)} className="text-muted-foreground/60 hover:text-foreground transition-colors">
                   <X size={14} strokeWidth={1.5} />
