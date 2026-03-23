@@ -125,7 +125,6 @@ const AiAssistant = () => {
 
     let assistantText = "";
     const assistantId = String(Date.now() + 1);
-    pendingSpeakRef.current = "";
 
     streamChat({
       messages: allMessages,
