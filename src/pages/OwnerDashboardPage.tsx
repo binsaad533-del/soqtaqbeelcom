@@ -197,6 +197,10 @@ const OwnerDashboardPage = () => {
         )}
 
         {activeTab === 5 && (
+          <SecurityIncidentPanel />
+        )}
+
+        {activeTab === 6 && (
           <div className="space-y-3">
             <h2 className="font-medium mb-2">الإعدادات</h2>
             {["إعدادات عامة", "إعدادات العلامة التجارية", "إعدادات الإشعارات", "إعدادات الذكاء الاصطناعي", "إعدادات الأمان"].map((s, i) => (
