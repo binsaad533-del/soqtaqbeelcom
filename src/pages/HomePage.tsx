@@ -85,53 +85,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Problem-Solution */}
-      <section className="py-16 md:py-24">
-        <div className="container">
-          <div className="grid md:grid-cols-2 gap-6 md:gap-10 max-w-3xl mx-auto" ref={addRevealRef} style={{ opacity: 0 }}>
-            {/* Sellers */}
-            <div className="bg-card rounded-2xl p-6 shadow-soft">
-              <h3 className="text-lg font-medium mb-4 text-primary">أصحاب المشاريع</h3>
-              <ul className="space-y-3">
-                {[
-                  "صعوبة تسويق المشروع",
-                  "عرض غير واضح للمشتري",
-                  "تأخير في البيع وإتمام الصفقة",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed">
-                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-muted-foreground/40 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Buyers */}
-            <div className="bg-card rounded-2xl p-6 shadow-soft">
-              <h3 className="text-lg font-medium mb-4 text-primary">الباحثين عن الفرص</h3>
-              <ul className="space-y-3">
-                {[
-                  "صعوبة العثور على فرص حقيقية",
-                  "بيانات ناقصة أو غير واضحة",
-                  "أسعار غير منطقية",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed">
-                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-muted-foreground/40 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Center message */}
-          <div className="text-center mt-10" ref={addRevealRef} style={{ opacity: 0 }}>
-            <span className="inline-block gradient-primary text-primary-foreground text-sm font-medium px-5 py-2 rounded-full shadow-soft">
-              هنا يلتقون
-            </span>
-          </div>
-        </div>
-      </section>
 
 
       {/* Smart Platform */}
