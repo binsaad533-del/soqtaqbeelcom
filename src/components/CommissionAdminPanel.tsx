@@ -119,7 +119,7 @@ const CommissionAdminPanel = () => {
                 <div>
                   <div className="text-sm font-medium">{c.commission_amount.toLocaleString("en-US")} ر.س</div>
                   <div className="text-[10px] text-muted-foreground">
-                    صفقة: {c.deal_amount.toLocaleString("en-US")} ر.س • {new Date(c.created_at).toLocaleDateString("ar-SA")}
+                    صفقة: {c.deal_amount.toLocaleString("en-US")} ر.س • صفقة: {c.deal_amount.toLocaleString("en-US")} ر.س • {new Date(c.created_at).toLocaleDateString("en-US")}
                   </div>
                 </div>
                 <Badge variant="outline" className={`text-[10px] ${COMMISSION_STATUS_COLORS[s]}`}>
