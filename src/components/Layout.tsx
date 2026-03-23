@@ -43,7 +43,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <div className="container h-full flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img src={logo} alt="سوق تقبيل" className="h-12 w-auto" />
+            <img src={logo} alt="سوق تقبيل" className="h-16 md:h-18 w-auto" />
           </Link>
 
           {/* Center nav */}
