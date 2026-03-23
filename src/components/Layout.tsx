@@ -3,6 +3,7 @@ import { Search, User, Menu, X, LogIn, LogOut } from "lucide-react";
 import { useState } from "react";
 import AiStar from "./AiStar";
 import AiAssistant from "./AiAssistant";
+import Footer from "./Footer";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 
