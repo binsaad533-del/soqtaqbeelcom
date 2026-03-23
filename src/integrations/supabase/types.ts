@@ -14,6 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
+      deal_agreements: {
+        Row: {
+          agreement_number: string
+          amendment_reason: string | null
+          business_activity: string | null
+          buyer_approved: boolean
+          buyer_approved_at: string | null
+          buyer_contact: string | null
+          buyer_name: string | null
+          created_at: string
+          deal_id: string
+          deal_title: string | null
+          deal_type: string | null
+          declarations: Json | null
+          documents_referenced: Json | null
+          excluded_assets: Json | null
+          financial_terms: Json | null
+          id: string
+          important_notes: Json | null
+          included_assets: Json | null
+          lease_details: Json | null
+          liabilities: Json | null
+          license_status: Json | null
+          location: string | null
+          pdf_path: string | null
+          previous_version_id: string | null
+          seller_approved: boolean
+          seller_approved_at: string | null
+          seller_contact: string | null
+          seller_name: string | null
+          status: string
+          version: number
+        }
+        Insert: {
+          agreement_number: string
+          amendment_reason?: string | null
+          business_activity?: string | null
+          buyer_approved?: boolean
+          buyer_approved_at?: string | null
+          buyer_contact?: string | null
+          buyer_name?: string | null
+          created_at?: string
+          deal_id: string
+          deal_title?: string | null
+          deal_type?: string | null
+          declarations?: Json | null
+          documents_referenced?: Json | null
+          excluded_assets?: Json | null
+          financial_terms?: Json | null
+          id?: string
+          important_notes?: Json | null
+          included_assets?: Json | null
+          lease_details?: Json | null
+          liabilities?: Json | null
+          license_status?: Json | null
+          location?: string | null
+          pdf_path?: string | null
+          previous_version_id?: string | null
+          seller_approved?: boolean
+          seller_approved_at?: string | null
+          seller_contact?: string | null
+          seller_name?: string | null
+          status?: string
+          version?: number
+        }
+        Update: {
+          agreement_number?: string
+          amendment_reason?: string | null
+          business_activity?: string | null
+          buyer_approved?: boolean
+          buyer_approved_at?: string | null
+          buyer_contact?: string | null
+          buyer_name?: string | null
+          created_at?: string
+          deal_id?: string
+          deal_title?: string | null
+          deal_type?: string | null
+          declarations?: Json | null
+          documents_referenced?: Json | null
+          excluded_assets?: Json | null
+          financial_terms?: Json | null
+          id?: string
+          important_notes?: Json | null
+          included_assets?: Json | null
+          lease_details?: Json | null
+          liabilities?: Json | null
+          license_status?: Json | null
+          location?: string | null
+          pdf_path?: string | null
+          previous_version_id?: string | null
+          seller_approved?: boolean
+          seller_approved_at?: string | null
+          seller_contact?: string | null
+          seller_name?: string | null
+          status?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_agreements_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_agreements_previous_version_id_fkey"
+            columns: ["previous_version_id"]
+            isOneToOne: false
+            referencedRelation: "deal_agreements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_checks: {
         Row: {
           created_at: string
@@ -46,6 +160,86 @@ export type Database = {
           requested_by?: string | null
           status?: string
           summary?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      deal_history: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          deal_id: string
+          details: Json | null
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          deal_id: string
+          details?: Json | null
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          deal_id?: string
+          details?: Json | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_history_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          agreed_price: number | null
+          buyer_id: string | null
+          completed_at: string | null
+          created_at: string
+          deal_details: Json | null
+          deal_type: string | null
+          id: string
+          listing_id: string
+          locked: boolean
+          seller_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agreed_price?: number | null
+          buyer_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          deal_details?: Json | null
+          deal_type?: string | null
+          id?: string
+          listing_id: string
+          locked?: boolean
+          seller_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agreed_price?: number | null
+          buyer_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          deal_details?: Json | null
+          deal_type?: string | null
+          id?: string
+          listing_id?: string
+          locked?: boolean
+          seller_id?: string | null
+          status?: string
           updated_at?: string
         }
         Relationships: []
