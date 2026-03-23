@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Send, ArrowRight, Zap, Loader2, Shield } from "lucide-react";
+import { Send, ArrowRight, Zap, Loader2, Shield, Scale } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import TrustBadge from "@/components/TrustBadge";
 import DealRiskIndicator from "@/components/DealRiskIndicator";
