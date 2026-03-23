@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { X, Send, Sparkles, ChevronLeft, Zap } from "lucide-react";
 import AiStar from "./AiStar";
 import { useAiContext, type AiSuggestion } from "@/hooks/useAiContext";
@@ -7,9 +7,72 @@ import { Button } from "@/components/ui/button";
 
 interface ChatMsg {
   id: string;
-  role: "user" | "ai";
-  text: string;
+  role: "user" | "assistant";
+  content: string;
   time: string;
+}
+
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
+
+async function streamChat({
+  messages,
+  context,
+  onDelta,
+  onDone,
+  onError,
+}: {
+  messages: { role: string; content: string }[];
+  context?: string;
+  onDelta: (text: string) => void;
+  onDone: () => void;
+  onError: (msg: string) => void;
+}) {
+  try {
+    const resp = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ messages, context }),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: "خطأ غير معروف" }));
+      onError(err.error || "حدث خطأ");
+      return;
+    }
+
+    if (!resp.body) { onError("لا يوجد استجابة"); return; }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let idx: number;
+      while ((idx = buffer.indexOf("\n")) !== -1) {
+        let line = buffer.slice(0, idx);
+        buffer = buffer.slice(idx + 1);
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (!line.startsWith("data: ")) continue;
+        const json = line.slice(6).trim();
+        if (json === "[DONE]") { onDone(); return; }
+        try {
+          const parsed = JSON.parse(json);
+          const c = parsed.choices?.[0]?.delta?.content;
+          if (c) onDelta(c);
+        } catch { /* partial */ }
+      }
+    }
+    onDone();
+  } catch (e) {
+    onError("فشل الاتصال بالمساعد الذكي");
+  }
 }
 
 const AiAssistant = () => {
@@ -17,71 +80,66 @@ const AiAssistant = () => {
   const [chatMode, setChatMode] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
-  const [typing, setTyping] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { greeting, role, suggestions, proactiveMessage, dismissProactive, pathname } = useAiContext();
 
-  // Reset on page change
-  useEffect(() => {
-    setChatMode(false);
-    setMessages([]);
-  }, [pathname]);
-
-  // Scroll chat
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages, typing]);
-
-  // Focus input
-  useEffect(() => {
-    if (chatMode && inputRef.current) inputRef.current.focus();
-  }, [chatMode]);
+  useEffect(() => { setChatMode(false); setMessages([]); }, [pathname]);
+  useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
+  useEffect(() => { chatMode && inputRef.current?.focus(); }, [chatMode]);
 
   const now = () => new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
-  const simulateAiResponse = (userText: string) => {
-    setTyping(true);
-    setTimeout(() => {
-      const responses: Record<string, string> = {
-        default: "أنا هنا لمساعدتك. اسألني عن أي شيء يخص الصفقة أو المنصة وسأجيبك فوراً.",
-      };
+  const buildContext = useCallback(() => {
+    return `الصفحة الحالية: ${pathname}\nدور المستخدم: ${role}`;
+  }, [pathname, role]);
 
-      let response = responses.default;
+  const sendMessage = useCallback((text: string) => {
+    const userMsg: ChatMsg = { id: String(Date.now()), role: "user", content: text, time: now() };
+    setMessages(prev => [...prev, userMsg]);
+    setStreaming(true);
 
-      if (userText.includes("سعر") || userText.includes("تقييم")) {
-        response = "بناءً على تحليل الأصول المعلنة والإيرادات المقدّرة، يبدو السعر المطلوب ضمن النطاق المعقول مع وجود هامش تفاوض يتراوح بين 10% إلى 15%. أنصح بالتركيز على تفاصيل عقد الإيجار والالتزامات المالية القائمة قبل تقديم عرض.";
-      } else if (userText.includes("تفاوض") || userText.includes("عرض")) {
-        response = "أقترح البدء بعرض يعكس قيمة الأصول المؤكّدة مع خصم لأي مخاطر تشغيلية. يمكنني صياغة عرض احترافي نيابة عنك يتضمن شروط حماية وفترة انتقالية.";
-      } else if (userText.includes("مخاطر") || userText.includes("خطر")) {
-        response = "أبرز المخاطر المحتملة:\n• عدم وضوح الالتزامات المالية القائمة\n• حالة بعض المعدات تحتاج تحقق ميداني\n• مدة الإيجار المتبقية قد تؤثر على العائد\n• غياب بعض المستندات الداعمة\n\nأنصح بطلب كشف حساب بنكي لآخر 6 أشهر ومراجعة عقد الإيجار بالتفصيل.";
-      } else if (userText.includes("مستند") || userText.includes("ملف") || userText.includes("رفع")) {
-        response = "يمكنك رفع المستندات وسأقوم باستخراج البيانات تلقائياً وتوزيعها على الحقول المناسبة. أدعم: عقود الإيجار، السجلات التجارية، الفواتير، رخص البلدية والدفاع المدني، وأي مستندات داعمة أخرى.";
-      } else if (userText.includes("صور") || userText.includes("صورة")) {
-        response = "ارفع صور المشروع وسأقوم بـ:\n• تحليل الأصول المرئية وتصنيفها\n• تقدير حالة المعدات\n• اكتشاف الزوايا الناقصة\n• تحسين جودة الصور للعرض\n• إنشاء جرد أولي تلقائي";
-      }
+    const allMessages = [...messages, { role: "user", content: text }].map(m => ({
+      role: m.role === "assistant" ? "assistant" as const : "user" as const,
+      content: "content" in m ? m.content : "",
+    }));
 
-      setMessages(prev => [...prev, { id: String(Date.now()), role: "ai", text: response, time: now() }]);
-      setTyping(false);
-    }, 1200);
-  };
+    let assistantText = "";
+    const assistantId = String(Date.now() + 1);
+
+    streamChat({
+      messages: allMessages,
+      context: buildContext(),
+      onDelta: (chunk) => {
+        assistantText += chunk;
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (last?.role === "assistant" && last.id === assistantId) {
+            return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantText } : m);
+          }
+          return [...prev, { id: assistantId, role: "assistant", content: assistantText, time: now() }];
+        });
+      },
+      onDone: () => setStreaming(false),
+      onError: (err) => {
+        setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: `⚠️ ${err}`, time: now() }]);
+        setStreaming(false);
+      },
+    });
+  }, [messages, buildContext]);
 
   const handleSend = () => {
-    if (!input.trim()) return;
-    const userMsg: ChatMsg = { id: String(Date.now()), role: "user", text: input, time: now() };
-    setMessages(prev => [...prev, userMsg]);
+    if (!input.trim() || streaming) return;
+    const text = input;
     setInput("");
-    simulateAiResponse(input);
+    sendMessage(text);
   };
 
   const handleSuggestionClick = (s: AiSuggestion) => {
     setChatMode(true);
-    const userMsg: ChatMsg = { id: String(Date.now()), role: "user", text: s.label, time: now() };
-    setMessages([userMsg]);
-    simulateAiResponse(s.label);
+    sendMessage(s.label);
   };
 
   return (
@@ -153,10 +211,8 @@ const AiAssistant = () => {
           </div>
 
           {!chatMode ? (
-            /* Suggestions View */
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               <p className="text-xs text-muted-foreground leading-relaxed mb-3">{greeting}</p>
-
               {suggestions.map((s) => (
                 <button
                   key={s.id}
@@ -168,9 +224,7 @@ const AiAssistant = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm font-medium text-foreground">{s.label}</span>
-                        {s.priority === "high" && (
-                          <Zap size={10} className="text-warning shrink-0" strokeWidth={2} />
-                        )}
+                        {s.priority === "high" && <Zap size={10} className="text-warning shrink-0" strokeWidth={2} />}
                       </div>
                       <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{s.description}</p>
                     </div>
@@ -178,8 +232,6 @@ const AiAssistant = () => {
                   </div>
                 </button>
               ))}
-
-              {/* Quick chat entry */}
               <button
                 onClick={() => setChatMode(true)}
                 className="w-full mt-2 py-2.5 rounded-xl border border-dashed border-primary/20 text-xs text-primary hover:bg-primary/[0.03] transition-colors"
@@ -188,7 +240,6 @@ const AiAssistant = () => {
               </button>
             </div>
           ) : (
-            /* Chat View */
             <>
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.map((msg) => (
@@ -199,19 +250,19 @@ const AiAssistant = () => {
                         ? "bg-primary/8 border border-primary/10"
                         : "bg-accent/50 border border-accent-foreground/10"
                     )}>
-                      {msg.role === "ai" && (
+                      {msg.role === "assistant" && (
                         <div className="flex items-center gap-1 mb-1.5">
                           <AiStar size={12} animate={false} />
                           <span className="text-[10px] text-accent-foreground font-medium">المساعد الذكي</span>
                         </div>
                       )}
-                      {msg.text}
+                      {msg.content}
                     </div>
                     <span className="text-[9px] text-muted-foreground mt-0.5 px-1 block">{msg.time}</span>
                   </div>
                 ))}
 
-                {typing && (
+                {streaming && messages[messages.length - 1]?.role !== "assistant" && (
                   <div className="ml-auto max-w-[85%]">
                     <div className="rounded-2xl px-3.5 py-2.5 bg-accent/50 border border-accent-foreground/10">
                       <div className="flex items-center gap-1 mb-1">
@@ -238,8 +289,9 @@ const AiAssistant = () => {
                     onKeyDown={e => e.key === "Enter" && handleSend()}
                     placeholder="اكتب سؤالك..."
                     className="flex-1 px-3 py-2 rounded-xl border border-border/50 bg-background text-xs placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
+                    disabled={streaming}
                   />
-                  <Button onClick={handleSend} size="icon" className="gradient-primary text-primary-foreground rounded-xl h-8 w-8 active:scale-[0.95]">
+                  <Button onClick={handleSend} size="icon" disabled={streaming} className="gradient-primary text-primary-foreground rounded-xl h-8 w-8 active:scale-[0.95]">
                     <Send size={13} strokeWidth={1.5} />
                   </Button>
                 </div>

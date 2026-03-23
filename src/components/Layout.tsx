@@ -3,6 +3,7 @@ import { Search, User, Menu, X, LogIn, LogOut } from "lucide-react";
 import { useState } from "react";
 import AiStar from "./AiStar";
 import AiAssistant from "./AiAssistant";
+import Footer from "./Footer";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 
@@ -99,22 +100,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
       <main className="flex-1">{children}</main>
       <AiAssistant />
-
-      <footer className="border-t border-border/50 bg-card/50">
-        <div className="container py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <AiStar size={20} animate={false} />
-              <span className="text-sm text-muted-foreground">سوق تقبيل — منصة تقبّل الأعمال الذكية</span>
-            </div>
-            <div className="flex gap-6 text-sm text-muted-foreground">
-              <Link to="/marketplace" className="hover:text-foreground transition-colors">السوق</Link>
-              <Link to="/create-listing" className="hover:text-foreground transition-colors">أضف فرصة</Link>
-              <Link to="/dashboard" className="hover:text-foreground transition-colors">حسابي</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
