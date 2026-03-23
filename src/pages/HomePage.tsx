@@ -52,19 +52,6 @@ const HomePage = () => {
               <span className="gradient-text">والذكاء الاصطناعي يكمل الباقي</span>
             </h1>
 
-            {/* Moqbil speech bubble */}
-            <div
-              className={`
-                flex justify-center mb-4
-                transition-all duration-700 ease-out delay-500
-                ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}
-              `}
-            >
-              <span className="inline-flex items-center gap-1.5 bg-card/90 backdrop-blur-sm text-xs font-medium text-foreground/80 px-4 py-2 rounded-full shadow-soft border border-border/30">
-                ✨ أنا مقبل… أكمل لك كل شيء!
-              </span>
-            </div>
-
             <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
               جرد، تقييم، بيانات، وتفاوض — كلها تلقائيًا بدون ما تكتب سطر واحد.
             </p>
