@@ -182,7 +182,7 @@ const CustomerDashboardPage = () => {
               <Link key={deal.id} to={`/negotiate/${deal.id}`} className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card hover:shadow-soft transition-all">
                 <div className="flex-1">
                   <div className="text-sm font-medium">صفقة #{deal.id.slice(0, 8)}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{new Date(deal.created_at).toLocaleDateString("ar-SA")}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5"><div className="text-xs text-muted-foreground mt-0.5">{new Date(deal.created_at).toLocaleDateString("en-US")}</div></div>
                 </div>
                 <span className="text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary">نشطة</span>
               </Link>
