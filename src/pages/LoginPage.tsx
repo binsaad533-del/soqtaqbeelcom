@@ -130,7 +130,7 @@ const LoginPage = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="سوق تقبيل" className="h-28 md:h-32 w-auto mx-auto" />
+            <img src={logo} alt="سوق تقبيل" className="h-14 md:h-16 w-auto mx-auto" />
           </div>
           <h1 className="text-2xl font-medium gradient-text">سوق تقبيل</h1>
           <p className="text-sm text-muted-foreground mt-2">
