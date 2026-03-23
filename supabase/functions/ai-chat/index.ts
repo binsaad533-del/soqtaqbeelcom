@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `أنت المساعد الذكي لمنصة "سوق تقبيل" — منصة سعودية متخصصة في تقبّل الأعمال التجارية والمشاريع.
+const SYSTEM_PROMPT = `أنت المساعد الذكي لمنصة "سوق تقبيل" — منصة سعودية متخصصة في تقبيل الأعمال التجارية والمشاريع.
 
 شخصيتك:
 - تتكلم بالعامية السعودية بشكل طبيعي وودود
