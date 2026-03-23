@@ -141,11 +141,6 @@ const AiAssistant = () => {
       },
       onDone: () => {
         setStreaming(false);
-        // Speak the full response when done
-        if (pendingSpeakRef.current) {
-          speak(pendingSpeakRef.current);
-          pendingSpeakRef.current = "";
-        }
       },
       onError: (err) => {
         setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: `⚠️ ${err}`, time: now() }]);
