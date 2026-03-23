@@ -1,5 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { MapPin, FileText, MessageCircle, Building2, Loader2 } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
@@ -8,6 +8,8 @@ import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals } from "@/hooks/useDeals";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
+import { cn } from "@/lib/utils";
 
 const ListingDetailsPage = () => {
   const { id } = useParams();
@@ -31,27 +33,15 @@ const ListingDetailsPage = () => {
   }, [id, getListing]);
 
   const handleStartNegotiation = async () => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+    if (!user) { navigate("/login"); return; }
     if (!listing) return;
-
-    // Check if deal already exists
     const myDeals = await getMyDeals();
     const existing = myDeals.find(d => d.listing_id === listing.id);
-    if (existing) {
-      navigate(`/negotiate/${existing.id}`);
-      return;
-    }
-
+    if (existing) { navigate(`/negotiate/${existing.id}`); return; }
     setStartingDeal(true);
     const { data, error } = await createDeal(listing.id, listing.owner_id);
-    if (error) {
-      toast.error("حدث خطأ أثناء بدء التفاوض");
-    } else if (data) {
-      navigate(`/negotiate/${data.id}`);
-    }
+    if (error) { toast.error("حدث خطأ أثناء بدء التفاوض"); }
+    else if (data) { navigate(`/negotiate/${data.id}`); }
     setStartingDeal(false);
   };
 
@@ -82,7 +72,11 @@ const ListingDetailsPage = () => {
   const documents = (listing.documents || []) as Array<{ name: string; status: string; url?: string }>;
   const isOwner = user?.id === listing.owner_id;
 
-  const dealTypeLabel = listing.deal_type === "full" ? "تقبّل كامل" : listing.deal_type === "partial" ? "تقبّل جزئي" : listing.deal_type || "—";
+  // Deal structure data
+  const dealOptions = ((listing as any).deal_options || []) as Array<{ type_id: string; priority: number; is_primary: boolean }>;
+  const primaryDealType = (listing as any).primary_deal_type || listing.deal_type;
+  const primaryConfig = DEAL_TYPE_MAP[primaryDealType];
+  const alternativeOptions = dealOptions.filter(o => !o.is_primary);
 
   return (
     <div className="py-8">
@@ -107,6 +101,15 @@ const ListingDetailsPage = () => {
                 </div>
               ))}
             </div>
+
+            {/* Deal Structure Panel */}
+            {primaryConfig && (
+              <DealStructureDisplay
+                primaryConfig={primaryConfig}
+                primaryTypeId={primaryDealType}
+                alternatives={alternativeOptions}
+              />
+            )}
 
             {/* Summary */}
             {(listing.description || listing.ai_summary) && (
@@ -161,7 +164,6 @@ const ListingDetailsPage = () => {
               </div>
             )}
 
-            {/* AI Deal Check Panel */}
             <DealCheckPanel listing={listing} />
           </div>
 
@@ -179,7 +181,7 @@ const ListingDetailsPage = () => {
               </div>
 
               <div className="space-y-3 mb-6">
-                <InfoRow label="نوع الصفقة" value={dealTypeLabel} />
+                <InfoRow label="نوع الصفقة" value={primaryConfig?.label || listing.deal_type || "—"} />
                 {listing.annual_rent && <InfoRow label="الإيجار السنوي" value={`${Number(listing.annual_rent).toLocaleString("en-US")} ر.س`} />}
                 {listing.lease_duration && <InfoRow label="مدة العقد" value={listing.lease_duration} />}
                 {listing.lease_remaining && <InfoRow label="المتبقي" value={listing.lease_remaining} />}
@@ -204,11 +206,7 @@ const ListingDetailsPage = () => {
                   disabled={startingDeal}
                   className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
                 >
-                  {startingDeal ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <MessageCircle size={16} strokeWidth={1.5} />
-                  )}
+                  {startingDeal ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} strokeWidth={1.5} />}
                   ابدأ التفاوض
                 </Button>
               )}
@@ -220,11 +218,97 @@ const ListingDetailsPage = () => {
   );
 };
 
+// ---- Sub-components ----
+
 const InfoRow = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-center justify-between text-sm">
     <span className="text-muted-foreground">{label}</span>
     <span>{value}</span>
   </div>
 );
+
+interface DealStructureDisplayProps {
+  primaryConfig: typeof DEAL_TYPE_MAP[string];
+  primaryTypeId: string;
+  alternatives: Array<{ type_id: string; priority: number }>;
+}
+
+const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: DealStructureDisplayProps) => {
+  if (!primaryConfig) return null;
+
+  return (
+    <div className="bg-card rounded-2xl p-6 shadow-soft space-y-4">
+      <div className="flex items-center gap-2">
+        <Shield size={18} strokeWidth={1.3} className="text-primary" />
+        <h3 className="font-medium">هيكل الصفقة</h3>
+      </div>
+
+      {/* Primary deal type */}
+      <div className="border border-primary/20 bg-primary/5 rounded-xl p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium flex items-center gap-0.5">
+            <Star size={10} fill="currentColor" /> الخيار الرئيسي
+          </span>
+          <span className="text-sm font-medium">{primaryConfig.label}</span>
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">{primaryConfig.desc}</p>
+
+        {primaryConfig.includes.length > 0 && (
+          <div className="mb-2">
+            <div className="text-[11px] font-medium text-success mb-1 flex items-center gap-1">
+              <Check size={11} /> يشمل
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {primaryConfig.includes.map((item, i) => (
+                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-success/10 text-success">{item}</span>
+              ))}
+            </div>
+          </div>
+        )}
+        {primaryConfig.excludes.length > 0 && (
+          <div>
+            <div className="text-[11px] font-medium text-destructive mb-1 flex items-center gap-1">
+              <AlertTriangle size={11} /> لا يشمل
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {primaryConfig.excludes.map((item, i) => (
+                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">{item}</span>
+              ))}
+            </div>
+          </div>
+        )}
+        {primaryConfig.cautionNotes.length > 0 && (
+          <div className="mt-2 pt-2 border-t border-border/30">
+            {primaryConfig.cautionNotes.map((note, i) => (
+              <div key={i} className="text-[11px] text-warning flex items-start gap-1 mt-0.5">
+                <AlertTriangle size={10} className="shrink-0 mt-0.5" /> {note}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Alternative options */}
+      {alternatives.length > 0 && (
+        <div className="space-y-2">
+          <div className="text-xs text-muted-foreground font-medium">خيارات بديلة متاحة</div>
+          {alternatives.map((alt, idx) => {
+            const config = DEAL_TYPE_MAP[alt.type_id];
+            if (!config) return null;
+            return (
+              <div key={alt.type_id} className="border border-border/50 rounded-xl p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">بديل {idx + 1}</span>
+                  <span className="text-sm">{config.label}</span>
+                </div>
+                <p className="text-xs text-muted-foreground">{config.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default ListingDetailsPage;
