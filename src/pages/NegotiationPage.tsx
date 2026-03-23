@@ -150,6 +150,29 @@ const NegotiationPage = () => {
     );
   }
 
+  if (showLegalPanel && deal && listing) {
+    return (
+      <div className="py-8">
+        <div className="container max-w-3xl">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+            <button onClick={() => setShowLegalPanel(false)} className="hover:text-foreground transition-colors flex items-center gap-1">
+              <ArrowRight size={14} strokeWidth={1.3} />
+              العودة للتفاوض
+            </button>
+          </div>
+          <LegalConfirmationPanel
+            deal={deal}
+            listing={listing}
+            onConfirmed={() => {
+              setShowLegalPanel(false);
+              loadData();
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="py-8">
       <div className="container max-w-4xl">
