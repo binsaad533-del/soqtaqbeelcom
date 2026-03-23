@@ -6,7 +6,7 @@ import {
   type Commission,
   type CommissionStatus,
 } from "@/hooks/useCommissions";
-import { Landmark, CheckCircle2, Clock, AlertTriangle, Eye, Send, ShieldCheck } from "lucide-react";
+import { Landmark, CheckCircle2, AlertTriangle, Eye, Send, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
