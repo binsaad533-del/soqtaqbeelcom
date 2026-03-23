@@ -4,6 +4,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import AiStar from "@/components/AiStar";
 import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown } from "lucide-react";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
+import { checkPasswordStrength } from "@/lib/security";
+import PasswordStrengthBar from "@/components/PasswordStrengthBar";
 
 const COUNTRY_CODES = [
   { code: "+966", flag: "🇸🇦", name: "السعودية" },
