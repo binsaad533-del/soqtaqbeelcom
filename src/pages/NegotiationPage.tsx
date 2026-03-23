@@ -137,7 +137,7 @@ const NegotiationPage = () => {
 
   const isBuyer = user?.id === deal?.buyer_id;
   const otherParty = isBuyer ? "البائع" : "المشتري";
-  const listingTitle = listing?.title || listing?.business_activity || "فرصة تقبّل";
+  const listingTitle = listing?.title || listing?.business_activity || "فرصة تقبيل";
 
   if (loading) {
     return (

@@ -239,8 +239,8 @@ const CreateListingPage = () => {
   return (
     <div className="py-8">
       <div className="container max-w-3xl">
-        <h1 className="text-2xl font-medium mb-2">إضافة فرصة تقبّل</h1>
-        <p className="text-sm text-muted-foreground mb-8">أنشئ إعلان تقبّل احترافي بمساعدة الذكاء الاصطناعي</p>
+        <h1 className="text-2xl font-medium mb-2">إضافة فرصة تقبيل</h1>
+        <p className="text-sm text-muted-foreground mb-8">أنشئ إعلان تقبيل احترافي بمساعدة الذكاء الاصطناعي</p>
 
         <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
         <input ref={docInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" multiple className="hidden" onChange={handleDocUpload} />

@@ -146,7 +146,7 @@ const AgreementPage = () => {
           buyerContact: buyerProfile?.phone || "",
           sellerName: sellerProfile?.full_name || "البائع",
           sellerContact: sellerProfile?.phone || "",
-          dealTitle: listing?.title || listing?.business_activity || "صفقة تقبّل",
+          dealTitle: listing?.title || listing?.business_activity || "صفقة تقبيل",
           dealType: listing?.deal_type || "full",
           location: `${listing?.district || ""}, ${listing?.city || ""}`.replace(/^, |, $/, ""),
           businessActivity: listing?.business_activity || "",
@@ -484,7 +484,7 @@ const AgreementPage = () => {
                 <span className="text-sm font-medium gradient-text">سوق تقبيل</span>
               </div>
               <p className="text-[10px] text-muted-foreground">
-                منصة ذكية لتقبّل المشاريع والأعمال التجارية في المملكة العربية السعودية
+                منصة ذكية لتقبيل المشاريع والأعمال التجارية في المملكة العربية السعودية
               </p>
             </div>
           </div>

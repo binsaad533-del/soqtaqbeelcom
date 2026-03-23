@@ -85,8 +85,8 @@ const MarketplacePage = () => {
       <div className="container max-w-5xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-medium">سوق التقبّل</h1>
-            <p className="text-sm text-muted-foreground">استعرض فرص التقبّل المتاحة</p>
+            <h1 className="text-2xl font-medium">سوق التقبيل</h1>
+            <p className="text-sm text-muted-foreground">استعرض فرص التقبيل المتاحة</p>
           </div>
           <AiStar size={24} />
         </div>
@@ -158,7 +158,7 @@ const ListingCard = ({ listing }: { listing: EnrichedListing }) => {
       </div>
       <div className="p-4">
         <div className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">
-          {listing.title || listing.business_activity || "فرصة تقبّل"}
+          {listing.title || listing.business_activity || "فرصة تقبيل"}
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
           <MapPin size={12} strokeWidth={1.3} />

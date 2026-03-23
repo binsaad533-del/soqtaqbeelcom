@@ -6,7 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية قصيرة وقوية لكل صفقة تقبّل أو بيع أصول أو فرصة تجارية.
+const SYSTEM_PROMPT = `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية قصيرة وقوية لكل صفقة تقبيل أو بيع أصول أو فرصة تجارية.
 
 يجب أن تحلل الصفقة بناءً على جميع البيانات المتاحة وتنتج تقريراً مهنياً بالعربية.
 
@@ -262,11 +262,11 @@ function buildAnalysisPrompt(listing: any): string {
 
   // Included / Excluded
   if (listing.included?.length) {
-    sections.push("\n## يشمل التقبّل:");
+    sections.push("\n## يشمل التقبيل:");
     listing.included.forEach((item: string) => sections.push(`- ${item}`));
   }
   if (listing.excluded?.length) {
-    sections.push("\n## لا يشمل التقبّل:");
+    sections.push("\n## لا يشمل التقبيل:");
     listing.excluded.forEach((item: string) => sections.push(`- ${item}`));
   }
 

@@ -77,10 +77,10 @@ const HomePage = () => {
               <AiStar size={48} />
             </div>
             <h1 className="text-3xl md:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.3 }}>
-              تقبّل الأعمال بذكاء
+              تقبيل الأعمال بذكاء
             </h1>
             <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
-              منصة ذكية لعرض وتحليل وتفاوض فرص تقبّل المحلات والمشاريع التجارية في السعودية
+              منصة ذكية لعرض وتحليل وتفاوض فرص تقبيل المحلات والمشاريع التجارية في السعودية
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft hover:shadow-soft-lg transition-shadow active:scale-[0.98]">
@@ -116,7 +116,7 @@ const HomePage = () => {
         <div className="container">
           <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
             <h2 className="text-2xl md:text-3xl font-medium mb-3">منصة متكاملة بالذكاء الاصطناعي</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">كل أداة تحتاجها لتقييم وتفاوض وتوثيق صفقات تقبّل الأعمال</p>
+            <p className="text-muted-foreground max-w-md mx-auto">كل أداة تحتاجها لتقييم وتفاوض وتوثيق صفقات تقبيل الأعمال</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (

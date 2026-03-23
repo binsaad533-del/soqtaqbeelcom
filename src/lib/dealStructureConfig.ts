@@ -16,7 +16,7 @@ export interface DealTypeConfig {
 export const DEAL_TYPES: DealTypeConfig[] = [
   {
     id: "full_takeover",
-    label: "تقبّل كامل",
+    label: "تقبيل كامل",
     desc: "نقل الأعمال بالكامل بما تملكه وما عليها من التزامات",
     includes: [
       "السجل التجاري",
@@ -230,17 +230,17 @@ export interface ConflictRule {
 export const CONFLICT_RULES: ConflictRule[] = [
   {
     types: ["full_takeover", "assets_only"],
-    message: "التقبّل الكامل يشمل الأصول بالفعل — اختيار «أصول فقط» كبديل قد يسبب التباساً. تأكد من التمييز الواضح بين الخيارين.",
+    message: "التقبيل الكامل يشمل الأصول بالفعل — اختيار «أصول فقط» كبديل قد يسبب التباساً. تأكد من التمييز الواضح بين الخيارين.",
     severity: "warning",
   },
   {
     types: ["cr_only", "full_takeover"],
-    message: "لا يمكن تقديم «سجل تجاري فقط» كبديل لـ «تقبّل كامل» — الفرق جوهري في نطاق الصفقة.",
+    message: "لا يمكن تقديم «سجل تجاري فقط» كبديل لـ «تقبيل كامل» — الفرق جوهري في نطاق الصفقة.",
     severity: "warning",
   },
   {
     types: ["location_only", "full_takeover"],
-    message: "«موقع فقط» لا يتوافق مع «تقبّل كامل» كخيارات متزامنة بدون توضيح واضح.",
+    message: "«موقع فقط» لا يتوافق مع «تقبيل كامل» كخيارات متزامنة بدون توضيح واضح.",
     severity: "warning",
   },
   {
