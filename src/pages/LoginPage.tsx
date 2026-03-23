@@ -35,6 +35,7 @@ const LoginPage = () => {
   const [success, setSuccess] = useState("");
   const { signIn, signUp } = useAuthContext();
   const navigate = useNavigate();
+  const { reportFailedLogin } = useSecurityIncidents();
 
   // Auto-convert Arabic numerals on phone input
   const handlePhoneChange = useCallback((value: string) => {
