@@ -93,6 +93,11 @@ const LoginPage = () => {
         setLoading(false);
         return;
       }
+      if (!checkPasswordStrength(password).valid) {
+        setError("كلمة المرور ضعيفة. يجب أن تحتوي على 8 أحرف على الأقل مع حرف كبير ورقم ورمز خاص");
+        setLoading(false);
+        return;
+      }
       if (!agreedToTerms) {
         setError("يجب الموافقة على الشروط والأحكام وسياسة الخصوصية");
         setLoading(false);
