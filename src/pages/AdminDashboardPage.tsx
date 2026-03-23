@@ -7,8 +7,9 @@ import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
 import { BarChart3, Users, FileText, Handshake, ChevronLeft, Loader2, Shield, Database } from "lucide-react";
 import BackupPanel from "@/components/BackupPanel";
+import CommissionAdminPanel from "@/components/CommissionAdminPanel";
 
-type Tab = "overview" | "backup";
+type Tab = "overview" | "commissions" | "backup";
 
 const AdminDashboardPage = () => {
   const { getAllListings } = useListings();
