@@ -1,464 +1,213 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
-import {
-  FileText, Users, MessageCircle, AlertCircle, Shield, Settings,
-  BarChart3, Eye, ChevronLeft, Clock, Check, XCircle, Search,
-  UserCheck, UserX, FolderOpen, Activity, Bell
-} from "lucide-react";
+import { useListings, type Listing } from "@/hooks/useListings";
+import { useDeals, type Deal } from "@/hooks/useDeals";
+import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import {
+  Users, FileText, Handshake, Shield, Settings, BarChart3,
+  Eye, CheckCircle, ChevronLeft, Search, Activity, Loader2
+} from "lucide-react";
 
 const tabs = [
   { label: "نظرة عامة", icon: BarChart3 },
   { label: "المستخدمون", icon: Users },
   { label: "الإعلانات", icon: FileText },
-  { label: "الصفقات", icon: MessageCircle },
-  { label: "الشكاوى", icon: AlertCircle },
+  { label: "الصفقات", icon: Handshake },
   { label: "المشرفون", icon: Shield },
   { label: "الإعدادات", icon: Settings },
 ];
 
-// Mock data
-const stats = [
-  { label: "إجمالي المستخدمين", value: "1,247", icon: Users, trend: "+12%" },
-  { label: "إعلانات نشطة", value: "847", icon: FileText, trend: "+8%" },
-  { label: "صفقات جارية", value: "156", icon: MessageCircle, trend: "+23%" },
-  { label: "معدل الإتمام", value: "78%", icon: Check, trend: "+5%" },
-  { label: "شكاوى مفتوحة", value: "7", icon: AlertCircle, trend: "-3" },
-  { label: "تحليلات AI نشطة", value: "34", icon: Activity, trend: "" },
-];
-
-const recentUsers = [
-  { id: "1", name: "أحمد محمد", email: "ahmed@email.com", role: "عميل", status: "نشط", date: "2026-03-22" },
-  { id: "2", name: "سارة الخالد", email: "sara@email.com", role: "عميل", status: "نشط", date: "2026-03-21" },
-  { id: "3", name: "خالد العتيبي", email: "khalid@email.com", role: "عميل", status: "معلّق", date: "2026-03-20" },
-  { id: "4", name: "نورة القحطاني", email: "noura@email.com", role: "عميل", status: "نشط", date: "2026-03-19" },
-];
-
-const recentListings = [
-  { id: "1", title: "مطعم شاورما — النسيم", quality: "ممتاز", disclosure: 92, status: "نشط" },
-  { id: "2", title: "كافيه مختص — الروضة", quality: "جيد", disclosure: 87, status: "قيد المراجعة" },
-  { id: "3", title: "صالون رجالي — الفيصلية", quality: "متوسط", disclosure: 78, status: "نشط" },
-  { id: "4", title: "ورشة سيارات — الصفا", quality: "ضعيف", disclosure: 68, status: "مرفوض" },
-];
-
-const complaints = [
-  { id: "1", title: "مشكلة في رفع الصور", user: "أحمد محمد", priority: "عالية", status: "مفتوحة", date: "2026-03-22" },
-  { id: "2", title: "خطأ في بيانات الإعلان", user: "سارة الخالد", priority: "متوسطة", status: "قيد المعالجة", date: "2026-03-21" },
-  { id: "3", title: "استفسار عن التفاوض", user: "خالد العتيبي", priority: "منخفضة", status: "محلولة", date: "2026-03-20" },
-];
-
-const supervisors = [
-  { id: "1", name: "محمد الحربي", email: "m.harbi@email.com", cases: 23, open: 5, closed: 18, delayed: 2 },
-  { id: "2", name: "فهد السعيد", email: "f.saeed@email.com", cases: 19, open: 3, closed: 16, delayed: 0 },
-];
-
 const OwnerDashboardPage = () => {
   const { profile, signOut } = useAuthContext();
+  const { getAllListings } = useListings();
+  const { getAllDeals } = useDeals();
+  const { getAllProfiles, getAllRoles, updateProfile } = useProfiles();
+
   const [activeTab, setActiveTab] = useState(0);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [roles, setRoles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      const [l, d, p, r] = await Promise.all([getAllListings(), getAllDeals(), getAllProfiles(), getAllRoles()]);
+      setListings(l);
+      setDeals(d);
+      setProfiles(p);
+      setRoles(r);
+      setLoading(false);
+    };
+    load();
+  }, [getAllListings, getAllDeals, getAllProfiles, getAllRoles]);
+
+  const getUserRole = (userId: string) => roles.find((r: any) => r.user_id === userId)?.role || "customer";
+  const supervisors = profiles.filter(p => getUserRole(p.user_id) === "supervisor");
+  const customers = profiles.filter(p => getUserRole(p.user_id) === "customer");
+  const filteredProfiles = profiles.filter(p => !searchQuery || p.full_name?.includes(searchQuery) || p.phone?.includes(searchQuery));
+
+  const toggleSuspend = async (p: Profile) => {
+    await updateProfile(p.user_id, { is_suspended: !p.is_suspended });
+    setProfiles(prev => prev.map(pr => pr.user_id === p.user_id ? { ...pr, is_suspended: !pr.is_suspended } : pr));
+  };
+
+  if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={24} className="animate-spin text-primary" /></div>;
+
   return (
-    <div className="py-6">
-      <div className="container">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-medium">لوحة إدارة المنصة</h1>
-            <p className="text-xs text-muted-foreground mt-1">
-              مرحباً {profile?.full_name || "مالك المنصة"} — تحكم كامل في المنصة
-            </p>
-          </div>
+    <div className="py-8">
+      <div className="container max-w-5xl">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <button className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
-              <Bell size={18} strokeWidth={1.3} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-            </button>
-            <AiStar size={24} />
+            <AiStar size={28} />
+            <div>
+              <h1 className="text-xl font-medium">لوحة تحكم المنصة</h1>
+              <p className="text-sm text-muted-foreground">مرحباً {profile?.full_name}</p>
+            </div>
           </div>
+          <button onClick={signOut} className="text-xs text-muted-foreground hover:text-foreground transition-colors">خروج</button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
+        <div className="flex gap-1 bg-muted/50 rounded-xl p-1 mb-6 overflow-x-auto">
           {tabs.map((tab, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveTab(i)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs whitespace-nowrap transition-all active:scale-[0.97]",
-                activeTab === i ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50"
-              )}
-            >
+            <button key={i} onClick={() => setActiveTab(i)} className={cn("flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs whitespace-nowrap transition-all", activeTab === i ? "bg-card shadow-sm text-foreground" : "text-muted-foreground")}>
               <tab.icon size={14} strokeWidth={1.3} />
               {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Overview Tab */}
         {activeTab === 0 && (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {stats.map((stat, i) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: "المستخدمون", value: profiles.length, icon: Users, color: "text-primary" },
+                { label: "الإعلانات", value: listings.length, icon: FileText, color: "text-accent-foreground" },
+                { label: "المنشورة", value: listings.filter(l => l.status === "published").length, icon: Eye, color: "text-success" },
+                { label: "الصفقات", value: deals.length, icon: Handshake, color: "text-warning" },
+                { label: "مكتملة", value: deals.filter(d => d.status === "completed").length, icon: CheckCircle, color: "text-success" },
+                { label: "تفاوض نشط", value: deals.filter(d => d.status === "negotiating").length, icon: Activity, color: "text-primary" },
+                { label: "المشرفون", value: supervisors.length, icon: Shield, color: "text-accent-foreground" },
+                { label: "العملاء", value: customers.length, icon: Users, color: "text-foreground" },
+              ].map((s, i) => (
                 <div key={i} className="bg-card rounded-xl p-4 shadow-soft">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <stat.icon size={14} strokeWidth={1.3} className="text-muted-foreground" />
-                    <span className="text-[11px] text-muted-foreground">{stat.label}</span>
-                  </div>
-                  <div className="flex items-end justify-between">
-                    <span className="text-lg font-medium">{stat.value}</span>
-                    {stat.trend && (
-                      <span className={cn("text-[10px]", stat.trend.startsWith("+") ? "text-success" : "text-destructive")}>
-                        {stat.trend}
-                      </span>
-                    )}
-                  </div>
+                  <s.icon size={18} className={cn("mb-2", s.color)} strokeWidth={1.3} />
+                  <div className="text-lg font-medium">{s.value}</div>
+                  <div className="text-[10px] text-muted-foreground">{s.label}</div>
                 </div>
               ))}
             </div>
-
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Recent Listings */}
-              <div className="bg-card rounded-2xl p-5 shadow-soft">
-                <h2 className="text-sm font-medium mb-3">أحدث الإعلانات</h2>
-                <div className="space-y-2">
-                  {recentListings.map((l) => (
-                    <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/30 transition-colors">
-                      <div>
-                        <div className="text-sm">{l.title}</div>
-                        <div className="text-[11px] text-muted-foreground">إفصاح {l.disclosure}%</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
-                          l.quality === "ممتاز" ? "bg-success/10 text-success" :
-                          l.quality === "جيد" ? "bg-accent text-accent-foreground" :
-                          l.quality === "متوسط" ? "bg-warning/10 text-warning" :
-                          "bg-destructive/10 text-destructive"
-                        )}>{l.quality}</span>
-                        <ChevronLeft size={14} strokeWidth={1.3} className="text-muted-foreground" />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Recent Complaints */}
-              <div className="bg-card rounded-2xl p-5 shadow-soft">
-                <h2 className="text-sm font-medium mb-3">الشكاوى الأخيرة</h2>
-                <div className="space-y-2">
-                  {complaints.map((c) => (
-                    <div key={c.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/30 transition-colors">
-                      <div>
-                        <div className="text-sm">{c.title}</div>
-                        <div className="text-[11px] text-muted-foreground">{c.user} — {c.date}</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
-                          c.status === "مفتوحة" ? "bg-warning/10 text-warning" :
-                          c.status === "قيد المعالجة" ? "bg-primary/10 text-primary" :
-                          "bg-success/10 text-success"
-                        )}>{c.status}</span>
-                      </div>
+            <div>
+              <h3 className="font-medium mb-3">آخر الإعلانات</h3>
+              <div className="space-y-2">
+                {listings.slice(0, 5).map(l => (
+                  <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card hover:shadow-soft transition-all">
+                    <div>
+                      <div className="text-sm">{l.title || "بدون عنوان"}</div>
+                      <div className="text-xs text-muted-foreground">{l.city} — {l.price ? `${Number(l.price).toLocaleString()} ر.س` : "—"}</div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Supervisor Performance */}
-            <div className="bg-card rounded-2xl p-5 shadow-soft">
-              <h2 className="text-sm font-medium mb-3">أداء المشرفين</h2>
-              <div className="grid md:grid-cols-2 gap-3">
-                {supervisors.map((s) => (
-                  <div key={s.id} className="p-4 rounded-xl bg-muted/30">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <div className="text-sm font-medium">{s.name}</div>
-                        <div className="text-[11px] text-muted-foreground">{s.email}</div>
-                      </div>
-                      <Shield size={16} strokeWidth={1.3} className="text-primary/50" />
-                    </div>
-                    <div className="grid grid-cols-4 gap-2 text-center">
-                      <div>
-                        <div className="text-sm font-medium">{s.cases}</div>
-                        <div className="text-[10px] text-muted-foreground">إجمالي</div>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-warning">{s.open}</div>
-                        <div className="text-[10px] text-muted-foreground">مفتوح</div>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-success">{s.closed}</div>
-                        <div className="text-[10px] text-muted-foreground">مغلق</div>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-destructive">{s.delayed}</div>
-                        <div className="text-[10px] text-muted-foreground">متأخر</div>
-                      </div>
-                    </div>
-                  </div>
+                    <span className={cn("text-[10px] px-2 py-0.5 rounded-md", l.status === "published" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{l.status === "published" ? "منشور" : "مسودة"}</span>
+                  </Link>
                 ))}
+                {listings.length === 0 && <p className="text-center text-sm text-muted-foreground py-8">لا توجد إعلانات</p>}
               </div>
             </div>
           </div>
         )}
 
-        {/* Users Tab */}
         {activeTab === 1 && (
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1 max-w-sm">
-                <Search size={14} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="البحث عن مستخدم..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pr-9 pl-4 py-2.5 bg-card rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none"
-                  dir="rtl"
-                />
-              </div>
+            <div className="relative">
+              <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" strokeWidth={1.3} />
+              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="ابحث بالاسم أو الجوال..." className="w-full pr-9 pl-4 py-2 rounded-xl border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/30" />
             </div>
-
-            <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border/50">
-                      <th className="text-right p-3 text-xs text-muted-foreground font-normal">الاسم</th>
-                      <th className="text-right p-3 text-xs text-muted-foreground font-normal">البريد</th>
-                      <th className="text-right p-3 text-xs text-muted-foreground font-normal">الدور</th>
-                      <th className="text-right p-3 text-xs text-muted-foreground font-normal">الحالة</th>
-                      <th className="text-right p-3 text-xs text-muted-foreground font-normal">تاريخ التسجيل</th>
-                      <th className="p-3"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentUsers.map((u) => (
-                      <tr key={u.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
-                        <td className="p-3">{u.name}</td>
-                        <td className="p-3 text-muted-foreground text-xs" dir="ltr">{u.email}</td>
-                        <td className="p-3">
-                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-accent text-accent-foreground">{u.role}</span>
-                        </td>
-                        <td className="p-3">
-                          <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
-                            u.status === "نشط" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
-                          )}>{u.status}</span>
-                        </td>
-                        <td className="p-3 text-muted-foreground text-xs">{u.date}</td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-1">
-                            <button className="p-1.5 rounded-lg hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors">
-                              <Eye size={14} strokeWidth={1.3} />
-                            </button>
-                            <button className="p-1.5 rounded-lg hover:bg-success/10 text-muted-foreground hover:text-success transition-colors">
-                              <UserCheck size={14} strokeWidth={1.3} />
-                            </button>
-                            <button className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
-                              <UserX size={14} strokeWidth={1.3} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Listings Tab */}
-        {activeTab === 2 && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1 max-w-sm">
-                <Search size={14} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="البحث في الإعلانات..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pr-9 pl-4 py-2.5 bg-card rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none"
-                  dir="rtl"
-                />
-              </div>
-              <div className="flex gap-1">
-                {["الكل", "نشط", "قيد المراجعة", "مرفوض"].map((f) => (
-                  <button key={f} className="px-3 py-2 text-[11px] rounded-lg text-muted-foreground hover:bg-muted/50 transition-colors">{f}</button>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-card rounded-2xl p-5 shadow-soft space-y-2">
-              {recentListings.map((l) => (
-                <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/30 transition-colors">
-                  <div className="flex-1">
-                    <div className="text-sm">{l.title}</div>
-                    <div className="text-[11px] text-muted-foreground">إفصاح {l.disclosure}%</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
-                      l.status === "نشط" ? "bg-success/10 text-success" :
-                      l.status === "قيد المراجعة" ? "bg-warning/10 text-warning" :
-                      "bg-destructive/10 text-destructive"
-                    )}>{l.status}</span>
-                    <ChevronLeft size={14} strokeWidth={1.3} className="text-muted-foreground" />
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Deals Tab */}
-        {activeTab === 3 && (
-          <div className="bg-card rounded-2xl p-5 shadow-soft">
-            <h2 className="text-sm font-medium mb-4">الصفقات والتفاوضات</h2>
             <div className="space-y-2">
-              {[
-                { title: "مطعم شاورما — تفاوض نشط", buyer: "أحمد محمد", seller: "سارة الخالد", stage: "قيد التفاوض", progress: 65 },
-                { title: "كافيه مختص — بانتظار الموافقة", buyer: "خالد العتيبي", seller: "نورة القحطاني", stage: "بانتظار الموافقة", progress: 90 },
-                { title: "صالون رجالي — مكتمل", buyer: "فهد السعيد", seller: "محمد الحربي", stage: "مكتمل", progress: 100 },
-              ].map((deal, i) => (
-                <div key={i} className="p-4 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm font-medium">{deal.title}</div>
-                    <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
-                      deal.stage === "مكتمل" ? "bg-success/10 text-success" :
-                      deal.stage === "بانتظار الموافقة" ? "bg-warning/10 text-warning" :
-                      "bg-primary/10 text-primary"
-                    )}>{deal.stage}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-2">
-                    <span>المشتري: {deal.buyer}</span>
-                    <span>البائع: {deal.seller}</span>
-                  </div>
-                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all"
-                      style={{
-                        width: `${deal.progress}%`,
-                        background: deal.progress === 100 ? "hsl(var(--success))" : "var(--gradient-primary)",
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Complaints Tab */}
-        {activeTab === 4 && (
-          <div className="bg-card rounded-2xl p-5 shadow-soft">
-            <h2 className="text-sm font-medium mb-4">الشكاوى والدعم</h2>
-            <div className="space-y-2">
-              {complaints.map((c) => (
-                <div key={c.id} className="p-4 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="text-sm font-medium">{c.title}</div>
-                    <div className="flex items-center gap-2">
-                      <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
-                        c.priority === "عالية" ? "bg-destructive/10 text-destructive" :
-                        c.priority === "متوسطة" ? "bg-warning/10 text-warning" :
-                        "bg-muted text-muted-foreground"
-                      )}>{c.priority}</span>
-                      <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
-                        c.status === "مفتوحة" ? "bg-warning/10 text-warning" :
-                        c.status === "قيد المعالجة" ? "bg-primary/10 text-primary" :
-                        "bg-success/10 text-success"
-                      )}>{c.status}</span>
-                    </div>
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">{c.user} — {c.date}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Supervisors Tab */}
-        {activeTab === 5 && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium">إدارة المشرفين</h2>
-              <button
-                className="px-4 py-2 rounded-xl text-xs text-primary-foreground"
-                style={{ background: "var(--gradient-primary)" }}
-              >
-                + إضافة مشرف
-              </button>
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              {supervisors.map((s) => (
-                <div key={s.id} className="bg-card rounded-2xl p-5 shadow-soft">
-                  <div className="flex items-center justify-between mb-4">
+              {filteredProfiles.map(p => (
+                <div key={p.id} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-sm text-primary font-medium">{p.full_name?.charAt(0) || "?"}</div>
                     <div>
-                      <div className="font-medium text-sm">{s.name}</div>
-                      <div className="text-[11px] text-muted-foreground" dir="ltr">{s.email}</div>
-                    </div>
-                    <div className="flex gap-1">
-                      <button className="p-1.5 rounded-lg hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors">
-                        <Settings size={14} strokeWidth={1.3} />
-                      </button>
+                      <div className="text-sm font-medium">{p.full_name || "—"}</div>
+                      <div className="text-xs text-muted-foreground">{p.phone || "—"} • {getUserRole(p.user_id) === "supervisor" ? "مشرف" : "عميل"}</div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-4 gap-3 text-center">
-                    <StatBlock label="إجمالي" value={String(s.cases)} />
-                    <StatBlock label="مفتوح" value={String(s.open)} color="warning" />
-                    <StatBlock label="مغلق" value={String(s.closed)} color="success" />
-                    <StatBlock label="متأخر" value={String(s.delayed)} color="destructive" />
-                  </div>
+                  <button onClick={() => toggleSuspend(p)} className={cn("text-[10px] px-2 py-0.5 rounded-md", p.is_suspended ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive")}>
+                    {p.is_suspended ? "معلّق" : "تعليق"}
+                  </button>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Settings Tab */}
-        {activeTab === 6 && (
-          <div className="space-y-4">
-            {[
-              { title: "الإعدادات العامة", desc: "اسم المنصة، اللغة، المنطقة الزمنية" },
-              { title: "إعدادات المصادقة", desc: "طرق تسجيل الدخول، التحقق من الهوية" },
-              { title: "إعدادات الإشعارات", desc: "البريد الإلكتروني، الرسائل النصية، التنبيهات" },
-              { title: "إعدادات الذكاء الاصطناعي", desc: "نماذج التحليل، دقة الاستخراج، سلوك التفاوض" },
-              { title: "إعدادات رفع الملفات", desc: "أنواع الملفات المسموحة، الحجم الأقصى" },
-              { title: "التصنيفات", desc: "إدارة فئات الأعمال والتصنيفات الفرعية" },
-              { title: "سير العمل", desc: "مراحل الصفقة، منطق الموافقة، التصعيد" },
-            ].map((setting, i) => (
-              <div key={i} className="bg-card rounded-xl p-4 shadow-soft flex items-center justify-between hover:shadow-soft-lg transition-all cursor-pointer">
-                <div>
-                  <div className="text-sm font-medium">{setting.title}</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">{setting.desc}</div>
+        {activeTab === 2 && (
+          <div className="space-y-3">
+            <h2 className="font-medium mb-2">جميع الإعلانات ({listings.length})</h2>
+            {listings.map(l => (
+              <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card hover:shadow-soft transition-all">
+                <div className="flex-1">
+                  <div className="text-sm">{l.title || "بدون عنوان"}</div>
+                  <div className="text-xs text-muted-foreground">{l.city} • {l.business_activity || "—"}</div>
                 </div>
-                <ChevronLeft size={16} strokeWidth={1.3} className="text-muted-foreground" />
+                <ChevronLeft size={14} className="text-muted-foreground" strokeWidth={1.3} />
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 3 && (
+          <div className="space-y-3">
+            <h2 className="font-medium mb-2">جميع الصفقات ({deals.length})</h2>
+            {deals.map(d => (
+              <div key={d.id} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card">
+                <div>
+                  <div className="text-sm">صفقة #{d.id.slice(0, 8)}</div>
+                  <div className="text-xs text-muted-foreground">{d.agreed_price ? `${Number(d.agreed_price).toLocaleString()} ر.س` : "—"}</div>
+                </div>
+                <span className={cn("text-[10px] px-2 py-0.5 rounded-md", d.status === "completed" ? "bg-success/10 text-success" : "bg-primary/10 text-primary")}>{d.status === "completed" ? "مكتملة" : "تفاوض"}</span>
               </div>
             ))}
+            {deals.length === 0 && <p className="text-center text-sm text-muted-foreground py-12">لا توجد صفقات</p>}
+          </div>
+        )}
 
-            <div className="pt-4 border-t border-border/50">
-              <button
-                onClick={signOut}
-                className="px-4 py-2 rounded-xl text-xs text-destructive bg-destructive/5 hover:bg-destructive/10 transition-colors"
-              >
-                تسجيل الخروج
-              </button>
-            </div>
+        {activeTab === 4 && (
+          <div className="space-y-3">
+            <h2 className="font-medium mb-2">المشرفون ({supervisors.length})</h2>
+            {supervisors.length === 0 ? <p className="text-center text-sm text-muted-foreground py-12">لا يوجد مشرفون</p> : supervisors.map(s => (
+              <div key={s.id} className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-sm font-medium">{s.full_name?.charAt(0) || "?"}</div>
+                  <div>
+                    <div className="text-sm font-medium">{s.full_name}</div>
+                    <div className="text-xs text-muted-foreground">{s.phone || "—"}</div>
+                  </div>
+                </div>
+                <span className={cn("text-[10px] px-2 py-0.5 rounded-md", s.is_active ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{s.is_active ? "نشط" : "غير نشط"}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 5 && (
+          <div className="space-y-3">
+            <h2 className="font-medium mb-2">الإعدادات</h2>
+            {["إعدادات عامة", "إعدادات العلامة التجارية", "إعدادات الإشعارات", "إعدادات الذكاء الاصطناعي", "إعدادات الأمان"].map((s, i) => (
+              <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card">
+                <span className="text-sm">{s}</span>
+                <ChevronLeft size={14} className="text-muted-foreground" strokeWidth={1.3} />
+              </div>
+            ))}
           </div>
         )}
       </div>
     </div>
   );
 };
-
-const StatBlock = ({ label, value, color }: { label: string; value: string; color?: string }) => (
-  <div className="p-2 rounded-lg bg-muted/30">
-    <div className={cn("text-sm font-medium", color ? `text-${color}` : "")}>{value}</div>
-    <div className="text-[10px] text-muted-foreground">{label}</div>
-  </div>
-);
 
 export default OwnerDashboardPage;
