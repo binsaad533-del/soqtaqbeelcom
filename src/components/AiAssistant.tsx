@@ -156,7 +156,7 @@ const AiAssistant = () => {
               onClick={() => { setOpen(true); dismissProactive(); }}
               className="mt-2 text-[11px] text-primary hover:underline"
             >
-              تحدث مع المساعد الذكي ←
+              تكلم مع المساعد الذكي ←
             </button>
           </div>
           <div className="w-3 h-3 bg-card border-b border-l border-primary/10 rotate-[-45deg] absolute -bottom-1.5 left-10" />
