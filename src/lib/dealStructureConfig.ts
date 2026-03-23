@@ -16,7 +16,7 @@ export interface DealTypeConfig {
 export const DEAL_TYPES: DealTypeConfig[] = [
   {
     id: "full_takeover",
-    label: "تقبّل كامل",
+    label: "تقبيل كامل",
     desc: "نقل الأعمال بالكامل بما تملكه وما عليها من التزامات",
     includes: [
       "السجل التجاري",
