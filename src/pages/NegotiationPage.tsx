@@ -238,6 +238,25 @@ const NegotiationPage = () => {
 
           {/* Sidebar */}
           <div className="space-y-5">
+            {/* Other party trust */}
+            {otherProfile && (
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <div className="flex items-center gap-2 mb-3">
+                  <Shield size={14} strokeWidth={1.5} className="text-primary" />
+                  <h3 className="font-medium text-sm">مستوى ثقة {otherParty}</h3>
+                </div>
+                <TrustBadge score={otherProfile.trust_score} verificationLevel={otherProfile.verification_level} size="md" showScore />
+                <div className="mt-2 text-[10px] text-muted-foreground">
+                  صفقات مكتملة: {otherProfile.completed_deals || 0} • ملغاة: {otherProfile.cancelled_deals || 0}
+                </div>
+              </div>
+            )}
+
+            {/* Deal risk */}
+            {deal.risk_score !== null && deal.risk_score !== undefined && (
+              <DealRiskIndicator riskScore={deal.risk_score} riskFactors={deal.risk_factors || []} />
+            )}
+
             <div className="bg-gradient-to-b from-primary/5 to-card rounded-2xl p-5 shadow-soft border border-primary/10">
               <div className="flex items-center gap-2 mb-3">
                 <AiStar size={18} animate={false} />
