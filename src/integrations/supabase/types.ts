@@ -793,6 +793,53 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          deal_id: string
+          honesty: number
+          id: string
+          listing_accuracy: number
+          overall_experience: number
+          responsiveness: number
+          reviewer_id: string
+          seller_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          deal_id: string
+          honesty: number
+          id?: string
+          listing_accuracy: number
+          overall_experience: number
+          responsiveness: number
+          reviewer_id: string
+          seller_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          deal_id?: string
+          honesty?: number
+          id?: string
+          listing_accuracy?: number
+          overall_experience?: number
+          responsiveness?: number
+          reviewer_id?: string
+          seller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_reviews_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           assigned_by: string | null
@@ -822,6 +869,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_seller_trust_score: {
+        Args: { _seller_id: string }
+        Returns: number
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
