@@ -109,6 +109,10 @@ const AgreementPage = () => {
         .order("created_at", { ascending: false });
       if (historyData) setHistory(historyData as unknown as HistoryEntry[]);
 
+      // Load commission
+      const commData = await getCommission(id);
+      setCommission(commData);
+
     } catch (e) {
       console.error("Failed to load agreement:", e);
     }
