@@ -48,7 +48,7 @@ const HomePage = () => {
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
               ارفع صور مشروعك…
               <br />
-              <span className="gradient-text">والذكاء يسوّي الباقي</span>
+              <span className="gradient-text">والذكاء الاصطناعي يكمل الباقي</span>
             </h1>
             <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
               جرد، تقييم، بيانات، وتفاوض — كلها تلقائيًا بدون ما تكتب سطر واحد.
