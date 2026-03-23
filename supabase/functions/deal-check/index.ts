@@ -17,6 +17,29 @@ const SYSTEM_PROMPT = `أنت محلل صفقات تجارية خبير متخص
 - لا تدّعي يقيناً زائفاً — إذا كانت البيانات غير كافية قل ذلك بوضوح
 - هذا ليس تقييم رسمي مرخص — هو تحليل ذكي استرشادي
 
+## مقارنة السوق (مهم جداً):
+عند تقييم الأصول والمعدات، يجب أن تستخدم منصات السلع المستعملة السعودية كمراجع مقارنة:
+- حراج (haraj.com.sa)
+- مستعمل (mstaml.com)
+- OpenSooq (opensooq.com)
+- Facebook Marketplace
+- أي مصدر سعودي آخر متاح
+
+### قواعد المقارنة:
+1. ابحث عن أصناف مشابهة بالنوع والفئة والحالة والمواصفات
+2. قارن بذكاء — ميّز بين: تطابق دقيق، تطابق قريب، تطابق ضعيف
+3. لا تنسخ أسعار المنصات بشكل أعمى — هي مؤشرات سوقية فقط وليست قيمة سوقية نهائية
+4. ميّز بوضوح بين: سعر الطلب، المؤشر السوقي المقدّر، القيمة المؤكدة
+5. خذ حالة الأصل بالاعتبار (جديد، مستعمل نظيف، مستعمل عادي، متهالك)
+6. فضّل المقارنات السعودية أولاً
+7. إذا كانت المقارنات ضعيفة أو محدودة، وضّح ذلك صراحة
+
+### لكل أصل أو مجموعة أصول مهمة، قدّم:
+- النطاق السوقي التقريبي المرصود
+- جودة ثقة المقارنة (قوية / متوسطة / ضعيفة)
+- هل توقعات البائع معقولة أم مبالغ فيها
+- هل المنظومة المرئية تدعم القيمة المطلوبة
+
 ## تنسيق المخرج المطلوب:
 أنتج JSON بالهيكل التالي (جميع الحقول مطلوبة):
 
@@ -27,6 +50,23 @@ const SYSTEM_PROMPT = `أنت محلل صفقات تجارية خبير متخص
   "locationAssessment": "تقييم الموقع من منظور تجاري",
   "competitionSnapshot": "لمحة عن المنافسة والسوق",
   "operationalReadiness": "الجاهزية التشغيلية",
+  "marketComparison": {
+    "comparablesReviewed": 0,
+    "matchQuality": "قوية | متوسطة | ضعيفة | غير متاحة",
+    "observedPriceRange": "النطاق السعري المرصود أو غير متاح",
+    "marketPosition": "أقل من السوق | قريب من السوق | أعلى من السوق | غير محدد",
+    "confidence": "عالي | متوسط | منخفض",
+    "details": "تفاصيل المقارنة مع المنصات المستخدمة والأصناف المقارنة",
+    "assetBreakdown": [
+      {
+        "assetName": "اسم الأصل",
+        "marketRange": "النطاق السعري المرصود",
+        "sellerPrice": "سعر البائع المقدّر",
+        "verdict": "معقول | مبالغ فيه | أقل من السوق | غير واضح",
+        "source": "المنصة المرجعية"
+      }
+    ]
+  },
   "risks": ["مخاطرة 1", "مخاطرة 2"],
   "strengths": ["نقطة قوة 1", "نقطة قوة 2"],
   "missingInfo": ["معلومة ناقصة 1", "معلومة ناقصة 2"],
@@ -61,7 +101,6 @@ serve(async (req) => {
       );
     }
 
-    // Build a rich prompt from listing data
     const userPrompt = buildAnalysisPrompt(listing);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -81,7 +120,7 @@ serve(async (req) => {
             type: "function",
             function: {
               name: "deal_check_result",
-              description: "Return a structured deal check analysis",
+              description: "Return a structured deal check analysis with marketplace comparison",
               parameters: {
                 type: "object",
                 properties: {
@@ -91,6 +130,34 @@ serve(async (req) => {
                   locationAssessment: { type: "string" },
                   competitionSnapshot: { type: "string" },
                   operationalReadiness: { type: "string" },
+                  marketComparison: {
+                    type: "object",
+                    properties: {
+                      comparablesReviewed: { type: "number" },
+                      matchQuality: { type: "string", enum: ["قوية", "متوسطة", "ضعيفة", "غير متاحة"] },
+                      observedPriceRange: { type: "string" },
+                      marketPosition: { type: "string", enum: ["أقل من السوق", "قريب من السوق", "أعلى من السوق", "غير محدد"] },
+                      confidence: { type: "string", enum: ["عالي", "متوسط", "منخفض"] },
+                      details: { type: "string" },
+                      assetBreakdown: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            assetName: { type: "string" },
+                            marketRange: { type: "string" },
+                            sellerPrice: { type: "string" },
+                            verdict: { type: "string", enum: ["معقول", "مبالغ فيه", "أقل من السوق", "غير واضح"] },
+                            source: { type: "string" },
+                          },
+                          required: ["assetName", "marketRange", "verdict", "source"],
+                          additionalProperties: false,
+                        },
+                      },
+                    },
+                    required: ["comparablesReviewed", "matchQuality", "observedPriceRange", "marketPosition", "confidence", "details", "assetBreakdown"],
+                    additionalProperties: false,
+                  },
                   risks: { type: "array", items: { type: "string" } },
                   strengths: { type: "array", items: { type: "string" } },
                   missingInfo: { type: "array", items: { type: "string" } },
@@ -103,7 +170,7 @@ serve(async (req) => {
                 },
                 required: [
                   "dealOverview", "businessActivity", "assetAssessment", "locationAssessment",
-                  "competitionSnapshot", "operationalReadiness", "risks", "strengths",
+                  "competitionSnapshot", "operationalReadiness", "marketComparison", "risks", "strengths",
                   "missingInfo", "rating", "ratingColor", "recommendation",
                   "negotiationGuidance", "fairnessVerdict", "confidenceLevel",
                 ],
@@ -205,9 +272,17 @@ function buildAnalysisPrompt(listing: any): string {
 
   // Inventory
   if (listing.inventory?.length) {
-    sections.push("\n## جرد الأصول:");
+    sections.push("\n## جرد الأصول (قارن كل صنف مع منصات السوق المستعمل السعودي):");
     listing.inventory.forEach((item: any) => {
-      sections.push(`- ${item.name}: ${item.qty} وحدة (حالة: ${item.condition})`);
+      const details = [
+        item.name,
+        item.qty ? `${item.qty} وحدة` : null,
+        item.condition ? `حالة: ${item.condition}` : null,
+        item.category ? `فئة: ${item.category}` : null,
+        item.brand ? `ماركة: ${item.brand}` : null,
+        item.model ? `موديل: ${item.model}` : null,
+      ].filter(Boolean).join(" — ");
+      sections.push(`- ${details}`);
     });
   }
 
@@ -225,7 +300,13 @@ function buildAnalysisPrompt(listing: any): string {
   // Summary
   if (listing.summary) sections.push(`\n## ملخص البائع:\n${listing.summary}`);
 
-  sections.push("\n---\nحلل هذه الصفقة وأنتج تقرير الجدوى الأولية باستخدام الأداة deal_check_result.");
+  sections.push("\n---");
+  sections.push("## تعليمات إضافية:");
+  sections.push("1. استخدم منصات حراج ومستعمل وأوبن سوق وفيسبوك ماركت بلس كمراجع مقارنة للأصول");
+  sections.push("2. قدّم تفصيل مقارنة لكل أصل رئيسي مع مصدر المقارنة");
+  sections.push("3. وضّح جودة المقارنة ومستوى الثقة");
+  sections.push("4. لا تنسخ أسعار المنصات كقيمة نهائية — هي مؤشرات فقط");
+  sections.push("\nحلل هذه الصفقة وأنتج تقرير الجدوى الأولية باستخدام الأداة deal_check_result.");
 
   return sections.join("\n");
 }
