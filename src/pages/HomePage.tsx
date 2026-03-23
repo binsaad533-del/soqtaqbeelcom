@@ -79,26 +79,24 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Why Us */}
+      {/* Smart Platform */}
       <section className="py-16 md:py-24">
         <div className="container">
           <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
-            <h2 className="text-2xl md:text-3xl font-medium mb-4">ليش تقبيل؟</h2>
-            <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
-              لأنك ما تحتاج منصة تعرض مشروعك فقط…
-              <br />
-              <span className="font-medium text-foreground">تحتاج منصة تساعدك تبيعه فعليًا.</span>
+            <h2 className="text-2xl md:text-3xl font-medium mb-4">منصة ذكية لإتمام الصفقات… مو مجرد عرض</h2>
+            <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+              كل الأدوات اللي تحتاجها لتقييم، عرض، وتوثيق الصفقات في مكان واحد — بطريقة ذكية وسريعة وواضحة.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
             {[
-              { num: "1", title: "صفقات حقيقية… مو مجرد إعلانات", desc: "نركّز على إتمام الصفقة، مو مجرد عرض إعلان بين آلاف الإعلانات العشوائية." },
-              { num: "2", title: "بيانات واضحة وموثوقة", desc: "نرتّب ونحلل المعلومات بحيث تكون دقيقة ومفهومة، بدون عشوائية أو نقص." },
-              { num: "3", title: "تسعير منطقي ومدروس", desc: "نساعدك تفهم القيمة الحقيقية للمشروع، ونكشف الأسعار غير الواقعية." },
-              { num: "4", title: "إدخال بيانات سريع وسهل", desc: "نختصر عليك الوقت بخطوات بسيطة وواضحة، بدون تعقيد أو نماذج طويلة." },
-              { num: "5", title: "تجربة منظمة وواضحة", desc: "كل شيء مصمم ليكون واضح ومرتب من أول خطوة حتى إتمام الصفقة." },
-              { num: "6", title: "ذكاء اصطناعي يدعم قرارك", desc: "تحليل تلقائي للصور والمستندات والأسعار يساعدك تاخذ قرار مبني على بيانات حقيقية." },
+              { num: "1", title: "صفقات حقيقية… مو مجرد إعلانات", desc: "نركّز على إتمام الصفقة، مو مجرد عرض إعلان بين آلاف الإعلانات." },
+              { num: "2", title: "بيانات واضحة وموثوقة", desc: "نرتّب ونحلل المعلومات لتكون دقيقة ومفهومة بدون عشوائية." },
+              { num: "3", title: "تسعير منطقي ومدروس", desc: "نحلل القيمة الحقيقية ونكشف الأسعار غير الواقعية." },
+              { num: "4", title: "إدخال بيانات سريع وسهل", desc: "خطوات بسيطة بدون نماذج طويلة أو تعقيد." },
+              { num: "5", title: "ذكاء يساعدك في القرار", desc: "تحليل ذكي للصور، البيانات، والتفاوض." },
+              { num: "6", title: "تجربة منظمة وواضحة", desc: "كل شيء مرتب من البداية حتى إتمام الصفقة." },
             ].map((item, i) => (
               <div
                 key={item.num}
