@@ -110,8 +110,10 @@ const AiAssistant = () => {
   const now = () => new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
   const buildContext = useCallback(() => {
-    return `الصفحة الحالية: ${pathname}\nدور المستخدم: ${role}`;
-  }, [pathname, role]);
+    let ctx = `الصفحة الحالية: ${pathname}\nدور المستخدم: ${role}`;
+    if (pageData) ctx += `\n\n${pageData}`;
+    return ctx;
+  }, [pathname, role, pageData]);
 
   const sendMessage = useCallback((text: string) => {
     const userMsg: ChatMsg = { id: String(Date.now()), role: "user", content: text, time: now() };
