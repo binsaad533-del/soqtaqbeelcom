@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import AiStar from "@/components/AiStar";
+import SocialIcons from "@/components/SocialIcons";
 import { Send, MessageSquare, Mail, Phone, MapPin, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -113,6 +114,11 @@ const ContactPage = () => {
                 <div>الأحد - الخميس: 9:00 ص - 5:00 م</div>
                 <div>الجمعة - السبت: مغلق</div>
               </div>
+            </div>
+
+            <div className="bg-card rounded-2xl p-5 shadow-soft">
+              <h3 className="text-sm font-medium mb-3">تابعنا</h3>
+              <SocialIcons size="md" />
             </div>
           </div>
 

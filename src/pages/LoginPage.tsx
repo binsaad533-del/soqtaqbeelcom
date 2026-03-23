@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import AiStar from "@/components/AiStar";
+import SocialIcons from "@/components/SocialIcons";
 import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown } from "lucide-react";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";
@@ -342,9 +343,12 @@ const LoginPage = () => {
           </form>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          <Link to="/" className="hover:text-foreground transition-colors">← العودة للرئيسية</Link>
-        </p>
+        <div className="flex flex-col items-center gap-4 mt-6">
+          <SocialIcons />
+          <p className="text-xs text-muted-foreground">
+            <Link to="/" className="hover:text-foreground transition-colors">← العودة للرئيسية</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
