@@ -106,6 +106,21 @@ const ListingDetailsPage = () => {
           <span className="text-foreground">{listing.title || listing.business_activity || "فرصة تقبيل"}</span>
         </div>
 
+        {isSimulation && (
+          <div className="mb-5 rounded-2xl bg-primary/5 border border-primary/15 p-4 flex items-start gap-3" dir="rtl">
+            <div className="mt-0.5 shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <Info size={16} className="text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground mb-1">هذا الإعلان للعرض التوضيحي فقط</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                هذه الصفقة مجرد محاكاة لتوضيح طريقة عمل المنصة. لا يمكن التفاوض عليها أو إتمامها. 
+                تصفّح <Link to="/marketplace" className="text-primary hover:underline font-medium">السوق</Link> لاستعراض الفرص الحقيقية عند توفرها.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             {/* Images */}
