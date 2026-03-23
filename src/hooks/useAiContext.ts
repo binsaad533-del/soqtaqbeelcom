@@ -71,13 +71,13 @@ const getNegotiationContext = (id?: string) => ({
 });
 
 const getListingContext = (id?: string) => ({
-  greeting: "أحلل هذه الفرصة لك",
+  greeting: "خلني أشيّك لك على هذي الفرصة 🧠",
   role: "محلل صفقات",
   suggestions: [
-    { id: "deal-intel", icon: "🧠", label: "تحليل الصفقة", description: "تحليل تجاري شامل للفرصة مع المخاطر والفرص", priority: "high" as const },
-    { id: "price-check", icon: "💰", label: "تقييم السعر", description: "هل السعر المطلوب عادل؟ أقارنه مع السوق", priority: "high" as const },
-    { id: "start-negotiate", icon: "🤝", label: "ابدأ التفاوض", description: "أساعدك في بدء مفاوضة ذكية", priority: "medium" as const },
-    { id: "verify", icon: "✅", label: "تحقق من الإفصاح", description: "أراجع مدى اكتمال المعلومات والمستندات", priority: "medium" as const },
+    { id: "deal-intel", icon: "🧠", label: "حلل لي الصفقة", description: "أعطيك تحليل شامل مع المخاطر والفرص", priority: "high" as const },
+    { id: "price-check", icon: "💰", label: "السعر عادل؟", description: "أشيّك لك إذا السعر معقول مقارنة بالسوق", priority: "high" as const },
+    { id: "start-negotiate", icon: "🤝", label: "أبغى أفاوض", description: "أساعدك تبدأ مفاوضة ذكية", priority: "medium" as const },
+    { id: "verify", icon: "✅", label: "البيانات كاملة؟", description: "أراجع لك مدى اكتمال المعلومات والمستندات", priority: "medium" as const },
   ],
 });
 
