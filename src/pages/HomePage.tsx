@@ -133,29 +133,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-16 md:py-20 border-t border-border/50">
-        <div className="container">
-          <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
-            <h2 className="text-2xl md:text-3xl font-medium mb-4">كيف تعمل المنصة؟</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto" ref={addRevealRef} style={{ opacity: 0 }}>
-            {[
-              { num: "1", title: "اعرض مشروعك بسهولة", desc: "أدخل بيانات مشروعك بخطوات بسيطة وواضحة." },
-              { num: "2", title: "نرتب ونحلل البيانات", desc: "نحلل المعلومات ونقدمها بشكل منظم وموثوق." },
-              { num: "3", title: "نوصلك بالشخص المناسب", desc: "نربط البائع بالمشتري المناسب لإتمام الصفقة." },
-            ].map((step) => (
-              <div key={step.num} className="text-center">
-                <span className="inline-flex w-10 h-10 rounded-full bg-primary/10 text-primary items-center justify-center font-medium text-base mb-3">
-                  {step.num}
-                </span>
-                <h3 className="font-medium mb-1.5">{step.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Smart Platform */}
       <section className="py-16 md:py-24 border-t border-border/50">
