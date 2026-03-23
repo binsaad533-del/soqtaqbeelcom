@@ -70,22 +70,7 @@ const HomePage = () => {
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
               ارفع صور مشروعك…
               <br />
-              <span className="gradient-text relative inline-flex items-center gap-2">
-                والذكاء الاصطناعي يكمل الباقي
-                {/* Moqbil in hero - peeking next to the text */}
-                <img
-                  src={muqbilWaveImg}
-                  alt="مقبل"
-                  className={`
-                    inline-block w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg
-                    transition-all duration-1000 ease-out
-                    ${entered ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-75"}
-                  `}
-                  style={{ animationDelay: "1.5s" }}
-                  width={64}
-                  height={64}
-                />
-              </span>
+              <span className="gradient-text">والذكاء الاصطناعي يكمل الباقي</span>
             </h1>
 
             {/* Moqbil speech bubble */}
