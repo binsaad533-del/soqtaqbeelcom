@@ -238,7 +238,7 @@ const AiAssistant = () => {
                   <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                   <span className="text-[10px] text-success">نشط</span>
                 </div>
-                <button onClick={() => { setOpen(false); stopSpeaking(); stopListening(); }} className="text-muted-foreground/60 hover:text-foreground transition-colors">
+                <button onClick={() => setOpen(false)} className="text-muted-foreground/60 hover:text-foreground transition-colors">
                   <X size={14} strokeWidth={1.5} />
                 </button>
               </div>
