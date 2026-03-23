@@ -97,7 +97,12 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
     }
   }, [step, understanding.markViewed]);
 
-  const allChecked = REQUIRED_CONFIRMATIONS.every(c => checked[c]);
+  // Use seller confirmations (includes commission acknowledgment) for seller
+  const activeConfirmations = isSeller
+    ? SELLER_CONFIRMATIONS
+    : REQUIRED_CONFIRMATIONS;
+
+  const allChecked = activeConfirmations.every(c => checked[c]);
 
   const handleStepChange = (newStep: "summary" | "risks" | "confirm") => {
     if (newStep === "confirm" && !understanding.canProceed) {
