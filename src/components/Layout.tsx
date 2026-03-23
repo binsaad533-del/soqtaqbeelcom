@@ -80,6 +80,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </header>
 
       <main className="flex-1">{children}</main>
+      <AiAssistant />
 
       <footer className="border-t border-border/50 bg-card/50">
         <div className="container py-8">
