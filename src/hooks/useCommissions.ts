@@ -9,7 +9,7 @@ export interface Commission {
   deal_amount: number;
   commission_rate: number;
   commission_amount: number;
-  payment_status: string;
+  payment_status: CommissionStatus;
   receipt_path: string | null;
   paid_at: string | null;
   marked_paid_at: string | null;
@@ -20,6 +20,29 @@ export interface Commission {
   updated_at: string;
 }
 
+export type CommissionStatus =
+  | "unpaid"
+  | "reminder_sent"
+  | "paid_unverified"
+  | "paid_proof_uploaded"
+  | "verified";
+
+export const COMMISSION_STATUS_LABELS: Record<CommissionStatus, string> = {
+  unpaid: "غير مدفوعة",
+  reminder_sent: "تم التذكير",
+  paid_unverified: "تم الدفع (بدون إثبات)",
+  paid_proof_uploaded: "تم الدفع (مع إثبات)",
+  verified: "تم التحقق ✓",
+};
+
+export const COMMISSION_STATUS_COLORS: Record<CommissionStatus, string> = {
+  unpaid: "text-amber-600",
+  reminder_sent: "text-amber-500",
+  paid_unverified: "text-blue-600",
+  paid_proof_uploaded: "text-indigo-600",
+  verified: "text-emerald-600",
+};
+
 export const COMMISSION_RATE = 0.01; // 1%
 
 export const BANK_DETAILS = {
@@ -27,6 +50,8 @@ export const BANK_DETAILS = {
   bank: "مصرف الراجحي",
   iban: "SA4180000611608016026222",
 } as const;
+
+export const COMMISSION_ACKNOWLEDGMENT_KEY = "commission_acknowledged";
 
 export function calculateCommission(amount: number): number {
   return Math.round(amount * COMMISSION_RATE * 100) / 100;
@@ -64,17 +89,51 @@ export function useCommissions() {
 
   const markAsPaid = useCallback(async (commissionId: string, receiptPath?: string) => {
     const now = new Date().toISOString();
+    const status: CommissionStatus = receiptPath ? "paid_proof_uploaded" : "paid_unverified";
     const { error } = await supabase
       .from("deal_commissions")
       .update({
-        payment_status: "paid",
+        payment_status: status,
         marked_paid_at: now,
-        paid_at: now,
         ...(receiptPath ? { receipt_path: receiptPath } : {}),
       } as any)
       .eq("id", commissionId);
     return { error };
   }, []);
+
+  const verifyCommission = useCallback(async (commissionId: string) => {
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from("deal_commissions")
+      .update({
+        payment_status: "verified",
+        paid_at: now,
+      } as any)
+      .eq("id", commissionId);
+    return { error };
+  }, []);
+
+  const sendReminder = useCallback(async (commission: Commission) => {
+    if (!user) return;
+    // Insert notification for seller
+    await supabase.from("notifications").insert({
+      user_id: commission.seller_id,
+      title: "تذكير ودي بسداد العمولة 🤍",
+      body: `نأمل التكرم بسداد عمولة المنصة (1%) الخاصة بهذه الصفقة. مبلغ العمولة: ${commission.commission_amount.toLocaleString("en-US")} ر.س. ثقتكم وأمانتكم محل تقديرنا 🙏`,
+      type: "commission_reminder",
+      reference_type: "deal",
+      reference_id: commission.deal_id,
+    });
+    // Update reminder count
+    await supabase
+      .from("deal_commissions")
+      .update({
+        reminder_count: commission.reminder_count + 1,
+        last_reminder_at: new Date().toISOString(),
+        payment_status: commission.payment_status === "unpaid" ? "reminder_sent" : commission.payment_status,
+      } as any)
+      .eq("id", commission.id);
+  }, [user]);
 
   const uploadReceipt = useCallback(async (commissionId: string, file: File): Promise<string | null> => {
     if (!user) return null;
@@ -92,6 +151,8 @@ export function useCommissions() {
     getMyCommissions,
     getAllCommissions,
     markAsPaid,
+    verifyCommission,
+    sendReminder,
     uploadReceipt,
   };
 }

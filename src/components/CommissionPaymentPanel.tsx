@@ -1,7 +1,14 @@
-import { useState, useRef } from "react";
-import { Copy, CheckCircle2, Upload, Loader2, Landmark } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Copy, CheckCircle2, Upload, Loader2, Landmark, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BANK_DETAILS, type Commission } from "@/hooks/useCommissions";
+import { Badge } from "@/components/ui/badge";
+import {
+  BANK_DETAILS,
+  COMMISSION_STATUS_LABELS,
+  COMMISSION_STATUS_COLORS,
+  type Commission,
+  type CommissionStatus,
+} from "@/hooks/useCommissions";
 import { useCommissions } from "@/hooks/useCommissions";
 import { toast } from "sonner";
 
@@ -15,11 +22,22 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
   const { markAsPaid, uploadReceipt } = useCommissions();
   const [uploading, setUploading] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Show success message on first render if deal just completed
+  useEffect(() => {
+    if (commission.payment_status === "unpaid" && isSeller) {
+      setShowSuccess(true);
+      const t = setTimeout(() => setShowSuccess(false), 10000);
+      return () => clearTimeout(t);
+    }
+  }, []);
 
   const copyText = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
+    toast.success("تم النسخ");
     setTimeout(() => setCopiedField(null), 2000);
   };
 
@@ -31,7 +49,7 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
     if (path) {
       const { error } = await markAsPaid(commission.id, path);
       if (!error) {
-        toast.success("تم تسجيل الدفع بنجاح");
+        toast.success("تم رفع الإيصال وتسجيل الدفع بنجاح");
         onUpdate();
       } else {
         toast.error("فشل تسجيل الدفع");
@@ -45,23 +63,40 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
   const handleMarkPaid = async () => {
     const { error } = await markAsPaid(commission.id);
     if (!error) {
-      toast.success("تم تحديث حالة الدفع");
+      toast.success("تم تحديث حالة الدفع — يرجى رفع إيصال التحويل لاحقاً");
       onUpdate();
     }
   };
 
-  const isPaid = commission.payment_status === "paid";
+  const status = commission.payment_status as CommissionStatus;
+  const isCompleted = status === "verified";
+  const isPaidOrProof = status === "paid_unverified" || status === "paid_proof_uploaded" || status === "verified";
 
   return (
     <div className="bg-card rounded-2xl shadow-soft border border-border/30 overflow-hidden">
-      <div className="p-5 border-b border-border/20">
-        <div className="flex items-center gap-2 mb-1">
-          <Landmark size={16} className="text-primary" />
-          <h3 className="font-medium text-sm">دفع العمولة</h3>
+      {/* Success message for seller */}
+      {showSuccess && isSeller && (
+        <div className="bg-primary/5 border-b border-primary/10 p-5 text-center">
+          <PartyPopper size={28} className="text-primary mx-auto mb-2" />
+          <p className="text-sm font-medium mb-1">تم إتمام الصفقة بنجاح 🎉</p>
+          <p className="text-xs text-muted-foreground leading-relaxed max-w-sm mx-auto">
+            نذكركم بلطف بسداد عمولة المنصة (1%) عبر التحويل البنكي.
+            <br />
+            نشكر لكم أمانتكم والتزامكم 🤍
+          </p>
         </div>
-        <p className="text-[11px] text-muted-foreground">
-          عمولة المنصة مستحقة بعد إتمام الصفقة
-        </p>
+      )}
+
+      <div className="p-5 border-b border-border/20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Landmark size={16} className="text-primary" />
+            <h3 className="font-medium text-sm">دفع العمولة</h3>
+          </div>
+          <Badge variant="outline" className={`text-[10px] ${COMMISSION_STATUS_COLORS[status]}`}>
+            {COMMISSION_STATUS_LABELS[status]}
+          </Badge>
+        </div>
       </div>
 
       <div className="p-5 space-y-4">
@@ -76,22 +111,14 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
           </p>
         </div>
 
-        {/* Status */}
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">حالة الدفع</span>
-          <span className={isPaid ? "text-emerald-600 font-medium" : "text-amber-600 font-medium"}>
-            {isPaid ? "✓ تم الدفع" : "غير مدفوع"}
-          </span>
-        </div>
-
-        {/* Bank details */}
-        {!isPaid && (
+        {/* Bank details - show when not fully paid */}
+        {!isCompleted && (
           <div className="space-y-2.5">
-            <p className="text-xs font-medium">تفاصيل الحساب البنكي</p>
+            <p className="text-xs font-medium">بيانات التحويل</p>
             {[
-              { label: "المستفيد", value: BANK_DETAILS.beneficiary, key: "beneficiary" },
+              { label: "اسم المستفيد", value: BANK_DETAILS.beneficiary, key: "beneficiary" },
               { label: "البنك", value: BANK_DETAILS.bank, key: "bank" },
-              { label: "الآيبان", value: BANK_DETAILS.iban, key: "iban" },
+              { label: "رقم الآيبان", value: BANK_DETAILS.iban, key: "iban" },
             ].map(item => (
               <div key={item.key} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2.5">
                 <div>
@@ -109,6 +136,9 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
                 </button>
               </div>
             ))}
+            <p className="text-[10px] text-muted-foreground text-center">
+              يرجى رفع إثبات التحويل بعد السداد
+            </p>
           </div>
         )}
 
@@ -120,7 +150,7 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
         </div>
 
         {/* Actions for seller */}
-        {isSeller && !isPaid && (
+        {isSeller && !isPaidOrProof && (
           <div className="space-y-2">
             <input
               ref={fileRef}
@@ -133,7 +163,6 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
               className="w-full rounded-xl gap-2"
-              variant="outline"
             >
               {uploading
                 ? <><Loader2 size={14} className="animate-spin" />جاري الرفع...</>
@@ -142,18 +171,21 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
             </Button>
             <Button
               onClick={handleMarkPaid}
-              variant="ghost"
-              className="w-full rounded-xl text-xs text-muted-foreground"
+              variant="outline"
+              className="w-full rounded-xl text-xs"
             >
-              تأكيد الدفع بدون إيصال
+              تم سداد العمولة (بدون إيصال)
             </Button>
           </div>
         )}
 
-        {isPaid && commission.marked_paid_at && (
-          <div className="flex items-center gap-2 justify-center text-xs text-emerald-600">
-            <CheckCircle2 size={14} />
-            <span>تم تأكيد الدفع في {new Date(commission.marked_paid_at).toLocaleDateString("ar-SA")}</span>
+        {isPaidOrProof && (
+          <div className="flex items-center gap-2 justify-center text-xs">
+            <CheckCircle2 size={14} className={COMMISSION_STATUS_COLORS[status]} />
+            <span className={COMMISSION_STATUS_COLORS[status]}>
+              {COMMISSION_STATUS_LABELS[status]}
+              {commission.marked_paid_at && ` — ${new Date(commission.marked_paid_at).toLocaleDateString("ar-SA")}`}
+            </span>
           </div>
         )}
       </div>
