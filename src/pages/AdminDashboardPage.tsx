@@ -5,11 +5,12 @@ import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
-import { BarChart3, Users, FileText, Handshake, ChevronLeft, Loader2, Shield, Database } from "lucide-react";
+import { BarChart3, Users, FileText, Handshake, ChevronLeft, Loader2, Shield, Database, UserPlus } from "lucide-react";
 import BackupPanel from "@/components/BackupPanel";
 import CommissionAdminPanel from "@/components/CommissionAdminPanel";
+import CrmDashboard from "@/components/crm/CrmDashboard";
 
-type Tab = "overview" | "commissions" | "backup";
+type Tab = "overview" | "crm" | "commissions" | "backup";
 
 const AdminDashboardPage = () => {
   const { getAllListings } = useListings();
