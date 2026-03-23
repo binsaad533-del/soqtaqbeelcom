@@ -216,6 +216,21 @@ const ListingDetailsPage = () => {
                 </div>
               )}
 
+              {/* Seller Trust Badge */}
+              {sellerProfile && (
+                <div className="mb-4 p-3 bg-muted/20 rounded-xl">
+                  <p className="text-[11px] text-muted-foreground mb-2">مستوى ثقة البائع</p>
+                  <TrustBadge
+                    score={sellerProfile.trust_score}
+                    verificationLevel={sellerProfile.verification_level}
+                    size="md"
+                    showScore
+                    showBadges
+                    badges={getSellerBadges(sellerProfile)}
+                  />
+                </div>
+              )}
+
               {!isOwner && (
                 <Button
                   onClick={handleStartNegotiation}
@@ -225,6 +240,11 @@ const ListingDetailsPage = () => {
                   {startingDeal ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} strokeWidth={1.5} />}
                   ابدأ التفاوض
                 </Button>
+              )}
+
+              {/* Seller Reviews */}
+              {sellerReviews.length > 0 && (
+                <SellerReviewsSummary reviews={sellerReviews} className="mt-4" />
               )}
             </div>
           </div>
