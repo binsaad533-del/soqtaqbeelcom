@@ -21,40 +21,40 @@ interface UserBehavior {
 
 const pageContextMap: Record<string, { greeting: string; role: string; suggestions: AiSuggestion[] }> = {
   "/": {
-    greeting: "مرحباً بك في سوق تقبيل",
-    role: "مرشد ذكي",
+    greeting: "هلا وغلا 👋 أنا مساعدك الذكي، وش تبغى نسوي اليوم؟",
+    role: "مرشدك الذكي",
     suggestions: [
-      { id: "browse", icon: "🔍", label: "استكشف الفرص", description: "أساعدك في إيجاد أفضل الفرص المتاحة حسب اهتماماتك", priority: "high" },
-      { id: "create", icon: "📝", label: "أضف فرصتك", description: "أنشئ إعلان احترافي بمساعدة الذكاء الاصطناعي في دقائق", priority: "high" },
-      { id: "analyze", icon: "📊", label: "تحليل السوق", description: "احصل على رؤية ذكية عن السوق السعودي حسب المدينة والنشاط", priority: "medium" },
+      { id: "browse", icon: "🔍", label: "وريني الفرص", description: "خلني أدوّرلك على أفضل الفرص اللي تناسبك 👌", priority: "high" },
+      { id: "create", icon: "📝", label: "أبغى أضيف فرصة", description: "أساعدك تسوي إعلان احترافي بدقايق", priority: "high" },
+      { id: "analyze", icon: "📊", label: "حلل لي السوق", description: "أعطيك نظرة ذكية على السوق حسب المدينة والنشاط", priority: "medium" },
     ],
   },
   "/marketplace": {
-    greeting: "أنا هنا لمساعدتك في إيجاد الفرصة المناسبة",
+    greeting: "تبغى تلاقي فرصة حلوة؟ خلني أساعدك 🎯",
     role: "محلل فرص",
     suggestions: [
-      { id: "filter", icon: "🎯", label: "فلترة ذكية", description: "أساعدك في تضييق البحث بناءً على ميزانيتك واهتماماتك", priority: "high" },
-      { id: "compare", icon: "⚖️", label: "قارن الفرص", description: "قارن بين عدة فرص جنباً إلى جنب", priority: "medium" },
-      { id: "alert", icon: "🔔", label: "تنبيه فرص جديدة", description: "أبلغك فور ظهور فرص تناسب معاييرك", priority: "low" },
+      { id: "filter", icon: "🎯", label: "ضيّق البحث", description: "قولي ميزانيتك واهتمامك وأنا أرتب لك الباقي", priority: "high" },
+      { id: "compare", icon: "⚖️", label: "قارن بينهم", description: "خلني أقارن لك بين كذا فرصة مع بعض", priority: "medium" },
+      { id: "alert", icon: "🔔", label: "نبّهني لو فيه جديد", description: "أخليك أول واحد يعرف لو نزلت فرصة تناسبك", priority: "low" },
     ],
   },
   "/create-listing": {
-    greeting: "سأساعدك في إنشاء إعلان احترافي",
+    greeting: "يلا نسوي إعلان يجذب المشترين ✨",
     role: "مساعد إنشاء",
     suggestions: [
-      { id: "autofill", icon: "✨", label: "تعبئة تلقائية", description: "ارفع المستندات وسأستخرج البيانات تلقائياً", priority: "high" },
-      { id: "photos", icon: "📷", label: "تحليل الصور", description: "ارفع صور المشروع وسأحدد الأصول والمعدات", priority: "high" },
-      { id: "complete", icon: "📋", label: "إكمال الإعلان", description: "أكمل الحقول الناقصة بناءً على المعلومات المتوفرة", priority: "medium" },
-      { id: "docs", icon: "📄", label: "استخراج من المستندات", description: "ارفع العقود والفواتير وسأستخرج التفاصيل", priority: "medium" },
+      { id: "autofill", icon: "✨", label: "عبّي تلقائي", description: "ارفع المستندات وأنا أطلع البيانات لك", priority: "high" },
+      { id: "photos", icon: "📷", label: "حلل الصور", description: "ارفع صور المشروع وأنا أحدد الأصول والمعدات", priority: "high" },
+      { id: "complete", icon: "📋", label: "كمّل الإعلان", description: "أكمّل لك الحقول الناقصة من المعلومات الموجودة", priority: "medium" },
+      { id: "docs", icon: "📄", label: "طلّع من المستندات", description: "ارفع العقود والفواتير وأنا أستخرج التفاصيل", priority: "medium" },
     ],
   },
   "/dashboard": {
-    greeting: "لوحة التحكم الخاصة بك",
-    role: "مدير عمليات",
+    greeting: "هلا فيك 👋 خلني أعطيك ملخص سريع",
+    role: "مدير عملياتك",
     suggestions: [
-      { id: "status", icon: "📈", label: "ملخص الحالة", description: "نظرة عامة على إعلاناتك ومفاوضاتك", priority: "high" },
-      { id: "improve", icon: "💡", label: "تحسين الإعلانات", description: "أقترح تحسينات لزيادة جاذبية إعلاناتك", priority: "medium" },
-      { id: "missing", icon: "⚠️", label: "معلومات ناقصة", description: "أحدد المعلومات المطلوبة لإكمال ملفاتك", priority: "high" },
+      { id: "status", icon: "📈", label: "وش آخر الأخبار؟", description: "نظرة سريعة على إعلاناتك ومفاوضاتك", priority: "high" },
+      { id: "improve", icon: "💡", label: "حسّن إعلاناتك", description: "عندي اقتراحات تخلي إعلاناتك أقوى", priority: "medium" },
+      { id: "missing", icon: "⚠️", label: "وش الناقص؟", description: "أقولك وش المعلومات اللي لازم تكمّلها", priority: "high" },
     ],
   },
 };
