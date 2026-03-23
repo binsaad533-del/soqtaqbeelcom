@@ -8,8 +8,9 @@ import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
 import {
   Users, FileText, Handshake, Shield, Settings, BarChart3,
-  Eye, CheckCircle, ChevronLeft, Search, Activity, Loader2
+  Eye, CheckCircle, ChevronLeft, Search, Activity, Loader2, ShieldAlert
 } from "lucide-react";
+import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 
 const tabs = [
   { label: "نظرة عامة", icon: BarChart3 },
@@ -17,6 +18,7 @@ const tabs = [
   { label: "الإعلانات", icon: FileText },
   { label: "الصفقات", icon: Handshake },
   { label: "المشرفون", icon: Shield },
+  { label: "الأمان", icon: ShieldAlert },
   { label: "الإعدادات", icon: Settings },
 ];
 
