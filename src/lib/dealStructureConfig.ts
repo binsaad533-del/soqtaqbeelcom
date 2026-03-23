@@ -230,7 +230,7 @@ export interface ConflictRule {
 export const CONFLICT_RULES: ConflictRule[] = [
   {
     types: ["full_takeover", "assets_only"],
-    message: "التقبّل الكامل يشمل الأصول بالفعل — اختيار «أصول فقط» كبديل قد يسبب التباساً. تأكد من التمييز الواضح بين الخيارين.",
+    message: "التقبيل الكامل يشمل الأصول بالفعل — اختيار «أصول فقط» كبديل قد يسبب التباساً. تأكد من التمييز الواضح بين الخيارين.",
     severity: "warning",
   },
   {
