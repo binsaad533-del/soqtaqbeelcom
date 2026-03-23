@@ -106,10 +106,10 @@ const SmartSearchBar = ({ onApplyFilters }: Props) => {
           placeholder="أنا مقبل… وش تدور عليه؟"
           disabled={loading}
           className={cn(
-            "w-full pr-11 pl-10 py-3.5 rounded-2xl border text-sm transition-all",
-            "bg-card border-border/50 shadow-soft",
-            "focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10",
-            "placeholder:text-muted-foreground/60",
+            "w-full pr-10 pl-9 py-2.5 rounded-xl border text-sm transition-all",
+            "bg-background border-border/40",
+            "focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/10",
+            "placeholder:text-muted-foreground/50",
             loading && "opacity-70"
           )}
         />
