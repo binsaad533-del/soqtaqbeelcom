@@ -100,6 +100,8 @@ const AdminDashboardPage = () => {
           </>
         )}
 
+        {activeTab === "commissions" && <CommissionAdminPanel />}
+
         {activeTab === "backup" && <BackupPanel />}
       </div>
     </div>
