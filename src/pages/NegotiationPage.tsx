@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Send, ArrowRight, Zap, Loader2, Shield } from "lucide-react";
+import { Send, ArrowRight, Zap, Loader2, Shield, Scale } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import TrustBadge from "@/components/TrustBadge";
 import DealRiskIndicator from "@/components/DealRiskIndicator";
+import LegalConfirmationPanel from "@/components/LegalConfirmationPanel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useDeals, type NegotiationMessage } from "@/hooks/useDeals";
@@ -30,6 +31,7 @@ const NegotiationPage = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [otherProfile, setOtherProfile] = useState<any>(null);
+  const [showLegalPanel, setShowLegalPanel] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -144,6 +146,29 @@ const NegotiationPage = () => {
         <Button asChild variant="outline" className="mt-4 rounded-xl">
           <Link to="/dashboard">العودة للوحة التحكم</Link>
         </Button>
+      </div>
+    );
+  }
+
+  if (showLegalPanel && deal && listing) {
+    return (
+      <div className="py-8">
+        <div className="container max-w-3xl">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+            <button onClick={() => setShowLegalPanel(false)} className="hover:text-foreground transition-colors flex items-center gap-1">
+              <ArrowRight size={14} strokeWidth={1.3} />
+              العودة للتفاوض
+            </button>
+          </div>
+          <LegalConfirmationPanel
+            deal={deal}
+            listing={listing}
+            onConfirmed={() => {
+              setShowLegalPanel(false);
+              loadData();
+            }}
+          />
+        </div>
       </div>
     );
   }
@@ -280,20 +305,36 @@ const NegotiationPage = () => {
               </div>
             </div>
 
-            {/* Final Approval */}
-            {deal.status !== "completed" && (
-              <div className="bg-card rounded-2xl p-5 shadow-soft border border-success/20">
+            {/* Legal Confirmation / Final Approval */}
+            {deal.status !== "completed" && deal.status !== "finalized" && (
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-primary/20">
                 <div className="flex items-center gap-2 mb-2">
-                  <Shield size={14} strokeWidth={1.5} className="text-success" />
-                  <h3 className="font-medium text-sm">الموافقة النهائية</h3>
+                  <Scale size={14} strokeWidth={1.5} className="text-primary" />
+                  <h3 className="font-medium text-sm">التأكيد القانوني</h3>
                 </div>
                 <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed">
-                  عند الاتفاق، يمكنك الانتقال لإنشاء الاتفاقية الرسمية.
+                  قبل إنهاء الصفقة، يجب على الطرفين مراجعة الملخص والموافقة رسمياً.
                 </p>
-                <Button asChild variant="outline" className="w-full rounded-xl active:scale-[0.98] text-xs">
-                  <Link to={`/agreement/${dealId}`}>
-                    عرض ملخص الاتفاق للموافقة
-                  </Link>
+                <Button
+                  onClick={() => setShowLegalPanel(true)}
+                  variant="outline"
+                  className="w-full rounded-xl active:scale-[0.98] text-xs"
+                >
+                  بدء التأكيد القانوني
+                </Button>
+              </div>
+            )}
+            {deal.status === "finalized" && (
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-primary/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <Shield size={14} strokeWidth={1.5} className="text-primary" />
+                  <h3 className="font-medium text-sm">الصفقة مُقفلة</h3>
+                </div>
+                <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed">
+                  تمت الموافقة من الطرفين. يمكنك الانتقال للاتفاقية.
+                </p>
+                <Button asChild className="w-full rounded-xl text-xs gradient-primary text-primary-foreground">
+                  <Link to={`/agreement/${dealId}`}>عرض الاتفاقية</Link>
                 </Button>
               </div>
             )}

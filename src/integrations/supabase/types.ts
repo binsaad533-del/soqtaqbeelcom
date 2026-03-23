@@ -352,6 +352,59 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_confirmations: {
+        Row: {
+          confirmations: Json
+          confirmed_at: string
+          deal_id: string
+          deal_snapshot: Json
+          id: string
+          invalidated_at: string | null
+          invalidation_reason: string | null
+          ip_address: string | null
+          party_role: string
+          user_agent: string | null
+          user_id: string
+          version: number
+        }
+        Insert: {
+          confirmations?: Json
+          confirmed_at?: string
+          deal_id: string
+          deal_snapshot?: Json
+          id?: string
+          invalidated_at?: string | null
+          invalidation_reason?: string | null
+          ip_address?: string | null
+          party_role: string
+          user_agent?: string | null
+          user_id: string
+          version?: number
+        }
+        Update: {
+          confirmations?: Json
+          confirmed_at?: string
+          deal_id?: string
+          deal_snapshot?: Json
+          id?: string
+          invalidated_at?: string | null
+          invalidation_reason?: string | null
+          ip_address?: string | null
+          party_role?: string
+          user_agent?: string | null
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_confirmations_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
           ai_rating: string | null
