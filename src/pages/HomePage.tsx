@@ -138,15 +138,57 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Why Us */}
+      <section className="py-16 md:py-24">
+        <div className="container">
+          <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
+            <h2 className="text-2xl md:text-3xl font-medium mb-4">ليش تقبيل؟</h2>
+            <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
+              لأنك ما تحتاج منصة تعرض مشروعك فقط…
+              <br />
+              <span className="font-medium text-foreground">تحتاج منصة تساعدك تبيعه فعليًا.</span>
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
+            {[
+              { num: "١", title: "صفقات حقيقية… مو مجرد إعلانات", desc: "نركّز على إتمام الصفقة، مو مجرد عرض إعلان بين آلاف الإعلانات العشوائية." },
+              { num: "٢", title: "بيانات واضحة وموثوقة", desc: "نرتّب ونحلل المعلومات بحيث تكون دقيقة ومفهومة، بدون عشوائية أو نقص." },
+              { num: "٣", title: "تسعير منطقي ومدروس", desc: "نساعدك تفهم القيمة الحقيقية للمشروع، ونكشف الأسعار غير الواقعية." },
+              { num: "٤", title: "إدخال بيانات سريع وسهل", desc: "نختصر عليك الوقت بخطوات بسيطة وواضحة، بدون تعقيد أو نماذج طويلة." },
+              { num: "٥", title: "تجربة منظمة وواضحة", desc: "كل شيء مصمم ليكون واضح ومرتب من أول خطوة حتى إتمام الصفقة." },
+            ].map((item, i) => (
+              <div
+                key={item.num}
+                ref={addRevealRef}
+                style={{ opacity: 0, animationDelay: `${i * 80}ms` }}
+                className="bg-card rounded-2xl p-5 shadow-soft hover:shadow-soft-lg transition-all duration-300"
+              >
+                <span className="inline-flex w-8 h-8 rounded-lg bg-primary/10 text-primary items-center justify-center font-medium text-sm mb-3">
+                  {item.num}
+                </span>
+                <h3 className="font-medium mb-1.5">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-16 gradient-hero" ref={addRevealRef} style={{ opacity: 0 }}>
         <div className="container text-center">
           <AiStar size={36} className="justify-center mb-4" />
-          <h2 className="text-2xl md:text-3xl font-medium mb-3">ابدأ الآن</h2>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">أضف فرصتك أو تصفّح الفرص المتاحة واستفد من التحليل الذكي</p>
-          <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft active:scale-[0.98]">
-            <Link to="/create-listing">أضف فرصة جديدة</Link>
-          </Button>
+          <p className="text-muted-foreground mb-1">إذا عندك مشروع… أو تبحث عن فرصة</p>
+          <h2 className="text-2xl md:text-3xl font-medium mb-6">ابدأ الآن وخلك أقرب لصفقة ناجحة</h2>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft active:scale-[0.98]">
+              <Link to="/create-listing">ابدأ الآن</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-xl border-border/60 hover:bg-accent/50 active:scale-[0.98]">
+              <Link to="/marketplace">تصفح المشاريع</Link>
+            </Button>
+          </div>
         </div>
       </section>
     </div>
