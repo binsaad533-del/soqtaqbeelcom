@@ -289,13 +289,6 @@ const AiAssistant = () => {
                         <div className="flex items-center gap-1.5 mb-1.5">
                           <img src={muqbilImg} alt="مقبل" className="w-5 h-5 object-contain" width={20} height={20} />
                           <span className="text-[10px] text-accent-foreground font-medium">مقبل</span>
-                          {isSpeaking && (
-                            <span className="flex items-center gap-0.5 mr-1">
-                              <span className="w-1 h-2 bg-primary/60 rounded-full animate-pulse" />
-                              <span className="w-1 h-3 bg-primary/60 rounded-full animate-pulse" style={{ animationDelay: "100ms" }} />
-                              <span className="w-1 h-2 bg-primary/60 rounded-full animate-pulse" style={{ animationDelay: "200ms" }} />
-                            </span>
-                          )}
                         </div>
                       )}
                       {msg.content}
