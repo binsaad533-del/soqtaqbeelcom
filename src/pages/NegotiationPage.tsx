@@ -2,10 +2,14 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Send, ArrowRight, Zap, Loader2, Shield } from "lucide-react";
 import AiStar from "@/components/AiStar";
+import TrustBadge from "@/components/TrustBadge";
+import DealRiskIndicator from "@/components/DealRiskIndicator";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useDeals, type NegotiationMessage } from "@/hooks/useDeals";
 import { useListings, type Listing } from "@/hooks/useListings";
+import { useFraudEngine } from "@/hooks/useFraudEngine";
+import { useProfiles } from "@/hooks/useProfiles";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
