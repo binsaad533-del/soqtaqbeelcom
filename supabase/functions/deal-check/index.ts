@@ -6,7 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية قصيرة وقوية لكل صفقة تقبّل أو بيع أصول أو فرصة تجارية.
+const SYSTEM_PROMPT = `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية قصيرة وقوية لكل صفقة تقبيل أو بيع أصول أو فرصة تجارية.
 
 يجب أن تحلل الصفقة بناءً على جميع البيانات المتاحة وتنتج تقريراً مهنياً بالعربية.
 
