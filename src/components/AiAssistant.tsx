@@ -236,7 +236,7 @@ const AiAssistant = () => {
                 onClick={() => setChatMode(true)}
                 className="w-full mt-2 py-2.5 rounded-xl border border-dashed border-primary/20 text-xs text-primary hover:bg-primary/[0.03] transition-colors"
               >
-                💬 اسألني أي سؤال...
+                💬 اسألني أي شي...
               </button>
             </div>
           ) : (
