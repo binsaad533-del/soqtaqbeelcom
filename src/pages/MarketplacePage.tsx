@@ -172,9 +172,12 @@ const ListingCard = ({ listing }: { listing: EnrichedListing }) => {
           <ShieldCheck size={10} /> بائع موثوق
         </div>
       )}
-      <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center">
+      <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center relative">
         {listing.photos && Object.values(listing.photos).flat().length > 0 ? (
-          <img src={(Object.values(listing.photos).flat() as string[])[0]} alt="" className="w-full h-full object-cover" />
+          <>
+            <img src={(Object.values(listing.photos).flat() as string[])[0]} alt="" className="w-full h-full object-cover" />
+            {hasSimulationPhotos(listing.photos as Record<string, unknown>) && <SimulationOverlay size="sm" />}
+          </>
         ) : (
           <Eye size={24} className="text-muted-foreground/30" strokeWidth={1} />
         )}
