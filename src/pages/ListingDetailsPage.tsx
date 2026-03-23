@@ -89,6 +89,7 @@ const ListingDetailsPage = () => {
   const inventory = (listing.inventory || []) as Array<{ name: string; qty: number; condition: string }>;
   const documents = (listing.documents || []) as Array<{ name: string; status: string; url?: string }>;
   const isOwner = user?.id === listing.owner_id;
+  const isSimulation = hasSimulationPhotos(listing.photos as Record<string, unknown>);
 
   // Deal structure data
   const dealOptions = ((listing as any).deal_options || []) as Array<{ type_id: string; priority: number; is_primary: boolean }>;
