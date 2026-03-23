@@ -58,8 +58,19 @@ const NegotiationPage = () => {
     // Load messages
     const msgs = await getMessages(dealId);
     setMessages(msgs);
+
+    // Load other party's profile for trust badge
+    const otherId = user?.id === dealData.buyer_id ? dealData.seller_id : dealData.buyer_id;
+    if (otherId) {
+      const p = await getProfile(otherId);
+      setOtherProfile(p);
+    }
+
+    // Calculate deal risk
+    calculateDealRisk(dealId).catch(() => {});
+
     setLoading(false);
-  }, [dealId, getListing, getMessages]);
+  }, [dealId, getListing, getMessages, user, getProfile, calculateDealRisk]);
 
   useEffect(() => {
     loadData();
