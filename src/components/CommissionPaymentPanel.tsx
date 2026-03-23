@@ -118,6 +118,7 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
             {[
               { label: "اسم المستفيد", value: BANK_DETAILS.beneficiary, key: "beneficiary" },
               { label: "البنك", value: BANK_DETAILS.bank, key: "bank" },
+              { label: "رقم الحساب", value: BANK_DETAILS.accountNumber, key: "account" },
               { label: "رقم الآيبان", value: BANK_DETAILS.iban, key: "iban" },
             ].map(item => (
               <div key={item.key} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2.5">
