@@ -3,8 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
-import muqbilWaveImg from "@/assets/muqbil-wave.png";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 const stats = [
   { value: "847", label: "فرصة نشطة" },
