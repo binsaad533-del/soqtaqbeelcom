@@ -172,7 +172,10 @@ const ListingDetailsPage = () => {
               </div>
             </div>
 
-            {/* AI Deal Intelligence Panel */}
+            {/* AI Deal Check Panel */}
+            <DealCheckPanel listing={listing} />
+
+            {/* AI Deal Intelligence Panel (Static) */}
             <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
               <button
                 onClick={() => setAiPanelOpen(!aiPanelOpen)}
@@ -190,19 +193,14 @@ const ListingDetailsPage = () => {
 
               {aiPanelOpen && (
                 <div className="px-6 pb-6 space-y-6">
-                  {/* AI Opinion */}
                   <div className="bg-accent/40 rounded-xl p-4">
                     <div className="text-xs text-muted-foreground mb-1">رأي الذكاء الاصطناعي</div>
                     <div className="text-lg font-medium gradient-text mb-2">{aiPanel.opinion}</div>
                     <p className="text-sm text-muted-foreground leading-relaxed">{aiPanel.opinionDetail}</p>
                   </div>
-
-                  {/* Market View */}
                   <AiSection icon={BarChart3} title="نظرة عامة على السوق" content={aiPanel.marketView} />
                   <AiSection icon={MapPin} title={`السوق في ${listing.city}`} content={aiPanel.cityView} />
                   <AiSection icon={MapPin} title={`الموقع: ${listing.district}`} content={aiPanel.districtView} />
-
-                  {/* Risks */}
                   <div>
                     <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
                       <AlertTriangle size={16} strokeWidth={1.3} className="text-destructive/70" />
@@ -217,8 +215,6 @@ const ListingDetailsPage = () => {
                       ))}
                     </ul>
                   </div>
-
-                  {/* Opportunities */}
                   <div>
                     <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
                       <TrendingUp size={16} strokeWidth={1.3} className="text-success" />
@@ -233,8 +229,6 @@ const ListingDetailsPage = () => {
                       ))}
                     </ul>
                   </div>
-
-                  {/* Suggestions */}
                   <div>
                     <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
                       <Lightbulb size={16} strokeWidth={1.3} className="text-warning" />
