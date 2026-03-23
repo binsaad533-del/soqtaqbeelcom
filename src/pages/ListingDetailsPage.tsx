@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { MapPin, FileText, ShieldCheck, AlertTriangle, TrendingUp, Lightbulb, MessageCircle, ChevronDown, ChevronUp, Building2, BarChart3 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
+import DealCheckPanel from "@/components/DealCheckPanel";
 import { useState } from "react";
 
 const ListingDetailsPage = () => {
