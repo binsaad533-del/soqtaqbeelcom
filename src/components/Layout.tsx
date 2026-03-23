@@ -1,7 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, User, Menu, X, LogIn, LogOut } from "lucide-react";
-import { useState } from "react";
-import AiStar from "./AiStar";
+import { User, Menu, X, LogIn, LogOut, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
 import AiAssistant from "./AiAssistant";
 import Footer from "./Footer";
 import { cn } from "@/lib/utils";
@@ -19,57 +18,92 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuthContext();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
-        <div className="container flex items-center justify-between h-14">
-          <Link to="/" className="flex items-center gap-2">
-            <AiStar size={24} />
-            <span className="text-lg font-medium gradient-text">سوق تقبيل</span>
+    <div className="min-h-screen flex flex-col bg-background">
+      <header
+        className={cn(
+          "sticky top-0 z-50 bg-background/95 backdrop-blur-md transition-all duration-200",
+          scrolled ? "h-[52px] shadow-[0_1px_3px_0_hsl(var(--foreground)/0.04)]" : "h-[60px]"
+        )}
+      >
+        <div className="container h-full flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <span className="text-[15px] font-semibold tracking-tight text-foreground">سوق تقبيل</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={cn(
-                  "px-4 py-2 rounded-lg text-sm transition-colors",
-                  location.pathname === link.path
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+          {/* Center nav */}
+          <nav className="hidden md:flex items-center gap-0.5">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={cn(
+                    "relative px-3.5 py-1.5 text-[13px] transition-colors rounded-lg",
+                    isActive
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {link.label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[1.5px] bg-foreground rounded-full" />
+                  )}
+                </Link>
+              );
+            })}
           </nav>
 
-          <div className="flex items-center gap-2">
-            <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
-              <Search size={18} strokeWidth={1.5} />
-            </button>
+          {/* Right actions */}
+          <div className="flex items-center gap-1.5">
             {user ? (
               <>
-                <Link to="/dashboard" className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
-                  <User size={18} strokeWidth={1.5} />
+                <Link
+                  to="/create-listing"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-foreground text-background text-[12px] font-medium hover:bg-foreground/90 transition-colors"
+                >
+                  <Plus size={13} strokeWidth={2} />
+                  أضف فرصة
+                </Link>
+                <Link
+                  to="/dashboard"
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <User size={17} strokeWidth={1.5} />
                 </Link>
                 <button
                   onClick={async () => { await signOut(); navigate("/"); }}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
                   title="تسجيل الخروج"
                 >
-                  <LogOut size={18} strokeWidth={1.5} />
+                  <LogOut size={17} strokeWidth={1.5} />
                 </button>
               </>
             ) : (
-              <Link to="/login" className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
-                <LogIn size={18} strokeWidth={1.5} />
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <LogIn size={15} strokeWidth={1.5} />
+                تسجيل الدخول
               </Link>
             )}
             <button
-              className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground"
+              className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X size={18} strokeWidth={1.5} /> : <Menu size={18} strokeWidth={1.5} />}
@@ -77,23 +111,33 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
 
+        {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-border/50 bg-card p-4 space-y-1">
+          <div className="md:hidden bg-background border-t border-border/20 px-4 py-3 space-y-0.5">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "block px-4 py-3 rounded-lg text-sm transition-colors",
+                  "block px-3 py-2.5 rounded-lg text-[13px] transition-colors",
                   location.pathname === link.path
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-muted/50"
+                    ? "text-foreground font-medium bg-muted/30"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
                 )}
               >
                 {link.label}
               </Link>
             ))}
+            {!user && (
+              <Link
+                to="/login"
+                onClick={() => setMobileOpen(false)}
+                className="block px-3 py-2.5 rounded-lg text-[13px] text-muted-foreground hover:text-foreground"
+              >
+                تسجيل الدخول
+              </Link>
+            )}
           </div>
         )}
       </header>
