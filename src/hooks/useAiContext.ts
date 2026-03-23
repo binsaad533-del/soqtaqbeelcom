@@ -21,63 +21,63 @@ interface UserBehavior {
 
 const pageContextMap: Record<string, { greeting: string; role: string; suggestions: AiSuggestion[] }> = {
   "/": {
-    greeting: "مرحباً بك في سوق تقبيل",
-    role: "مرشد ذكي",
+    greeting: "هلا وغلا 👋 أنا مساعدك الذكي، وش تبغى نسوي اليوم؟",
+    role: "مرشدك الذكي",
     suggestions: [
-      { id: "browse", icon: "🔍", label: "استكشف الفرص", description: "أساعدك في إيجاد أفضل الفرص المتاحة حسب اهتماماتك", priority: "high" },
-      { id: "create", icon: "📝", label: "أضف فرصتك", description: "أنشئ إعلان احترافي بمساعدة الذكاء الاصطناعي في دقائق", priority: "high" },
-      { id: "analyze", icon: "📊", label: "تحليل السوق", description: "احصل على رؤية ذكية عن السوق السعودي حسب المدينة والنشاط", priority: "medium" },
+      { id: "browse", icon: "🔍", label: "وريني الفرص", description: "خلني أدوّرلك على أفضل الفرص اللي تناسبك 👌", priority: "high" },
+      { id: "create", icon: "📝", label: "أبغى أضيف فرصة", description: "أساعدك تسوي إعلان احترافي بدقايق", priority: "high" },
+      { id: "analyze", icon: "📊", label: "حلل لي السوق", description: "أعطيك نظرة ذكية على السوق حسب المدينة والنشاط", priority: "medium" },
     ],
   },
   "/marketplace": {
-    greeting: "أنا هنا لمساعدتك في إيجاد الفرصة المناسبة",
+    greeting: "تبغى تلاقي فرصة حلوة؟ خلني أساعدك 🎯",
     role: "محلل فرص",
     suggestions: [
-      { id: "filter", icon: "🎯", label: "فلترة ذكية", description: "أساعدك في تضييق البحث بناءً على ميزانيتك واهتماماتك", priority: "high" },
-      { id: "compare", icon: "⚖️", label: "قارن الفرص", description: "قارن بين عدة فرص جنباً إلى جنب", priority: "medium" },
-      { id: "alert", icon: "🔔", label: "تنبيه فرص جديدة", description: "أبلغك فور ظهور فرص تناسب معاييرك", priority: "low" },
+      { id: "filter", icon: "🎯", label: "ضيّق البحث", description: "قولي ميزانيتك واهتمامك وأنا أرتب لك الباقي", priority: "high" },
+      { id: "compare", icon: "⚖️", label: "قارن بينهم", description: "خلني أقارن لك بين كذا فرصة مع بعض", priority: "medium" },
+      { id: "alert", icon: "🔔", label: "نبّهني لو فيه جديد", description: "أخليك أول واحد يعرف لو نزلت فرصة تناسبك", priority: "low" },
     ],
   },
   "/create-listing": {
-    greeting: "سأساعدك في إنشاء إعلان احترافي",
+    greeting: "يلا نسوي إعلان يجذب المشترين ✨",
     role: "مساعد إنشاء",
     suggestions: [
-      { id: "autofill", icon: "✨", label: "تعبئة تلقائية", description: "ارفع المستندات وسأستخرج البيانات تلقائياً", priority: "high" },
-      { id: "photos", icon: "📷", label: "تحليل الصور", description: "ارفع صور المشروع وسأحدد الأصول والمعدات", priority: "high" },
-      { id: "complete", icon: "📋", label: "إكمال الإعلان", description: "أكمل الحقول الناقصة بناءً على المعلومات المتوفرة", priority: "medium" },
-      { id: "docs", icon: "📄", label: "استخراج من المستندات", description: "ارفع العقود والفواتير وسأستخرج التفاصيل", priority: "medium" },
+      { id: "autofill", icon: "✨", label: "عبّي تلقائي", description: "ارفع المستندات وأنا أطلع البيانات لك", priority: "high" },
+      { id: "photos", icon: "📷", label: "حلل الصور", description: "ارفع صور المشروع وأنا أحدد الأصول والمعدات", priority: "high" },
+      { id: "complete", icon: "📋", label: "كمّل الإعلان", description: "أكمّل لك الحقول الناقصة من المعلومات الموجودة", priority: "medium" },
+      { id: "docs", icon: "📄", label: "طلّع من المستندات", description: "ارفع العقود والفواتير وأنا أستخرج التفاصيل", priority: "medium" },
     ],
   },
   "/dashboard": {
-    greeting: "لوحة التحكم الخاصة بك",
-    role: "مدير عمليات",
+    greeting: "هلا فيك 👋 خلني أعطيك ملخص سريع",
+    role: "مدير عملياتك",
     suggestions: [
-      { id: "status", icon: "📈", label: "ملخص الحالة", description: "نظرة عامة على إعلاناتك ومفاوضاتك", priority: "high" },
-      { id: "improve", icon: "💡", label: "تحسين الإعلانات", description: "أقترح تحسينات لزيادة جاذبية إعلاناتك", priority: "medium" },
-      { id: "missing", icon: "⚠️", label: "معلومات ناقصة", description: "أحدد المعلومات المطلوبة لإكمال ملفاتك", priority: "high" },
+      { id: "status", icon: "📈", label: "وش آخر الأخبار؟", description: "نظرة سريعة على إعلاناتك ومفاوضاتك", priority: "high" },
+      { id: "improve", icon: "💡", label: "حسّن إعلاناتك", description: "عندي اقتراحات تخلي إعلاناتك أقوى", priority: "medium" },
+      { id: "missing", icon: "⚠️", label: "وش الناقص؟", description: "أقولك وش المعلومات اللي لازم تكمّلها", priority: "high" },
     ],
   },
 };
 
 const getNegotiationContext = (id?: string) => ({
-  greeting: "أنا مفاوضك الذكي",
-  role: "مفاوض محترف",
+  greeting: "أنا معاك بالتفاوض 🤝 خلنا نوصل لأفضل اتفاق",
+  role: "مفاوضك الذكي",
   suggestions: [
-    { id: "negotiate", icon: "🤝", label: "تفاوض بالنيابة", description: "أتولى التفاوض نيابة عنك للوصول لأفضل اتفاق ممكن", priority: "high" as const },
-    { id: "analyze-offer", icon: "📊", label: "تحليل العرض", description: "أحلل العرض الحالي وأقترح رد مناسب", priority: "high" as const },
-    { id: "risks", icon: "⚡", label: "كشف المخاطر", description: "أحدد نقاط الضعف والمخاطر في الصفقة", priority: "medium" as const },
-    { id: "draft", icon: "✍️", label: "صياغة رد", description: "أصيغ رد احترافي ومقنع للطرف الآخر", priority: "medium" as const },
+    { id: "negotiate", icon: "🤝", label: "فاوض عني", description: "أتولى التفاوض عنك وأوصلك لأفضل نتيجة 💪", priority: "high" as const },
+    { id: "analyze-offer", icon: "📊", label: "شيّك على العرض", description: "أحلل لك العرض الحالي وأقترح رد مناسب", priority: "high" as const },
+    { id: "risks", icon: "⚡", label: "فيه مخاطر؟", description: "أكشف لك نقاط الضعف والمخاطر بالصفقة", priority: "medium" as const },
+    { id: "draft", icon: "✍️", label: "اكتب لي رد", description: "أصيغ لك رد احترافي ومقنع للطرف الثاني", priority: "medium" as const },
   ],
 });
 
 const getListingContext = (id?: string) => ({
-  greeting: "أحلل هذه الفرصة لك",
+  greeting: "خلني أشيّك لك على هذي الفرصة 🧠",
   role: "محلل صفقات",
   suggestions: [
-    { id: "deal-intel", icon: "🧠", label: "تحليل الصفقة", description: "تحليل تجاري شامل للفرصة مع المخاطر والفرص", priority: "high" as const },
-    { id: "price-check", icon: "💰", label: "تقييم السعر", description: "هل السعر المطلوب عادل؟ أقارنه مع السوق", priority: "high" as const },
-    { id: "start-negotiate", icon: "🤝", label: "ابدأ التفاوض", description: "أساعدك في بدء مفاوضة ذكية", priority: "medium" as const },
-    { id: "verify", icon: "✅", label: "تحقق من الإفصاح", description: "أراجع مدى اكتمال المعلومات والمستندات", priority: "medium" as const },
+    { id: "deal-intel", icon: "🧠", label: "حلل لي الصفقة", description: "أعطيك تحليل شامل مع المخاطر والفرص", priority: "high" as const },
+    { id: "price-check", icon: "💰", label: "السعر عادل؟", description: "أشيّك لك إذا السعر معقول مقارنة بالسوق", priority: "high" as const },
+    { id: "start-negotiate", icon: "🤝", label: "أبغى أفاوض", description: "أساعدك تبدأ مفاوضة ذكية", priority: "medium" as const },
+    { id: "verify", icon: "✅", label: "البيانات كاملة؟", description: "أراجع لك مدى اكتمال المعلومات والمستندات", priority: "medium" as const },
   ],
 });
 
@@ -107,11 +107,11 @@ export function useAiContext() {
     }
     if (pathname.startsWith("/agreement/")) {
       return {
-        greeting: "ملخص الاتفاق جاهز",
+        greeting: "الاتفاق جاهز، خلني أراجعه معاك 📋",
         role: "مراجع اتفاقيات",
         suggestions: [
-          { id: "review", icon: "📋", label: "مراجعة الاتفاق", description: "أراجع بنود الاتفاق وأبرز النقاط المهمة", priority: "high" as const },
-          { id: "risks", icon: "⚠️", label: "تنبيهات قانونية", description: "أحدد النقاط التي تحتاج انتباه قانوني", priority: "high" as const },
+          { id: "review", icon: "📋", label: "راجع لي الاتفاق", description: "أشيّك على البنود وأبرز لك النقاط المهمة", priority: "high" as const },
+          { id: "risks", icon: "⚠️", label: "فيه شي لازم انتبه له؟", description: "أحدد لك النقاط اللي تحتاج انتباه قانوني", priority: "high" as const },
         ],
       };
     }
@@ -128,7 +128,7 @@ export function useAiContext() {
         const newIdle = prev.idleSeconds + 1;
         if (newIdle === 8 && !prev.hesitationDetected) {
           const ctx = getContext();
-          setProactiveMessage(`💡 ${ctx.suggestions[0]?.description || "كيف أقدر أساعدك؟"}`);
+          setProactiveMessage(`💡 ${ctx.suggestions[0]?.description || "تبغاني أساعدك بشي؟ 👌"}`);
           return { ...prev, idleSeconds: newIdle, hesitationDetected: true };
         }
         return { ...prev, idleSeconds: newIdle };

@@ -156,7 +156,7 @@ const AiAssistant = () => {
               onClick={() => { setOpen(true); dismissProactive(); }}
               className="mt-2 text-[11px] text-primary hover:underline"
             >
-              تحدث مع المساعد الذكي ←
+              تكلم مع المساعد الذكي ←
             </button>
           </div>
           <div className="w-3 h-3 bg-card border-b border-l border-primary/10 rotate-[-45deg] absolute -bottom-1.5 left-10" />
@@ -236,7 +236,7 @@ const AiAssistant = () => {
                 onClick={() => setChatMode(true)}
                 className="w-full mt-2 py-2.5 rounded-xl border border-dashed border-primary/20 text-xs text-primary hover:bg-primary/[0.03] transition-colors"
               >
-                💬 اسألني أي سؤال...
+                💬 اسألني أي شي...
               </button>
             </div>
           ) : (
@@ -287,7 +287,7 @@ const AiAssistant = () => {
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && handleSend()}
-                    placeholder="اكتب سؤالك..."
+                    placeholder="قولي وش تبغى..."
                     className="flex-1 px-3 py-2 rounded-xl border border-border/50 bg-background text-xs placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
                     disabled={streaming}
                   />
