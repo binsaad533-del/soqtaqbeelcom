@@ -305,6 +305,11 @@ const NegotiationPage = () => {
               </div>
             </div>
 
+            {/* Commission Info */}
+            {listing?.price && (
+              <CommissionBanner dealAmount={deal.agreed_price || listing.price} showDetails />
+            )}
+
             {/* Legal Confirmation / Final Approval */}
             {deal.status !== "completed" && deal.status !== "finalized" && (
               <div className="bg-card rounded-2xl p-5 shadow-soft border border-primary/20">

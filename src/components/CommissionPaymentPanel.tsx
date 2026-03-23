@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
-import { Copy, CheckCircle2, Upload, Loader2, Landmark, Info } from "lucide-react";
+import { Copy, CheckCircle2, Upload, Loader2, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BANK_DETAILS, calculateCommission, type Commission } from "@/hooks/useCommissions";
+import { BANK_DETAILS, type Commission } from "@/hooks/useCommissions";
 import { useCommissions } from "@/hooks/useCommissions";
 import { toast } from "sonner";
 
