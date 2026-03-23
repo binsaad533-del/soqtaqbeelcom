@@ -91,6 +91,11 @@ const LoginPage = () => {
         setLoading(false);
         return;
       }
+      if (!agreedToTerms) {
+        setError("يجب الموافقة على الشروط والأحكام وسياسة الخصوصية");
+        setLoading(false);
+        return;
+      }
       const phoneNumber = loginMethod === "phone" ? `${countryCode}${phone}` : undefined;
       const { error } = await signUp(authEmail, password, fullName, phoneNumber);
       if (error) {
