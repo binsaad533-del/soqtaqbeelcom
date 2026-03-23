@@ -250,7 +250,7 @@ const ListingDetailsPage = () => {
                 </div>
               )}
 
-              {!isOwner && (
+              {!isOwner && !isSimulation && (
                 <Button
                   onClick={handleStartNegotiation}
                   disabled={startingDeal}
@@ -259,6 +259,12 @@ const ListingDetailsPage = () => {
                   {startingDeal ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} strokeWidth={1.5} />}
                   ابدأ التفاوض
                 </Button>
+              )}
+
+              {isSimulation && (
+                <div className="w-full text-center py-3 rounded-xl bg-muted/40 text-muted-foreground text-sm">
+                  عرض توضيحي — التفاوض غير متاح
+                </div>
               )}
 
               {/* Seller Reviews */}
