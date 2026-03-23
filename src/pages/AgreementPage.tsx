@@ -335,7 +335,7 @@ const AgreementPage = () => {
               </button>
               <span className="text-muted-foreground">الإصدار {agreement.version}</span>
               <span className="text-muted-foreground">
-                {new Date(agreement.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" })}
+                {new Date(agreement.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
               </span>
             </div>
           </div>
