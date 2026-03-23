@@ -402,6 +402,9 @@ const OwnerDashboardPage = () => {
           </div>
         )}
 
+        {/* ===== CRM ===== */}
+        {activeTab === "crm" && <CrmDashboard />}
+
         {/* ===== SECURITY ===== */}
         {activeTab === "security" && <SecurityIncidentPanel />}
 
