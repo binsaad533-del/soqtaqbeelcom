@@ -90,7 +90,8 @@ const LoginPage = () => {
         setLoading(false);
         return;
       }
-      const { error } = await signUp(authEmail, password, fullName);
+      const phoneNumber = loginMethod === "phone" ? `${countryCode}${phone}` : undefined;
+      const { error } = await signUp(authEmail, password, fullName, phoneNumber);
       if (error) {
         setError(error.message);
       } else {
