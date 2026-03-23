@@ -21,7 +21,11 @@ const ListingDetailsPage = () => {
   const { user } = useAuthContext();
   const { getListing } = useListings();
   const { createDeal, getMyDeals } = useDeals();
+  const { getProfile } = useProfiles();
+  const { getSellerReviews } = useSellerReviews();
   const [listing, setListing] = useState<Listing | null>(null);
+  const [sellerProfile, setSellerProfile] = useState<any>(null);
+  const [sellerReviews, setSellerReviews] = useState<SellerReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [startingDeal, setStartingDeal] = useState(false);
 
