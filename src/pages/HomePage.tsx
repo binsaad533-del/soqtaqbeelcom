@@ -44,7 +44,7 @@ const HomePage = () => {
             <div className="flex justify-center mb-6">
               <img src={logo} alt="سوق تقبيل" className="h-16 md:h-20 w-auto mx-auto" />
             </div>
-            <p className="text-sm font-medium text-primary mb-3 tracking-wide">أول منصة سعودية بالذكاء الاصطناعي لتقبيل الأعمال</p>
+            <p className="text-sm font-medium text-primary mb-3 tracking-wide">أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع</p>
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
               ارفع صور مشروعك…
               <br />
