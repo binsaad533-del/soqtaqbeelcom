@@ -146,7 +146,7 @@ const AgreementPage = () => {
           buyerContact: buyerProfile?.phone || "",
           sellerName: sellerProfile?.full_name || "البائع",
           sellerContact: sellerProfile?.phone || "",
-          dealTitle: listing?.title || listing?.business_activity || "صفقة تقبّل",
+          dealTitle: listing?.title || listing?.business_activity || "صفقة تقبيل",
           dealType: listing?.deal_type || "full",
           location: `${listing?.district || ""}, ${listing?.city || ""}`.replace(/^, |, $/, ""),
           businessActivity: listing?.business_activity || "",
