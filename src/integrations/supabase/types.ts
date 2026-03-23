@@ -319,6 +319,30 @@ export type Database = {
         }
         Relationships: []
       }
+      failed_login_attempts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       listings: {
         Row: {
           ai_rating: string | null
@@ -558,6 +582,60 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      security_incidents: {
+        Row: {
+          affected_resource_id: string | null
+          affected_resource_type: string | null
+          affected_user_id: string | null
+          created_at: string
+          description: string
+          details: Json | null
+          id: string
+          incident_type: string
+          recommended_actions: Json | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          affected_resource_id?: string | null
+          affected_resource_type?: string | null
+          affected_user_id?: string | null
+          created_at?: string
+          description: string
+          details?: Json | null
+          id?: string
+          incident_type: string
+          recommended_actions?: Json | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          affected_resource_id?: string | null
+          affected_resource_type?: string | null
+          affected_user_id?: string | null
+          created_at?: string
+          description?: string
+          details?: Json | null
+          id?: string
+          incident_type?: string
+          recommended_actions?: Json | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
