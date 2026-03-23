@@ -323,7 +323,7 @@ const AiAssistant = () => {
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && handleSend()}
-                    placeholder={voiceEnabled ? "اكتب أو اضغط 🎙️ للتحدث..." : "قولي وش تبغى..."}
+                    placeholder="قولي وش تبغى..."
                     className="flex-1 px-3 py-2 rounded-xl border border-border/50 bg-background text-xs placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
                     disabled={streaming}
                   />
