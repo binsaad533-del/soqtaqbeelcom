@@ -51,6 +51,7 @@ const AdminDashboardPage = () => {
         <div className="flex items-center gap-1 mb-6 bg-muted/50 rounded-xl p-1 w-fit">
           {[
             { id: "overview" as Tab, label: "نظرة عامة", icon: BarChart3 },
+            { id: "crm" as Tab, label: "العملاء المحتملين", icon: UserPlus },
             { id: "commissions" as Tab, label: "العمولات", icon: Database },
             { id: "backup" as Tab, label: "النسخ الاحتياطي", icon: Shield },
           ].map(tab => (
