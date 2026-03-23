@@ -131,7 +131,7 @@ const CommissionAdminPanel = () => {
                 <div className="px-3 pb-3 pt-1 border-t border-border/30 space-y-2">
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
                     <div><span className="text-muted-foreground">التذكيرات: </span>{c.reminder_count}</div>
-                    <div><span className="text-muted-foreground">آخر تذكير: </span>{c.last_reminder_at ? new Date(c.last_reminder_at).toLocaleDateString("ar-SA") : "—"}</div>
+                    <div><span className="text-muted-foreground">آخر تذكير: </span><div><span className="text-muted-foreground">آخر تذكير: </span>{c.last_reminder_at ? new Date(c.last_reminder_at).toLocaleDateString("en-US") : "—"}</div></div>
                     <div><span className="text-muted-foreground">إيصال: </span>{c.receipt_path ? "✓ مرفق" : "لا يوجد"}</div>
                     <div><span className="text-muted-foreground">تأكيد الدفع: </span>{c.marked_paid_at ? new Date(c.marked_paid_at).toLocaleDateString("ar-SA") : "—"}</div>
                   </div>
