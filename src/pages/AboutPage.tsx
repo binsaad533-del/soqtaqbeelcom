@@ -78,17 +78,90 @@ const AboutPage = () => {
         </div>
       </section>
 
+      {/* Why Us */}
+      <section className="py-16 md:py-24 border-t border-border/30">
+        <div className="container max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-semibold mb-4">ليش تقبيل؟</h2>
+            <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
+              لأنك ما تحتاج منصة تعرض مشروعك فقط…
+              <br />
+              <span className="font-medium text-foreground">تحتاج منصة تساعدك تبيعه فعليًا.</span>
+            </p>
+          </div>
+
+          <div className="space-y-6 md:space-y-8">
+            {[
+              {
+                num: "١",
+                title: "صفقات حقيقية… مو مجرد إعلانات",
+                desc: "في \"تقبيل\"، نركّز على إتمام الصفقة، مو مجرد عرض إعلان بين آلاف الإعلانات العشوائية.",
+              },
+              {
+                num: "٢",
+                title: "بيانات واضحة وموثوقة",
+                desc: "نرتّب ونحلل المعلومات بحيث تكون دقيقة ومفهومة، بدون عشوائية أو نقص في التفاصيل.",
+              },
+              {
+                num: "٣",
+                title: "تسعير منطقي ومدروس",
+                desc: "نساعدك تفهم القيمة الحقيقية للمشروع، ونكشف الأسعار غير الواقعية.",
+              },
+              {
+                num: "٤",
+                title: "إدخال بيانات سريع وسهل",
+                desc: "نختصر عليك الوقت بخطوات بسيطة وواضحة، بدون تعقيد أو نماذج طويلة ومشتتة.",
+              },
+              {
+                num: "٥",
+                title: "تجربة منظمة وواضحة",
+                desc: "كل شيء في المنصة مصمم ليكون واضح، مرتب، وسهل الاستخدام من أول خطوة حتى إتمام الصفقة.",
+              },
+            ].map((item) => (
+              <div
+                key={item.num}
+                className="flex gap-4 md:gap-5 items-start bg-card rounded-2xl p-5 md:p-6 shadow-soft"
+              >
+                <span className="shrink-0 w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm">
+                  {item.num}
+                </span>
+                <div>
+                  <h3 className="font-semibold mb-1">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Trust */}
+          <div className="mt-12 text-center">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-lg mx-auto">
+              منصة سعودية بالكامل، مملوكة لشركة{" "}
+              <a
+                href="https://www.jsaas-group.com/en"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-medium"
+              >
+                عين جساس
+              </a>{" "}
+              بخبرة تشغيلية واستثمارية حقيقية.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Closing + CTA */}
       <section className="py-16 md:py-20 border-t border-border/30">
         <div className="container max-w-2xl mx-auto text-center">
-          <p className="text-lg md:text-xl text-muted-foreground mb-1">هدفنا ليس مجرد عرض مشاريع…</p>
-          <p className="text-lg md:text-xl font-semibold mb-8">بل إتمام صفقات ناجحة.</p>
+          <p className="text-base md:text-lg text-muted-foreground mb-1">إذا عندك مشروع… أو تبحث عن فرصة</p>
+          <p className="text-lg md:text-xl font-semibold mb-8">ابدأ الآن وخلك أقرب لصفقة ناجحة.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft active:scale-[0.98]">
-              <Link to="/create-listing">ابدأ عرض مشروعك</Link>
+              <Link to="/create-listing">ابدأ الآن</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="rounded-xl border-border/60 hover:bg-accent/50 active:scale-[0.98]">
-              <Link to="/marketplace">تصفح الفرص</Link>
+              <Link to="/marketplace">تصفح المشاريع</Link>
             </Button>
           </div>
         </div>
