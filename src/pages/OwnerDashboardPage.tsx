@@ -143,12 +143,16 @@ const OwnerDashboardPage = () => {
     <div className="py-6">
       <div className="container max-w-6xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-semibold">لوحة تحكم المنصة</h1>
-            <p className="text-sm text-muted-foreground">مرحباً {profile?.full_name}</p>
-          </div>
-        </div>
+         <div className="flex items-center justify-between mb-6">
+           <div>
+             <h1 className="text-xl font-semibold">لوحة تحكم المنصة</h1>
+             <p className="text-sm text-muted-foreground">مرحباً {profile?.full_name}</p>
+           </div>
+           <Link to="/monitoring" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors bg-muted/50 px-3 py-2 rounded-xl">
+             <Eye size={13} strokeWidth={1.5} />
+             المراقبة المباشرة
+           </Link>
+         </div>
 
         {/* Tabs */}
         <div className="flex gap-1 bg-muted/40 rounded-xl p-1 mb-6 overflow-x-auto">
