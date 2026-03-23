@@ -85,8 +85,8 @@ const MarketplacePage = () => {
       <div className="container max-w-5xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-medium">سوق التقبّل</h1>
-            <p className="text-sm text-muted-foreground">استعرض فرص التقبّل المتاحة</p>
+            <h1 className="text-2xl font-medium">سوق التقبيل</h1>
+            <p className="text-sm text-muted-foreground">استعرض فرص التقبيل المتاحة</p>
           </div>
           <AiStar size={24} />
         </div>
