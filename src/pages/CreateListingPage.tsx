@@ -1,28 +1,22 @@
 import { useState, useCallback, useRef } from "react";
-import { Check, Upload, Camera, FileText, ClipboardList, Eye, ArrowLeft, ArrowRight, Plus, Trash2, Loader2 } from "lucide-react";
+import { Check, Upload, Camera, FileText, ClipboardList, Eye, ArrowLeft, ArrowRight, Plus, Trash2, Loader2, Shield } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useListings } from "@/hooks/useListings";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
+import { DEAL_TYPE_MAP, getRequiredDocuments } from "@/lib/dealStructureConfig";
 
 const steps = [
-  { label: "نوع التقبّل", icon: ClipboardList },
+  { label: "هيكل الصفقة", icon: Shield },
   { label: "صور المشروع", icon: Camera },
   { label: "تحليل الصور", icon: Eye },
   { label: "مراجعة الجرد", icon: ClipboardList },
   { label: "المستندات", icon: FileText },
   { label: "بيانات الإفصاح", icon: ClipboardList },
   { label: "المراجعة والنشر", icon: Check },
-];
-
-const dealTypes = [
-  { id: "full", label: "تقبّل كامل", desc: "نقل الأعمال بالكامل مع جميع الأصول والسجل" },
-  { id: "assets", label: "أصول فقط", desc: "بيع المعدات والأثاث والأجهزة فقط" },
-  { id: "assets-cr", label: "أصول + سجل تجاري", desc: "الأصول مع نقل السجل التجاري" },
-  { id: "assets-name", label: "أصول + اسم تجاري", desc: "الأصول مع الاسم التجاري والعلامة" },
-  { id: "assets-cr-no-name", label: "أصول + سجل بدون الاسم", desc: "الأصول والسجل لكن بدون نقل الاسم التجاري" },
 ];
 
 const photoGroups = [
@@ -32,16 +26,6 @@ const photoGroups = [
   { id: "street", label: "الشارع المحيط", desc: "صور للشارع والمحيط التجاري", min: 1 },
   { id: "signage", label: "اللوحة / اللافتة", desc: "صورة واضحة للافتة المحل", min: 1 },
   { id: "equipment", label: "المعدات والأجهزة", desc: "صور قريبة للمعدات والأثاث والأجهزة", min: 4 },
-];
-
-const docTypes = [
-  "عقد الإيجار",
-  "السجل التجاري",
-  "رخصة البلدية",
-  "رخصة الدفاع المدني",
-  "فواتير شراء المعدات",
-  "سجلات الصيانة",
-  "مستندات أخرى",
 ];
 
 interface InventoryItem {
@@ -55,7 +39,14 @@ interface InventoryItem {
 
 const CreateListingPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedDealType, setSelectedDealType] = useState("");
+  const [dealStructure, setDealStructure] = useState<DealStructureSelection>({
+    selectedTypes: [],
+    primaryType: "",
+    conflicts: [],
+    requiredDisclosures: [],
+    requiredDocuments: [],
+    isValid: false,
+  });
   const [photos, setPhotos] = useState<Record<string, string[]>>({});
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzed, setAnalyzed] = useState(false);
@@ -64,7 +55,6 @@ const CreateListingPage = () => {
   const [listingId, setListingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Disclosure fields
   const [disclosure, setDisclosure] = useState({
     business_activity: "",
     city: "",
@@ -89,10 +79,18 @@ const CreateListingPage = () => {
   const docInputRef = useRef<HTMLInputElement>(null);
   const [activeDocType, setActiveDocType] = useState<string | null>(null);
 
-  // Create draft listing on first step completion
   const ensureListing = useCallback(async () => {
     if (listingId) return listingId;
-    const { data, error } = await createListing({ deal_type: selectedDealType, status: "draft" });
+    const { data, error } = await createListing({
+      deal_type: dealStructure.primaryType || "full_takeover",
+      primary_deal_type: dealStructure.primaryType,
+      deal_options: dealStructure.selectedTypes.map((id, i) => ({
+        type_id: id,
+        priority: i,
+        is_primary: id === dealStructure.primaryType,
+      })),
+      status: "draft",
+    } as any);
     if (error || !data) {
       toast.error("حدث خطأ أثناء حفظ المسودة");
       return null;
@@ -100,7 +98,7 @@ const CreateListingPage = () => {
     const id = (data as any).id;
     setListingId(id);
     return id;
-  }, [listingId, selectedDealType, createListing]);
+  }, [listingId, dealStructure, createListing]);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !activePhotoGroup) return;
@@ -117,7 +115,6 @@ const CreateListingPage = () => {
       ...prev,
       [activePhotoGroup]: [...(prev[activePhotoGroup] || []), ...urls],
     }));
-    // Save to DB
     const allPhotos = { ...photos, [activePhotoGroup]: [...(photos[activePhotoGroup] || []), ...urls] };
     await updateListing(id, { photos: allPhotos } as any);
     setSaving(false);
@@ -147,7 +144,6 @@ const CreateListingPage = () => {
 
   const handleAnalyze = async () => {
     setAnalyzing(true);
-    // AI analysis simulation - in production this calls the AI edge function
     setTimeout(() => {
       setInventory([
         { id: "1", name: "شواية صناعية", qty: 2, condition: "جيدة", category: "معدات مطبخ", included: true },
@@ -165,7 +161,18 @@ const CreateListingPage = () => {
 
   const handleNext = async () => {
     if (currentStep === 0) {
-      await ensureListing();
+      const id = await ensureListing();
+      if (id) {
+        await updateListing(id, {
+          deal_type: dealStructure.primaryType,
+          primary_deal_type: dealStructure.primaryType,
+          deal_options: dealStructure.selectedTypes.map((typeId, i) => ({
+            type_id: typeId,
+            priority: i,
+            is_primary: typeId === dealStructure.primaryType,
+          })),
+        } as any);
+      }
     }
     if (currentStep === 2 && !analyzed) {
       handleAnalyze();
@@ -181,7 +188,6 @@ const CreateListingPage = () => {
     if (!id) return;
     setSaving(true);
 
-    // Calculate disclosure score
     const fields = Object.values(disclosure);
     const filled = fields.filter(v => v.trim() !== "").length;
     const score = Math.round((filled / fields.length) * 100);
@@ -192,6 +198,8 @@ const CreateListingPage = () => {
       annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
       disclosure_score: score,
       inventory: inventory.filter(i => i.included),
+      deal_disclosures: dealStructure.requiredDisclosures,
+      required_documents: dealStructure.requiredDocuments,
       status: "published",
       published_at: new Date().toISOString(),
       title: `${disclosure.business_activity || "مشروع"} — ${disclosure.district || ""}, ${disclosure.city || ""}`,
@@ -203,12 +211,18 @@ const CreateListingPage = () => {
   };
 
   const totalPhotos = Object.values(photos).reduce((a, b) => a + b.length, 0);
-
   const disclosureScore = (() => {
     const fields = Object.values(disclosure);
     const filled = fields.filter(v => v.trim() !== "").length;
     return Math.round((filled / fields.length) * 100);
   })();
+
+  // Dynamic required documents based on deal structure
+  const dynamicDocTypes = dealStructure.requiredDocuments.length > 0
+    ? dealStructure.requiredDocuments
+    : ["عقد الإيجار", "السجل التجاري", "رخصة البلدية", "رخصة الدفاع المدني", "فواتير شراء المعدات", "مستندات أخرى"];
+
+  const primaryDealLabel = DEAL_TYPE_MAP[dealStructure.primaryType]?.label || dealStructure.primaryType;
 
   return (
     <div className="py-8">
@@ -216,7 +230,6 @@ const CreateListingPage = () => {
         <h1 className="text-2xl font-medium mb-2">إضافة فرصة تقبّل</h1>
         <p className="text-sm text-muted-foreground mb-8">أنشئ إعلان تقبّل احترافي بمساعدة الذكاء الاصطناعي</p>
 
-        {/* Hidden file inputs */}
         <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
         <input ref={docInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" multiple className="hidden" onChange={handleDocUpload} />
 
@@ -237,7 +250,6 @@ const CreateListingPage = () => {
           ))}
         </div>
 
-        {/* Saving indicator */}
         {saving && (
           <div className="flex items-center gap-2 text-xs text-primary mb-4">
             <Loader2 size={14} className="animate-spin" />
@@ -245,31 +257,10 @@ const CreateListingPage = () => {
           </div>
         )}
 
-        {/* Step Content */}
         <div className="bg-card rounded-2xl shadow-soft p-6 md:p-8 min-h-[400px]">
-          {/* Step 0: Deal Type */}
+          {/* Step 0: Deal Structure Engine */}
           {currentStep === 0 && (
-            <div className="space-y-4">
-              <h2 className="font-medium mb-1">اختر نوع التقبّل</h2>
-              <p className="text-sm text-muted-foreground mb-4">حدد ما ترغب في عرضه للمشتري</p>
-              <div className="space-y-3">
-                {dealTypes.map((dt) => (
-                  <button
-                    key={dt.id}
-                    onClick={() => setSelectedDealType(dt.id)}
-                    className={cn(
-                      "w-full text-start p-4 rounded-xl border transition-all active:scale-[0.99]",
-                      selectedDealType === dt.id
-                        ? "border-primary/30 bg-primary/5"
-                        : "border-border/50 hover:border-border"
-                    )}
-                  >
-                    <div className="font-medium text-sm mb-0.5">{dt.label}</div>
-                    <div className="text-xs text-muted-foreground">{dt.desc}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <DealStructureEngine value={dealStructure} onChange={setDealStructure} />
           )}
 
           {/* Step 1: Photos */}
@@ -294,22 +285,16 @@ const CreateListingPage = () => {
                         <div className="text-xs text-muted-foreground">{group.desc} — {group.min} صور على الأقل</div>
                       </div>
                       <button
-                        onClick={() => {
-                          setActivePhotoGroup(group.id);
-                          fileInputRef.current?.click();
-                        }}
+                        onClick={() => { setActivePhotoGroup(group.id); fileInputRef.current?.click(); }}
                         className={cn(
                           "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all active:scale-[0.97]",
-                          (photos[group.id]?.length || 0) >= group.min
-                            ? "bg-success/10 text-success"
-                            : "bg-accent text-accent-foreground"
+                          (photos[group.id]?.length || 0) >= group.min ? "bg-success/10 text-success" : "bg-accent text-accent-foreground"
                         )}
                       >
                         <Upload size={14} strokeWidth={1.3} />
                         {(photos[group.id]?.length || 0) > 0 ? `${photos[group.id].length} صورة` : "رفع"}
                       </button>
                     </div>
-                    {/* Photo thumbnails */}
                     {photos[group.id]?.length > 0 && (
                       <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
                         {photos[group.id].map((url, i) => (
@@ -341,14 +326,12 @@ const CreateListingPage = () => {
                     <Check size={24} strokeWidth={1.3} className="text-success" />
                   </div>
                   <h2 className="font-medium mb-2">اكتمل التحليل</h2>
-                  <p className="text-sm text-muted-foreground max-w-sm mb-4">تم اكتشاف {inventory.length} عنصر من الصور. راجع الجرد في الخطوة التالية.</p>
+                  <p className="text-sm text-muted-foreground max-w-sm mb-4">تم اكتشاف {inventory.length} عنصر من الصور.</p>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {inventory.slice(0, 4).map(item => (
                       <span key={item.id} className="text-xs bg-accent/60 text-accent-foreground px-3 py-1 rounded-lg">{item.name}</span>
                     ))}
-                    {inventory.length > 4 && (
-                      <span className="text-xs text-muted-foreground px-2 py-1">+{inventory.length - 4} عناصر أخرى</span>
-                    )}
+                    {inventory.length > 4 && <span className="text-xs text-muted-foreground px-2 py-1">+{inventory.length - 4}</span>}
                   </div>
                 </>
               ) : (
@@ -367,25 +350,21 @@ const CreateListingPage = () => {
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <h2 className="font-medium">مراجعة الجرد</h2>
-                  <p className="text-xs text-muted-foreground">{inventory.filter(i => i.included).length} عنصر مشمول — {inventory.filter(i => !i.included).length} مستثنى</p>
+                  <p className="text-xs text-muted-foreground">{inventory.filter(i => i.included).length} مشمول — {inventory.filter(i => !i.included).length} مستثنى</p>
                 </div>
                 <button
                   onClick={() => setInventory(prev => [...prev, { id: String(Date.now()), name: "عنصر جديد", qty: 1, condition: "جيدة", category: "أخرى", included: true }])}
                   className="flex items-center gap-1 text-xs text-primary hover:underline"
                 >
-                  <Plus size={14} strokeWidth={1.3} />
-                  أضف عنصراً
+                  <Plus size={14} strokeWidth={1.3} /> أضف عنصراً
                 </button>
               </div>
               <div className="space-y-2">
                 {inventory.map((item) => (
-                  <div
-                    key={item.id}
-                    className={cn(
-                      "flex items-center justify-between p-3 rounded-xl border transition-all",
-                      item.included ? "border-border/50 bg-card" : "border-border/30 bg-muted/30 opacity-60"
-                    )}
-                  >
+                  <div key={item.id} className={cn(
+                    "flex items-center justify-between p-3 rounded-xl border transition-all",
+                    item.included ? "border-border/50 bg-card" : "border-border/30 bg-muted/30 opacity-60"
+                  )}>
                     <div className="flex-1">
                       <div className="text-sm">{item.name}</div>
                       <div className="text-xs text-muted-foreground">{item.category} — {item.qty} وحدة — {item.condition}</div>
@@ -400,10 +379,7 @@ const CreateListingPage = () => {
                       >
                         {item.included ? "مشمول" : "مستثنى"}
                       </button>
-                      <button
-                        onClick={() => setInventory(inv => inv.filter(i => i.id !== item.id))}
-                        className="p-1 text-muted-foreground hover:text-destructive transition-colors"
-                      >
+                      <button onClick={() => setInventory(inv => inv.filter(i => i.id !== item.id))} className="p-1 text-muted-foreground hover:text-destructive transition-colors">
                         <Trash2 size={14} strokeWidth={1.3} />
                       </button>
                     </div>
@@ -413,12 +389,14 @@ const CreateListingPage = () => {
             </div>
           )}
 
-          {/* Step 4: Documents */}
+          {/* Step 4: Documents (dynamic based on deal structure) */}
           {currentStep === 4 && (
             <div className="space-y-4">
-              <h2 className="font-medium mb-1">المستندات الداعمة</h2>
-              <p className="text-sm text-muted-foreground mb-4">ارفع المستندات التي تدعم الإعلان — الذكاء الاصطناعي سيستخرج البيانات تلقائياً</p>
-              {docTypes.map((doc, i) => (
+              <h2 className="font-medium mb-1">المستندات المطلوبة</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                بناءً على هيكل الصفقة ({primaryDealLabel}) — المستندات التالية مطلوبة أو موصى بها
+              </p>
+              {dynamicDocTypes.map((doc, i) => (
                 <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-border/50">
                   <div className="flex items-center gap-2">
                     <FileText size={16} strokeWidth={1.3} className="text-muted-foreground" />
@@ -430,14 +408,10 @@ const CreateListingPage = () => {
                     </div>
                   </div>
                   <button
-                    onClick={() => {
-                      setActiveDocType(doc);
-                      docInputRef.current?.click();
-                    }}
+                    onClick={() => { setActiveDocType(doc); docInputRef.current?.click(); }}
                     className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]"
                   >
-                    <Upload size={14} strokeWidth={1.3} />
-                    رفع
+                    <Upload size={14} strokeWidth={1.3} /> رفع
                   </button>
                 </div>
               ))}
@@ -448,7 +422,22 @@ const CreateListingPage = () => {
           {currentStep === 5 && (
             <div className="space-y-4">
               <h2 className="font-medium mb-1">بيانات الإفصاح</h2>
-              <p className="text-sm text-muted-foreground mb-4">أكمل بيانات الإفصاح لتعزيز ثقة المشترين</p>
+              <p className="text-sm text-muted-foreground mb-2">أكمل بيانات الإفصاح لتعزيز ثقة المشترين</p>
+              
+              {/* Show required disclosures from deal structure */}
+              {dealStructure.requiredDisclosures.length > 0 && (
+                <div className="bg-warning/5 border border-warning/20 rounded-xl p-3 mb-4">
+                  <div className="text-xs font-medium text-warning mb-1.5 flex items-center gap-1">
+                    <Shield size={12} /> الإفصاحات المطلوبة لهيكل الصفقة المختار
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {dealStructure.requiredDisclosures.map((d, i) => (
+                      <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-warning/10 text-warning">{d}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-3">
                 <FormField label="نوع النشاط" placeholder="مثال: مطعم وجبات سريعة" value={disclosure.business_activity} onChange={v => setDisclosure(p => ({ ...p, business_activity: v }))} />
                 <div className="grid grid-cols-2 gap-3">
@@ -486,10 +475,31 @@ const CreateListingPage = () => {
                   <p className="text-xs text-muted-foreground">راجع البيانات قبل النشر</p>
                 </div>
               </div>
+
+              {/* Deal structure summary */}
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
+                <div className="text-xs font-medium text-primary mb-1">هيكل الصفقة</div>
+                {dealStructure.selectedTypes.map((typeId, idx) => {
+                  const dt = DEAL_TYPE_MAP[typeId];
+                  if (!dt) return null;
+                  return (
+                    <div key={typeId} className="flex items-center gap-2 text-xs">
+                      <span className={cn(
+                        "px-1.5 py-0.5 rounded font-medium",
+                        typeId === dealStructure.primaryType ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                      )}>
+                        {typeId === dealStructure.primaryType ? "رئيسي" : `بديل ${idx}`}
+                      </span>
+                      <span>{dt.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
               <div className="bg-accent/30 rounded-xl p-5">
                 <p className="text-sm leading-relaxed text-foreground">
                   {disclosure.business_activity || "مشروع"} في {disclosure.district || "—"}, {disclosure.city || "—"}.
-                  {selectedDealType === "full" ? " يشمل التقبّل جميع المعدات والأجهزة والديكور." : ` نوع التقبّل: ${dealTypes.find(d => d.id === selectedDealType)?.label || selectedDealType}.`}
+                  {` هيكل الصفقة: ${primaryDealLabel}.`}
                   {" "}عدد الأصول المؤكّدة: {inventory.filter(i => i.included).length} عنصر.
                   {disclosure.annual_rent && ` الإيجار السنوي ${disclosure.annual_rent} ريال.`}
                   {disclosure.lease_remaining && ` متبقي من العقد ${disclosure.lease_remaining}.`}
@@ -502,8 +512,6 @@ const CreateListingPage = () => {
                 </div>
                 <span className="text-xs text-muted-foreground">إفصاح {disclosureScore}%</span>
               </div>
-
-              {/* Summary cards */}
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="p-3 rounded-xl bg-muted/50">
                   <div className="text-lg font-medium text-foreground">{totalPhotos}</div>
@@ -518,7 +526,6 @@ const CreateListingPage = () => {
                   <div className="text-[10px] text-muted-foreground">مستند</div>
                 </div>
               </div>
-
               <Button
                 onClick={handlePublish}
                 disabled={saving || loading}
@@ -533,19 +540,13 @@ const CreateListingPage = () => {
 
         {/* Navigation */}
         <div className="flex items-center justify-between mt-6">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 0}
-            className="rounded-xl active:scale-[0.98]"
-          >
-            <ArrowRight size={16} strokeWidth={1.5} />
-            السابق
+          <Button variant="outline" onClick={handleBack} disabled={currentStep === 0} className="rounded-xl active:scale-[0.98]">
+            <ArrowRight size={16} strokeWidth={1.5} /> السابق
           </Button>
           {currentStep < steps.length - 1 && (
             <Button
               onClick={handleNext}
-              disabled={(currentStep === 0 && !selectedDealType) || saving}
+              disabled={(currentStep === 0 && !dealStructure.isValid) || saving}
               className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
             >
               {currentStep === 2 && !analyzed ? "ابدأ التحليل" : "التالي"}
