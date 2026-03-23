@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { cn } from "@/lib/utils";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
-import { Info } from "lucide-react";
+
 
 const ListingDetailsPage = () => {
   const { id } = useParams();
@@ -107,16 +107,39 @@ const ListingDetailsPage = () => {
         </div>
 
         {isSimulation && (
-          <div className="mb-5 rounded-2xl bg-primary/5 border border-primary/15 p-4 flex items-start gap-3" dir="rtl">
-            <div className="mt-0.5 shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <Info size={16} className="text-primary" />
+          <div className="mb-5 rounded-2xl bg-amber-50 border border-amber-200 p-5" dir="rtl">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="mt-0.5 shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                <AlertTriangle size={20} className="text-amber-600" />
+              </div>
+              <div>
+                <p className="text-base font-semibold text-amber-900 mb-1">⚠️ عرض توضيحي — ليس إعلاناً حقيقياً</p>
+                <p className="text-sm text-amber-800 leading-relaxed">
+                  هذا الإعلان مجرد <strong>محاكاة</strong> لتوضيح كيف تعمل منصة سوق تقبيل. جميع البيانات والصور والأسعار المعروضة هنا <strong>وهمية وغير حقيقية</strong>.
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-foreground mb-1">هذا الإعلان للعرض التوضيحي فقط</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                هذه الصفقة مجرد محاكاة لتوضيح طريقة عمل المنصة. لا يمكن التفاوض عليها أو إتمامها. 
-                تصفّح <Link to="/marketplace" className="text-primary hover:underline font-medium">السوق</Link> لاستعراض الفرص الحقيقية عند توفرها.
-              </p>
+            <div className="mr-[52px] space-y-2">
+              <div className="flex items-center gap-2 text-sm text-amber-700">
+                <span className="shrink-0">🚫</span>
+                <span>لا يمكن التفاوض أو إتمام صفقة على هذا الإعلان</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-amber-700">
+                <span className="shrink-0">📋</span>
+                <span>الهدف هو تعريفك بآلية عرض الفرص والتفاوض عليها</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-amber-700">
+                <span className="shrink-0">✅</span>
+                <span>عند إضافة فرص حقيقية من بائعين موثقين، ستظهر بدون هذا التنبيه</span>
+              </div>
+              <div className="mt-3">
+                <Link 
+                  to="/create-listing" 
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  أضف فرصتك الآن
+                </Link>
+              </div>
             </div>
           </div>
         )}
