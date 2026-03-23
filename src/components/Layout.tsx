@@ -15,6 +15,8 @@ const navLinks = [
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuthContext();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
