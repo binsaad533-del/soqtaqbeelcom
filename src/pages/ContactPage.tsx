@@ -102,32 +102,16 @@ const ContactPage = () => {
               <div className="flex items-start gap-3">
                 <Mail size={14} className="text-primary mt-0.5 shrink-0" strokeWidth={1.3} />
                 <div>
-                  <div className="text-[11px] font-medium">الدعم العام</div>
+                  <div className="text-[11px] font-medium">الدعم والمساعدة</div>
                   <a href="mailto:support@soqtaqbeel.com" className="text-[11px] text-muted-foreground hover:text-primary transition-colors" dir="ltr">support@soqtaqbeel.com</a>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <AlertTriangle size={14} className="text-destructive mt-0.5 shrink-0" strokeWidth={1.3} />
+                <Mail size={14} className="text-primary mt-0.5 shrink-0" strokeWidth={1.3} />
                 <div>
-                  <div className="text-[11px] font-medium">الشكاوى</div>
-                  <a href="mailto:complaints@soqtaqbeel.com" className="text-[11px] text-muted-foreground hover:text-primary transition-colors" dir="ltr">complaints@soqtaqbeel.com</a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Briefcase size={14} className="text-accent-foreground mt-0.5 shrink-0" strokeWidth={1.3} />
-                <div>
-                  <div className="text-[11px] font-medium">الشراكات والأعمال</div>
-                  <a href="mailto:business@soqtaqbeel.com" className="text-[11px] text-muted-foreground hover:text-primary transition-colors" dir="ltr">business@soqtaqbeel.com</a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Handshake size={14} className="text-success mt-0.5 shrink-0" strokeWidth={1.3} />
-                <div>
-                  <div className="text-[11px] font-medium">المبيعات والصفقات</div>
-                  <a href="mailto:deals@soqtaqbeel.com" className="text-[11px] text-muted-foreground hover:text-primary transition-colors" dir="ltr">deals@soqtaqbeel.com</a>
+                  <div className="text-[11px] font-medium">استفسارات عامة</div>
+                  <a href="mailto:info@soqtaqbeel.com" className="text-[11px] text-muted-foreground hover:text-primary transition-colors" dir="ltr">info@soqtaqbeel.com</a>
                 </div>
               </div>
             </div>
