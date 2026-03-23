@@ -6,6 +6,7 @@ import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown } from "l
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";
 import PasswordStrengthBar from "@/components/PasswordStrengthBar";
+import { useSecurityIncidents } from "@/hooks/useSecurityIncidents";
 
 const COUNTRY_CODES = [
   { code: "+966", flag: "🇸🇦", name: "السعودية" },
@@ -34,6 +35,7 @@ const LoginPage = () => {
   const [success, setSuccess] = useState("");
   const { signIn, signUp } = useAuthContext();
   const navigate = useNavigate();
+  const { reportFailedLogin } = useSecurityIncidents();
 
   // Auto-convert Arabic numerals on phone input
   const handlePhoneChange = useCallback((value: string) => {
@@ -79,6 +81,7 @@ const LoginPage = () => {
     if (isLogin) {
       const { error } = await signIn(authEmail, password);
       if (error) {
+        reportFailedLogin(authEmail);
         setError(
           error.message === "Invalid login credentials"
             ? "بيانات الدخول غير صحيحة"

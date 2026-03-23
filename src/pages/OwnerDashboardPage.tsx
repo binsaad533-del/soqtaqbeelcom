@@ -8,8 +8,9 @@ import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
 import {
   Users, FileText, Handshake, Shield, Settings, BarChart3,
-  Eye, CheckCircle, ChevronLeft, Search, Activity, Loader2
+  Eye, CheckCircle, ChevronLeft, Search, Activity, Loader2, ShieldAlert
 } from "lucide-react";
+import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 
 const tabs = [
   { label: "نظرة عامة", icon: BarChart3 },
@@ -17,6 +18,7 @@ const tabs = [
   { label: "الإعلانات", icon: FileText },
   { label: "الصفقات", icon: Handshake },
   { label: "المشرفون", icon: Shield },
+  { label: "الأمان", icon: ShieldAlert },
   { label: "الإعدادات", icon: Settings },
 ];
 
@@ -195,6 +197,10 @@ const OwnerDashboardPage = () => {
         )}
 
         {activeTab === 5 && (
+          <SecurityIncidentPanel />
+        )}
+
+        {activeTab === 6 && (
           <div className="space-y-3">
             <h2 className="font-medium mb-2">الإعدادات</h2>
             {["إعدادات عامة", "إعدادات العلامة التجارية", "إعدادات الإشعارات", "إعدادات الذكاء الاصطناعي", "إعدادات الأمان"].map((s, i) => (
