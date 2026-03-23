@@ -90,6 +90,7 @@ const AiAssistant = () => {
   const peekTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const { greeting, role, suggestions, proactiveMessage, dismissProactive, pathname } = useAiContext();
+  const { pageData } = usePageData();
 
   useEffect(() => { setChatMode(false); setMessages([]); }, [pathname]);
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
