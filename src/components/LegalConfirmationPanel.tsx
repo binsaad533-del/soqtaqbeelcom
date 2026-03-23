@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import AiStar from "./AiStar";
 import DealRiskIndicator from "./DealRiskIndicator";
+import CommissionBanner from "./CommissionBanner";
 import { DEAL_TYPE_MAP, type DealTypeConfig } from "@/lib/dealStructureConfig";
 import { useLegalConfirmation, CONFIRMATION_LABELS } from "@/hooks/useLegalConfirmation";
 import { useDealUnderstanding, SECTIONS, type SectionKey } from "@/hooks/useDealUnderstanding";
@@ -263,6 +264,8 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
                   : "غير محدد"
               } />
               <Row label="الموقع" value={`${listing?.district || ""} ${listing?.city || ""}`.trim() || "—"} />
+              {/* Commission disclosure */}
+              <CommissionBanner dealAmount={deal.agreed_price || listing?.price} showDetails className="mt-3" />
               {listing?.lease_duration && <Row label="مدة الإيجار" value={listing.lease_duration} />}
               {listing?.annual_rent && <Row label="الإيجار السنوي" value={`${listing.annual_rent.toLocaleString("en-US")} ر.س`} />}
             </div>

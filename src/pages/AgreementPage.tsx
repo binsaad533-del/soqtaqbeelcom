@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings } from "@/hooks/useListings";
+import { useCommissions, type Commission } from "@/hooks/useCommissions";
+import CommissionBanner from "@/components/CommissionBanner";
+import CommissionPaymentPanel from "@/components/CommissionPaymentPanel";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -57,10 +60,12 @@ const AgreementPage = () => {
   const { id } = useParams(); // deal ID
   const { user } = useAuthContext();
   const { getListing } = useListings();
+  const { getCommission } = useCommissions();
   const [agreement, setAgreement] = useState<AgreementRecord | null>(null);
   const [allVersions, setAllVersions] = useState<AgreementRecord[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [deal, setDeal] = useState<any>(null);
+  const [commission, setCommission] = useState<Commission | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [approving, setApproving] = useState(false);
@@ -103,6 +108,10 @@ const AgreementPage = () => {
         .eq("deal_id", id)
         .order("created_at", { ascending: false });
       if (historyData) setHistory(historyData as unknown as HistoryEntry[]);
+
+      // Load commission
+      const commData = await getCommission(id);
+      setCommission(commData);
 
     } catch (e) {
       console.error("Failed to load agreement:", e);
@@ -531,6 +540,22 @@ const AgreementPage = () => {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Commission Section */}
+          {commission && (
+            <div className="border-t border-border/20 p-5">
+              <CommissionPaymentPanel
+                commission={commission}
+                isSeller={isSeller}
+                onUpdate={loadData}
+              />
+            </div>
+          )}
+          {!commission && deal?.agreed_price && (
+            <div className="border-t border-border/20 p-5">
+              <CommissionBanner dealAmount={deal.agreed_price} showDetails />
             </div>
           )}
 

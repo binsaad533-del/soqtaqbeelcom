@@ -12,12 +12,15 @@ import {
   Eye, CheckCircle, ChevronLeft, Search, Activity, Loader2, ShieldAlert, AlertTriangle
 } from "lucide-react";
 import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
+import CommissionAdminPanel from "@/components/CommissionAdminPanel";
+import { Landmark } from "lucide-react";
 
 const tabs = [
   { label: "نظرة عامة", icon: BarChart3 },
   { label: "المستخدمون", icon: Users },
   { label: "الإعلانات", icon: FileText },
   { label: "الصفقات", icon: Handshake },
+  { label: "العمولات", icon: Landmark },
   { label: "المشرفون", icon: Shield },
   { label: "الأمان", icon: ShieldAlert },
   { label: "الإعدادات", icon: Settings },
@@ -186,6 +189,10 @@ const OwnerDashboardPage = () => {
         )}
 
         {activeTab === 4 && (
+          <CommissionAdminPanel />
+        )}
+
+        {activeTab === 5 && (
           <div className="space-y-3">
             <h2 className="font-medium mb-2">المشرفون ({supervisors.length})</h2>
             {supervisors.length === 0 ? <p className="text-center text-sm text-muted-foreground py-12">لا يوجد مشرفون</p> : supervisors.map(s => (
@@ -203,11 +210,11 @@ const OwnerDashboardPage = () => {
           </div>
         )}
 
-        {activeTab === 5 && (
+        {activeTab === 6 && (
           <SecurityIncidentPanel />
         )}
 
-        {activeTab === 6 && (
+        {activeTab === 7 && (
           <div className="space-y-3">
             <h2 className="font-medium mb-2">الإعدادات</h2>
             {["إعدادات عامة", "إعدادات العلامة التجارية", "إعدادات الإشعارات", "إعدادات الذكاء الاصطناعي", "إعدادات الأمان"].map((s, i) => (

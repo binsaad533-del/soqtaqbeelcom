@@ -13,7 +13,7 @@ import { useFraudEngine } from "@/hooks/useFraudEngine";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-
+import CommissionBanner from "@/components/CommissionBanner";
 
 const NegotiationPage = () => {
   const { id: dealId } = useParams();
@@ -304,6 +304,11 @@ const NegotiationPage = () => {
                 )}
               </div>
             </div>
+
+            {/* Commission Info */}
+            {listing?.price && (
+              <CommissionBanner dealAmount={deal.agreed_price || listing.price} showDetails />
+            )}
 
             {/* Legal Confirmation / Final Approval */}
             {deal.status !== "completed" && deal.status !== "finalized" && (
