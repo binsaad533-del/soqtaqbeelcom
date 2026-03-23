@@ -124,13 +124,13 @@ const HomePage = () => {
               <div
                 key={i}
                 ref={addRevealRef}
-                style={{ opacity: 0, animationDelay: `${i * 80}ms` }}
-                className="group bg-card rounded-2xl p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 cursor-default"
+                style={{ opacity: 0, animationDelay: `${i * 120}ms` }}
+                className="group bg-card rounded-2xl p-6 shadow-soft hover:shadow-soft-lg hover:scale-[1.03] hover:-translate-y-1 transition-all duration-300 cursor-default"
               >
-                <div className="w-10 h-10 rounded-xl bg-accent/60 flex items-center justify-center mb-4 group-hover:bg-accent transition-colors">
-                  <f.icon size={20} strokeWidth={1.3} className="text-accent-foreground" />
+                <div className="w-10 h-10 rounded-xl bg-accent/60 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                  <f.icon size={20} strokeWidth={1.3} />
                 </div>
-                <h3 className="font-medium mb-2">{f.title}</h3>
+                <h3 className="font-medium mb-2 group-hover:text-primary transition-colors duration-300">{f.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
               </div>
             ))}
