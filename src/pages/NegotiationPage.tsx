@@ -105,10 +105,13 @@ const NegotiationPage = () => {
   const handleSend = async () => {
     if (!input.trim() || !dealId || sending) return;
     setSending(true);
-    const msg = await sendMessage(dealId, input.trim());
+    const trimmed = input.trim();
+    const msg = await sendMessage(dealId, trimmed);
     if (msg) {
       setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
     }
+    // Monitor for fraud keywords in background
+    if (user) monitorChat(dealId, trimmed, user.id).catch(() => {});
     setInput("");
     setSending(false);
   };
