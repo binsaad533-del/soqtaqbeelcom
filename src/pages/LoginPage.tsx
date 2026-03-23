@@ -291,6 +291,7 @@ const LoginPage = () => {
                 {showPassword ? <EyeOff size={16} strokeWidth={1.3} /> : <Eye size={16} strokeWidth={1.3} />}
               </button>
             </div>
+            {!isLogin && <PasswordStrengthBar password={password} />}
 
             {/* Terms agreement (register only) */}
             {!isLogin && (
