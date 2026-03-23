@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import AiStar from "@/components/AiStar";
+import SocialIcons from "@/components/SocialIcons";
 import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown } from "lucide-react";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";
