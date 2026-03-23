@@ -8,7 +8,7 @@ import { useDeals, type NegotiationMessage } from "@/hooks/useDeals";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+
 
 const NegotiationPage = () => {
   const { id: dealId } = useParams();
