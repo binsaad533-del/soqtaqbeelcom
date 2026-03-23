@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Send, ArrowRight, Zap, Bot, Loader2, Shield } from "lucide-react";
+import { Send, ArrowRight, Zap, Loader2, Shield } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
