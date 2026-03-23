@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
-import AiStar from "@/components/AiStar";
+import logo from "@/assets/logo.png";
 import SocialIcons from "@/components/SocialIcons";
 import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown } from "lucide-react";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
@@ -130,7 +130,7 @@ const LoginPage = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <AiStar size={40} />
+            <img src={logo} alt="سوق تقبيل" className="h-10 w-auto" />
           </div>
           <h1 className="text-2xl font-medium gradient-text">سوق تقبيل</h1>
           <p className="text-sm text-muted-foreground mt-2">
