@@ -4,6 +4,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import AiStar from "@/components/AiStar";
 import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown } from "lucide-react";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
+import { checkPasswordStrength } from "@/lib/security";
+import PasswordStrengthBar from "@/components/PasswordStrengthBar";
 
 const COUNTRY_CODES = [
   { code: "+966", flag: "🇸🇦", name: "السعودية" },
@@ -88,6 +90,11 @@ const LoginPage = () => {
     } else {
       if (!fullName.trim()) {
         setError("الرجاء إدخال الاسم الكامل");
+        setLoading(false);
+        return;
+      }
+      if (!checkPasswordStrength(password).valid) {
+        setError("كلمة المرور ضعيفة. يجب أن تحتوي على 8 أحرف على الأقل مع حرف كبير ورقم ورمز خاص");
         setLoading(false);
         return;
       }
@@ -284,6 +291,7 @@ const LoginPage = () => {
                 {showPassword ? <EyeOff size={16} strokeWidth={1.3} /> : <Eye size={16} strokeWidth={1.3} />}
               </button>
             </div>
+            {!isLogin && <PasswordStrengthBar password={password} />}
 
             {/* Terms agreement (register only) */}
             {!isLogin && (

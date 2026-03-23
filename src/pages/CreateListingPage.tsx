@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from "react";
+import { validateImageFile, validateDocFile, logAudit } from "@/lib/security";
 import { Check, Upload, Camera, FileText, ClipboardList, Eye, ArrowLeft, ArrowRight, Plus, Trash2, Loader2, Shield } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
@@ -108,6 +109,11 @@ const CreateListingPage = () => {
     const files = Array.from(e.target.files);
     const urls: string[] = [];
     for (const file of files) {
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        toast.error(validation.error);
+        continue;
+      }
       const url = await uploadFile(id, file, `photos/${activePhotoGroup}`);
       if (url) urls.push(url);
     }
@@ -129,6 +135,11 @@ const CreateListingPage = () => {
     const files = Array.from(e.target.files);
     const urls: string[] = [];
     for (const file of files) {
+      const validation = validateDocFile(file);
+      if (!validation.valid) {
+        toast.error(validation.error);
+        continue;
+      }
       const url = await uploadFile(id, file, `docs/${activeDocType}`);
       if (url) urls.push(url);
     }
@@ -205,6 +216,7 @@ const CreateListingPage = () => {
       title: `${disclosure.business_activity || "مشروع"} — ${disclosure.district || ""}, ${disclosure.city || ""}`,
     } as any);
 
+    await logAudit("listing_published", "listing", id, { title: disclosure.business_activity });
     setSaving(false);
     toast.success("تم نشر الإعلان بنجاح!");
     navigate("/dashboard");
