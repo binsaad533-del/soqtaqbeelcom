@@ -239,6 +239,81 @@ const DealCheckPanel = ({ listing }: DealCheckPanelProps) => {
                 content={analysis.operationalReadiness}
               />
 
+              {/* Market Comparison */}
+              {analysis.marketComparison && (
+                <div>
+                  <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
+                    <Store size={15} strokeWidth={1.3} className="text-primary/60" />
+                    مقارنة السوق المستعمل
+                  </h4>
+
+                  {/* Summary Stats */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                    <div className="bg-muted/50 rounded-lg p-2.5 text-center">
+                      <div className="text-xs text-muted-foreground">مقارنات</div>
+                      <div className="text-sm font-medium">{analysis.marketComparison.comparablesReviewed}</div>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-2.5 text-center">
+                      <div className="text-xs text-muted-foreground">جودة التطابق</div>
+                      <div className="text-sm font-medium">{analysis.marketComparison.matchQuality}</div>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-2.5 text-center">
+                      <div className="text-xs text-muted-foreground">الموقف السعري</div>
+                      <div className={cn("text-sm font-medium",
+                        analysis.marketComparison.marketPosition === "أقل من السوق" ? "text-emerald-600" :
+                        analysis.marketComparison.marketPosition === "أعلى من السوق" ? "text-red-500" :
+                        "text-foreground"
+                      )}>{analysis.marketComparison.marketPosition}</div>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-2.5 text-center">
+                      <div className="text-xs text-muted-foreground">مستوى الثقة</div>
+                      <div className="text-sm font-medium">{analysis.marketComparison.confidence}</div>
+                    </div>
+                  </div>
+
+                  {/* Price Range */}
+                  {analysis.marketComparison.observedPriceRange && analysis.marketComparison.observedPriceRange !== "غير متاح" && (
+                    <div className="bg-accent/30 rounded-lg p-3 mb-3">
+                      <div className="text-xs text-muted-foreground mb-1">النطاق السعري المرصود</div>
+                      <div className="text-sm font-medium">{analysis.marketComparison.observedPriceRange}</div>
+                    </div>
+                  )}
+
+                  {/* Details */}
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-3">{analysis.marketComparison.details}</p>
+
+                  {/* Asset Breakdown Table */}
+                  {analysis.marketComparison.assetBreakdown?.length > 0 && (
+                    <div className="border border-border/50 rounded-xl overflow-hidden">
+                      <div className="bg-muted/30 px-3 py-2 text-xs font-medium flex items-center gap-1.5">
+                        <ShoppingCart size={12} strokeWidth={1.3} />
+                        تفصيل مقارنة الأصول
+                      </div>
+                      <div className="divide-y divide-border/30">
+                        {analysis.marketComparison.assetBreakdown.map((item, i) => (
+                          <div key={i} className="px-3 py-2.5 flex items-center justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-medium truncate">{item.assetName}</div>
+                              <div className="text-[10px] text-muted-foreground">
+                                {item.marketRange} • {item.source}
+                              </div>
+                            </div>
+                            <span className={cn("text-[10px] px-2 py-0.5 rounded-md shrink-0",
+                              item.verdict === "معقول" ? "bg-emerald-50 text-emerald-700" :
+                              item.verdict === "مبالغ فيه" ? "bg-red-50 text-red-700" :
+                              item.verdict === "أقل من السوق" ? "bg-blue-50 text-blue-700" :
+                              "bg-muted text-muted-foreground"
+                            )}>
+                              {item.verdict}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Strengths */}
               <ListSection
                 icon={TrendingUp}
