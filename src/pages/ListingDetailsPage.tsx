@@ -1,11 +1,15 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star } from "lucide-react";
 import AiStar from "@/components/AiStar";
+import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
+import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
 import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals } from "@/hooks/useDeals";
+import { useProfiles } from "@/hooks/useProfiles";
+import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
