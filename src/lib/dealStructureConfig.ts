@@ -235,7 +235,7 @@ export const CONFLICT_RULES: ConflictRule[] = [
   },
   {
     types: ["cr_only", "full_takeover"],
-    message: "لا يمكن تقديم «سجل تجاري فقط» كبديل لـ «تقبّل كامل» — الفرق جوهري في نطاق الصفقة.",
+    message: "لا يمكن تقديم «سجل تجاري فقط» كبديل لـ «تقبيل كامل» — الفرق جوهري في نطاق الصفقة.",
     severity: "warning",
   },
   {
