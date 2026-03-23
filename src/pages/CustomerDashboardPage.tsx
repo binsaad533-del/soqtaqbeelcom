@@ -126,7 +126,7 @@ const CustomerDashboardPage = () => {
                   <div className="flex-1">
                     <div className="text-sm font-medium">{n.title}</div>
                     {n.body && <div className="text-xs text-muted-foreground mt-0.5">{n.body}</div>}
-                    <div className="text-[10px] text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString("ar-SA")}</div>
+                    <div className="text-[10px] text-muted-foreground mt-1"><div className="text-[10px] text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString("en-US")}</div></div>
                   </div>
                 </div>
               </button>
