@@ -27,6 +27,7 @@ const LoginPage = () => {
   const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const { signIn, signUp } = useAuthContext();
@@ -87,6 +88,11 @@ const LoginPage = () => {
     } else {
       if (!fullName.trim()) {
         setError("الرجاء إدخال الاسم الكامل");
+        setLoading(false);
+        return;
+      }
+      if (!agreedToTerms) {
+        setError("يجب الموافقة على الشروط والأحكام وسياسة الخصوصية");
         setLoading(false);
         return;
       }
@@ -278,6 +284,28 @@ const LoginPage = () => {
                 {showPassword ? <EyeOff size={16} strokeWidth={1.3} /> : <Eye size={16} strokeWidth={1.3} />}
               </button>
             </div>
+
+            {/* Terms agreement (register only) */}
+            {!isLogin && (
+              <label className="flex items-start gap-2 cursor-pointer select-none" dir="rtl">
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded border-border accent-primary shrink-0"
+                />
+                <span className="text-xs text-muted-foreground leading-relaxed">
+                  أوافق على{" "}
+                  <Link to="/terms" target="_blank" className="text-primary hover:underline font-medium">
+                    الشروط والأحكام
+                  </Link>
+                  {" "}و{" "}
+                  <Link to="/privacy" target="_blank" className="text-primary hover:underline font-medium">
+                    سياسة الخصوصية
+                  </Link>
+                </span>
+              </label>
+            )}
 
             {/* Messages */}
             {error && (
