@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { validateImageFile, validateDocFile, logAudit } from "@/lib/security";
-import { Check, Upload, Camera, FileText, ClipboardList, Eye, ArrowLeft, ArrowRight, Plus, Trash2, Loader2, Shield } from "lucide-react";
+import { Check, Upload, Camera, FileText, ClipboardList, Eye, ArrowLeft, ArrowRight, Plus, Trash2, Loader2, Shield, AlertTriangle, Minus, Image as ImageIcon, Layers } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
 import { DEAL_TYPE_MAP, getRequiredDocuments } from "@/lib/dealStructureConfig";
+import { supabase } from "@/integrations/supabase/client";
 
 const steps = [
   { label: "هيكل الصفقة", icon: Shield },
@@ -36,6 +37,16 @@ interface InventoryItem {
   condition: string;
   category: string;
   included: boolean;
+  confidence: "high" | "medium" | "low";
+  detectionNote: string;
+  photoIndices: number[];
+  isSameAssetMultipleAngles: boolean;
+  userConfirmed: boolean;
+}
+
+interface DedupAction {
+  description: string;
+  merged_count: number;
 }
 
 const CreateListingPage = () => {
@@ -51,10 +62,14 @@ const CreateListingPage = () => {
   const [photos, setPhotos] = useState<Record<string, string[]>>({});
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzed, setAnalyzed] = useState(false);
+  const [analyzeProgress, setAnalyzeProgress] = useState(0);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [analysisSummary, setAnalysisSummary] = useState("");
+  const [dedupActions, setDedupActions] = useState<DedupAction[]>([]);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, string[]>>({});
   const [listingId, setListingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
   const [disclosure, setDisclosure] = useState({
     business_activity: "",
@@ -154,20 +169,57 @@ const CreateListingPage = () => {
   };
 
   const handleAnalyze = async () => {
+    const allPhotoUrls = Object.values(photos).flat();
+    if (allPhotoUrls.length === 0) {
+      toast.error("يرجى رفع صور أولاً");
+      return;
+    }
+
     setAnalyzing(true);
-    setTimeout(() => {
-      setInventory([
-        { id: "1", name: "شواية صناعية", qty: 2, condition: "جيدة", category: "معدات مطبخ", included: true },
-        { id: "2", name: "ثلاجة عرض", qty: 3, condition: "جيدة", category: "تبريد", included: true },
-        { id: "3", name: "طاولة طعام مع كراسي", qty: 8, condition: "متوسطة", category: "أثاث", included: true },
-        { id: "4", name: "مقلاة صناعية", qty: 1, condition: "جيدة", category: "معدات مطبخ", included: true },
-        { id: "5", name: "جهاز كاشير", qty: 1, condition: "جيدة", category: "أجهزة", included: true },
-        { id: "6", name: "لوحة إعلانية خارجية", qty: 1, condition: "جيدة", category: "ديكور", included: true },
-        { id: "7", name: "مكيف سبليت", qty: 2, condition: "متوسطة", category: "تكييف", included: true },
-      ]);
-      setAnalyzing(false);
+    setAnalyzeProgress(10);
+
+    // Progress simulation
+    const progressInterval = setInterval(() => {
+      setAnalyzeProgress(prev => Math.min(prev + 8, 85));
+    }, 1500);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-inventory", {
+        body: { photoUrls: allPhotoUrls, photoGroups: photos },
+      });
+
+      clearInterval(progressInterval);
+      setAnalyzeProgress(100);
+
+      if (error || !data || data.error) {
+        throw new Error(data?.error || error?.message || "فشل التحليل");
+      }
+
+      const assets: InventoryItem[] = (data.assets || []).map((a: any, i: number) => ({
+        id: String(i + 1),
+        name: a.name,
+        qty: a.quantity || 1,
+        condition: a.condition || "غير واضح",
+        category: a.category || "أخرى",
+        included: true,
+        confidence: a.confidence || "medium",
+        detectionNote: a.detection_note || "",
+        photoIndices: a.photo_indices || [],
+        isSameAssetMultipleAngles: a.is_same_asset_multiple_angles || false,
+        userConfirmed: a.confidence === "high",
+      }));
+
+      setInventory(assets);
+      setAnalysisSummary(data.analysis_summary || "");
+      setDedupActions(data.dedup_actions || []);
       setAnalyzed(true);
-    }, 3000);
+      toast.success("تم تحليل الصور وتحديد عدد الأصول بدقة بناءً على التمييز بين زوايا التصوير وتكرار الأصول");
+    } catch (err: any) {
+      clearInterval(progressInterval);
+      toast.error(err.message || "حدث خطأ أثناء تحليل الصور");
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const handleNext = async () => {
@@ -223,18 +275,30 @@ const CreateListingPage = () => {
   };
 
   const totalPhotos = Object.values(photos).reduce((a, b) => a + b.length, 0);
+  const allPhotoUrls = Object.values(photos).flat();
   const disclosureScore = (() => {
     const fields = Object.values(disclosure);
     const filled = fields.filter(v => v.trim() !== "").length;
     return Math.round((filled / fields.length) * 100);
   })();
 
-  // Dynamic required documents based on deal structure
   const dynamicDocTypes = dealStructure.requiredDocuments.length > 0
     ? dealStructure.requiredDocuments
     : ["عقد الإيجار", "السجل التجاري", "رخصة البلدية", "رخصة الدفاع المدني", "فواتير شراء المعدات", "مستندات أخرى"];
 
   const primaryDealLabel = DEAL_TYPE_MAP[dealStructure.primaryType]?.label || dealStructure.primaryType;
+
+  const lowConfidenceItems = inventory.filter(i => i.confidence === "low" && !i.userConfirmed);
+  const medConfidenceItems = inventory.filter(i => i.confidence === "medium" && !i.userConfirmed);
+
+  const getConfidenceBadge = (confidence: string) => {
+    switch (confidence) {
+      case "high": return <span className="text-[10px] px-1.5 py-0.5 rounded bg-success/10 text-success">ثقة عالية</span>;
+      case "medium": return <span className="text-[10px] px-1.5 py-0.5 rounded bg-warning/10 text-warning">ثقة متوسطة</span>;
+      case "low": return <span className="text-[10px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">يحتاج تأكيد</span>;
+      default: return null;
+    }
+  };
 
   return (
     <div className="py-8">
@@ -327,9 +391,18 @@ const CreateListingPage = () => {
                 <>
                   <AiStar size={56} className="mb-6" />
                   <h2 className="font-medium mb-2">الذكاء الاصطناعي يحلّل الصور...</h2>
-                  <p className="text-sm text-muted-foreground max-w-sm">جاري اكتشاف الأصول والمعدات من الصور المرفوعة وبناء جرد أولي</p>
-                  <div className="mt-6 h-1 w-48 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full gradient-primary animate-pulse" style={{ width: "60%" }} />
+                  <p className="text-sm text-muted-foreground max-w-sm">جاري اكتشاف الأصول وتمييز زوايا التصوير من الأصول المتعددة</p>
+                  <div className="mt-6 w-56">
+                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div className="h-full rounded-full gradient-primary transition-all duration-700" style={{ width: `${analyzeProgress}%` }} />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-2">{analyzeProgress}%</p>
+                  </div>
+                  <div className="mt-4 space-y-1 text-[11px] text-muted-foreground">
+                    {analyzeProgress > 20 && <p>🔍 تحليل تفاصيل الصور...</p>}
+                    {analyzeProgress > 45 && <p>🧠 مقارنة الأصول بين الصور...</p>}
+                    {analyzeProgress > 65 && <p>📊 تمييز الزوايا من الأصول المتعددة...</p>}
+                    {analyzeProgress > 80 && <p>✅ إعداد الجرد النهائي...</p>}
                   </div>
                 </>
               ) : analyzed ? (
@@ -337,20 +410,71 @@ const CreateListingPage = () => {
                   <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mb-4">
                     <Check size={24} strokeWidth={1.3} className="text-success" />
                   </div>
-                  <h2 className="font-medium mb-2">اكتمل التحليل</h2>
-                  <p className="text-sm text-muted-foreground max-w-sm mb-4">تم اكتشاف {inventory.length} عنصر من الصور.</p>
+                  <h2 className="font-medium mb-2">اكتمل التحليل الذكي</h2>
+                  <p className="text-sm text-muted-foreground max-w-md mb-4">{analysisSummary || `تم اكتشاف ${inventory.length} أصل من الصور.`}</p>
+                  
+                  {/* Dedup actions summary */}
+                  {dedupActions.length > 0 && (
+                    <div className="w-full max-w-md bg-primary/5 border border-primary/20 rounded-xl p-4 mb-4 text-start">
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-primary mb-2">
+                        <Layers size={14} />
+                        إجراءات منع التكرار
+                      </div>
+                      {dedupActions.map((action, i) => (
+                        <div key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5 mt-1">
+                          <span className="text-primary mt-0.5">•</span>
+                          <span>{action.description} ({action.merged_count} صور)</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Confidence summary */}
+                  <div className="flex flex-wrap gap-3 justify-center mb-4">
+                    <div className="text-center px-4 py-2 rounded-xl bg-success/5 border border-success/20">
+                      <div className="text-lg font-medium text-success">{inventory.filter(i => i.confidence === "high").length}</div>
+                      <div className="text-[10px] text-success">ثقة عالية</div>
+                    </div>
+                    <div className="text-center px-4 py-2 rounded-xl bg-warning/5 border border-warning/20">
+                      <div className="text-lg font-medium text-warning">{inventory.filter(i => i.confidence === "medium").length}</div>
+                      <div className="text-[10px] text-warning">ثقة متوسطة</div>
+                    </div>
+                    <div className="text-center px-4 py-2 rounded-xl bg-destructive/5 border border-destructive/20">
+                      <div className="text-lg font-medium text-destructive">{inventory.filter(i => i.confidence === "low").length}</div>
+                      <div className="text-[10px] text-destructive">يحتاج تأكيد</div>
+                    </div>
+                  </div>
+
                   <div className="flex flex-wrap gap-2 justify-center">
-                    {inventory.slice(0, 4).map(item => (
-                      <span key={item.id} className="text-xs bg-accent/60 text-accent-foreground px-3 py-1 rounded-lg">{item.name}</span>
+                    {inventory.slice(0, 5).map(item => (
+                      <span key={item.id} className="text-xs bg-accent/60 text-accent-foreground px-3 py-1 rounded-lg">
+                        {item.name} {item.qty > 1 ? `×${item.qty}` : ""}
+                      </span>
                     ))}
-                    {inventory.length > 4 && <span className="text-xs text-muted-foreground px-2 py-1">+{inventory.length - 4}</span>}
+                    {inventory.length > 5 && <span className="text-xs text-muted-foreground px-2 py-1">+{inventory.length - 5}</span>}
                   </div>
                 </>
               ) : (
                 <>
                   <AiStar size={48} className="mb-6" />
                   <h2 className="font-medium mb-2">تحليل الصور بالذكاء الاصطناعي</h2>
-                  <p className="text-sm text-muted-foreground max-w-sm">سيقوم الذكاء الاصطناعي بتحليل صورك واكتشاف الأصول والمعدات تلقائياً</p>
+                  <p className="text-sm text-muted-foreground max-w-sm mb-2">سيقوم الذكاء الاصطناعي بتحليل صورك واكتشاف الأصول مع التمييز الذكي بين:</p>
+                  <div className="space-y-2 text-start max-w-sm">
+                    <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <ImageIcon size={14} className="text-primary mt-0.5 shrink-0" />
+                      <span>أصل واحد مصوّر من <strong className="text-foreground">زوايا مختلفة</strong> ← يُحسب مرة واحدة</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <Layers size={14} className="text-primary mt-0.5 shrink-0" />
+                      <span>أصول <strong className="text-foreground">متعددة متشابهة</strong> ← يُحسب كل واحد منها</span>
+                    </div>
+                  </div>
+                  {totalPhotos === 0 && (
+                    <div className="mt-4 flex items-center gap-1.5 text-xs text-warning">
+                      <AlertTriangle size={14} />
+                      يرجى رفع صور في الخطوة السابقة أولاً
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -362,46 +486,169 @@ const CreateListingPage = () => {
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <h2 className="font-medium">مراجعة الجرد</h2>
-                  <p className="text-xs text-muted-foreground">{inventory.filter(i => i.included).length} مشمول — {inventory.filter(i => !i.included).length} مستثنى</p>
+                  <p className="text-xs text-muted-foreground">
+                    {inventory.filter(i => i.included).length} مشمول — {inventory.filter(i => !i.included).length} مستثنى
+                    {" "}— إجمالي القطع: {inventory.filter(i => i.included).reduce((s, i) => s + i.qty, 0)}
+                  </p>
                 </div>
                 <button
-                  onClick={() => setInventory(prev => [...prev, { id: String(Date.now()), name: "عنصر جديد", qty: 1, condition: "جيدة", category: "أخرى", included: true }])}
+                  onClick={() => setInventory(prev => [...prev, {
+                    id: String(Date.now()),
+                    name: "عنصر جديد",
+                    qty: 1,
+                    condition: "جيدة",
+                    category: "أخرى",
+                    included: true,
+                    confidence: "high",
+                    detectionNote: "مضاف يدوياً",
+                    photoIndices: [],
+                    isSameAssetMultipleAngles: false,
+                    userConfirmed: true,
+                  }])}
                   className="flex items-center gap-1 text-xs text-primary hover:underline"
                 >
                   <Plus size={14} strokeWidth={1.3} /> أضف عنصراً
                 </button>
               </div>
+
+              {/* Low confidence items requiring confirmation */}
+              {lowConfidenceItems.length > 0 && (
+                <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-destructive">
+                    <AlertTriangle size={14} />
+                    عناصر تحتاج تأكيدك ({lowConfidenceItems.length})
+                  </div>
+                  {lowConfidenceItems.map(item => (
+                    <ConfirmationCard
+                      key={item.id}
+                      item={item}
+                      allPhotoUrls={allPhotoUrls}
+                      onConfirmSame={() => {
+                        setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: 1, userConfirmed: true } : i));
+                      }}
+                      onConfirmMultiple={(qty) => {
+                        setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty, userConfirmed: true } : i));
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Medium confidence items */}
+              {medConfidenceItems.length > 0 && (
+                <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-warning">
+                    <AlertTriangle size={14} />
+                    عناصر يُنصح بتأكيدها ({medConfidenceItems.length})
+                  </div>
+                  {medConfidenceItems.map(item => (
+                    <ConfirmationCard
+                      key={item.id}
+                      item={item}
+                      allPhotoUrls={allPhotoUrls}
+                      onConfirmSame={() => {
+                        setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: 1, userConfirmed: true } : i));
+                      }}
+                      onConfirmMultiple={(qty) => {
+                        setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty, userConfirmed: true } : i));
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* All inventory items */}
               <div className="space-y-2">
                 {inventory.map((item) => (
                   <div key={item.id} className={cn(
-                    "flex items-center justify-between p-3 rounded-xl border transition-all",
+                    "p-3 rounded-xl border transition-all",
                     item.included ? "border-border/50 bg-card" : "border-border/30 bg-muted/30 opacity-60"
                   )}>
-                    <div className="flex-1">
-                      <div className="text-sm">{item.name}</div>
-                      <div className="text-xs text-muted-foreground">{item.category} — {item.qty} وحدة — {item.condition}</div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, included: !i.included } : i))}
-                        className={cn(
-                          "text-xs px-2.5 py-1 rounded-md transition-all active:scale-[0.97]",
-                          item.included ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        {editingItemId === item.id ? (
+                          <input
+                            type="text"
+                            value={item.name}
+                            onChange={(e) => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, name: e.target.value } : i))}
+                            onBlur={() => setEditingItemId(null)}
+                            onKeyDown={(e) => e.key === "Enter" && setEditingItemId(null)}
+                            autoFocus
+                            className="text-sm bg-transparent border-b border-primary/30 outline-none w-full"
+                          />
+                        ) : (
+                          <div className="text-sm cursor-pointer hover:text-primary transition-colors" onClick={() => setEditingItemId(item.id)}>
+                            {item.name}
+                          </div>
                         )}
-                      >
-                        {item.included ? "مشمول" : "مستثنى"}
-                      </button>
-                      <button onClick={() => setInventory(inv => inv.filter(i => i.id !== item.id))} className="p-1 text-muted-foreground hover:text-destructive transition-colors">
-                        <Trash2 size={14} strokeWidth={1.3} />
-                      </button>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          <span className="text-xs text-muted-foreground">{item.category}</span>
+                          <span className="text-xs text-muted-foreground">— {item.condition}</span>
+                          {getConfidenceBadge(item.confidence)}
+                          {item.isSameAssetMultipleAngles && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">زوايا متعددة</span>
+                          )}
+                        </div>
+                        {item.detectionNote && (
+                          <div className="text-[10px] text-muted-foreground mt-0.5 italic">{item.detectionNote}</div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 mr-3">
+                        {/* Editable quantity */}
+                        <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-1">
+                          <button
+                            onClick={() => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: Math.max(1, i.qty - 1) } : i))}
+                            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            <Minus size={12} />
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.qty}
+                            onChange={(e) => {
+                              const val = Math.max(1, parseInt(e.target.value) || 1);
+                              setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: val } : i));
+                            }}
+                            className="w-8 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <button
+                            onClick={() => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i))}
+                            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            <Plus size={12} />
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, included: !i.included } : i))}
+                          className={cn(
+                            "text-xs px-2.5 py-1 rounded-md transition-all active:scale-[0.97]",
+                            item.included ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {item.included ? "مشمول" : "مستثنى"}
+                        </button>
+                        <button onClick={() => setInventory(inv => inv.filter(i => i.id !== item.id))} className="p-1 text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 size={14} strokeWidth={1.3} />
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Related photos */}
+                    {item.photoIndices.length > 0 && allPhotoUrls.length > 0 && (
+                      <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
+                        {item.photoIndices.filter(idx => idx < allPhotoUrls.length).slice(0, 6).map((idx) => (
+                          <img key={idx} src={allPhotoUrls[idx]} alt="" className="w-10 h-10 rounded-md object-cover shrink-0 border border-border/30" />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Step 4: Documents (dynamic based on deal structure) */}
+          {/* Step 4: Documents */}
           {currentStep === 4 && (
             <div className="space-y-4">
               <h2 className="font-medium mb-1">المستندات المطلوبة</h2>
@@ -436,7 +683,6 @@ const CreateListingPage = () => {
               <h2 className="font-medium mb-1">بيانات الإفصاح</h2>
               <p className="text-sm text-muted-foreground mb-2">أكمل بيانات الإفصاح لتعزيز ثقة المشترين</p>
               
-              {/* Show required disclosures from deal structure */}
               {dealStructure.requiredDisclosures.length > 0 && (
                 <div className="bg-warning/5 border border-warning/20 rounded-xl p-3 mb-4">
                   <div className="text-xs font-medium text-warning mb-1.5 flex items-center gap-1">
@@ -488,7 +734,6 @@ const CreateListingPage = () => {
                 </div>
               </div>
 
-              {/* Deal structure summary */}
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
                 <div className="text-xs font-medium text-primary mb-1">هيكل الصفقة</div>
                 {dealStructure.selectedTypes.map((typeId, idx) => {
@@ -512,7 +757,7 @@ const CreateListingPage = () => {
                 <p className="text-sm leading-relaxed text-foreground">
                   {disclosure.business_activity || "مشروع"} في {disclosure.district || "—"}, {disclosure.city || "—"}.
                   {` هيكل الصفقة: ${primaryDealLabel}.`}
-                  {" "}عدد الأصول المؤكّدة: {inventory.filter(i => i.included).length} عنصر.
+                  {" "}عدد الأصول المؤكّدة: {inventory.filter(i => i.included).length} عنصر ({inventory.filter(i => i.included).reduce((s, i) => s + i.qty, 0)} قطعة).
                   {disclosure.annual_rent && ` الإيجار السنوي ${disclosure.annual_rent} ريال.`}
                   {disclosure.lease_remaining && ` متبقي من العقد ${disclosure.lease_remaining}.`}
                   {disclosure.price && ` السعر المطلوب ${Number(disclosure.price).toLocaleString()} ريال.`}
@@ -558,15 +803,87 @@ const CreateListingPage = () => {
           {currentStep < steps.length - 1 && (
             <Button
               onClick={handleNext}
-              disabled={(currentStep === 0 && !dealStructure.isValid) || saving}
+              disabled={(currentStep === 0 && !dealStructure.isValid) || saving || (currentStep === 2 && analyzing)}
               className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
             >
-              {currentStep === 2 && !analyzed ? "ابدأ التحليل" : "التالي"}
+              {currentStep === 2 && !analyzed ? "ابدأ التحليل الذكي" : "التالي"}
               <ArrowLeft size={16} strokeWidth={1.5} />
             </Button>
           )}
         </div>
       </div>
+    </div>
+  );
+};
+
+// ─── Confirmation Card for low/medium confidence items ──────
+const ConfirmationCard = ({
+  item,
+  allPhotoUrls,
+  onConfirmSame,
+  onConfirmMultiple,
+}: {
+  item: InventoryItem;
+  allPhotoUrls: string[];
+  onConfirmSame: () => void;
+  onConfirmMultiple: (qty: number) => void;
+}) => {
+  const [showQtyInput, setShowQtyInput] = useState(false);
+  const [tempQty, setTempQty] = useState(item.qty);
+
+  return (
+    <div className="bg-card rounded-lg p-3 border border-border/50">
+      <div className="text-sm font-medium mb-1">{item.name}</div>
+      <div className="text-[11px] text-muted-foreground mb-2">{item.detectionNote}</div>
+
+      {/* Show related photos */}
+      {item.photoIndices.length > 0 && (
+        <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
+          {item.photoIndices.filter(idx => idx < allPhotoUrls.length).slice(0, 6).map((idx) => (
+            <img key={idx} src={allPhotoUrls[idx]} alt="" className="w-14 h-14 rounded-md object-cover shrink-0 border border-border/30" />
+          ))}
+        </div>
+      )}
+
+      <p className="text-xs text-muted-foreground mb-2">هل هذه الصور لنفس الأصل أم لأصول متعددة؟</p>
+
+      {!showQtyInput ? (
+        <div className="flex gap-2">
+          <button
+            onClick={onConfirmSame}
+            className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors active:scale-[0.97]"
+          >
+            هذا نفس الأصل
+          </button>
+          <button
+            onClick={() => setShowQtyInput(true)}
+            className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/80 transition-colors active:scale-[0.97]"
+          >
+            هذه أصول متعددة
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">عدد القطع:</span>
+          <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-1">
+            <button onClick={() => setTempQty(q => Math.max(2, q - 1))} className="p-1"><Minus size={12} /></button>
+            <input
+              type="number"
+              min="2"
+              value={tempQty}
+              onChange={e => setTempQty(Math.max(2, parseInt(e.target.value) || 2))}
+              className="w-10 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            />
+            <button onClick={() => setTempQty(q => q + 1)} className="p-1"><Plus size={12} /></button>
+          </div>
+          <button
+            onClick={() => onConfirmMultiple(tempQty)}
+            className="text-xs px-3 py-1.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors active:scale-[0.97]"
+          >
+            تأكيد
+          </button>
+        </div>
+      )}
     </div>
   );
 };
