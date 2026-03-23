@@ -8,10 +8,10 @@ import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useListings } from "@/hooks/useListings";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-// Types for agreement data
 interface AgreementRecord {
   id: string;
   deal_id: string;
@@ -26,13 +26,13 @@ interface AgreementRecord {
   deal_type: string | null;
   location: string | null;
   business_activity: string | null;
-  included_assets: string[];
-  excluded_assets: string[];
+  included_assets: any[];
+  excluded_assets: any[];
   financial_terms: Record<string, any>;
   declarations: Record<string, any>;
-  documents_referenced: string[];
+  documents_referenced: any[];
   liabilities: Record<string, any>;
-  important_notes: string[];
+  important_notes: any[];
   license_status: Record<string, any>;
   lease_details: Record<string, any>;
   buyer_approved: boolean;
@@ -54,11 +54,13 @@ interface HistoryEntry {
 }
 
 const AgreementPage = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // deal ID
   const { user } = useAuthContext();
+  const { getListing } = useListings();
   const [agreement, setAgreement] = useState<AgreementRecord | null>(null);
   const [allVersions, setAllVersions] = useState<AgreementRecord[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [deal, setDeal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [approving, setApproving] = useState(false);
@@ -66,64 +68,117 @@ const AgreementPage = () => {
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Determine if this is a deal ID (for generating) or agreement already exists
-  // For demo, we use mock data if no real data found
-  const [useMock, setUseMock] = useState(false);
-
   useEffect(() => {
-    loadAgreement();
+    loadData();
   }, [id]);
 
-  const loadAgreement = async () => {
+  const loadData = async () => {
+    if (!id) return;
     setLoading(true);
     try {
-      // Try to load by deal_id first
-      const { data: agreements, error } = await supabase
+      // Load deal
+      const { data: dealData } = await supabase
+        .from("deals")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      setDeal(dealData);
+
+      // Load agreements
+      const { data: agreements } = await supabase
         .from("deal_agreements")
         .select("*")
-        .eq("deal_id", id!)
+        .eq("deal_id", id)
         .order("version", { ascending: false });
 
-      if (error) throw error;
-
       if (agreements && agreements.length > 0) {
-        const latest = agreements[0] as unknown as AgreementRecord;
-        setAgreement(latest);
+        setAgreement(agreements[0] as unknown as AgreementRecord);
         setAllVersions(agreements as unknown as AgreementRecord[]);
-      } else {
-        // No agreement yet — show generation option or mock
-        setUseMock(true);
       }
 
       // Load history
       const { data: historyData } = await supabase
         .from("deal_history")
         .select("*")
-        .eq("deal_id", id!)
+        .eq("deal_id", id)
         .order("created_at", { ascending: false });
-
       if (historyData) setHistory(historyData as unknown as HistoryEntry[]);
+
     } catch (e) {
       console.error("Failed to load agreement:", e);
-      setUseMock(true);
     }
     setLoading(false);
   };
 
   const generateAgreement = async () => {
+    if (!deal) return;
     setGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-agreement", {
-        body: {
-          dealId: id,
-          agreementData: mockAgreementInput,
+      // Load listing data for context
+      const listing = await getListing(deal.listing_id);
+
+      // Get profiles for buyer/seller
+      const { data: buyerProfile } = await supabase
+        .from("profiles")
+        .select("full_name, phone")
+        .eq("user_id", deal.buyer_id)
+        .maybeSingle();
+      const { data: sellerProfile } = await supabase
+        .from("profiles")
+        .select("full_name, phone")
+        .eq("user_id", deal.seller_id)
+        .maybeSingle();
+
+      const agreementData = {
+        dealId: id,
+        agreementData: {
+          actorId: user?.id,
+          buyerName: buyerProfile?.full_name || "المشتري",
+          buyerContact: buyerProfile?.phone || "",
+          sellerName: sellerProfile?.full_name || "البائع",
+          sellerContact: sellerProfile?.phone || "",
+          dealTitle: listing?.title || listing?.business_activity || "صفقة تقبّل",
+          dealType: listing?.deal_type || "full",
+          location: `${listing?.district || ""}, ${listing?.city || ""}`.replace(/^, |, $/, ""),
+          businessActivity: listing?.business_activity || "",
+          includedAssets: (listing?.inventory || []).map((i: any) => `${i.name} (${i.qty})`),
+          excludedAssets: [],
+          financialTerms: {
+            agreedPrice: deal.agreed_price || listing?.price || 0,
+            currency: "ر.س",
+            paymentNote: "حسب الاتفاق بين الطرفين",
+          },
+          declarations: {
+            buyerDeclares: "أقر بمراجعة جميع البيانات المقدمة والموافقة عليها",
+            sellerDeclares: "أقر بصحة المعلومات المقدمة حسب علمي",
+            platformNote: "المنصة وسيط تقني فقط — الاتفاق بين الطرفين مباشرة",
+          },
+          documentsReferenced: (listing?.documents || []).filter((d: any) => d.status === "مرفق").map((d: any) => d.name),
+          liabilities: {
+            financialLiabilities: listing?.liabilities || "لا توجد",
+            delayedSalaries: listing?.overdue_salaries || "لا يوجد",
+            unpaidRent: listing?.overdue_rent || "لا يوجد",
+          },
+          importantNotes: [],
+          licenseStatus: {
+            municipality: listing?.municipality_license || "—",
+            civilDefense: listing?.civil_defense_license || "—",
+            cameras: listing?.surveillance_cameras || "—",
+          },
+          leaseDetails: {
+            annualRent: listing?.annual_rent ? `${Number(listing.annual_rent).toLocaleString("en-US")} ر.س` : "—",
+            remaining: listing?.lease_remaining || "—",
+          },
         },
+      };
+
+      const { data, error } = await supabase.functions.invoke("generate-agreement", {
+        body: agreementData,
       });
       if (error) throw error;
       if (data?.agreement) {
         setAgreement(data.agreement as AgreementRecord);
         setAllVersions([data.agreement as AgreementRecord]);
-        setUseMock(false);
         toast.success("تم إنشاء الاتفاقية بنجاح");
       }
     } catch (e: any) {
@@ -144,12 +199,10 @@ const AgreementPage = () => {
         .from("deal_agreements")
         .update(updateField)
         .eq("id", agreement.id);
-
       if (error) throw error;
 
       setAgreement(prev => prev ? { ...prev, ...updateField } : prev);
 
-      // Record in history
       await supabase.from("deal_history").insert({
         deal_id: agreement.deal_id,
         action: `${side}_approved`,
@@ -165,79 +218,15 @@ const AgreementPage = () => {
   };
 
   const copyAgreementNumber = () => {
-    const num = agreement?.agreement_number || "AGR-DEMO";
+    const num = agreement?.agreement_number || "";
+    if (!num) return;
     navigator.clipboard.writeText(num);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Mock data for demo
-  const mockAgreementInput = {
-    actorId: user?.id,
-    buyerName: "محمد العتيبي",
-    buyerContact: "+966 5XXXXXXXX",
-    sellerName: "أحمد الشمري",
-    sellerContact: "+966 5XXXXXXXX",
-    dealTitle: "مطعم شاورما مجهّز بالكامل",
-    dealType: "تقبّل كامل",
-    location: "حي النسيم، الرياض",
-    businessActivity: "مطاعم",
-    includedAssets: [
-      "شواية صناعية (2)",
-      "ثلاجة عرض (3)",
-      "طاولة طعام مع كراسي (8)",
-      "مقلاة صناعية (1)",
-      "جهاز كاشير (1)",
-      "لوحة إعلانية خارجية (1)",
-    ],
-    excludedAssets: ["المخزون الغذائي الحالي", "حسابات التواصل الاجتماعي"],
-    financialTerms: { agreedPrice: 165000, currency: "ر.س", paymentNote: "دفعة واحدة عند التوقيع" },
-    declarations: {
-      buyerDeclares: "أقر بمراجعة جميع البيانات المقدمة والموافقة عليها",
-      sellerDeclares: "أقر بصحة المعلومات المقدمة حسب علمي",
-      platformNote: "المنصة وسيط تقني فقط — الاتفاق بين الطرفين مباشرة",
-    },
-    documentsReferenced: ["عقد الإيجار", "السجل التجاري", "رخصة البلدية", "رخصة الدفاع المدني"],
-    liabilities: { financialLiabilities: "لا توجد", delayedSalaries: "لا يوجد", unpaidRent: "لا يوجد" },
-    importantNotes: [
-      "يُنصح بتجديد عقد الإيجار قبل إتمام نقل الملكية",
-      "فواتير شراء المعدات لم تُرفق — يُفضل طلبها",
-      "بعض الأثاث بحالة متوسطة — تم احتسابه في التسعير",
-    ],
-    licenseStatus: { municipality: "سارية", civilDefense: "سارية", cameras: "متوفرة ومطابقة" },
-    leaseDetails: { annualRent: "45,000 ر.س", remaining: "1.5 سنة", note: "يُنصح بالتفاوض على تجديد العقد" },
-  };
-
-  const displayData = agreement || {
-    agreement_number: "AGR-DEMO",
-    version: 1,
-    status: "active",
-    created_at: new Date().toISOString(),
-    buyer_approved: false,
-    seller_approved: false,
-    buyer_approved_at: null,
-    seller_approved_at: null,
-    ...mockAgreementInput,
-    buyer_name: mockAgreementInput.buyerName,
-    seller_name: mockAgreementInput.sellerName,
-    buyer_contact: mockAgreementInput.buyerContact,
-    seller_contact: mockAgreementInput.sellerContact,
-    deal_title: mockAgreementInput.dealTitle,
-    deal_type: mockAgreementInput.dealType,
-    location: mockAgreementInput.location,
-    business_activity: mockAgreementInput.businessActivity,
-    included_assets: mockAgreementInput.includedAssets,
-    excluded_assets: mockAgreementInput.excludedAssets,
-    financial_terms: mockAgreementInput.financialTerms,
-    declarations: mockAgreementInput.declarations,
-    documents_referenced: mockAgreementInput.documentsReferenced,
-    liabilities: mockAgreementInput.liabilities,
-    important_notes: mockAgreementInput.importantNotes,
-    license_status: mockAgreementInput.licenseStatus,
-    lease_details: mockAgreementInput.leaseDetails,
-  };
-
-  const bothApproved = displayData.buyer_approved && displayData.seller_approved;
+  const isBuyer = user?.id === deal?.buyer_id;
+  const isSeller = user?.id === deal?.seller_id;
 
   if (loading) {
     return (
@@ -249,10 +238,51 @@ const AgreementPage = () => {
     );
   }
 
+  if (!deal) {
+    return (
+      <div className="py-20 text-center">
+        <AiStar size={32} className="mx-auto mb-4" />
+        <p className="text-sm text-muted-foreground">الصفقة غير موجودة</p>
+        <Button asChild variant="outline" className="mt-4 rounded-xl">
+          <Link to="/dashboard">العودة للوحة التحكم</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  // No agreement yet
+  if (!agreement) {
+    return (
+      <div className="py-8">
+        <div className="container max-w-2xl">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+            <Link to={`/negotiate/${id}`} className="hover:text-foreground transition-colors flex items-center gap-1">
+              <ArrowRight size={14} strokeWidth={1.3} />
+              العودة للتفاوض
+            </Link>
+          </div>
+          <div className="bg-card rounded-2xl shadow-soft p-8 text-center">
+            <AiStar size={40} className="mx-auto mb-4" />
+            <h2 className="text-lg font-medium mb-2">لم يتم إنشاء الاتفاقية بعد</h2>
+            <p className="text-sm text-muted-foreground mb-6">عند الاتفاق على شروط الصفقة، يمكنك إنشاء الاتفاقية الرسمية</p>
+            <Button onClick={generateAgreement} disabled={generating} className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
+              {generating ? (
+                <span className="flex items-center gap-2"><Loader2 size={14} className="animate-spin" />جاري إنشاء الاتفاقية...</span>
+              ) : (
+                <><Check size={16} strokeWidth={1.5} />إنشاء الاتفاقية</>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const bothApproved = agreement.buyer_approved && agreement.seller_approved;
+
   return (
     <div className="py-8">
       <div className="container max-w-2xl">
-        {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to={`/negotiate/${id}`} className="hover:text-foreground transition-colors flex items-center gap-1">
             <ArrowRight size={14} strokeWidth={1.3} />
@@ -260,7 +290,6 @@ const AgreementPage = () => {
           </Link>
         </div>
 
-        {/* Status Banner */}
         {bothApproved && (
           <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
@@ -273,7 +302,6 @@ const AgreementPage = () => {
           </div>
         )}
 
-        {/* Main Agreement Card */}
         <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
           {/* Header */}
           <div className="p-6 border-b border-border/20 bg-gradient-to-l from-primary/5 to-transparent">
@@ -282,7 +310,7 @@ const AgreementPage = () => {
                 <AiStar size={28} />
                 <div>
                   <h1 className="text-lg font-medium">اتفاقية الصفقة</h1>
-                  <p className="text-xs text-muted-foreground">{displayData.deal_title} — {displayData.location}</p>
+                  <p className="text-xs text-muted-foreground">{agreement.deal_title} — {agreement.location}</p>
                 </div>
               </div>
               {bothApproved && (
@@ -291,19 +319,14 @@ const AgreementPage = () => {
                 </div>
               )}
             </div>
-
-            {/* Agreement metadata */}
             <div className="flex flex-wrap items-center gap-3 text-[11px]">
-              <button
-                onClick={copyAgreementNumber}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-              >
+              <button onClick={copyAgreementNumber} className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
                 {copied ? <CheckCircle2 size={11} className="text-emerald-500" /> : <Copy size={11} />}
-                <span className="font-mono">{displayData.agreement_number}</span>
+                <span className="font-mono">{agreement.agreement_number}</span>
               </button>
-              <span className="text-muted-foreground">الإصدار {displayData.version}</span>
+              <span className="text-muted-foreground">الإصدار {agreement.version}</span>
               <span className="text-muted-foreground">
-                {new Date(displayData.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" })}
+                {new Date(agreement.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" })}
               </span>
             </div>
           </div>
@@ -312,66 +335,57 @@ const AgreementPage = () => {
             {/* Approval Status */}
             <div className="grid grid-cols-2 gap-3">
               <ApprovalCard
-                label="المشتري"
-                name={displayData.buyer_name}
-                approved={displayData.buyer_approved}
-                approvedAt={displayData.buyer_approved_at}
-                onApprove={() => handleApprove("buyer")}
-                loading={approving}
-                disabled={bothApproved}
+                label="المشتري" name={agreement.buyer_name}
+                approved={agreement.buyer_approved} approvedAt={agreement.buyer_approved_at}
+                onApprove={() => handleApprove("buyer")} loading={approving}
+                disabled={bothApproved || !isBuyer || agreement.buyer_approved}
               />
               <ApprovalCard
-                label="البائع"
-                name={displayData.seller_name}
-                approved={displayData.seller_approved}
-                approvedAt={displayData.seller_approved_at}
-                onApprove={() => handleApprove("seller")}
-                loading={approving}
-                disabled={bothApproved}
+                label="البائع" name={agreement.seller_name}
+                approved={agreement.seller_approved} approvedAt={agreement.seller_approved_at}
+                onApprove={() => handleApprove("seller")} loading={approving}
+                disabled={bothApproved || !isSeller || agreement.seller_approved}
               />
             </div>
 
-            {/* Parties */}
             <Section title="أطراف الاتفاقية">
-              <InfoRow label="المشتري" value={displayData.buyer_name || "—"} />
-              <InfoRow label="تواصل المشتري" value={displayData.buyer_contact || "—"} />
-              <InfoRow label="البائع" value={displayData.seller_name || "—"} />
-              <InfoRow label="تواصل البائع" value={displayData.seller_contact || "—"} />
+              <InfoRow label="المشتري" value={agreement.buyer_name || "—"} />
+              <InfoRow label="تواصل المشتري" value={agreement.buyer_contact || "—"} />
+              <InfoRow label="البائع" value={agreement.seller_name || "—"} />
+              <InfoRow label="تواصل البائع" value={agreement.seller_contact || "—"} />
             </Section>
 
-            {/* Deal Details */}
             <Section title="تفاصيل الصفقة">
-              <InfoRow label="عنوان الصفقة" value={displayData.deal_title || "—"} />
-              <InfoRow label="نوع الصفقة" value={displayData.deal_type || "—"} />
-              <InfoRow label="الموقع" value={displayData.location || "—"} />
-              <InfoRow label="النشاط التجاري" value={displayData.business_activity || "—"} />
+              <InfoRow label="عنوان الصفقة" value={agreement.deal_title || "—"} />
+              <InfoRow label="نوع الصفقة" value={agreement.deal_type || "—"} />
+              <InfoRow label="الموقع" value={agreement.location || "—"} />
+              <InfoRow label="النشاط التجاري" value={agreement.business_activity || "—"} />
             </Section>
 
-            {/* Financial Terms */}
             <Section title="الشروط المالية">
-              <InfoRow label="السعر المتفق عليه" value={`${(displayData.financial_terms?.agreedPrice || 0).toLocaleString("en-US")} ${displayData.financial_terms?.currency || "ر.س"}`} />
-              {displayData.financial_terms?.paymentNote && (
-                <InfoRow label="ملاحظة الدفع" value={displayData.financial_terms.paymentNote} />
+              <InfoRow label="السعر المتفق عليه" value={`${(agreement.financial_terms?.agreedPrice || 0).toLocaleString("en-US")} ${agreement.financial_terms?.currency || "ر.س"}`} />
+              {agreement.financial_terms?.paymentNote && (
+                <InfoRow label="ملاحظة الدفع" value={agreement.financial_terms.paymentNote} />
               )}
             </Section>
 
-            {/* Included Assets */}
-            <Section title="الأصول المشمولة">
-              <ul className="space-y-1.5">
-                {(displayData.included_assets || []).map((item: string, i: number) => (
-                  <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500/60 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </Section>
+            {(agreement.included_assets || []).length > 0 && (
+              <Section title="الأصول المشمولة">
+                <ul className="space-y-1.5">
+                  {(agreement.included_assets as string[]).map((item, i) => (
+                    <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500/60 shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </Section>
+            )}
 
-            {/* Excluded Assets */}
-            {(displayData.excluded_assets || []).length > 0 && (
+            {(agreement.excluded_assets || []).length > 0 && (
               <Section title="المستثنى من الصفقة">
                 <ul className="space-y-1.5">
-                  {displayData.excluded_assets.map((item: string, i: number) => (
+                  {(agreement.excluded_assets as string[]).map((item, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                       <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500/60 shrink-0" />
                       {item}
@@ -381,71 +395,64 @@ const AgreementPage = () => {
               </Section>
             )}
 
-            {/* Lease Details */}
             <Section title="تفاصيل الإيجار">
-              <InfoRow label="الإيجار السنوي" value={displayData.lease_details?.annualRent || "—"} />
-              <InfoRow label="المتبقي من العقد" value={displayData.lease_details?.remaining || "—"} />
-              {displayData.lease_details?.note && (
-                <InfoRow label="ملاحظة" value={displayData.lease_details.note} />
-              )}
+              <InfoRow label="الإيجار السنوي" value={agreement.lease_details?.annualRent || "—"} />
+              <InfoRow label="المتبقي من العقد" value={agreement.lease_details?.remaining || "—"} />
             </Section>
 
-            {/* Liabilities */}
             <Section title="الالتزامات المفصح عنها">
-              <InfoRow label="التزامات مالية" value={displayData.liabilities?.financialLiabilities || "—"} />
-              <InfoRow label="رواتب متأخرة" value={displayData.liabilities?.delayedSalaries || "—"} />
-              <InfoRow label="إيجار متأخر" value={displayData.liabilities?.unpaidRent || "—"} />
+              <InfoRow label="التزامات مالية" value={agreement.liabilities?.financialLiabilities || "—"} />
+              <InfoRow label="رواتب متأخرة" value={agreement.liabilities?.delayedSalaries || "—"} />
+              <InfoRow label="إيجار متأخر" value={agreement.liabilities?.unpaidRent || "—"} />
             </Section>
 
-            {/* License Status */}
             <Section title="حالة التراخيص">
-              <InfoRow label="رخصة البلدية" value={displayData.license_status?.municipality || "—"} />
-              <InfoRow label="الدفاع المدني" value={displayData.license_status?.civilDefense || "—"} />
-              <InfoRow label="كاميرات المراقبة" value={displayData.license_status?.cameras || "—"} />
+              <InfoRow label="رخصة البلدية" value={agreement.license_status?.municipality || "—"} />
+              <InfoRow label="الدفاع المدني" value={agreement.license_status?.civilDefense || "—"} />
+              <InfoRow label="كاميرات المراقبة" value={agreement.license_status?.cameras || "—"} />
             </Section>
 
-            {/* Documents */}
-            <Section title="المستندات المرجعية">
-              <div className="space-y-1.5">
-                {(displayData.documents_referenced || []).map((doc: string, i: number) => (
-                  <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <FileText size={14} strokeWidth={1.3} />
-                    {doc}
-                    <span className="text-xs bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded mr-auto">مرجع</span>
-                  </div>
-                ))}
-              </div>
-            </Section>
+            {(agreement.documents_referenced || []).length > 0 && (
+              <Section title="المستندات المرجعية">
+                <div className="space-y-1.5">
+                  {(agreement.documents_referenced as string[]).map((doc, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <FileText size={14} strokeWidth={1.3} />
+                      {doc}
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
 
             {/* Declarations */}
             <Section title="الإقرارات">
               <div className="space-y-3">
-                {displayData.declarations?.buyerDeclares && (
+                {agreement.declarations?.buyerDeclares && (
                   <div className="text-sm text-muted-foreground bg-muted/30 rounded-xl p-3">
                     <span className="text-xs text-foreground font-medium block mb-1">إقرار المشتري:</span>
-                    {displayData.declarations.buyerDeclares}
+                    {agreement.declarations.buyerDeclares}
                   </div>
                 )}
-                {displayData.declarations?.sellerDeclares && (
+                {agreement.declarations?.sellerDeclares && (
                   <div className="text-sm text-muted-foreground bg-muted/30 rounded-xl p-3">
                     <span className="text-xs text-foreground font-medium block mb-1">إقرار البائع:</span>
-                    {displayData.declarations.sellerDeclares}
+                    {agreement.declarations.sellerDeclares}
                   </div>
                 )}
-                {displayData.declarations?.platformNote && (
+                {agreement.declarations?.platformNote && (
                   <div className="text-sm text-muted-foreground bg-primary/5 rounded-xl p-3 border border-primary/10">
                     <span className="text-xs text-primary font-medium block mb-1">ملاحظة المنصة:</span>
-                    {displayData.declarations.platformNote}
+                    {agreement.declarations.platformNote}
                   </div>
                 )}
               </div>
             </Section>
 
-            {/* Important Notes */}
-            {(displayData.important_notes || []).length > 0 && (
+            {(agreement.important_notes || []).length > 0 && (
               <Section title="ملاحظات مهمة">
                 <ul className="space-y-1.5">
-                  {displayData.important_notes.map((note: string, i: number) => (
+                  {(agreement.important_notes as string[]).map((note, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                       <AlertTriangle size={13} strokeWidth={1.3} className="text-amber-500 mt-0.5 shrink-0" />
                       {note}
@@ -455,15 +462,13 @@ const AgreementPage = () => {
               </Section>
             )}
 
-            {/* Amendment Note */}
-            {agreement?.amendment_reason && (
+            {agreement.amendment_reason && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                 <p className="text-xs font-medium text-amber-800 mb-1">سبب التعديل:</p>
                 <p className="text-sm text-amber-700">{agreement.amendment_reason}</p>
               </div>
             )}
 
-            {/* Platform Branding */}
             <div className="pt-4 border-t border-border/20 text-center">
               <div className="flex items-center justify-center gap-2 mb-1">
                 <AiStar size={16} animate={false} />
@@ -478,10 +483,7 @@ const AgreementPage = () => {
           {/* Version History */}
           {allVersions.length > 1 && (
             <div className="border-t border-border/20">
-              <button
-                onClick={() => setVersionsOpen(!versionsOpen)}
-                className="w-full flex items-center justify-between p-4 hover:bg-accent/20 transition-colors"
-              >
+              <button onClick={() => setVersionsOpen(!versionsOpen)} className="w-full flex items-center justify-between p-4 hover:bg-accent/20 transition-colors">
                 <span className="text-sm font-medium flex items-center gap-2">
                   <History size={15} strokeWidth={1.3} className="text-primary/60" />
                   إصدارات الاتفاقية ({allVersions.length})
@@ -490,18 +492,16 @@ const AgreementPage = () => {
               </button>
               {versionsOpen && (
                 <div className="px-4 pb-4 space-y-2">
-                  {allVersions.map((v) => (
+                  {allVersions.map(v => (
                     <div key={v.id} className={cn(
                       "flex items-center justify-between py-2 px-3 rounded-xl text-sm",
-                      v.id === agreement?.id ? "bg-primary/5 border border-primary/10" : "bg-muted/30"
+                      v.id === agreement.id ? "bg-primary/5 border border-primary/10" : "bg-muted/30"
                     )}>
                       <div>
                         <span className="font-medium">الإصدار {v.version}</span>
                         {v.amendment_reason && <span className="text-xs text-muted-foreground mr-2">— {v.amendment_reason}</span>}
                       </div>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(v.created_at).toLocaleDateString("ar-SA")}
-                      </span>
+                      <span className="text-xs text-muted-foreground">{new Date(v.created_at).toLocaleDateString("ar-SA")}</span>
                     </div>
                   ))}
                 </div>
@@ -512,10 +512,7 @@ const AgreementPage = () => {
           {/* Deal History */}
           {history.length > 0 && (
             <div className="border-t border-border/20">
-              <button
-                onClick={() => setHistoryOpen(!historyOpen)}
-                className="w-full flex items-center justify-between p-4 hover:bg-accent/20 transition-colors"
-              >
+              <button onClick={() => setHistoryOpen(!historyOpen)} className="w-full flex items-center justify-between p-4 hover:bg-accent/20 transition-colors">
                 <span className="text-sm font-medium flex items-center gap-2">
                   <Clock size={15} strokeWidth={1.3} className="text-primary/60" />
                   سجل الصفقة ({history.length})
@@ -524,7 +521,7 @@ const AgreementPage = () => {
               </button>
               {historyOpen && (
                 <div className="px-4 pb-4 space-y-2">
-                  {history.map((h) => (
+                  {history.map(h => (
                     <div key={h.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-muted/30 text-sm">
                       <span className="text-muted-foreground">{ACTION_LABELS[h.action] || h.action}</span>
                       <span className="text-xs text-muted-foreground">
@@ -539,33 +536,16 @@ const AgreementPage = () => {
 
           {/* Actions */}
           <div className="p-5 border-t border-border/20 flex gap-3">
-            {useMock && !agreement && (
-              <Button
-                onClick={generateAgreement}
-                disabled={generating}
-                className="flex-1 gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
-              >
-                {generating ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 size={14} className="animate-spin" />
-                    جاري إنشاء الاتفاقية...
-                  </span>
-                ) : (
-                  <>
-                    <Check size={16} strokeWidth={1.5} />
-                    إنشاء الاتفاقية
-                  </>
-                )}
+            {!bothApproved && isBuyer && !agreement.buyer_approved && (
+              <Button onClick={() => handleApprove("buyer")} disabled={approving} className="flex-1 gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
+                <Check size={16} strokeWidth={1.5} />
+                اعتماد الاتفاقية (مشتري)
               </Button>
             )}
-            {!useMock && !bothApproved && (
-              <Button
-                onClick={() => handleApprove("buyer")}
-                disabled={approving || displayData.buyer_approved}
-                className="flex-1 gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
-              >
+            {!bothApproved && isSeller && !agreement.seller_approved && (
+              <Button onClick={() => handleApprove("seller")} disabled={approving} className="flex-1 gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
                 <Check size={16} strokeWidth={1.5} />
-                {displayData.buyer_approved ? "تم الاعتماد" : "اعتماد الاتفاقية"}
+                اعتماد الاتفاقية (بائع)
               </Button>
             )}
             <Button variant="outline" className="rounded-xl active:scale-[0.98]">
@@ -575,7 +555,6 @@ const AgreementPage = () => {
           </div>
         </div>
 
-        {/* Non-deletable notice */}
         <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-muted-foreground/60">
           <Shield size={12} strokeWidth={1.3} />
           <span>هذه الاتفاقية محفوظة بشكل دائم ولا يمكن حذفها أو تعديلها — أي تغيير ينشئ إصدار جديد</span>
@@ -612,13 +591,7 @@ const ApprovalCard = ({
         <span className="text-xs">تم الاعتماد</span>
       </div>
     ) : (
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={onApprove}
-        disabled={loading || disabled}
-        className="text-xs rounded-lg h-7 px-3"
-      >
+      <Button size="sm" variant="outline" onClick={onApprove} disabled={loading || disabled} className="text-xs rounded-lg h-7 px-3">
         {loading ? <Loader2 size={12} className="animate-spin" /> : "اعتماد"}
       </Button>
     )}
