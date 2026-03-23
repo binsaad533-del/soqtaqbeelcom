@@ -89,27 +89,8 @@ const AiAssistant = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const peekTimer = useRef<ReturnType<typeof setTimeout>>();
-  const pendingSpeakRef = useRef<string>("");
-
   const { greeting, role, suggestions, proactiveMessage, dismissProactive, pathname } = useAiContext();
   const { pageData } = usePageData();
-
-  const handleVoiceTranscript = useCallback((text: string) => {
-    setChatMode(true);
-    sendMessageRef.current?.(text);
-  }, []);
-
-  const {
-    isListening,
-    isSpeaking,
-    voiceEnabled,
-    supportsRecognition,
-    startListening,
-    stopListening,
-    speak,
-    stopSpeaking,
-    toggleVoice,
-  } = useVoiceChat({ onTranscript: handleVoiceTranscript });
 
   useEffect(() => { setChatMode(false); setMessages([]); }, [pathname]);
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
