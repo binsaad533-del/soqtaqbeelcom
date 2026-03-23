@@ -113,15 +113,21 @@ const MarketplacePage = () => {
           <p className="text-[11px] text-muted-foreground">البائعون الملتزمون بالسداد والموثّقون يظهرون أولاً في النتائج</p>
         </div>
 
-        {/* Smart AI Search */}
-        <SmartSearchBar onApplyFilters={handleSmartSearch} />
+        {/* Mobile: Smart search + filter button */}
+        {isMobile && (
+          <SmartSearchBar onApplyFilters={handleSmartSearch} />
+        )}
 
         <div className="flex gap-6">
           {/* Desktop filters sidebar */}
           {!isMobile && (
             <aside className="w-64 shrink-0">
-              <div className="sticky top-24 bg-card rounded-2xl p-4 shadow-soft">
-                <MarketplaceFilters filters={filters} onChange={setFilters} resultCount={filtered.length} />
+              <div className="sticky top-24 space-y-4">
+                {/* Smart search above filters */}
+                <SmartSearchBar onApplyFilters={handleSmartSearch} />
+                <div className="bg-card rounded-2xl p-4 shadow-soft">
+                  <MarketplaceFilters filters={filters} onChange={setFilters} resultCount={filtered.length} />
+                </div>
               </div>
             </aside>
           )}

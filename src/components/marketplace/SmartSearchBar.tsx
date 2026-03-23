@@ -83,7 +83,7 @@ const SmartSearchBar = ({ onApplyFilters }: Props) => {
   };
 
   return (
-    <div className="mb-5 space-y-2">
+    <div className="space-y-2">
       {/* Input */}
       <div className="relative group">
         <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10">
