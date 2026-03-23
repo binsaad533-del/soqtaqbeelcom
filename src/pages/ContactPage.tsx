@@ -115,6 +115,11 @@ const ContactPage = () => {
                 <div>الجمعة - السبت: مغلق</div>
               </div>
             </div>
+
+            <div className="bg-card rounded-2xl p-5 shadow-soft">
+              <h3 className="text-sm font-medium mb-3">تابعنا</h3>
+              <SocialIcons size="md" />
+            </div>
           </div>
 
           {/* Contact Form */}
