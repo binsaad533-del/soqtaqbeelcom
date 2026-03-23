@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSecurityIncidents, type SecurityIncident } from "@/hooks/useSecurityIncidents";
+import { useSecurityIncidents } from "@/hooks/useSecurityIncidents";
 import { Shield, ShieldAlert, ShieldCheck, AlertTriangle, Lock, Snowflake, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
