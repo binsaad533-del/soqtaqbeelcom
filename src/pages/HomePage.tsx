@@ -58,22 +58,6 @@ const HomePage = () => {
 
   return (
     <div className="relative">
-      {/* Moqbil floating (appears when hero scrolls out) */}
-      <div
-        className={`
-          fixed bottom-24 left-4 z-40 pointer-events-none
-          transition-all duration-700 ease-out
-          ${!heroVisible && entered ? "opacity-80 translate-x-0" : "opacity-0 -translate-x-10"}
-        `}
-      >
-        <img
-          src={muqbilWaveImg}
-          alt="مقبل"
-          className="w-12 h-12 object-contain drop-shadow-md"
-          width={48}
-          height={48}
-        />
-      </div>
 
       {/* Hero */}
       <section className="gradient-hero py-20 md:py-32 relative overflow-hidden" ref={heroRef}>
