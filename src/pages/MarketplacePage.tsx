@@ -5,7 +5,8 @@ import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import AiStar from "@/components/AiStar";
-import TrustBadge, { getSellerBadges, getTrustLevel } from "@/components/TrustBadge";
+import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
+import SimulationOverlay, { hasSimulationPhotos } from "@/components/SimulationOverlay";
 import MarketplaceFilters, { defaultFilters, type FilterState } from "@/components/marketplace/MarketplaceFilters";
 import MobileFilterSheet from "@/components/marketplace/MobileFilterSheet";
 import SmartSearchBar from "@/components/marketplace/SmartSearchBar";
@@ -172,9 +173,12 @@ const ListingCard = ({ listing }: { listing: EnrichedListing }) => {
           <ShieldCheck size={10} /> بائع موثوق
         </div>
       )}
-      <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center">
+      <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center relative">
         {listing.photos && Object.values(listing.photos).flat().length > 0 ? (
-          <img src={(Object.values(listing.photos).flat() as string[])[0]} alt="" className="w-full h-full object-cover" />
+          <>
+            <img src={(Object.values(listing.photos).flat() as string[])[0]} alt="" className="w-full h-full object-cover" />
+            {hasSimulationPhotos(listing.photos as Record<string, unknown>) && <SimulationOverlay size="sm" />}
+          </>
         ) : (
           <Eye size={24} className="text-muted-foreground/30" strokeWidth={1} />
         )}
