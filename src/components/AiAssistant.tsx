@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { X, Send, Sparkles, ChevronLeft, Zap } from "lucide-react";
 import { useAiContext, type AiSuggestion } from "@/hooks/useAiContext";
+import { usePageData } from "@/hooks/usePageData";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import muqbilImg from "@/assets/muqbil-character.png";
