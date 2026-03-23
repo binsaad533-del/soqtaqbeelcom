@@ -7,6 +7,7 @@ const footerLinks = [
   { label: "أضف فرصة", path: "/create-listing" },
   { label: "الشروط", path: "/terms" },
   { label: "الخصوصية", path: "/privacy" },
+  { label: "من نحن", path: "/about" },
   { label: "تواصل معنا", path: "/contact" },
 ];
 
