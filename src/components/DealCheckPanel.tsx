@@ -9,6 +9,24 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
+interface AssetBreakdownItem {
+  assetName: string;
+  marketRange: string;
+  sellerPrice?: string;
+  verdict: string;
+  source: string;
+}
+
+interface MarketComparison {
+  comparablesReviewed: number;
+  matchQuality: string;
+  observedPriceRange: string;
+  marketPosition: string;
+  confidence: string;
+  details: string;
+  assetBreakdown: AssetBreakdownItem[];
+}
+
 interface DealCheckAnalysis {
   dealOverview: string;
   businessActivity: string;
@@ -16,6 +34,7 @@ interface DealCheckAnalysis {
   locationAssessment: string;
   competitionSnapshot: string;
   operationalReadiness: string;
+  marketComparison?: MarketComparison;
   risks: string[];
   strengths: string[];
   missingInfo: string[];
