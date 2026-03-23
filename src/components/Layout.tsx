@@ -3,6 +3,7 @@ import { User, Menu, X, LogIn, LogOut, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import AiAssistant from "./AiAssistant";
 import Footer from "./Footer";
+import NotificationBell from "./NotificationBell";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 
@@ -79,6 +80,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   <Plus size={13} strokeWidth={2} />
                   أضف فرصة
                 </Link>
+                <NotificationBell />
                 <Link
                   to="/dashboard"
                   className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
