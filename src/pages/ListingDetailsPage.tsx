@@ -1,11 +1,15 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star } from "lucide-react";
 import AiStar from "@/components/AiStar";
+import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
+import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
 import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals } from "@/hooks/useDeals";
+import { useProfiles } from "@/hooks/useProfiles";
+import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
@@ -17,7 +21,11 @@ const ListingDetailsPage = () => {
   const { user } = useAuthContext();
   const { getListing } = useListings();
   const { createDeal, getMyDeals } = useDeals();
+  const { getProfile } = useProfiles();
+  const { getSellerReviews } = useSellerReviews();
   const [listing, setListing] = useState<Listing | null>(null);
+  const [sellerProfile, setSellerProfile] = useState<any>(null);
+  const [sellerReviews, setSellerReviews] = useState<SellerReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [startingDeal, setStartingDeal] = useState(false);
 
@@ -27,6 +35,14 @@ const ListingDetailsPage = () => {
       setLoading(true);
       const data = await getListing(id);
       setListing(data);
+      if (data) {
+        const [profile, reviews] = await Promise.all([
+          getProfile(data.owner_id),
+          getSellerReviews(data.owner_id),
+        ]);
+        setSellerProfile(profile);
+        setSellerReviews(reviews);
+      }
       setLoading(false);
     };
     load();
@@ -200,6 +216,21 @@ const ListingDetailsPage = () => {
                 </div>
               )}
 
+              {/* Seller Trust Badge */}
+              {sellerProfile && (
+                <div className="mb-4 p-3 bg-muted/20 rounded-xl">
+                  <p className="text-[11px] text-muted-foreground mb-2">مستوى ثقة البائع</p>
+                  <TrustBadge
+                    score={sellerProfile.trust_score}
+                    verificationLevel={sellerProfile.verification_level}
+                    size="md"
+                    showScore
+                    showBadges
+                    badges={getSellerBadges(sellerProfile)}
+                  />
+                </div>
+              )}
+
               {!isOwner && (
                 <Button
                   onClick={handleStartNegotiation}
@@ -209,6 +240,11 @@ const ListingDetailsPage = () => {
                   {startingDeal ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} strokeWidth={1.5} />}
                   ابدأ التفاوض
                 </Button>
+              )}
+
+              {/* Seller Reviews */}
+              {sellerReviews.length > 0 && (
+                <SellerReviewsSummary reviews={sellerReviews} className="mt-4" />
               )}
             </div>
           </div>

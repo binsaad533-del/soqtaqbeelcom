@@ -5,12 +5,15 @@ import AiStar from "@/components/AiStar";
 import TrustBadge from "@/components/TrustBadge";
 import DealRiskIndicator from "@/components/DealRiskIndicator";
 import LegalConfirmationPanel from "@/components/LegalConfirmationPanel";
+import SellerReviewForm from "@/components/SellerReviewForm";
+import CommissionPaymentPanel from "@/components/CommissionPaymentPanel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useDeals, type NegotiationMessage } from "@/hooks/useDeals";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useFraudEngine } from "@/hooks/useFraudEngine";
 import { useProfiles } from "@/hooks/useProfiles";
+import { useCommissions, type Commission } from "@/hooks/useCommissions";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import CommissionBanner from "@/components/CommissionBanner";
@@ -23,6 +26,7 @@ const NegotiationPage = () => {
   const { getListing } = useListings();
   const { monitorChat, calculateDealRisk } = useFraudEngine();
   const { getProfile } = useProfiles();
+  const { getCommission } = useCommissions();
 
   const [deal, setDeal] = useState<any>(null);
   const [listing, setListing] = useState<Listing | null>(null);
@@ -32,6 +36,7 @@ const NegotiationPage = () => {
   const [sending, setSending] = useState(false);
   const [otherProfile, setOtherProfile] = useState<any>(null);
   const [showLegalPanel, setShowLegalPanel] = useState(false);
+  const [commission, setCommission] = useState<Commission | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,6 +75,12 @@ const NegotiationPage = () => {
 
     // Calculate deal risk
     calculateDealRisk(dealId).catch(() => {});
+
+    // Load commission if deal is completed
+    if (dealData.status === "completed" || dealData.status === "finalized") {
+      const comm = await getCommission(dealId);
+      setCommission(comm);
+    }
 
     setLoading(false);
   }, [dealId, getListing, getMessages, user, getProfile, calculateDealRisk]);
@@ -342,6 +353,23 @@ const NegotiationPage = () => {
                   <Link to={`/agreement/${dealId}`}>عرض الاتفاقية</Link>
                 </Button>
               </div>
+            )}
+
+            {/* Commission Payment Panel for seller */}
+            {commission && (deal.status === "completed" || deal.status === "finalized") && (
+              <CommissionPaymentPanel
+                commission={commission}
+                isSeller={user?.id === deal.seller_id}
+                onUpdate={loadData}
+              />
+            )}
+
+            {/* Buyer Review Form after deal completion */}
+            {isBuyer && (deal.status === "completed" || deal.status === "finalized") && deal.seller_id && (
+              <SellerReviewForm
+                dealId={deal.id}
+                sellerId={deal.seller_id}
+              />
             )}
           </div>
         </div>

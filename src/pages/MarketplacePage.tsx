@@ -82,14 +82,16 @@ const MarketplacePage = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-primary">{listing.price ? `${Number(listing.price).toLocaleString()} ر.س` : "—"}</span>
-                    {listing.disclosure_score !== null && listing.disclosure_score > 0 && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-12 h-1 rounded-full bg-muted overflow-hidden">
-                          <div className="h-full rounded-full gradient-primary" style={{ width: `${listing.disclosure_score}%` }} />
+                    <div className="flex items-center gap-2">
+                      {listing.disclosure_score !== null && listing.disclosure_score > 0 && (
+                        <div className="flex items-center gap-1">
+                          <div className="w-12 h-1 rounded-full bg-muted overflow-hidden">
+                            <div className="h-full rounded-full gradient-primary" style={{ width: `${listing.disclosure_score}%` }} />
+                          </div>
+                          <span className="text-[9px] text-muted-foreground">{listing.disclosure_score}%</span>
                         </div>
-                        <span className="text-[9px] text-muted-foreground">{listing.disclosure_score}%</span>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </Link>
