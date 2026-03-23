@@ -172,15 +172,6 @@ const AiAssistant = () => {
     dismissProactive();
   };
 
-  const handleMicClick = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      if (isSpeaking) stopSpeaking();
-      startListening();
-    }
-  };
-
   return (
     <>
       {/* Proactive tooltip with مقبل peeking */}
