@@ -15,6 +15,8 @@ import AgreementPage from "./pages/AgreementPage";
 import DashboardRouter from "./pages/DashboardRouter";
 import LoginPage from "./pages/LoginPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
