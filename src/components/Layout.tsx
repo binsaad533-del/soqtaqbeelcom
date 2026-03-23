@@ -1,9 +1,10 @@
-import { Link, useLocation } from "react-router-dom";
-import { Search, User, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Search, User, Menu, X, LogIn, LogOut } from "lucide-react";
 import { useState } from "react";
 import AiStar from "./AiStar";
 import AiAssistant from "./AiAssistant";
 import { cn } from "@/lib/utils";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const navLinks = [
   { label: "الرئيسية", path: "/" },
