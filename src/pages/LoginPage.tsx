@@ -1,11 +1,27 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import AiStar from "@/components/AiStar";
-import { Eye, EyeOff, Mail, Lock, User as UserIcon } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown } from "lucide-react";
+import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
+
+const COUNTRY_CODES = [
+  { code: "+966", flag: "🇸🇦", name: "السعودية" },
+  { code: "+971", flag: "🇦🇪", name: "الإمارات" },
+  { code: "+973", flag: "🇧🇭", name: "البحرين" },
+  { code: "+968", flag: "🇴🇲", name: "عُمان" },
+  { code: "+965", flag: "🇰🇼", name: "الكويت" },
+  { code: "+974", flag: "🇶🇦", name: "قطر" },
+  { code: "+20", flag: "🇪🇬", name: "مصر" },
+  { code: "+962", flag: "🇯🇴", name: "الأردن" },
+];
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [loginMethod, setLoginMethod] = useState<"phone" | "email">("phone");
+  const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("+966");
+  const [showCountryCodes, setShowCountryCodes] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -16,18 +32,55 @@ const LoginPage = () => {
   const { signIn, signUp } = useAuthContext();
   const navigate = useNavigate();
 
+  // Auto-convert Arabic numerals on phone input
+  const handlePhoneChange = useCallback((value: string) => {
+    const digits = toDigitsOnly(value);
+    // Saudi mobile: starts with 5, max 9 digits
+    if (digits.length <= 9) {
+      setPhone(digits);
+    }
+  }, []);
+
+  // Auto-convert Arabic numerals on password input
+  const handlePasswordChange = useCallback((value: string) => {
+    setPassword(toEnglishNumerals(value));
+  }, []);
+
+  // Generate a deterministic email from phone for auth
+  const phoneToEmail = (phoneNum: string, cc: string) => {
+    const clean = cc.replace("+", "") + phoneNum;
+    return `${clean}@phone.souqtaqbeel.app`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
     setLoading(true);
 
+    const authEmail =
+      loginMethod === "phone" ? phoneToEmail(phone, countryCode) : email;
+
+    if (loginMethod === "phone" && phone.length < 9) {
+      setError("الرجاء إدخال رقم جوال صحيح");
+      setLoading(false);
+      return;
+    }
+
+    if (loginMethod === "phone" && !phone.startsWith("5")) {
+      setError("رقم الجوال يجب أن يبدأ بالرقم 5");
+      setLoading(false);
+      return;
+    }
+
     if (isLogin) {
-      const { error } = await signIn(email, password);
+      const { error } = await signIn(authEmail, password);
       if (error) {
-        setError(error.message === "Invalid login credentials"
-          ? "بيانات الدخول غير صحيحة"
-          : error.message);
+        setError(
+          error.message === "Invalid login credentials"
+            ? "بيانات الدخول غير صحيحة"
+            : error.message
+        );
       } else {
         navigate("/dashboard");
       }
@@ -37,19 +90,27 @@ const LoginPage = () => {
         setLoading(false);
         return;
       }
-      const { error } = await signUp(email, password, fullName);
+      const phoneNumber = loginMethod === "phone" ? `${countryCode}${phone}` : undefined;
+      const { error } = await signUp(authEmail, password, fullName, phoneNumber);
       if (error) {
         setError(error.message);
       } else {
-        setSuccess("تم إنشاء الحساب بنجاح! تحقق من بريدك الإلكتروني للتفعيل.");
+        setSuccess(
+          loginMethod === "phone"
+            ? "تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن."
+            : "تم إنشاء الحساب بنجاح! تحقق من بريدك الإلكتروني للتفعيل."
+        );
       }
     }
     setLoading(false);
   };
 
+  const selectedCountry = COUNTRY_CODES.find((c) => c.code === countryCode);
+
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
+        {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <AiStar size={40} />
@@ -61,8 +122,8 @@ const LoginPage = () => {
         </div>
 
         <div className="bg-card rounded-2xl p-6 shadow-soft">
-          {/* Toggle */}
-          <div className="flex bg-muted rounded-xl p-1 mb-6">
+          {/* Login / Register toggle */}
+          <div className="flex bg-muted rounded-xl p-1 mb-5">
             <button
               onClick={() => { setIsLogin(true); setError(""); setSuccess(""); }}
               className={`flex-1 py-2 rounded-lg text-sm transition-all ${
@@ -81,7 +142,36 @@ const LoginPage = () => {
             </button>
           </div>
 
+          {/* Phone / Email method toggle */}
+          <div className="flex gap-2 mb-5">
+            <button
+              type="button"
+              onClick={() => { setLoginMethod("phone"); setError(""); }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs transition-all border ${
+                loginMethod === "phone"
+                  ? "border-primary/30 bg-primary/5 text-primary"
+                  : "border-border/50 text-muted-foreground hover:border-border"
+              }`}
+            >
+              <Phone size={14} strokeWidth={1.3} />
+              رقم الجوال
+            </button>
+            <button
+              type="button"
+              onClick={() => { setLoginMethod("email"); setError(""); }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs transition-all border ${
+                loginMethod === "email"
+                  ? "border-primary/30 bg-primary/5 text-primary"
+                  : "border-border/50 text-muted-foreground hover:border-border"
+              }`}
+            >
+              <Mail size={14} strokeWidth={1.3} />
+              البريد الإلكتروني
+            </button>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Full name (register only) */}
             {!isLogin && (
               <div className="relative">
                 <UserIcon size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -96,26 +186,85 @@ const LoginPage = () => {
               </div>
             )}
 
-            <div className="relative">
-              <Mail size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="email"
-                placeholder="البريد الإلكتروني"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors"
-                dir="ltr"
-                required
-              />
-            </div>
+            {/* Phone input */}
+            {loginMethod === "phone" && (
+              <div className="relative flex gap-2">
+                {/* Country code selector */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowCountryCodes(!showCountryCodes)}
+                    className="flex items-center gap-1 h-full px-3 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 hover:border-primary/30 transition-colors whitespace-nowrap"
+                  >
+                    <span className="text-base leading-none">{selectedCountry?.flag}</span>
+                    <span className="text-xs text-muted-foreground" dir="ltr">{countryCode}</span>
+                    <ChevronDown size={12} strokeWidth={1.3} className="text-muted-foreground" />
+                  </button>
 
+                  {showCountryCodes && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowCountryCodes(false)} />
+                      <div className="absolute top-full mt-1 right-0 z-50 bg-card border border-border/50 rounded-xl shadow-lg py-1 min-w-[180px] max-h-[220px] overflow-y-auto">
+                        {COUNTRY_CODES.map((c) => (
+                          <button
+                            key={c.code}
+                            type="button"
+                            onClick={() => { setCountryCode(c.code); setShowCountryCodes(false); }}
+                            className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50 transition-colors ${
+                              c.code === countryCode ? "bg-primary/5 text-primary" : ""
+                            }`}
+                          >
+                            <span className="text-base">{c.flag}</span>
+                            <span className="flex-1 text-right text-xs">{c.name}</span>
+                            <span className="text-xs text-muted-foreground" dir="ltr">{c.code}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Phone number input */}
+                <div className="relative flex-1">
+                  <Phone size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="5XXXXXXXX"
+                    value={phone}
+                    onChange={(e) => handlePhoneChange(e.target.value)}
+                    className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors tracking-wider"
+                    dir="ltr"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Email input */}
+            {loginMethod === "email" && (
+              <div className="relative">
+                <Mail size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="email"
+                  placeholder="البريد الإلكتروني"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors"
+                  dir="ltr"
+                  required
+                />
+              </div>
+            )}
+
+            {/* Password */}
             <div className="relative">
               <Lock size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="كلمة المرور"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => handlePasswordChange(e.target.value)}
                 className="w-full pr-10 pl-10 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors"
                 dir="ltr"
                 required
@@ -130,11 +279,12 @@ const LoginPage = () => {
               </button>
             </div>
 
+            {/* Messages */}
             {error && (
               <div className="bg-destructive/5 text-destructive text-xs p-3 rounded-xl">{error}</div>
             )}
             {success && (
-              <div className="bg-success/5 text-success text-xs p-3 rounded-xl">{success}</div>
+              <div className="bg-green-50 text-green-700 text-xs p-3 rounded-xl">{success}</div>
             )}
 
             <button
