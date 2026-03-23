@@ -113,6 +113,9 @@ const MarketplacePage = () => {
           <p className="text-[11px] text-muted-foreground">البائعون الملتزمون بالسداد والموثّقون يظهرون أولاً في النتائج</p>
         </div>
 
+        {/* Smart AI Search */}
+        <SmartSearchBar onApplyFilters={handleSmartSearch} />
+
         <div className="flex gap-6">
           {/* Desktop filters sidebar */}
           {!isMobile && (
