@@ -22,10 +22,11 @@ import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 import { toast } from "sonner";
 import CrmDashboard from "@/components/crm/CrmDashboard";
 
-type Tab = "overview" | "deals" | "users" | "listings" | "security" | "settings";
+type Tab = "overview" | "crm" | "deals" | "users" | "listings" | "security" | "settings";
 
 const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: "overview", label: "نظرة عامة", icon: BarChart3 },
+  { id: "crm", label: "العملاء المحتملين", icon: Users },
   { id: "deals", label: "الصفقات والعمولات", icon: Handshake },
   { id: "users", label: "المستخدمون", icon: Users },
   { id: "listings", label: "الإعلانات", icon: FileText },
