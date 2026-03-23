@@ -44,21 +44,27 @@ const HomePage = () => {
             <div className="flex justify-center mb-6">
               <img src={logo} alt="سوق تقبيل" className="h-16 md:h-20 w-auto mx-auto" />
             </div>
-            <h1 className="text-3xl md:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.3 }}>
-              تقبيل الأعمال بذكاء
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
+              عندك مشروع وما عرفت تبيعه؟
+              <br />
+              أو تدور فرصة جاهزة تبدأ فيها؟
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
-              منصة ذكية لعرض وتحليل وتفاوض فرص تقبيل المحلات والمشاريع التجارية
+            <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto leading-relaxed">
+              في "تقبيل" نربط بين أصحاب المشاريع والباحثين عن الفرص
+              <br className="hidden sm:block" />
+              بطريقة ذكية تساعد على إتمام الصفقة بسرعة ووضوح.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft hover:shadow-soft-lg transition-shadow active:scale-[0.98]">
-                <Link to="/marketplace">
-                  تصفّح الفرص
-                  <ArrowLeft size={16} strokeWidth={1.5} />
+                <Link to="/create-listing">
+                  اعرض مشروعك
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="rounded-xl border-border/60 hover:bg-accent/50 active:scale-[0.98]">
-                <Link to="/create-listing">أضف فرصتك</Link>
+                <Link to="/marketplace">
+                  تصفح الفرص
+                  <ArrowLeft size={16} strokeWidth={1.5} />
+                </Link>
               </Button>
             </div>
           </div>
@@ -79,8 +85,80 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Smart Platform */}
+      {/* Problem-Solution */}
       <section className="py-16 md:py-24">
+        <div className="container">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-10 max-w-3xl mx-auto" ref={addRevealRef} style={{ opacity: 0 }}>
+            {/* Sellers */}
+            <div className="bg-card rounded-2xl p-6 shadow-soft">
+              <h3 className="text-lg font-medium mb-4 text-primary">أصحاب المشاريع</h3>
+              <ul className="space-y-3">
+                {[
+                  "صعوبة تسويق المشروع",
+                  "عرض غير واضح للمشتري",
+                  "تأخير في البيع وإتمام الصفقة",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed">
+                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-muted-foreground/40 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Buyers */}
+            <div className="bg-card rounded-2xl p-6 shadow-soft">
+              <h3 className="text-lg font-medium mb-4 text-primary">الباحثين عن الفرص</h3>
+              <ul className="space-y-3">
+                {[
+                  "صعوبة العثور على فرص حقيقية",
+                  "بيانات ناقصة أو غير واضحة",
+                  "أسعار غير منطقية",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed">
+                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-muted-foreground/40 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Center message */}
+          <div className="text-center mt-10" ref={addRevealRef} style={{ opacity: 0 }}>
+            <span className="inline-block gradient-primary text-primary-foreground text-sm font-medium px-5 py-2 rounded-full shadow-soft">
+              هنا يلتقون
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16 md:py-20 border-t border-border/50">
+        <div className="container">
+          <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
+            <h2 className="text-2xl md:text-3xl font-medium mb-4">كيف تعمل المنصة؟</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto" ref={addRevealRef} style={{ opacity: 0 }}>
+            {[
+              { num: "1", title: "اعرض مشروعك بسهولة", desc: "أدخل بيانات مشروعك بخطوات بسيطة وواضحة." },
+              { num: "2", title: "نرتب ونحلل البيانات", desc: "نحلل المعلومات ونقدمها بشكل منظم وموثوق." },
+              { num: "3", title: "نوصلك بالشخص المناسب", desc: "نربط البائع بالمشتري المناسب لإتمام الصفقة." },
+            ].map((step) => (
+              <div key={step.num} className="text-center">
+                <span className="inline-flex w-10 h-10 rounded-full bg-primary/10 text-primary items-center justify-center font-medium text-base mb-3">
+                  {step.num}
+                </span>
+                <h3 className="font-medium mb-1.5">{step.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Smart Platform */}
+      <section className="py-16 md:py-24 border-t border-border/50">
         <div className="container">
           <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
             <h2 className="text-2xl md:text-3xl font-medium mb-4">منصة ذكية لإتمام الصفقات… مو مجرد عرض</h2>
@@ -115,18 +193,27 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Trust */}
+      <section className="py-12 border-t border-border/50" ref={addRevealRef} style={{ opacity: 0 }}>
+        <div className="container text-center">
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-lg mx-auto">
+            منصة سعودية مملوكة لشركة <span className="font-medium text-foreground">عين جساس</span> — تهدف لإتمام الصفقات بشكل احترافي وموثوق
+          </p>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-16 gradient-hero" ref={addRevealRef} style={{ opacity: 0 }}>
         <div className="container text-center">
           <AiStar size={36} className="justify-center mb-4" />
-          <p className="text-muted-foreground mb-1">إذا عندك مشروع… أو تبحث عن فرصة</p>
-          <h2 className="text-2xl md:text-3xl font-medium mb-6">ابدأ الآن وخلك أقرب لصفقة ناجحة</h2>
+          <h2 className="text-2xl md:text-3xl font-medium mb-2">ابدأ الآن خلال 30 ثانية</h2>
+          <p className="text-muted-foreground mb-6">سواء تبي تعرض مشروعك أو تدور فرصة… المنصة جاهزة لك</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft active:scale-[0.98]">
-              <Link to="/create-listing">ابدأ الآن</Link>
+              <Link to="/create-listing">اعرض مشروعك</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="rounded-xl border-border/60 hover:bg-accent/50 active:scale-[0.98]">
-              <Link to="/marketplace">تصفح المشاريع</Link>
+              <Link to="/marketplace">تصفح الفرص</Link>
             </Button>
           </div>
         </div>
