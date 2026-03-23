@@ -8,6 +8,7 @@ import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges, getTrustLevel } from "@/components/TrustBadge";
 import MarketplaceFilters, { defaultFilters, type FilterState } from "@/components/marketplace/MarketplaceFilters";
 import MobileFilterSheet from "@/components/marketplace/MobileFilterSheet";
+import SmartSearchBar from "@/components/marketplace/SmartSearchBar";
 import { MapPin, Eye, ShieldCheck, TrendingUp } from "lucide-react";
 
 interface EnrichedListing extends Listing {
