@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
-import { Shield, AlertTriangle, CheckCircle2, Clock, FileCheck, Info } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle2, Clock, FileCheck, Info, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import AiStar from "./AiStar";
 import DealRiskIndicator from "./DealRiskIndicator";
 import { DEAL_TYPE_MAP, type DealTypeConfig } from "@/lib/dealStructureConfig";
 import { useLegalConfirmation, CONFIRMATION_LABELS } from "@/hooks/useLegalConfirmation";
+import { useDealUnderstanding, SECTIONS, type SectionKey } from "@/hooks/useDealUnderstanding";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -48,18 +50,19 @@ interface Props {
 const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
   const { user } = useAuthContext();
   const { getConfirmations, submitConfirmation, loading, REQUIRED_CONFIRMATIONS } = useLegalConfirmation();
+  const understanding = useDealUnderstanding();
 
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [buyerConfirmed, setBuyerConfirmed] = useState(false);
   const [sellerConfirmed, setSellerConfirmed] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [step, setStep] = useState<"summary" | "risks" | "confirm">("summary");
+  const [showScoreWarning, setShowScoreWarning] = useState(false);
 
   const isBuyer = user?.id === deal.buyer_id;
   const isSeller = user?.id === deal.seller_id;
   const partyRole = isBuyer ? "buyer" : "seller";
 
-  // Resolve deal types
   const primaryTypeId = listing?.primary_deal_type || listing?.deal_type || deal.deal_type || "full_takeover";
   const primaryType = DEAL_TYPE_MAP[primaryTypeId];
   const altTypes: DealTypeConfig[] = [];
@@ -80,13 +83,36 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
     if (bc && sc) onConfirmed();
   }, [deal.id, getConfirmations, isBuyer, isSeller, onConfirmed]);
 
+  useEffect(() => { loadStatus(); }, [loadStatus]);
+
+  // Track section views based on step navigation
   useEffect(() => {
-    loadStatus();
-  }, [loadStatus]);
+    if (step === "summary") {
+      understanding.markViewed("deal_summary");
+    }
+    if (step === "risks") {
+      understanding.markViewed("liabilities");
+      understanding.markViewed("ai_analysis");
+    }
+  }, [step, understanding.markViewed]);
 
   const allChecked = REQUIRED_CONFIRMATIONS.every(c => checked[c]);
 
+  const handleStepChange = (newStep: "summary" | "risks" | "confirm") => {
+    if (newStep === "confirm" && !understanding.canProceed) {
+      setShowScoreWarning(true);
+      return;
+    }
+    setShowScoreWarning(false);
+    setStep(newStep);
+  };
+
   const handleSubmit = async () => {
+    if (!understanding.canProceed) {
+      setShowScoreWarning(true);
+      return;
+    }
+
     const snapshot = {
       deal_type: primaryTypeId,
       price: deal.agreed_price || listing?.price,
@@ -94,6 +120,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
       risk_score: deal.risk_score,
       includes: primaryType?.includes,
       excludes: primaryType?.excludes,
+      understanding_score: understanding.getSnapshot(),
     };
 
     const result = await submitConfirmation(
@@ -111,13 +138,11 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
 
   const toggleCheck = (key: string) => setChecked(prev => ({ ...prev, [key]: !prev[key] }));
 
-  // Risk warnings
   const warnings: string[] = [];
   if (deal.risk_score && deal.risk_score >= 50) warnings.push(`هذه الصفقة مصنفة كمخاطرة ${deal.risk_score >= 70 ? "عالية" : "متوسطة"}`);
   if (deal.fraud_flags && Array.isArray(deal.fraud_flags) && deal.fraud_flags.length > 0) warnings.push("تم رصد مؤشرات احتيال محتملة");
   if (primaryType?.cautionNotes) warnings.push(...primaryType.cautionNotes);
 
-  // If deal is already locked
   if (deal.locked || deal.status === "finalized") {
     return (
       <div className="bg-card rounded-2xl p-8 shadow-soft border border-primary/20 text-center">
@@ -128,26 +153,86 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
     );
   }
 
+  const scoreColor = understanding.score >= 70
+    ? "text-foreground"
+    : understanding.score >= 40
+      ? "text-muted-foreground"
+      : "text-muted-foreground/60";
+
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header + Understanding Score */}
       <div className="bg-card rounded-2xl p-6 shadow-soft border border-border/30">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <Shield size={20} className="text-primary" />
           </div>
-          <div>
+          <div className="flex-1">
             <h2 className="font-semibold text-base">التأكيد القانوني الذكي</h2>
             <p className="text-xs text-muted-foreground">يجب على الطرفين إتمام هذه الخطوة قبل إنهاء الصفقة</p>
           </div>
         </div>
+
+        {/* Understanding Score Bar */}
+        <div className="bg-muted/30 rounded-xl p-4 mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Eye size={14} className="text-muted-foreground" />
+              <span className="text-xs font-medium">مستوى الاستيعاب</span>
+            </div>
+            <span className={cn("text-sm font-semibold tabular-nums", scoreColor)}>
+              {understanding.score}%
+            </span>
+          </div>
+          <Progress value={understanding.score} className="h-2" />
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-[10px] text-muted-foreground/60">
+              الحد الأدنى المطلوب: {understanding.MIN_SCORE}%
+            </span>
+            <span className="text-[10px] text-muted-foreground/60">
+              وقت المراجعة: {understanding.elapsedSeconds}ث
+              {understanding.timeComplete ? " ✓" : ` / ${understanding.MIN_TIME_SECONDS}ث`}
+            </span>
+          </div>
+
+          {/* Section checklist */}
+          <div className="mt-3 grid grid-cols-2 gap-1.5">
+            {SECTIONS.filter(s => s.key !== "time_spent").map(s => (
+              <div key={s.key} className="flex items-center gap-1.5">
+                <div className={cn(
+                  "w-2.5 h-2.5 rounded-full shrink-0 transition-colors",
+                  understanding.viewed.has(s.key) ? "bg-foreground" : "bg-muted-foreground/20"
+                )} />
+                <span className={cn(
+                  "text-[10px] transition-colors",
+                  understanding.viewed.has(s.key) ? "text-foreground" : "text-muted-foreground/50",
+                  s.critical && !understanding.viewed.has(s.key) && "font-medium"
+                )}>
+                  {s.label}{s.critical ? " *" : ""}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Score Warning */}
+        {showScoreWarning && (
+          <div className="bg-muted/50 border border-border/40 rounded-xl px-4 py-3 mb-4">
+            <div className="flex items-start gap-2">
+              <AlertTriangle size={14} className="text-foreground/70 mt-0.5 shrink-0" />
+              <span className="text-xs leading-relaxed text-foreground/70">
+                {understanding.getWarning()}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Progress steps */}
         <div className="flex items-center gap-2">
           {(["summary", "risks", "confirm"] as const).map((s, i) => (
             <button
               key={s}
-              onClick={() => setStep(s)}
+              onClick={() => handleStepChange(s)}
               className={cn(
                 "flex-1 text-center py-2 rounded-xl text-xs font-medium transition-all",
                 step === s
@@ -183,11 +268,16 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
             </div>
           </div>
 
-          {/* Included / Excluded */}
           {primaryType && (
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-card rounded-2xl p-5 shadow-soft border border-primary/10">
-                <h4 className="text-xs font-medium text-primary mb-3">✓ مشمول في الصفقة</h4>
+              <div
+                className="bg-card rounded-2xl p-5 shadow-soft border border-primary/10 cursor-pointer hover:border-primary/30 transition-colors"
+                onClick={() => understanding.markViewed("included_items")}
+              >
+                <h4 className="text-xs font-medium text-primary mb-3 flex items-center justify-between">
+                  ✓ مشمول في الصفقة
+                  {understanding.viewed.has("included_items") && <CheckCircle2 size={12} className="text-primary" />}
+                </h4>
                 <ul className="space-y-1.5">
                   {primaryType.includes.map((item, i) => (
                     <li key={i} className="text-xs text-foreground/80 flex items-start gap-2">
@@ -197,8 +287,14 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
                   ))}
                 </ul>
               </div>
-              <div className="bg-card rounded-2xl p-5 shadow-soft border border-destructive/10">
-                <h4 className="text-xs font-medium text-destructive mb-3">✗ غير مشمول</h4>
+              <div
+                className="bg-card rounded-2xl p-5 shadow-soft border border-destructive/10 cursor-pointer hover:border-destructive/30 transition-colors"
+                onClick={() => understanding.markViewed("excluded_items")}
+              >
+                <h4 className="text-xs font-medium text-destructive mb-3 flex items-center justify-between">
+                  ✗ غير مشمول
+                  {understanding.viewed.has("excluded_items") && <CheckCircle2 size={12} className="text-foreground" />}
+                </h4>
                 {primaryType.excludes.length > 0 ? (
                   <ul className="space-y-1.5">
                     {primaryType.excludes.map((item, i) => (
@@ -215,7 +311,6 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
             </div>
           )}
 
-          {/* Alternative deal types */}
           {altTypes.length > 0 && (
             <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
               <h4 className="text-xs font-medium mb-3 flex items-center gap-2">
@@ -233,7 +328,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
             </div>
           )}
 
-          <Button onClick={() => setStep("risks")} className="w-full rounded-xl">
+          <Button onClick={() => handleStepChange("risks")} className="w-full rounded-xl">
             التالي — المخاطر والتحذيرات
           </Button>
         </div>
@@ -242,17 +337,16 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
       {/* Step 2: Risks */}
       {step === "risks" && (
         <div className="space-y-4">
-          {/* AI Warnings */}
           {warnings.length > 0 && (
-            <div className="bg-card rounded-2xl p-6 shadow-soft border border-amber-500/20">
+            <div className="bg-card rounded-2xl p-6 shadow-soft border border-border/40">
               <div className="flex items-center gap-2 mb-4">
                 <AiStar size={18} />
                 <h3 className="font-medium text-sm">تحذيرات الذكاء الاصطناعي</h3>
               </div>
               <div className="space-y-2.5">
                 {warnings.map((w, i) => (
-                  <div key={i} className="flex items-start gap-2.5 bg-amber-500/5 rounded-xl px-4 py-3">
-                    <AlertTriangle size={14} className="text-amber-600 mt-0.5 shrink-0" />
+                  <div key={i} className="flex items-start gap-2.5 bg-muted/40 rounded-xl px-4 py-3">
+                    <AlertTriangle size={14} className="text-foreground/60 mt-0.5 shrink-0" />
                     <span className="text-xs leading-relaxed">{w}</span>
                   </div>
                 ))}
@@ -260,17 +354,21 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
             </div>
           )}
 
-          {/* Deal risk indicator */}
           {deal.risk_score !== null && deal.risk_score !== undefined && (
             <DealRiskIndicator riskScore={deal.risk_score} riskFactors={deal.risk_factors || []} />
           )}
 
-          {/* Mandatory disclosures */}
           {primaryType && primaryType.mandatoryDisclosures.length > 0 && (
-            <div className="bg-card rounded-2xl p-6 shadow-soft border border-border/30">
-              <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
-                <Shield size={14} className="text-primary" />
-                الإفصاحات الإلزامية لهذا النوع
+            <div
+              className="bg-card rounded-2xl p-6 shadow-soft border border-border/30 cursor-pointer hover:border-primary/20 transition-colors"
+              onClick={() => understanding.markViewed("documents")}
+            >
+              <h3 className="font-medium text-sm mb-3 flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Shield size={14} className="text-primary" />
+                  الإفصاحات الإلزامية لهذا النوع
+                </span>
+                {understanding.viewed.has("documents") && <CheckCircle2 size={14} className="text-primary" />}
               </h3>
               <ul className="space-y-1.5">
                 {primaryType.mandatoryDisclosures.map((d, i) => (
@@ -283,7 +381,19 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
             </div>
           )}
 
-          {/* General risk notice */}
+          {/* AI Summary Prompt */}
+          <div className="bg-muted/20 rounded-2xl p-5 border border-border/20">
+            <div className="flex items-start gap-2.5">
+              <AiStar size={16} animate={false} />
+              <div>
+                <p className="text-xs font-medium mb-1">هل تريد ملخصاً للمخاطر الرئيسية؟</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  يمكن للذكاء الاصطناعي تلخيص النقاط المهمة وتوضيح المخاطر المحتملة بلغة مبسطة.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-muted/30 rounded-2xl p-5 border border-border/20">
             <div className="flex items-start gap-2.5">
               <Info size={14} className="text-muted-foreground mt-0.5 shrink-0" />
@@ -299,7 +409,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
             <Button variant="outline" onClick={() => setStep("summary")} className="flex-1 rounded-xl">
               السابق
             </Button>
-            <Button onClick={() => setStep("confirm")} className="flex-1 rounded-xl">
+            <Button onClick={() => handleStepChange("confirm")} className="flex-1 rounded-xl">
               التالي — التأكيد النهائي
             </Button>
           </div>
@@ -309,7 +419,6 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
       {/* Step 3: Confirmation */}
       {step === "confirm" && (
         <div className="space-y-4">
-          {/* Dual approval status */}
           <div className="bg-card rounded-2xl p-6 shadow-soft border border-border/30">
             <h3 className="font-medium text-sm mb-4">حالة الموافقة</h3>
             <div className="grid grid-cols-2 gap-4">
@@ -318,7 +427,25 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
             </div>
           </div>
 
-          {/* Checkboxes */}
+          {/* Understanding score gate */}
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium flex items-center gap-2">
+                <Eye size={14} className="text-muted-foreground" />
+                درجة الاستيعاب عند التأكيد
+              </span>
+              <span className={cn("text-sm font-bold tabular-nums", scoreColor)}>
+                {understanding.score}%
+              </span>
+            </div>
+            <Progress value={understanding.score} className="h-1.5" />
+            {!understanding.canProceed && (
+              <p className="text-[11px] text-muted-foreground mt-2">
+                يجب أن تصل درجة الاستيعاب إلى {understanding.MIN_SCORE}% على الأقل مع مراجعة جميع الأقسام الحرجة.
+              </p>
+            )}
+          </div>
+
           {!submitted ? (
             <div className="bg-card rounded-2xl p-6 shadow-soft border border-primary/10">
               <h3 className="font-medium text-sm mb-4 flex items-center gap-2">
@@ -350,7 +477,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
                 </Button>
                 <Button
                   onClick={handleSubmit}
-                  disabled={!allChecked || loading}
+                  disabled={!allChecked || loading || !understanding.canProceed}
                   className="flex-1 rounded-xl gradient-primary text-primary-foreground"
                 >
                   {loading ? "جاري التأكيد..." : "تأكيد الموافقة النهائية"}
@@ -384,9 +511,7 @@ const Row = ({ label, value, highlight }: { label: string; value: string; highli
 const ApprovalCard = ({ label, confirmed, isYou }: { label: string; confirmed: boolean; isYou: boolean }) => (
   <div className={cn(
     "rounded-xl p-4 text-center border transition-all",
-    confirmed
-      ? "bg-primary/5 border-primary/20"
-      : "bg-muted/20 border-border/30"
+    confirmed ? "bg-primary/5 border-primary/20" : "bg-muted/20 border-border/30"
   )}>
     {confirmed
       ? <CheckCircle2 size={20} className="text-primary mx-auto mb-2" />
