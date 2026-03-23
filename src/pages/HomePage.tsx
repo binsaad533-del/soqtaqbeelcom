@@ -93,6 +93,9 @@ const HomePage = () => {
                 <Link to="/create-listing">أضف فرصتك</Link>
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground/70 mt-8">
+              في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦
+            </p>
           </div>
         </div>
       </section>

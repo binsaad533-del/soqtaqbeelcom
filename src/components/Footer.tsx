@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import AiStar from "./AiStar";
+import ainJasaasLogo from "@/assets/ain-jasaas-logo.png";
 
 const Footer = () => {
   return (
-    <footer className="border-t border-border/50 bg-card/50">
+    <footer className="border-t border-border/30 bg-background/50">
       <div className="container py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -47,14 +48,50 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border/30 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <span className="text-[11px] text-muted-foreground">
-            © {new Date().getFullYear()} سوق تقبيل. جميع الحقوق محفوظة.
-          </span>
-          <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
-            <Link to="/terms" className="hover:text-foreground transition-colors">الشروط</Link>
-            <Link to="/privacy" className="hover:text-foreground transition-colors">الخصوصية</Link>
-            <Link to="/contact" className="hover:text-foreground transition-colors">تواصل معنا</Link>
+        {/* Brand Statement */}
+        <div className="mt-10 mb-6 text-center">
+          <p className="text-sm text-muted-foreground/80">
+            في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦
+          </p>
+        </div>
+
+        {/* Ownership & Logo */}
+        <div className="border-t border-border/20 pt-6">
+          <div className="flex flex-col items-center gap-4">
+            <p className="text-[11px] text-muted-foreground/70 text-center leading-relaxed">
+              المنصة مملوكة ومدارة ومشغلة بواسطة شركة{" "}
+              <a
+                href="https://www.jsaas-group.com/en"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground hover:underline transition-colors"
+              >
+                عين جساس
+              </a>
+              . جميع الحقوق محفوظة © {new Date().getFullYear()}
+            </p>
+
+            <a
+              href="https://www.jsaas-group.com/en"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="opacity-75 hover:opacity-100 transition-opacity"
+            >
+              <img
+                src={ainJasaasLogo}
+                alt="Ain Jasaas Company"
+                width={32}
+                height={32}
+                loading="lazy"
+                className="w-8 h-8 object-contain"
+              />
+            </a>
+
+            <div className="flex items-center gap-4 text-[10px] text-muted-foreground/60">
+              <Link to="/terms" className="hover:text-foreground transition-colors">الشروط</Link>
+              <Link to="/privacy" className="hover:text-foreground transition-colors">الخصوصية</Link>
+              <Link to="/contact" className="hover:text-foreground transition-colors">تواصل معنا</Link>
+            </div>
           </div>
         </div>
       </div>
