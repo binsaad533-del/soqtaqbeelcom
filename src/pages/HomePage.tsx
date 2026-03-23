@@ -44,15 +44,17 @@ const HomePage = () => {
             <div className="flex justify-center mb-6">
               <img src={logo} alt="سوق تقبيل" className="h-16 md:h-20 w-auto mx-auto" />
             </div>
+            <p className="text-sm font-medium text-primary mb-3 tracking-wide">أول منصة سعودية بالذكاء الاصطناعي لتقبيل الأعمال</p>
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
-              عندك مشروع وما عرفت تبيعه؟
+              ارفع صور مشروعك…
               <br />
-              أو تدور فرصة جاهزة تبدأ فيها؟
+              <span className="gradient-text">والذكاء يسوّي الباقي</span>
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto leading-relaxed">
-              في "تقبيل" نربط بين أصحاب المشاريع والباحثين عن الفرص
-              <br className="hidden sm:block" />
-              بطريقة ذكية تساعد على إتمام الصفقة بسرعة ووضوح.
+            <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
+              جرد، تقييم، بيانات، وتفاوض — كلها تلقائيًا بدون ما تكتب سطر واحد.
+            </p>
+            <p className="text-xs md:text-sm text-muted-foreground/70 mb-8">
+              فقط ارفع الصور والمستندات وخلّ المنصة تشتغل لك.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft hover:shadow-soft-lg transition-shadow active:scale-[0.98]">
