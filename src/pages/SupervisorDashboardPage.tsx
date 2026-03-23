@@ -1,136 +1,129 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
-import {
-  FileText, MessageCircle, AlertCircle, ChevronLeft, Clock, Check,
-  Search, FolderOpen, ArrowUp, Bell
-} from "lucide-react";
+import { useListings, type Listing } from "@/hooks/useListings";
+import { useDeals, type Deal } from "@/hooks/useDeals";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { FileText, MessageSquare, AlertTriangle, CheckCircle, Clock, ChevronLeft, Loader2, Eye } from "lucide-react";
 
 const tabs = [
-  { label: "المهام", icon: FolderOpen },
+  { label: "نظرة عامة", icon: Eye },
   { label: "الإعلانات", icon: FileText },
-  { label: "التفاوضات", icon: MessageCircle },
-  { label: "الشكاوى", icon: AlertCircle },
-];
-
-const assignedCases = [
-  { id: "1", title: "مراجعة إعلان مطعم الشاورما", type: "مراجعة", status: "قيد المعالجة", priority: "عالية", date: "2026-03-22" },
-  { id: "2", title: "شكوى عميل بخصوص صور مفقودة", type: "شكوى", status: "مفتوح", priority: "متوسطة", date: "2026-03-21" },
-  { id: "3", title: "متابعة تفاوض كافيه الروضة", type: "تفاوض", status: "بانتظار الرد", priority: "عالية", date: "2026-03-20" },
-  { id: "4", title: "التحقق من مستندات ترخيص", type: "مستندات", status: "مكتمل", priority: "منخفضة", date: "2026-03-19" },
-];
-
-const stats = [
-  { label: "مهام مسندة", value: "12", icon: FolderOpen },
-  { label: "مفتوحة", value: "5", icon: Clock, color: "warning" },
-  { label: "مكتملة", value: "7", icon: Check, color: "success" },
-  { label: "بانتظار العميل", value: "3", icon: AlertCircle },
+  { label: "المفاوضات", icon: MessageSquare },
+  { label: "الشكاوى", icon: AlertTriangle },
 ];
 
 const SupervisorDashboardPage = () => {
   const { profile, signOut } = useAuthContext();
+  const { getAllListings } = useListings();
+  const { getAllDeals } = useDeals();
   const [activeTab, setActiveTab] = useState(0);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      const [l, d] = await Promise.all([getAllListings(), getAllDeals()]);
+      setListings(l);
+      setDeals(d);
+      setLoading(false);
+    };
+    load();
+  }, [getAllListings, getAllDeals]);
+
+  if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={24} className="animate-spin text-primary" /></div>;
 
   return (
-    <div className="py-6">
-      <div className="container">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-medium">لوحة المشرف</h1>
-            <p className="text-xs text-muted-foreground mt-1">
-              مرحباً {profile?.full_name || "المشرف"} — إليك مهامك المسندة
-            </p>
-          </div>
+    <div className="py-8">
+      <div className="container max-w-4xl">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <button className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
-              <Bell size={18} strokeWidth={1.3} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-warning rounded-full" />
-            </button>
             <AiStar size={24} />
+            <div>
+              <h1 className="text-xl font-medium">لوحة المشرف</h1>
+              <p className="text-sm text-muted-foreground">مرحباً {profile?.full_name}</p>
+            </div>
           </div>
+          <button onClick={signOut} className="text-xs text-muted-foreground hover:text-foreground transition-colors">خروج</button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          {stats.map((stat, i) => (
-            <div key={i} className="bg-card rounded-xl p-4 shadow-soft">
-              <div className="flex items-center gap-1.5 mb-2">
-                <stat.icon size={14} strokeWidth={1.3} className="text-muted-foreground" />
-                <span className="text-[11px] text-muted-foreground">{stat.label}</span>
-              </div>
-              <span className={cn("text-lg font-medium", stat.color ? `text-${stat.color}` : "")}>{stat.value}</span>
+        <div className="grid grid-cols-4 gap-3 mb-6">
+          {[
+            { label: "الإعلانات", value: listings.length, icon: FileText },
+            { label: "الصفقات", value: deals.length, icon: MessageSquare },
+            { label: "مكتملة", value: deals.filter(d => d.status === "completed").length, icon: CheckCircle },
+            { label: "قيد التفاوض", value: deals.filter(d => d.status === "negotiating").length, icon: Clock },
+          ].map((s, i) => (
+            <div key={i} className="bg-card rounded-xl p-4 shadow-soft text-center">
+              <s.icon size={18} className="mx-auto mb-2 text-primary" strokeWidth={1.3} />
+              <div className="text-lg font-medium">{s.value}</div>
+              <div className="text-[10px] text-muted-foreground">{s.label}</div>
             </div>
           ))}
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-6 overflow-x-auto">
+        <div className="flex gap-1 bg-muted/50 rounded-xl p-1 mb-6 overflow-x-auto">
           {tabs.map((tab, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveTab(i)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs whitespace-nowrap transition-all active:scale-[0.97]",
-                activeTab === i ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50"
-              )}
-            >
+            <button key={i} onClick={() => setActiveTab(i)} className={cn("flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs whitespace-nowrap transition-all", activeTab === i ? "bg-card shadow-sm text-foreground" : "text-muted-foreground")}>
               <tab.icon size={14} strokeWidth={1.3} />
               {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Cases List */}
-        <div className="bg-card rounded-2xl p-5 shadow-soft space-y-2">
-          {assignedCases
-            .filter((c) => {
-              if (activeTab === 0) return true;
-              if (activeTab === 1) return c.type === "مراجعة" || c.type === "مستندات";
-              if (activeTab === 2) return c.type === "تفاوض";
-              if (activeTab === 3) return c.type === "شكوى";
-              return true;
-            })
-            .map((c) => (
-            <div key={c.id} className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/20 transition-colors cursor-pointer">
-              <div className="flex-1">
-                <div className="text-sm">{c.title}</div>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-accent text-accent-foreground">{c.type}</span>
-                  <span className="text-[10px] text-muted-foreground">{c.date}</span>
+        {activeTab === 0 && (
+          <div className="space-y-3">
+            <h3 className="font-medium">آخر الإعلانات</h3>
+            {listings.slice(0, 8).map(l => (
+              <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card hover:shadow-soft transition-all">
+                <div>
+                  <div className="text-sm">{l.title || "بدون عنوان"}</div>
+                  <div className="text-xs text-muted-foreground">{l.city} • {new Date(l.created_at).toLocaleDateString("ar-SA")}</div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
-                  c.priority === "عالية" ? "bg-destructive/10 text-destructive" :
-                  c.priority === "متوسطة" ? "bg-warning/10 text-warning" :
-                  "bg-muted text-muted-foreground"
-                )}>{c.priority}</span>
-                <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
-                  c.status === "مكتمل" ? "bg-success/10 text-success" :
-                  c.status === "مفتوح" ? "bg-warning/10 text-warning" :
-                  c.status === "قيد المعالجة" ? "bg-primary/10 text-primary" :
-                  "bg-muted text-muted-foreground"
-                )}>{c.status}</span>
-                {c.status !== "مكتمل" && (
-                  <button className="p-1 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors" title="تصعيد">
-                    <ArrowUp size={14} strokeWidth={1.3} />
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+                <ChevronLeft size={14} className="text-muted-foreground" strokeWidth={1.3} />
+              </Link>
+            ))}
+          </div>
+        )}
 
-        <div className="mt-6 pt-4 border-t border-border/50">
-          <button
-            onClick={signOut}
-            className="px-4 py-2 rounded-xl text-xs text-destructive bg-destructive/5 hover:bg-destructive/10 transition-colors"
-          >
-            تسجيل الخروج
-          </button>
-        </div>
+        {activeTab === 1 && (
+          <div className="space-y-3">
+            {listings.map(l => (
+              <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card hover:shadow-soft transition-all">
+                <div className="flex-1">
+                  <div className="text-sm">{l.title || "بدون عنوان"}</div>
+                  <div className="text-xs text-muted-foreground">{l.business_activity || "—"} • {l.city}</div>
+                </div>
+                <span className={cn("text-[10px] px-2 py-0.5 rounded-md", l.status === "published" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{l.status === "published" ? "منشور" : l.status}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 2 && (
+          <div className="space-y-3">
+            {deals.map(d => (
+              <div key={d.id} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card">
+                <div>
+                  <div className="text-sm">صفقة #{d.id.slice(0, 8)}</div>
+                  <div className="text-xs text-muted-foreground">{new Date(d.created_at).toLocaleDateString("ar-SA")}</div>
+                </div>
+                <span className={cn("text-[10px] px-2 py-0.5 rounded-md", d.status === "completed" ? "bg-success/10 text-success" : "bg-primary/10 text-primary")}>{d.status === "completed" ? "مكتملة" : "تفاوض"}</span>
+              </div>
+            ))}
+            {deals.length === 0 && <p className="text-center text-sm text-muted-foreground py-12">لا توجد صفقات</p>}
+          </div>
+        )}
+
+        {activeTab === 3 && (
+          <div className="text-center py-12">
+            <AlertTriangle size={32} className="mx-auto mb-3 text-muted-foreground/50" strokeWidth={1} />
+            <p className="text-sm text-muted-foreground">لا توجد شكاوى حالياً</p>
+          </div>
+        )}
       </div>
     </div>
   );

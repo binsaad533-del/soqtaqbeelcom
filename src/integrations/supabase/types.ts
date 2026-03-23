@@ -244,6 +244,188 @@ export type Database = {
         }
         Relationships: []
       }
+      listings: {
+        Row: {
+          ai_rating: string | null
+          ai_summary: string | null
+          annual_rent: number | null
+          business_activity: string | null
+          category: string | null
+          city: string | null
+          civil_defense_license: string | null
+          created_at: string
+          deal_type: string
+          description: string | null
+          disclosure_score: number | null
+          district: string | null
+          documents: Json | null
+          featured: boolean
+          id: string
+          inventory: Json | null
+          lease_duration: string | null
+          lease_paid_period: string | null
+          lease_remaining: string | null
+          liabilities: string | null
+          municipality_license: string | null
+          overdue_rent: string | null
+          overdue_salaries: string | null
+          owner_id: string
+          photos: Json | null
+          price: number | null
+          published_at: string | null
+          status: string
+          surveillance_cameras: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_rating?: string | null
+          ai_summary?: string | null
+          annual_rent?: number | null
+          business_activity?: string | null
+          category?: string | null
+          city?: string | null
+          civil_defense_license?: string | null
+          created_at?: string
+          deal_type?: string
+          description?: string | null
+          disclosure_score?: number | null
+          district?: string | null
+          documents?: Json | null
+          featured?: boolean
+          id?: string
+          inventory?: Json | null
+          lease_duration?: string | null
+          lease_paid_period?: string | null
+          lease_remaining?: string | null
+          liabilities?: string | null
+          municipality_license?: string | null
+          overdue_rent?: string | null
+          overdue_salaries?: string | null
+          owner_id: string
+          photos?: Json | null
+          price?: number | null
+          published_at?: string | null
+          status?: string
+          surveillance_cameras?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_rating?: string | null
+          ai_summary?: string | null
+          annual_rent?: number | null
+          business_activity?: string | null
+          category?: string | null
+          city?: string | null
+          civil_defense_license?: string | null
+          created_at?: string
+          deal_type?: string
+          description?: string | null
+          disclosure_score?: number | null
+          district?: string | null
+          documents?: Json | null
+          featured?: boolean
+          id?: string
+          inventory?: Json | null
+          lease_duration?: string | null
+          lease_paid_period?: string | null
+          lease_remaining?: string | null
+          liabilities?: string | null
+          municipality_license?: string | null
+          overdue_rent?: string | null
+          overdue_salaries?: string | null
+          owner_id?: string
+          photos?: Json | null
+          price?: number | null
+          published_at?: string | null
+          status?: string
+          surveillance_cameras?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      negotiation_messages: {
+        Row: {
+          created_at: string
+          deal_id: string
+          id: string
+          is_read: boolean
+          message: string
+          message_type: string
+          metadata: Json | null
+          sender_id: string
+          sender_type: string
+        }
+        Insert: {
+          created_at?: string
+          deal_id: string
+          id?: string
+          is_read?: boolean
+          message: string
+          message_type?: string
+          metadata?: Json | null
+          sender_id: string
+          sender_type?: string
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          message_type?: string
+          metadata?: Json | null
+          sender_id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "negotiation_messages_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          reference_id: string | null
+          reference_type: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          reference_id?: string | null
+          reference_type?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          reference_id?: string | null
+          reference_type?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
