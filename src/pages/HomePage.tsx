@@ -5,39 +5,6 @@ import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 import { useEffect, useRef } from "react";
 
-const features = [
-  {
-    icon: Camera,
-    title: "تحليل ذكي للصور",
-    desc: "يكتشف الأصول والمعدات تلقائياً من صور المحل ويبني جرداً أولياً",
-  },
-  {
-    icon: FileText,
-    title: "استخراج بيانات المستندات",
-    desc: "يقرأ عقود الإيجار والرخص ويستخلص البيانات الأساسية تلقائياً",
-  },
-  {
-    icon: ShieldCheck,
-    title: "إفصاح كامل وشفاف",
-    desc: "نموذج إفصاح إلزامي يحمي المشتري ويعزز ثقة السوق",
-  },
-  {
-    icon: BarChart3,
-    title: "تحليل ذكاء الصفقة",
-    desc: "تحليل تجاري شامل للمخاطر والفرص والتوصيات لكل فرصة",
-  },
-  {
-    icon: MessageCircle,
-    title: "تفاوض داخل المنصة",
-    desc: "نظام تفاوض منظّم مع مساعد ذكي يسهّل الوصول لاتفاق",
-  },
-  {
-    icon: Sparkles,
-    title: "ملخص اتفاق موثّق",
-    desc: "توثيق كامل للصفقة المتفق عليها بما يشمل كل التفاصيل",
-  },
-];
-
 const stats = [
   { value: "847", label: "فرصة نشطة" },
   { value: "12", label: "مدينة" },
@@ -106,32 +73,6 @@ const HomePage = () => {
               <div key={i} className={`text-center animate-reveal-delay-${i + 1}`}>
                 <div className="text-2xl md:text-3xl font-medium gradient-text">{stat.value}</div>
                 <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-16 md:py-24">
-        <div className="container">
-          <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
-            <h2 className="text-2xl md:text-3xl font-medium mb-3">منصة متكاملة بالذكاء الاصطناعي</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">كل أداة تحتاجها لتقييم وتفاوض وتوثيق صفقات تقبيل الأعمال</p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {features.map((f, i) => (
-              <div
-                key={i}
-                ref={addRevealRef}
-                style={{ opacity: 0, animationDelay: `${i * 120}ms` }}
-                className="group bg-card rounded-2xl p-6 shadow-soft hover:shadow-soft-lg hover:scale-[1.03] hover:-translate-y-1 transition-all duration-300 cursor-default"
-              >
-                <div className="w-10 h-10 rounded-xl bg-accent/60 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-                  <f.icon size={20} strokeWidth={1.3} />
-                </div>
-                <h3 className="font-medium mb-2 group-hover:text-primary transition-colors duration-300">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
