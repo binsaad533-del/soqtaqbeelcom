@@ -25,13 +25,22 @@ const REQUIRED_CONFIRMATIONS = [
   "agree_to_proceed",
 ] as const;
 
+// Seller-only: commission acknowledgment
+const SELLER_CONFIRMATIONS = [
+  ...REQUIRED_CONFIRMATIONS,
+  "commission_acknowledged",
+] as const;
+
 export const CONFIRMATION_LABELS: Record<string, string> = {
   reviewed_details: "أؤكد أنني راجعت جميع تفاصيل الصفقة",
   understand_included_excluded: "أفهم ما هو مشمول وما هو مستبعد في هذه الصفقة",
   accept_responsibility: "أتحمل المسؤولية الكاملة عن قراري",
   platform_not_liable: "أفهم أن المنصة غير مسؤولة عن نتائج الصفقة",
   agree_to_proceed: "أوافق على المضي في هذه الصفقة",
+  commission_acknowledged: "أقر بأنني مسؤول عن سداد عمولة المنصة (1%) بعد إتمام الصفقة",
 };
+
+export { SELLER_CONFIRMATIONS };
 
 export function useLegalConfirmation() {
   const { user } = useAuthContext();
@@ -68,7 +77,8 @@ export function useLegalConfirmation() {
     if (!user) return { error: new Error("Not authenticated"), data: null };
 
     // Verify all required confirmations are checked
-    const allChecked = REQUIRED_CONFIRMATIONS.every(c => confirmations.includes(c));
+    const requiredList = partyRole === "seller" ? SELLER_CONFIRMATIONS : REQUIRED_CONFIRMATIONS;
+    const allChecked = requiredList.every(c => confirmations.includes(c));
     if (!allChecked) return { error: new Error("All confirmations are required"), data: null };
 
     setLoading(true);

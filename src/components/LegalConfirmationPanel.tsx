@@ -7,7 +7,7 @@ import AiStar from "./AiStar";
 import DealRiskIndicator from "./DealRiskIndicator";
 import CommissionBanner from "./CommissionBanner";
 import { DEAL_TYPE_MAP, type DealTypeConfig } from "@/lib/dealStructureConfig";
-import { useLegalConfirmation, CONFIRMATION_LABELS } from "@/hooks/useLegalConfirmation";
+import { useLegalConfirmation, CONFIRMATION_LABELS, SELLER_CONFIRMATIONS } from "@/hooks/useLegalConfirmation";
 import { useDealUnderstanding, SECTIONS, type SectionKey } from "@/hooks/useDealUnderstanding";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -97,7 +97,12 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
     }
   }, [step, understanding.markViewed]);
 
-  const allChecked = REQUIRED_CONFIRMATIONS.every(c => checked[c]);
+  // Use seller confirmations (includes commission acknowledgment) for seller
+  const activeConfirmations = isSeller
+    ? SELLER_CONFIRMATIONS
+    : REQUIRED_CONFIRMATIONS;
+
+  const allChecked = activeConfirmations.every(c => checked[c]);
 
   const handleStepChange = (newStep: "summary" | "risks" | "confirm") => {
     if (newStep === "confirm" && !understanding.canProceed) {
@@ -456,10 +461,13 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
                 إقرار وموافقة — {isBuyer ? "المشتري" : "البائع"}
               </h3>
               <div className="space-y-4">
-                {REQUIRED_CONFIRMATIONS.map(key => (
+                {activeConfirmations.map(key => (
                   <label
                     key={key}
-                    className="flex items-start gap-3 cursor-pointer group"
+                    className={cn(
+                      "flex items-start gap-3 cursor-pointer group",
+                      key === "commission_acknowledged" && "bg-primary/5 rounded-xl p-3 border border-primary/10"
+                    )}
                     onClick={() => toggleCheck(key)}
                   >
                     <Checkbox
@@ -467,7 +475,10 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
                       onCheckedChange={() => toggleCheck(key)}
                       className="mt-0.5"
                     />
-                    <span className="text-sm leading-relaxed group-hover:text-foreground transition-colors">
+                    <span className={cn(
+                      "text-sm leading-relaxed group-hover:text-foreground transition-colors",
+                      key === "commission_acknowledged" && "font-medium"
+                    )}>
                       {CONFIRMATION_LABELS[key]}
                     </span>
                   </label>
