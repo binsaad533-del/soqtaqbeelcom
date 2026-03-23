@@ -76,6 +76,14 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/monitoring"
+                element={
+                  <ProtectedRoute>
+                    <MonitoringDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

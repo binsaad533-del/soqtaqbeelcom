@@ -10,10 +10,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AiStar from "@/components/AiStar";
 import {
   Activity, Users, FileText, Handshake, Zap, AlertTriangle,
-  CheckCircle2, XCircle, Clock, Eye, Search, RefreshCw,
+  CheckCircle2, XCircle, Clock, Search, RefreshCw,
   TrendingUp, TrendingDown, Loader2, Shield, Landmark,
-  MessageSquare, Bot, ChevronDown, ChevronUp, Filter,
-  Monitor, Cpu, Bell, ArrowRight,
+  MessageSquare, Bot,
+  Monitor, Bell, ArrowRight,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────
