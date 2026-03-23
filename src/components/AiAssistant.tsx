@@ -147,7 +147,7 @@ const AiAssistant = () => {
         setStreaming(false);
       },
     });
-  }, [messages, buildContext, speak]);
+  }, [messages, buildContext]);
 
   // Keep ref updated for voice callback
   const sendMessageRef = useRef(sendMessage);
