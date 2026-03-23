@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings } from "@/hooks/useListings";
+import { useCommissions, type Commission } from "@/hooks/useCommissions";
+import CommissionBanner from "@/components/CommissionBanner";
+import CommissionPaymentPanel from "@/components/CommissionPaymentPanel";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
