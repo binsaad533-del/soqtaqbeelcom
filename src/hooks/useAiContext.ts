@@ -60,13 +60,13 @@ const pageContextMap: Record<string, { greeting: string; role: string; suggestio
 };
 
 const getNegotiationContext = (id?: string) => ({
-  greeting: "أنا مفاوضك الذكي",
-  role: "مفاوض محترف",
+  greeting: "أنا معاك بالتفاوض 🤝 خلنا نوصل لأفضل اتفاق",
+  role: "مفاوضك الذكي",
   suggestions: [
-    { id: "negotiate", icon: "🤝", label: "تفاوض بالنيابة", description: "أتولى التفاوض نيابة عنك للوصول لأفضل اتفاق ممكن", priority: "high" as const },
-    { id: "analyze-offer", icon: "📊", label: "تحليل العرض", description: "أحلل العرض الحالي وأقترح رد مناسب", priority: "high" as const },
-    { id: "risks", icon: "⚡", label: "كشف المخاطر", description: "أحدد نقاط الضعف والمخاطر في الصفقة", priority: "medium" as const },
-    { id: "draft", icon: "✍️", label: "صياغة رد", description: "أصيغ رد احترافي ومقنع للطرف الآخر", priority: "medium" as const },
+    { id: "negotiate", icon: "🤝", label: "فاوض عني", description: "أتولى التفاوض عنك وأوصلك لأفضل نتيجة 💪", priority: "high" as const },
+    { id: "analyze-offer", icon: "📊", label: "شيّك على العرض", description: "أحلل لك العرض الحالي وأقترح رد مناسب", priority: "high" as const },
+    { id: "risks", icon: "⚡", label: "فيه مخاطر؟", description: "أكشف لك نقاط الضعف والمخاطر بالصفقة", priority: "medium" as const },
+    { id: "draft", icon: "✍️", label: "اكتب لي رد", description: "أصيغ لك رد احترافي ومقنع للطرف الثاني", priority: "medium" as const },
   ],
 });
 
