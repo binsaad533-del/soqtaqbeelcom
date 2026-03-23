@@ -5,10 +5,11 @@ import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import AiStar from "@/components/AiStar";
+import TrustBadge from "@/components/TrustBadge";
 import { cn } from "@/lib/utils";
 import {
   Users, FileText, Handshake, Shield, Settings, BarChart3,
-  Eye, CheckCircle, ChevronLeft, Search, Activity, Loader2, ShieldAlert
+  Eye, CheckCircle, ChevronLeft, Search, Activity, Loader2, ShieldAlert, AlertTriangle
 } from "lucide-react";
 import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 
