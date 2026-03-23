@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Search, User, Menu, X } from "lucide-react";
 import { useState } from "react";
 import AiStar from "./AiStar";
+import AiAssistant from "./AiAssistant";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
