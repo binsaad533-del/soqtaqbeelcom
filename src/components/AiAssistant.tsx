@@ -317,22 +317,6 @@ const AiAssistant = () => {
 
               <div className="p-3 border-t border-border/30">
                 <div className="flex items-center gap-2">
-                  {/* Mic button */}
-                  {supportsRecognition && voiceEnabled && (
-                    <Button
-                      onClick={handleMicClick}
-                      size="icon"
-                      variant={isListening ? "destructive" : "outline"}
-                      disabled={streaming}
-                      className={cn(
-                        "rounded-xl h-8 w-8 shrink-0 transition-all",
-                        isListening && "animate-pulse"
-                      )}
-                      title={isListening ? "إيقاف الاستماع" : "تحدث مع مقبل"}
-                    >
-                      {isListening ? <MicOff size={13} strokeWidth={1.5} /> : <Mic size={13} strokeWidth={1.5} />}
-                    </Button>
-                  )}
                   <input
                     ref={inputRef}
                     type="text"
