@@ -343,9 +343,12 @@ const LoginPage = () => {
           </form>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          <Link to="/" className="hover:text-foreground transition-colors">← العودة للرئيسية</Link>
-        </p>
+        <div className="flex flex-col items-center gap-4 mt-6">
+          <SocialIcons />
+          <p className="text-xs text-muted-foreground">
+            <Link to="/" className="hover:text-foreground transition-colors">← العودة للرئيسية</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
