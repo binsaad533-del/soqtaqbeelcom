@@ -107,11 +107,11 @@ export function useAiContext() {
     }
     if (pathname.startsWith("/agreement/")) {
       return {
-        greeting: "ملخص الاتفاق جاهز",
+        greeting: "الاتفاق جاهز، خلني أراجعه معاك 📋",
         role: "مراجع اتفاقيات",
         suggestions: [
-          { id: "review", icon: "📋", label: "مراجعة الاتفاق", description: "أراجع بنود الاتفاق وأبرز النقاط المهمة", priority: "high" as const },
-          { id: "risks", icon: "⚠️", label: "تنبيهات قانونية", description: "أحدد النقاط التي تحتاج انتباه قانوني", priority: "high" as const },
+          { id: "review", icon: "📋", label: "راجع لي الاتفاق", description: "أشيّك على البنود وأبرز لك النقاط المهمة", priority: "high" as const },
+          { id: "risks", icon: "⚠️", label: "فيه شي لازم انتبه له؟", description: "أحدد لك النقاط اللي تحتاج انتباه قانوني", priority: "high" as const },
         ],
       };
     }
