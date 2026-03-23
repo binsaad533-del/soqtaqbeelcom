@@ -81,7 +81,7 @@ const HomePage = () => {
               تقبيل الأعمال بذكاء
             </h1>
             <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
-              منصة ذكية لعرض وتحليل وتفاوض فرص تقبيل المحلات والمشاريع التجارية في السعودية
+              منصة ذكية لعرض وتحليل وتفاوض فرص تقبيل المحلات والمشاريع التجارية
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft hover:shadow-soft-lg transition-shadow active:scale-[0.98]">
