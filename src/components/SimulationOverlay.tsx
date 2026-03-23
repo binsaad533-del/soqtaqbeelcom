@@ -4,7 +4,7 @@
  */
 
 export const isSimulationImage = (url: string): boolean =>
-  typeof url === "string" && url.includes("/sim/");
+  typeof url === "string" && (url.includes("/sim/") || url.includes("/sim%2F") || url.includes("sim%2f"));
 
 export const hasSimulationPhotos = (photos: Record<string, unknown> | null | undefined): boolean => {
   if (!photos) return false;
