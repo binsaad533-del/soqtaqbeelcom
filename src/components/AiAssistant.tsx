@@ -109,23 +109,20 @@ const AiAssistant = () => {
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          "fixed bottom-6 left-6 z-50 flex items-center gap-2.5 transition-all duration-300 hover:shadow-soft-hover group",
+          "fixed bottom-6 left-6 z-50 flex items-center gap-2 transition-all duration-300 hover:shadow-soft-hover",
           open
-            ? "w-12 h-12 rounded-full gradient-primary shadow-soft-lg justify-center scale-95"
-            : "h-12 rounded-full gradient-primary shadow-soft-lg px-5 pr-4"
+            ? "w-11 h-11 rounded-full gradient-primary shadow-soft-lg justify-center scale-95"
+            : "h-11 rounded-full gradient-primary shadow-soft-lg px-4 pr-3"
         )}
       >
         {open ? (
-          <X size={18} className="text-primary-foreground" strokeWidth={1.5} />
+          <X size={16} className="text-primary-foreground" strokeWidth={1.5} />
         ) : (
           <>
             <div className="relative shrink-0">
-              <AiStar size={24} animate className="[&>div]:!opacity-100" />
+              <AiStar size={20} animate className="[&>div]:!opacity-100" />
             </div>
-            <span className="text-primary-foreground text-sm font-medium whitespace-nowrap">المساعد الذكي</span>
-            {/* Outer glow rings */}
-            <span className="absolute inset-0 rounded-full animate-ping bg-primary/15 pointer-events-none" style={{ animationDuration: "3s" }} />
-            <span className="absolute -inset-1 rounded-full border-2 border-primary/20 animate-pulse pointer-events-none" />
+            <span className="text-primary-foreground text-xs font-medium whitespace-nowrap">المساعد الذكي</span>
           </>
         )}
       </button>
