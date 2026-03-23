@@ -118,5 +118,18 @@ export function useListings() {
     return urlData.publicUrl;
   }, [user]);
 
-  return { createListing, updateListing, getMyListings, getPublishedListings, getAllListings, getListing, uploadFile, loading };
+  const softDeleteListing = useCallback(async (id: string) => {
+    if (!user) return { error: new Error("Not authenticated"), data: null };
+    setLoading(true);
+    const { data: listing, error } = await supabase
+      .from("listings")
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user.id, status: "archived" } as any)
+      .eq("id", id)
+      .select()
+      .single();
+    setLoading(false);
+    return { data: listing, error };
+  }, [user]);
+
+  return { createListing, updateListing, softDeleteListing, getMyListings, getPublishedListings, getAllListings, getListing, uploadFile, loading };
 }
