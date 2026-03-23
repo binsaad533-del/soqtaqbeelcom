@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import AiStar from "@/components/AiStar";
+import SocialIcons from "@/components/SocialIcons";
 import { Send, MessageSquare, Mail, Phone, MapPin, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
