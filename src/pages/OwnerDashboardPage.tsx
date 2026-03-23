@@ -12,12 +12,15 @@ import {
   Eye, CheckCircle, ChevronLeft, Search, Activity, Loader2, ShieldAlert, AlertTriangle
 } from "lucide-react";
 import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
+import CommissionAdminPanel from "@/components/CommissionAdminPanel";
+import { Landmark } from "lucide-react";
 
 const tabs = [
   { label: "نظرة عامة", icon: BarChart3 },
   { label: "المستخدمون", icon: Users },
   { label: "الإعلانات", icon: FileText },
   { label: "الصفقات", icon: Handshake },
+  { label: "العمولات", icon: Landmark },
   { label: "المشرفون", icon: Shield },
   { label: "الأمان", icon: ShieldAlert },
   { label: "الإعدادات", icon: Settings },
