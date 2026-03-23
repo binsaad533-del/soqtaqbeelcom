@@ -2,10 +2,14 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Send, ArrowRight, Zap, Loader2, Shield } from "lucide-react";
 import AiStar from "@/components/AiStar";
+import TrustBadge from "@/components/TrustBadge";
+import DealRiskIndicator from "@/components/DealRiskIndicator";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useDeals, type NegotiationMessage } from "@/hooks/useDeals";
 import { useListings, type Listing } from "@/hooks/useListings";
+import { useFraudEngine } from "@/hooks/useFraudEngine";
+import { useProfiles } from "@/hooks/useProfiles";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,6 +20,8 @@ const NegotiationPage = () => {
   const { user } = useAuthContext();
   const { getMessages, sendMessage } = useDeals();
   const { getListing } = useListings();
+  const { monitorChat, calculateDealRisk } = useFraudEngine();
+  const { getProfile } = useProfiles();
 
   const [deal, setDeal] = useState<any>(null);
   const [listing, setListing] = useState<Listing | null>(null);
@@ -23,7 +29,7 @@ const NegotiationPage = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  
+  const [otherProfile, setOtherProfile] = useState<any>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,8 +58,19 @@ const NegotiationPage = () => {
     // Load messages
     const msgs = await getMessages(dealId);
     setMessages(msgs);
+
+    // Load other party's profile for trust badge
+    const otherId = user?.id === dealData.buyer_id ? dealData.seller_id : dealData.buyer_id;
+    if (otherId) {
+      const p = await getProfile(otherId);
+      setOtherProfile(p);
+    }
+
+    // Calculate deal risk
+    calculateDealRisk(dealId).catch(() => {});
+
     setLoading(false);
-  }, [dealId, getListing, getMessages]);
+  }, [dealId, getListing, getMessages, user, getProfile, calculateDealRisk]);
 
   useEffect(() => {
     loadData();
@@ -88,10 +105,13 @@ const NegotiationPage = () => {
   const handleSend = async () => {
     if (!input.trim() || !dealId || sending) return;
     setSending(true);
-    const msg = await sendMessage(dealId, input.trim());
+    const trimmed = input.trim();
+    const msg = await sendMessage(dealId, trimmed);
     if (msg) {
       setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
     }
+    // Monitor for fraud keywords in background
+    if (user) monitorChat(dealId, trimmed, user.id).catch(() => {});
     setInput("");
     setSending(false);
   };
@@ -218,6 +238,25 @@ const NegotiationPage = () => {
 
           {/* Sidebar */}
           <div className="space-y-5">
+            {/* Other party trust */}
+            {otherProfile && (
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <div className="flex items-center gap-2 mb-3">
+                  <Shield size={14} strokeWidth={1.5} className="text-primary" />
+                  <h3 className="font-medium text-sm">مستوى ثقة {otherParty}</h3>
+                </div>
+                <TrustBadge score={otherProfile.trust_score} verificationLevel={otherProfile.verification_level} size="md" showScore />
+                <div className="mt-2 text-[10px] text-muted-foreground">
+                  صفقات مكتملة: {otherProfile.completed_deals || 0} • ملغاة: {otherProfile.cancelled_deals || 0}
+                </div>
+              </div>
+            )}
+
+            {/* Deal risk */}
+            {deal.risk_score !== null && deal.risk_score !== undefined && (
+              <DealRiskIndicator riskScore={deal.risk_score} riskFactors={deal.risk_factors || []} />
+            )}
+
             <div className="bg-gradient-to-b from-primary/5 to-card rounded-2xl p-5 shadow-soft border border-primary/10">
               <div className="flex items-center gap-2 mb-3">
                 <AiStar size={18} animate={false} />

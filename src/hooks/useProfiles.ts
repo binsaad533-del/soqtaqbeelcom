@@ -14,6 +14,12 @@ export interface Profile {
   last_activity: string | null;
   created_at: string;
   updated_at: string;
+  trust_score: number;
+  verification_level: string;
+  kyc_data: any;
+  completed_deals: number;
+  cancelled_deals: number;
+  disputes_count: number;
 }
 
 export function useProfiles() {

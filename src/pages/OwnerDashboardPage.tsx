@@ -5,10 +5,11 @@ import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import AiStar from "@/components/AiStar";
+import TrustBadge from "@/components/TrustBadge";
 import { cn } from "@/lib/utils";
 import {
   Users, FileText, Handshake, Shield, Settings, BarChart3,
-  Eye, CheckCircle, ChevronLeft, Search, Activity, Loader2, ShieldAlert
+  Eye, CheckCircle, ChevronLeft, Search, Activity, Loader2, ShieldAlert, AlertTriangle
 } from "lucide-react";
 import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 
@@ -134,13 +135,19 @@ const OwnerDashboardPage = () => {
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-sm text-primary font-medium">{p.full_name?.charAt(0) || "?"}</div>
                     <div>
-                      <div className="text-sm font-medium">{p.full_name || "—"}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{p.full_name || "—"}</span>
+                        <TrustBadge score={p.trust_score} verificationLevel={p.verification_level} size="sm" />
+                      </div>
                       <div className="text-xs text-muted-foreground">{p.phone || "—"} • {getUserRole(p.user_id) === "supervisor" ? "مشرف" : "عميل"}</div>
                     </div>
                   </div>
-                  <button onClick={() => toggleSuspend(p)} className={cn("text-[10px] px-2 py-0.5 rounded-md", p.is_suspended ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive")}>
-                    {p.is_suspended ? "معلّق" : "تعليق"}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {p.trust_score < 25 && <AlertTriangle size={12} className="text-destructive" />}
+                    <button onClick={() => toggleSuspend(p)} className={cn("text-[10px] px-2 py-0.5 rounded-md", p.is_suspended ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive")}>
+                      {p.is_suspended ? "معلّق" : "تعليق"}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

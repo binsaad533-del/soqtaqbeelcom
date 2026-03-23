@@ -282,9 +282,12 @@ export type Database = {
           created_at: string
           deal_details: Json | null
           deal_type: string | null
+          fraud_flags: Json | null
           id: string
           listing_id: string
           locked: boolean
+          risk_factors: Json | null
+          risk_score: number | null
           seller_id: string | null
           status: string
           updated_at: string
@@ -296,9 +299,12 @@ export type Database = {
           created_at?: string
           deal_details?: Json | null
           deal_type?: string | null
+          fraud_flags?: Json | null
           id?: string
           listing_id: string
           locked?: boolean
+          risk_factors?: Json | null
+          risk_score?: number | null
           seller_id?: string | null
           status?: string
           updated_at?: string
@@ -310,9 +316,12 @@ export type Database = {
           created_at?: string
           deal_details?: Json | null
           deal_type?: string | null
+          fraud_flags?: Json | null
           id?: string
           listing_id?: string
           locked?: boolean
+          risk_factors?: Json | null
+          risk_score?: number | null
           seller_id?: string | null
           status?: string
           updated_at?: string
@@ -364,6 +373,8 @@ export type Database = {
           district: string | null
           documents: Json | null
           featured: boolean
+          fraud_flags: Json | null
+          fraud_score: number | null
           id: string
           inventory: Json | null
           lease_duration: string | null
@@ -404,6 +415,8 @@ export type Database = {
           district?: string | null
           documents?: Json | null
           featured?: boolean
+          fraud_flags?: Json | null
+          fraud_score?: number | null
           id?: string
           inventory?: Json | null
           lease_duration?: string | null
@@ -444,6 +457,8 @@ export type Database = {
           district?: string | null
           documents?: Json | null
           featured?: boolean
+          fraud_flags?: Json | null
+          fraud_score?: number | null
           id?: string
           inventory?: Json | null
           lease_duration?: string | null
@@ -549,45 +564,63 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          cancelled_deals: number
           city: string | null
+          completed_deals: number
           created_at: string
+          disputes_count: number
           full_name: string | null
           id: string
           is_active: boolean
           is_suspended: boolean
           is_verified: boolean
+          kyc_data: Json | null
           last_activity: string | null
           phone: string | null
+          trust_score: number
           updated_at: string
           user_id: string
+          verification_level: string
         }
         Insert: {
           avatar_url?: string | null
+          cancelled_deals?: number
           city?: string | null
+          completed_deals?: number
           created_at?: string
+          disputes_count?: number
           full_name?: string | null
           id?: string
           is_active?: boolean
           is_suspended?: boolean
           is_verified?: boolean
+          kyc_data?: Json | null
           last_activity?: string | null
           phone?: string | null
+          trust_score?: number
           updated_at?: string
           user_id: string
+          verification_level?: string
         }
         Update: {
           avatar_url?: string | null
+          cancelled_deals?: number
           city?: string | null
+          completed_deals?: number
           created_at?: string
+          disputes_count?: number
           full_name?: string | null
           id?: string
           is_active?: boolean
           is_suspended?: boolean
           is_verified?: boolean
+          kyc_data?: Json | null
           last_activity?: string | null
           phone?: string | null
+          trust_score?: number
           updated_at?: string
           user_id?: string
+          verification_level?: string
         }
         Relationships: []
       }
