@@ -216,6 +216,7 @@ const CreateListingPage = () => {
       title: `${disclosure.business_activity || "مشروع"} — ${disclosure.district || ""}, ${disclosure.city || ""}`,
     } as any);
 
+    await logAudit("listing_published", "listing", id, { title: disclosure.business_activity });
     setSaving(false);
     toast.success("تم نشر الإعلان بنجاح!");
     navigate("/dashboard");
