@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Sparkles, ShieldCheck, FileText, MessageCircle, BarChart3, Camera } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
