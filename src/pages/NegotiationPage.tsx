@@ -20,6 +20,8 @@ const NegotiationPage = () => {
   const { user } = useAuthContext();
   const { getMessages, sendMessage } = useDeals();
   const { getListing } = useListings();
+  const { monitorChat, calculateDealRisk } = useFraudEngine();
+  const { getProfile } = useProfiles();
 
   const [deal, setDeal] = useState<any>(null);
   const [listing, setListing] = useState<Listing | null>(null);
