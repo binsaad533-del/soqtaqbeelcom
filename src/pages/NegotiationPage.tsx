@@ -26,6 +26,7 @@ const NegotiationPage = () => {
   const { getListing } = useListings();
   const { monitorChat, calculateDealRisk } = useFraudEngine();
   const { getProfile } = useProfiles();
+  const { getCommission } = useCommissions();
 
   const [deal, setDeal] = useState<any>(null);
   const [listing, setListing] = useState<Listing | null>(null);
@@ -35,6 +36,7 @@ const NegotiationPage = () => {
   const [sending, setSending] = useState(false);
   const [otherProfile, setOtherProfile] = useState<any>(null);
   const [showLegalPanel, setShowLegalPanel] = useState(false);
+  const [commission, setCommission] = useState<Commission | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
