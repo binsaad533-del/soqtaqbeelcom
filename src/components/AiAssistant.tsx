@@ -230,7 +230,7 @@ const AiAssistant = () => {
                 <img src={muqbilImg} alt="مقبل" className="w-10 h-10 object-contain" width={40} height={40} />
                 <div>
                   <h3 className="text-sm font-medium">مقبل</h3>
-                  <p className="text-[10px] text-muted-foreground">{role}</p>
+                  <p className="text-[10px] text-muted-foreground">شنب وطحطوح ومحلل فرص</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
