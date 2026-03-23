@@ -81,6 +81,7 @@ const LoginPage = () => {
     if (isLogin) {
       const { error } = await signIn(authEmail, password);
       if (error) {
+        reportFailedLogin(authEmail);
         setError(
           error.message === "Invalid login credentials"
             ? "بيانات الدخول غير صحيحة"
