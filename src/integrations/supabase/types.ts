@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      deal_checks: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          rating: string | null
+          raw_input: Json | null
+          requested_by: string | null
+          status: string
+          summary: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          rating?: string | null
+          raw_input?: Json | null
+          requested_by?: string | null
+          status?: string
+          summary?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          rating?: string | null
+          raw_input?: Json | null
+          requested_by?: string | null
+          status?: string
+          summary?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
