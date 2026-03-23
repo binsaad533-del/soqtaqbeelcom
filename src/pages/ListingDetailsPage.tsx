@@ -14,6 +14,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { cn } from "@/lib/utils";
+import SimulationOverlay, { isSimulationImage } from "@/components/SimulationOverlay";
 
 const ListingDetailsPage = () => {
   const { id } = useParams();
