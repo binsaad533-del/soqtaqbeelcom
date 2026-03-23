@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   ShieldCheck, AlertTriangle, TrendingUp, Lightbulb, MessageCircle,
   ChevronDown, ChevronUp, MapPin, BarChart3, Briefcase, CheckCircle2,
-  FileQuestion, Scale, Target, Loader2, Activity
+  FileQuestion, Scale, Target, Loader2, Activity, ShoppingCart, Store
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
