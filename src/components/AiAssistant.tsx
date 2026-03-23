@@ -131,7 +131,6 @@ const AiAssistant = () => {
       context: buildContext(),
       onDelta: (chunk) => {
         assistantText += chunk;
-        pendingSpeakRef.current += chunk;
         setMessages(prev => {
           const last = prev[prev.length - 1];
           if (last?.role === "assistant" && last.id === assistantId) {
