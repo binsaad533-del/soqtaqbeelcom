@@ -81,7 +81,7 @@ const SupervisorDashboardPage = () => {
               <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card hover:shadow-soft transition-all">
                 <div>
                   <div className="text-sm">{l.title || "بدون عنوان"}</div>
-                  <div className="text-xs text-muted-foreground">{l.city} • {new Date(l.created_at).toLocaleDateString("ar-SA")}</div>
+                  <div className="text-xs text-muted-foreground">{l.city} • <div className="text-xs text-muted-foreground">{l.city} • {new Date(l.created_at).toLocaleDateString("en-US")}</div></div>
                 </div>
                 <ChevronLeft size={14} className="text-muted-foreground" strokeWidth={1.3} />
               </Link>
@@ -109,7 +109,7 @@ const SupervisorDashboardPage = () => {
               <div key={d.id} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card">
                 <div>
                   <div className="text-sm">صفقة #{d.id.slice(0, 8)}</div>
-                  <div className="text-xs text-muted-foreground">{new Date(d.created_at).toLocaleDateString("ar-SA")}</div>
+                  <div className="text-xs text-muted-foreground"><div className="text-xs text-muted-foreground">{new Date(d.created_at).toLocaleDateString("en-US")}</div></div>
                 </div>
                 <span className={cn("text-[10px] px-2 py-0.5 rounded-md", d.status === "completed" ? "bg-success/10 text-success" : "bg-primary/10 text-primary")}>{d.status === "completed" ? "مكتملة" : "تفاوض"}</span>
               </div>

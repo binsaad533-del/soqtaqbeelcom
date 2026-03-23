@@ -119,7 +119,7 @@ const CommissionAdminPanel = () => {
                 <div>
                   <div className="text-sm font-medium">{c.commission_amount.toLocaleString("en-US")} ر.س</div>
                   <div className="text-[10px] text-muted-foreground">
-                    صفقة: {c.deal_amount.toLocaleString("en-US")} ر.س • {new Date(c.created_at).toLocaleDateString("ar-SA")}
+                    صفقة: {c.deal_amount.toLocaleString("en-US")} ر.س • صفقة: {c.deal_amount.toLocaleString("en-US")} ر.س • {new Date(c.created_at).toLocaleDateString("en-US")}
                   </div>
                 </div>
                 <Badge variant="outline" className={`text-[10px] ${COMMISSION_STATUS_COLORS[s]}`}>
@@ -131,9 +131,9 @@ const CommissionAdminPanel = () => {
                 <div className="px-3 pb-3 pt-1 border-t border-border/30 space-y-2">
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
                     <div><span className="text-muted-foreground">التذكيرات: </span>{c.reminder_count}</div>
-                    <div><span className="text-muted-foreground">آخر تذكير: </span>{c.last_reminder_at ? new Date(c.last_reminder_at).toLocaleDateString("ar-SA") : "—"}</div>
+                    <div><span className="text-muted-foreground">آخر تذكير: </span><div><span className="text-muted-foreground">آخر تذكير: </span>{c.last_reminder_at ? new Date(c.last_reminder_at).toLocaleDateString("en-US") : "—"}</div></div>
                     <div><span className="text-muted-foreground">إيصال: </span>{c.receipt_path ? "✓ مرفق" : "لا يوجد"}</div>
-                    <div><span className="text-muted-foreground">تأكيد الدفع: </span>{c.marked_paid_at ? new Date(c.marked_paid_at).toLocaleDateString("ar-SA") : "—"}</div>
+                    <div><span className="text-muted-foreground">تأكيد الدفع: </span><div><span className="text-muted-foreground">تأكيد الدفع: </span>{c.marked_paid_at ? new Date(c.marked_paid_at).toLocaleDateString("en-US") : "—"}</div></div>
                   </div>
                   <div className="flex gap-2">
                     {s !== "verified" && (s === "paid_unverified" || s === "paid_proof_uploaded") && (

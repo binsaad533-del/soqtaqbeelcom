@@ -299,7 +299,7 @@ const OwnerDashboardPage = () => {
                             {COMMISSION_STATUS_LABELS[s] || "غير مدفوعة"}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">{new Date(row.created_at).toLocaleDateString("ar-SA")}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground"><TableCell className="text-xs text-muted-foreground">{new Date(row.created_at).toLocaleDateString("en-US")}</TableCell></TableCell>
                         <TableCell>
                           {row.commission && s !== "verified" && (s === "paid_unverified" || s === "paid_proof_uploaded") && (
                             <Button size="sm" variant="ghost" onClick={() => handleVerify(row.commission!.id)} className="h-7 text-[10px] gap-1">

@@ -71,7 +71,7 @@ const SellerReviewsSummary = ({ reviews, className }: Props) => {
         <div key={i} className="mt-3 pt-3 border-t border-border/20">
           <p className="text-xs text-muted-foreground leading-relaxed">"{r.comment}"</p>
           <p className="text-[10px] text-muted-foreground/60 mt-1">
-            {new Date(r.created_at).toLocaleDateString("ar-SA")}
+            {new Date(r.created_at).toLocaleDateString("en-US")}
           </p>
         </div>
       ))}

@@ -129,7 +129,7 @@ const SecurityIncidentPanel = () => {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-[10px] text-muted-foreground">
-                      {new Date(incident.created_at).toLocaleDateString("ar-SA")}
+                      {new Date(incident.created_at).toLocaleDateString("en-US")}
                     </span>
                     {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                   </div>
