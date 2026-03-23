@@ -49,9 +49,24 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
               <Search size={18} strokeWidth={1.5} />
             </button>
-            <Link to="/dashboard" className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
-              <User size={18} strokeWidth={1.5} />
-            </Link>
+            {user ? (
+              <>
+                <Link to="/dashboard" className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
+                  <User size={18} strokeWidth={1.5} />
+                </Link>
+                <button
+                  onClick={async () => { await signOut(); navigate("/"); }}
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  title="تسجيل الخروج"
+                >
+                  <LogOut size={18} strokeWidth={1.5} />
+                </button>
+              </>
+            ) : (
+              <Link to="/login" className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
+                <LogIn size={18} strokeWidth={1.5} />
+              </Link>
+            )}
             <button
               className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground"
               onClick={() => setMobileOpen(!mobileOpen)}
