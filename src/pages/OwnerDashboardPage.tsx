@@ -189,6 +189,10 @@ const OwnerDashboardPage = () => {
         )}
 
         {activeTab === 4 && (
+          <CommissionAdminPanel />
+        )}
+
+        {activeTab === 5 && (
           <div className="space-y-3">
             <h2 className="font-medium mb-2">المشرفون ({supervisors.length})</h2>
             {supervisors.length === 0 ? <p className="text-center text-sm text-muted-foreground py-12">لا يوجد مشرفون</p> : supervisors.map(s => (
@@ -206,11 +210,11 @@ const OwnerDashboardPage = () => {
           </div>
         )}
 
-        {activeTab === 5 && (
+        {activeTab === 6 && (
           <SecurityIncidentPanel />
         )}
 
-        {activeTab === 6 && (
+        {activeTab === 7 && (
           <div className="space-y-3">
             <h2 className="font-medium mb-2">الإعدادات</h2>
             {["إعدادات عامة", "إعدادات العلامة التجارية", "إعدادات الإشعارات", "إعدادات الذكاء الاصطناعي", "إعدادات الأمان"].map((s, i) => (
