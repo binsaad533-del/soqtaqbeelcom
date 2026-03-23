@@ -77,7 +77,8 @@ export function useLegalConfirmation() {
     if (!user) return { error: new Error("Not authenticated"), data: null };
 
     // Verify all required confirmations are checked
-    const allChecked = REQUIRED_CONFIRMATIONS.every(c => confirmations.includes(c));
+    const requiredList = partyRole === "seller" ? SELLER_CONFIRMATIONS : REQUIRED_CONFIRMATIONS;
+    const allChecked = requiredList.every(c => confirmations.includes(c));
     if (!allChecked) return { error: new Error("All confirmations are required"), data: null };
 
     setLoading(true);
