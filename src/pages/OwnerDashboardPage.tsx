@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings, type Listing } from "@/hooks/useListings";
@@ -20,11 +20,13 @@ import {
 } from "lucide-react";
 import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 import { toast } from "sonner";
+import CrmDashboard from "@/components/crm/CrmDashboard";
 
-type Tab = "overview" | "deals" | "users" | "listings" | "security" | "settings";
+type Tab = "overview" | "crm" | "deals" | "users" | "listings" | "security" | "settings";
 
 const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: "overview", label: "نظرة عامة", icon: BarChart3 },
+  { id: "crm", label: "العملاء المحتملين", icon: Users },
   { id: "deals", label: "الصفقات والعمولات", icon: Handshake },
   { id: "users", label: "المستخدمون", icon: Users },
   { id: "listings", label: "الإعلانات", icon: FileText },
@@ -399,6 +401,9 @@ const OwnerDashboardPage = () => {
             </div>
           </div>
         )}
+
+        {/* ===== CRM ===== */}
+        {activeTab === "crm" && <CrmDashboard />}
 
         {/* ===== SECURITY ===== */}
         {activeTab === "security" && <SecurityIncidentPanel />}

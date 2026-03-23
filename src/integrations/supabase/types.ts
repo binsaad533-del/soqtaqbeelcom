@@ -89,6 +89,83 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_lead_activities: {
+        Row: {
+          action_type: string
+          actor_id: string
+          created_at: string
+          details: string | null
+          id: string
+          lead_id: string
+        }
+        Insert: {
+          action_type: string
+          actor_id: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          lead_id: string
+        }
+        Update: {
+          action_type?: string
+          actor_id?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          lead_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_leads: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          message: string | null
+          phone: string
+          source: string
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          message?: string | null
+          phone: string
+          source?: string
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          message?: string | null
+          phone?: string
+          source?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       deal_agreements: {
         Row: {
           agreement_number: string

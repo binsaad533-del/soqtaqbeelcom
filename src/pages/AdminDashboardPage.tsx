@@ -5,11 +5,12 @@ import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
-import { BarChart3, Users, FileText, Handshake, ChevronLeft, Loader2, Shield, Database } from "lucide-react";
+import { BarChart3, Users, FileText, Handshake, ChevronLeft, Loader2, Shield, Database, UserPlus } from "lucide-react";
 import BackupPanel from "@/components/BackupPanel";
 import CommissionAdminPanel from "@/components/CommissionAdminPanel";
+import CrmDashboard from "@/components/crm/CrmDashboard";
 
-type Tab = "overview" | "commissions" | "backup";
+type Tab = "overview" | "crm" | "commissions" | "backup";
 
 const AdminDashboardPage = () => {
   const { getAllListings } = useListings();
@@ -50,6 +51,7 @@ const AdminDashboardPage = () => {
         <div className="flex items-center gap-1 mb-6 bg-muted/50 rounded-xl p-1 w-fit">
           {[
             { id: "overview" as Tab, label: "نظرة عامة", icon: BarChart3 },
+            { id: "crm" as Tab, label: "العملاء المحتملين", icon: UserPlus },
             { id: "commissions" as Tab, label: "العمولات", icon: Database },
             { id: "backup" as Tab, label: "النسخ الاحتياطي", icon: Shield },
           ].map(tab => (
@@ -99,6 +101,8 @@ const AdminDashboardPage = () => {
             </div>
           </>
         )}
+
+        {activeTab === "crm" && <CrmDashboard />}
 
         {activeTab === "commissions" && <CommissionAdminPanel />}
 
