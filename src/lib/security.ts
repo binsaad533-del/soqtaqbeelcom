@@ -45,7 +45,7 @@ export function sanitizeText(input: string): string {
 
 export function sanitizeForSearch(input: string): string {
   // Remove SQL injection patterns
-  return input.replace(/[';\\--]/g, "").trim();
+  return input.replace(/[';\\\-\-]/g, "").trim();
 }
 
 // ─── File Upload Security ──────────────────────────────────
