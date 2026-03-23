@@ -135,6 +135,11 @@ const CreateListingPage = () => {
     const files = Array.from(e.target.files);
     const urls: string[] = [];
     for (const file of files) {
+      const validation = validateDocFile(file);
+      if (!validation.valid) {
+        toast.error(validation.error);
+        continue;
+      }
       const url = await uploadFile(id, file, `docs/${activeDocType}`);
       if (url) urls.push(url);
     }
