@@ -247,6 +247,7 @@ export type Database = {
       listings: {
         Row: {
           ai_rating: string | null
+          ai_structure_validation: Json | null
           ai_summary: string | null
           annual_rent: number | null
           business_activity: string | null
@@ -254,6 +255,8 @@ export type Database = {
           city: string | null
           civil_defense_license: string | null
           created_at: string
+          deal_disclosures: Json | null
+          deal_options: Json | null
           deal_type: string
           description: string | null
           disclosure_score: number | null
@@ -272,7 +275,9 @@ export type Database = {
           owner_id: string
           photos: Json | null
           price: number | null
+          primary_deal_type: string | null
           published_at: string | null
+          required_documents: Json | null
           status: string
           surveillance_cameras: string | null
           title: string | null
@@ -280,6 +285,7 @@ export type Database = {
         }
         Insert: {
           ai_rating?: string | null
+          ai_structure_validation?: Json | null
           ai_summary?: string | null
           annual_rent?: number | null
           business_activity?: string | null
@@ -287,6 +293,8 @@ export type Database = {
           city?: string | null
           civil_defense_license?: string | null
           created_at?: string
+          deal_disclosures?: Json | null
+          deal_options?: Json | null
           deal_type?: string
           description?: string | null
           disclosure_score?: number | null
@@ -305,7 +313,9 @@ export type Database = {
           owner_id: string
           photos?: Json | null
           price?: number | null
+          primary_deal_type?: string | null
           published_at?: string | null
+          required_documents?: Json | null
           status?: string
           surveillance_cameras?: string | null
           title?: string | null
@@ -313,6 +323,7 @@ export type Database = {
         }
         Update: {
           ai_rating?: string | null
+          ai_structure_validation?: Json | null
           ai_summary?: string | null
           annual_rent?: number | null
           business_activity?: string | null
@@ -320,6 +331,8 @@ export type Database = {
           city?: string | null
           civil_defense_license?: string | null
           created_at?: string
+          deal_disclosures?: Json | null
+          deal_options?: Json | null
           deal_type?: string
           description?: string | null
           disclosure_score?: number | null
@@ -338,7 +351,9 @@ export type Database = {
           owner_id?: string
           photos?: Json | null
           price?: number | null
+          primary_deal_type?: string | null
           published_at?: string | null
+          required_documents?: Json | null
           status?: string
           surveillance_cameras?: string | null
           title?: string | null
