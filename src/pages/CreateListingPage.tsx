@@ -109,6 +109,11 @@ const CreateListingPage = () => {
     const files = Array.from(e.target.files);
     const urls: string[] = [];
     for (const file of files) {
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        toast.error(validation.error);
+        continue;
+      }
       const url = await uploadFile(id, file, `photos/${activePhotoGroup}`);
       if (url) urls.push(url);
     }
