@@ -510,7 +510,7 @@ const AgreementPage = () => {
                         <span className="font-medium">الإصدار {v.version}</span>
                         {v.amendment_reason && <span className="text-xs text-muted-foreground mr-2">— {v.amendment_reason}</span>}
                       </div>
-                      <span className="text-xs text-muted-foreground">{new Date(v.created_at).toLocaleDateString("ar-SA")}</span>
+                      <span className="text-xs text-muted-foreground"><span className="text-xs text-muted-foreground">{new Date(v.created_at).toLocaleDateString("en-US")}</span></span>
                     </div>
                   ))}
                 </div>

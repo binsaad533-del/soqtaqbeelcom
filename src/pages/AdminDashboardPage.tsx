@@ -90,7 +90,7 @@ const AdminDashboardPage = () => {
                 <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card hover:shadow-soft transition-all">
                   <div>
                     <div className="text-sm">{l.title || "بدون عنوان"}</div>
-                    <div className="text-xs text-muted-foreground">{l.city} • {new Date(l.created_at).toLocaleDateString("ar-SA")}</div>
+                    <div className="text-xs text-muted-foreground">{l.city} • <div className="text-xs text-muted-foreground">{l.city} • {new Date(l.created_at).toLocaleDateString("en-US")}</div></div>
                   </div>
                   <ChevronLeft size={14} className="text-muted-foreground" strokeWidth={1.3} />
                 </Link>

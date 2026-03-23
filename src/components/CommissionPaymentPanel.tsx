@@ -185,7 +185,7 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
             <CheckCircle2 size={14} className={COMMISSION_STATUS_COLORS[status]} />
             <span className={COMMISSION_STATUS_COLORS[status]}>
               {COMMISSION_STATUS_LABELS[status]}
-              {commission.marked_paid_at && ` — ${new Date(commission.marked_paid_at).toLocaleDateString("ar-SA")}`}
+              {commission.marked_paid_at && ` — ${new Date(commission.marked_paid_at).toLocaleDateString("en-US")}`}
             </span>
           </div>
         )}
