@@ -6,6 +6,7 @@ import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown } from "l
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";
 import PasswordStrengthBar from "@/components/PasswordStrengthBar";
+import { useSecurityIncidents } from "@/hooks/useSecurityIncidents";
 
 const COUNTRY_CODES = [
   { code: "+966", flag: "🇸🇦", name: "السعودية" },
