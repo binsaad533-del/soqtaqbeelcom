@@ -7,7 +7,7 @@ import AiStar from "./AiStar";
 import DealRiskIndicator from "./DealRiskIndicator";
 import CommissionBanner from "./CommissionBanner";
 import { DEAL_TYPE_MAP, type DealTypeConfig } from "@/lib/dealStructureConfig";
-import { useLegalConfirmation, CONFIRMATION_LABELS } from "@/hooks/useLegalConfirmation";
+import { useLegalConfirmation, CONFIRMATION_LABELS, SELLER_CONFIRMATIONS } from "@/hooks/useLegalConfirmation";
 import { useDealUnderstanding, SECTIONS, type SectionKey } from "@/hooks/useDealUnderstanding";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
