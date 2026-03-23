@@ -17,7 +17,6 @@ const ListingDetailsPage = () => {
   const { createDeal, getMyDeals } = useDeals();
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
-  const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [startingDeal, setStartingDeal] = useState(false);
 
   useEffect(() => {

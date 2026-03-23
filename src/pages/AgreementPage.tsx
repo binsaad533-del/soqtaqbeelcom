@@ -55,7 +55,7 @@ interface HistoryEntry {
 
 const AgreementPage = () => {
   const { id } = useParams(); // deal ID
-  const { user, profile } = useAuthContext();
+  const { user } = useAuthContext();
   const { getListing } = useListings();
   const [agreement, setAgreement] = useState<AgreementRecord | null>(null);
   const [allVersions, setAllVersions] = useState<AgreementRecord[]>([]);
