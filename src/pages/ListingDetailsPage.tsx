@@ -108,8 +108,9 @@ const ListingDetailsPage = () => {
             {/* Images */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {photos.length > 0 ? photos.slice(0, 6).map((url, i) => (
-                <div key={i} className="aspect-[4/3] bg-card rounded-xl shadow-soft overflow-hidden">
+                <div key={i} className="aspect-[4/3] bg-card rounded-xl shadow-soft overflow-hidden relative">
                   <img src={url} alt="" className="w-full h-full object-cover" />
+                  {isSimulationImage(url) && <SimulationOverlay size="sm" />}
                 </div>
               )) : [1, 2, 3].map(i => (
                 <div key={i} className="aspect-[4/3] bg-card rounded-xl gradient-hero flex items-center justify-center shadow-soft">
