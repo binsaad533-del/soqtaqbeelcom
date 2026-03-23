@@ -77,7 +77,7 @@ const HomePage = () => {
               <AiStar size={48} />
             </div>
             <h1 className="text-3xl md:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.3 }}>
-              تقبّل الأعمال بذكاء
+              تقبيل الأعمال بذكاء
             </h1>
             <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
               منصة ذكية لعرض وتحليل وتفاوض فرص تقبّل المحلات والمشاريع التجارية في السعودية
