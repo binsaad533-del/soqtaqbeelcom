@@ -60,10 +60,12 @@ const AgreementPage = () => {
   const { id } = useParams(); // deal ID
   const { user } = useAuthContext();
   const { getListing } = useListings();
+  const { getCommission } = useCommissions();
   const [agreement, setAgreement] = useState<AgreementRecord | null>(null);
   const [allVersions, setAllVersions] = useState<AgreementRecord[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [deal, setDeal] = useState<any>(null);
+  const [commission, setCommission] = useState<Commission | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [approving, setApproving] = useState(false);
