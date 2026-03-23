@@ -262,7 +262,7 @@ function buildAnalysisPrompt(listing: any): string {
 
   // Included / Excluded
   if (listing.included?.length) {
-    sections.push("\n## يشمل التقبّل:");
+    sections.push("\n## يشمل التقبيل:");
     listing.included.forEach((item: string) => sections.push(`- ${item}`));
   }
   if (listing.excluded?.length) {
