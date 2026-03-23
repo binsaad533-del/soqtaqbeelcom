@@ -123,14 +123,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Trust */}
-      <section className="py-12 border-t border-border/50" ref={addRevealRef} style={{ opacity: 0 }}>
-        <div className="container text-center">
-          <p className="text-sm text-muted-foreground leading-relaxed max-w-lg mx-auto">
-            منصة سعودية مملوكة لشركة <span className="font-medium text-foreground">عين جساس</span> — تهدف لإتمام الصفقات بشكل احترافي وموثوق
-          </p>
-        </div>
-      </section>
 
       {/* CTA */}
       <section className="py-16 gradient-hero" ref={addRevealRef} style={{ opacity: 0 }}>
