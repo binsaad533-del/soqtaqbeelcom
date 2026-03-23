@@ -239,6 +239,68 @@ export type Database = {
         }
         Relationships: []
       }
+      deal_commissions: {
+        Row: {
+          commission_amount: number | null
+          commission_rate: number
+          created_at: string
+          deal_amount: number
+          deal_id: string
+          id: string
+          last_reminder_at: string | null
+          marked_paid_at: string | null
+          notes: string | null
+          paid_at: string | null
+          payment_status: string
+          receipt_path: string | null
+          reminder_count: number
+          seller_id: string
+          updated_at: string
+        }
+        Insert: {
+          commission_amount?: number | null
+          commission_rate?: number
+          created_at?: string
+          deal_amount?: number
+          deal_id: string
+          id?: string
+          last_reminder_at?: string | null
+          marked_paid_at?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_status?: string
+          receipt_path?: string | null
+          reminder_count?: number
+          seller_id: string
+          updated_at?: string
+        }
+        Update: {
+          commission_amount?: number | null
+          commission_rate?: number
+          created_at?: string
+          deal_amount?: number
+          deal_id?: string
+          id?: string
+          last_reminder_at?: string | null
+          marked_paid_at?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_status?: string
+          receipt_path?: string | null
+          reminder_count?: number
+          seller_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_commissions_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: true
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_history: {
         Row: {
           action: string
