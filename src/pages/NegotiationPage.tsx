@@ -4,6 +4,7 @@ import { Send, ArrowRight, Zap, Loader2, Shield, Scale } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import TrustBadge from "@/components/TrustBadge";
 import DealRiskIndicator from "@/components/DealRiskIndicator";
+import LegalConfirmationPanel from "@/components/LegalConfirmationPanel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useDeals, type NegotiationMessage } from "@/hooks/useDeals";
