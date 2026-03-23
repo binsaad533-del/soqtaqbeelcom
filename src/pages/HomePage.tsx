@@ -75,7 +75,7 @@ const HomePage = () => {
         <div className="container relative z-10">
           <div className="max-w-2xl mx-auto text-center animate-reveal">
             <div className="flex justify-center mb-6">
-              <AiStar size={48} />
+              <img src={logo} alt="سوق تقبيل" className="h-12 md:h-16 w-auto" />
             </div>
             <h1 className="text-3xl md:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.3 }}>
               تقبيل الأعمال بذكاء

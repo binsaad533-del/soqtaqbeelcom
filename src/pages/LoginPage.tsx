@@ -131,7 +131,7 @@ const LoginPage = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <AiStar size={40} />
+            <img src={logo} alt="سوق تقبيل" className="h-10 w-auto" />
           </div>
           <h1 className="text-2xl font-medium gradient-text">سوق تقبيل</h1>
           <p className="text-sm text-muted-foreground mt-2">
