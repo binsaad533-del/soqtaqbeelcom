@@ -34,6 +34,11 @@ export interface Listing {
   created_at: string;
   updated_at: string;
   published_at: string | null;
+  deal_options: any[];
+  deal_disclosures: Record<string, any>;
+  required_documents: any[];
+  primary_deal_type: string | null;
+  ai_structure_validation: any | null;
 }
 
 export function useListings() {
