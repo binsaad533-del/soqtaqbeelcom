@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { X, Send, Sparkles, ChevronLeft, Zap } from "lucide-react";
 import { useAiContext, type AiSuggestion } from "@/hooks/useAiContext";
+import { usePageData } from "@/hooks/usePageData";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import muqbilImg from "@/assets/muqbil-character.png";
@@ -89,6 +90,7 @@ const AiAssistant = () => {
   const peekTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const { greeting, role, suggestions, proactiveMessage, dismissProactive, pathname } = useAiContext();
+  const { pageData } = usePageData();
 
   useEffect(() => { setChatMode(false); setMessages([]); }, [pathname]);
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
@@ -108,8 +110,10 @@ const AiAssistant = () => {
   const now = () => new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
   const buildContext = useCallback(() => {
-    return `الصفحة الحالية: ${pathname}\nدور المستخدم: ${role}`;
-  }, [pathname, role]);
+    let ctx = `الصفحة الحالية: ${pathname}\nدور المستخدم: ${role}`;
+    if (pageData) ctx += `\n\n${pageData}`;
+    return ctx;
+  }, [pathname, role, pageData]);
 
   const sendMessage = useCallback((text: string) => {
     const userMsg: ChatMsg = { id: String(Date.now()), role: "user", content: text, time: now() };
