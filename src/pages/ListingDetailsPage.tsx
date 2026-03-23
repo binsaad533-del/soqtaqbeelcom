@@ -100,7 +100,7 @@ const ListingDetailsPage = () => {
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/marketplace" className="hover:text-foreground transition-colors">السوق</Link>
           <span>/</span>
-          <span className="text-foreground">{listing.title || listing.business_activity || "فرصة تقبّل"}</span>
+          <span className="text-foreground">{listing.title || listing.business_activity || "فرصة تقبيل"}</span>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
