@@ -25,6 +25,10 @@ const MarketplacePage = () => {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
 
+  const handleSmartSearch = (partial: Partial<FilterState>, _message: string) => {
+    setFilters(prev => ({ ...prev, ...partial }));
+  };
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
