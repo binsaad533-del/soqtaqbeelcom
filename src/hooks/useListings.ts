@@ -39,6 +39,8 @@ export interface Listing {
   required_documents: any[];
   primary_deal_type: string | null;
   ai_structure_validation: any | null;
+  deleted_at: string | null;
+  deleted_by: string | null;
 }
 
 export function useListings() {
