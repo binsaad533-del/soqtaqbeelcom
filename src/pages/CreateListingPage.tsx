@@ -1,8 +1,11 @@
-import { useState } from "react";
-import { Check, Upload, Camera, FileText, ClipboardList, Eye, ArrowLeft, ArrowRight, Plus, X, Trash2 } from "lucide-react";
+import { useState, useCallback, useRef } from "react";
+import { Check, Upload, Camera, FileText, ClipboardList, Eye, ArrowLeft, ArrowRight, Plus, Trash2, Loader2 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useListings } from "@/hooks/useListings";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const steps = [
   { label: "نوع التقبّل", icon: ClipboardList },
@@ -31,31 +34,141 @@ const photoGroups = [
   { id: "equipment", label: "المعدات والأجهزة", desc: "صور قريبة للمعدات والأثاث والأجهزة", min: 4 },
 ];
 
-const mockInventory = [
-  { id: "1", name: "شواية صناعية", qty: 2, condition: "جيدة", category: "معدات مطبخ", included: true },
-  { id: "2", name: "ثلاجة عرض", qty: 3, condition: "جيدة", category: "تبريد", included: true },
-  { id: "3", name: "طاولة طعام مع كراسي", qty: 8, condition: "متوسطة", category: "أثاث", included: true },
-  { id: "4", name: "مقلاة صناعية", qty: 1, condition: "جيدة", category: "معدات مطبخ", included: true },
-  { id: "5", name: "جهاز كاشير", qty: 1, condition: "جيدة", category: "أجهزة", included: true },
-  { id: "6", name: "لوحة إعلانية خارجية", qty: 1, condition: "جيدة", category: "ديكور", included: true },
-  { id: "7", name: "مكيف سبليت", qty: 2, condition: "متوسطة", category: "تكييف", included: true },
+const docTypes = [
+  "عقد الإيجار",
+  "السجل التجاري",
+  "رخصة البلدية",
+  "رخصة الدفاع المدني",
+  "فواتير شراء المعدات",
+  "سجلات الصيانة",
+  "مستندات أخرى",
 ];
+
+interface InventoryItem {
+  id: string;
+  name: string;
+  qty: number;
+  condition: string;
+  category: string;
+  included: boolean;
+}
 
 const CreateListingPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedDealType, setSelectedDealType] = useState("");
-  const [photos, setPhotos] = useState<Record<string, number>>({});
+  const [photos, setPhotos] = useState<Record<string, string[]>>({});
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzed, setAnalyzed] = useState(false);
-  const [inventory, setInventory] = useState(mockInventory);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [uploadedDocs, setUploadedDocs] = useState<Record<string, string[]>>({});
+  const [listingId, setListingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const handleNext = () => {
+  // Disclosure fields
+  const [disclosure, setDisclosure] = useState({
+    business_activity: "",
+    city: "",
+    district: "",
+    price: "",
+    annual_rent: "",
+    lease_duration: "",
+    lease_paid_period: "",
+    lease_remaining: "",
+    liabilities: "",
+    overdue_salaries: "",
+    overdue_rent: "",
+    municipality_license: "",
+    civil_defense_license: "",
+    surveillance_cameras: "",
+  });
+
+  const { createListing, updateListing, uploadFile, loading } = useListings();
+  const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activePhotoGroup, setActivePhotoGroup] = useState<string | null>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
+  const [activeDocType, setActiveDocType] = useState<string | null>(null);
+
+  // Create draft listing on first step completion
+  const ensureListing = useCallback(async () => {
+    if (listingId) return listingId;
+    const { data, error } = await createListing({ deal_type: selectedDealType, status: "draft" });
+    if (error || !data) {
+      toast.error("حدث خطأ أثناء حفظ المسودة");
+      return null;
+    }
+    const id = (data as any).id;
+    setListingId(id);
+    return id;
+  }, [listingId, selectedDealType, createListing]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !activePhotoGroup) return;
+    const id = await ensureListing();
+    if (!id) return;
+    setSaving(true);
+    const files = Array.from(e.target.files);
+    const urls: string[] = [];
+    for (const file of files) {
+      const url = await uploadFile(id, file, `photos/${activePhotoGroup}`);
+      if (url) urls.push(url);
+    }
+    setPhotos(prev => ({
+      ...prev,
+      [activePhotoGroup]: [...(prev[activePhotoGroup] || []), ...urls],
+    }));
+    // Save to DB
+    const allPhotos = { ...photos, [activePhotoGroup]: [...(photos[activePhotoGroup] || []), ...urls] };
+    await updateListing(id, { photos: allPhotos } as any);
+    setSaving(false);
+    e.target.value = "";
+  };
+
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !activeDocType) return;
+    const id = await ensureListing();
+    if (!id) return;
+    setSaving(true);
+    const files = Array.from(e.target.files);
+    const urls: string[] = [];
+    for (const file of files) {
+      const url = await uploadFile(id, file, `docs/${activeDocType}`);
+      if (url) urls.push(url);
+    }
+    setUploadedDocs(prev => ({
+      ...prev,
+      [activeDocType]: [...(prev[activeDocType] || []), ...urls],
+    }));
+    const allDocs = { ...uploadedDocs, [activeDocType]: [...(uploadedDocs[activeDocType] || []), ...urls] };
+    await updateListing(id, { documents: Object.entries(allDocs).map(([type, files]) => ({ type, files })) } as any);
+    setSaving(false);
+    e.target.value = "";
+  };
+
+  const handleAnalyze = async () => {
+    setAnalyzing(true);
+    // AI analysis simulation - in production this calls the AI edge function
+    setTimeout(() => {
+      setInventory([
+        { id: "1", name: "شواية صناعية", qty: 2, condition: "جيدة", category: "معدات مطبخ", included: true },
+        { id: "2", name: "ثلاجة عرض", qty: 3, condition: "جيدة", category: "تبريد", included: true },
+        { id: "3", name: "طاولة طعام مع كراسي", qty: 8, condition: "متوسطة", category: "أثاث", included: true },
+        { id: "4", name: "مقلاة صناعية", qty: 1, condition: "جيدة", category: "معدات مطبخ", included: true },
+        { id: "5", name: "جهاز كاشير", qty: 1, condition: "جيدة", category: "أجهزة", included: true },
+        { id: "6", name: "لوحة إعلانية خارجية", qty: 1, condition: "جيدة", category: "ديكور", included: true },
+        { id: "7", name: "مكيف سبليت", qty: 2, condition: "متوسطة", category: "تكييف", included: true },
+      ]);
+      setAnalyzing(false);
+      setAnalyzed(true);
+    }, 3000);
+  };
+
+  const handleNext = async () => {
+    if (currentStep === 0) {
+      await ensureListing();
+    }
     if (currentStep === 2 && !analyzed) {
-      setAnalyzing(true);
-      setTimeout(() => {
-        setAnalyzing(false);
-        setAnalyzed(true);
-      }, 3000);
+      handleAnalyze();
       return;
     }
     setCurrentStep(Math.min(steps.length - 1, currentStep + 1));
@@ -63,13 +176,49 @@ const CreateListingPage = () => {
 
   const handleBack = () => setCurrentStep(Math.max(0, currentStep - 1));
 
-  const totalPhotos = Object.values(photos).reduce((a, b) => a + b, 0);
+  const handlePublish = async () => {
+    const id = listingId;
+    if (!id) return;
+    setSaving(true);
+
+    // Calculate disclosure score
+    const fields = Object.values(disclosure);
+    const filled = fields.filter(v => v.trim() !== "").length;
+    const score = Math.round((filled / fields.length) * 100);
+
+    await updateListing(id, {
+      ...disclosure,
+      price: disclosure.price ? Number(disclosure.price) : null,
+      annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+      disclosure_score: score,
+      inventory: inventory.filter(i => i.included),
+      status: "published",
+      published_at: new Date().toISOString(),
+      title: `${disclosure.business_activity || "مشروع"} — ${disclosure.district || ""}, ${disclosure.city || ""}`,
+    } as any);
+
+    setSaving(false);
+    toast.success("تم نشر الإعلان بنجاح!");
+    navigate("/dashboard");
+  };
+
+  const totalPhotos = Object.values(photos).reduce((a, b) => a + b.length, 0);
+
+  const disclosureScore = (() => {
+    const fields = Object.values(disclosure);
+    const filled = fields.filter(v => v.trim() !== "").length;
+    return Math.round((filled / fields.length) * 100);
+  })();
 
   return (
     <div className="py-8">
       <div className="container max-w-3xl">
         <h1 className="text-2xl font-medium mb-2">إضافة فرصة تقبّل</h1>
         <p className="text-sm text-muted-foreground mb-8">أنشئ إعلان تقبّل احترافي بمساعدة الذكاء الاصطناعي</p>
+
+        {/* Hidden file inputs */}
+        <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
+        <input ref={docInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" multiple className="hidden" onChange={handleDocUpload} />
 
         {/* Steps indicator */}
         <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-2">
@@ -87,6 +236,14 @@ const CreateListingPage = () => {
             </div>
           ))}
         </div>
+
+        {/* Saving indicator */}
+        {saving && (
+          <div className="flex items-center gap-2 text-xs text-primary mb-4">
+            <Loader2 size={14} className="animate-spin" />
+            جاري الحفظ...
+          </div>
+        )}
 
         {/* Step Content */}
         <div className="bg-card rounded-2xl shadow-soft p-6 md:p-8 min-h-[400px]">
@@ -130,23 +287,36 @@ const CreateListingPage = () => {
               </div>
               <div className="space-y-4">
                 {photoGroups.map((group) => (
-                  <div key={group.id} className="flex items-center justify-between p-4 rounded-xl border border-border/50">
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">{group.label}</div>
-                      <div className="text-xs text-muted-foreground">{group.desc} — {group.min} صور على الأقل</div>
+                  <div key={group.id} className="p-4 rounded-xl border border-border/50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">{group.label}</div>
+                        <div className="text-xs text-muted-foreground">{group.desc} — {group.min} صور على الأقل</div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setActivePhotoGroup(group.id);
+                          fileInputRef.current?.click();
+                        }}
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all active:scale-[0.97]",
+                          (photos[group.id]?.length || 0) >= group.min
+                            ? "bg-success/10 text-success"
+                            : "bg-accent text-accent-foreground"
+                        )}
+                      >
+                        <Upload size={14} strokeWidth={1.3} />
+                        {(photos[group.id]?.length || 0) > 0 ? `${photos[group.id].length} صورة` : "رفع"}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setPhotos(p => ({ ...p, [group.id]: (p[group.id] || 0) + 2 }))}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all active:scale-[0.97]",
-                        (photos[group.id] || 0) >= group.min
-                          ? "bg-success/10 text-success"
-                          : "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      <Upload size={14} strokeWidth={1.3} />
-                      {(photos[group.id] || 0) > 0 ? `${photos[group.id]} صورة` : "رفع"}
-                    </button>
+                    {/* Photo thumbnails */}
+                    {photos[group.id]?.length > 0 && (
+                      <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+                        {photos[group.id].map((url, i) => (
+                          <img key={i} src={url} alt="" className="w-16 h-16 rounded-lg object-cover shrink-0 border border-border/30" />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -171,12 +341,14 @@ const CreateListingPage = () => {
                     <Check size={24} strokeWidth={1.3} className="text-success" />
                   </div>
                   <h2 className="font-medium mb-2">اكتمل التحليل</h2>
-                  <p className="text-sm text-muted-foreground max-w-sm mb-4">تم اكتشاف {mockInventory.length} عنصر من الصور. راجع الجرد في الخطوة التالية.</p>
+                  <p className="text-sm text-muted-foreground max-w-sm mb-4">تم اكتشاف {inventory.length} عنصر من الصور. راجع الجرد في الخطوة التالية.</p>
                   <div className="flex flex-wrap gap-2 justify-center">
-                    {mockInventory.slice(0, 4).map(item => (
+                    {inventory.slice(0, 4).map(item => (
                       <span key={item.id} className="text-xs bg-accent/60 text-accent-foreground px-3 py-1 rounded-lg">{item.name}</span>
                     ))}
-                    <span className="text-xs text-muted-foreground px-2 py-1">+{mockInventory.length - 4} عناصر أخرى</span>
+                    {inventory.length > 4 && (
+                      <span className="text-xs text-muted-foreground px-2 py-1">+{inventory.length - 4} عناصر أخرى</span>
+                    )}
                   </div>
                 </>
               ) : (
@@ -197,7 +369,10 @@ const CreateListingPage = () => {
                   <h2 className="font-medium">مراجعة الجرد</h2>
                   <p className="text-xs text-muted-foreground">{inventory.filter(i => i.included).length} عنصر مشمول — {inventory.filter(i => !i.included).length} مستثنى</p>
                 </div>
-                <button className="flex items-center gap-1 text-xs text-primary hover:underline">
+                <button
+                  onClick={() => setInventory(prev => [...prev, { id: String(Date.now()), name: "عنصر جديد", qty: 1, condition: "جيدة", category: "أخرى", included: true }])}
+                  className="flex items-center gap-1 text-xs text-primary hover:underline"
+                >
                   <Plus size={14} strokeWidth={1.3} />
                   أضف عنصراً
                 </button>
@@ -243,21 +418,24 @@ const CreateListingPage = () => {
             <div className="space-y-4">
               <h2 className="font-medium mb-1">المستندات الداعمة</h2>
               <p className="text-sm text-muted-foreground mb-4">ارفع المستندات التي تدعم الإعلان — الذكاء الاصطناعي سيستخرج البيانات تلقائياً</p>
-              {[
-                "عقد الإيجار",
-                "السجل التجاري",
-                "رخصة البلدية",
-                "رخصة الدفاع المدني",
-                "فواتير شراء المعدات",
-                "سجلات الصيانة",
-                "مستندات أخرى",
-              ].map((doc, i) => (
+              {docTypes.map((doc, i) => (
                 <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-border/50">
                   <div className="flex items-center gap-2">
                     <FileText size={16} strokeWidth={1.3} className="text-muted-foreground" />
-                    <span className="text-sm">{doc}</span>
+                    <div>
+                      <span className="text-sm">{doc}</span>
+                      {uploadedDocs[doc]?.length > 0 && (
+                        <span className="text-[10px] text-success mr-2">✓ {uploadedDocs[doc].length} ملف</span>
+                      )}
+                    </div>
                   </div>
-                  <button className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]">
+                  <button
+                    onClick={() => {
+                      setActiveDocType(doc);
+                      docInputRef.current?.click();
+                    }}
+                    className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]"
+                  >
                     <Upload size={14} strokeWidth={1.3} />
                     رفع
                   </button>
@@ -272,28 +450,28 @@ const CreateListingPage = () => {
               <h2 className="font-medium mb-1">بيانات الإفصاح</h2>
               <p className="text-sm text-muted-foreground mb-4">أكمل بيانات الإفصاح لتعزيز ثقة المشترين</p>
               <div className="space-y-3">
-                <FormField label="نوع النشاط" placeholder="مثال: مطعم وجبات سريعة" />
+                <FormField label="نوع النشاط" placeholder="مثال: مطعم وجبات سريعة" value={disclosure.business_activity} onChange={v => setDisclosure(p => ({ ...p, business_activity: v }))} />
                 <div className="grid grid-cols-2 gap-3">
-                  <FormField label="المدينة" placeholder="الرياض" />
-                  <FormField label="الحي" placeholder="حي النسيم" />
+                  <FormField label="المدينة" placeholder="الرياض" value={disclosure.city} onChange={v => setDisclosure(p => ({ ...p, city: v }))} />
+                  <FormField label="الحي" placeholder="حي النسيم" value={disclosure.district} onChange={v => setDisclosure(p => ({ ...p, district: v }))} />
                 </div>
-                <FormField label="السعر المطلوب" placeholder="180000" suffix="ر.س" />
+                <FormField label="السعر المطلوب" placeholder="180000" suffix="ر.س" value={disclosure.price} onChange={v => setDisclosure(p => ({ ...p, price: v }))} />
                 <div className="grid grid-cols-2 gap-3">
-                  <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" />
-                  <FormField label="مدة العقد" placeholder="3 سنوات" />
+                  <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" value={disclosure.annual_rent} onChange={v => setDisclosure(p => ({ ...p, annual_rent: v }))} />
+                  <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={v => setDisclosure(p => ({ ...p, lease_duration: v }))} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <FormField label="الفترة المدفوعة" placeholder="1.5 سنة" />
-                  <FormField label="المتبقي من العقد" placeholder="1.5 سنة" />
+                  <FormField label="الفترة المدفوعة" placeholder="1.5 سنة" value={disclosure.lease_paid_period} onChange={v => setDisclosure(p => ({ ...p, lease_paid_period: v }))} />
+                  <FormField label="المتبقي من العقد" placeholder="1.5 سنة" value={disclosure.lease_remaining} onChange={v => setDisclosure(p => ({ ...p, lease_remaining: v }))} />
                 </div>
-                <FormField label="الالتزامات المالية" placeholder="لا توجد" />
-                <FormField label="رواتب متأخرة" placeholder="لا يوجد" />
-                <FormField label="إيجار متأخر" placeholder="لا يوجد" />
+                <FormField label="الالتزامات المالية" placeholder="لا توجد" value={disclosure.liabilities} onChange={v => setDisclosure(p => ({ ...p, liabilities: v }))} />
+                <FormField label="رواتب متأخرة" placeholder="لا يوجد" value={disclosure.overdue_salaries} onChange={v => setDisclosure(p => ({ ...p, overdue_salaries: v }))} />
+                <FormField label="إيجار متأخر" placeholder="لا يوجد" value={disclosure.overdue_rent} onChange={v => setDisclosure(p => ({ ...p, overdue_rent: v }))} />
                 <div className="grid grid-cols-2 gap-3">
-                  <SelectField label="رخصة البلدية" options={["سارية", "منتهية", "غير متوفرة"]} />
-                  <SelectField label="الدفاع المدني" options={["سارية", "منتهية", "غير متوفرة"]} />
+                  <SelectField label="رخصة البلدية" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.municipality_license} onChange={v => setDisclosure(p => ({ ...p, municipality_license: v }))} />
+                  <SelectField label="الدفاع المدني" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.civil_defense_license} onChange={v => setDisclosure(p => ({ ...p, civil_defense_license: v }))} />
                 </div>
-                <SelectField label="كاميرات مراقبة" options={["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"]} />
+                <SelectField label="كاميرات مراقبة" options={["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"]} value={disclosure.surveillance_cameras} onChange={v => setDisclosure(p => ({ ...p, surveillance_cameras: v }))} />
               </div>
             </div>
           )}
@@ -305,22 +483,48 @@ const CreateListingPage = () => {
                 <AiStar size={28} />
                 <div>
                   <h2 className="font-medium">ملخص الإعلان</h2>
-                  <p className="text-xs text-muted-foreground">ملخص تم إنشاؤه بالذكاء الاصطناعي — راجعه قبل النشر</p>
+                  <p className="text-xs text-muted-foreground">راجع البيانات قبل النشر</p>
                 </div>
               </div>
               <div className="bg-accent/30 rounded-xl p-5">
                 <p className="text-sm leading-relaxed text-foreground">
-                  مطعم شاورما مجهّز بالكامل في موقع تجاري نشط بحي النسيم، الرياض. يشمل التقبّل جميع المعدات والأجهزة والديكور والاسم التجاري والسجل التجاري. عدد الأصول المؤكّدة: 7 عناصر. الإيجار السنوي 45,000 ريال مع متبقي عقد 1.5 سنة. رخصة البلدية والدفاع المدني ساريتان. السعر المطلوب 180,000 ريال.
+                  {disclosure.business_activity || "مشروع"} في {disclosure.district || "—"}, {disclosure.city || "—"}.
+                  {selectedDealType === "full" ? " يشمل التقبّل جميع المعدات والأجهزة والديكور." : ` نوع التقبّل: ${dealTypes.find(d => d.id === selectedDealType)?.label || selectedDealType}.`}
+                  {" "}عدد الأصول المؤكّدة: {inventory.filter(i => i.included).length} عنصر.
+                  {disclosure.annual_rent && ` الإيجار السنوي ${disclosure.annual_rent} ريال.`}
+                  {disclosure.lease_remaining && ` متبقي من العقد ${disclosure.lease_remaining}.`}
+                  {disclosure.price && ` السعر المطلوب ${Number(disclosure.price).toLocaleString()} ريال.`}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full rounded-full gradient-primary" style={{ width: "92%" }} />
+                  <div className="h-full rounded-full gradient-primary" style={{ width: `${disclosureScore}%` }} />
                 </div>
-                <span className="text-xs text-muted-foreground">إفصاح 92%</span>
+                <span className="text-xs text-muted-foreground">إفصاح {disclosureScore}%</span>
               </div>
-              <Button className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
-                <Check size={16} strokeWidth={1.5} />
+
+              {/* Summary cards */}
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="p-3 rounded-xl bg-muted/50">
+                  <div className="text-lg font-medium text-foreground">{totalPhotos}</div>
+                  <div className="text-[10px] text-muted-foreground">صورة</div>
+                </div>
+                <div className="p-3 rounded-xl bg-muted/50">
+                  <div className="text-lg font-medium text-foreground">{inventory.filter(i => i.included).length}</div>
+                  <div className="text-[10px] text-muted-foreground">أصل مشمول</div>
+                </div>
+                <div className="p-3 rounded-xl bg-muted/50">
+                  <div className="text-lg font-medium text-foreground">{Object.values(uploadedDocs).flat().length}</div>
+                  <div className="text-[10px] text-muted-foreground">مستند</div>
+                </div>
+              </div>
+
+              <Button
+                onClick={handlePublish}
+                disabled={saving || loading}
+                className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
+              >
+                {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
                 نشر الإعلان
               </Button>
             </div>
@@ -341,7 +545,7 @@ const CreateListingPage = () => {
           {currentStep < steps.length - 1 && (
             <Button
               onClick={handleNext}
-              disabled={currentStep === 0 && !selectedDealType}
+              disabled={(currentStep === 0 && !selectedDealType) || saving}
               className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
             >
               {currentStep === 2 && !analyzed ? "ابدأ التحليل" : "التالي"}
@@ -354,13 +558,17 @@ const CreateListingPage = () => {
   );
 };
 
-const FormField = ({ label, placeholder, suffix }: { label: string; placeholder: string; suffix?: string }) => (
+const FormField = ({ label, placeholder, suffix, value, onChange }: {
+  label: string; placeholder: string; suffix?: string; value: string; onChange: (v: string) => void;
+}) => (
   <div>
     <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
     <div className="relative">
       <input
         type="text"
         placeholder={placeholder}
+        value={value}
+        onChange={e => onChange(e.target.value)}
         className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20 transition-all"
       />
       {suffix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{suffix}</span>}
@@ -368,10 +576,16 @@ const FormField = ({ label, placeholder, suffix }: { label: string; placeholder:
   </div>
 );
 
-const SelectField = ({ label, options }: { label: string; options: string[] }) => (
+const SelectField = ({ label, options, value, onChange }: {
+  label: string; options: string[]; value: string; onChange: (v: string) => void;
+}) => (
   <div>
     <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
-    <select className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20 transition-all">
+    <select
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20 transition-all"
+    >
       <option value="">اختر...</option>
       {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
     </select>
