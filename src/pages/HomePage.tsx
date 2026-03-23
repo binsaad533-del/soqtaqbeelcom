@@ -77,7 +77,7 @@ const HomePage = () => {
             <div className="flex justify-center mb-6">
               <img src={logo} alt="سوق تقبيل" className="h-16 md:h-20 w-auto mx-auto" />
             </div>
-            <h1 className="text-3xl md:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.3 }}>
+            <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-5" style={{ lineHeight: 1.3, fontFamily: "'Cairo', sans-serif" }}>
               تقبيل الأعمال بذكاء
             </h1>
             <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
