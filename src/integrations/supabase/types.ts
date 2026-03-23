@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      backup_logs: {
+        Row: {
+          backup_type: string
+          completed_at: string | null
+          error_message: string | null
+          id: string
+          initiated_by: string | null
+          metadata: Json | null
+          size_bytes: number | null
+          started_at: string
+          status: string
+          tables_included: Json | null
+        }
+        Insert: {
+          backup_type?: string
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          initiated_by?: string | null
+          metadata?: Json | null
+          size_bytes?: number | null
+          started_at?: string
+          status?: string
+          tables_included?: Json | null
+        }
+        Update: {
+          backup_type?: string
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          initiated_by?: string | null
+          metadata?: Json | null
+          size_bytes?: number | null
+          started_at?: string
+          status?: string
+          tables_included?: Json | null
+        }
+        Relationships: []
+      }
       deal_agreements: {
         Row: {
           agreement_number: string
