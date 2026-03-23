@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import AiStar from "./AiStar";
-import ainJasaasLogo from "@/assets/ain-jasaas-logo.png";
+
 
 const Footer = () => {
   return (
