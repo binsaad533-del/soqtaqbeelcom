@@ -39,7 +39,7 @@ const HomePage = () => {
     <div className="relative">
 
       {/* Hero */}
-      <section className="gradient-hero py-20 md:py-32 relative overflow-hidden" ref={heroRef}>
+      <section className="gradient-hero py-20 md:py-32 relative overflow-hidden">
         <div className="container relative z-10">
           <div className="max-w-2xl mx-auto text-center animate-reveal">
             <div className="flex justify-center mb-6">
