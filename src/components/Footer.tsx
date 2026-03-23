@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SocialIcons from "./SocialIcons";
 
 const footerLinks = [
   { label: "الرئيسية", path: "/" },
@@ -29,6 +30,9 @@ const Footer = () => {
             </span>
           ))}
         </div>
+
+        {/* Social Icons */}
+        <SocialIcons className="justify-center" />
 
         {/* Line 2: Brand statement */}
         <p className="text-[12px] text-muted-foreground/70">
