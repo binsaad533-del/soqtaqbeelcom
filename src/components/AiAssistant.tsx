@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Sparkles, ChevronLeft, Zap } from "lucide-react";
+import { X, Send, Sparkles, ChevronLeft, Zap, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { useAiContext, type AiSuggestion } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
+import { useVoiceChat } from "@/hooks/useVoiceChat";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import muqbilImg from "@/assets/muqbil-character.png";
@@ -88,20 +89,36 @@ const AiAssistant = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const peekTimer = useRef<ReturnType<typeof setTimeout>>();
+  const pendingSpeakRef = useRef<string>("");
 
   const { greeting, role, suggestions, proactiveMessage, dismissProactive, pathname } = useAiContext();
   const { pageData } = usePageData();
+
+  const handleVoiceTranscript = useCallback((text: string) => {
+    setChatMode(true);
+    sendMessageRef.current?.(text);
+  }, []);
+
+  const {
+    isListening,
+    isSpeaking,
+    voiceEnabled,
+    supportsRecognition,
+    startListening,
+    stopListening,
+    speak,
+    stopSpeaking,
+    toggleVoice,
+  } = useVoiceChat({ onTranscript: handleVoiceTranscript });
 
   useEffect(() => { setChatMode(false); setMessages([]); }, [pathname]);
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
   useEffect(() => { chatMode && inputRef.current?.focus(); }, [chatMode]);
 
-  // Peek behavior: show مقبل peeking after idle
   useEffect(() => {
     if (open || hasInteracted) return;
     peekTimer.current = setTimeout(() => {
       setPeeking(true);
-      // Auto-hide after 5s
       setTimeout(() => setPeeking(false), 5000);
     }, 6000);
     return () => { clearTimeout(peekTimer.current); setPeeking(false); };
@@ -127,12 +144,14 @@ const AiAssistant = () => {
 
     let assistantText = "";
     const assistantId = String(Date.now() + 1);
+    pendingSpeakRef.current = "";
 
     streamChat({
       messages: allMessages,
       context: buildContext(),
       onDelta: (chunk) => {
         assistantText += chunk;
+        pendingSpeakRef.current += chunk;
         setMessages(prev => {
           const last = prev[prev.length - 1];
           if (last?.role === "assistant" && last.id === assistantId) {
@@ -141,13 +160,24 @@ const AiAssistant = () => {
           return [...prev, { id: assistantId, role: "assistant", content: assistantText, time: now() }];
         });
       },
-      onDone: () => setStreaming(false),
+      onDone: () => {
+        setStreaming(false);
+        // Speak the full response when done
+        if (pendingSpeakRef.current) {
+          speak(pendingSpeakRef.current);
+          pendingSpeakRef.current = "";
+        }
+      },
       onError: (err) => {
         setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: `⚠️ ${err}`, time: now() }]);
         setStreaming(false);
       },
     });
-  }, [messages, buildContext]);
+  }, [messages, buildContext, speak]);
+
+  // Keep ref updated for voice callback
+  const sendMessageRef = useRef(sendMessage);
+  sendMessageRef.current = sendMessage;
 
   const handleSend = () => {
     if (!input.trim() || streaming) return;
@@ -168,6 +198,15 @@ const AiAssistant = () => {
     dismissProactive();
   };
 
+  const handleMicClick = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      if (isSpeaking) stopSpeaking();
+      startListening();
+    }
+  };
+
   return (
     <>
       {/* Proactive tooltip with مقبل peeking */}
@@ -176,15 +215,8 @@ const AiAssistant = () => {
           className="fixed bottom-16 left-0 z-50 flex items-end gap-0 cursor-pointer animate-fade-in"
           onClick={handleOpen}
         >
-          {/* مقبل peeking from side */}
           <div className="relative -ml-6 transition-transform duration-500 ease-out hover:translate-x-2">
-            <img
-              src={muqbilWaveImg}
-              alt="مقبل"
-              className="w-20 h-20 object-contain drop-shadow-md"
-              width={80}
-              height={80}
-            />
+            <img src={muqbilWaveImg} alt="مقبل" className="w-20 h-20 object-contain drop-shadow-md" width={80} height={80} />
           </div>
           {proactiveMessage && (
             <div className="max-w-60 mb-8 mr-2">
@@ -197,27 +229,20 @@ const AiAssistant = () => {
                 </button>
                 <p className="text-[11px] text-foreground/80 leading-relaxed pr-3">{proactiveMessage}</p>
               </div>
-              {/* Speech bubble arrow */}
               <div className="w-2.5 h-2.5 bg-card border-b border-l border-border/40 rotate-[-45deg] absolute bottom-6 left-16" />
             </div>
           )}
         </div>
       )}
 
-      {/* مقبل character button — peeks from left edge */}
+      {/* مقبل character button */}
       {!open && !peeking && !proactiveMessage && (
         <button
           onClick={handleOpen}
           className="fixed bottom-6 left-0 z-50 flex items-center gap-1.5 group transition-all duration-300"
         >
           <div className="relative -ml-3 group-hover:ml-0 transition-all duration-300">
-            <img
-              src={muqbilImg}
-              alt="مقبل"
-              className="w-14 h-14 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
-              width={56}
-              height={56}
-            />
+            <img src={muqbilImg} alt="مقبل" className="w-14 h-14 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300" width={56} height={56} />
           </div>
           <span className="text-[11px] font-medium text-foreground/70 bg-card/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full shadow-soft border border-border/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
             مقبل — مساعدك الذكي
@@ -228,7 +253,7 @@ const AiAssistant = () => {
       {/* Chat Panel */}
       {open && (
         <div className="fixed bottom-4 left-4 z-50 w-[380px] max-h-[520px] bg-card rounded-2xl shadow-soft-lg border border-border/40 flex flex-col animate-fade-in overflow-hidden">
-          {/* Header with مقبل */}
+          {/* Header */}
           <div className="p-3.5 border-b border-border/30 bg-gradient-to-l from-primary/5 to-transparent">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -243,12 +268,25 @@ const AiAssistant = () => {
                   <p className="text-[10px] text-muted-foreground">{role}</p>
                 </div>
               </div>
-                <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                {/* Voice toggle */}
+                <button
+                  onClick={toggleVoice}
+                  className={cn(
+                    "p-1.5 rounded-lg transition-colors",
+                    voiceEnabled
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground/50 hover:text-muted-foreground"
+                  )}
+                  title={voiceEnabled ? "إيقاف الصوت" : "تفعيل الصوت"}
+                >
+                  {voiceEnabled ? <Volume2 size={14} strokeWidth={1.5} /> : <VolumeX size={14} strokeWidth={1.5} />}
+                </button>
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                   <span className="text-[10px] text-success">نشط</span>
                 </div>
-                <button onClick={() => setOpen(false)} className="text-muted-foreground/60 hover:text-foreground transition-colors">
+                <button onClick={() => { setOpen(false); stopSpeaking(); stopListening(); }} className="text-muted-foreground/60 hover:text-foreground transition-colors">
                   <X size={14} strokeWidth={1.5} />
                 </button>
               </div>
@@ -299,6 +337,13 @@ const AiAssistant = () => {
                         <div className="flex items-center gap-1.5 mb-1.5">
                           <img src={muqbilImg} alt="مقبل" className="w-5 h-5 object-contain" width={20} height={20} />
                           <span className="text-[10px] text-accent-foreground font-medium">مقبل</span>
+                          {isSpeaking && (
+                            <span className="flex items-center gap-0.5 mr-1">
+                              <span className="w-1 h-2 bg-primary/60 rounded-full animate-pulse" />
+                              <span className="w-1 h-3 bg-primary/60 rounded-full animate-pulse" style={{ animationDelay: "100ms" }} />
+                              <span className="w-1 h-2 bg-primary/60 rounded-full animate-pulse" style={{ animationDelay: "200ms" }} />
+                            </span>
+                          )}
                         </div>
                       )}
                       {msg.content}
@@ -322,17 +367,48 @@ const AiAssistant = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Listening indicator */}
+                {isListening && (
+                  <div className="mr-auto max-w-[85%]">
+                    <div className="rounded-2xl px-3.5 py-2.5 bg-primary/8 border border-primary/20">
+                      <div className="flex items-center gap-2">
+                        <div className="relative">
+                          <Mic size={14} className="text-primary animate-pulse" />
+                          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-destructive animate-ping" />
+                        </div>
+                        <span className="text-[11px] text-primary font-medium">أسمعك... تكلم 🎙️</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="p-3 border-t border-border/30">
                 <div className="flex items-center gap-2">
+                  {/* Mic button */}
+                  {supportsRecognition && voiceEnabled && (
+                    <Button
+                      onClick={handleMicClick}
+                      size="icon"
+                      variant={isListening ? "destructive" : "outline"}
+                      disabled={streaming}
+                      className={cn(
+                        "rounded-xl h-8 w-8 shrink-0 transition-all",
+                        isListening && "animate-pulse"
+                      )}
+                      title={isListening ? "إيقاف الاستماع" : "تحدث مع مقبل"}
+                    >
+                      {isListening ? <MicOff size={13} strokeWidth={1.5} /> : <Mic size={13} strokeWidth={1.5} />}
+                    </Button>
+                  )}
                   <input
                     ref={inputRef}
                     type="text"
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && handleSend()}
-                    placeholder="قولي وش تبغى..."
+                    placeholder={voiceEnabled ? "اكتب أو اضغط 🎙️ للتحدث..." : "قولي وش تبغى..."}
                     className="flex-1 px-3 py-2 rounded-xl border border-border/50 bg-background text-xs placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
                     disabled={streaming}
                   />
