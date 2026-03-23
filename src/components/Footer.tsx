@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import AiStar from "./AiStar";
-import ainJasaasLogo from "@/assets/ain-jasaas-logo.png";
+
 
 const Footer = () => {
   return (
@@ -71,21 +71,6 @@ const Footer = () => {
               . جميع الحقوق محفوظة © {new Date().getFullYear()}
             </p>
 
-            <a
-              href="https://www.jsaas-group.com/en"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="opacity-75 hover:opacity-100 transition-opacity"
-            >
-              <img
-                src={ainJasaasLogo}
-                alt="Ain Jasaas Company"
-                width={32}
-                height={32}
-                loading="lazy"
-                className="w-8 h-8 object-contain"
-              />
-            </a>
 
             <div className="flex items-center gap-4 text-[10px] text-muted-foreground/60">
               <Link to="/terms" className="hover:text-foreground transition-colors">الشروط</Link>
