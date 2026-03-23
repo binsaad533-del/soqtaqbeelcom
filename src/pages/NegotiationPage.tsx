@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const NegotiationPage = () => {
   const { id: dealId } = useParams();
-  const navigate = useNavigate();
+  
   const { user } = useAuthContext();
   const { getMessages, sendMessage } = useDeals();
   const { getListing } = useListings();
