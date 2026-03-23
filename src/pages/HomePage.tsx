@@ -3,8 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
-import muqbilWaveImg from "@/assets/muqbil-wave.png";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 const stats = [
   { value: "847", label: "فرصة نشطة" },
@@ -15,9 +14,6 @@ const stats = [
 
 const HomePage = () => {
   const revealRefs = useRef<HTMLDivElement[]>([]);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [heroVisible, setHeroVisible] = useState(true);
-  const [entered, setEntered] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -35,48 +31,15 @@ const HomePage = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Moqbil entrance animation
-  useEffect(() => {
-    const t = setTimeout(() => setEntered(true), 1200);
-    return () => clearTimeout(t);
-  }, []);
-
-  // Track hero visibility for Moqbil transition
-  useEffect(() => {
-    if (!heroRef.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setHeroVisible(entry.isIntersecting),
-      { threshold: 0.2 }
-    );
-    observer.observe(heroRef.current);
-    return () => observer.disconnect();
-  }, []);
-
   const addRevealRef = (el: HTMLDivElement | null) => {
     if (el && !revealRefs.current.includes(el)) revealRefs.current.push(el);
   };
 
   return (
     <div className="relative">
-      {/* Moqbil floating (appears when hero scrolls out) */}
-      <div
-        className={`
-          fixed bottom-24 left-4 z-40 pointer-events-none
-          transition-all duration-700 ease-out
-          ${!heroVisible && entered ? "opacity-80 translate-x-0" : "opacity-0 -translate-x-10"}
-        `}
-      >
-        <img
-          src={muqbilWaveImg}
-          alt="مقبل"
-          className="w-12 h-12 object-contain drop-shadow-md"
-          width={48}
-          height={48}
-        />
-      </div>
 
       {/* Hero */}
-      <section className="gradient-hero py-20 md:py-32 relative overflow-hidden" ref={heroRef}>
+      <section className="gradient-hero py-20 md:py-32 relative overflow-hidden">
         <div className="container relative z-10">
           <div className="max-w-2xl mx-auto text-center animate-reveal">
             <div className="flex justify-center mb-6">
@@ -86,36 +49,8 @@ const HomePage = () => {
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
               ارفع صور مشروعك…
               <br />
-              <span className="gradient-text relative inline-flex items-center gap-2">
-                والذكاء الاصطناعي يكمل الباقي
-                {/* Moqbil in hero - peeking next to the text */}
-                <img
-                  src={muqbilWaveImg}
-                  alt="مقبل"
-                  className={`
-                    inline-block w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg
-                    transition-all duration-1000 ease-out
-                    ${entered ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-75"}
-                  `}
-                  style={{ animationDelay: "1.5s" }}
-                  width={64}
-                  height={64}
-                />
-              </span>
+              <span className="gradient-text">والذكاء الاصطناعي يكمل الباقي</span>
             </h1>
-
-            {/* Moqbil speech bubble */}
-            <div
-              className={`
-                flex justify-center mb-4
-                transition-all duration-700 ease-out delay-500
-                ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}
-              `}
-            >
-              <span className="inline-flex items-center gap-1.5 bg-card/90 backdrop-blur-sm text-xs font-medium text-foreground/80 px-4 py-2 rounded-full shadow-soft border border-border/30">
-                ✨ أنا مقبل… أكمل لك كل شيء!
-              </span>
-            </div>
 
             <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
               جرد، تقييم، بيانات، وتفاوض — كلها تلقائيًا بدون ما تكتب سطر واحد.
