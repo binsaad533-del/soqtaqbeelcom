@@ -234,19 +234,6 @@ const AiAssistant = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {/* Voice toggle */}
-                <button
-                  onClick={toggleVoice}
-                  className={cn(
-                    "p-1.5 rounded-lg transition-colors",
-                    voiceEnabled
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground/50 hover:text-muted-foreground"
-                  )}
-                  title={voiceEnabled ? "إيقاف الصوت" : "تفعيل الصوت"}
-                >
-                  {voiceEnabled ? <Volume2 size={14} strokeWidth={1.5} /> : <VolumeX size={14} strokeWidth={1.5} />}
-                </button>
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                   <span className="text-[10px] text-success">نشط</span>
