@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { X, Send, Sparkles, ChevronLeft, Zap } from "lucide-react";
-import AiStar from "./AiStar";
 import { useAiContext, type AiSuggestion } from "@/hooks/useAiContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import muqbilImg from "@/assets/muqbil-character.png";
+import muqbilWaveImg from "@/assets/muqbil-wave.png";
 
 interface ChatMsg {
   id: string;
@@ -71,7 +72,7 @@ async function streamChat({
     }
     onDone();
   } catch (e) {
-    onError("فشل الاتصال بالمساعد الذكي");
+    onError("فشل الاتصال بمقبل");
   }
 }
 
@@ -81,14 +82,28 @@ const AiAssistant = () => {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [peeking, setPeeking] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const peekTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const { greeting, role, suggestions, proactiveMessage, dismissProactive, pathname } = useAiContext();
 
   useEffect(() => { setChatMode(false); setMessages([]); }, [pathname]);
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
   useEffect(() => { chatMode && inputRef.current?.focus(); }, [chatMode]);
+
+  // Peek behavior: show مقبل peeking after idle
+  useEffect(() => {
+    if (open || hasInteracted) return;
+    peekTimer.current = setTimeout(() => {
+      setPeeking(true);
+      // Auto-hide after 5s
+      setTimeout(() => setPeeking(false), 5000);
+    }, 6000);
+    return () => { clearTimeout(peekTimer.current); setPeeking(false); };
+  }, [pathname, open, hasInteracted]);
 
   const now = () => new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
@@ -142,54 +157,75 @@ const AiAssistant = () => {
     sendMessage(s.label);
   };
 
+  const handleOpen = () => {
+    setOpen(true);
+    setPeeking(false);
+    setHasInteracted(true);
+    dismissProactive();
+  };
+
   return (
     <>
-      {/* Proactive tooltip */}
-      {proactiveMessage && !open && (
-        <div className="fixed bottom-24 left-6 z-50 max-w-72 animate-reveal">
-          <div className="bg-card rounded-2xl p-3.5 shadow-soft-lg border border-primary/10 relative">
-            <button onClick={dismissProactive} className="absolute top-2 right-2 text-muted-foreground/50 hover:text-foreground">
-              <X size={12} />
-            </button>
-            <p className="text-xs text-foreground/80 leading-relaxed pr-4">{proactiveMessage}</p>
-            <button
-              onClick={() => { setOpen(true); dismissProactive(); }}
-              className="mt-2 text-[11px] text-primary hover:underline"
-            >
-              تكلم مع المساعد الذكي ←
-            </button>
+      {/* Proactive tooltip with مقبل peeking */}
+      {(proactiveMessage || peeking) && !open && (
+        <div
+          className="fixed bottom-16 left-0 z-50 flex items-end gap-0 cursor-pointer animate-fade-in"
+          onClick={handleOpen}
+        >
+          {/* مقبل peeking from side */}
+          <div className="relative -ml-6 transition-transform duration-500 ease-out hover:translate-x-2">
+            <img
+              src={muqbilWaveImg}
+              alt="مقبل"
+              className="w-20 h-20 object-contain drop-shadow-md"
+              width={80}
+              height={80}
+            />
           </div>
-          <div className="w-3 h-3 bg-card border-b border-l border-primary/10 rotate-[-45deg] absolute -bottom-1.5 left-10" />
+          {proactiveMessage && (
+            <div className="max-w-60 mb-8 mr-2">
+              <div className="bg-card rounded-2xl p-3 shadow-soft-lg border border-border/40 relative">
+                <button
+                  onClick={(e) => { e.stopPropagation(); dismissProactive(); setPeeking(false); }}
+                  className="absolute top-1.5 right-1.5 text-muted-foreground/50 hover:text-foreground"
+                >
+                  <X size={10} />
+                </button>
+                <p className="text-[11px] text-foreground/80 leading-relaxed pr-3">{proactiveMessage}</p>
+              </div>
+              {/* Speech bubble arrow */}
+              <div className="w-2.5 h-2.5 bg-card border-b border-l border-border/40 rotate-[-45deg] absolute bottom-6 left-16" />
+            </div>
+          )}
         </div>
       )}
 
-      {/* FAB */}
-      <button
-        onClick={() => setOpen(!open)}
-        className={cn(
-          "fixed bottom-6 left-6 z-50 flex items-center gap-2 transition-all duration-300 hover:shadow-soft-hover",
-          open
-            ? "w-11 h-11 rounded-full gradient-primary shadow-soft-lg justify-center scale-95"
-            : "h-11 rounded-full gradient-primary shadow-soft-lg px-4 pr-3"
-        )}
-      >
-        {open ? (
-          <X size={16} className="text-primary-foreground" strokeWidth={1.5} />
-        ) : (
-          <>
-            <div className="relative shrink-0">
-              <AiStar size={20} animate className="[&>div]:!opacity-100" />
-            </div>
-            <span className="text-primary-foreground text-xs font-medium whitespace-nowrap">المساعد الذكي</span>
-          </>
-        )}
-      </button>
+      {/* مقبل character button — peeks from left edge */}
+      {!open && !peeking && !proactiveMessage && (
+        <button
+          onClick={handleOpen}
+          className="fixed bottom-6 left-0 z-50 flex items-center gap-1.5 group transition-all duration-300"
+        >
+          <div className="relative -ml-3 group-hover:ml-0 transition-all duration-300">
+            <img
+              src={muqbilImg}
+              alt="مقبل"
+              className="w-14 h-14 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
+              width={56}
+              height={56}
+            />
+          </div>
+          <span className="text-[11px] font-medium text-foreground/70 bg-card/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full shadow-soft border border-border/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+            مقبل — مساعدك الذكي
+          </span>
+        </button>
+      )}
 
-      {/* Panel */}
+      {/* Chat Panel */}
       {open && (
-        <div className="fixed bottom-24 left-6 z-50 w-[380px] max-h-[520px] bg-card rounded-2xl shadow-soft-lg border border-border/40 flex flex-col animate-reveal overflow-hidden">
-          {/* Header */}
-          <div className="p-4 border-b border-border/30 bg-gradient-to-l from-primary/5 to-transparent">
+        <div className="fixed bottom-4 left-4 z-50 w-[380px] max-h-[520px] bg-card rounded-2xl shadow-soft-lg border border-border/40 flex flex-col animate-fade-in overflow-hidden">
+          {/* Header with مقبل */}
+          <div className="p-3.5 border-b border-border/30 bg-gradient-to-l from-primary/5 to-transparent">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 {chatMode && (
@@ -197,15 +233,20 @@ const AiAssistant = () => {
                     <ChevronLeft size={16} strokeWidth={1.5} />
                   </button>
                 )}
-                <AiStar size={22} animate={false} />
+                <img src={muqbilImg} alt="مقبل" className="w-10 h-10 object-contain" width={40} height={40} />
                 <div>
-                  <h3 className="text-sm font-medium">المساعد الذكي</h3>
+                  <h3 className="text-sm font-medium">مقبل</h3>
                   <p className="text-[10px] text-muted-foreground">{role}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                <span className="text-[10px] text-success">نشط</span>
+                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                  <span className="text-[10px] text-success">نشط</span>
+                </div>
+                <button onClick={() => setOpen(false)} className="text-muted-foreground/60 hover:text-foreground transition-colors">
+                  <X size={14} strokeWidth={1.5} />
+                </button>
               </div>
             </div>
           </div>
@@ -251,9 +292,9 @@ const AiAssistant = () => {
                         : "bg-accent/50 border border-accent-foreground/10"
                     )}>
                       {msg.role === "assistant" && (
-                        <div className="flex items-center gap-1 mb-1.5">
-                          <AiStar size={12} animate={false} />
-                          <span className="text-[10px] text-accent-foreground font-medium">المساعد الذكي</span>
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <img src={muqbilImg} alt="مقبل" className="w-5 h-5 object-contain" width={20} height={20} />
+                          <span className="text-[10px] text-accent-foreground font-medium">مقبل</span>
                         </div>
                       )}
                       {msg.content}
@@ -265,8 +306,8 @@ const AiAssistant = () => {
                 {streaming && messages[messages.length - 1]?.role !== "assistant" && (
                   <div className="ml-auto max-w-[85%]">
                     <div className="rounded-2xl px-3.5 py-2.5 bg-accent/50 border border-accent-foreground/10">
-                      <div className="flex items-center gap-1 mb-1">
-                        <AiStar size={12} />
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <img src={muqbilImg} alt="مقبل" className="w-5 h-5 object-contain" width={20} height={20} />
                         <span className="text-[10px] text-accent-foreground font-medium">يفكر...</span>
                       </div>
                       <div className="flex gap-1">
