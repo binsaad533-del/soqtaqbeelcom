@@ -3,7 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
-import { useEffect, useRef } from "react";
+import muqbilWaveImg from "@/assets/muqbil-wave.png";
+import { useEffect, useRef, useState } from "react";
 
 const stats = [
   { value: "847", label: "فرصة نشطة" },
@@ -14,6 +15,9 @@ const stats = [
 
 const HomePage = () => {
   const revealRefs = useRef<HTMLDivElement[]>([]);
+  const heroTextRef = useRef<HTMLSpanElement>(null);
+  const [moqbilStyle, setMoqbilStyle] = useState<"hero" | "floating">("hero");
+  const [heroVisible, setHeroVisible] = useState(true);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -31,12 +35,65 @@ const HomePage = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Track when hero text scrolls out of view
+  useEffect(() => {
+    if (!heroTextRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const visible = entry.isIntersecting;
+        setHeroVisible(visible);
+        setMoqbilStyle(visible ? "hero" : "floating");
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(heroTextRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   const addRevealRef = (el: HTMLDivElement | null) => {
     if (el && !revealRefs.current.includes(el)) revealRefs.current.push(el);
   };
 
   return (
     <div>
+      {/* Moqbil - appears near hero text, then floats when scrolled */}
+      <div
+        className={`
+          pointer-events-none z-40 transition-all duration-700 ease-out
+          ${moqbilStyle === "hero"
+            ? "absolute"
+            : "fixed bottom-24 left-4"
+          }
+        `}
+        style={moqbilStyle === "hero" ? {
+          top: heroTextRef.current
+            ? heroTextRef.current.getBoundingClientRect().top + window.scrollY - 20
+            : "auto",
+          left: heroTextRef.current
+            ? heroTextRef.current.getBoundingClientRect().left - 70
+            : 20,
+        } : undefined}
+      >
+        <img
+          src={muqbilWaveImg}
+          alt="مقبل"
+          className={`
+            drop-shadow-lg transition-all duration-700
+            ${moqbilStyle === "hero"
+              ? "w-16 h-16 md:w-20 md:h-20 animate-[bounce_3s_ease-in-out_infinite]"
+              : "w-14 h-14 opacity-80 hover:opacity-100"
+            }
+          `}
+          width={80}
+          height={80}
+        />
+        {moqbilStyle === "hero" && (
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-card/95 backdrop-blur-sm text-[11px] font-medium text-foreground px-3 py-1.5 rounded-full shadow-soft border border-border/30 animate-fade-in">
+            أنا مقبل… أكمل لك كل شيء! ✨
+          </div>
+        )}
+      </div>
+
       {/* Hero */}
       <section className="gradient-hero py-20 md:py-32 relative overflow-hidden">
         <div className="container relative z-10">
@@ -48,7 +105,7 @@ const HomePage = () => {
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
               ارفع صور مشروعك…
               <br />
-              <span className="gradient-text">والذكاء الاصطناعي يكمل الباقي</span>
+              <span ref={heroTextRef} className="gradient-text inline-block">والذكاء الاصطناعي يكمل الباقي</span>
             </h1>
             <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
               جرد، تقييم، بيانات، وتفاوض — كلها تلقائيًا بدون ما تكتب سطر واحد.
@@ -87,8 +144,6 @@ const HomePage = () => {
         </div>
       </section>
 
-
-
       {/* Smart Platform */}
       <section className="py-16 md:py-24 border-t border-border/50">
         <div className="container">
@@ -124,7 +179,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
 
       {/* CTA */}
       <section className="py-16 gradient-hero" ref={addRevealRef} style={{ opacity: 0 }}>
