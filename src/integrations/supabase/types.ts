@@ -357,6 +357,8 @@ export type Database = {
           deal_disclosures: Json | null
           deal_options: Json | null
           deal_type: string
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           disclosure_score: number | null
           district: string | null
@@ -395,6 +397,8 @@ export type Database = {
           deal_disclosures?: Json | null
           deal_options?: Json | null
           deal_type?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           disclosure_score?: number | null
           district?: string | null
@@ -433,6 +437,8 @@ export type Database = {
           deal_disclosures?: Json | null
           deal_options?: Json | null
           deal_type?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           disclosure_score?: number | null
           district?: string | null
