@@ -461,10 +461,13 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
                 إقرار وموافقة — {isBuyer ? "المشتري" : "البائع"}
               </h3>
               <div className="space-y-4">
-                {REQUIRED_CONFIRMATIONS.map(key => (
+                {activeConfirmations.map(key => (
                   <label
                     key={key}
-                    className="flex items-start gap-3 cursor-pointer group"
+                    className={cn(
+                      "flex items-start gap-3 cursor-pointer group",
+                      key === "commission_acknowledged" && "bg-primary/5 rounded-xl p-3 border border-primary/10"
+                    )}
                     onClick={() => toggleCheck(key)}
                   >
                     <Checkbox
@@ -472,7 +475,10 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
                       onCheckedChange={() => toggleCheck(key)}
                       className="mt-0.5"
                     />
-                    <span className="text-sm leading-relaxed group-hover:text-foreground transition-colors">
+                    <span className={cn(
+                      "text-sm leading-relaxed group-hover:text-foreground transition-colors",
+                      key === "commission_acknowledged" && "font-medium"
+                    )}>
                       {CONFIRMATION_LABELS[key]}
                     </span>
                   </label>
