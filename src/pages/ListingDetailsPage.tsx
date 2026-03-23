@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { cn } from "@/lib/utils";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
-import { Info } from "lucide-react";
+
 
 const ListingDetailsPage = () => {
   const { id } = useParams();
