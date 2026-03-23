@@ -14,7 +14,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { cn } from "@/lib/utils";
-import SimulationOverlay, { isSimulationImage } from "@/components/SimulationOverlay";
+import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
+import { Info } from "lucide-react";
 
 const ListingDetailsPage = () => {
   const { id } = useParams();
@@ -88,6 +89,7 @@ const ListingDetailsPage = () => {
   const inventory = (listing.inventory || []) as Array<{ name: string; qty: number; condition: string }>;
   const documents = (listing.documents || []) as Array<{ name: string; status: string; url?: string }>;
   const isOwner = user?.id === listing.owner_id;
+  const isSimulation = hasSimulationPhotos(listing.photos as Record<string, unknown>);
 
   // Deal structure data
   const dealOptions = ((listing as any).deal_options || []) as Array<{ type_id: string; priority: number; is_primary: boolean }>;
@@ -103,6 +105,21 @@ const ListingDetailsPage = () => {
           <span>/</span>
           <span className="text-foreground">{listing.title || listing.business_activity || "فرصة تقبيل"}</span>
         </div>
+
+        {isSimulation && (
+          <div className="mb-5 rounded-2xl bg-primary/5 border border-primary/15 p-4 flex items-start gap-3" dir="rtl">
+            <div className="mt-0.5 shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <Info size={16} className="text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground mb-1">هذا الإعلان للعرض التوضيحي فقط</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                هذه الصفقة مجرد محاكاة لتوضيح طريقة عمل المنصة. لا يمكن التفاوض عليها أو إتمامها. 
+                تصفّح <Link to="/marketplace" className="text-primary hover:underline font-medium">السوق</Link> لاستعراض الفرص الحقيقية عند توفرها.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
@@ -233,7 +250,7 @@ const ListingDetailsPage = () => {
                 </div>
               )}
 
-              {!isOwner && (
+              {!isOwner && !isSimulation && (
                 <Button
                   onClick={handleStartNegotiation}
                   disabled={startingDeal}
@@ -242,6 +259,12 @@ const ListingDetailsPage = () => {
                   {startingDeal ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} strokeWidth={1.5} />}
                   ابدأ التفاوض
                 </Button>
+              )}
+
+              {isSimulation && (
+                <div className="w-full text-center py-3 rounded-xl bg-muted/40 text-muted-foreground text-sm">
+                  عرض توضيحي — التفاوض غير متاح
+                </div>
               )}
 
               {/* Seller Reviews */}
