@@ -8,6 +8,7 @@ import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges, getTrustLevel } from "@/components/TrustBadge";
 import MarketplaceFilters, { defaultFilters, type FilterState } from "@/components/marketplace/MarketplaceFilters";
 import MobileFilterSheet from "@/components/marketplace/MobileFilterSheet";
+import SmartSearchBar from "@/components/marketplace/SmartSearchBar";
 import { MapPin, Eye, ShieldCheck, TrendingUp } from "lucide-react";
 
 interface EnrichedListing extends Listing {
@@ -23,6 +24,10 @@ const MarketplacePage = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
+
+  const handleSmartSearch = (partial: Partial<FilterState>, _message: string) => {
+    setFilters(prev => ({ ...prev, ...partial }));
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -107,6 +112,9 @@ const MarketplacePage = () => {
           <TrendingUp size={14} className="text-primary shrink-0" />
           <p className="text-[11px] text-muted-foreground">البائعون الملتزمون بالسداد والموثّقون يظهرون أولاً في النتائج</p>
         </div>
+
+        {/* Smart AI Search */}
+        <SmartSearchBar onApplyFilters={handleSmartSearch} />
 
         <div className="flex gap-6">
           {/* Desktop filters sidebar */}
