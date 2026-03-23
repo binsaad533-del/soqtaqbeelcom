@@ -91,7 +91,7 @@ const HomePage = () => {
       <section className="py-16 md:py-24 border-t border-border/50">
         <div className="container">
           <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
-            <h2 className="text-2xl md:text-3xl font-medium mb-4">منصة ذكية لإتمام الصفقات… مو مجرد عرض</h2>
+            <h2 className="text-2xl md:text-3xl font-medium mb-4">منصة بالذكاء الاصطناعي لإتمام الصفقات… مو مجرد عرض</h2>
             <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               كل الأدوات اللي تحتاجها لتقييم، عرض، وتوثيق الصفقات في مكان واحد — بطريقة ذكية وسريعة وواضحة.
             </p>
