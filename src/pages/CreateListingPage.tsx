@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from "react";
+import { validateImageFile, validateDocFile, logAudit } from "@/lib/security";
 import { Check, Upload, Camera, FileText, ClipboardList, Eye, ArrowLeft, ArrowRight, Plus, Trash2, Loader2, Shield } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
