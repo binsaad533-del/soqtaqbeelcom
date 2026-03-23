@@ -35,6 +35,14 @@ const ListingDetailsPage = () => {
       setLoading(true);
       const data = await getListing(id);
       setListing(data);
+      if (data) {
+        const [profile, reviews] = await Promise.all([
+          getProfile(data.owner_id),
+          getSellerReviews(data.owner_id),
+        ]);
+        setSellerProfile(profile);
+        setSellerReviews(reviews);
+      }
       setLoading(false);
     };
     load();
