@@ -76,6 +76,12 @@ const NegotiationPage = () => {
     // Calculate deal risk
     calculateDealRisk(dealId).catch(() => {});
 
+    // Load commission if deal is completed
+    if (dealData.status === "completed" || dealData.status === "finalized") {
+      const comm = await getCommission(dealId);
+      setCommission(comm);
+    }
+
     setLoading(false);
   }, [dealId, getListing, getMessages, user, getProfile, calculateDealRisk]);
 
