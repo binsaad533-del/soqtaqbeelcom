@@ -15,6 +15,7 @@ import CreateListingPage from "./pages/CreateListingPage";
 import NegotiationPage from "./pages/NegotiationPage";
 import AgreementPage from "./pages/AgreementPage";
 import DashboardRouter from "./pages/DashboardRouter";
+import MonitoringDashboardPage from "./pages/MonitoringDashboardPage";
 import LoginPage from "./pages/LoginPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import TermsPage from "./pages/TermsPage";
@@ -72,6 +73,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <DashboardRouter />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/monitoring"
+                element={
+                  <ProtectedRoute>
+                    <MonitoringDashboardPage />
                   </ProtectedRoute>
                 }
               />
