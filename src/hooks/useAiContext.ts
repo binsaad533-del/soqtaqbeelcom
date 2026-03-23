@@ -128,7 +128,7 @@ export function useAiContext() {
         const newIdle = prev.idleSeconds + 1;
         if (newIdle === 8 && !prev.hesitationDetected) {
           const ctx = getContext();
-          setProactiveMessage(`💡 ${ctx.suggestions[0]?.description || "كيف أقدر أساعدك؟"}`);
+          setProactiveMessage(`💡 ${ctx.suggestions[0]?.description || "تبغاني أساعدك بشي؟ 👌"}`);
           return { ...prev, idleSeconds: newIdle, hesitationDetected: true };
         }
         return { ...prev, idleSeconds: newIdle };
