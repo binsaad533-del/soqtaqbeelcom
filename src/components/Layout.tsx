@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { User, Menu, X, LogIn, LogOut, Plus } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { useState, useEffect } from "react";
 import AiAssistant from "./AiAssistant";
 import Footer from "./Footer";
