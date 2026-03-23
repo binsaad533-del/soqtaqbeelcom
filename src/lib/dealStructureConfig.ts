@@ -240,7 +240,7 @@ export const CONFLICT_RULES: ConflictRule[] = [
   },
   {
     types: ["location_only", "full_takeover"],
-    message: "«موقع فقط» لا يتوافق مع «تقبّل كامل» كخيارات متزامنة بدون توضيح واضح.",
+    message: "«موقع فقط» لا يتوافق مع «تقبيل كامل» كخيارات متزامنة بدون توضيح واضح.",
     severity: "warning",
   },
   {

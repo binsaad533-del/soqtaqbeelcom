@@ -266,7 +266,7 @@ function buildAnalysisPrompt(listing: any): string {
     listing.included.forEach((item: string) => sections.push(`- ${item}`));
   }
   if (listing.excluded?.length) {
-    sections.push("\n## لا يشمل التقبّل:");
+    sections.push("\n## لا يشمل التقبيل:");
     listing.excluded.forEach((item: string) => sections.push(`- ${item}`));
   }
 

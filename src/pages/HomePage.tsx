@@ -116,7 +116,7 @@ const HomePage = () => {
         <div className="container">
           <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
             <h2 className="text-2xl md:text-3xl font-medium mb-3">منصة متكاملة بالذكاء الاصطناعي</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">كل أداة تحتاجها لتقييم وتفاوض وتوثيق صفقات تقبّل الأعمال</p>
+            <p className="text-muted-foreground max-w-md mx-auto">كل أداة تحتاجها لتقييم وتفاوض وتوثيق صفقات تقبيل الأعمال</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (

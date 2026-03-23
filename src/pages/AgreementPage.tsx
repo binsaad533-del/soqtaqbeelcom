@@ -484,7 +484,7 @@ const AgreementPage = () => {
                 <span className="text-sm font-medium gradient-text">سوق تقبيل</span>
               </div>
               <p className="text-[10px] text-muted-foreground">
-                منصة ذكية لتقبّل المشاريع والأعمال التجارية في المملكة العربية السعودية
+                منصة ذكية لتقبيل المشاريع والأعمال التجارية في المملكة العربية السعودية
               </p>
             </div>
           </div>

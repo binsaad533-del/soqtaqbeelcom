@@ -186,7 +186,7 @@ const ListingDetailsPage = () => {
           {/* Sidebar */}
           <div className="space-y-5">
             <div className="bg-card rounded-2xl p-6 shadow-soft sticky top-20">
-              <h2 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || "فرصة تقبّل"}</h2>
+              <h2 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || "فرصة تقبيل"}</h2>
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
                 <MapPin size={14} strokeWidth={1.3} />
                 {listing.district && `${listing.district}, `}{listing.city || "—"}

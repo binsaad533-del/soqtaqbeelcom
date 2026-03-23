@@ -158,7 +158,7 @@ const ListingCard = ({ listing }: { listing: EnrichedListing }) => {
       </div>
       <div className="p-4">
         <div className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">
-          {listing.title || listing.business_activity || "فرصة تقبّل"}
+          {listing.title || listing.business_activity || "فرصة تقبيل"}
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
           <MapPin size={12} strokeWidth={1.3} />
