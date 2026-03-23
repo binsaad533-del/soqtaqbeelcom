@@ -313,20 +313,6 @@ const AiAssistant = () => {
                   </div>
                 )}
 
-                {/* Listening indicator */}
-                {isListening && (
-                  <div className="mr-auto max-w-[85%]">
-                    <div className="rounded-2xl px-3.5 py-2.5 bg-primary/8 border border-primary/20">
-                      <div className="flex items-center gap-2">
-                        <div className="relative">
-                          <Mic size={14} className="text-primary animate-pulse" />
-                          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-destructive animate-ping" />
-                        </div>
-                        <span className="text-[11px] text-primary font-medium">أسمعك... تكلم 🎙️</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="p-3 border-t border-border/30">
