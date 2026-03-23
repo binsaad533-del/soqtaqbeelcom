@@ -14,9 +14,6 @@ const stats = [
 
 const HomePage = () => {
   const revealRefs = useRef<HTMLDivElement[]>([]);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [heroVisible, setHeroVisible] = useState(true);
-  const [entered, setEntered] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -31,23 +28,6 @@ const HomePage = () => {
       { threshold: 0.15 }
     );
     revealRefs.current.forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
-  // Moqbil entrance animation
-  useEffect(() => {
-    const t = setTimeout(() => setEntered(true), 1200);
-    return () => clearTimeout(t);
-  }, []);
-
-  // Track hero visibility for Moqbil transition
-  useEffect(() => {
-    if (!heroRef.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setHeroVisible(entry.isIntersecting),
-      { threshold: 0.2 }
-    );
-    observer.observe(heroRef.current);
     return () => observer.disconnect();
   }, []);
 
