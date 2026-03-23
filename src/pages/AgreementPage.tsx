@@ -543,6 +543,22 @@ const AgreementPage = () => {
             </div>
           )}
 
+          {/* Commission Section */}
+          {commission && (
+            <div className="border-t border-border/20 p-5">
+              <CommissionPaymentPanel
+                commission={commission}
+                isSeller={isSeller}
+                onUpdate={loadData}
+              />
+            </div>
+          )}
+          {!commission && deal?.agreed_price && (
+            <div className="border-t border-border/20 p-5">
+              <CommissionBanner dealAmount={deal.agreed_price} showDetails />
+            </div>
+          )}
+
           {/* Actions */}
           <div className="p-5 border-t border-border/20 flex gap-3">
             {!bothApproved && isBuyer && !agreement.buyer_approved && (
