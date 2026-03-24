@@ -461,6 +461,7 @@ const CreateListingPage = () => {
         } as never);
       }
     }
+    saveDraft();
     setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
   };
 
