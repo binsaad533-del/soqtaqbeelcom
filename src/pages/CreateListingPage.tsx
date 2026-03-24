@@ -512,7 +512,8 @@ const CreateListingPage = () => {
     if (!listingId) return;
     setPublishAttempted(true);
 
-    const hasPhotos = totalPhotos > 0;
+    const imgReq = getImageRequirement(dealStructure.primaryType);
+    const hasPhotos = imgReq === "none" || imgReq === "optional" || totalPhotos > 0;
     const hasActivity = disclosure.business_activity.trim() !== "";
     const hasCity = disclosure.city.trim() !== "";
     const hasPrice = disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0;
