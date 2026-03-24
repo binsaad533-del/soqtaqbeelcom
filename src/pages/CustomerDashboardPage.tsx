@@ -191,24 +191,6 @@ const CustomerDashboardPage = () => {
           {/* ═══ MAIN COLUMN (2/3) ═══ */}
           <div className="lg:col-span-2 space-y-5">
 
-            {/* ── Activity Summary Row ── */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-xl p-3 bg-card border border-border/30 text-center">
-                <div className="text-lg font-bold">{loading ? "—" : stats.totalListings}</div>
-                <div className="text-[10px] text-muted-foreground">إعلان</div>
-                <div className="text-[9px] text-primary mt-0.5">{stats.published} منشور · {stats.draftCount} مسودة</div>
-              </div>
-              <div className="rounded-xl p-3 bg-card border border-border/30 text-center">
-                <div className="text-lg font-bold">{loading ? "—" : stats.activeDeals}</div>
-                <div className="text-[10px] text-muted-foreground">صفقة نشطة</div>
-                <div className="text-[9px] text-primary mt-0.5">قيد التفاوض</div>
-              </div>
-              <div className="rounded-xl p-3 bg-card border border-border/30 text-center">
-                <div className="text-lg font-bold">{loading ? "—" : stats.completedDeals}</div>
-                <div className="text-[10px] text-muted-foreground">صفقة مكتملة</div>
-                <div className="text-[9px] text-success mt-0.5">{stats.completedDeals > 0 ? "مبروك!" : "لم تكتمل بعد"}</div>
-              </div>
-            </div>
 
             {/* ── Drafts (if any) ── */}
             {!loading && drafts.length > 0 && (
