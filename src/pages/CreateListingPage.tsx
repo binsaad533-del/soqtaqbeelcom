@@ -396,6 +396,14 @@ const CreateListingPage = () => {
       return;
     }
 
+    const MAX_ANALYSIS_IMAGES = 20;
+    const totalImages = allPhotoUrlsForAnalysis.length;
+    const limitedUrls = allPhotoUrlsForAnalysis.slice(0, MAX_ANALYSIS_IMAGES);
+
+    if (totalImages > MAX_ANALYSIS_IMAGES) {
+      toast.info(`لديك ${totalImages} صورة — سيتم تحليل أول ${MAX_ANALYSIS_IMAGES} صورة فقط. الصور المتبقية لن تُحلل.`, { duration: 6000 });
+    }
+
     setAnalyzing(true);
     setAnalyzeProgress(10);
 
@@ -405,7 +413,7 @@ const CreateListingPage = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("analyze-inventory", {
-        body: { photoUrls: allPhotoUrlsForAnalysis, photoGroups: photos },
+        body: { photoUrls: limitedUrls, photoGroups: photos },
       });
 
       clearInterval(progressInterval);
