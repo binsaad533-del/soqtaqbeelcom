@@ -856,6 +856,8 @@ export type Database = {
           kyc_data: Json | null
           last_activity: string | null
           phone: string | null
+          phone_verified: boolean
+          phone_verified_at: string | null
           trust_score: number
           updated_at: string
           user_id: string
@@ -876,6 +878,8 @@ export type Database = {
           kyc_data?: Json | null
           last_activity?: string | null
           phone?: string | null
+          phone_verified?: boolean
+          phone_verified_at?: string | null
           trust_score?: number
           updated_at?: string
           user_id: string
@@ -896,6 +900,8 @@ export type Database = {
           kyc_data?: Json | null
           last_activity?: string | null
           phone?: string | null
+          phone_verified?: boolean
+          phone_verified_at?: string | null
           trust_score?: number
           updated_at?: string
           user_id?: string
