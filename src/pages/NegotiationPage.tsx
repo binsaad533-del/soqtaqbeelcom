@@ -76,6 +76,8 @@ const NegotiationPage = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState("");
   const [showAiPanel, setShowAiPanel] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<"summary" | "actions">("summary");
+  const [showAiToolbar, setShowAiToolbar] = useState(false);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
   const lastMsgCountRef = useRef(0);
