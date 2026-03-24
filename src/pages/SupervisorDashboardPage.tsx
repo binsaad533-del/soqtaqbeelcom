@@ -5,6 +5,7 @@ import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
+import { t, STATUS_LABELS } from "@/lib/translations";
 import { FileText, MessageSquare, AlertTriangle, CheckCircle, Clock, ChevronLeft, Loader2, Eye } from "lucide-react";
 
 const tabs = [
@@ -97,7 +98,7 @@ const SupervisorDashboardPage = () => {
                   <div className="text-sm">{l.title || "بدون عنوان"}</div>
                   <div className="text-xs text-muted-foreground">{l.business_activity || "—"} • {l.city}</div>
                 </div>
-                <span className={cn("text-[10px] px-2 py-0.5 rounded-md", l.status === "published" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{l.status === "published" ? "منشور" : l.status}</span>
+                <span className={cn("text-[10px] px-2 py-0.5 rounded-md", l.status === "published" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{t(l.status, STATUS_LABELS)}</span>
               </Link>
             ))}
           </div>
