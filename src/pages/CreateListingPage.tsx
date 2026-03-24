@@ -1103,7 +1103,25 @@ const CreateListingPage = () => {
                       </div>
                       <h2 className="font-medium text-sm">اكتمل التحليل — تم اكتشاف {inventory.length} أصل</h2>
                     </div>
-                    {analysisSummary && <p className="text-xs text-muted-foreground">{analysisSummary}</p>}
+                    {(() => {
+                      const included = inventory.filter(i => i.included);
+                      const excluded = inventory.filter(i => !i.included);
+                      const totalQty = included.reduce((sum, i) => sum + (i.quantity || 1), 0);
+                      const categories = [...new Set(included.map(i => i.category).filter(Boolean))];
+                      const parts: string[] = [];
+                      if (included.length > 0) {
+                        parts.push(`${included.length} أصل مشمول (إجمالي ${totalQty} قطعة)`);
+                      }
+                      if (excluded.length > 0) {
+                        parts.push(`${excluded.length} مستثنى`);
+                      }
+                      if (categories.length > 0) {
+                        parts.push(`الفئات: ${categories.join("، ")}`);
+                      }
+                      return parts.length > 0 ? (
+                        <p className="text-xs text-muted-foreground">{parts.join(" · ")}</p>
+                      ) : null;
+                    })()}
                     <div className="flex flex-wrap gap-3 justify-center mt-3">
                       <div className="text-center px-3 py-1.5 rounded-lg bg-success/5 border border-success/20">
                         <div className="text-sm font-medium text-success">{inventory.filter((i) => i.confidence === "high").length}</div>
