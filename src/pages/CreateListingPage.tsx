@@ -112,6 +112,7 @@ const CreateListingPage = () => {
   const [uploadingGroup, setUploadingGroup] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number }>({ current: 0, total: 0 });
   const [analyzing, setAnalyzing] = useState(false);
+  const [stepDirection, setStepDirection] = useState<"next" | "prev">("next");
   const [analyzed, setAnalyzed] = useState(false);
   const [analyzeProgress, setAnalyzeProgress] = useState(0);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -561,6 +562,7 @@ const CreateListingPage = () => {
       }
     }
     saveDraft();
+    setStepDirection("next");
     // For CR-only, skip AI analysis step (step 2) entirely
     if (isCrOnly && currentStep === 1) {
       setCurrentStep(3); // Jump directly to disclosure
@@ -571,6 +573,7 @@ const CreateListingPage = () => {
 
   const handleBack = () => {
     saveDraft();
+    setStepDirection("prev");
     // For CR-only, skip AI analysis step when going back from disclosure
     if (isCrOnly && currentStep === 3) {
       setCurrentStep(1); // Jump back to photos/docs
@@ -886,7 +889,7 @@ const CreateListingPage = () => {
 
           {/* ── Step 0: Deal Structure ── */}
           {currentStep === 0 && (
-            <div className="space-y-6">
+            <div key="step-0" className={`space-y-6 ${stepDirection === "next" ? "animate-step-slide-in-next" : "animate-step-slide-in-prev"}`}>
               <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-5 border border-primary/10 text-center">
                 <Shield size={28} strokeWidth={1.5} className="text-primary mx-auto mb-3" />
                 <h2 className="font-semibold text-sm mb-1">اختر هيكل الصفقة المناسب</h2>
@@ -907,7 +910,7 @@ const CreateListingPage = () => {
 
           {/* ── Step 1: Photos & Documents ── */}
           {currentStep === 1 && (
-            <div className="space-y-6">
+            <div key="step-1" className={`space-y-6 ${stepDirection === "next" ? "animate-step-slide-in-next" : "animate-step-slide-in-prev"}`}>
               <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-5 border border-primary/10 text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Sparkles size={20} strokeWidth={1.5} className="text-primary" />
@@ -1131,7 +1134,7 @@ const CreateListingPage = () => {
 
           {/* ── Step 2: AI Analysis ── */}
           {currentStep === 2 && (
-            <div className="space-y-6">
+            <div key="step-2" className={`space-y-6 ${stepDirection === "next" ? "animate-step-slide-in-next" : "animate-step-slide-in-prev"}`}>
               {!analyzed ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   {analyzing ? (
@@ -1337,7 +1340,7 @@ const CreateListingPage = () => {
 
           {/* ── Step 3: Disclosure & Publish ── */}
           {currentStep === 3 && (
-            <div className="space-y-6">
+            <div key="step-3" className={`space-y-6 ${stepDirection === "next" ? "animate-step-slide-in-next" : "animate-step-slide-in-prev"}`}>
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-1">
                   <ClipboardList size={16} strokeWidth={1.5} className="text-primary" />
