@@ -387,7 +387,11 @@ const CreateListingPage = () => {
                     )}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-lg">{group.emoji}</span>
+                          {(() => {
+                            const iconMap: Record<string, any> = { Camera, DoorOpen, Building2, MapPin, Tag, Wrench };
+                            const Icon = iconMap[group.icon] || Camera;
+                            return <Icon size={18} strokeWidth={1.5} className="text-primary" />;
+                          })()}
                           <div>
                             <div className="text-xs font-medium">{group.label}</div>
                             <div className="text-[10px] text-muted-foreground">{group.min} صور على الأقل</div>
