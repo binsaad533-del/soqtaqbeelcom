@@ -1094,7 +1094,7 @@ const CreateListingPage = () => {
                   </div>
                 )}
 
-                <Button onClick={handlePublish} disabled={saving || loading || (!canPublish && publishAttempted)} className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
+                <Button onClick={handlePublishClick} disabled={saving || loading || (!canPublish && publishAttempted)} className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
                   {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
                   نشر الإعلان
                 </Button>
