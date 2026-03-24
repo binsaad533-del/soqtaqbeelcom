@@ -46,21 +46,18 @@ const steps = [
 ];
 
 const allPhotoGroups = [
-  { id: "interior", label: "صور داخلية للمحل", min: 3, icon: "Camera", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup", "location_only"] },
-  { id: "exterior", label: "واجهة المحل", min: 2, icon: "DoorOpen", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup", "location_only"] },
-  { id: "building", label: "المبنى", min: 1, icon: "Building2", dealTypes: ["full_takeover", "transfer_no_liabilities", "location_only"] },
-  { id: "street", label: "الشارع المحيط", min: 1, icon: "MapPin", dealTypes: ["full_takeover", "transfer_no_liabilities", "location_only"] },
+  { id: "interior", label: "صور داخلية للمحل", min: 3, icon: "Camera", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup"] },
+  { id: "exterior", label: "واجهة المحل", min: 2, icon: "DoorOpen", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup"] },
+  { id: "building", label: "المبنى", min: 1, icon: "Building2", dealTypes: ["full_takeover", "transfer_no_liabilities"] },
+  { id: "street", label: "الشارع المحيط", min: 1, icon: "MapPin", dealTypes: ["full_takeover", "transfer_no_liabilities"] },
   { id: "signage", label: "اللوحة / اللافتة", min: 1, icon: "Tag", dealTypes: ["full_takeover", "transfer_no_liabilities"] },
   { id: "equipment", label: "المعدات والأجهزة", min: 4, icon: "Wrench", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup", "assets_only"] },
-  { id: "cr_doc", label: "صورة السجل التجاري", min: 1, icon: "FileText", dealTypes: ["cr_only"] },
 ];
 
 // Image requirement now driven by central schema
 function getImageRequirement(dealType: string): "required" | "optional" | "none" {
   const rules = getRules(dealType);
   if (rules.imageRequired) return "required";
-  // cr_only has no image requirement at all
-  if (dealType === "cr_only") return "none";
   return "optional";
 }
 
