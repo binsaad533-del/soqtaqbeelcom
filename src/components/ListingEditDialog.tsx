@@ -14,6 +14,10 @@ interface ListingEditDialogProps {
   onUpdated?: (updated: Partial<Listing>) => void;
 }
 
+/* ── tiny helper: should this field render? ── */
+const shouldShow = (dealType: string, field: string) =>
+  isFieldRelevant(dealType, field) || ["business_activity", "city", "district", "price"].includes(field);
+
 const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated }: ListingEditDialogProps) => {
   const dealType = listing.primary_deal_type || listing.deal_type || "full_takeover";
   const { updateListing } = useListings();
@@ -34,6 +38,9 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated }: ListingEd
     civil_defense_license: listing.civil_defense_license || "",
     surveillance_cameras: listing.surveillance_cameras || "",
   });
+
+  const set = (field: keyof typeof fields, value: string) =>
+    setFields((prev) => ({ ...prev, [field]: value }));
 
   const handleSave = async () => {
     if (!fields.business_activity.trim() || !fields.city.trim() || !fields.price.trim() || Number(fields.price) <= 0) {
@@ -71,43 +78,13 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated }: ListingEd
     }
   };
 
-  const Field = ({ label, field, placeholder, suffix, type = "text" }: { label: string; field: keyof typeof fields; placeholder: string; suffix?: string; type?: string }) => {
-    if (!isFieldRelevant(dealType, field) && !["business_activity", "city", "district", "price"].includes(field)) {
-      return null;
-    }
-    return (
-      <div>
-        <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
-        <div className="relative">
-          <input
-            type={type}
-            value={fields[field]}
-            onChange={(e) => setFields((prev) => ({ ...prev, [field]: e.target.value }))}
-            placeholder={placeholder}
-            className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
-          />
-          {suffix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{suffix}</span>}
-        </div>
-      </div>
-    );
-  };
-
-  const SelectField = ({ label, field, options }: { label: string; field: keyof typeof fields; options: string[] }) => {
-    if (!isFieldRelevant(dealType, field)) return null;
-    return (
-      <div>
-        <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
-        <select
-          value={fields[field]}
-          onChange={(e) => setFields((prev) => ({ ...prev, [field]: e.target.value }))}
-          className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
-        >
-          <option value="">اختر...</option>
-          {options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-        </select>
-      </div>
-    );
-  };
+  const inputCls = "w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20";
+  const selectOpts = (options: string[]) => (
+    <>
+      <option value="">اختر...</option>
+      {options.map((o) => <option key={o} value={o}>{o}</option>)}
+    </>
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -123,25 +100,112 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated }: ListingEd
         </DialogHeader>
 
         <div className="space-y-3 mt-2">
-          <Field label="نوع النشاط *" field="business_activity" placeholder="مطعم وجبات سريعة" />
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="المدينة *" field="city" placeholder="الرياض" />
-            <Field label="الحي" field="district" placeholder="حي النسيم" />
+          {/* نوع النشاط */}
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">نوع النشاط *</label>
+            <input type="text" value={fields.business_activity} onChange={(e) => set("business_activity", e.target.value)} placeholder="مطعم وجبات سريعة" className={inputCls} />
           </div>
-          <Field label="السعر المطلوب *" field="price" placeholder="180000" suffix="ر.س" type="number" />
-          <Field label="الإيجار السنوي" field="annual_rent" placeholder="45000" suffix="ر.س" type="number" />
+
           <div className="grid grid-cols-2 gap-3">
-            <Field label="مدة العقد" field="lease_duration" placeholder="3 سنوات" />
-            <Field label="المتبقي من العقد" field="lease_remaining" placeholder="1.5 سنة" />
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">المدينة *</label>
+              <input type="text" value={fields.city} onChange={(e) => set("city", e.target.value)} placeholder="الرياض" className={inputCls} />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">الحي</label>
+              <input type="text" value={fields.district} onChange={(e) => set("district", e.target.value)} placeholder="حي النسيم" className={inputCls} />
+            </div>
           </div>
-          <Field label="الالتزامات المالية" field="liabilities" placeholder="لا توجد" />
-          <Field label="رواتب متأخرة" field="overdue_salaries" placeholder="لا يوجد" />
-          <Field label="إيجار متأخر" field="overdue_rent" placeholder="لا يوجد" />
-          <div className="grid grid-cols-2 gap-3">
-            <SelectField label="رخصة البلدية" field="municipality_license" options={["سارية", "منتهية", "غير متوفرة"]} />
-            <SelectField label="الدفاع المدني" field="civil_defense_license" options={["سارية", "منتهية", "غير متوفرة"]} />
+
+          {/* السعر */}
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">السعر المطلوب *</label>
+            <div className="relative">
+              <input type="number" value={fields.price} onChange={(e) => set("price", e.target.value)} placeholder="180000" className={inputCls} />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ر.س</span>
+            </div>
           </div>
-          <SelectField label="كاميرات مراقبة" field="surveillance_cameras" options={["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"]} />
+
+          {/* الإيجار السنوي */}
+          {shouldShow(dealType, "annual_rent") && (
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">الإيجار السنوي</label>
+              <div className="relative">
+                <input type="number" value={fields.annual_rent} onChange={(e) => set("annual_rent", e.target.value)} placeholder="45000" className={inputCls} />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ر.س</span>
+              </div>
+            </div>
+          )}
+
+          {/* مدة العقد / المتبقي */}
+          {(shouldShow(dealType, "lease_duration") || shouldShow(dealType, "lease_remaining")) && (
+            <div className="grid grid-cols-2 gap-3">
+              {shouldShow(dealType, "lease_duration") && (
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">مدة العقد</label>
+                  <input type="text" value={fields.lease_duration} onChange={(e) => set("lease_duration", e.target.value)} placeholder="3 سنوات" className={inputCls} />
+                </div>
+              )}
+              {shouldShow(dealType, "lease_remaining") && (
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">المتبقي من العقد</label>
+                  <input type="text" value={fields.lease_remaining} onChange={(e) => set("lease_remaining", e.target.value)} placeholder="1.5 سنة" className={inputCls} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {shouldShow(dealType, "liabilities") && (
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">الالتزامات المالية</label>
+              <input type="text" value={fields.liabilities} onChange={(e) => set("liabilities", e.target.value)} placeholder="لا توجد" className={inputCls} />
+            </div>
+          )}
+
+          {shouldShow(dealType, "overdue_salaries") && (
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">رواتب متأخرة</label>
+              <input type="text" value={fields.overdue_salaries} onChange={(e) => set("overdue_salaries", e.target.value)} placeholder="لا يوجد" className={inputCls} />
+            </div>
+          )}
+
+          {shouldShow(dealType, "overdue_rent") && (
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">إيجار متأخر</label>
+              <input type="text" value={fields.overdue_rent} onChange={(e) => set("overdue_rent", e.target.value)} placeholder="لا يوجد" className={inputCls} />
+            </div>
+          )}
+
+          {/* التراخيص */}
+          {(shouldShow(dealType, "municipality_license") || shouldShow(dealType, "civil_defense_license")) && (
+            <div className="grid grid-cols-2 gap-3">
+              {shouldShow(dealType, "municipality_license") && (
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">رخصة البلدية</label>
+                  <select value={fields.municipality_license} onChange={(e) => set("municipality_license", e.target.value)} className={inputCls}>
+                    {selectOpts(["سارية", "منتهية", "غير متوفرة"])}
+                  </select>
+                </div>
+              )}
+              {shouldShow(dealType, "civil_defense_license") && (
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">الدفاع المدني</label>
+                  <select value={fields.civil_defense_license} onChange={(e) => set("civil_defense_license", e.target.value)} className={inputCls}>
+                    {selectOpts(["سارية", "منتهية", "غير متوفرة"])}
+                  </select>
+                </div>
+              )}
+            </div>
+          )}
+
+          {shouldShow(dealType, "surveillance_cameras") && (
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">كاميرات مراقبة</label>
+              <select value={fields.surveillance_cameras} onChange={(e) => set("surveillance_cameras", e.target.value)} className={inputCls}>
+                {selectOpts(["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"])}
+              </select>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3 mt-4">
