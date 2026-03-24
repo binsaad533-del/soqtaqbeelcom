@@ -252,7 +252,13 @@ const CreateListingPage = () => {
     setCurrentStep(Math.min(steps.length - 1, currentStep + 1));
   };
 
-  const handleBack = () => setCurrentStep(Math.max(0, currentStep - 1));
+  const handleBack = () => {
+    if (currentStep === 0 && !showDealStructure) {
+      setShowDealStructure(true);
+      return;
+    }
+    setCurrentStep(Math.max(0, currentStep - 1));
+  };
 
   const handlePublish = async () => {
     const id = listingId;
@@ -839,7 +845,7 @@ const CreateListingPage = () => {
 
         {/* Navigation */}
         <div className="flex items-center justify-between mt-6">
-          <Button variant="outline" onClick={handleBack} disabled={currentStep === 0} className="rounded-xl active:scale-[0.98]">
+          <Button variant="outline" onClick={handleBack} disabled={currentStep === 0 && showDealStructure} className="rounded-xl active:scale-[0.98]">
             <ArrowRight size={16} strokeWidth={1.5} /> السابق
           </Button>
           {currentStep < steps.length - 1 && (
