@@ -257,13 +257,6 @@ const AgreementPage = () => {
         const buyerName = buyerProfile.data?.full_name || "المشتري";
         const sellerName = sellerProfile.data?.full_name || "البائع";
 
-        // Get buyer and seller emails
-        const [buyerAuth, sellerAuth] = await Promise.all([
-          supabase.rpc("get_user_role", { _user_id: deal.buyer_id }),
-          supabase.rpc("get_user_role", { _user_id: deal.seller_id }),
-        ]);
-
-        // We can't get emails from auth directly, but the current user's email is available
         // Send to current user at minimum
         if (user?.email) {
           const currentRole = user.id === deal.buyer_id ? "buyer" : "seller";
