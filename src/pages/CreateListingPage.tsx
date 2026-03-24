@@ -331,16 +331,17 @@ const CreateListingPage = () => {
         }
       }
 
-      let updatedPhotos: Record<string, string[]> = {};
       setPhotos((prev) => {
-        updatedPhotos = {
+        const updatedPhotos = {
           ...prev,
           [group]: [...(prev[group] || []), ...uploadedUrls],
         };
+        // Save to DB inside callback to guarantee latest state
+        updateListing(id, { photos: updatedPhotos } as never).catch((err) =>
+          console.error("Photo DB sync failed", err)
+        );
         return updatedPhotos;
       });
-
-      await updateListing(id, { photos: updatedPhotos } as never);
 
       if (uploadedUrls.length > 0) {
         toast.success(`تم تجهيز ورفع ${uploadedUrls.length} صورة بنجاح`);
@@ -528,6 +529,11 @@ const CreateListingPage = () => {
       }
 
       await logAudit("listing_published", "listing", listingId, { title: disclosure.business_activity }).catch(() => {});
+      // Stop auto-save timer before navigating away
+      if (autoSaveTimerRef.current) {
+        clearInterval(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
       setSaving(false);
       toast.success("تم نشر الإعلان بنجاح! 🎉");
       navigate(`/listing/${listingId}`);
