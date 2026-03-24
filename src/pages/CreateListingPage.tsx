@@ -1093,11 +1093,15 @@ const CreateListingPage = () => {
                   })}
                 </div>
 
-                <div className="text-center pt-2 pb-1">
+                <div className="text-center pt-2 pb-1 space-y-2">
                   <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/10">
                     <Sparkles size={16} strokeWidth={1.5} className="text-primary" />
                     <p className="text-sm font-medium text-foreground">كلما زادت الصور، كان التحليل أدق والإعلان أقوى</p>
                   </div>
+                  <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
+                    <Upload size={10} strokeWidth={1.5} />
+                    يمكنك سحب الصور وإفلاتها مباشرة على أي مجموعة
+                  </p>
                 </div>
               </div>
 
