@@ -733,6 +733,11 @@ const CreateListingPage = () => {
     for (const f of reqFields) {
       if ((disclosure as Record<string, string>)[f]?.trim()) filled += 1;
     }
+    // Price always required
+    total += 1;
+    if (disclosure.price?.trim()) filled += 1;
+    return Math.round((filled / Math.max(total, 1)) * 100);
+  })();
 
   // ── Drag & drop handler ──
   const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>, groupId: string) => {
