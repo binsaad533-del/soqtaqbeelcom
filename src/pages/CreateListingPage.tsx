@@ -122,15 +122,42 @@ const CreateListingPage = () => {
     return id;
   }, [listingId, dealStructure, createListing]);
 
+  // Convert non-web-friendly images (HEIC, etc.) to JPEG using canvas
+  const convertToJpeg = useCallback(async (file: File): Promise<File> => {
+    const webFriendly = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (webFriendly.includes(file.type)) return file;
+    
+    // Try to convert via canvas (works for formats the browser can decode)
+    try {
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(bitmap, 0, 0);
+      bitmap.close();
+      
+      const blob = await new Promise<Blob>((resolve) => {
+        canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.9);
+      });
+      
+      const newName = file.name.replace(/\.[^.]+$/, ".jpg");
+      return new File([blob], newName, { type: "image/jpeg" });
+    } catch {
+      // If browser can't decode (e.g. HEIC on non-Safari), return as-is
+      return file;
+    }
+  }, []);
+
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !activePhotoGroup) return;
     const id = await ensureListing();
     if (!id) return;
     const group = activePhotoGroup;
-    const files = Array.from(e.target.files);
+    const rawFiles = Array.from(e.target.files);
     
     // Create local previews immediately
-    const localUrls = files.map(f => URL.createObjectURL(f));
+    const localUrls = rawFiles.map(f => URL.createObjectURL(f));
     setLocalPreviews(prev => ({
       ...prev,
       [group]: [...(prev[group] || []), ...localUrls],
@@ -138,18 +165,19 @@ const CreateListingPage = () => {
     
     // Start upload with progress
     setUploadingGroup(group);
-    setUploadProgress({ current: 0, total: files.length });
+    setUploadProgress({ current: 0, total: rawFiles.length });
     setSaving(true);
     
     const urls: string[] = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      setUploadProgress({ current: i + 1, total: files.length });
-      const validation = validateImageFile(file);
+    for (let i = 0; i < rawFiles.length; i++) {
+      setUploadProgress({ current: i + 1, total: rawFiles.length });
+      const validation = validateImageFile(rawFiles[i]);
       if (!validation.valid) {
         toast.error(validation.error);
         continue;
       }
+      // Convert HEIC and other non-web formats to JPEG
+      const file = await convertToJpeg(rawFiles[i]);
       const url = await uploadFile(id, file, `photos/${group}`);
       if (url) urls.push(url);
     }
