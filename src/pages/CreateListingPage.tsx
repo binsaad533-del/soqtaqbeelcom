@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import heic2any from "heic2any";
+import { heicTo, isHeic } from "heic-to";
 import { validateImageFile, validateDocFile, logAudit } from "@/lib/security";
 import {
   Check,
@@ -149,25 +149,32 @@ const CreateListingPage = () => {
     return id;
   }, [listingId, dealStructure, createListing]);
 
-  const isHeicLikeFile = useCallback((file: File) => {
+  const isHeicLikeFile = useCallback(async (file: File) => {
     const name = file.name.toLowerCase();
-    return file.type === "image/heic" || file.type === "image/heif" || name.endsWith(".heic") || name.endsWith(".heif");
+    if (file.type === "image/heic" || file.type === "image/heif" || name.endsWith(".heic") || name.endsWith(".heif")) {
+      return true;
+    }
+
+    try {
+      return await isHeic(file);
+    } catch {
+      return false;
+    }
   }, []);
 
   const convertToJpeg = useCallback(async (file: File): Promise<File> => {
     const webFriendly = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (webFriendly.includes(file.type)) return file;
 
-    if (isHeicLikeFile(file)) {
-      const result = await heic2any({
+    if (await isHeicLikeFile(file)) {
+      const blob = await heicTo({
         blob: file,
-        toType: "image/jpeg",
+        type: "image/jpeg",
         quality: 0.92,
-      } as never);
+      });
 
-      const blob = Array.isArray(result) ? result[0] : result;
       const newName = file.name.replace(/\.[^.]+$/i, ".jpg");
-      return new File([blob as BlobPart], newName, { type: "image/jpeg" });
+      return new File([blob], newName, { type: "image/jpeg" });
     }
 
     try {
