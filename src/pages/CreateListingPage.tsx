@@ -310,18 +310,22 @@ const CreateListingPage = () => {
         <input ref={docInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" multiple className="hidden" onChange={handleDocUpload} />
 
         {/* Steps indicator */}
-        <div className="flex flex-wrap items-center gap-1 mb-8 pb-2">
+        <div className="flex items-center justify-between mb-8 pb-2">
           {steps.map((step, i) => (
-            <div key={i} className="flex items-center gap-1">
-              <div className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all",
-                i === currentStep ? "bg-primary/10 text-primary" :
-                i < currentStep ? "bg-success/10 text-success" : "text-muted-foreground"
-              )}>
-                {i < currentStep ? <Check size={12} strokeWidth={1.5} /> : <step.icon size={12} strokeWidth={1.5} />}
-                {step.label}
-              </div>
-              {i < steps.length - 1 && <div className="w-4 h-px bg-border" />}
+            <div key={i} className="flex items-center gap-0.5 flex-1">
+              <button
+                type="button"
+                onClick={() => { if (i < currentStep) setCurrentStep(i); }}
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all w-full justify-center",
+                  i === currentStep ? "bg-primary/10 text-primary font-medium" :
+                  i < currentStep ? "text-success cursor-pointer hover:bg-success/5" : "text-muted-foreground"
+                )}
+              >
+                {i < currentStep ? <Check size={11} strokeWidth={2} /> : <step.icon size={11} strokeWidth={1.3} />}
+                <span className="hidden md:inline">{step.label}</span>
+              </button>
+              {i < steps.length - 1 && <div className="w-3 h-px bg-border shrink-0" />}
             </div>
           ))}
         </div>
