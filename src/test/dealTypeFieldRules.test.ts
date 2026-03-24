@@ -216,5 +216,48 @@ describe("dealTypeFieldRules", () => {
       expect(errors["business_activity"]).toBeUndefined();
     });
   });
-});
+
+  // ── City validation ──
+  describe("isKnownCity", () => {
+    it("recognizes major Saudi cities", () => {
+      expect(isKnownCity("الرياض")).toBe(true);
+      expect(isKnownCity("جدة")).toBe(true);
+      expect(isKnownCity("الدمام")).toBe(true);
+      expect(isKnownCity("أبها")).toBe(true);
+    });
+
+    it("rejects random text as city", () => {
+      expect(isKnownCity("كوكب المريخ")).toBe(false);
+      expect(isKnownCity("بلاد الوقواق")).toBe(false);
+    });
+  });
+
+  describe("validateDisclosure rejects invalid city", () => {
+    it("rejects unknown city for full_takeover", () => {
+      const errors = validateDisclosure("full_takeover", {
+        business_activity: "مطعم",
+        city: "بلاد الوقواق",
+        price: "5000",
+      });
+      expect(errors["city"]).toContain("مدينة سعودية صحيحة");
+    });
+
+    it("rejects gibberish city", () => {
+      const errors = validateDisclosure("full_takeover", {
+        business_activity: "مطعم",
+        city: "اااااا",
+        price: "5000",
+      });
+      expect(errors["city"]).toContain("غير مفهوم");
+    });
+
+    it("accepts valid city", () => {
+      const errors = validateDisclosure("full_takeover", {
+        business_activity: "مطعم",
+        city: "جدة",
+        price: "5000",
+      });
+      expect(errors["city"]).toBeUndefined();
+    });
+  });
 });
