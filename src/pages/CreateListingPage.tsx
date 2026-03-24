@@ -252,7 +252,13 @@ const CreateListingPage = () => {
     setCurrentStep(Math.min(steps.length - 1, currentStep + 1));
   };
 
-  const handleBack = () => setCurrentStep(Math.max(0, currentStep - 1));
+  const handleBack = () => {
+    if (currentStep === 0 && !showDealStructure) {
+      setShowDealStructure(true);
+      return;
+    }
+    setCurrentStep(Math.max(0, currentStep - 1));
+  };
 
   const handlePublish = async () => {
     const id = listingId;
