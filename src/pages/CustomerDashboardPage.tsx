@@ -252,7 +252,13 @@ const CustomerDashboardPage = () => {
               <span className="hidden md:inline text-border/50">|</span>
 
               <span className="flex items-center gap-1.5 shrink-0">
-                <Clock size={13} /> {memberSince}
+                <Clock size={13} /> انضم: {memberSince}
+              </span>
+
+              <span className="hidden md:inline text-border/50">|</span>
+
+              <span className="flex items-center gap-1.5 shrink-0">
+                <Clock size={13} /> آخر دخول: {lastLoginFormatted}
               </span>
 
               <span className="hidden md:inline text-border/50">|</span>
