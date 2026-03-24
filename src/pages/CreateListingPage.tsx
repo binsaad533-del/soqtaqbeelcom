@@ -1031,7 +1031,17 @@ const CreateListingPage = () => {
                     const Icon = iconMap[group.icon] || Camera;
 
                     return (
-                      <div key={group.id} className={cn("p-3.5 rounded-xl border transition-all", done ? "border-success/30 bg-success/5" : "border-border/50 bg-card hover:border-primary/30")}>
+                      <div
+                        key={group.id}
+                        className={cn(
+                          "p-3.5 rounded-xl border transition-all",
+                          done ? "border-success/30 bg-success/5" : "border-border/50 bg-card hover:border-primary/30",
+                          draggingGroup === group.id && "border-primary border-dashed bg-primary/5 scale-[1.01]"
+                        )}
+                        onDragOver={(e) => { e.preventDefault(); setDraggingGroup(group.id); }}
+                        onDragLeave={() => setDraggingGroup(null)}
+                        onDrop={(e) => handleDrop(e, group.id)}
+                      >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
                             <Icon size={18} strokeWidth={1.5} className="text-primary" />
