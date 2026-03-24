@@ -57,6 +57,9 @@ const CreateListingPage = () => {
     isValid: false,
   });
   const [photos, setPhotos] = useState<Record<string, string[]>>({});
+  const [localPreviews, setLocalPreviews] = useState<Record<string, string[]>>({});
+  const [uploadingGroup, setUploadingGroup] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number }>({ current: 0, total: 0 });
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzed, setAnalyzed] = useState(false);
   const [analyzeProgress, setAnalyzeProgress] = useState(0);
@@ -123,25 +126,42 @@ const CreateListingPage = () => {
     if (!e.target.files || !activePhotoGroup) return;
     const id = await ensureListing();
     if (!id) return;
-    setSaving(true);
+    const group = activePhotoGroup;
     const files = Array.from(e.target.files);
+    
+    // Create local previews immediately
+    const localUrls = files.map(f => URL.createObjectURL(f));
+    setLocalPreviews(prev => ({
+      ...prev,
+      [group]: [...(prev[group] || []), ...localUrls],
+    }));
+    
+    // Start upload with progress
+    setUploadingGroup(group);
+    setUploadProgress({ current: 0, total: files.length });
+    setSaving(true);
+    
     const urls: string[] = [];
-    for (const file of files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      setUploadProgress({ current: i + 1, total: files.length });
       const validation = validateImageFile(file);
       if (!validation.valid) {
         toast.error(validation.error);
         continue;
       }
-      const url = await uploadFile(id, file, `photos/${activePhotoGroup}`);
+      const url = await uploadFile(id, file, `photos/${group}`);
       if (url) urls.push(url);
     }
     setPhotos(prev => ({
       ...prev,
-      [activePhotoGroup]: [...(prev[activePhotoGroup] || []), ...urls],
+      [group]: [...(prev[group] || []), ...urls],
     }));
-    const allPhotos = { ...photos, [activePhotoGroup]: [...(photos[activePhotoGroup] || []), ...urls] };
+    const allPhotos = { ...photos, [group]: [...(photos[group] || []), ...urls] };
     await updateListing(id, { photos: allPhotos } as any);
     setSaving(false);
+    setUploadingGroup(null);
+    toast.success(`تم رفع ${urls.length} صورة بنجاح`);
     e.target.value = "";
   };
 
@@ -449,22 +469,70 @@ const CreateListingPage = () => {
                               </div>
                               <button
                                 onClick={() => { setActivePhotoGroup(group.id); fileInputRef.current?.click(); }}
+                                disabled={uploadingGroup === group.id}
                                 className={cn(
                                   "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all active:scale-[0.97]",
+                                  uploadingGroup === group.id ? "bg-primary/20 text-primary cursor-wait" :
                                   done ? "bg-success/10 text-success" : "bg-primary/10 text-primary hover:bg-primary/20"
                                 )}
                               >
-                                <Upload size={12} strokeWidth={1.5} />
-                                {count > 0 ? `${count} ✓` : "رفع"}
+                                {uploadingGroup === group.id ? (
+                                  <>
+                                    <Loader2 size={12} className="animate-spin" />
+                                    {uploadProgress.current}/{uploadProgress.total}
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload size={12} strokeWidth={1.5} />
+                                    {count > 0 ? `${count} ✓` : "رفع"}
+                                  </>
+                                )}
                               </button>
                             </div>
-                            {photos[group.id]?.length > 0 && (
-                              <div className="flex gap-1.5 mt-2.5 overflow-x-auto pb-1">
-                                {photos[group.id].map((url, i) => (
-                                  <img key={i} src={url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0 border border-border/30" />
-                                ))}
+
+                            {/* Upload progress bar */}
+                            {uploadingGroup === group.id && (
+                              <div className="mt-2.5 space-y-1.5 animate-fade-in">
+                                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                                  <div className="h-full rounded-full gradient-primary transition-all duration-500 ease-out" style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }} />
+                                </div>
+                                <p className="text-[10px] text-primary text-center">
+                                  جاري رفع الصورة {uploadProgress.current} من {uploadProgress.total}...
+                                </p>
                               </div>
                             )}
+
+                            {/* Show local previews first, then remote URLs */}
+                            {(() => {
+                              const previews = localPreviews[group.id] || [];
+                              const remoteUrls = photos[group.id] || [];
+                              const allUrls = previews.length > 0 ? previews : remoteUrls;
+                              if (allUrls.length === 0) return null;
+                              return (
+                                <div className="flex gap-1.5 mt-2.5 overflow-x-auto pb-1">
+                                  {allUrls.map((url, i) => (
+                                    <div key={i} className="relative shrink-0">
+                                      <img
+                                        src={url}
+                                        alt=""
+                                        className="w-12 h-12 rounded-lg object-cover border border-border/30"
+                                        onError={(e) => {
+                                          // If image fails to load (e.g. HEIC), show placeholder
+                                          const target = e.target as HTMLImageElement;
+                                          target.style.display = 'none';
+                                          target.parentElement!.classList.add('bg-primary/10');
+                                        }}
+                                      />
+                                      {uploadingGroup === group.id && i >= (allUrls.length - uploadProgress.total + uploadProgress.current) && i < allUrls.length && (
+                                        <div className="absolute inset-0 rounded-lg bg-background/60 flex items-center justify-center">
+                                          <Loader2 size={14} className="animate-spin text-primary" />
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })()}
                           </div>
                         );
                       })}
