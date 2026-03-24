@@ -49,15 +49,8 @@ export function sanitizeForSearch(input: string): string {
 }
 
 // ─── File Upload Security ──────────────────────────────────
-const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const ALLOWED_DOC_TYPES = [
-  "application/pdf",
-  "image/jpeg", "image/png", "image/webp",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-];
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+const MAX_IMAGE_SIZE = 15 * 1024 * 1024; // 15MB
 
 export interface FileValidationResult {
   valid: boolean;
@@ -65,8 +58,14 @@ export interface FileValidationResult {
 }
 
 export function validateImageFile(file: File): FileValidationResult {
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    return { valid: false, error: "نوع الملف غير مسموح. الأنواع المسموحة: JPG, PNG, WebP" };
+  // Accept any image type including HEIC/HEIF from phone cameras
+  if (!file.type.startsWith("image/") && file.type !== "") {
+    // Check by extension as fallback (some phones don't set MIME correctly)
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    const imageExts = ["jpg", "jpeg", "png", "webp", "heic", "heif", "gif", "bmp", "tiff", "tif", "svg", "avif", "raw", "cr2", "nef", "arw", "dng"];
+    if (!imageExts.includes(ext)) {
+      return { valid: false, error: "الملف لا يبدو صورة. يرجى رفع ملف صورة" };
+    }
   }
   if (file.size > MAX_IMAGE_SIZE) {
     return { valid: false, error: `حجم الصورة يجب أن لا يتجاوز ${MAX_IMAGE_SIZE / 1024 / 1024} ميجابايت` };
@@ -75,9 +74,7 @@ export function validateImageFile(file: File): FileValidationResult {
 }
 
 export function validateDocFile(file: File): FileValidationResult {
-  if (!ALLOWED_DOC_TYPES.includes(file.type)) {
-    return { valid: false, error: "نوع الملف غير مسموح. الأنواع المسموحة: PDF, JPG, PNG, DOCX" };
-  }
+  // Accept virtually all document and image types
   if (file.size > MAX_FILE_SIZE) {
     return { valid: false, error: `حجم الملف يجب أن لا يتجاوز ${MAX_FILE_SIZE / 1024 / 1024} ميجابايت` };
   }
