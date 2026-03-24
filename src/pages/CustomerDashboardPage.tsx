@@ -255,6 +255,18 @@ const CustomerDashboardPage = () => {
             {/* ── Quick Actions ── */}
             <div className="rounded-2xl border border-border/30 bg-card p-4 space-y-2">
               <h3 className="text-sm font-medium mb-3">إجراءات سريعة</h3>
+              {drafts.length > 0 && (
+                <Link to={`/listing/${drafts[0].id}`} className="flex items-center gap-3 p-3 rounded-xl bg-warning/5 hover:bg-warning/10 transition-colors group">
+                  <div className="w-8 h-8 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
+                    <Edit3 size={14} strokeWidth={1.5} className="text-warning" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-xs font-medium">إكمال المسودة</div>
+                    <div className="text-[10px] text-muted-foreground truncate">{drafts[0].title || "بدون عنوان"}</div>
+                  </div>
+                  <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              )}
               <Link to="/create-listing" className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors group">
                 <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center shrink-0">
                   <Plus size={14} strokeWidth={2} className="text-primary-foreground" />
