@@ -589,28 +589,37 @@ const NegotiationPage = () => {
                   </div>
 
                   {/* Interactive readiness steps */}
-                  {(deal.risk_factors as string[] || []).length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-border/20">
-                      <p className="text-[10px] text-muted-foreground mb-2">خطوات لتحسين الجاهزية:</p>
-                      <div className="space-y-1.5">
-                        {(deal.risk_factors as string[]).map((factor, i) => {
-                          const stepMap: Record<string, { label: string; action: string; path: string }> = {
-                            "مشتري غير موثق": { label: "وثّق حسابك", action: "verify", path: "/dashboard" },
-                            "بائع غير موثق": { label: "وثّق حسابك", action: "verify", path: "/dashboard" },
-                            "نوع الصفقة غير محدد": { label: "حدد النوع", action: "deal_type", path: `/listing/${deal.listing_id}` },
-                            "لا يوجد سعر متفق عليه": { label: "تفاوض على السعر", action: "chat", path: "" },
-                            "صفقة جديدة بدون رسائل": { label: "ابدأ المحادثة", action: "chat", path: "" },
-                          };
-                          const step = stepMap[factor];
-                          const isActionable = !!step;
+                  {(() => {
+                    const allSteps = [
+                      { key: "buyer_verified", label: "توثيق المشتري", factor: "مشتري غير موثق", action: "verify", path: "/dashboard", done: profile?.is_verified === true || (profile?.verification_level !== "none") },
+                      { key: "seller_verified", label: "توثيق البائع", factor: "بائع غير موثق", action: "verify", path: "/dashboard", done: otherProfile?.is_verified === true || (otherProfile?.verification_level && otherProfile.verification_level !== "none") },
+                      { key: "deal_type", label: "تحديد نوع الصفقة", factor: "نوع الصفقة غير محدد", action: "deal_type", path: `/listing/${deal.listing_id}`, done: !!deal.deal_type },
+                      { key: "has_messages", label: "بدء المحادثة", factor: "صفقة جديدة بدون رسائل", action: "chat", path: "", done: messages.length > 0 },
+                      { key: "agreed_price", label: "الاتفاق على السعر", factor: "لا يوجد سعر متفق عليه", action: "chat", path: "", done: !!deal.agreed_price },
+                    ];
+                    const riskFactors = (deal.risk_factors as string[]) || [];
+                    const relevantSteps = allSteps.filter(s => riskFactors.includes(s.factor) || s.done);
+                    if (relevantSteps.length === 0) return null;
 
-                          return (
-                            <div key={i} className="flex items-center gap-2 text-[10px] group">
-                              <div className="w-4 h-4 rounded-full bg-warning/15 flex items-center justify-center shrink-0">
-                                <div className="w-1.5 h-1.5 rounded-full bg-warning" />
-                              </div>
-                              <span className="flex-1 text-muted-foreground">{factor}</span>
-                              {isActionable && (
+                    return (
+                      <div className="mt-3 pt-3 border-t border-border/20">
+                        <p className="text-[10px] text-muted-foreground mb-2">خطوات الجاهزية:</p>
+                        <div className="space-y-1.5">
+                          {relevantSteps.map((step) => (
+                            <div key={step.key} className="flex items-center gap-2 text-[10px] group">
+                              {step.done ? (
+                                <div className="w-4 h-4 rounded-full bg-success/15 flex items-center justify-center shrink-0">
+                                  <CheckCircle2 size={10} className="text-success" strokeWidth={2} />
+                                </div>
+                              ) : (
+                                <div className="w-4 h-4 rounded-full bg-warning/15 flex items-center justify-center shrink-0">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-warning" />
+                                </div>
+                              )}
+                              <span className={cn("flex-1", step.done ? "text-muted-foreground/50 line-through" : "text-muted-foreground")}>
+                                {step.done ? step.label : step.factor}
+                              </span>
+                              {!step.done && (
                                 step.action === "chat" ? (
                                   <button
                                     onClick={() => {
@@ -631,11 +640,11 @@ const NegotiationPage = () => {
                                 )
                               )}
                             </div>
-                          );
-                        })}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
 
                 {/* Other party trust — compact */}
