@@ -1369,7 +1369,7 @@ const CreateListingPage = () => {
                 </div>
 
                 {/* Photo validation warning */}
-                {publishAttempted && !publishValidation.hasPhotos && imageReq === "required" && (
+                {publishAttempted && !photosOk && imageReq === "required" && (
                   <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-center gap-2">
                     <AlertTriangle size={14} className="text-destructive shrink-0" />
                     <p className="text-xs text-destructive">يجب رفع صورة واحدة على الأقل — عد إلى خطوة الصور والمستندات</p>
