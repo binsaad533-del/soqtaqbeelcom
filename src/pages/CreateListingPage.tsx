@@ -331,16 +331,17 @@ const CreateListingPage = () => {
         }
       }
 
-      let updatedPhotos: Record<string, string[]> = {};
       setPhotos((prev) => {
-        updatedPhotos = {
+        const updatedPhotos = {
           ...prev,
           [group]: [...(prev[group] || []), ...uploadedUrls],
         };
+        // Save to DB inside callback to guarantee latest state
+        updateListing(id, { photos: updatedPhotos } as never).catch((err) =>
+          console.error("Photo DB sync failed", err)
+        );
         return updatedPhotos;
       });
-
-      await updateListing(id, { photos: updatedPhotos } as never);
 
       if (uploadedUrls.length > 0) {
         toast.success(`تم تجهيز ورفع ${uploadedUrls.length} صورة بنجاح`);
