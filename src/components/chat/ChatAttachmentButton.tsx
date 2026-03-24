@@ -21,7 +21,9 @@ export default function ChatAttachmentButton({ dealId, onFileSent, disabled }: C
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const isImage = file.type.startsWith("image/");
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    const imageExts = ["jpg", "jpeg", "png", "webp", "heic", "heif", "gif", "bmp", "avif"];
+    const isImage = file.type.startsWith("image/") || imageExts.includes(ext);
     const validation = isImage ? validateImageFile(file) : validateDocFile(file);
     if (!validation.valid) {
       toast.error(validation.error || "ملف غير مدعوم");
