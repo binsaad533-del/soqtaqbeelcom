@@ -101,6 +101,22 @@ const CustomerDashboardPage = () => {
           </div>
         </div>
 
+        {/* Error Banner */}
+        {loadError && (
+          <div className="mb-4 p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle size={16} className="text-destructive shrink-0" />
+              <span className="text-sm text-destructive">{loadError}</span>
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-xs text-destructive font-medium hover:underline whitespace-nowrap"
+            >
+              إعادة المحاولة
+            </button>
+          </div>
+        )}
+
         {/* Quick Stats */}
         <div className="grid grid-cols-4 gap-3 mb-6">
           {[
