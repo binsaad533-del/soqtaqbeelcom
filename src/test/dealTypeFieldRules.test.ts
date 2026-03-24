@@ -5,6 +5,7 @@ import {
   isFieldRequired,
   validateDisclosure,
   validateImages,
+  isGibberish,
 } from "@/lib/dealTypeFieldRules";
 
 describe("dealTypeFieldRules", () => {
