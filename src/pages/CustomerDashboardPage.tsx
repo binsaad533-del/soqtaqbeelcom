@@ -272,18 +272,20 @@ const CustomerDashboardPage = () => {
               <span className="hidden md:inline text-border/50">|</span>
 
               {/* Email */}
-              <div className="flex items-center gap-1.5 group/email min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
                 <Mail size={13} className="shrink-0" />
                 {editingField === "email" ? (
                   <div className="flex items-center gap-1">
-                    <input type="email" dir="ltr" className="bg-muted/50 rounded px-2 py-0.5 w-44 border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="email@example.com" />
+                    <input type="email" dir="ltr" lang="en" className="bg-muted/50 rounded px-2 py-0.5 w-44 border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="email@example.com" />
                     <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
                     <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
                   </div>
                 ) : (
                   <>
-                    <span className="truncate" dir="ltr">{userEmail || "لم يُضاف"}</span>
-                    <button onClick={() => startEdit("email", userEmail || "")} className="opacity-0 group-hover/email:opacity-100 text-muted-foreground hover:text-primary shrink-0"><Pencil size={10} /></button>
+                    <span className="truncate" dir="ltr">
+                      {hasRealEmail ? userEmail : <span className="text-warning">لم يُضاف</span>}
+                    </span>
+                    <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-primary hover:text-primary/80 shrink-0"><Pencil size={10} /></button>
                   </>
                 )}
               </div>
@@ -291,7 +293,7 @@ const CustomerDashboardPage = () => {
               <span className="hidden md:inline text-border/50">|</span>
 
               {/* Phone */}
-              <div className="flex items-center gap-1.5 group/phone shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <Phone size={13} />
                 {editingField === "phone" ? (
                   <div className="flex items-center gap-1">
@@ -301,8 +303,8 @@ const CustomerDashboardPage = () => {
                   </div>
                 ) : (
                   <>
-                    <span dir="ltr">{profile?.phone ? toEnglishNumerals(profile.phone) : "لم يُضاف"}</span>
-                    <button onClick={() => startEdit("phone", profile?.phone || "")} className="opacity-0 group-hover/phone:opacity-100 text-muted-foreground hover:text-primary"><Pencil size={10} /></button>
+                    <span dir="ltr">{profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">لم يُضاف</span>}</span>
+                    <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-primary hover:text-primary/80"><Pencil size={10} /></button>
                   </>
                 )}
               </div>
