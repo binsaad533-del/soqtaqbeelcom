@@ -246,8 +246,10 @@ const LoginPage = () => {
                     placeholder="5XXXXXXXX"
                     value={phone}
                     onChange={(e) => handlePhoneChange(e.target.value)}
-                    className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors tracking-wider"
+                    className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors tracking-wider text-left"
                     dir="ltr"
+                    lang="en"
+                    autoComplete="tel-national"
                     required
                   />
                 </div>
@@ -260,11 +262,14 @@ const LoginPage = () => {
                 <Mail size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="email"
-                  placeholder="البريد الإلكتروني"
+                  inputMode="email"
+                  placeholder="example@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors"
+                  className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors text-left"
                   dir="ltr"
+                  lang="en"
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -275,11 +280,14 @@ const LoginPage = () => {
               <Lock size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type={showPassword ? "text" : "password"}
+                inputMode="text"
                 placeholder="كلمة المرور"
                 value={password}
                 onChange={(e) => handlePasswordChange(e.target.value)}
-                className="w-full pr-10 pl-10 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors"
+                className="w-full pr-10 pl-10 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors text-left"
                 dir="ltr"
+                lang="en"
+                autoComplete={isLogin ? "current-password" : "new-password"}
                 required
                 minLength={6}
               />
