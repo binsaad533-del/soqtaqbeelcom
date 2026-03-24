@@ -216,43 +216,154 @@ const OwnerDashboardPage = () => {
               ))}
             </div>
 
-            {/* Smart Alerts */}
-            {(unpaidCompleted.length > 0 || listingsNoPhotos.length > 0) && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium flex items-center gap-1.5"><Bell size={14} strokeWidth={1.3} /> تنبيهات ذكية</h3>
-                {unpaidCompleted.length > 0 && (
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-destructive/5 border border-destructive/10">
-                    <AlertTriangle size={14} className="text-destructive shrink-0" />
-                    <span className="text-xs text-destructive">{unpaidCompleted.length} صفقة مكتملة لم تُدفع عمولتها</span>
-                    <button onClick={() => setActiveTab("deals")} className="mr-auto text-[10px] text-destructive underline">عرض</button>
-                  </div>
-                )}
-                {listingsNoPhotos.length > 0 && (
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/50 border border-border/50">
-                    <ImageOff size={14} className="text-muted-foreground shrink-0" />
-                    <span className="text-xs text-muted-foreground">{listingsNoPhotos.length} إعلان بدون صور أو بيانات ناقصة</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Recent Listings */}
-            <div>
-              <h3 className="text-sm font-medium mb-3">آخر الإعلانات</h3>
-              <div className="space-y-2">
-                {listings.slice(0, 5).map(l => (
-                  <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all">
-                    <div>
-                      <div className="text-sm">{l.title || "بدون عنوان"}</div>
-                      <div className="text-[11px] text-muted-foreground">{l.city} — {l.price ? `${Number(l.price).toLocaleString()} ر.س` : "—"}</div>
+            {/* Two-column layout: Alerts + Recent Activity */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {/* Left Column: Smart Alerts + Quick Stats */}
+              <div className="space-y-4">
+                {/* Smart Alerts */}
+                <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                  <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
+                    <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center">
+                      <Bell size={14} className="text-warning" strokeWidth={1.5} />
                     </div>
-                    <span className={cn("text-[10px] px-2 py-0.5 rounded-md", l.status === "published" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
-                      {l.status === "published" ? "منشور" : "مسودة"}
-                    </span>
-                  </Link>
-                ))}
-                {listings.length === 0 && <p className="text-center text-sm text-muted-foreground py-8">لا توجد إعلانات</p>}
+                    تنبيهات ذكية
+                  </h3>
+                  <div className="space-y-2.5">
+                    {unpaidCompleted.length > 0 && (
+                      <div className="flex items-center gap-3 p-3.5 rounded-xl bg-destructive/5 border border-destructive/10">
+                        <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
+                          <AlertTriangle size={14} className="text-destructive" />
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-xs font-medium text-destructive">{unpaidCompleted.length} صفقة مكتملة لم تُدفع عمولتها</span>
+                          <p className="text-[10px] text-destructive/70 mt-0.5">يجب متابعة تحصيل العمولات</p>
+                        </div>
+                        <button onClick={() => setActiveTab("deals")} className="text-[10px] text-destructive bg-destructive/10 px-3 py-1.5 rounded-lg hover:bg-destructive/20 transition-colors font-medium">عرض</button>
+                      </div>
+                    )}
+                    {listingsNoPhotos.length > 0 && (
+                      <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/50 border border-border/40">
+                        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                          <ImageOff size={14} className="text-muted-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-xs font-medium">{listingsNoPhotos.length} إعلان بدون صور أو بيانات ناقصة</span>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">الإعلانات بالصور تحصل على تفاعل أعلى</p>
+                        </div>
+                      </div>
+                    )}
+                    {unpaidCompleted.length === 0 && listingsNoPhotos.length === 0 && (
+                      <div className="text-center py-6 text-muted-foreground">
+                        <ShieldCheck size={20} className="mx-auto mb-2 text-success" />
+                        <p className="text-xs">لا توجد تنبيهات — كل شيء على ما يرام</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Platform Performance Summary */}
+                <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                  <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <BarChart3 size={14} className="text-primary" strokeWidth={1.5} />
+                    </div>
+                    أداء المنصة
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { label: "معدل إكمال الصفقات", value: deals.length > 0 ? Math.round((completedDeals.length / deals.length) * 100) : 0, suffix: "%" },
+                      { label: "نسبة تحصيل العمولات", value: totalCommissionDue > 0 ? Math.round((totalCollected / totalCommissionDue) * 100) : 0, suffix: "%" },
+                      { label: "المستخدمون النشطون", value: profiles.length > 0 ? Math.round((profiles.filter(p => p.is_active && !p.is_suspended).length / profiles.length) * 100) : 0, suffix: "%" },
+                    ].map((stat, i) => (
+                      <div key={i}>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[11px] text-muted-foreground">{stat.label}</span>
+                          <span className="text-xs font-semibold">{stat.value}{stat.suffix}</span>
+                        </div>
+                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-primary/60 rounded-full transition-all duration-500" style={{ width: `${Math.min(stat.value, 100)}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
+
+              {/* Right Column: Recent Listings + Deals */}
+              <div className="space-y-4">
+                {/* Recent Listings */}
+                <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <FileText size={14} className="text-primary" strokeWidth={1.5} />
+                      </div>
+                      آخر الإعلانات
+                    </h3>
+                    <button onClick={() => setActiveTab("listings")} className="text-[10px] text-primary hover:underline">عرض الكل</button>
+                  </div>
+                  <div className="space-y-2">
+                    {listings.slice(0, 5).map(l => (
+                      <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/60 transition-all group">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                            <FileText size={14} className="text-muted-foreground" strokeWidth={1.3} />
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium group-hover:text-primary transition-colors">{l.title || "بدون عنوان"}</div>
+                            <div className="text-[10px] text-muted-foreground">{l.city || "—"} {l.price ? `• ${Number(l.price).toLocaleString()} ر.س` : ""}</div>
+                          </div>
+                        </div>
+                        <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", l.status === "published" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>
+                          {l.status === "published" ? "منشور" : "مسودة"}
+                        </span>
+                      </Link>
+                    ))}
+                    {listings.length === 0 && <p className="text-center text-xs text-muted-foreground py-8">لا توجد إعلانات</p>}
+                  </div>
+                </div>
+
+                {/* Recent Deals */}
+                <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center">
+                        <Handshake size={14} className="text-success" strokeWidth={1.5} />
+                      </div>
+                      آخر الصفقات
+                    </h3>
+                    <button onClick={() => setActiveTab("deals")} className="text-[10px] text-primary hover:underline">عرض الكل</button>
+                  </div>
+                  <div className="space-y-2">
+                    {deals.slice(0, 5).map(d => {
+                      const listing = listings.find(l => l.id === d.listing_id);
+                      const statusMap: Record<string, { label: string; cls: string }> = {
+                        negotiating: { label: "قيد التفاوض", cls: "bg-warning/10 text-warning" },
+                        completed: { label: "مكتملة", cls: "bg-success/10 text-success" },
+                        finalized: { label: "نهائية", cls: "bg-primary/10 text-primary" },
+                        cancelled: { label: "ملغاة", cls: "bg-destructive/10 text-destructive" },
+                      };
+                      const st = statusMap[d.status] || { label: d.status, cls: "bg-muted text-muted-foreground" };
+                      return (
+                        <div key={d.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                              <Handshake size={14} className="text-muted-foreground" strokeWidth={1.3} />
+                            </div>
+                            <div>
+                              <div className="text-xs font-medium">{listing?.title || "بدون عنوان"}</div>
+                              <div className="text-[10px] text-muted-foreground">{d.agreed_price ? `${Number(d.agreed_price).toLocaleString()} ر.س` : "—"} • {new Date(d.created_at).toLocaleDateString("ar-SA")}</div>
+                            </div>
+                          </div>
+                          <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
+                        </div>
+                      );
+                    })}
+                    {deals.length === 0 && <p className="text-center text-xs text-muted-foreground py-8">لا توجد صفقات</p>}
+                  </div>
+                </div>
+              </div>
+            </div>
             </div>
           </div>
         )}
