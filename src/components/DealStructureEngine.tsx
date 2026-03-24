@@ -55,7 +55,17 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
     if (selectedTypes.includes(typeId)) {
       newTypes = selectedTypes.filter(t => t !== typeId);
     } else {
-      newTypes = [...selectedTypes, typeId];
+      // Auto-resolve conflicts: remove any type that conflicts with the new selection
+      newTypes = [...selectedTypes];
+      for (const rule of CONFLICT_RULES) {
+        if (rule.types.includes(typeId)) {
+          const conflicting = rule.types.find(t => t !== typeId);
+          if (conflicting && newTypes.includes(conflicting)) {
+            newTypes = newTypes.filter(t => t !== conflicting);
+          }
+        }
+      }
+      newTypes = [...newTypes, typeId];
     }
     let newPrimary = primaryType;
     if (newTypes.length === 0) newPrimary = "";
