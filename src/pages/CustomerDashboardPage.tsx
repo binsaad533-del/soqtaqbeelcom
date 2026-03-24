@@ -431,7 +431,7 @@ const CustomerDashboardPage = () => {
                         <div className="flex-1 min-w-0">
                           <div className="text-[10px] font-medium truncate">صفقة #{deal.id.slice(0, 6)}</div>
                           <div className="flex items-center gap-1.5 text-[8px] text-muted-foreground">
-                            <span>{new Date(deal.created_at).toLocaleDateString("ar-SA")}</span>
+                            <span>{new Date(deal.created_at).toLocaleDateString("en-GB")}</span>
                             {deal.agreed_price && <><span>·</span><span className="font-medium text-foreground/70">{Number(deal.agreed_price).toLocaleString()} ر.س</span></>}
                           </div>
                         </div>
@@ -476,7 +476,7 @@ const CustomerDashboardPage = () => {
                         <div className="flex-1 min-w-0">
                           <div className="text-[10px] font-medium truncate">{listing.title || "بدون عنوان"}</div>
                           <div className="flex items-center gap-1.5 text-[8px] text-muted-foreground">
-                            <span>{new Date(listing.created_at).toLocaleDateString("ar-SA")}</span>
+                            <span>{new Date(listing.created_at).toLocaleDateString("en-GB")}</span>
                             {listing.city && <><span>·</span><span>{listing.city}</span></>}
                             {listing.price && <><span>·</span><span className="font-medium text-foreground/70">{Number(listing.price).toLocaleString()} ر.س</span></>}
                           </div>
