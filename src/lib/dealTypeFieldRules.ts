@@ -76,24 +76,6 @@ export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
     docsRequired: false,
   },
 
-  // ── Commercial Registration Only ──
-  cr_only: {
-    requiredFields: ["price"],
-    optionalFields: ["business_activity", "city", "district"],
-    hiddenFields: [...LEASE_FIELDS, ...LIABILITY_FIELDS, ...LICENSE_FIELDS],
-    imageRequired: false,
-    docsRequired: true,
-  },
-
-  // ── Location Only ──
-  location_only: {
-    requiredFields: ["city", "price"],
-    optionalFields: ["business_activity", "district", ...LEASE_FIELDS],
-    hiddenFields: [...LIABILITY_FIELDS, ...LICENSE_FIELDS],
-    imageRequired: false,
-    docsRequired: false,
-  },
-
   // ── Assets + CR ──
   assets_cr: {
     requiredFields: ["business_activity", "city", "price"],

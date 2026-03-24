@@ -31,18 +31,6 @@ const DEAL_TYPE_SCOPES: Record<string, { label: string; analyzeFields: string[];
     skipFields: ["cr", "tradeName", "lease", "liabilities", "licenses", "operations"],
     focusAreas: ["المعدات والأجهزة", "حالة الأصول", "الكمية", "واقعية السعر", "النقل والتسليم"],
   },
-  cr_only: {
-    label: "سجل تجاري فقط",
-    analyzeFields: ["cr"],
-    skipFields: ["assets", "lease", "tradeName", "operations"],
-    focusAreas: ["حالة السجل التجاري", "الأنشطة المسجلة", "الالتزامات المرتبطة", "المستحقات الحكومية"],
-  },
-  location_only: {
-    label: "موقع فقط (نقل إيجار)",
-    analyzeFields: ["lease", "location"],
-    skipFields: ["cr", "tradeName", "assets", "operations"],
-    focusAreas: ["عقد الإيجار", "موافقة المؤجر", "الإيجار", "المدة المتبقية", "الموقع التجاري"],
-  },
 };
 
 function buildDealTypeContext(listing: any): string {
