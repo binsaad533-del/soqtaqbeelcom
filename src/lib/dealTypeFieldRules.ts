@@ -144,6 +144,40 @@ export function isFieldRequired(dealType: string, field: string): boolean {
 }
 
 /**
+ * Detect if a text value is gibberish / nonsensical.
+ * Checks for: too short meaningful content, repeated chars, no Arabic/English words,
+ * random keyboard mashing patterns.
+ */
+export function isGibberish(text: string): boolean {
+  if (!text || text.trim().length < 3) return false; // too short to judge
+  const trimmed = text.trim();
+
+  // Single repeated character (e.g. "ااااا", "xxxxx")
+  if (/^(.)\1{2,}$/.test(trimmed)) return true;
+
+  // Mostly repeated chars (>70% same char)
+  const charCounts: Record<string, number> = {};
+  for (const c of trimmed.replace(/\s/g, '')) {
+    charCounts[c] = (charCounts[c] || 0) + 1;
+  }
+  const maxCount = Math.max(...Object.values(charCounts));
+  if (trimmed.replace(/\s/g, '').length > 3 && maxCount / trimmed.replace(/\s/g, '').length > 0.7) return true;
+
+  // No Arabic or English letters at all (just symbols/numbers)
+  if (!/[\u0600-\u06FFa-zA-Z]/.test(trimmed)) return true;
+
+  // Random keyboard patterns — only flag if no vowels (real words have vowels)
+  const latinOnly = trimmed.replace(/[^a-zA-Z]/g, '');
+  if (latinOnly.length >= 4 && !/[aeiouAEIOU]/i.test(latinOnly)) return true;
+  // Common keyboard row mashing patterns
+  if (/^[asdfghjkl;]{4,}$/i.test(trimmed) || /^[qwertyu]{4,}$/i.test(trimmed) || /^[zxcvbnm]{4,}$/i.test(trimmed)) return true;
+  // Single/double Arabic letter (not a word)
+  if (/^[\u0600-\u06FF]{1,2}$/.test(trimmed)) return true;
+
+  return false;
+}
+
+/**
  * Validate disclosure data against a deal type's rules.
  * Returns an object with field → error message for each failing required field.
  */
@@ -163,11 +197,20 @@ export function validateDisclosure(
     } else {
       if (!value || value.trim() === "") {
         errors[field] = `${FIELD_LABELS[field] || field} مطلوب`;
+      } else if (isGibberish(value)) {
+        errors[field] = `${FIELD_LABELS[field] || field} غير مفهوم — الوصف غير الواضح سيجعل الصفقة تبدو مشبوهة`;
       }
     }
   }
 
-  // Image validation is done separately (needs photo count)
+  // Also validate optional fields if filled with gibberish
+  for (const field of rules.optionalFields) {
+    const value = disclosure[field];
+    if (value && value.trim() !== "" && isGibberish(value)) {
+      errors[field] = `${FIELD_LABELS[field] || field} غير مفهوم — الوصف غير الواضح سيجعل الصفقة تبدو مشبوهة`;
+    }
+  }
+
   return errors;
 }
 
