@@ -554,11 +554,16 @@ const CreateListingPage = () => {
 
   const totalPhotos = photoGroups.reduce((sum, group) => sum + getGroupDisplayUrls(group.id).length, 0);
   const allPhotoUrls = Object.values(photos).flat();
-  const disclosureScore = (() => {
-    const fields = Object.values(disclosure);
-    const filled = fields.filter((v) => v.trim() !== "").length;
-    return Math.round((filled / fields.length) * 100);
-  })();
+  const dealTypeForTransparency = dealStructure.primaryType || "full_takeover";
+  const transparencyResult = calculateTransparency({
+    ...disclosure,
+    price: disclosure.price ? Number(disclosure.price) : null,
+    annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+    primary_deal_type: dealTypeForTransparency,
+    inventory,
+    photos,
+  });
+  const disclosureScore = transparencyResult.score;
 
   const dynamicDocTypes = dealStructure.requiredDocuments.length > 0
     ? dealStructure.requiredDocuments
