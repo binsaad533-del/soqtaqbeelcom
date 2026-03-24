@@ -239,9 +239,10 @@ const NegotiationPage = () => {
         // Notify if message is from other party (not me)
         if (newMsg.sender_id !== user?.id) {
           const isAttachment = newMsg.message_type === "image" || newMsg.message_type === "document";
+          const dealLabel = listing?.title || listing?.business_activity || "فرصة تقبيل";
           const title = isAttachment ? "📎 مرفق جديد في التفاوض" : "💬 رسالة جديدة في التفاوض";
           const body = isAttachment
-            ? `تم إرسال ${newMsg.message_type === "image" ? "صورة" : "مستند"} في صفقة ${listingTitle}`
+            ? `تم إرسال ${newMsg.message_type === "image" ? "صورة" : "مستند"} في صفقة ${dealLabel}`
             : newMsg.message.length > 60 ? newMsg.message.slice(0, 60) + "…" : newMsg.message;
 
           // Play notification sound
@@ -278,7 +279,7 @@ const NegotiationPage = () => {
     }
 
     return () => { supabase.removeChannel(channel); };
-  }, [dealId, user?.id, listingTitle]);
+  }, [dealId, user?.id, listing]);
 
   useEffect(() => { scrollToBottom(); }, [messages]);
 
