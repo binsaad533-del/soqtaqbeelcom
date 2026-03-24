@@ -54,6 +54,25 @@ const allPhotoGroups = [
   { id: "cr_doc", label: "صورة السجل التجاري", min: 1, icon: "FileText", dealTypes: ["cr_only"] },
 ];
 
+// Deal types where images are required / optional / not needed
+function getImageRequirement(dealType: string): "required" | "optional" | "none" {
+  switch (dealType) {
+    case "assets_only":
+    case "assets_setup":
+    case "assets_cr":
+    case "assets_cr_name":
+      return "required";
+    case "full_takeover":
+    case "transfer_no_liabilities":
+    case "location_only":
+      return "optional";
+    case "cr_only":
+      return "none";
+    default:
+      return "optional";
+  }
+}
+
 interface InventoryItem {
   id: string;
   name: string;
@@ -493,7 +512,8 @@ const CreateListingPage = () => {
     if (!listingId) return;
     setPublishAttempted(true);
 
-    const hasPhotos = totalPhotos > 0;
+    const imgReq = getImageRequirement(dealStructure.primaryType);
+    const hasPhotos = imgReq === "none" || imgReq === "optional" || totalPhotos > 0;
     const hasActivity = disclosure.business_activity.trim() !== "";
     const hasCity = disclosure.city.trim() !== "";
     const hasPrice = disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0;
@@ -585,8 +605,10 @@ const CreateListingPage = () => {
   const medConfidenceItems = inventory.filter((item) => item.confidence === "medium" && !item.userConfirmed);
 
   // ── Publish validation ──
+  const imageReq = getImageRequirement(dealStructure.primaryType);
+  const photosOk = imageReq === "none" || imageReq === "optional" || totalPhotos > 0;
   const publishValidation = {
-    hasPhotos: totalPhotos > 0,
+    hasPhotos: photosOk,
     hasActivity: disclosure.business_activity.trim() !== "",
     hasCity: disclosure.city.trim() !== "",
     hasPrice: disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0,
@@ -844,10 +866,15 @@ const CreateListingPage = () => {
                       <h2 className="font-medium mb-2">تحليل الصور بالذكاء الاصطناعي</h2>
                       <p className="text-sm text-muted-foreground max-w-sm mb-1">سيقوم مقبل بتحليل صورك واكتشاف الأصول تلقائياً</p>
                       <p className="text-xs text-success mb-4 animate-fade-in">فقط اضغط الزر — والباقي علينا</p>
-                      {allPhotoUrls.length === 0 ? (
+                      {allPhotoUrls.length === 0 && imageReq === "none" ? (
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Check size={14} className="text-success" />
+                          هذا النوع من الصفقات لا يتطلب صوراً — يمكنك المتابعة للخطوة التالية
+                        </div>
+                      ) : allPhotoUrls.length === 0 ? (
                         <div className="flex items-center gap-1.5 text-xs text-warning">
                           <AlertTriangle size={14} />
-                          يرجى رفع صور في الخطوة السابقة أولاً
+                          {imageReq === "required" ? "يرجى رفع صور في الخطوة السابقة أولاً" : "لم يتم رفع صور — يمكنك المتابعة أو العودة لرفع صور"}
                         </div>
                       ) : (
                         <>
@@ -1030,7 +1057,7 @@ const CreateListingPage = () => {
                     <div>
                       <p className="text-xs font-medium text-destructive">يرجى إكمال الحقول المطلوبة قبل النشر</p>
                       <ul className="text-[11px] text-destructive/80 mt-1 space-y-0.5 list-disc list-inside">
-                        {!publishValidation.hasPhotos && <li>يجب رفع صورة واحدة على الأقل</li>}
+                        {!publishValidation.hasPhotos && imageReq === "required" && <li>يجب رفع صورة واحدة على الأقل</li>}
                         {!publishValidation.hasActivity && <li>نوع النشاط مطلوب</li>}
                         {!publishValidation.hasCity && <li>المدينة مطلوبة</li>}
                         {!publishValidation.hasPrice && <li>السعر مطلوب ويجب أن يكون رقماً صحيحاً</li>}
@@ -1138,7 +1165,7 @@ const CreateListingPage = () => {
                 </div>
 
                 {/* Photo validation warning */}
-                {publishAttempted && !publishValidation.hasPhotos && (
+                {publishAttempted && !publishValidation.hasPhotos && imageReq === "required" && (
                   <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-center gap-2">
                     <AlertTriangle size={14} className="text-destructive shrink-0" />
                     <p className="text-xs text-destructive">يجب رفع صورة واحدة على الأقل — عد إلى خطوة الصور والمستندات</p>
