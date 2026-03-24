@@ -246,8 +246,10 @@ const LoginPage = () => {
                     placeholder="5XXXXXXXX"
                     value={phone}
                     onChange={(e) => handlePhoneChange(e.target.value)}
-                    className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors tracking-wider"
+                    className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors tracking-wider text-left"
                     dir="ltr"
+                    lang="en"
+                    autoComplete="tel-national"
                     required
                   />
                 </div>
