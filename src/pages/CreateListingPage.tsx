@@ -529,6 +529,11 @@ const CreateListingPage = () => {
       }
 
       await logAudit("listing_published", "listing", listingId, { title: disclosure.business_activity }).catch(() => {});
+      // Stop auto-save timer before navigating away
+      if (autoSaveTimerRef.current) {
+        clearInterval(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
       setSaving(false);
       toast.success("تم نشر الإعلان بنجاح! 🎉");
       navigate(`/listing/${listingId}`);
