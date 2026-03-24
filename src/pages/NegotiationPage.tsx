@@ -80,6 +80,8 @@ const NegotiationPage = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const lastMsgCountRef = useRef(0);
 
+  const listingTitle = listing?.title || listing?.business_activity || "فرصة تقبيل";
+
   const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
   const buildContext = useCallback(() => {
