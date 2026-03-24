@@ -197,6 +197,30 @@ const AgreementPage = () => {
     setGenerating(false);
   };
 
+  const sendDealCompletionEmail = async (recipientEmail: string, recipientName: string, role: string, otherPartyName: string) => {
+    try {
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "deal-completed",
+          recipientEmail,
+          idempotencyKey: `deal-completed-${agreement?.deal_id}-${role}`,
+          templateData: {
+            recipientName,
+            dealTitle: agreement?.deal_title || "",
+            agreementNumber: agreement?.agreement_number || "",
+            agreedPrice: agreement?.financial_terms?.agreedPrice
+              ? Number(agreement.financial_terms.agreedPrice).toLocaleString("en-US")
+              : "",
+            otherPartyName,
+            role,
+          },
+        },
+      });
+    } catch (e) {
+      console.error("Failed to send deal completion email:", e);
+    }
+  };
+
   const handleApprove = async (side: "buyer" | "seller") => {
     if (!agreement) return;
     setApproving(true);
@@ -211,7 +235,8 @@ const AgreementPage = () => {
         .eq("id", agreement.id);
       if (error) throw error;
 
-      setAgreement(prev => prev ? { ...prev, ...updateField } : prev);
+      const updatedAgreement = { ...agreement, ...updateField };
+      setAgreement(updatedAgreement);
 
       await supabase.from("deal_history").insert({
         deal_id: agreement.deal_id,
@@ -219,6 +244,33 @@ const AgreementPage = () => {
         actor_id: user?.id,
         details: { agreement_id: agreement.id, version: agreement.version },
       });
+
+      // If both parties have now approved, send completion emails
+      if (updatedAgreement.buyer_approved && updatedAgreement.seller_approved && deal) {
+        // Get both profiles
+        const [buyerProfile, sellerProfile] = await Promise.all([
+          supabase.from("profiles").select("full_name, user_id").eq("user_id", deal.buyer_id).maybeSingle(),
+          supabase.from("profiles").select("full_name, user_id").eq("user_id", deal.seller_id).maybeSingle(),
+        ]);
+
+        // Get emails from auth (user metadata)
+        const buyerName = buyerProfile.data?.full_name || "المشتري";
+        const sellerName = sellerProfile.data?.full_name || "البائع";
+
+        // Get buyer and seller emails
+        const [buyerAuth, sellerAuth] = await Promise.all([
+          supabase.rpc("get_user_role", { _user_id: deal.buyer_id }),
+          supabase.rpc("get_user_role", { _user_id: deal.seller_id }),
+        ]);
+
+        // We can't get emails from auth directly, but the current user's email is available
+        // Send to current user at minimum
+        if (user?.email) {
+          const currentRole = user.id === deal.buyer_id ? "buyer" : "seller";
+          const otherName = currentRole === "buyer" ? sellerName : buyerName;
+          await sendDealCompletionEmail(user.email, currentRole === "buyer" ? buyerName : sellerName, currentRole, otherName);
+        }
+      }
 
       toast.success(side === "buyer" ? "تم اعتماد المشتري" : "تم اعتماد البائع");
     } catch (e: any) {
