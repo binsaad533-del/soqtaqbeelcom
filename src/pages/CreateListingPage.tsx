@@ -1233,48 +1233,76 @@ const CreateListingPage = () => {
                     <div>
                       <p className="text-xs font-medium text-destructive">يرجى إكمال الحقول المطلوبة قبل النشر</p>
                       <ul className="text-[11px] text-destructive/80 mt-1 space-y-0.5 list-disc list-inside">
-                        {!publishValidation.hasPhotos && imageReq === "required" && <li>يجب رفع صورة واحدة على الأقل</li>}
-                        {!publishValidation.hasActivity && <li>نوع النشاط مطلوب</li>}
-                        {!publishValidation.hasCity && <li>المدينة مطلوبة</li>}
-                        {!publishValidation.hasPrice && <li>السعر مطلوب ويجب أن يكون رقماً صحيحاً</li>}
+                        {!photosOk && imageReq === "required" && <li>يجب رفع صورة واحدة على الأقل</li>}
+                        {Object.entries(disclosureErrors).map(([field, msg]) => (
+                          <li key={field}>{msg}</li>
+                        ))}
                       </ul>
                     </div>
                   </div>
                 )}
 
                 <div className="space-y-3">
-                  <FormField label="نوع النشاط *" placeholder="مثال: مطعم وجبات سريعة" value={disclosure.business_activity} onChange={(v) => setDisclosure((prev) => ({ ...prev, business_activity: v }))} error={publishAttempted && !publishValidation.hasActivity ? "نوع النشاط مطلوب" : undefined} />
+                  {/* Render fields dynamically from deal-type schema */}
+                  {isFieldVisible(dealTypeForTransparency, "business_activity") && (
+                    <FormField
+                      label={`نوع النشاط${activeRules.requiredFields.includes("business_activity") ? " *" : ""}`}
+                      placeholder="مثال: مطعم وجبات سريعة"
+                      value={disclosure.business_activity}
+                      onChange={(v) => setDisclosure((prev) => ({ ...prev, business_activity: v }))}
+                      error={publishAttempted && disclosureErrors["business_activity"]}
+                    />
+                  )}
                   <div className="grid grid-cols-2 gap-3">
-                    <FormField label="المدينة *" placeholder="الرياض" value={disclosure.city} onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))} error={publishAttempted && !publishValidation.hasCity ? "المدينة مطلوبة" : undefined} />
-                    <FormField label="الحي" placeholder="حي النسيم" value={disclosure.district} onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))} />
+                    {isFieldVisible(dealTypeForTransparency, "city") && (
+                      <FormField
+                        label={`المدينة${activeRules.requiredFields.includes("city") ? " *" : ""}`}
+                        placeholder="الرياض"
+                        value={disclosure.city}
+                        onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))}
+                        error={publishAttempted && disclosureErrors["city"]}
+                      />
+                    )}
+                    {isFieldVisible(dealTypeForTransparency, "district") && (
+                      <FormField label="الحي" placeholder="حي النسيم" value={disclosure.district} onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))} />
+                    )}
                   </div>
-                  <FormField label="السعر المطلوب *" placeholder="180000" suffix="ر.س" value={disclosure.price} onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))} error={publishAttempted && !publishValidation.hasPrice ? "السعر مطلوب ويجب أن يكون رقماً أكبر من صفر" : undefined} />
-                  {isFieldRelevant(dealTypeForTransparency, "annual_rent") && (
+                  <FormField
+                    label="السعر المطلوب *"
+                    placeholder="180000"
+                    suffix="ر.س"
+                    value={disclosure.price}
+                    onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))}
+                    error={publishAttempted && disclosureErrors["price"]}
+                  />
+                  {isFieldVisible(dealTypeForTransparency, "annual_rent") && (
                     <div className="grid grid-cols-2 gap-3">
                       <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} />
-                      <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_duration: v }))} />
+                      {isFieldVisible(dealTypeForTransparency, "lease_duration") && (
+                        <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_duration: v }))} />
+                      )}
                     </div>
                   )}
-                  {isFieldRelevant(dealTypeForTransparency, "lease_remaining") && (
+                  {isFieldVisible(dealTypeForTransparency, "lease_remaining") && (
                     <div className="grid grid-cols-2 gap-3">
                       <FormField label="الفترة المدفوعة" placeholder="1.5 سنة" value={disclosure.lease_paid_period} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_paid_period: v }))} />
                       <FormField label="المتبقي من العقد" placeholder="1.5 سنة" value={disclosure.lease_remaining} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_remaining: v }))} />
                     </div>
                   )}
-                  {isFieldRelevant(dealTypeForTransparency, "liabilities") && (
+                  {isFieldVisible(dealTypeForTransparency, "liabilities") && (
                     <>
                       <FormField label="الالتزامات المالية" placeholder="لا توجد" value={disclosure.liabilities} onChange={(v) => setDisclosure((prev) => ({ ...prev, liabilities: v }))} />
                       <FormField label="رواتب متأخرة" placeholder="لا يوجد" value={disclosure.overdue_salaries} onChange={(v) => setDisclosure((prev) => ({ ...prev, overdue_salaries: v }))} />
                       <FormField label="إيجار متأخر" placeholder="لا يوجد" value={disclosure.overdue_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, overdue_rent: v }))} />
                     </>
                   )}
-                  {isFieldRelevant(dealTypeForTransparency, "municipality_license") && (
+                  {isFieldVisible(dealTypeForTransparency, "municipality_license") && (
                     <div className="grid grid-cols-2 gap-3">
                       <SelectField label="رخصة البلدية" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.municipality_license} onChange={(v) => setDisclosure((prev) => ({ ...prev, municipality_license: v }))} />
                       <SelectField label="الدفاع المدني" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.civil_defense_license} onChange={(v) => setDisclosure((prev) => ({ ...prev, civil_defense_license: v }))} />
                     </div>
                   )}
-                  {isFieldRelevant(dealTypeForTransparency, "surveillance_cameras") && (
+                  {isFieldVisible(dealTypeForTransparency, "surveillance_cameras") && (
                     <SelectField label="كاميرات مراقبة" options={["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"]} value={disclosure.surveillance_cameras} onChange={(v) => setDisclosure((prev) => ({ ...prev, surveillance_cameras: v }))} />
                   )}
                 </div>
