@@ -161,9 +161,8 @@ describe("dealTypeFieldRules", () => {
       const rules = getRules("some_unknown_type");
       const ftRules = getRules("full_takeover");
       expect(rules.requiredFields).toEqual(ftRules.requiredFields);
+    });
   });
-
-  // ── Gibberish detection ──
   describe("isGibberish", () => {
     it("detects repeated characters", () => {
       expect(isGibberish("اااااا")).toBe(true);
