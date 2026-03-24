@@ -803,16 +803,102 @@ const CreateListingPage = () => {
               <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-5 border border-primary/10 text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Sparkles size={20} strokeWidth={1.5} className="text-primary" />
-                  <Camera size={20} strokeWidth={1.5} className="text-primary" />
+                  {isCrOnly ? <FileText size={20} strokeWidth={1.5} className="text-primary" /> : <Camera size={20} strokeWidth={1.5} className="text-primary" />}
                 </div>
-                <h2 className="font-semibold text-sm mb-1">فقط ارفع الصور والمستندات — مقبل يتولى الباقي!</h2>
+                <h2 className="font-semibold text-sm mb-1">
+                  {isCrOnly ? "ارفع صورة السجل التجاري — مقبل يستخرج البيانات تلقائياً!" : "فقط ارفع الصور والمستندات — مقبل يتولى الباقي!"}
+                </h2>
                 <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed mb-1">
-                  الذكاء الاصطناعي يستخرج قائمة الأصول ويحلل حالتها تلقائياً
+                  {isCrOnly ? "الذكاء الاصطناعي يقرأ السجل التجاري ويعبّئ البيانات نيابة عنك" : "الذكاء الاصطناعي يستخرج قائمة الأصول ويحلل حالتها تلقائياً"}
                 </p>
                 <p className="text-sm font-semibold text-primary animate-fade-in [animation-delay:0.4s] [animation-fill-mode:backwards]">
                   ✦ بدون أي إدخال يدوي منك ✦
                 </p>
               </div>
+
+              {/* CR Extraction Status */}
+              {isCrOnly && crExtracting && (
+                <div className="flex flex-col items-center justify-center py-4 gap-3 animate-fade-in">
+                  <Loader2 size={28} className="animate-spin text-primary" />
+                  <p className="text-sm font-medium text-primary">جاري استخراج بيانات السجل التجاري...</p>
+                  <p className="text-xs text-muted-foreground">لا تحتاج تعمل شيء — مقبل يقرأ المستند</p>
+                </div>
+              )}
+
+              {isCrOnly && crExtractionDone && crExtraction && (
+                <div className={cn(
+                  "rounded-xl border p-4 space-y-3 animate-fade-in",
+                  crExtraction.extraction_confidence === "high" ? "bg-success/5 border-success/20" :
+                  crExtraction.extraction_confidence === "medium" ? "bg-warning/5 border-warning/20" :
+                  "bg-destructive/5 border-destructive/20"
+                )}>
+                  <div className="flex items-center gap-2">
+                    {crExtraction.extraction_confidence === "high" ? (
+                      <Check size={16} className="text-success" />
+                    ) : crExtraction.extraction_confidence === "medium" ? (
+                      <AlertTriangle size={14} className="text-warning" />
+                    ) : (
+                      <AlertTriangle size={14} className="text-destructive" />
+                    )}
+                    <p className="text-xs font-medium">
+                      {crExtraction.extraction_confidence === "high"
+                        ? "تم استخراج بيانات السجل التجاري بنجاح — راجع وأكّد"
+                        : crExtraction.extraction_confidence === "medium"
+                        ? "تم استخراج بعض البيانات — أكمل الحقول الناقصة"
+                        : "لم نتمكن من استخراج بيانات كافية — أكمل الحقول يدوياً"}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    {crExtraction.cr_number && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">رقم السجل: </span>
+                        <span className="font-medium">{crExtraction.cr_number}</span>
+                      </div>
+                    )}
+                    {crExtraction.entity_name && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">الاسم: </span>
+                        <span className="font-medium">{crExtraction.entity_name}</span>
+                      </div>
+                    )}
+                    {crExtraction.business_activity && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">النشاط: </span>
+                        <span className="font-medium">{crExtraction.business_activity}</span>
+                      </div>
+                    )}
+                    {crExtraction.city && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">المدينة: </span>
+                        <span className="font-medium">{crExtraction.city}</span>
+                      </div>
+                    )}
+                    {crExtraction.status && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">الحالة: </span>
+                        <span className="font-medium">{crExtraction.status}</span>
+                      </div>
+                    )}
+                    {crExtraction.expiry_date && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">الانتهاء: </span>
+                        <span className="font-medium">{crExtraction.expiry_date}</span>
+                      </div>
+                    )}
+                  </div>
+                  {crExtraction.extraction_notes && (
+                    <p className="text-[10px] text-muted-foreground italic">{crExtraction.extraction_notes}</p>
+                  )}
+                </div>
+              )}
+
+              {isCrOnly && crExtractionDone && !crExtraction && (
+                <div className="rounded-xl bg-destructive/5 border border-destructive/20 p-4 text-center animate-fade-in">
+                  <AlertTriangle size={20} className="text-destructive mx-auto mb-2" />
+                  <p className="text-xs font-medium text-destructive">تعذّر استخراج البيانات من المستند</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">يمكنك إكمال الحقول يدوياً في الخطوة التالية</p>
+                </div>
+              )}
 
               {/* Photos */}
               <div className="space-y-4">
