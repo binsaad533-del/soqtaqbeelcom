@@ -1123,40 +1123,22 @@ const CreateListingPage = () => {
                         <p className="text-xs text-muted-foreground">{parts.join(" · ")}</p>
                       ) : null;
                     })()}
-                    <div className="flex flex-wrap gap-3 justify-center mt-3">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="text-center px-3 py-1.5 rounded-lg bg-success/5 border border-success/20 cursor-help">
-                            <div className="text-sm font-medium text-success">{inventory.filter((i) => i.confidence === "high").length}</div>
-                            <div className="text-[10px] text-success">ثقة عالية</div>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-[200px] text-center">
-                          <p className="text-xs">أصول تعرّف عليها النظام بوضوح تام من الصور</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="text-center px-3 py-1.5 rounded-lg bg-warning/5 border border-warning/20 cursor-help">
-                            <div className="text-sm font-medium text-warning">{inventory.filter((i) => i.confidence === "medium").length}</div>
-                            <div className="text-[10px] text-warning">ثقة متوسطة</div>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-[200px] text-center">
-                          <p className="text-xs">أصول تعرّف عليها النظام لكن بدرجة أقل من اليقين، مثل أجهزة مغطاة جزئياً</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="text-center px-3 py-1.5 rounded-lg bg-destructive/5 border border-destructive/20 cursor-help">
-                            <div className="text-sm font-medium text-destructive">{inventory.filter((i) => i.confidence === "low").length}</div>
-                            <div className="text-[10px] text-destructive">يحتاج تأكيد</div>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-[200px] text-center">
-                          <p className="text-xs">أصول لم يستطع النظام تحديدها بدقة ويحتاج تأكيدك اليدوي</p>
-                        </TooltipContent>
-                      </Tooltip>
+                    <div className="grid grid-cols-3 gap-2 mt-3">
+                      <div className="text-center px-2 py-2 rounded-lg bg-success/5 border border-success/20">
+                        <div className="text-sm font-medium text-success">{inventory.filter((i) => i.confidence === "high").length}</div>
+                        <div className="text-[10px] font-medium text-success">ثقة عالية</div>
+                        <div className="text-[9px] text-muted-foreground mt-1 leading-tight">تعرّف عليها بوضوح</div>
+                      </div>
+                      <div className="text-center px-2 py-2 rounded-lg bg-warning/5 border border-warning/20">
+                        <div className="text-sm font-medium text-warning">{inventory.filter((i) => i.confidence === "medium").length}</div>
+                        <div className="text-[10px] font-medium text-warning">ثقة متوسطة</div>
+                        <div className="text-[9px] text-muted-foreground mt-1 leading-tight">يقين أقل، مغطاة جزئياً</div>
+                      </div>
+                      <div className="text-center px-2 py-2 rounded-lg bg-destructive/5 border border-destructive/20">
+                        <div className="text-sm font-medium text-destructive">{inventory.filter((i) => i.confidence === "low").length}</div>
+                        <div className="text-[10px] font-medium text-destructive">يحتاج تأكيد</div>
+                        <div className="text-[9px] text-muted-foreground mt-1 leading-tight">يحتاج تأكيدك اليدوي</div>
+                      </div>
                     </div>
                   </div>
 
