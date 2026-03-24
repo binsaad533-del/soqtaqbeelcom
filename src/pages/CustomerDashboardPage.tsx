@@ -28,24 +28,40 @@ const CustomerDashboardPage = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+      setLoadError(null);
+      const errors: string[] = [];
+
+      let l: Listing[] = [];
+      let d: Deal[] = [];
+
       try {
-        const [l, d] = await Promise.all([
-          getMyListings().catch(() => [] as Listing[]),
-          getMyDeals().catch(() => [] as Deal[]),
-        ]);
-        setListings(l || []);
-        setDeals(d || []);
-      } catch (err) {
-        console.error("Dashboard data load failed:", err);
-        setListings([]);
-        setDeals([]);
-      } finally {
-        setLoading(false);
+        l = await getMyListings();
+      } catch (err: any) {
+        console.error("[CustomerDashboard] Listings load failed:", err);
+        errors.push("الإعلانات");
       }
+
+      try {
+        d = await getMyDeals();
+      } catch (err: any) {
+        console.error("[CustomerDashboard] Deals load failed:", err);
+        errors.push("الصفقات");
+      }
+
+      setListings(l);
+      setDeals(d);
+
+      if (errors.length > 0) {
+        setLoadError(`فشل تحميل: ${errors.join("، ")} — يرجى تحديث الصفحة`);
+      }
+
+      console.log("[CustomerDashboard] Loaded:", { listings: l.length, deals: d.length, errors });
+      setLoading(false);
     };
     load();
   }, [getMyListings, getMyDeals]);

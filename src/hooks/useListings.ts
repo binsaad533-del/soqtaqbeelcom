@@ -87,11 +87,16 @@ export function useListings() {
 
   const getMyListings = useCallback(async () => {
     if (!user) return [];
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("listings")
       .select("*")
       .eq("owner_id", user.id)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false });
+    if (error) {
+      console.error("[useListings] getMyListings failed:", { userId: user.id, error: error.message, code: error.code });
+      throw new Error(`فشل تحميل الإعلانات: ${error.message}`);
+    }
     return (data || []) as unknown as Listing[];
   }, [user]);
 
