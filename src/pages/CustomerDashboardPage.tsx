@@ -84,7 +84,8 @@ const CustomerDashboardPage = () => {
         if (error) throw error;
         toast.success("تم إرسال رابط التحقق إلى بريدك الجديد");
       } else {
-        const { error } = await supabase.from("profiles").update({ [field]: value }).eq("user_id", profile.user_id);
+        const cleanValue = field === "phone" ? toDigitsOnly(value) : value;
+        const { error } = await supabase.from("profiles").update({ [field]: cleanValue }).eq("user_id", profile.user_id);
         if (error) throw error;
         toast.success("تم التحديث بنجاح");
       }
