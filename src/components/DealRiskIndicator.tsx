@@ -11,7 +11,7 @@ interface DealRiskIndicatorProps {
 const getRiskLevel = (score: number) => {
   if (score <= 25) return { label: "آمن", color: "text-success", bg: "bg-success/10", Icon: CheckCircle };
   if (score <= 50) return { label: "خطر متوسط", color: "text-warning", bg: "bg-warning/10", Icon: AlertTriangle };
-  if (score <= 75) return { label: "خطر مرتفع", color: "text-orange-500", bg: "bg-orange-500/10", Icon: ShieldAlert };
+  if (score <= 75) return { label: "خطر مرتفع", color: "text-destructive", bg: "bg-destructive/10", Icon: ShieldAlert };
   return { label: "خطر حرج", color: "text-destructive", bg: "bg-destructive/10", Icon: XOctagon };
 };
 
