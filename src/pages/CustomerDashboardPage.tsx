@@ -7,7 +7,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
 import {
-  Bell, Plus, FileText, MessageSquare, Shield, HelpCircle,
+  Bell, Plus, FileText, MessageSquare, Shield, HelpCircle, AlertCircle,
   ChevronLeft, Eye, CheckCircle, Upload, Loader2
 } from "lucide-react";
 
@@ -28,24 +28,40 @@ const CustomerDashboardPage = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+      setLoadError(null);
+      const errors: string[] = [];
+
+      let l: Listing[] = [];
+      let d: Deal[] = [];
+
       try {
-        const [l, d] = await Promise.all([
-          getMyListings().catch(() => [] as Listing[]),
-          getMyDeals().catch(() => [] as Deal[]),
-        ]);
-        setListings(l || []);
-        setDeals(d || []);
-      } catch (err) {
-        console.error("Dashboard data load failed:", err);
-        setListings([]);
-        setDeals([]);
-      } finally {
-        setLoading(false);
+        l = await getMyListings();
+      } catch (err: any) {
+        console.error("[CustomerDashboard] Listings load failed:", err);
+        errors.push("الإعلانات");
       }
+
+      try {
+        d = await getMyDeals();
+      } catch (err: any) {
+        console.error("[CustomerDashboard] Deals load failed:", err);
+        errors.push("الصفقات");
+      }
+
+      setListings(l);
+      setDeals(d);
+
+      if (errors.length > 0) {
+        setLoadError(`فشل تحميل: ${errors.join("، ")} — يرجى تحديث الصفحة`);
+      }
+
+      console.log("[CustomerDashboard] Loaded:", { listings: l.length, deals: d.length, errors });
+      setLoading(false);
     };
     load();
   }, [getMyListings, getMyDeals]);
@@ -84,6 +100,22 @@ const CustomerDashboardPage = () => {
             <button onClick={signOut} className="text-xs text-muted-foreground hover:text-foreground transition-colors">خروج</button>
           </div>
         </div>
+
+        {/* Error Banner */}
+        {loadError && (
+          <div className="mb-4 p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle size={16} className="text-destructive shrink-0" />
+              <span className="text-sm text-destructive">{loadError}</span>
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-xs text-destructive font-medium hover:underline whitespace-nowrap"
+            >
+              إعادة المحاولة
+            </button>
+          </div>
+        )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-4 gap-3 mb-6">

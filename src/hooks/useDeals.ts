@@ -35,11 +35,15 @@ export function useDeals() {
 
   const getMyDeals = useCallback(async () => {
     if (!user) return [];
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("deals")
       .select("*")
       .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
       .order("created_at", { ascending: false });
+    if (error) {
+      console.error("[useDeals] getMyDeals failed:", { userId: user.id, error: error.message });
+      throw new Error(`فشل تحميل الصفقات: ${error.message}`);
+    }
     return (data || []) as Deal[];
   }, [user]);
 
