@@ -1200,7 +1200,20 @@ const CreateListingPage = () => {
                   <ClipboardList size={16} strokeWidth={1.5} className="text-primary" />
                   <h2 className="font-medium text-sm">بيانات الإفصاح</h2>
                 </div>
-                <p className="text-xs text-muted-foreground">أكمل بيانات الإفصاح لتعزيز ثقة المشترين — مقبل يعبّئ ما يقدر تلقائياً</p>
+                <p className="text-xs text-muted-foreground">
+                  {isCrOnly ? "راجع البيانات المستخرجة وأكمل ما يلزم — لا حاجة لحقول الأصول أو الإيجار" : "أكمل بيانات الإفصاح لتعزيز ثقة المشترين — مقبل يعبّئ ما يقدر تلقائياً"}
+                </p>
+
+                {/* CR extraction auto-fill notice */}
+                {isCrOnly && crExtractionDone && crExtraction && (
+                  <div className="bg-success/5 border border-success/20 rounded-xl p-3 flex items-start gap-2 animate-fade-in">
+                    <Check size={14} className="text-success shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-success">تم تعبئة الحقول تلقائياً من السجل التجاري</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">راجع البيانات وعدّلها إن لزم الأمر — ثم حدد السعر المطلوب</p>
+                    </div>
+                  </div>
+                )}
 
                 {dealStructure.requiredDisclosures.length > 0 && (
                   <div className="bg-warning/5 border border-warning/20 rounded-xl p-3">
