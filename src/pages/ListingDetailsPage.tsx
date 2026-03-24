@@ -32,14 +32,18 @@ const ListingDetailsPage = () => {
   const [sellerProfile, setSellerProfile] = useState<any>(null);
   const [sellerReviews, setSellerReviews] = useState<SellerReview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [startingDeal, setStartingDeal] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  useEffect(() => {
+  const loadListing = async () => {
     if (!id) return;
-    const load = async () => {
-      setLoading(true);
+    setLoading(true);
+    setLoadError(null);
+    try {
+      console.log("[ListingDetails] Loading listing:", id);
       const data = await getListing(id);
+      console.log("[ListingDetails] Listing loaded:", { id, found: !!data, status: data?.status });
       setListing(data);
       if (data) {
         const [profile, reviews] = await Promise.all([
@@ -49,9 +53,16 @@ const ListingDetailsPage = () => {
         setSellerProfile(profile);
         setSellerReviews(reviews);
       }
+    } catch (err: any) {
+      console.error("[ListingDetails] Load failed:", { id, error: err?.message });
+      setLoadError("فشل تحميل الإعلان — يرجى المحاولة مرة أخرى");
+    } finally {
       setLoading(false);
-    };
-    load();
+    }
+  };
+
+  useEffect(() => {
+    loadListing();
   }, [id, getListing]);
 
   const handleStartNegotiation = async () => {
