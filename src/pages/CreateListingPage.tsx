@@ -12,13 +12,9 @@ import { DEAL_TYPE_MAP, getRequiredDocuments } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
 
 const steps = [
-  { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — مقبل يرتب الباقي" },
-  { label: "صور المشروع", icon: Camera, hint: "ارفع الصور فقط — مقبل يستخرج كل شيء" },
-  { label: "تحليل الصور", icon: Eye, hint: "مقبل يحلل الصور تلقائياً — استرخِ وشاهد" },
-  { label: "مراجعة الجرد", icon: ClipboardList, hint: "مقبل جهّز الجرد — فقط راجع وأكّد" },
-  { label: "المستندات", icon: FileText, hint: "ارفع المستندات — مقبل يقرأ ويستخرج البيانات" },
-  { label: "بيانات الإفصاح", icon: ClipboardList, hint: "مقبل يعبّئ البيانات — فقط تأكد منها" },
-  { label: "المراجعة والنشر", icon: Check, hint: "كل شيء جاهز — راجع وانشر بضغطة واحدة" },
+  { label: "هيكل الصفقة والصور", icon: Camera, hint: "اختر نوع الصفقة وارفع الصور — مقبل يتكفّل بالباقي" },
+  { label: "التحليل والجرد والمستندات", icon: Eye, hint: "مقبل يحلل ويجرد تلقائياً — فقط راجع وأكّد" },
+  { label: "الإفصاح والنشر", icon: Check, hint: "أكمل البيانات وانشر بضغطة واحدة" },
 ];
 
 const allPhotoGroups = [
@@ -71,6 +67,7 @@ const CreateListingPage = () => {
   const [listingId, setListingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [showDealStructure, setShowDealStructure] = useState(true);
 
   const [disclosure, setDisclosure] = useState({
     business_activity: "",
@@ -96,7 +93,6 @@ const CreateListingPage = () => {
   const docInputRef = useRef<HTMLInputElement>(null);
   const [activeDocType, setActiveDocType] = useState<string | null>(null);
 
-  // Filter photo groups based on selected deal types
   const photoGroups = allPhotoGroups.filter(group => {
     if (dealStructure.selectedTypes.length === 0) return true;
     return dealStructure.selectedTypes.some(dt => group.dealTypes.includes(dt));
@@ -185,7 +181,6 @@ const CreateListingPage = () => {
     setAnalyzing(true);
     setAnalyzeProgress(10);
 
-    // Progress simulation
     const progressInterval = setInterval(() => {
       setAnalyzeProgress(prev => Math.min(prev + 8, 85));
     }, 1500);
@@ -220,7 +215,7 @@ const CreateListingPage = () => {
       setAnalysisSummary(data.analysis_summary || "");
       setDedupActions(data.dedup_actions || []);
       setAnalyzed(true);
-      toast.success("تم تحليل الصور وتحديد عدد الأصول بدقة بناءً على التمييز بين زوايا التصوير وتكرار الأصول");
+      toast.success("تم تحليل الصور وتحديد الأصول بدقة");
     } catch (err: any) {
       clearInterval(progressInterval);
       toast.error(err.message || "حدث خطأ أثناء تحليل الصور");
@@ -231,6 +226,10 @@ const CreateListingPage = () => {
 
   const handleNext = async () => {
     if (currentStep === 0) {
+      if (!dealStructure.isValid) {
+        toast.error("يرجى اختيار هيكل الصفقة أولاً");
+        return;
+      }
       const id = await ensureListing();
       if (id) {
         await updateListing(id, {
@@ -243,10 +242,12 @@ const CreateListingPage = () => {
           })),
         } as any);
       }
-    }
-    if (currentStep === 2 && !analyzed) {
-      handleAnalyze();
-      return;
+      // Auto-start analysis when moving to step 2
+      if (!analyzed && Object.values(photos).flat().length > 0) {
+        setCurrentStep(1);
+        setTimeout(() => handleAnalyze(), 300);
+        return;
+      }
     }
     setCurrentStep(Math.min(steps.length - 1, currentStep + 1));
   };
@@ -320,23 +321,23 @@ const CreateListingPage = () => {
         <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
         <input ref={docInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" multiple className="hidden" onChange={handleDocUpload} />
 
-        {/* Steps indicator */}
+        {/* Steps indicator - 3 steps */}
         <div className="flex items-center justify-between mb-8 pb-2">
           {steps.map((step, i) => (
-            <div key={i} className="flex items-center gap-0.5 flex-1">
+            <div key={i} className="flex items-center gap-1 flex-1">
               <button
                 type="button"
                 onClick={() => { if (i < currentStep) setCurrentStep(i); }}
                 className={cn(
-                  "flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all w-full justify-center",
-                  i === currentStep ? "bg-primary/10 text-primary font-medium" :
+                  "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs whitespace-nowrap transition-all w-full justify-center",
+                  i === currentStep ? "bg-primary/10 text-primary font-medium border border-primary/20" :
                   i < currentStep ? "text-success cursor-pointer hover:bg-success/5" : "text-muted-foreground"
                 )}
               >
-                {i < currentStep ? <Check size={11} strokeWidth={2} /> : <step.icon size={11} strokeWidth={1.3} />}
-                <span className="hidden md:inline">{step.label}</span>
+                {i < currentStep ? <Check size={13} strokeWidth={2} /> : <step.icon size={13} strokeWidth={1.3} />}
+                <span>{step.label}</span>
               </button>
-              {i < steps.length - 1 && <div className="w-3 h-px bg-border shrink-0" />}
+              {i < steps.length - 1 && <div className="w-6 h-px bg-border shrink-0" />}
             </div>
           ))}
         </div>
@@ -355,519 +356,483 @@ const CreateListingPage = () => {
         )}
 
         <div className="bg-card rounded-2xl shadow-soft p-6 md:p-8 min-h-[400px]">
-          {/* Step 0: Deal Structure Engine */}
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {/* STEP 1: Deal Structure + Photos */}
+          {/* ═══════════════════════════════════════════════════════════ */}
           {currentStep === 0 && (
-            <DealStructureEngine value={dealStructure} onChange={setDealStructure} />
+            <div className="space-y-6">
+              {/* Deal Structure Section */}
+              <div>
+                <button
+                  onClick={() => setShowDealStructure(!showDealStructure)}
+                  className="flex items-center justify-between w-full text-right"
+                >
+                  <div className="flex items-center gap-2">
+                    <Shield size={18} strokeWidth={1.5} className="text-primary" />
+                    <h2 className="font-medium text-sm">هيكل الصفقة</h2>
+                    {dealStructure.isValid && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/10 text-success font-medium">
+                        <Check size={10} className="inline ml-0.5" />
+                        {primaryDealLabel}
+                      </span>
+                    )}
+                  </div>
+                  <ArrowLeft size={14} className={cn("text-muted-foreground transition-transform", showDealStructure && "rotate-90")} />
+                </button>
+                {showDealStructure && (
+                  <div className="mt-3 animate-fade-in">
+                    <DealStructureEngine value={dealStructure} onChange={(val) => { setDealStructure(val); if (val.isValid) setTimeout(() => setShowDealStructure(false), 400); }} />
+                  </div>
+                )}
+              </div>
+
+              {/* Divider */}
+              {dealStructure.isValid && (
+                <>
+                  <div className="border-t border-border/50" />
+
+                  {/* Photos Section */}
+                  <div className="space-y-5">
+                    {/* Hero banner */}
+                    <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-5 border border-primary/10 text-center">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <Sparkles size={20} strokeWidth={1.5} className="text-primary" />
+                        <Camera size={20} strokeWidth={1.5} className="text-primary" />
+                      </div>
+                      <h2 className="font-semibold text-sm mb-1">فقط ارفع الصور — مقبل يتولى الباقي!</h2>
+                      <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed mb-1">
+                        الذكاء الاصطناعي يستخرج قائمة الأصول ويحلل حالتها تلقائياً
+                      </p>
+                      <p className="text-sm font-semibold text-primary animate-fade-in [animation-delay:0.4s] [animation-fill-mode:backwards]">
+                        ✦ بدون أي إدخال يدوي منك ✦
+                      </p>
+                      <p className="text-sm font-bold animate-fade-in [animation-delay:0.8s] [animation-fill-mode:backwards] mt-1" style={{ color: 'hsl(var(--success))' }}>
+                        بدون ما تكتب سطر واحد
+                      </p>
+                    </div>
+
+                    {/* Progress */}
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 flex-1 rounded-full bg-muted overflow-hidden">
+                        <div className="h-full rounded-full gradient-primary transition-all duration-500" style={{ width: `${Math.min(100, (totalPhotos / 12) * 100)}%` }} />
+                      </div>
+                      <span className="text-xs font-medium text-primary">{totalPhotos} صورة</span>
+                    </div>
+
+                    {/* Photo groups */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {photoGroups.map((group) => {
+                        const count = photos[group.id]?.length || 0;
+                        const done = count >= group.min;
+                        return (
+                          <div key={group.id} className={cn(
+                            "p-3.5 rounded-xl border transition-all",
+                            done ? "border-success/30 bg-success/5" : "border-border/50 bg-card hover:border-primary/30"
+                          )}>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2.5">
+                                {(() => {
+                                  const iconMap: Record<string, any> = { Camera, DoorOpen, Building2, MapPin, Tag, Wrench, FileText };
+                                  const Icon = iconMap[group.icon] || Camera;
+                                  return <Icon size={18} strokeWidth={1.5} className="text-primary" />;
+                                })()}
+                                <div>
+                                  <div className="text-xs font-medium">{group.label}</div>
+                                  <div className="text-[10px] text-muted-foreground">{group.min} صور على الأقل</div>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => { setActivePhotoGroup(group.id); fileInputRef.current?.click(); }}
+                                className={cn(
+                                  "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all active:scale-[0.97]",
+                                  done ? "bg-success/10 text-success" : "bg-primary/10 text-primary hover:bg-primary/20"
+                                )}
+                              >
+                                <Upload size={12} strokeWidth={1.5} />
+                                {count > 0 ? `${count} ✓` : "رفع"}
+                              </button>
+                            </div>
+                            {photos[group.id]?.length > 0 && (
+                              <div className="flex gap-1.5 mt-2.5 overflow-x-auto pb-1">
+                                {photos[group.id].map((url, i) => (
+                                  <img key={i} src={url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0 border border-border/30" />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Encouragement */}
+                    <div className="text-center pt-2 pb-1">
+                      <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/10">
+                        <Sparkles size={16} strokeWidth={1.5} className="text-primary" />
+                        <p className="text-sm font-medium text-foreground">
+                          كلما زادت الصور، كان التحليل أدق والإعلان أقوى
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
-          {/* Step 1: Photos */}
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {/* STEP 2: AI Analysis + Inventory Review + Documents */}
+          {/* ═══════════════════════════════════════════════════════════ */}
           {currentStep === 1 && (
-            <div className="space-y-5">
-              {/* Hero banner */}
-              <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-6 border border-primary/10 text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Sparkles size={22} strokeWidth={1.5} className="text-primary" />
-                  <Camera size={22} strokeWidth={1.5} className="text-primary" />
+            <div className="space-y-6">
+              {/* AI Analysis Section */}
+              {!analyzed ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  {analyzing ? (
+                    <>
+                      <AiStar size={56} className="mb-6" />
+                      <h2 className="font-medium mb-2">الذكاء الاصطناعي يحلّل الصور...</h2>
+                      <p className="text-sm text-muted-foreground max-w-sm">جاري اكتشاف الأصول وتمييز زوايا التصوير</p>
+                      <div className="mt-6 w-56">
+                        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                          <div className="h-full rounded-full gradient-primary transition-all duration-700" style={{ width: `${analyzeProgress}%` }} />
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-2">{analyzeProgress}%</p>
+                      </div>
+                      <div className="mt-4 space-y-1 text-[11px] text-muted-foreground">
+                        {analyzeProgress > 20 && <p className="flex items-center justify-center gap-1"><Eye size={12} className="text-primary" /> تحليل تفاصيل الصور...</p>}
+                        {analyzeProgress > 45 && <p className="flex items-center justify-center gap-1"><Layers size={12} className="text-primary" /> مقارنة الأصول بين الصور...</p>}
+                        {analyzeProgress > 65 && <p className="flex items-center justify-center gap-1"><ClipboardList size={12} className="text-primary" /> تمييز الزوايا من الأصول المتعددة...</p>}
+                        {analyzeProgress > 80 && <p className="flex items-center justify-center gap-1"><Check size={12} className="text-success" /> إعداد الجرد النهائي...</p>}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <AiStar size={48} className="mb-6" />
+                      <h2 className="font-medium mb-2">تحليل الصور بالذكاء الاصطناعي</h2>
+                      <p className="text-sm text-muted-foreground max-w-sm mb-4">سيقوم مقبل بتحليل صورك واكتشاف الأصول تلقائياً</p>
+                      {totalPhotos === 0 ? (
+                        <div className="flex items-center gap-1.5 text-xs text-warning">
+                          <AlertTriangle size={14} />
+                          يرجى رفع صور في الخطوة السابقة أولاً
+                        </div>
+                      ) : (
+                        <Button onClick={handleAnalyze} className="gradient-primary text-primary-foreground rounded-xl">
+                          <Eye size={16} strokeWidth={1.5} />
+                          ابدأ التحليل الذكي ({totalPhotos} صورة)
+                        </Button>
+                      )}
+                    </>
+                  )}
                 </div>
-                <h2 className="font-semibold text-base mb-2">فقط ارفع الصور — مقبل يتولى الباقي!</h2>
-                <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed mb-1">
-                  ارفع صور مشروعك وسيقوم الذكاء الاصطناعي تلقائياً باستخراج قائمة الأصول والمعدات وتحليل حالتها وتقدير قيمتها
-                </p>
-                <p className="text-sm font-semibold text-primary animate-fade-in [animation-delay:0.4s] [animation-fill-mode:backwards]">
-                  ✦ بدون أي إدخال يدوي منك ✦
-                </p>
-                <p className="text-base font-bold animate-fade-in [animation-delay:0.8s] [animation-fill-mode:backwards] mt-1" style={{ color: 'hsl(var(--success))' }}>
-                  <span className="pulse inline-block">🚀</span> بدون ما تكتب سطر واحد
-                </p>
-                <div className="flex items-center justify-center gap-4 mt-3">
-                  {[
-                    { icon: Eye, text: "اكتشاف الأصول" },
-                    { icon: ClipboardList, text: "جرد تلقائي" },
-                    { icon: Layers, text: "تقدير القيمة" },
-                  ].map((f, i) => {
-                    const Icon = f.icon;
+              ) : (
+                <>
+                  {/* Analysis complete summary */}
+                  <div className="rounded-xl bg-success/5 border border-success/20 p-4 text-center">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
+                        <Check size={18} strokeWidth={1.5} className="text-success" />
+                      </div>
+                      <h2 className="font-medium text-sm">اكتمل التحليل — تم اكتشاف {inventory.length} أصل</h2>
+                    </div>
+                    {analysisSummary && <p className="text-xs text-muted-foreground">{analysisSummary}</p>}
+                    <div className="flex flex-wrap gap-3 justify-center mt-3">
+                      <div className="text-center px-3 py-1.5 rounded-lg bg-success/5 border border-success/20">
+                        <div className="text-sm font-medium text-success">{inventory.filter(i => i.confidence === "high").length}</div>
+                        <div className="text-[10px] text-success">ثقة عالية</div>
+                      </div>
+                      <div className="text-center px-3 py-1.5 rounded-lg bg-warning/5 border border-warning/20">
+                        <div className="text-sm font-medium text-warning">{inventory.filter(i => i.confidence === "medium").length}</div>
+                        <div className="text-[10px] text-warning">ثقة متوسطة</div>
+                      </div>
+                      <div className="text-center px-3 py-1.5 rounded-lg bg-destructive/5 border border-destructive/20">
+                        <div className="text-sm font-medium text-destructive">{inventory.filter(i => i.confidence === "low").length}</div>
+                        <div className="text-[10px] text-destructive">يحتاج تأكيد</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Inventory Review */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <ClipboardList size={16} strokeWidth={1.5} className="text-primary" />
+                        <h3 className="font-medium text-sm">مراجعة الجرد</h3>
+                        <span className="text-[10px] text-muted-foreground">
+                          {inventory.filter(i => i.included).length} مشمول — {inventory.filter(i => !i.included).length} مستثنى
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setInventory(prev => [...prev, {
+                          id: String(Date.now()),
+                          name: "عنصر جديد",
+                          qty: 1,
+                          condition: "جيدة",
+                          category: "أخرى",
+                          included: true,
+                          confidence: "high",
+                          detectionNote: "مضاف يدوياً",
+                          photoIndices: [],
+                          isSameAssetMultipleAngles: false,
+                          userConfirmed: true,
+                        }])}
+                        className="flex items-center gap-1 text-xs text-primary hover:underline"
+                      >
+                        <Plus size={14} strokeWidth={1.3} /> أضف عنصراً
+                      </button>
+                    </div>
+
+                    {/* Low confidence items */}
+                    {lowConfidenceItems.length > 0 && (
+                      <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-destructive">
+                          <AlertTriangle size={14} />
+                          عناصر تحتاج تأكيدك ({lowConfidenceItems.length})
+                        </div>
+                        {lowConfidenceItems.map(item => (
+                          <ConfirmationCard
+                            key={item.id}
+                            item={item}
+                            allPhotoUrls={allPhotoUrls}
+                            onConfirmSame={() => {
+                              setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: 1, userConfirmed: true } : i));
+                            }}
+                            onConfirmMultiple={(qty) => {
+                              setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty, userConfirmed: true } : i));
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Medium confidence items */}
+                    {medConfidenceItems.length > 0 && (
+                      <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-warning">
+                          <AlertTriangle size={14} />
+                          عناصر يُنصح بتأكيدها ({medConfidenceItems.length})
+                        </div>
+                        {medConfidenceItems.map(item => (
+                          <ConfirmationCard
+                            key={item.id}
+                            item={item}
+                            allPhotoUrls={allPhotoUrls}
+                            onConfirmSame={() => {
+                              setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: 1, userConfirmed: true } : i));
+                            }}
+                            onConfirmMultiple={(qty) => {
+                              setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty, userConfirmed: true } : i));
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* All inventory items */}
+                    <div className="space-y-2">
+                      {inventory.map((item) => (
+                        <div key={item.id} className={cn(
+                          "p-3 rounded-xl border transition-all",
+                          item.included ? "border-border/50 bg-card" : "border-border/30 bg-muted/30 opacity-60"
+                        )}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1 min-w-0">
+                              {editingItemId === item.id ? (
+                                <input
+                                  type="text"
+                                  value={item.name}
+                                  onChange={(e) => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, name: e.target.value } : i))}
+                                  onBlur={() => setEditingItemId(null)}
+                                  onKeyDown={(e) => e.key === "Enter" && setEditingItemId(null)}
+                                  autoFocus
+                                  className="text-sm bg-transparent border-b border-primary/30 outline-none w-full"
+                                />
+                              ) : (
+                                <div className="text-sm cursor-pointer hover:text-primary transition-colors" onClick={() => setEditingItemId(item.id)}>
+                                  {item.name}
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                <span className="text-xs text-muted-foreground">{item.category}</span>
+                                <span className="text-xs text-muted-foreground">— {item.condition}</span>
+                                {getConfidenceBadge(item.confidence)}
+                                {item.isSameAssetMultipleAngles && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">زوايا متعددة</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0 mr-3">
+                              <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-1">
+                                <button onClick={() => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: Math.max(1, i.qty - 1) } : i))} className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Minus size={12} /></button>
+                                <input type="number" min="1" value={item.qty} onChange={(e) => { const val = Math.max(1, parseInt(e.target.value) || 1); setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: val } : i)); }} className="w-8 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                <button onClick={() => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i))} className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Plus size={12} /></button>
+                              </div>
+                              <button onClick={() => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, included: !i.included } : i))} className={cn("text-xs px-2.5 py-1 rounded-md transition-all active:scale-[0.97]", item.included ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{item.included ? "مشمول" : "مستثنى"}</button>
+                              <button onClick={() => setInventory(inv => inv.filter(i => i.id !== item.id))} className="p-1 text-muted-foreground hover:text-destructive transition-colors"><Trash2 size={14} strokeWidth={1.3} /></button>
+                            </div>
+                          </div>
+                          {item.photoIndices.length > 0 && allPhotoUrls.length > 0 && (
+                            <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
+                              {item.photoIndices.filter(idx => idx < allPhotoUrls.length).slice(0, 6).map((idx) => (
+                                <img key={idx} src={allPhotoUrls[idx]} alt="" className="w-10 h-10 rounded-md object-cover shrink-0 border border-border/30" />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Documents Section */}
+                  <div className="border-t border-border/50 pt-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <FileText size={16} strokeWidth={1.5} className="text-primary" />
+                      <h3 className="font-medium text-sm">المستندات المطلوبة</h3>
+                      <span className="text-[10px] text-muted-foreground">({primaryDealLabel})</span>
+                    </div>
+                    <div className="space-y-2">
+                      {dynamicDocTypes.map((doc, i) => (
+                        <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-border/50">
+                          <div className="flex items-center gap-2">
+                            <FileText size={14} strokeWidth={1.3} className="text-muted-foreground" />
+                            <div>
+                              <span className="text-xs">{doc}</span>
+                              {uploadedDocs[doc]?.length > 0 && (
+                                <span className="text-[10px] text-success mr-2">✓ {uploadedDocs[doc].length} ملف</span>
+                              )}
+                            </div>
+                          </div>
+                          <button onClick={() => { setActiveDocType(doc); docInputRef.current?.click(); }} className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]">
+                            <Upload size={12} strokeWidth={1.3} /> رفع
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {/* STEP 3: Disclosure + Review & Publish */}
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {currentStep === 2 && (
+            <div className="space-y-6">
+              {/* Disclosure Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <ClipboardList size={16} strokeWidth={1.5} className="text-primary" />
+                  <h2 className="font-medium text-sm">بيانات الإفصاح</h2>
+                </div>
+                <p className="text-xs text-muted-foreground">أكمل بيانات الإفصاح لتعزيز ثقة المشترين — مقبل يعبّئ ما يقدر تلقائياً</p>
+
+                {dealStructure.requiredDisclosures.length > 0 && (
+                  <div className="bg-warning/5 border border-warning/20 rounded-xl p-3">
+                    <div className="text-xs font-medium text-warning mb-1.5 flex items-center gap-1">
+                      <Shield size={12} /> الإفصاحات المطلوبة
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {dealStructure.requiredDisclosures.map((d, i) => (
+                        <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-warning/10 text-warning">{d}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <FormField label="نوع النشاط" placeholder="مثال: مطعم وجبات سريعة" value={disclosure.business_activity} onChange={v => setDisclosure(p => ({ ...p, business_activity: v }))} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField label="المدينة" placeholder="الرياض" value={disclosure.city} onChange={v => setDisclosure(p => ({ ...p, city: v }))} />
+                    <FormField label="الحي" placeholder="حي النسيم" value={disclosure.district} onChange={v => setDisclosure(p => ({ ...p, district: v }))} />
+                  </div>
+                  <FormField label="السعر المطلوب" placeholder="180000" suffix="ر.س" value={disclosure.price} onChange={v => setDisclosure(p => ({ ...p, price: v }))} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" value={disclosure.annual_rent} onChange={v => setDisclosure(p => ({ ...p, annual_rent: v }))} />
+                    <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={v => setDisclosure(p => ({ ...p, lease_duration: v }))} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField label="الفترة المدفوعة" placeholder="1.5 سنة" value={disclosure.lease_paid_period} onChange={v => setDisclosure(p => ({ ...p, lease_paid_period: v }))} />
+                    <FormField label="المتبقي من العقد" placeholder="1.5 سنة" value={disclosure.lease_remaining} onChange={v => setDisclosure(p => ({ ...p, lease_remaining: v }))} />
+                  </div>
+                  <FormField label="الالتزامات المالية" placeholder="لا توجد" value={disclosure.liabilities} onChange={v => setDisclosure(p => ({ ...p, liabilities: v }))} />
+                  <FormField label="رواتب متأخرة" placeholder="لا يوجد" value={disclosure.overdue_salaries} onChange={v => setDisclosure(p => ({ ...p, overdue_salaries: v }))} />
+                  <FormField label="إيجار متأخر" placeholder="لا يوجد" value={disclosure.overdue_rent} onChange={v => setDisclosure(p => ({ ...p, overdue_rent: v }))} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <SelectField label="رخصة البلدية" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.municipality_license} onChange={v => setDisclosure(p => ({ ...p, municipality_license: v }))} />
+                    <SelectField label="الدفاع المدني" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.civil_defense_license} onChange={v => setDisclosure(p => ({ ...p, civil_defense_license: v }))} />
+                  </div>
+                  <SelectField label="كاميرات مراقبة" options={["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"]} value={disclosure.surveillance_cameras} onChange={v => setDisclosure(p => ({ ...p, surveillance_cameras: v }))} />
+                </div>
+              </div>
+
+              {/* Review & Publish Section */}
+              <div className="border-t border-border/50 pt-6 space-y-5">
+                <div className="flex items-center gap-3">
+                  <AiStar size={24} />
+                  <div>
+                    <h2 className="font-medium text-sm">ملخص الإعلان</h2>
+                    <p className="text-[10px] text-muted-foreground">راجع البيانات قبل النشر</p>
+                  </div>
+                </div>
+
+                <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
+                  <div className="text-xs font-medium text-primary mb-1">هيكل الصفقة</div>
+                  {dealStructure.selectedTypes.map((typeId, idx) => {
+                    const dt = DEAL_TYPE_MAP[typeId];
+                    if (!dt) return null;
                     return (
-                      <div key={i} className="flex items-center gap-1.5 text-[11px] text-muted-foreground bg-card/80 px-3 py-1.5 rounded-lg border border-border/30">
-                        <Icon size={13} strokeWidth={1.5} className="text-primary" />
-                        <span>{f.text}</span>
+                      <div key={typeId} className="flex items-center gap-2 text-xs">
+                        <span className={cn(
+                          "px-1.5 py-0.5 rounded font-medium",
+                          typeId === dealStructure.primaryType ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                        )}>
+                          {typeId === dealStructure.primaryType ? "رئيسي" : `بديل ${idx}`}
+                        </span>
+                        <span>{dt.label}</span>
                       </div>
                     );
                   })}
                 </div>
-              </div>
 
-              {/* Progress */}
-              <div className="flex items-center gap-2">
-                <div className="h-2 flex-1 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full rounded-full gradient-primary transition-all duration-500" style={{ width: `${Math.min(100, (totalPhotos / 12) * 100)}%` }} />
-                </div>
-                <span className="text-xs font-medium text-primary">{totalPhotos} صورة</span>
-              </div>
-
-              {/* Photo groups - compact grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {photoGroups.map((group) => {
-                  const count = photos[group.id]?.length || 0;
-                  const done = count >= group.min;
-                  return (
-                    <div key={group.id} className={cn(
-                      "p-3.5 rounded-xl border transition-all",
-                      done ? "border-success/30 bg-success/5" : "border-border/50 bg-card hover:border-primary/30"
-                    )}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          {(() => {
-                            const iconMap: Record<string, any> = { Camera, DoorOpen, Building2, MapPin, Tag, Wrench };
-                            const Icon = iconMap[group.icon] || Camera;
-                            return <Icon size={18} strokeWidth={1.5} className="text-primary" />;
-                          })()}
-                          <div>
-                            <div className="text-xs font-medium">{group.label}</div>
-                            <div className="text-[10px] text-muted-foreground">{group.min} صور على الأقل</div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => { setActivePhotoGroup(group.id); fileInputRef.current?.click(); }}
-                          className={cn(
-                            "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all active:scale-[0.97]",
-                            done ? "bg-success/10 text-success" : "bg-primary/10 text-primary hover:bg-primary/20"
-                          )}
-                        >
-                          <Upload size={12} strokeWidth={1.5} />
-                          {count > 0 ? `${count} ✓` : "رفع"}
-                        </button>
-                      </div>
-                      {photos[group.id]?.length > 0 && (
-                        <div className="flex gap-1.5 mt-2.5 overflow-x-auto pb-1">
-                          {photos[group.id].map((url, i) => (
-                            <img key={i} src={url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0 border border-border/30" />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Encouragement footer */}
-              <div className="text-center pt-4 pb-1">
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/10">
-                  <Sparkles size={16} strokeWidth={1.5} className="text-primary" />
-                  <p className="text-sm font-medium text-foreground">
-                    كلما زادت الصور، كان التحليل أدق والإعلان أقوى
+                <div className="bg-accent/30 rounded-xl p-5">
+                  <p className="text-sm leading-relaxed text-foreground">
+                    {disclosure.business_activity || "مشروع"} في {disclosure.district || "—"}, {disclosure.city || "—"}.
+                    {` هيكل الصفقة: ${primaryDealLabel}.`}
+                    {" "}عدد الأصول المؤكّدة: {inventory.filter(i => i.included).length} عنصر ({inventory.filter(i => i.included).reduce((s, i) => s + i.qty, 0)} قطعة).
+                    {disclosure.annual_rent && ` الإيجار السنوي ${disclosure.annual_rent} ريال.`}
+                    {disclosure.lease_remaining && ` متبقي من العقد ${disclosure.lease_remaining}.`}
+                    {disclosure.price && ` السعر المطلوب ${Number(disclosure.price).toLocaleString()} ريال.`}
                   </p>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: AI Analysis */}
-          {currentStep === 2 && (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              {analyzing ? (
-                <>
-                  <AiStar size={56} className="mb-6" />
-                  <h2 className="font-medium mb-2">الذكاء الاصطناعي يحلّل الصور...</h2>
-                  <p className="text-sm text-muted-foreground max-w-sm">جاري اكتشاف الأصول وتمييز زوايا التصوير من الأصول المتعددة</p>
-                  <div className="mt-6 w-56">
-                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                      <div className="h-full rounded-full gradient-primary transition-all duration-700" style={{ width: `${analyzeProgress}%` }} />
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-2">{analyzeProgress}%</p>
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full gradient-primary" style={{ width: `${disclosureScore}%` }} />
                   </div>
-                  <div className="mt-4 space-y-1 text-[11px] text-muted-foreground">
-                    {analyzeProgress > 20 && <p>🔍 تحليل تفاصيل الصور...</p>}
-                    {analyzeProgress > 45 && <p>🧠 مقارنة الأصول بين الصور...</p>}
-                    {analyzeProgress > 65 && <p>📊 تمييز الزوايا من الأصول المتعددة...</p>}
-                    {analyzeProgress > 80 && <p>✅ إعداد الجرد النهائي...</p>}
-                  </div>
-                </>
-              ) : analyzed ? (
-                <>
-                  <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mb-4">
-                    <Check size={24} strokeWidth={1.3} className="text-success" />
-                  </div>
-                  <h2 className="font-medium mb-2">اكتمل التحليل الذكي</h2>
-                  <p className="text-sm text-muted-foreground max-w-md mb-4">{analysisSummary || `تم اكتشاف ${inventory.length} أصل من الصور.`}</p>
-                  
-                  {/* Dedup actions summary */}
-                  {dedupActions.length > 0 && (
-                    <div className="w-full max-w-md bg-primary/5 border border-primary/20 rounded-xl p-4 mb-4 text-start">
-                      <div className="flex items-center gap-1.5 text-xs font-medium text-primary mb-2">
-                        <Layers size={14} />
-                        إجراءات منع التكرار
-                      </div>
-                      {dedupActions.map((action, i) => (
-                        <div key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5 mt-1">
-                          <span className="text-primary mt-0.5">•</span>
-                          <span>{action.description} ({action.merged_count} صور)</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Confidence summary */}
-                  <div className="flex flex-wrap gap-3 justify-center mb-4">
-                    <div className="text-center px-4 py-2 rounded-xl bg-success/5 border border-success/20">
-                      <div className="text-lg font-medium text-success">{inventory.filter(i => i.confidence === "high").length}</div>
-                      <div className="text-[10px] text-success">ثقة عالية</div>
-                    </div>
-                    <div className="text-center px-4 py-2 rounded-xl bg-warning/5 border border-warning/20">
-                      <div className="text-lg font-medium text-warning">{inventory.filter(i => i.confidence === "medium").length}</div>
-                      <div className="text-[10px] text-warning">ثقة متوسطة</div>
-                    </div>
-                    <div className="text-center px-4 py-2 rounded-xl bg-destructive/5 border border-destructive/20">
-                      <div className="text-lg font-medium text-destructive">{inventory.filter(i => i.confidence === "low").length}</div>
-                      <div className="text-[10px] text-destructive">يحتاج تأكيد</div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {inventory.slice(0, 5).map(item => (
-                      <span key={item.id} className="text-xs bg-accent/60 text-accent-foreground px-3 py-1 rounded-lg">
-                        {item.name} {item.qty > 1 ? `×${item.qty}` : ""}
-                      </span>
-                    ))}
-                    {inventory.length > 5 && <span className="text-xs text-muted-foreground px-2 py-1">+{inventory.length - 5}</span>}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <AiStar size={48} className="mb-6" />
-                  <h2 className="font-medium mb-2">تحليل الصور بالذكاء الاصطناعي</h2>
-                  <p className="text-sm text-muted-foreground max-w-sm mb-2">سيقوم الذكاء الاصطناعي بتحليل صورك واكتشاف الأصول مع التمييز الذكي بين:</p>
-                  <div className="space-y-2 text-start max-w-sm">
-                    <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                      <ImageIcon size={14} className="text-primary mt-0.5 shrink-0" />
-                      <span>أصل واحد مصوّر من <strong className="text-foreground">زوايا مختلفة</strong> ← يُحسب مرة واحدة</span>
-                    </div>
-                    <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                      <Layers size={14} className="text-primary mt-0.5 shrink-0" />
-                      <span>أصول <strong className="text-foreground">متعددة متشابهة</strong> ← يُحسب كل واحد منها</span>
-                    </div>
-                  </div>
-                  {totalPhotos === 0 && (
-                    <div className="mt-4 flex items-center gap-1.5 text-xs text-warning">
-                      <AlertTriangle size={14} />
-                      يرجى رفع صور في الخطوة السابقة أولاً
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-
-          {/* Step 3: Inventory Review */}
-          {currentStep === 3 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <h2 className="font-medium">مراجعة الجرد</h2>
-                  <p className="text-xs text-muted-foreground">
-                    {inventory.filter(i => i.included).length} مشمول — {inventory.filter(i => !i.included).length} مستثنى
-                    {" "}— إجمالي القطع: {inventory.filter(i => i.included).reduce((s, i) => s + i.qty, 0)}
-                  </p>
+                  <span className="text-xs text-muted-foreground">إفصاح {disclosureScore}%</span>
                 </div>
-                <button
-                  onClick={() => setInventory(prev => [...prev, {
-                    id: String(Date.now()),
-                    name: "عنصر جديد",
-                    qty: 1,
-                    condition: "جيدة",
-                    category: "أخرى",
-                    included: true,
-                    confidence: "high",
-                    detectionNote: "مضاف يدوياً",
-                    photoIndices: [],
-                    isSameAssetMultipleAngles: false,
-                    userConfirmed: true,
-                  }])}
-                  className="flex items-center gap-1 text-xs text-primary hover:underline"
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="p-3 rounded-xl bg-muted/50">
+                    <div className="text-lg font-medium text-foreground">{totalPhotos}</div>
+                    <div className="text-[10px] text-muted-foreground">صورة</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-muted/50">
+                    <div className="text-lg font-medium text-foreground">{inventory.filter(i => i.included).length}</div>
+                    <div className="text-[10px] text-muted-foreground">أصل مشمول</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-muted/50">
+                    <div className="text-lg font-medium text-foreground">{Object.values(uploadedDocs).flat().length}</div>
+                    <div className="text-[10px] text-muted-foreground">مستند</div>
+                  </div>
+                </div>
+                <Button
+                  onClick={handlePublish}
+                  disabled={saving || loading}
+                  className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
                 >
-                  <Plus size={14} strokeWidth={1.3} /> أضف عنصراً
-                </button>
+                  {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
+                  نشر الإعلان
+                </Button>
               </div>
-
-              {/* Low confidence items requiring confirmation */}
-              {lowConfidenceItems.length > 0 && (
-                <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 space-y-3">
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-destructive">
-                    <AlertTriangle size={14} />
-                    عناصر تحتاج تأكيدك ({lowConfidenceItems.length})
-                  </div>
-                  {lowConfidenceItems.map(item => (
-                    <ConfirmationCard
-                      key={item.id}
-                      item={item}
-                      allPhotoUrls={allPhotoUrls}
-                      onConfirmSame={() => {
-                        setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: 1, userConfirmed: true } : i));
-                      }}
-                      onConfirmMultiple={(qty) => {
-                        setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty, userConfirmed: true } : i));
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Medium confidence items */}
-              {medConfidenceItems.length > 0 && (
-                <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 space-y-3">
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-warning">
-                    <AlertTriangle size={14} />
-                    عناصر يُنصح بتأكيدها ({medConfidenceItems.length})
-                  </div>
-                  {medConfidenceItems.map(item => (
-                    <ConfirmationCard
-                      key={item.id}
-                      item={item}
-                      allPhotoUrls={allPhotoUrls}
-                      onConfirmSame={() => {
-                        setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: 1, userConfirmed: true } : i));
-                      }}
-                      onConfirmMultiple={(qty) => {
-                        setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty, userConfirmed: true } : i));
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* All inventory items */}
-              <div className="space-y-2">
-                {inventory.map((item) => (
-                  <div key={item.id} className={cn(
-                    "p-3 rounded-xl border transition-all",
-                    item.included ? "border-border/50 bg-card" : "border-border/30 bg-muted/30 opacity-60"
-                  )}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        {editingItemId === item.id ? (
-                          <input
-                            type="text"
-                            value={item.name}
-                            onChange={(e) => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, name: e.target.value } : i))}
-                            onBlur={() => setEditingItemId(null)}
-                            onKeyDown={(e) => e.key === "Enter" && setEditingItemId(null)}
-                            autoFocus
-                            className="text-sm bg-transparent border-b border-primary/30 outline-none w-full"
-                          />
-                        ) : (
-                          <div className="text-sm cursor-pointer hover:text-primary transition-colors" onClick={() => setEditingItemId(item.id)}>
-                            {item.name}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                          <span className="text-xs text-muted-foreground">{item.category}</span>
-                          <span className="text-xs text-muted-foreground">— {item.condition}</span>
-                          {getConfidenceBadge(item.confidence)}
-                          {item.isSameAssetMultipleAngles && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">زوايا متعددة</span>
-                          )}
-                        </div>
-                        {item.detectionNote && (
-                          <div className="text-[10px] text-muted-foreground mt-0.5 italic">{item.detectionNote}</div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0 mr-3">
-                        {/* Editable quantity */}
-                        <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-1">
-                          <button
-                            onClick={() => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: Math.max(1, i.qty - 1) } : i))}
-                            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            <Minus size={12} />
-                          </button>
-                          <input
-                            type="number"
-                            min="1"
-                            value={item.qty}
-                            onChange={(e) => {
-                              const val = Math.max(1, parseInt(e.target.value) || 1);
-                              setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: val } : i));
-                            }}
-                            className="w-8 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          />
-                          <button
-                            onClick={() => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i))}
-                            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            <Plus size={12} />
-                          </button>
-                        </div>
-                        <button
-                          onClick={() => setInventory(inv => inv.map(i => i.id === item.id ? { ...i, included: !i.included } : i))}
-                          className={cn(
-                            "text-xs px-2.5 py-1 rounded-md transition-all active:scale-[0.97]",
-                            item.included ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
-                          )}
-                        >
-                          {item.included ? "مشمول" : "مستثنى"}
-                        </button>
-                        <button onClick={() => setInventory(inv => inv.filter(i => i.id !== item.id))} className="p-1 text-muted-foreground hover:text-destructive transition-colors">
-                          <Trash2 size={14} strokeWidth={1.3} />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Related photos */}
-                    {item.photoIndices.length > 0 && allPhotoUrls.length > 0 && (
-                      <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
-                        {item.photoIndices.filter(idx => idx < allPhotoUrls.length).slice(0, 6).map((idx) => (
-                          <img key={idx} src={allPhotoUrls[idx]} alt="" className="w-10 h-10 rounded-md object-cover shrink-0 border border-border/30" />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Documents */}
-          {currentStep === 4 && (
-            <div className="space-y-4">
-              <h2 className="font-medium mb-1">المستندات المطلوبة</h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                بناءً على هيكل الصفقة ({primaryDealLabel}) — المستندات التالية مطلوبة أو موصى بها
-              </p>
-              {dynamicDocTypes.map((doc, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-border/50">
-                  <div className="flex items-center gap-2">
-                    <FileText size={16} strokeWidth={1.3} className="text-muted-foreground" />
-                    <div>
-                      <span className="text-sm">{doc}</span>
-                      {uploadedDocs[doc]?.length > 0 && (
-                        <span className="text-[10px] text-success mr-2">✓ {uploadedDocs[doc].length} ملف</span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => { setActiveDocType(doc); docInputRef.current?.click(); }}
-                    className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]"
-                  >
-                    <Upload size={14} strokeWidth={1.3} /> رفع
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Step 5: Disclosure */}
-          {currentStep === 5 && (
-            <div className="space-y-4">
-              <h2 className="font-medium mb-1">بيانات الإفصاح</h2>
-              <p className="text-sm text-muted-foreground mb-2">أكمل بيانات الإفصاح لتعزيز ثقة المشترين</p>
-              
-              {dealStructure.requiredDisclosures.length > 0 && (
-                <div className="bg-warning/5 border border-warning/20 rounded-xl p-3 mb-4">
-                  <div className="text-xs font-medium text-warning mb-1.5 flex items-center gap-1">
-                    <Shield size={12} /> الإفصاحات المطلوبة لهيكل الصفقة المختار
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {dealStructure.requiredDisclosures.map((d, i) => (
-                      <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-warning/10 text-warning">{d}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                <FormField label="نوع النشاط" placeholder="مثال: مطعم وجبات سريعة" value={disclosure.business_activity} onChange={v => setDisclosure(p => ({ ...p, business_activity: v }))} />
-                <div className="grid grid-cols-2 gap-3">
-                  <FormField label="المدينة" placeholder="الرياض" value={disclosure.city} onChange={v => setDisclosure(p => ({ ...p, city: v }))} />
-                  <FormField label="الحي" placeholder="حي النسيم" value={disclosure.district} onChange={v => setDisclosure(p => ({ ...p, district: v }))} />
-                </div>
-                <FormField label="السعر المطلوب" placeholder="180000" suffix="ر.س" value={disclosure.price} onChange={v => setDisclosure(p => ({ ...p, price: v }))} />
-                <div className="grid grid-cols-2 gap-3">
-                  <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" value={disclosure.annual_rent} onChange={v => setDisclosure(p => ({ ...p, annual_rent: v }))} />
-                  <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={v => setDisclosure(p => ({ ...p, lease_duration: v }))} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <FormField label="الفترة المدفوعة" placeholder="1.5 سنة" value={disclosure.lease_paid_period} onChange={v => setDisclosure(p => ({ ...p, lease_paid_period: v }))} />
-                  <FormField label="المتبقي من العقد" placeholder="1.5 سنة" value={disclosure.lease_remaining} onChange={v => setDisclosure(p => ({ ...p, lease_remaining: v }))} />
-                </div>
-                <FormField label="الالتزامات المالية" placeholder="لا توجد" value={disclosure.liabilities} onChange={v => setDisclosure(p => ({ ...p, liabilities: v }))} />
-                <FormField label="رواتب متأخرة" placeholder="لا يوجد" value={disclosure.overdue_salaries} onChange={v => setDisclosure(p => ({ ...p, overdue_salaries: v }))} />
-                <FormField label="إيجار متأخر" placeholder="لا يوجد" value={disclosure.overdue_rent} onChange={v => setDisclosure(p => ({ ...p, overdue_rent: v }))} />
-                <div className="grid grid-cols-2 gap-3">
-                  <SelectField label="رخصة البلدية" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.municipality_license} onChange={v => setDisclosure(p => ({ ...p, municipality_license: v }))} />
-                  <SelectField label="الدفاع المدني" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.civil_defense_license} onChange={v => setDisclosure(p => ({ ...p, civil_defense_license: v }))} />
-                </div>
-                <SelectField label="كاميرات مراقبة" options={["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"]} value={disclosure.surveillance_cameras} onChange={v => setDisclosure(p => ({ ...p, surveillance_cameras: v }))} />
-              </div>
-            </div>
-          )}
-
-          {/* Step 6: Review */}
-          {currentStep === 6 && (
-            <div className="space-y-5">
-              <div className="flex items-center gap-3 mb-4">
-                <AiStar size={28} />
-                <div>
-                  <h2 className="font-medium">ملخص الإعلان</h2>
-                  <p className="text-xs text-muted-foreground">راجع البيانات قبل النشر</p>
-                </div>
-              </div>
-
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
-                <div className="text-xs font-medium text-primary mb-1">هيكل الصفقة</div>
-                {dealStructure.selectedTypes.map((typeId, idx) => {
-                  const dt = DEAL_TYPE_MAP[typeId];
-                  if (!dt) return null;
-                  return (
-                    <div key={typeId} className="flex items-center gap-2 text-xs">
-                      <span className={cn(
-                        "px-1.5 py-0.5 rounded font-medium",
-                        typeId === dealStructure.primaryType ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                      )}>
-                        {typeId === dealStructure.primaryType ? "رئيسي" : `بديل ${idx}`}
-                      </span>
-                      <span>{dt.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="bg-accent/30 rounded-xl p-5">
-                <p className="text-sm leading-relaxed text-foreground">
-                  {disclosure.business_activity || "مشروع"} في {disclosure.district || "—"}, {disclosure.city || "—"}.
-                  {` هيكل الصفقة: ${primaryDealLabel}.`}
-                  {" "}عدد الأصول المؤكّدة: {inventory.filter(i => i.included).length} عنصر ({inventory.filter(i => i.included).reduce((s, i) => s + i.qty, 0)} قطعة).
-                  {disclosure.annual_rent && ` الإيجار السنوي ${disclosure.annual_rent} ريال.`}
-                  {disclosure.lease_remaining && ` متبقي من العقد ${disclosure.lease_remaining}.`}
-                  {disclosure.price && ` السعر المطلوب ${Number(disclosure.price).toLocaleString()} ريال.`}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full rounded-full gradient-primary" style={{ width: `${disclosureScore}%` }} />
-                </div>
-                <span className="text-xs text-muted-foreground">إفصاح {disclosureScore}%</span>
-              </div>
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="p-3 rounded-xl bg-muted/50">
-                  <div className="text-lg font-medium text-foreground">{totalPhotos}</div>
-                  <div className="text-[10px] text-muted-foreground">صورة</div>
-                </div>
-                <div className="p-3 rounded-xl bg-muted/50">
-                  <div className="text-lg font-medium text-foreground">{inventory.filter(i => i.included).length}</div>
-                  <div className="text-[10px] text-muted-foreground">أصل مشمول</div>
-                </div>
-                <div className="p-3 rounded-xl bg-muted/50">
-                  <div className="text-lg font-medium text-foreground">{Object.values(uploadedDocs).flat().length}</div>
-                  <div className="text-[10px] text-muted-foreground">مستند</div>
-                </div>
-              </div>
-              <Button
-                onClick={handlePublish}
-                disabled={saving || loading}
-                className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
-              >
-                {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
-                نشر الإعلان
-              </Button>
             </div>
           )}
         </div>
@@ -880,10 +845,10 @@ const CreateListingPage = () => {
           {currentStep < steps.length - 1 && (
             <Button
               onClick={handleNext}
-              disabled={(currentStep === 0 && !dealStructure.isValid) || saving || (currentStep === 2 && analyzing)}
+              disabled={(currentStep === 0 && !dealStructure.isValid) || saving || (currentStep === 1 && analyzing)}
               className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
             >
-              {currentStep === 2 && !analyzed ? "ابدأ التحليل الذكي" : "التالي"}
+              التالي
               <ArrowLeft size={16} strokeWidth={1.5} />
             </Button>
           )}
@@ -912,8 +877,6 @@ const ConfirmationCard = ({
     <div className="bg-card rounded-lg p-3 border border-border/50">
       <div className="text-sm font-medium mb-1">{item.name}</div>
       <div className="text-[11px] text-muted-foreground mb-2">{item.detectionNote}</div>
-
-      {/* Show related photos */}
       {item.photoIndices.length > 0 && (
         <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
           {item.photoIndices.filter(idx => idx < allPhotoUrls.length).slice(0, 6).map((idx) => (
@@ -921,44 +884,21 @@ const ConfirmationCard = ({
           ))}
         </div>
       )}
-
       <p className="text-xs text-muted-foreground mb-2">هل هذه الصور لنفس الأصل أم لأصول متعددة؟</p>
-
       {!showQtyInput ? (
         <div className="flex gap-2">
-          <button
-            onClick={onConfirmSame}
-            className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors active:scale-[0.97]"
-          >
-            هذا نفس الأصل
-          </button>
-          <button
-            onClick={() => setShowQtyInput(true)}
-            className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/80 transition-colors active:scale-[0.97]"
-          >
-            هذه أصول متعددة
-          </button>
+          <button onClick={onConfirmSame} className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors active:scale-[0.97]">هذا نفس الأصل</button>
+          <button onClick={() => setShowQtyInput(true)} className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/80 transition-colors active:scale-[0.97]">هذه أصول متعددة</button>
         </div>
       ) : (
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">عدد القطع:</span>
           <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-1">
             <button onClick={() => setTempQty(q => Math.max(2, q - 1))} className="p-1"><Minus size={12} /></button>
-            <input
-              type="number"
-              min="2"
-              value={tempQty}
-              onChange={e => setTempQty(Math.max(2, parseInt(e.target.value) || 2))}
-              className="w-10 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            />
+            <input type="number" min="2" value={tempQty} onChange={e => setTempQty(Math.max(2, parseInt(e.target.value) || 2))} className="w-10 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
             <button onClick={() => setTempQty(q => q + 1)} className="p-1"><Plus size={12} /></button>
           </div>
-          <button
-            onClick={() => onConfirmMultiple(tempQty)}
-            className="text-xs px-3 py-1.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors active:scale-[0.97]"
-          >
-            تأكيد
-          </button>
+          <button onClick={() => onConfirmMultiple(tempQty)} className="text-xs px-3 py-1.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors active:scale-[0.97]">تأكيد</button>
         </div>
       )}
     </div>
