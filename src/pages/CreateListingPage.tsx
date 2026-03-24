@@ -1425,9 +1425,12 @@ const CreateListingPage = () => {
 
         {/* Navigation */}
         <div className="flex items-center justify-between mt-6">
-          <Button variant="outline" onClick={handleBack} disabled={currentStep === 0} className="rounded-xl active:scale-[0.98]">
-            <ArrowRight size={16} strokeWidth={1.5} /> السابق
-          </Button>
+          {currentStep > 0 && (
+            <Button variant="outline" onClick={handleBack} className="rounded-xl active:scale-[0.98]">
+              <ArrowRight size={16} strokeWidth={1.5} /> السابق
+            </Button>
+          )}
+          {currentStep === 0 && <div />}
           {currentStep < steps.length - 1 && (
             <Button onClick={handleNext} disabled={(currentStep === 0 && !dealStructure.isValid) || saving || (currentStep === 2 && analyzing)} className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
               التالي
