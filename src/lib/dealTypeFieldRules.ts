@@ -166,9 +166,13 @@ export function isGibberish(text: string): boolean {
   // No Arabic or English letters at all (just symbols/numbers)
   if (!/[\u0600-\u06FFa-zA-Z]/.test(trimmed)) return true;
 
-  // Random keyboard patterns (common mashing)
-  if (/^[asdfghjklqwertyuiopzxcvbnm]{4,}$/i.test(trimmed)) return true;
-  if (/^[ضصثقفغعهخحجدشسيبلاتنمكطذءؤرىةوزظ]{1,2}$/i.test(trimmed)) return true;
+  // Random keyboard patterns — only flag if no vowels (real words have vowels)
+  const latinOnly = trimmed.replace(/[^a-zA-Z]/g, '');
+  if (latinOnly.length >= 4 && !/[aeiouAEIOU]/i.test(latinOnly)) return true;
+  // Common keyboard row mashing patterns
+  if (/^[asdfghjkl;]{4,}$/i.test(trimmed) || /^[qwertyu]{4,}$/i.test(trimmed) || /^[zxcvbnm]{4,}$/i.test(trimmed)) return true;
+  // Single/double Arabic letter (not a word)
+  if (/^[\u0600-\u06FF]{1,2}$/.test(trimmed)) return true;
 
   return false;
 }
