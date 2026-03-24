@@ -251,6 +251,7 @@ const CreateListingPage = () => {
   // ── Auto-save every 30 seconds ──
   const saveDraft = useCallback(async () => {
     if (!listingId || saving) return;
+    setAutoSaveStatus("saving");
     try {
       await updateListing(listingId, {
         ...disclosure,
@@ -267,8 +268,11 @@ const CreateListingPage = () => {
         deal_disclosures: dealStructure.requiredDisclosures,
         required_documents: dealStructure.requiredDocuments,
       } as never);
+      setAutoSaveStatus("saved");
+      setTimeout(() => setAutoSaveStatus("idle"), 3000);
     } catch (err) {
       console.error("Auto-save failed", err);
+      setAutoSaveStatus("idle");
     }
   }, [listingId, saving, disclosure, inventory, dealStructure, updateListing]);
 
