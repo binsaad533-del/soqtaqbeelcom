@@ -478,11 +478,12 @@ const CreateListingPage = () => {
     setCurrentStep((prev) => Math.max(0, prev - 1));
   };
 
-  const handlePublish = async () => {
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+
+  const handlePublishClick = () => {
     if (!listingId) return;
     setPublishAttempted(true);
 
-    // Client-side strict validation
     const hasPhotos = totalPhotos > 0;
     const hasActivity = disclosure.business_activity.trim() !== "";
     const hasCity = disclosure.city.trim() !== "";
@@ -492,6 +493,13 @@ const CreateListingPage = () => {
       toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر");
       return;
     }
+
+    setShowPublishConfirm(true);
+  };
+
+  const handlePublish = async () => {
+    if (!listingId) return;
+    setShowPublishConfirm(false);
 
     setSaving(true);
     const fields = Object.values(disclosure);
