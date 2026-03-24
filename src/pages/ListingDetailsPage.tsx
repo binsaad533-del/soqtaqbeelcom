@@ -88,6 +88,16 @@ const ListingDetailsPage = () => {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="py-20 text-center">
+        <AlertTriangle size={32} className="mx-auto mb-4 text-destructive" />
+        <p className="text-sm text-destructive mb-3">{loadError}</p>
+        <Button onClick={loadListing} variant="outline" className="rounded-xl">إعادة المحاولة</Button>
+      </div>
+    );
+  }
+
   if (!listing) {
     return (
       <div className="py-20 text-center">
