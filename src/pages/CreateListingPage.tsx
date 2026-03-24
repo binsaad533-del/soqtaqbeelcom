@@ -243,7 +243,7 @@ const CreateListingPage = () => {
     };
   }, [saveDraft]);
 
-
+  const isHeicLikeFile = useCallback(async (file: File) => {
     const name = file.name.toLowerCase();
     if (file.type === "image/heic" || file.type === "image/heif" || name.endsWith(".heic") || name.endsWith(".heif")) {
       return true;
