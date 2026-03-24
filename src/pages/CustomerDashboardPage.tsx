@@ -165,9 +165,22 @@ const CustomerDashboardPage = () => {
   const memberSince = profile?.created_at
     ? (() => {
         const d = new Date(profile.created_at);
+        const day = d.getDate();
         const month = d.toLocaleDateString("ar-SA", { month: "long" });
         const year = d.getFullYear();
-        return `${month} ${year}`;
+        return `${day} ${month} ${year}`;
+      })()
+    : "—";
+
+  const lastLoginFormatted = profile?.last_activity
+    ? (() => {
+        const d = new Date(profile.last_activity);
+        const day = d.getDate();
+        const month = d.toLocaleDateString("ar-SA", { month: "long" });
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, "0");
+        const minutes = String(d.getMinutes()).padStart(2, "0");
+        return `${day} ${month} ${year} - ${hours}:${minutes}`;
       })()
     : "—";
 
@@ -239,7 +252,13 @@ const CustomerDashboardPage = () => {
               <span className="hidden md:inline text-border/50">|</span>
 
               <span className="flex items-center gap-1.5 shrink-0">
-                <Clock size={13} /> {memberSince}
+                <Clock size={13} /> انضم: {memberSince}
+              </span>
+
+              <span className="hidden md:inline text-border/50">|</span>
+
+              <span className="flex items-center gap-1.5 shrink-0">
+                <Clock size={13} /> آخر دخول: {lastLoginFormatted}
               </span>
 
               <span className="hidden md:inline text-border/50">|</span>
