@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import AiAssistant from "./AiAssistant";
 import Footer from "./Footer";
 import NotificationBell from "./NotificationBell";
+import ThemeToggle from "./ThemeToggle";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 
@@ -71,7 +72,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
             {user ? (
               <>
                 <Link
