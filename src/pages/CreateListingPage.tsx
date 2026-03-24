@@ -28,6 +28,7 @@ import {
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useListings } from "@/hooks/useListings";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
