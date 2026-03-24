@@ -187,11 +187,13 @@ const CustomerDashboardPage = () => {
     : "—";
 
   /* ── Profile completeness ── */
+  const hasRealEmail = !!(userEmail && !userEmail.endsWith("@phone.souqtaqbeel.app"));
   const profileCompleteness = useMemo(() => {
     if (!profile) return 0;
-    const fields = [profile.full_name, profile.phone, profile.city, profile.avatar_url];
+    const fields = [profile.full_name, profile.phone, profile.avatar_url, hasRealEmail];
     return Math.round((fields.filter(Boolean).length / fields.length) * 100);
-  }, [profile]);
+  }, [profile, hasRealEmail]);
+  const isProfileComplete = profileCompleteness >= 100;
 
   return (
     <div className="py-5 md:py-8">
@@ -244,10 +246,14 @@ const CustomerDashboardPage = () => {
 
             {/* Inline info items - all on one line */}
             <div className="flex items-center gap-4 text-xs text-muted-foreground flex-1 min-w-0 flex-wrap md:flex-nowrap">
-              <span className="flex items-center gap-1.5 shrink-0">
-                {profile?.is_verified
-                  ? <><UserCheck size={13} className="text-success" /> موثّق</>
-                  : <><Shield size={13} className="text-warning" /> غير موثّق</>
+              <span className={cn("flex items-center gap-1.5 shrink-0 px-2 py-0.5 rounded-full text-[10px] font-medium",
+                isProfileComplete
+                  ? "bg-success/15 text-success border border-success/30"
+                  : "bg-warning/15 text-warning border border-warning/30"
+              )}>
+                {isProfileComplete
+                  ? <><UserCheck size={13} /> موثّق</>
+                  : <><Shield size={13} /> غير موثّق</>
                 }
               </span>
 
@@ -266,18 +272,20 @@ const CustomerDashboardPage = () => {
               <span className="hidden md:inline text-border/50">|</span>
 
               {/* Email */}
-              <div className="flex items-center gap-1.5 group/email min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
                 <Mail size={13} className="shrink-0" />
                 {editingField === "email" ? (
                   <div className="flex items-center gap-1">
-                    <input type="email" dir="ltr" className="bg-muted/50 rounded px-2 py-0.5 w-44 border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="email@example.com" />
+                    <input type="email" dir="ltr" lang="en" className="bg-muted/50 rounded px-2 py-0.5 w-44 border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="email@example.com" />
                     <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
                     <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
                   </div>
                 ) : (
                   <>
-                    <span className="truncate" dir="ltr">{userEmail || "لم يُضاف"}</span>
-                    <button onClick={() => startEdit("email", userEmail || "")} className="opacity-0 group-hover/email:opacity-100 text-muted-foreground hover:text-primary shrink-0"><Pencil size={10} /></button>
+                    <span className="truncate" dir="ltr">
+                      {hasRealEmail ? userEmail : <span className="text-warning">لم يُضاف</span>}
+                    </span>
+                    <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-primary hover:text-primary/80 shrink-0"><Pencil size={10} /></button>
                   </>
                 )}
               </div>
@@ -285,7 +293,7 @@ const CustomerDashboardPage = () => {
               <span className="hidden md:inline text-border/50">|</span>
 
               {/* Phone */}
-              <div className="flex items-center gap-1.5 group/phone shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <Phone size={13} />
                 {editingField === "phone" ? (
                   <div className="flex items-center gap-1">
@@ -295,8 +303,8 @@ const CustomerDashboardPage = () => {
                   </div>
                 ) : (
                   <>
-                    <span dir="ltr">{profile?.phone ? toEnglishNumerals(profile.phone) : "لم يُضاف"}</span>
-                    <button onClick={() => startEdit("phone", profile?.phone || "")} className="opacity-0 group-hover/phone:opacity-100 text-muted-foreground hover:text-primary"><Pencil size={10} /></button>
+                    <span dir="ltr">{profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">لم يُضاف</span>}</span>
+                    <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-primary hover:text-primary/80"><Pencil size={10} /></button>
                   </>
                 )}
               </div>
@@ -305,21 +313,31 @@ const CustomerDashboardPage = () => {
 
 
           {/* Profile completeness bar */}
-          {profileCompleteness < 100 && (
-            <div className="mt-3 pt-3 border-t border-border/20">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-muted-foreground">اكتمال الملف الشخصي</span>
-                <span className={cn("text-xs font-medium",
-                  profileCompleteness >= 75 ? "text-success" : profileCompleteness >= 50 ? "text-warning" : "text-destructive"
-                )}>{profileCompleteness}%</span>
-              </div>
-              <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
-                <div className={cn("h-full rounded-full transition-all duration-500",
-                  profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
-                )} style={{ width: `${profileCompleteness}%` }} />
-              </div>
+          <div className="mt-3 pt-3 border-t border-border/20">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-muted-foreground">اكتمال الملف الشخصي</span>
+              <span className={cn("text-xs font-medium",
+                isProfileComplete ? "text-success" : profileCompleteness >= 50 ? "text-warning" : "text-destructive"
+              )}>{profileCompleteness}%</span>
             </div>
-          )}
+            {isProfileComplete ? (
+              <div className="flex items-center gap-1.5 text-xs text-success">
+                <CheckCircle size={13} />
+                <span className="font-medium">ملفك الشخصي مكتمل — حسابك موثّق</span>
+              </div>
+            ) : (
+              <>
+                <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className={cn("h-full rounded-full transition-all duration-500",
+                    profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
+                  )} style={{ width: `${profileCompleteness}%` }} />
+                </div>
+                <p className="text-[9px] text-muted-foreground mt-1">
+                  أكمل: {!profile?.full_name && "الاسم · "}{!profile?.phone && "الجوال · "}{!hasRealEmail && "الإيميل · "}{!profile?.avatar_url && "الصورة"}
+                </p>
+              </>
+            )}
+          </div>
         </div>
 
         {/* ══════ FINANCIAL OVERVIEW ══════ */}
