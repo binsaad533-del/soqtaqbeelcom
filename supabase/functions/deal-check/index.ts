@@ -6,77 +6,103 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية قصيرة وقوية لكل صفقة تقبيل أو بيع أصول أو فرصة تجارية.
+const DEAL_TYPE_SCOPES: Record<string, { label: string; analyzeFields: string[]; skipFields: string[]; focusAreas: string[] }> = {
+  full_takeover: {
+    label: "تقبيل كامل",
+    analyzeFields: ["assets", "lease", "cr", "tradeName", "liabilities", "licenses", "operations", "staff"],
+    skipFields: [],
+    focusAreas: ["الأصول والمعدات", "عقد الإيجار", "السجل التجاري", "الالتزامات المالية", "التراخيص", "العمالة", "استمرارية العمل"],
+  },
+  transfer_no_liabilities: {
+    label: "نقل أعمال بدون التزامات",
+    analyzeFields: ["assets", "lease", "cr", "tradeName", "licenses", "operations"],
+    skipFields: ["liabilities"],
+    focusAreas: ["الأصول والمعدات", "عقد الإيجار", "السجل التجاري", "التراخيص", "التحقق من تصفية الالتزامات"],
+  },
+  assets_setup: {
+    label: "أصول + تجهيز تشغيلي",
+    analyzeFields: ["assets", "location"],
+    skipFields: ["cr", "tradeName", "liabilities"],
+    focusAreas: ["الأصول والمعدات", "التجهيزات والديكور", "المخزون", "ترتيب الموقع"],
+  },
+  assets_only: {
+    label: "أصول فقط",
+    analyzeFields: ["assets"],
+    skipFields: ["cr", "tradeName", "lease", "liabilities", "licenses", "operations"],
+    focusAreas: ["المعدات والأجهزة", "حالة الأصول", "الكمية", "واقعية السعر", "النقل والتسليم"],
+  },
+  cr_only: {
+    label: "سجل تجاري فقط",
+    analyzeFields: ["cr"],
+    skipFields: ["assets", "lease", "tradeName", "operations"],
+    focusAreas: ["حالة السجل التجاري", "الأنشطة المسجلة", "الالتزامات المرتبطة", "المستحقات الحكومية"],
+  },
+  location_only: {
+    label: "موقع فقط (نقل إيجار)",
+    analyzeFields: ["lease", "location"],
+    skipFields: ["cr", "tradeName", "assets", "operations"],
+    focusAreas: ["عقد الإيجار", "موافقة المؤجر", "الإيجار", "المدة المتبقية", "الموقع التجاري"],
+  },
+};
 
-يجب أن تحلل الصفقة بناءً على جميع البيانات المتاحة وتنتج تقريراً مهنياً بالعربية.
+function buildDealTypeContext(listing: any): string {
+  const primaryType = listing.primary_deal_type || listing.deal_type || "full_takeover";
+  const dealOptions = listing.deal_options || [];
+  const scope = DEAL_TYPE_SCOPES[primaryType] || DEAL_TYPE_SCOPES["full_takeover"];
+
+  let context = `\n## نوع الصفقة الرئيسي: ${scope.label} (${primaryType})`;
+  context += `\n### نطاق التحليل المطلوب:`;
+  context += `\n- ركّز على: ${scope.focusAreas.join("، ")}`;
+
+  if (scope.skipFields.length > 0) {
+    context += `\n- ⚠️ لا تحلل ولا تسأل عن: ${scope.skipFields.map(f => {
+      const map: Record<string, string> = { cr: "السجل التجاري", tradeName: "الاسم التجاري / العلامة التجارية", lease: "عقد الإيجار / نقل الموقع", liabilities: "الالتزامات السابقة", licenses: "التراخيص", operations: "العمليات التشغيلية", staff: "العمالة", assets: "الأصول" };
+      return map[f] || f;
+    }).join("، ")}`;
+    context += `\n- إذا كانت هذه الحقول غير موجودة في البيانات، لا تطلبها كمعلومات ناقصة ولا تعتبرها مخاطرة`;
+  }
+
+  if (dealOptions.length > 1) {
+    context += `\n\n### خيارات الصفقة البديلة:`;
+    for (const opt of dealOptions) {
+      if (opt.is_primary) continue;
+      const altScope = DEAL_TYPE_SCOPES[opt.type_id];
+      if (altScope) {
+        context += `\n- ${altScope.label}: ركّز على ${altScope.focusAreas.slice(0, 3).join("، ")}`;
+      }
+    }
+    context += `\n\n### مطلوب: حلل كل مكوّن من الصفقة بشكل منفصل ثم قدّم توصية مجمّعة`;
+  }
+
+  return context;
+}
+
+const SYSTEM_PROMPT = `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية قصيرة وقوية لكل صفقة.
+
+## قاعدة أساسية — احترام نوع الصفقة:
+- يجب أن يكون تحليلك محصوراً بنطاق نوع الصفقة المحدد
+- إذا كانت الصفقة "أصول فقط": لا تسأل عن السجل التجاري أو الاسم التجاري أو عقد الإيجار أو الالتزامات السابقة
+- إذا كانت "سجل تجاري فقط": لا تسأل عن الأصول أو الموقع
+- إذا كانت "موقع فقط": لا تسأل عن الأصول أو السجل التجاري
+- الحقول غير المشمولة في نطاق الصفقة ليست "معلومات ناقصة" ولا "مخاطر"
 
 ## قواعد صارمة:
-- استخدم الأرقام الإنجليزية فقط (0-9) وليس العربية
-- كن عملياً وتجارياً ومباشراً — لا تستخدم لغة الشات بوت العامة
+- استخدم الأرقام الإنجليزية فقط (0-9)
+- كن عملياً وتجارياً ومباشراً
 - ميّز بوضوح بين: الأدلة، الاستنتاجات، والبيانات الناقصة
-- لا تدّعي يقيناً زائفاً — إذا كانت البيانات غير كافية قل ذلك بوضوح
+- لا تدّعي يقيناً زائفاً
 - هذا ليس تقييم رسمي مرخص — هو تحليل ذكي استرشادي
 
-## مقارنة السوق (مهم جداً):
-عند تقييم الأصول والمعدات، يجب أن تستخدم منصات السلع المستعملة السعودية كمراجع مقارنة:
-- حراج (haraj.com.sa)
-- مستعمل (mstaml.com)
-- OpenSooq (opensooq.com)
-- Facebook Marketplace
-- أي مصدر سعودي آخر متاح
+## مقارنة السوق:
+عند تقييم الأصول، استخدم منصات: حراج، مستعمل، OpenSooq، Facebook Marketplace
+- قارن بذكاء حسب النوع والفئة والحالة
+- ميّز بين: سعر الطلب، المؤشر السوقي المقدّر، القيمة المؤكدة
+- إذا لم يكن هناك أصول في الصفقة، تخطّ تقييم الأصول
 
-### قواعد المقارنة:
-1. ابحث عن أصناف مشابهة بالنوع والفئة والحالة والمواصفات
-2. قارن بذكاء — ميّز بين: تطابق دقيق، تطابق قريب، تطابق ضعيف
-3. لا تنسخ أسعار المنصات بشكل أعمى — هي مؤشرات سوقية فقط وليست قيمة سوقية نهائية
-4. ميّز بوضوح بين: سعر الطلب، المؤشر السوقي المقدّر، القيمة المؤكدة
-5. خذ حالة الأصل بالاعتبار (جديد، مستعمل نظيف، مستعمل عادي، متهالك)
-6. فضّل المقارنات السعودية أولاً
-7. إذا كانت المقارنات ضعيفة أو محدودة، وضّح ذلك صراحة
-
-### لكل أصل أو مجموعة أصول مهمة، قدّم:
-- النطاق السوقي التقريبي المرصود
-- جودة ثقة المقارنة (قوية / متوسطة / ضعيفة)
-- هل توقعات البائع معقولة أم مبالغ فيها
-- هل المنظومة المرئية تدعم القيمة المطلوبة
-
-## تنسيق المخرج المطلوب:
-أنتج JSON بالهيكل التالي (جميع الحقول مطلوبة):
-
-{
-  "dealOverview": "نظرة عامة موجزة عن الصفقة",
-  "businessActivity": "تحليل النشاط التجاري وتصنيفه",
-  "assetAssessment": "تقييم الأصول والمعدات",
-  "locationAssessment": "تقييم الموقع من منظور تجاري",
-  "competitionSnapshot": "لمحة عن المنافسة والسوق",
-  "operationalReadiness": "الجاهزية التشغيلية",
-  "marketComparison": {
-    "comparablesReviewed": 0,
-    "matchQuality": "قوية | متوسطة | ضعيفة | غير متاحة",
-    "observedPriceRange": "النطاق السعري المرصود أو غير متاح",
-    "marketPosition": "أقل من السوق | قريب من السوق | أعلى من السوق | غير محدد",
-    "confidence": "عالي | متوسط | منخفض",
-    "details": "تفاصيل المقارنة مع المنصات المستخدمة والأصناف المقارنة",
-    "assetBreakdown": [
-      {
-        "assetName": "اسم الأصل",
-        "marketRange": "النطاق السعري المرصود",
-        "sellerPrice": "سعر البائع المقدّر",
-        "verdict": "معقول | مبالغ فيه | أقل من السوق | غير واضح",
-        "source": "المنصة المرجعية"
-      }
-    ]
-  },
-  "risks": ["مخاطرة 1", "مخاطرة 2"],
-  "strengths": ["نقطة قوة 1", "نقطة قوة 2"],
-  "missingInfo": ["معلومة ناقصة 1", "معلومة ناقصة 2"],
-  "rating": "واحد من: فرصة ممتازة | فرصة جيدة | مقبولة مع حذر | مخاطر عالية | غير مكتملة",
-  "ratingColor": "واحد من: green | blue | yellow | red | gray",
-  "recommendation": "توصية قصيرة وواضحة",
-  "negotiationGuidance": ["نقطة تفاوض 1", "نقطة تفاوض 2"],
-  "fairnessVerdict": "تقييم عدالة السعر: جذاب | معقول | مبالغ فيه | غير واضح",
-  "confidenceLevel": "مستوى ثقة التحليل: عالي | متوسط | منخفض"
-}`;
+## تنسيق المخرج:
+أنتج JSON بالهيكل المطلوب. لكل حقل تحليل:
+- إذا كان خارج نطاق الصفقة، اكتب "خارج نطاق هذه الصفقة" بدل تحليل مفصل
+- missingInfo يجب أن تحتوي فقط على معلومات ناقصة ضمن نطاق الصفقة المحدد`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -120,7 +146,7 @@ serve(async (req) => {
             type: "function",
             function: {
               name: "deal_check_result",
-              description: "Return a structured deal check analysis with marketplace comparison",
+              description: "Return a structured deal check analysis respecting the deal type scope",
               parameters: {
                 type: "object",
                 properties: {
@@ -234,44 +260,59 @@ function buildAnalysisPrompt(listing: any): string {
 
   sections.push("# بيانات الصفقة المطلوب تحليلها\n");
 
-  if (listing.title) sections.push(`## العنوان: ${listing.title}`);
-  if (listing.category) sections.push(`## النشاط: ${listing.category}`);
-  if (listing.dealType) sections.push(`## نوع الصفقة: ${listing.dealType}`);
+  // Add deal type context FIRST - this is the most important part
+  sections.push(buildDealTypeContext(listing));
+
+  if (listing.title) sections.push(`\n## العنوان: ${listing.title}`);
+  if (listing.business_activity || listing.category) sections.push(`## النشاط: ${listing.business_activity || listing.category}`);
+  
+  const primaryType = listing.primary_deal_type || listing.deal_type;
+  const scope = DEAL_TYPE_SCOPES[primaryType] || DEAL_TYPE_SCOPES["full_takeover"];
+  
+  sections.push(`## نوع الصفقة: ${scope.label}`);
   if (listing.city) sections.push(`## المدينة: ${listing.city}`);
   if (listing.district) sections.push(`## الحي: ${listing.district}`);
   if (listing.price) sections.push(`## السعر المطلوب: ${listing.price} ريال سعودي`);
 
-  // Lease info
-  if (listing.rent || listing.leaseDuration || listing.remainingLease) {
-    sections.push("\n## بيانات الإيجار:");
-    if (listing.rent) sections.push(`- الإيجار السنوي: ${listing.rent} ريال`);
-    if (listing.leaseDuration) sections.push(`- مدة العقد: ${listing.leaseDuration}`);
-    if (listing.remainingLease) sections.push(`- المتبقي من العقد: ${listing.remainingLease}`);
+  // Lease info - only if relevant to deal type
+  if (scope.analyzeFields.includes("lease")) {
+    if (listing.annual_rent || listing.lease_duration || listing.lease_remaining) {
+      sections.push("\n## بيانات الإيجار:");
+      if (listing.annual_rent) sections.push(`- الإيجار السنوي: ${listing.annual_rent} ريال`);
+      if (listing.lease_duration) sections.push(`- مدة العقد: ${listing.lease_duration}`);
+      if (listing.lease_remaining) sections.push(`- المتبقي من العقد: ${listing.lease_remaining}`);
+    }
   }
 
-  // Licenses
-  if (listing.licenseStatus || listing.civilDefense || listing.cameras) {
-    sections.push("\n## التراخيص والامتثال:");
-    if (listing.licenseStatus) sections.push(`- رخصة البلدية: ${listing.licenseStatus}`);
-    if (listing.civilDefense) sections.push(`- الدفاع المدني: ${listing.civilDefense}`);
-    if (listing.cameras) sections.push(`- كاميرات المراقبة: ${listing.cameras}`);
+  // Licenses - only if relevant
+  if (scope.analyzeFields.includes("licenses")) {
+    if (listing.municipality_license || listing.civil_defense_license || listing.surveillance_cameras) {
+      sections.push("\n## التراخيص والامتثال:");
+      if (listing.municipality_license) sections.push(`- رخصة البلدية: ${listing.municipality_license}`);
+      if (listing.civil_defense_license) sections.push(`- الدفاع المدني: ${listing.civil_defense_license}`);
+      if (listing.surveillance_cameras) sections.push(`- كاميرات المراقبة: ${listing.surveillance_cameras}`);
+    }
   }
 
-  // Liabilities
-  if (listing.liabilities) sections.push(`\n## الالتزامات: ${listing.liabilities}`);
-
-  // Included / Excluded
-  if (listing.included?.length) {
-    sections.push("\n## يشمل التقبيل:");
-    listing.included.forEach((item: string) => sections.push(`- ${item}`));
-  }
-  if (listing.excluded?.length) {
-    sections.push("\n## لا يشمل التقبيل:");
-    listing.excluded.forEach((item: string) => sections.push(`- ${item}`));
+  // Liabilities - only if relevant
+  if (scope.analyzeFields.includes("liabilities")) {
+    if (listing.liabilities) sections.push(`\n## الالتزامات: ${listing.liabilities}`);
   }
 
-  // Inventory
-  if (listing.inventory?.length) {
+  // Deal structure includes/excludes
+  const dealOptions = listing.deal_options || [];
+  if (dealOptions.length > 0) {
+    sections.push("\n## هيكل الصفقة المختار:");
+    for (const opt of dealOptions) {
+      const optScope = DEAL_TYPE_SCOPES[opt.type_id];
+      if (optScope) {
+        sections.push(`- ${opt.is_primary ? "رئيسي" : "بديل"}: ${optScope.label}`);
+      }
+    }
+  }
+
+  // Inventory - only if assets are in scope
+  if (scope.analyzeFields.includes("assets") && listing.inventory?.length) {
     sections.push("\n## جرد الأصول (قارن كل صنف مع منصات السوق المستعمل السعودي):");
     listing.inventory.forEach((item: any) => {
       const details = [
@@ -279,8 +320,6 @@ function buildAnalysisPrompt(listing: any): string {
         item.qty ? `${item.qty} وحدة` : null,
         item.condition ? `حالة: ${item.condition}` : null,
         item.category ? `فئة: ${item.category}` : null,
-        item.brand ? `ماركة: ${item.brand}` : null,
-        item.model ? `موديل: ${item.model}` : null,
       ].filter(Boolean).join(" — ");
       sections.push(`- ${details}`);
     });
@@ -290,23 +329,25 @@ function buildAnalysisPrompt(listing: any): string {
   if (listing.documents?.length) {
     sections.push("\n## المستندات:");
     listing.documents.forEach((doc: any) => {
-      sections.push(`- ${doc.name}: ${doc.status}`);
+      sections.push(`- ${doc.name || doc.type}: ${doc.status || "مرفق"}`);
     });
   }
 
-  // Disclosure
-  if (listing.disclosureScore) sections.push(`\n## نسبة الإفصاح: ${listing.disclosureScore}%`);
-
-  // Summary
-  if (listing.summary) sections.push(`\n## ملخص البائع:\n${listing.summary}`);
+  if (listing.disclosure_score) sections.push(`\n## نسبة الإفصاح: ${listing.disclosure_score}%`);
+  if (listing.ai_summary) sections.push(`\n## ملخص البائع:\n${listing.ai_summary}`);
 
   sections.push("\n---");
-  sections.push("## تعليمات إضافية:");
-  sections.push("1. استخدم منصات حراج ومستعمل وأوبن سوق وفيسبوك ماركت بلس كمراجع مقارنة للأصول");
-  sections.push("2. قدّم تفصيل مقارنة لكل أصل رئيسي مع مصدر المقارنة");
-  sections.push("3. وضّح جودة المقارنة ومستوى الثقة");
-  sections.push("4. لا تنسخ أسعار المنصات كقيمة نهائية — هي مؤشرات فقط");
-  sections.push("\nحلل هذه الصفقة وأنتج تقرير الجدوى الأولية باستخدام الأداة deal_check_result.");
+  sections.push("## تعليمات:");
+  sections.push(`1. حلل هذه الصفقة حصرياً كصفقة "${scope.label}"`);
+  sections.push("2. لا تطلب معلومات خارج نطاق نوع الصفقة المحدد");
+  
+  if (scope.analyzeFields.includes("assets")) {
+    sections.push("3. استخدم منصات حراج ومستعمل وأوبن سوق كمراجع مقارنة للأصول");
+  } else {
+    sections.push("3. تخطّ مقارنة الأصول — ليست ضمن نطاق هذه الصفقة");
+  }
+  
+  sections.push("4. أنتج تقرير الجدوى باستخدام الأداة deal_check_result");
 
   return sections.join("\n");
 }
