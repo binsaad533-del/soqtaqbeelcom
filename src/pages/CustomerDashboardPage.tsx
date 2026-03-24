@@ -275,19 +275,6 @@ const CustomerDashboardPage = () => {
             </div>
           </div>
 
-          {/* Mobile-only profile fields */}
-          <div className="flex md:hidden items-center gap-4 mt-3 pt-3 border-t border-border/20 text-xs flex-wrap">
-            <div className="flex items-center gap-2">
-              <Mail size={13} className="text-muted-foreground" />
-              <span className="text-muted-foreground truncate" dir="ltr">{userEmail || "لم يُضاف"}</span>
-              <button onClick={() => startEdit("email", userEmail || "")} className="text-muted-foreground hover:text-primary"><Pencil size={11} /></button>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone size={13} className="text-muted-foreground" />
-              <span className="text-muted-foreground">{profile?.phone || "لم يُضاف"}</span>
-              <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-muted-foreground hover:text-primary"><Pencil size={11} /></button>
-            </div>
-          </div>
 
           {/* Profile completeness bar */}
           {profileCompleteness < 100 && (
