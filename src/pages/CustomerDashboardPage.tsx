@@ -61,9 +61,12 @@ const CustomerDashboardPage = () => {
     trustScore: profile?.trust_score ?? 50,
   }), [listings, deals, profile]);
 
+  const drafts = useMemo(() => listings.filter(l => l.status === "draft"), [listings]);
+  const publishedListings = useMemo(() => listings.filter(l => l.status !== "draft"), [listings]);
+
   const recentActivity = useMemo(() => {
     const items: { id: string; type: "listing" | "deal"; title: string; subtitle: string; status: string; date: string; link: string }[] = [];
-    listings.forEach(l => items.push({
+    publishedListings.forEach(l => items.push({
       id: l.id, type: "listing",
       title: l.title || "بدون عنوان",
       subtitle: [l.city, l.price ? `${Number(l.price).toLocaleString()} ر.س` : ""].filter(Boolean).join(" — "),
@@ -79,8 +82,8 @@ const CustomerDashboardPage = () => {
       status: d.status, date: d.completed_at || d.created_at,
       link: d.status === "completed" ? `/agreement/${d.id}` : `/negotiate/${d.id}`,
     }));
-    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 8);
-  }, [listings, deals]);
+    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
+  }, [publishedListings, deals]);
 
   const trustColor = stats.trustScore >= 70 ? "text-success" : stats.trustScore >= 40 ? "text-warning" : "text-destructive";
   const trustBg = stats.trustScore >= 70 ? "bg-success/10" : stats.trustScore >= 40 ? "bg-warning/10" : "bg-destructive/10";
