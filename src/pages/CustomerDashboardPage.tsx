@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   Plus, FileText, MessageSquare, Shield, AlertCircle,
   Eye, CheckCircle, Loader2, Activity,
-  ArrowUpRight, ChevronLeft, TrendingUp, Briefcase
+  ArrowUpRight, ChevronLeft, TrendingUp, Briefcase, Edit3
 } from "lucide-react";
 
 /* ── Status helpers ── */
@@ -61,9 +61,12 @@ const CustomerDashboardPage = () => {
     trustScore: profile?.trust_score ?? 50,
   }), [listings, deals, profile]);
 
+  const drafts = useMemo(() => listings.filter(l => l.status === "draft"), [listings]);
+  const publishedListings = useMemo(() => listings.filter(l => l.status !== "draft"), [listings]);
+
   const recentActivity = useMemo(() => {
     const items: { id: string; type: "listing" | "deal"; title: string; subtitle: string; status: string; date: string; link: string }[] = [];
-    listings.forEach(l => items.push({
+    publishedListings.forEach(l => items.push({
       id: l.id, type: "listing",
       title: l.title || "بدون عنوان",
       subtitle: [l.city, l.price ? `${Number(l.price).toLocaleString()} ر.س` : ""].filter(Boolean).join(" — "),
@@ -79,8 +82,8 @@ const CustomerDashboardPage = () => {
       status: d.status, date: d.completed_at || d.created_at,
       link: d.status === "completed" ? `/agreement/${d.id}` : `/negotiate/${d.id}`,
     }));
-    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 8);
-  }, [listings, deals]);
+    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
+  }, [publishedListings, deals]);
 
   const trustColor = stats.trustScore >= 70 ? "text-success" : stats.trustScore >= 40 ? "text-warning" : "text-destructive";
   const trustBg = stats.trustScore >= 70 ? "bg-success/10" : stats.trustScore >= 40 ? "bg-warning/10" : "bg-destructive/10";
@@ -147,6 +150,33 @@ const CustomerDashboardPage = () => {
               </div>
             </div>
 
+            {/* ── Drafts Banner (if any) ── */}
+            {!loading && drafts.length > 0 && (
+              <section className="rounded-2xl border border-warning/20 bg-warning/5 overflow-hidden">
+                <div className="flex items-center justify-between p-4 pb-2">
+                  <h2 className="text-sm font-medium flex items-center gap-2">
+                    <Edit3 size={14} className="text-warning" />
+                    مسودات تحتاج إكمال
+                    <span className="text-[10px] bg-warning/15 text-warning px-1.5 py-0.5 rounded-md">{drafts.length}</span>
+                  </h2>
+                </div>
+                <div className="divide-y divide-warning/10">
+                  {drafts.map((d) => (
+                    <Link key={d.id} to={`/listing/${d.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-warning/10 transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center shrink-0">
+                        <FileText size={14} className="text-warning" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{d.title || "بدون عنوان"}</div>
+                        <div className="text-[10px] text-muted-foreground">{d.city || "لم تحدد المدينة"}</div>
+                      </div>
+                      <span className="text-[10px] text-warning font-medium opacity-0 group-hover:opacity-100 transition-opacity">إكمال ←</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* ── Recent Activity (unified timeline) ── */}
             <section className="rounded-2xl border border-border/30 bg-card overflow-hidden">
               <div className="flex items-center justify-between p-4 pb-3 border-b border-border/20">
@@ -154,15 +184,15 @@ const CustomerDashboardPage = () => {
                   <TrendingUp size={14} className="text-primary" />
                   آخر النشاطات
                 </h2>
+                <Link to="/marketplace" className="text-[10px] text-primary hover:underline">تصفح السوق</Link>
               </div>
               {loading ? (
-                <div className="flex justify-center py-10"><Loader2 size={18} className="animate-spin text-primary" /></div>
+                <div className="flex justify-center py-8"><Loader2 size={18} className="animate-spin text-primary" /></div>
               ) : recentActivity.length === 0 ? (
-                <div className="text-center py-10 px-4">
-                  <Briefcase size={28} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
-                  <p className="text-sm text-muted-foreground mb-1">لا يوجد نشاط بعد</p>
-                  <p className="text-xs text-muted-foreground/70">أنشئ إعلانك الأول للبدء</p>
-                  <Link to="/create-listing" className="inline-flex items-center gap-1.5 mt-3 text-xs text-primary hover:underline font-medium">
+                <div className="text-center py-8 px-4">
+                  <Briefcase size={24} className="mx-auto mb-2 text-muted-foreground/20" strokeWidth={1} />
+                  <p className="text-xs text-muted-foreground mb-2">لا يوجد نشاط بعد</p>
+                  <Link to="/create-listing" className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium">
                     <Plus size={12} /> إنشاء إعلان
                   </Link>
                 </div>
@@ -172,14 +202,14 @@ const CustomerDashboardPage = () => {
                     const st = statusLabel(item.status);
                     const isDeal = item.type === "deal";
                     return (
-                      <Link key={`${item.type}-${item.id}`} to={item.link} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors group">
+                      <Link key={`${item.type}-${item.id}`} to={item.link} className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors group">
                         <div className={cn(
-                          "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+                          "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
                           isDeal ? (item.status === "completed" ? "bg-success/10" : "bg-primary/10") : "bg-secondary"
                         )}>
                           {isDeal
-                            ? (item.status === "completed" ? <Shield size={14} className="text-success" /> : <MessageSquare size={14} className="text-primary" />)
-                            : <FileText size={14} className="text-foreground/60" />
+                            ? (item.status === "completed" ? <Shield size={13} className="text-success" /> : <MessageSquare size={13} className="text-primary" />)
+                            : <FileText size={13} className="text-foreground/60" />
                           }
                         </div>
                         <div className="flex-1 min-w-0">
@@ -188,10 +218,7 @@ const CustomerDashboardPage = () => {
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className={cn("text-[10px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
-                          {isDeal
-                            ? <ArrowUpRight size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                            : <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                          }
+                          <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                       </Link>
                     );
@@ -228,6 +255,18 @@ const CustomerDashboardPage = () => {
             {/* ── Quick Actions ── */}
             <div className="rounded-2xl border border-border/30 bg-card p-4 space-y-2">
               <h3 className="text-sm font-medium mb-3">إجراءات سريعة</h3>
+              {drafts.length > 0 && (
+                <Link to={`/listing/${drafts[0].id}`} className="flex items-center gap-3 p-3 rounded-xl bg-warning/5 hover:bg-warning/10 transition-colors group">
+                  <div className="w-8 h-8 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
+                    <Edit3 size={14} strokeWidth={1.5} className="text-warning" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-xs font-medium">إكمال المسودة</div>
+                    <div className="text-[10px] text-muted-foreground truncate">{drafts[0].title || "بدون عنوان"}</div>
+                  </div>
+                  <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              )}
               <Link to="/create-listing" className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors group">
                 <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center shrink-0">
                   <Plus size={14} strokeWidth={2} className="text-primary-foreground" />
