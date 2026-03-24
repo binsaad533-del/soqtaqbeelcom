@@ -87,7 +87,6 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
     updateSelection(newTypes, primaryType);
   };
 
-  const conflicts = detectConflicts(selectedTypes);
 
   return (
     <div className="space-y-6">
