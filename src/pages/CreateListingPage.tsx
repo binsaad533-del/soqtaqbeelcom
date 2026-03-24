@@ -577,8 +577,11 @@ const CreateListingPage = () => {
   };
 
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  const [dealCheckLoading, setDealCheckLoading] = useState(false);
+  const [dealCheckResult, setDealCheckResult] = useState<any>(null);
+  const [dealCheckError, setDealCheckError] = useState("");
 
-  const handlePublishClick = () => {
+  const handlePublishClick = async () => {
     if (!listingId) return;
     setPublishAttempted(true);
 
@@ -591,7 +594,38 @@ const CreateListingPage = () => {
       return;
     }
 
+    // Run deal check before showing confirmation
     setShowPublishConfirm(true);
+    setDealCheckLoading(true);
+    setDealCheckError("");
+    setDealCheckResult(null);
+
+    try {
+      const listingPayload = {
+        ...disclosure,
+        price: disclosure.price ? Number(disclosure.price) : null,
+        annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+        primary_deal_type: dealStructure.primaryType,
+        deal_type: dealStructure.primaryType,
+        inventory: inventory.filter((item) => item.included),
+        photos,
+        documents: Object.entries(uploadedDocs).map(([type, files]) => ({ type, files })),
+      };
+
+      const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
+        body: { listing: listingPayload },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+      if (!data?.success) throw new Error(data?.error || "فشل التحليل");
+
+      setDealCheckResult(data.analysis);
+    } catch (e: any) {
+      console.error("[DealCheck] Pre-publish check failed:", e);
+      setDealCheckError(e.message || "تعذّر إجراء الفحص — يمكنك المتابعة بالنشر");
+    } finally {
+      setDealCheckLoading(false);
+    }
   };
 
   const handlePublish = async () => {
