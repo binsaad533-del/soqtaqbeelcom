@@ -304,7 +304,11 @@ const CreateListingPage = () => {
     <div className="py-8">
       <div className="container max-w-3xl">
         <h1 className="text-2xl font-medium mb-2">إضافة فرصة تقبيل</h1>
-        <p className="text-sm text-muted-foreground mb-8">أنشئ إعلان تقبيل احترافي بمساعدة الذكاء الاصطناعي</p>
+        <p className="text-sm text-muted-foreground">أنشئ إعلان تقبيل احترافي بمساعدة الذكاء الاصطناعي</p>
+        <p className="text-sm font-bold text-primary animate-fade-in [animation-delay:0.5s] [animation-fill-mode:backwards] mb-8">
+          <Sparkles size={14} className="inline-block ml-1" />
+          بدون ما تكتب سطر واحد
+        </p>
 
         <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
         <input ref={docInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" multiple className="hidden" onChange={handleDocUpload} />
