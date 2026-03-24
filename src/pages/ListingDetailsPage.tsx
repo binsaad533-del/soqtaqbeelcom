@@ -13,7 +13,7 @@ import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
-import { cn } from "@/lib/utils";
+import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
 
 
