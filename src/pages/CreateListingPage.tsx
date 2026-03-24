@@ -126,25 +126,42 @@ const CreateListingPage = () => {
     if (!e.target.files || !activePhotoGroup) return;
     const id = await ensureListing();
     if (!id) return;
-    setSaving(true);
+    const group = activePhotoGroup;
     const files = Array.from(e.target.files);
+    
+    // Create local previews immediately
+    const localUrls = files.map(f => URL.createObjectURL(f));
+    setLocalPreviews(prev => ({
+      ...prev,
+      [group]: [...(prev[group] || []), ...localUrls],
+    }));
+    
+    // Start upload with progress
+    setUploadingGroup(group);
+    setUploadProgress({ current: 0, total: files.length });
+    setSaving(true);
+    
     const urls: string[] = [];
-    for (const file of files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      setUploadProgress({ current: i + 1, total: files.length });
       const validation = validateImageFile(file);
       if (!validation.valid) {
         toast.error(validation.error);
         continue;
       }
-      const url = await uploadFile(id, file, `photos/${activePhotoGroup}`);
+      const url = await uploadFile(id, file, `photos/${group}`);
       if (url) urls.push(url);
     }
     setPhotos(prev => ({
       ...prev,
-      [activePhotoGroup]: [...(prev[activePhotoGroup] || []), ...urls],
+      [group]: [...(prev[group] || []), ...urls],
     }));
-    const allPhotos = { ...photos, [activePhotoGroup]: [...(photos[activePhotoGroup] || []), ...urls] };
+    const allPhotos = { ...photos, [group]: [...(photos[group] || []), ...urls] };
     await updateListing(id, { photos: allPhotos } as any);
     setSaving(false);
+    setUploadingGroup(null);
+    toast.success(`تم رفع ${urls.length} صورة بنجاح`);
     e.target.value = "";
   };
 
