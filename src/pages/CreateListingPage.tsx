@@ -846,13 +846,29 @@ const CreateListingPage = () => {
                   </div>
                 )}
 
+                {/* Validation error banner */}
+                {publishAttempted && !canPublish && (
+                  <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-start gap-2">
+                    <AlertTriangle size={16} className="text-destructive shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-destructive">يرجى إكمال الحقول المطلوبة قبل النشر</p>
+                      <ul className="text-[11px] text-destructive/80 mt-1 space-y-0.5 list-disc list-inside">
+                        {!publishValidation.hasPhotos && <li>يجب رفع صورة واحدة على الأقل</li>}
+                        {!publishValidation.hasActivity && <li>نوع النشاط مطلوب</li>}
+                        {!publishValidation.hasCity && <li>المدينة مطلوبة</li>}
+                        {!publishValidation.hasPrice && <li>السعر مطلوب ويجب أن يكون رقماً صحيحاً</li>}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-3">
-                  <FormField label="نوع النشاط" placeholder="مثال: مطعم وجبات سريعة" value={disclosure.business_activity} onChange={(v) => setDisclosure((prev) => ({ ...prev, business_activity: v }))} />
+                  <FormField label="نوع النشاط *" placeholder="مثال: مطعم وجبات سريعة" value={disclosure.business_activity} onChange={(v) => setDisclosure((prev) => ({ ...prev, business_activity: v }))} error={publishAttempted && !publishValidation.hasActivity ? "نوع النشاط مطلوب" : undefined} />
                   <div className="grid grid-cols-2 gap-3">
-                    <FormField label="المدينة" placeholder="الرياض" value={disclosure.city} onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))} />
+                    <FormField label="المدينة *" placeholder="الرياض" value={disclosure.city} onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))} error={publishAttempted && !publishValidation.hasCity ? "المدينة مطلوبة" : undefined} />
                     <FormField label="الحي" placeholder="حي النسيم" value={disclosure.district} onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))} />
                   </div>
-                  <FormField label="السعر المطلوب" placeholder="180000" suffix="ر.س" value={disclosure.price} onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))} />
+                  <FormField label="السعر المطلوب *" placeholder="180000" suffix="ر.س" value={disclosure.price} onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))} error={publishAttempted && !publishValidation.hasPrice ? "السعر مطلوب ويجب أن يكون رقماً أكبر من صفر" : undefined} />
                   <div className="grid grid-cols-2 gap-3">
                     <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} />
                     <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_duration: v }))} />
