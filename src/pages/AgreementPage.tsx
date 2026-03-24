@@ -366,7 +366,7 @@ const AgreementPage = () => {
 
             <Section title="تفاصيل الصفقة">
               <InfoRow label="عنوان الصفقة" value={agreement.deal_title || "—"} />
-              <InfoRow label="نوع الصفقة" value={agreement.deal_type || "—"} />
+              <InfoRow label="نوع الصفقة" value={t(agreement.deal_type, DEAL_TYPE_LABELS)} />
               <InfoRow label="الموقع" value={agreement.location || "—"} />
               <InfoRow label="النشاط التجاري" value={agreement.business_activity || "—"} />
             </Section>
