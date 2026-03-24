@@ -34,8 +34,9 @@ import { toast } from "sonner";
 import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
-import { isFieldRelevant, calculateTransparency } from "@/lib/transparencyScore";
+import { calculateTransparency } from "@/lib/transparencyScore";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
+import { getRules, isFieldVisible, validateDisclosure, validateImages, FIELD_LABELS as RULE_FIELD_LABELS } from "@/lib/dealTypeFieldRules";
 
 const steps = [
   { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على مقبل" },
@@ -54,23 +55,13 @@ const allPhotoGroups = [
   { id: "cr_doc", label: "صورة السجل التجاري", min: 1, icon: "FileText", dealTypes: ["cr_only"] },
 ];
 
-// Deal types where images are required / optional / not needed
+// Image requirement now driven by central schema
 function getImageRequirement(dealType: string): "required" | "optional" | "none" {
-  switch (dealType) {
-    case "assets_only":
-    case "assets_setup":
-    case "assets_cr":
-    case "assets_cr_name":
-      return "required";
-    case "full_takeover":
-    case "transfer_no_liabilities":
-    case "location_only":
-      return "optional";
-    case "cr_only":
-      return "none";
-    default:
-      return "optional";
-  }
+  const rules = getRules(dealType);
+  if (rules.imageRequired) return "required";
+  // cr_only has no image requirement at all
+  if (dealType === "cr_only") return "none";
+  return "optional";
 }
 
 interface InventoryItem {
@@ -593,11 +584,9 @@ const CreateListingPage = () => {
 
     const imgReq = getImageRequirement(dealStructure.primaryType);
     const hasPhotos = imgReq === "none" || imgReq === "optional" || totalPhotos > 0;
-    const hasActivity = disclosure.business_activity.trim() !== "";
-    const hasCity = disclosure.city.trim() !== "";
-    const hasPrice = disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0;
+    const errors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
 
-    if (!hasPhotos || !hasActivity || !hasCity || !hasPrice) {
+    if (!hasPhotos || Object.keys(errors).length > 0) {
       toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر");
       return;
     }
@@ -685,17 +674,24 @@ const CreateListingPage = () => {
   const lowConfidenceItems = inventory.filter((item) => item.confidence === "low" && !item.userConfirmed);
   const medConfidenceItems = inventory.filter((item) => item.confidence === "medium" && !item.userConfirmed);
 
-  // ── Publish validation ──
+  // ── Publish validation — driven by deal-type schema ──
+  const activeRules = getRules(dealStructure.primaryType || "full_takeover");
   const imageReq = getImageRequirement(dealStructure.primaryType);
   const photosOk = imageReq === "none" || imageReq === "optional" || totalPhotos > 0;
-  const publishValidation = {
-    hasPhotos: photosOk,
-    hasActivity: disclosure.business_activity.trim() !== "",
-    hasCity: disclosure.city.trim() !== "",
-    hasPrice: disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0,
-  };
-  const canPublish = publishValidation.hasPhotos && publishValidation.hasActivity && publishValidation.hasCity && publishValidation.hasPrice;
+  const disclosureErrors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
+  const canPublish = photosOk && Object.keys(disclosureErrors).length === 0;
   const [publishAttempted, setPublishAttempted] = useState(false);
+
+  // Debug logging for schema verification
+  console.debug("[CreateListing] deal-type schema:", {
+    dealType: dealStructure.primaryType,
+    requiredFields: activeRules.requiredFields,
+    optionalFields: activeRules.optionalFields,
+    hiddenFields: activeRules.hiddenFields,
+    imageRequired: activeRules.imageRequired,
+    validationErrors: disclosureErrors,
+    canPublish,
+  });
 
   const getConfidenceBadge = (confidence: string) => {
     switch (confidence) {
@@ -1237,48 +1233,76 @@ const CreateListingPage = () => {
                     <div>
                       <p className="text-xs font-medium text-destructive">يرجى إكمال الحقول المطلوبة قبل النشر</p>
                       <ul className="text-[11px] text-destructive/80 mt-1 space-y-0.5 list-disc list-inside">
-                        {!publishValidation.hasPhotos && imageReq === "required" && <li>يجب رفع صورة واحدة على الأقل</li>}
-                        {!publishValidation.hasActivity && <li>نوع النشاط مطلوب</li>}
-                        {!publishValidation.hasCity && <li>المدينة مطلوبة</li>}
-                        {!publishValidation.hasPrice && <li>السعر مطلوب ويجب أن يكون رقماً صحيحاً</li>}
+                        {!photosOk && imageReq === "required" && <li>يجب رفع صورة واحدة على الأقل</li>}
+                        {Object.entries(disclosureErrors).map(([field, msg]) => (
+                          <li key={field}>{msg}</li>
+                        ))}
                       </ul>
                     </div>
                   </div>
                 )}
 
                 <div className="space-y-3">
-                  <FormField label="نوع النشاط *" placeholder="مثال: مطعم وجبات سريعة" value={disclosure.business_activity} onChange={(v) => setDisclosure((prev) => ({ ...prev, business_activity: v }))} error={publishAttempted && !publishValidation.hasActivity ? "نوع النشاط مطلوب" : undefined} />
+                  {/* Render fields dynamically from deal-type schema */}
+                  {isFieldVisible(dealTypeForTransparency, "business_activity") && (
+                    <FormField
+                      label={`نوع النشاط${activeRules.requiredFields.includes("business_activity") ? " *" : ""}`}
+                      placeholder="مثال: مطعم وجبات سريعة"
+                      value={disclosure.business_activity}
+                      onChange={(v) => setDisclosure((prev) => ({ ...prev, business_activity: v }))}
+                      error={publishAttempted && disclosureErrors["business_activity"]}
+                    />
+                  )}
                   <div className="grid grid-cols-2 gap-3">
-                    <FormField label="المدينة *" placeholder="الرياض" value={disclosure.city} onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))} error={publishAttempted && !publishValidation.hasCity ? "المدينة مطلوبة" : undefined} />
-                    <FormField label="الحي" placeholder="حي النسيم" value={disclosure.district} onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))} />
+                    {isFieldVisible(dealTypeForTransparency, "city") && (
+                      <FormField
+                        label={`المدينة${activeRules.requiredFields.includes("city") ? " *" : ""}`}
+                        placeholder="الرياض"
+                        value={disclosure.city}
+                        onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))}
+                        error={publishAttempted && disclosureErrors["city"]}
+                      />
+                    )}
+                    {isFieldVisible(dealTypeForTransparency, "district") && (
+                      <FormField label="الحي" placeholder="حي النسيم" value={disclosure.district} onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))} />
+                    )}
                   </div>
-                  <FormField label="السعر المطلوب *" placeholder="180000" suffix="ر.س" value={disclosure.price} onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))} error={publishAttempted && !publishValidation.hasPrice ? "السعر مطلوب ويجب أن يكون رقماً أكبر من صفر" : undefined} />
-                  {isFieldRelevant(dealTypeForTransparency, "annual_rent") && (
+                  <FormField
+                    label="السعر المطلوب *"
+                    placeholder="180000"
+                    suffix="ر.س"
+                    value={disclosure.price}
+                    onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))}
+                    error={publishAttempted && disclosureErrors["price"]}
+                  />
+                  {isFieldVisible(dealTypeForTransparency, "annual_rent") && (
                     <div className="grid grid-cols-2 gap-3">
                       <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} />
-                      <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_duration: v }))} />
+                      {isFieldVisible(dealTypeForTransparency, "lease_duration") && (
+                        <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_duration: v }))} />
+                      )}
                     </div>
                   )}
-                  {isFieldRelevant(dealTypeForTransparency, "lease_remaining") && (
+                  {isFieldVisible(dealTypeForTransparency, "lease_remaining") && (
                     <div className="grid grid-cols-2 gap-3">
                       <FormField label="الفترة المدفوعة" placeholder="1.5 سنة" value={disclosure.lease_paid_period} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_paid_period: v }))} />
                       <FormField label="المتبقي من العقد" placeholder="1.5 سنة" value={disclosure.lease_remaining} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_remaining: v }))} />
                     </div>
                   )}
-                  {isFieldRelevant(dealTypeForTransparency, "liabilities") && (
+                  {isFieldVisible(dealTypeForTransparency, "liabilities") && (
                     <>
                       <FormField label="الالتزامات المالية" placeholder="لا توجد" value={disclosure.liabilities} onChange={(v) => setDisclosure((prev) => ({ ...prev, liabilities: v }))} />
                       <FormField label="رواتب متأخرة" placeholder="لا يوجد" value={disclosure.overdue_salaries} onChange={(v) => setDisclosure((prev) => ({ ...prev, overdue_salaries: v }))} />
                       <FormField label="إيجار متأخر" placeholder="لا يوجد" value={disclosure.overdue_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, overdue_rent: v }))} />
                     </>
                   )}
-                  {isFieldRelevant(dealTypeForTransparency, "municipality_license") && (
+                  {isFieldVisible(dealTypeForTransparency, "municipality_license") && (
                     <div className="grid grid-cols-2 gap-3">
                       <SelectField label="رخصة البلدية" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.municipality_license} onChange={(v) => setDisclosure((prev) => ({ ...prev, municipality_license: v }))} />
                       <SelectField label="الدفاع المدني" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.civil_defense_license} onChange={(v) => setDisclosure((prev) => ({ ...prev, civil_defense_license: v }))} />
                     </div>
                   )}
-                  {isFieldRelevant(dealTypeForTransparency, "surveillance_cameras") && (
+                  {isFieldVisible(dealTypeForTransparency, "surveillance_cameras") && (
                     <SelectField label="كاميرات مراقبة" options={["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"]} value={disclosure.surveillance_cameras} onChange={(v) => setDisclosure((prev) => ({ ...prev, surveillance_cameras: v }))} />
                   )}
                 </div>
@@ -1345,7 +1369,7 @@ const CreateListingPage = () => {
                 </div>
 
                 {/* Photo validation warning */}
-                {publishAttempted && !publishValidation.hasPhotos && imageReq === "required" && (
+                {publishAttempted && !photosOk && imageReq === "required" && (
                   <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-center gap-2">
                     <AlertTriangle size={14} className="text-destructive shrink-0" />
                     <p className="text-xs text-destructive">يجب رفع صورة واحدة على الأقل — عد إلى خطوة الصور والمستندات</p>

@@ -1,9 +1,9 @@
 /**
  * Deal-type-aware transparency scoring.
- * Separates transparency (data completeness) from price reasonableness.
+ * Now driven by the central dealTypeFieldRules schema.
  */
 
-import { DEAL_TYPE_MAP, type DealTypeConfig } from "./dealStructureConfig";
+import { getRules, FIELD_LABELS } from "./dealTypeFieldRules";
 
 interface ListingData {
   primary_deal_type?: string | null;
@@ -27,31 +27,6 @@ interface ListingData {
   deal_options?: any[];
 }
 
-// Fields relevant to each deal type
-const DEAL_TYPE_REQUIRED_FIELDS: Record<string, string[]> = {
-  full_takeover: [
-    "business_activity", "city", "price", "annual_rent", "lease_duration",
-    "lease_remaining", "liabilities", "municipality_license", "civil_defense_license",
-    "overdue_salaries", "overdue_rent", "surveillance_cameras",
-  ],
-  transfer_no_liabilities: [
-    "business_activity", "city", "price", "annual_rent", "lease_duration",
-    "lease_remaining", "municipality_license", "civil_defense_license",
-  ],
-  assets_setup: [
-    "business_activity", "city", "price",
-  ],
-  assets_only: [
-    "business_activity", "city", "price",
-  ],
-  cr_only: [
-    "business_activity", "city", "price",
-  ],
-  location_only: [
-    "business_activity", "city", "price", "annual_rent", "lease_duration", "lease_remaining",
-  ],
-};
-
 export type TransparencyLevel = "high" | "medium" | "low";
 export type PriceLevel = "reasonable" | "high" | "low" | "unknown";
 
@@ -64,33 +39,20 @@ export interface TransparencyResult {
   filledRequired: number;
 }
 
-const FIELD_LABELS: Record<string, string> = {
-  business_activity: "نوع النشاط",
-  city: "المدينة",
-  price: "السعر",
-  annual_rent: "الإيجار السنوي",
-  lease_duration: "مدة العقد",
-  lease_remaining: "المتبقي من العقد",
-  liabilities: "الالتزامات",
-  overdue_salaries: "الرواتب المتأخرة",
-  overdue_rent: "الإيجار المتأخر",
-  municipality_license: "رخصة البلدية",
-  civil_defense_license: "الدفاع المدني",
-  surveillance_cameras: "كاميرات المراقبة",
-};
-
 export function calculateTransparency(listing: ListingData): TransparencyResult {
   const dealType = listing.primary_deal_type || listing.deal_type || "full_takeover";
-  const requiredFields = DEAL_TYPE_REQUIRED_FIELDS[dealType] || DEAL_TYPE_REQUIRED_FIELDS["full_takeover"];
+  const rules = getRules(dealType);
 
+  // Only score required + optional (visible) fields
+  const scoredFields = [...rules.requiredFields, ...rules.optionalFields];
   const missing: string[] = [];
   let filled = 0;
 
-  for (const field of requiredFields) {
+  for (const field of scoredFields) {
     const value = (listing as any)[field];
     if (value !== null && value !== undefined && String(value).trim() !== "" && value !== 0) {
       filled++;
-    } else {
+    } else if (rules.requiredFields.includes(field)) {
       missing.push(FIELD_LABELS[field] || field);
     }
   }
@@ -99,16 +61,17 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
   let bonusPoints = 0;
   let bonusTotal = 0;
 
-  // Photos bonus (up to 15 points)
-  bonusTotal += 15;
-  const photoCount = listing.photos ? Object.values(listing.photos).flat().length : 0;
-  if (photoCount >= 6) bonusPoints += 15;
-  else if (photoCount >= 3) bonusPoints += 10;
-  else if (photoCount >= 1) bonusPoints += 5;
+  // Photos bonus (up to 15 points) — skip for CR-only
+  if (rules.imageRequired || !rules.hiddenFields.includes("annual_rent")) {
+    bonusTotal += 15;
+    const photoCount = listing.photos ? Object.values(listing.photos).flat().length : 0;
+    if (photoCount >= 6) bonusPoints += 15;
+    else if (photoCount >= 3) bonusPoints += 10;
+    else if (photoCount >= 1) bonusPoints += 5;
+  }
 
   // Inventory bonus for asset-related deals (up to 10 points)
-  const assetDeals = ["full_takeover", "transfer_no_liabilities", "assets_setup", "assets_only"];
-  if (assetDeals.includes(dealType)) {
+  if (rules.imageRequired) {
     bonusTotal += 10;
     const invCount = listing.inventory?.length || 0;
     if (invCount >= 5) bonusPoints += 10;
@@ -121,7 +84,7 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
   if (docCount >= 2) bonusPoints += 5;
   else if (docCount >= 1) bonusPoints += 3;
 
-  const fieldScore = requiredFields.length > 0 ? (filled / requiredFields.length) * 70 : 70;
+  const fieldScore = scoredFields.length > 0 ? (filled / scoredFields.length) * 70 : 70;
   const bonusScore = bonusTotal > 0 ? (bonusPoints / bonusTotal) * 30 : 30;
   const totalScore = Math.round(fieldScore + bonusScore);
 
@@ -144,22 +107,24 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
     level,
     label,
     missingFields: missing,
-    totalRequired: requiredFields.length,
+    totalRequired: rules.requiredFields.length,
     filledRequired: filled,
   };
 }
 
 /**
- * Get deal-type specific disclosure fields that should be shown to the user.
+ * Check if a specific field is relevant for a given deal type.
+ * Kept for backward compatibility in other files.
  */
-export function getRelevantDisclosureFields(dealType: string): string[] {
-  return DEAL_TYPE_REQUIRED_FIELDS[dealType] || DEAL_TYPE_REQUIRED_FIELDS["full_takeover"];
+export function isFieldRelevant(dealType: string, fieldName: string): boolean {
+  const rules = getRules(dealType);
+  return !rules.hiddenFields.includes(fieldName);
 }
 
 /**
- * Check if a specific field is relevant for a given deal type.
+ * Get deal-type specific disclosure fields that should be shown.
  */
-export function isFieldRelevant(dealType: string, fieldName: string): boolean {
-  const fields = DEAL_TYPE_REQUIRED_FIELDS[dealType] || DEAL_TYPE_REQUIRED_FIELDS["full_takeover"];
-  return fields.includes(fieldName);
+export function getRelevantDisclosureFields(dealType: string): string[] {
+  const rules = getRules(dealType);
+  return [...rules.requiredFields, ...rules.optionalFields];
 }
