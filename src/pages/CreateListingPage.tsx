@@ -421,10 +421,13 @@ const CreateListingPage = () => {
               </div>
 
               {/* Encouragement footer */}
-              <div className="text-center pt-2">
-                <p className="text-[11px] text-muted-foreground">
-                  💡 كلما زادت الصور، كان التحليل أدق والإعلان أقوى
-                </p>
+              <div className="text-center pt-4 pb-1">
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/10">
+                  <Sparkles size={16} strokeWidth={1.5} className="text-primary" />
+                  <p className="text-sm font-medium text-foreground">
+                    كلما زادت الصور، كان التحليل أدق والإعلان أقوى
+                  </p>
+                </div>
               </div>
             </div>
           )}
