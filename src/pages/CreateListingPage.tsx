@@ -373,6 +373,18 @@ const CreateListingPage = () => {
 
   const handlePublish = async () => {
     if (!listingId) return;
+    setPublishAttempted(true);
+
+    // Client-side strict validation
+    const hasPhotos = totalPhotos > 0;
+    const hasActivity = disclosure.business_activity.trim() !== "";
+    const hasCity = disclosure.city.trim() !== "";
+    const hasPrice = disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0;
+
+    if (!hasPhotos || !hasActivity || !hasCity || !hasPrice) {
+      toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر");
+      return;
+    }
 
     setSaving(true);
     const fields = Object.values(disclosure);
