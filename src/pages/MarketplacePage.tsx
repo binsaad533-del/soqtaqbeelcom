@@ -200,9 +200,10 @@ const ListingCard = ({ listing }: { listing: EnrichedListing }) => {
           <span className="text-sm font-medium text-primary">
             {listing.price ? `${Number(listing.price).toLocaleString()} ر.س` : "—"}
           </span>
-          {listing.disclosure_score !== null && listing.disclosure_score > 0 && (
-            <div className="flex items-center gap-1">
-              <div className="w-12 h-1 rounded-full bg-muted overflow-hidden">
+            {listing.disclosure_score !== null && listing.disclosure_score > 0 && (
+            <div className="flex items-center gap-1" title="نسبة شفافية البائع في الإفصاح عن تفاصيل الفرصة">
+              <span className="text-[8px] text-muted-foreground/70">شفافية</span>
+              <div className="w-10 h-1 rounded-full bg-muted overflow-hidden">
                 <div className="h-full rounded-full gradient-primary" style={{ width: `${listing.disclosure_score}%` }} />
               </div>
               <span className="text-[9px] text-muted-foreground">{listing.disclosure_score}%</span>
