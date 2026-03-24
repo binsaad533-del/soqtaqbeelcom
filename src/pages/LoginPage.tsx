@@ -362,6 +362,14 @@ const LoginPage = () => {
                 </span>
               ) : isLogin ? "تسجيل الدخول" : "إنشاء الحساب"}
             </button>
+
+            {isLogin && (
+              <p className="text-center">
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+                  نسيت كلمة المرور؟
+                </Link>
+              </p>
+            )}
           </form>
         </div>
 
