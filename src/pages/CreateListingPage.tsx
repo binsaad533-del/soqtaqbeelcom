@@ -567,7 +567,12 @@ const CreateListingPage = () => {
       }
     }
     saveDraft();
-    setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
+    // For CR-only, skip AI analysis step (step 2) entirely
+    if (isCrOnly && currentStep === 1) {
+      setCurrentStep(3); // Jump directly to disclosure
+    } else {
+      setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
+    }
   };
 
   const handleBack = () => {
