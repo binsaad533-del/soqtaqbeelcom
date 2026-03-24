@@ -628,7 +628,7 @@ const CreateListingPage = () => {
           </div>
         )}
 
-        <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif,.raw,.cr2,.nef,.arw,.dng" multiple className="hidden" onChange={handlePhotoUpload} />
+        <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif,.raw,.cr2,.nef,.arw,.dng,.pdf" multiple className="hidden" onChange={handlePhotoUpload} />
         <input ref={docInputRef} type="file" accept="*/*" multiple className="hidden" onChange={handleDocUpload} />
 
         {/* 4-step progress */}
