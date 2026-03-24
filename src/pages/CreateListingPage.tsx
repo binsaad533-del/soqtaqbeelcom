@@ -54,6 +54,25 @@ const allPhotoGroups = [
   { id: "cr_doc", label: "صورة السجل التجاري", min: 1, icon: "FileText", dealTypes: ["cr_only"] },
 ];
 
+// Deal types where images are required / optional / not needed
+function getImageRequirement(dealType: string): "required" | "optional" | "none" {
+  switch (dealType) {
+    case "assets_only":
+    case "assets_setup":
+    case "assets_cr":
+    case "assets_cr_name":
+      return "required";
+    case "full_takeover":
+    case "transfer_no_liabilities":
+    case "location_only":
+      return "optional";
+    case "cr_only":
+      return "none";
+    default:
+      return "optional";
+  }
+}
+
 interface InventoryItem {
   id: string;
   name: string;
