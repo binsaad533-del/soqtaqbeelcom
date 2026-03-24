@@ -866,10 +866,15 @@ const CreateListingPage = () => {
                       <h2 className="font-medium mb-2">تحليل الصور بالذكاء الاصطناعي</h2>
                       <p className="text-sm text-muted-foreground max-w-sm mb-1">سيقوم مقبل بتحليل صورك واكتشاف الأصول تلقائياً</p>
                       <p className="text-xs text-success mb-4 animate-fade-in">فقط اضغط الزر — والباقي علينا</p>
-                      {allPhotoUrls.length === 0 ? (
+                      {allPhotoUrls.length === 0 && imageReq === "none" ? (
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Check size={14} className="text-success" />
+                          هذا النوع من الصفقات لا يتطلب صوراً — يمكنك المتابعة للخطوة التالية
+                        </div>
+                      ) : allPhotoUrls.length === 0 ? (
                         <div className="flex items-center gap-1.5 text-xs text-warning">
                           <AlertTriangle size={14} />
-                          يرجى رفع صور في الخطوة السابقة أولاً
+                          {imageReq === "required" ? "يرجى رفع صور في الخطوة السابقة أولاً" : "لم يتم رفع صور — يمكنك المتابعة أو العودة لرفع صور"}
                         </div>
                       ) : (
                         <>
