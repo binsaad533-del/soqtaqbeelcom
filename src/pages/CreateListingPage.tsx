@@ -434,6 +434,46 @@ const CreateListingPage = () => {
     e.target.value = "";
   };
 
+  // ── CR document extraction ──
+  const handleCrExtraction = useCallback(async (documentUrl: string) => {
+    setCrExtracting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("extract-cr-data", {
+        body: { documentUrl },
+      });
+
+      if (error || !data || (data as { error?: string }).error) {
+        throw new Error((data as { error?: string })?.error || error?.message || "فشل استخراج البيانات");
+      }
+
+      const result = data as CrExtractionResult;
+      setCrExtraction(result);
+      setCrExtractionDone(true);
+
+      // Auto-fill disclosure fields from extraction
+      setDisclosure((prev) => ({
+        ...prev,
+        business_activity: result.business_activity || prev.business_activity,
+        city: result.city || prev.city,
+        district: result.district || prev.district,
+      }));
+
+      if (result.extraction_confidence === "high") {
+        toast.success("تم استخراج بيانات السجل التجاري بنجاح — راجع البيانات وأكّدها", { duration: 5000 });
+      } else if (result.extraction_confidence === "medium") {
+        toast.info("تم استخراج بعض البيانات — يرجى مراجعة وإكمال الحقول الناقصة", { duration: 5000 });
+      } else {
+        toast.warning("لم نتمكن من استخراج بيانات كافية من المستند — يرجى إكمال الحقول يدوياً", { duration: 6000 });
+      }
+    } catch (err) {
+      console.error("CR extraction failed:", err);
+      toast.error("تعذّر استخراج البيانات من السجل التجاري — يمكنك إكمال الحقول يدوياً");
+      setCrExtractionDone(true);
+    } finally {
+      setCrExtracting(false);
+    }
+  }, []);
+
   const handleAnalyze = async () => {
     const allPhotoUrlsForAnalysis = Object.values(photos).flat();
 
