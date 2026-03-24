@@ -51,11 +51,20 @@ const QuickPriceEdit = ({ listingId, currentPrice, onUpdated, className }: Quick
     <div className={cn("flex items-center gap-2", className)}>
       <div className="relative flex-1">
         <input
-          type="number"
+          type="text"
+          inputMode="numeric"
+          lang="en"
+          dir="ltr"
           value={price}
-          onChange={(e) => setPrice(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value
+              .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+              .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+              .replace(/[^0-9]/g, '');
+            setPrice(val);
+          }}
           autoFocus
-          className="w-full px-3 py-1.5 rounded-lg border border-primary/30 bg-background text-sm focus:outline-none focus:ring-1 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-full px-3 py-1.5 rounded-lg border border-primary/30 bg-background text-sm focus:outline-none focus:ring-1 focus:ring-primary/20"
           placeholder="السعر الجديد"
         />
         <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">ر.س</span>
