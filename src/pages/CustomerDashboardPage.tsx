@@ -188,11 +188,12 @@ const CustomerDashboardPage = () => {
 
   /* ── Profile completeness ── */
   const hasRealEmail = !!(userEmail && !userEmail.endsWith("@phone.souqtaqbeel.app"));
+  const isPhoneVerified = !!(profile as any)?.phone_verified;
   const profileCompleteness = useMemo(() => {
     if (!profile) return 0;
-    const fields = [profile.full_name, profile.phone, profile.avatar_url, hasRealEmail];
+    const fields = [profile.full_name, profile.phone, profile.avatar_url, hasRealEmail, isPhoneVerified];
     return Math.round((fields.filter(Boolean).length / fields.length) * 100);
-  }, [profile, hasRealEmail]);
+  }, [profile, hasRealEmail, isPhoneVerified]);
   const isProfileComplete = profileCompleteness >= 100;
 
   return (
@@ -333,7 +334,7 @@ const CustomerDashboardPage = () => {
                   )} style={{ width: `${profileCompleteness}%` }} />
                 </div>
                 <p className="text-[9px] text-muted-foreground mt-1">
-                  أكمل: {!profile?.full_name && "الاسم · "}{!profile?.phone && "الجوال · "}{!hasRealEmail && "الإيميل · "}{!profile?.avatar_url && "الصورة"}
+                  أكمل: {!profile?.full_name && "الاسم · "}{!profile?.phone && "الجوال · "}{!hasRealEmail && "الإيميل · "}{!profile?.avatar_url && "الصورة · "}{!isPhoneVerified && "توثيق الجوال"}
                 </p>
               </>
             )}
