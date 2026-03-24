@@ -57,6 +57,9 @@ const CreateListingPage = () => {
     isValid: false,
   });
   const [photos, setPhotos] = useState<Record<string, string[]>>({});
+  const [localPreviews, setLocalPreviews] = useState<Record<string, string[]>>({});
+  const [uploadingGroup, setUploadingGroup] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number }>({ current: 0, total: 0 });
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzed, setAnalyzed] = useState(false);
   const [analyzeProgress, setAnalyzeProgress] = useState(0);
