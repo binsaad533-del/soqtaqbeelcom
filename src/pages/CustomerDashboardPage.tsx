@@ -51,7 +51,7 @@ const formatCurrency = (n: number) =>
   n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(0)}K` : n.toString();
 
 const CustomerDashboardPage = () => {
-  const { profile, signOut } = useAuthContext();
+  const { profile, signOut, user } = useAuthContext();
   const { getMyListings } = useListings();
   const { getMyDeals } = useDeals();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
@@ -59,6 +59,61 @@ const CustomerDashboardPage = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  /* ── Profile editing state ── */
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const userEmail = user?.email || null;
+
+  const startEdit = (field: string, currentValue: string) => {
+    setEditingField(field);
+    setEditValue(currentValue || "");
+  };
+
+  const cancelEdit = () => { setEditingField(null); setEditValue(""); };
+
+  const saveField = useCallback(async (field: string, value: string) => {
+    if (!profile?.user_id) return;
+    setSaving(true);
+    try {
+      if (field === "email") {
+        const { error } = await supabase.auth.updateUser({ email: value });
+        if (error) throw error;
+        toast.success("تم إرسال رابط التحقق إلى بريدك الجديد");
+      } else {
+        const { error } = await supabase.from("profiles").update({ [field]: value }).eq("user_id", profile.user_id);
+        if (error) throw error;
+        toast.success("تم التحديث بنجاح");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "فشل التحديث");
+    } finally {
+      setSaving(false);
+      setEditingField(null);
+      setEditValue("");
+    }
+  }, [profile?.user_id]);
+
+  const handleAvatarUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !profile?.user_id) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("حجم الصورة يجب أن يكون أقل من 5 ميغا"); return; }
+    setSaving(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `avatars/${profile.user_id}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("listings").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from("listings").getPublicUrl(path);
+      const { error } = await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", profile.user_id);
+      if (error) throw error;
+      toast.success("تم تحديث الصورة");
+    } catch (err: any) {
+      toast.error(err?.message || "فشل رفع الصورة");
+    } finally { setSaving(false); }
+  }, [profile?.user_id]);
 
   useEffect(() => {
     const load = async () => {
