@@ -205,7 +205,9 @@ const CustomerDashboardPage = () => {
                             <div className="text-sm font-medium truncate">{d.title || "بدون عنوان"}</div>
                             <span className={cn("text-[10px] font-medium shrink-0 mr-2", progress >= 80 ? "text-success" : progress >= 50 ? "text-warning" : "text-destructive")}>{progress}%</span>
                           </div>
-                          <Progress value={progress} className="h-1.5 bg-warning/10 [&>div]:transition-all [&>div]:duration-500" indicatorClassName={cn(progress >= 80 ? "bg-success" : progress >= 50 ? "bg-warning" : "bg-destructive")} />
+                          <div className="w-full h-1.5 rounded-full bg-warning/10 overflow-hidden">
+                            <div className={cn("h-full rounded-full transition-all duration-500", progress >= 80 ? "bg-success" : progress >= 50 ? "bg-warning" : "bg-destructive")} style={{ width: `${progress}%` }} />
+                          </div>
                           <div className="text-[10px] text-muted-foreground mt-1">{d.city || "لم تحدد المدينة"} {progress < 100 && "· أكمل البيانات للنشر"}</div>
                         </div>
                         <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
