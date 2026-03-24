@@ -172,9 +172,10 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                   {/* Expand toggle */}
                   <button
                     onClick={() => setExpandedType(isExpanded ? null : dt.id)}
-                    className="p-1 text-muted-foreground hover:text-foreground shrink-0"
+                    className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 shrink-0 transition-colors"
+                    title="عرض التفاصيل"
                   >
-                    <Info size={16} />
+                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </button>
                 </div>
 
