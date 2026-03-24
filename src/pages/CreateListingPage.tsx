@@ -113,12 +113,15 @@ const CreateListingPage = () => {
     surveillance_cameras: "",
   });
 
-  const { createListing, updateListing, uploadFile, loading } = useListings();
+  const { createListing, updateListing, uploadFile, getMyDraft, loading } = useListings();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
   const [activePhotoGroup, setActivePhotoGroup] = useState<string | null>(null);
   const [activeDocType, setActiveDocType] = useState<string | null>(null);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [draftLoading, setDraftLoading] = useState(true);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const photoGroups = allPhotoGroups.filter((group) => {
     if (dealStructure.selectedTypes.length === 0) return true;
