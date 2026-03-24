@@ -92,6 +92,23 @@ interface DedupAction {
   merged_count: number;
 }
 
+interface CrExtractionResult {
+  cr_number?: string;
+  entity_name?: string;
+  business_activity?: string;
+  secondary_activities?: string[];
+  city?: string;
+  district?: string;
+  issue_date?: string;
+  expiry_date?: string;
+  status?: string;
+  entity_type?: string;
+  owner_name?: string;
+  extraction_confidence?: "high" | "medium" | "low";
+  extraction_notes?: string;
+  fields_confidence?: Record<string, string>;
+}
+
 const CreateListingPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [dealStructure, setDealStructure] = useState<DealStructureSelection>({
