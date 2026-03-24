@@ -161,6 +161,13 @@ const CreateListingPage = () => {
   const [draftLoading, setDraftLoading] = useState(true);
   const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // CR-only extraction state
+  const [crExtraction, setCrExtraction] = useState<CrExtractionResult | null>(null);
+  const [crExtracting, setCrExtracting] = useState(false);
+  const [crExtractionDone, setCrExtractionDone] = useState(false);
+
+  const isCrOnly = dealStructure.primaryType === "cr_only";
+
   const photoGroups = allPhotoGroups.filter((group) => {
     if (dealStructure.selectedTypes.length === 0) return true;
     return dealStructure.selectedTypes.some((dt) => group.dealTypes.includes(dt));
