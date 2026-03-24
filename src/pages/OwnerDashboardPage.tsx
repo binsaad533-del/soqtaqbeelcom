@@ -176,22 +176,42 @@ const OwnerDashboardPage = () => {
         {/* ===== OVERVIEW ===== */}
         {activeTab === "overview" && (
           <div className="space-y-6">
-            {/* KPI Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* KPI Grid - Row 1: Counts */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "إجمالي المستخدمين", value: profiles.length, icon: Users },
-                { label: "الإعلانات", value: listings.length, icon: FileText },
-                { label: "صفقات مكتملة", value: completedDeals.length, icon: Handshake },
-                { label: "صفقات جارية", value: activeDeals.length, icon: TrendingUp },
-                { label: "إجمالي قيمة الصفقات", value: `${totalDealValue.toLocaleString("en-US")} ر.س`, icon: BarChart3 },
-                { label: "العمولة المستحقة (1%)", value: `${totalCommissionDue.toLocaleString("en-US")} ر.س`, icon: Landmark },
-                { label: "العمولة المحصلة", value: `${totalCollected.toLocaleString("en-US")} ر.س`, icon: ShieldCheck },
-                { label: "العمولة غير المحصلة", value: `${totalUncollected.toLocaleString("en-US")} ر.س`, icon: AlertTriangle },
+                { label: "إجمالي المستخدمين", value: profiles.length, icon: Users, accent: "text-primary" },
+                { label: "الإعلانات", value: listings.length, icon: FileText, accent: "text-primary" },
+                { label: "صفقات مكتملة", value: completedDeals.length, icon: Handshake, accent: "text-success" },
+                { label: "صفقات جارية", value: activeDeals.length, icon: TrendingUp, accent: "text-primary" },
               ].map((s, i) => (
-                <div key={i} className="bg-card rounded-xl p-4 shadow-soft">
-                  <s.icon size={16} className="mb-2 text-muted-foreground" strokeWidth={1.3} />
-                  <div className="text-base font-semibold">{s.value}</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">{s.label}</div>
+                <div key={i} className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 hover:shadow-soft-lg transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] text-muted-foreground font-medium">{s.label}</span>
+                    <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center">
+                      <s.icon size={15} className={cn("shrink-0", s.accent)} strokeWidth={1.5} />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold tracking-tight">{s.value}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* KPI Grid - Row 2: Financial */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: "إجمالي قيمة الصفقات", value: `${totalDealValue.toLocaleString("en-US")} ر.س`, icon: BarChart3, accent: "text-primary" },
+                { label: "العمولة المستحقة (1%)", value: `${totalCommissionDue.toLocaleString("en-US")} ر.س`, icon: Landmark, accent: "text-primary" },
+                { label: "العمولة المحصلة", value: `${totalCollected.toLocaleString("en-US")} ر.س`, icon: ShieldCheck, accent: "text-success" },
+                { label: "العمولة غير المحصلة", value: `${totalUncollected.toLocaleString("en-US")} ر.س`, icon: AlertTriangle, accent: totalUncollected > 0 ? "text-warning" : "text-muted-foreground" },
+              ].map((s, i) => (
+                <div key={i} className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 hover:shadow-soft-lg transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] text-muted-foreground font-medium">{s.label}</span>
+                    <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center">
+                      <s.icon size={15} className={cn("shrink-0", s.accent)} strokeWidth={1.5} />
+                    </div>
+                  </div>
+                  <div className="text-lg font-bold tracking-tight">{s.value}</div>
                 </div>
               ))}
             </div>
