@@ -396,14 +396,34 @@ const CustomerDashboardPage = () => {
           {/* ═══ SIDEBAR (1/3) ═══ */}
           <div className="space-y-5">
 
-            {/* ── Profile Card ── */}
+            {/* ── Profile Card (Actionable) ── */}
             <div className="rounded-2xl border border-border/30 bg-card p-4">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                  {profile?.full_name?.charAt(0) || "؟"}
-                </div>
+                {/* Avatar with upload */}
+                <label className="relative w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold cursor-pointer group overflow-hidden shrink-0">
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
+                  ) : (
+                    profile?.full_name?.charAt(0) || "؟"
+                  )}
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                    <Camera size={14} className="text-white" />
+                  </div>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
+                </label>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">{profile?.full_name || "—"}</div>
+                  {editingField === "full_name" ? (
+                    <div className="flex items-center gap-1">
+                      <input className="text-sm font-medium bg-muted/50 rounded px-1.5 py-0.5 w-full border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
+                      <button onClick={() => saveField("full_name", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={12} /></button>
+                      <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={12} /></button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 group/name">
+                      <span className="text-sm font-medium truncate">{profile?.full_name || "—"}</span>
+                      <button onClick={() => startEdit("full_name", profile?.full_name || "")} className="opacity-0 group-hover/name:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={10} /></button>
+                    </div>
+                  )}
                   <div className="text-[10px] text-muted-foreground flex items-center gap-1">
                     {profile?.is_verified
                       ? <><UserCheck size={10} className="text-success" /> حساب موثّق</>
@@ -428,12 +448,57 @@ const CustomerDashboardPage = () => {
                 </div>
               </div>
 
-              <div className="space-y-1.5 text-[10px]">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Phone size={10} /> {profile?.phone || "لم يُضاف"}
+              {/* Editable fields */}
+              <div className="space-y-2 text-[10px]">
+                {/* Email */}
+                <div className="flex items-center gap-2 group/email">
+                  <Mail size={10} className="text-muted-foreground shrink-0" />
+                  {editingField === "email" ? (
+                    <div className="flex items-center gap-1 flex-1">
+                      <input type="email" className="bg-muted/50 rounded px-1.5 py-0.5 w-full border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="example@email.com" dir="ltr" />
+                      <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={10} /></button>
+                      <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={10} /></button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-muted-foreground truncate flex-1" dir="ltr">{userEmail || "لم يُضاف"}</span>
+                      <button onClick={() => startEdit("email", userEmail || "")} className="opacity-0 group-hover/email:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
+                    </>
+                  )}
                 </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin size={10} /> {profile?.city || "لم تُحدد"}
+
+                {/* Phone */}
+                <div className="flex items-center gap-2 group/phone">
+                  <Phone size={10} className="text-muted-foreground shrink-0" />
+                  {editingField === "phone" ? (
+                    <div className="flex items-center gap-1 flex-1">
+                      <input className="bg-muted/50 rounded px-1.5 py-0.5 w-full border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus dir="ltr" placeholder="05XXXXXXXX" />
+                      <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={10} /></button>
+                      <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={10} /></button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-muted-foreground truncate flex-1">{profile?.phone || "لم يُضاف"}</span>
+                      <button onClick={() => startEdit("phone", profile?.phone || "")} className="opacity-0 group-hover/phone:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
+                    </>
+                  )}
+                </div>
+
+                {/* City */}
+                <div className="flex items-center gap-2 group/city">
+                  <MapPin size={10} className="text-muted-foreground shrink-0" />
+                  {editingField === "city" ? (
+                    <div className="flex items-center gap-1 flex-1">
+                      <input className="bg-muted/50 rounded px-1.5 py-0.5 w-full border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="الرياض" />
+                      <button onClick={() => saveField("city", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={10} /></button>
+                      <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={10} /></button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-muted-foreground truncate flex-1">{profile?.city || "لم تُحدد"}</span>
+                      <button onClick={() => startEdit("city", profile?.city || "")} className="opacity-0 group-hover/city:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
