@@ -260,22 +260,6 @@ const CustomerDashboardPage = () => {
                   </>
                 )}
               </div>
-              {/* City */}
-              <div className="flex items-center gap-2 group/city">
-                <MapPin size={14} className="text-muted-foreground" />
-                {editingField === "city" ? (
-                  <div className="flex items-center gap-1.5">
-                    <input className="bg-muted/50 rounded px-2 py-1 w-24 border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="الرياض" />
-                    <button onClick={() => saveField("city", editValue)} disabled={saving} className="text-success"><Check size={13} /></button>
-                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={13} /></button>
-                  </div>
-                ) : (
-                  <>
-                    <span className="text-muted-foreground">{profile?.city || "لم تُحدد"}</span>
-                    <button onClick={() => startEdit("city", profile?.city || "")} className="opacity-0 group-hover/city:opacity-100 text-muted-foreground hover:text-primary"><Pencil size={11} /></button>
-                  </>
-                )}
-              </div>
             </div>
 
             {/* Actions */}
@@ -295,11 +279,6 @@ const CustomerDashboardPage = () => {
               <Phone size={13} className="text-muted-foreground" />
               <span className="text-muted-foreground">{profile?.phone || "لم يُضاف"}</span>
               <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-muted-foreground hover:text-primary"><Pencil size={11} /></button>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin size={13} className="text-muted-foreground" />
-              <span className="text-muted-foreground">{profile?.city || "لم تُحدد"}</span>
-              <button onClick={() => startEdit("city", profile?.city || "")} className="text-muted-foreground hover:text-primary"><Pencil size={11} /></button>
             </div>
           </div>
 
