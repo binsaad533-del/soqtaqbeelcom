@@ -363,7 +363,7 @@ const NegotiationPage = () => {
 
   const statusLabel = deal.status === "negotiating" ? "جاري التفاوض" : deal.status === "completed" ? "مكتمل" : deal.status === "finalized" ? "مُقفل" : deal.status;
   const riskLabel = !deal.risk_score || deal.risk_score <= 25 ? "مرتفعة" : deal.risk_score <= 50 ? "متوسطة" : "منخفضة";
-  const riskColor = !deal.risk_score || deal.risk_score <= 25 ? "text-emerald-600" : deal.risk_score <= 50 ? "text-amber-500" : "text-red-500";
+  const riskColor = !deal.risk_score || deal.risk_score <= 25 ? "text-success" : deal.risk_score <= 50 ? "text-warning" : "text-destructive";
   const readinessPercent = Math.max(0, 100 - (deal.risk_score || 0));
 
   return (
@@ -553,8 +553,8 @@ const NegotiationPage = () => {
                       جاهزية الصفقة
                     </h3>
                     <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-md", 
-                      readinessPercent >= 70 ? "bg-emerald-50 text-emerald-600" : 
-                      readinessPercent >= 40 ? "bg-amber-50 text-amber-600" : "bg-red-50 text-red-500"
+                      readinessPercent >= 70 ? "bg-success/10 text-success" : 
+                      readinessPercent >= 40 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
                     )}>
                       {readinessPercent}%
                     </span>
@@ -564,7 +564,7 @@ const NegotiationPage = () => {
                   <div className="w-full h-1.5 rounded-full bg-muted/60 mb-3">
                     <div
                       className={cn("h-full rounded-full transition-all duration-500",
-                        readinessPercent >= 70 ? "bg-emerald-500" : readinessPercent >= 40 ? "bg-amber-400" : "bg-red-400"
+                        readinessPercent >= 70 ? "bg-success" : readinessPercent >= 40 ? "bg-warning" : "bg-destructive"
                       )}
                       style={{ width: `${readinessPercent}%` }}
                     />
@@ -595,7 +595,7 @@ const NegotiationPage = () => {
                       <div className="space-y-1.5">
                         {(deal.risk_factors as string[]).map((factor, i) => (
                           <div key={i} className="flex items-start gap-1.5 text-[10px] text-muted-foreground/80">
-                            <ChevronDown size={10} className="text-amber-400 shrink-0 mt-0.5 rotate-[-90deg]" />
+                            <ChevronDown size={10} className="text-warning shrink-0 mt-0.5 rotate-[-90deg]" />
                             <span>{factor}</span>
                           </div>
                         ))}
