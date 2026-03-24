@@ -1744,6 +1744,7 @@ const CreateListingPage = () => {
         </div>
       )}
     </div>
+    </VerificationGate>
   );
 };
 
