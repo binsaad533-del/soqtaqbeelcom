@@ -274,6 +274,22 @@ function buildAnalysisPrompt(listing: any): string {
   if (listing.district) sections.push(`## الحي: ${listing.district}`);
   if (listing.price) sections.push(`## السعر المطلوب: ${listing.price} ريال سعودي`);
 
+  // CR extraction data — include when available (especially for cr_only)
+  const crData = listing.cr_extraction;
+  if (crData) {
+    sections.push("\n## بيانات مستخرجة من السجل التجاري (تم قراءتها من الوثيقة):");
+    if (crData.cr_number) sections.push(`- رقم السجل التجاري: ${crData.cr_number}`);
+    if (crData.entity_name) sections.push(`- اسم المنشأة: ${crData.entity_name}`);
+    if (crData.business_activity) sections.push(`- النشاط التجاري: ${crData.business_activity}`);
+    if (crData.city) sections.push(`- المدينة: ${crData.city}`);
+    if (crData.district) sections.push(`- الحي: ${crData.district}`);
+    if (crData.issue_date) sections.push(`- تاريخ الإصدار: ${crData.issue_date}`);
+    if (crData.expiry_date) sections.push(`- تاريخ الانتهاء: ${crData.expiry_date}`);
+    if (crData.legal_status) sections.push(`- الحالة القانونية: ${crData.legal_status}`);
+    if (crData.extraction_confidence) sections.push(`- دقة الاستخراج: ${crData.extraction_confidence}`);
+    sections.push("⚠️ هذه البيانات تم استخراجها فعلياً من مستند السجل التجاري — لا تعتبرها ناقصة ولا تطلبها كمعلومات مفقودة.");
+  }
+
   // Lease info - only if relevant to deal type
   if (scope.analyzeFields.includes("lease")) {
     if (listing.annual_rent || listing.lease_duration || listing.lease_remaining) {
@@ -340,14 +356,15 @@ function buildAnalysisPrompt(listing: any): string {
   sections.push("## تعليمات:");
   sections.push(`1. حلل هذه الصفقة حصرياً كصفقة "${scope.label}"`);
   sections.push("2. لا تطلب معلومات خارج نطاق نوع الصفقة المحدد");
+  sections.push("3. إذا تم تقديم بيانات مستخرجة من السجل التجاري أعلاه، استخدمها في التحليل ولا تعتبرها ناقصة");
   
   if (scope.analyzeFields.includes("assets")) {
-    sections.push("3. استخدم منصات حراج ومستعمل وأوبن سوق كمراجع مقارنة للأصول");
+    sections.push("4. استخدم منصات حراج ومستعمل وأوبن سوق كمراجع مقارنة للأصول");
   } else {
-    sections.push("3. تخطّ مقارنة الأصول — ليست ضمن نطاق هذه الصفقة");
+    sections.push("4. تخطّ مقارنة الأصول — ليست ضمن نطاق هذه الصفقة");
   }
   
-  sections.push("4. أنتج تقرير الجدوى باستخدام الأداة deal_check_result");
+  sections.push("5. أنتج تقرير الجدوى باستخدام الأداة deal_check_result");
 
   return sections.join("\n");
 }
