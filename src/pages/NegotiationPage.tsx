@@ -227,7 +227,7 @@ const NegotiationPage = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // Realtime messages
+  // Realtime messages + notifications
   useEffect(() => {
     if (!dealId) return;
     const channel = supabase
@@ -235,10 +235,51 @@ const NegotiationPage = () => {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "negotiation_messages", filter: `deal_id=eq.${dealId}` }, (payload) => {
         const newMsg = payload.new as unknown as NegotiationMessage;
         setMessages(prev => prev.some(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
+
+        // Notify if message is from other party (not me)
+        if (newMsg.sender_id !== user?.id) {
+          const isAttachment = newMsg.message_type === "image" || newMsg.message_type === "document";
+          const dealLabel = listing?.title || listing?.business_activity || "فرصة تقبيل";
+          const title = isAttachment ? "📎 مرفق جديد في التفاوض" : "💬 رسالة جديدة في التفاوض";
+          const body = isAttachment
+            ? `تم إرسال ${newMsg.message_type === "image" ? "صورة" : "مستند"} في صفقة ${dealLabel}`
+            : newMsg.message.length > 60 ? newMsg.message.slice(0, 60) + "…" : newMsg.message;
+
+          // Play notification sound
+          try {
+            const audio = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2JkJaXl5OLgHJlW1dZY293hI2UmZqZlI2BdGdcV1lfaXeDjZSZm5qVjoJ1aF1YW2Brd4SNlJmbmpWOgnRoXFhbYGx4hI6VmpualY6Bc2dcWFxhbXmFj5abm5qVjYByZltYXGFueYaQl5ycm5WNgHFmW1hcYm97h5GYnJyblo6AcGVaWFxjcHyIkpmcnJyWjn9vZFpYXGRxfYmTmp2dnJaPfm5jWVhdZXJ/ipScnp6dnJWOfW1iWVhdZnOAi5WdoJ+dnZWNfGxhWFlfZ3WCjZeeoaCenZaNe2tgWFlgaHaDjpifoqGfnpaNemphV1lhaXeEj5mgoqKgn5eMeWlgV1lianiFkJuho6OhoJ2Vinhof1dhbGuBfYqRl5mYlI+Gfm9nYGBmcH6Kk5qdnpuXkId+b2ZeXWRufIqTm5+gnJiSiX5wZl5cY2x7iZObnqCdmZKJfnBmXl1kbXuKlJ2goZ6alIqAcWdfXmVufIuVnqGin5yVi4FyaGBfZm9+jJafoqOfnZaLgXJoYF9ncH+Nl5+ioqCel4yBcmhfX2dxgI6Yn6Khn56XjIFyaF9fZ3GAjpeeoaCenpeMgHFnX19ncYCOl56hoJ6dl4t/cWZeXmdwf42WnaCanJqUin5wZl1cZW58i5SbnZ6bmZKIfm9lXVxkbXuJk5qcnJqXkId9bmRcW2Nse4iSmpycmpeSh31uZFxbYmx6iJGZm5uZlZGGfG1jW1pibHmHkJiampeTj4V7bGJaWmFreIaPlpmZl5KOhHpqYVlZX2l2hY2WmJeVkY2Demhg");
+            audio.volume = 0.3;
+            audio.play().catch(() => {});
+          } catch {}
+
+          // Toast notification
+          toast.info(title, { description: body, duration: 4000 });
+
+          // Save to notifications table
+          supabase.from("notifications").insert({
+            user_id: user?.id,
+            title,
+            body,
+            type: "message",
+            reference_type: "deal",
+            reference_id: dealId,
+          } as any).then(() => {});
+
+          // Browser notification (if permitted)
+          if (Notification.permission === "granted") {
+            try { new Notification(title, { body, icon: "/placeholder.svg" }); } catch {}
+          }
+        }
       })
       .subscribe();
+
+    // Request browser notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
+    }
+
     return () => { supabase.removeChannel(channel); };
-  }, [dealId]);
+  }, [dealId, user?.id, listing]);
 
   useEffect(() => { scrollToBottom(); }, [messages]);
 
