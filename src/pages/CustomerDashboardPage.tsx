@@ -8,8 +8,9 @@ import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
 import {
   Plus, FileText, MessageSquare, Shield, AlertCircle,
-  Eye, CheckCircle, Loader2, Activity,
-  ChevronLeft, TrendingUp, Briefcase, Edit3
+  Eye, CheckCircle, Loader2, Activity, ChevronLeft,
+  TrendingUp, Edit3, Wallet, BarChart3, Clock,
+  ArrowUpLeft, ArrowDownLeft, UserCheck, MapPin, Phone
 } from "lucide-react";
 import { DEAL_TYPE_FIELD_RULES } from "@/lib/dealTypeFieldRules";
 
@@ -17,38 +18,25 @@ import { DEAL_TYPE_FIELD_RULES } from "@/lib/dealTypeFieldRules";
 const calcDraftProgress = (listing: Listing): number => {
   const rules = DEAL_TYPE_FIELD_RULES[listing.deal_type] || DEAL_TYPE_FIELD_RULES["full_takeover"];
   if (!rules) return 0;
-
   const checks: boolean[] = [
-    !!listing.title,
-    !!listing.business_activity,
-    !!listing.city,
+    !!listing.title, !!listing.business_activity, !!listing.city,
     listing.price != null && listing.price > 0,
   ];
-
-  // Check required fields from deal type rules
   rules.requiredFields.forEach(f => {
-    if (!["business_activity", "city", "price"].includes(f)) {
-      checks.push(!!(listing as any)[f]);
-    }
+    if (!["business_activity", "city", "price"].includes(f)) checks.push(!!(listing as any)[f]);
   });
-
-  // Photos check
   const photos = listing.photos as Record<string, string[]> | null;
-  const hasPhotos = photos && Object.values(photos).some(arr => Array.isArray(arr) && arr.length > 0);
-  checks.push(!!hasPhotos);
-
-  // Documents check
+  checks.push(!!(photos && Object.values(photos).some(arr => Array.isArray(arr) && arr.length > 0)));
   const docs = listing.documents as any[] | null;
   checks.push(Array.isArray(docs) && docs.length > 0);
-
-  const filled = checks.filter(Boolean).length;
-  return Math.round((filled / checks.length) * 100);
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 };
-const statusLabel = (s: string) => {
+
+const statusBadge = (s: string) => {
   const map: Record<string, { label: string; color: string }> = {
     draft: { label: "مسودة", color: "bg-muted text-muted-foreground" },
     published: { label: "منشور", color: "bg-success/15 text-success border border-success/25" },
-    under_review: { label: "قيد المراجعة", color: "bg-warning/15 text-warning border border-warning/25" },
+    under_review: { label: "مراجعة", color: "bg-warning/15 text-warning border border-warning/25" },
     negotiating: { label: "تفاوض", color: "bg-primary/15 text-primary border border-primary/25" },
     completed: { label: "مكتمل", color: "bg-[hsl(270,60%,95%)] text-[hsl(270,60%,45%)] border border-[hsl(270,60%,80%)]" },
     rejected: { label: "مرفوض", color: "bg-destructive/15 text-destructive border border-destructive/25" },
@@ -56,8 +44,11 @@ const statusLabel = (s: string) => {
   return map[s] || { label: s, color: "bg-muted text-muted-foreground" };
 };
 
+const formatCurrency = (n: number) =>
+  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(0)}K` : n.toString();
+
 const CustomerDashboardPage = () => {
-  const { profile, signOut, user } = useAuthContext();
+  const { profile, signOut } = useAuthContext();
   const { getMyListings } = useListings();
   const { getMyDeals } = useDeals();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
@@ -71,64 +62,73 @@ const CustomerDashboardPage = () => {
       setLoading(true);
       setLoadError(null);
       const errors: string[] = [];
-      let l: Listing[] = [];
-      let d: Deal[] = [];
+      let l: Listing[] = [], d: Deal[] = [];
       try { l = await getMyListings(); } catch { errors.push("الإعلانات"); }
       try { d = await getMyDeals(); } catch { errors.push("الصفقات"); }
-      setListings(l);
-      setDeals(d);
-      if (errors.length > 0) setLoadError(`فشل تحميل: ${errors.join("، ")} — يرجى تحديث الصفحة`);
+      setListings(l); setDeals(d);
+      if (errors.length) setLoadError(`فشل تحميل: ${errors.join("، ")}`);
       setLoading(false);
     };
     load();
   }, [getMyListings, getMyDeals]);
 
-  const stats = useMemo(() => ({
-    totalListings: listings.length,
-    published: listings.filter(l => l.status === "published").length,
-    drafts: listings.filter(l => l.status === "draft").length,
-    activeDeals: deals.filter(d => d.status === "negotiating").length,
-    completedDeals: deals.filter(d => d.status === "completed").length,
-    trustScore: profile?.trust_score ?? 50,
-  }), [listings, deals, profile]);
+  /* ── Computed data ── */
+  const stats = useMemo(() => {
+    const published = listings.filter(l => l.status === "published").length;
+    const draftCount = listings.filter(l => l.status === "draft").length;
+    const activeDeals = deals.filter(d => d.status === "negotiating");
+    const completedDeals = deals.filter(d => d.status === "completed");
+    const totalDealValue = completedDeals.reduce((sum, d) => sum + (d.agreed_price || 0), 0);
+    const activeDealValue = activeDeals.reduce((sum, d) => sum + (d.agreed_price || 0), 0);
+    const totalListingValue = listings.reduce((sum, l) => sum + (l.price || 0), 0);
+    const avgDealValue = completedDeals.length ? totalDealValue / completedDeals.length : 0;
+    const successRate = deals.length ? Math.round((completedDeals.length / deals.length) * 100) : 0;
+    const trustScore = profile?.trust_score ?? 50;
+    return {
+      published, draftCount, totalListings: listings.length,
+      activeDeals: activeDeals.length, completedDeals: completedDeals.length,
+      totalDealValue, activeDealValue, totalListingValue, avgDealValue,
+      successRate, trustScore, totalDeals: deals.length,
+    };
+  }, [listings, deals, profile]);
 
   const drafts = useMemo(() => listings.filter(l => l.status === "draft"), [listings]);
-  const publishedListings = useMemo(() => listings.filter(l => l.status !== "draft"), [listings]);
 
-  const recentActivity = useMemo(() => {
-    const items: { id: string; type: "listing" | "deal"; title: string; subtitle: string; status: string; date: string; link: string }[] = [];
-    publishedListings.forEach(l => items.push({
-      id: l.id, type: "listing",
-      title: l.title || "بدون عنوان",
-      subtitle: [l.city, l.price ? `${Number(l.price).toLocaleString()} ر.س` : ""].filter(Boolean).join(" — "),
-      status: l.status, date: l.created_at,
-      link: `/listing/${l.id}`,
-    }));
-    deals.forEach(d => items.push({
-      id: d.id, type: "deal",
-      title: d.status === "completed" ? `اتفاقية #${d.id.slice(0, 6)}` : `صفقة #${d.id.slice(0, 6)}`,
-      subtitle: d.status === "completed" && d.completed_at
-        ? new Date(d.completed_at).toLocaleDateString("ar-SA")
-        : new Date(d.created_at).toLocaleDateString("ar-SA"),
-      status: d.status, date: d.completed_at || d.created_at,
-      link: d.status === "completed" ? `/agreement/${d.id}` : `/negotiate/${d.id}`,
-    }));
-    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
-  }, [publishedListings, deals]);
+  const recentDeals = useMemo(() =>
+    [...deals].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 4),
+    [deals]);
+
+  const recentListings = useMemo(() =>
+    listings.filter(l => l.status !== "draft").sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 4),
+    [listings]);
 
   const trustColor = stats.trustScore >= 70 ? "text-success" : stats.trustScore >= 40 ? "text-warning" : "text-destructive";
-  const trustBg = stats.trustScore >= 70 ? "bg-success/10" : stats.trustScore >= 40 ? "bg-warning/10" : "bg-destructive/10";
   const trustLabel = stats.trustScore >= 70 ? "ممتاز" : stats.trustScore >= 40 ? "جيد" : "يحتاج تحسين";
+  const memberSince = profile?.created_at ? new Date(profile.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "long" }) : "—";
+
+  /* ── Profile completeness ── */
+  const profileCompleteness = useMemo(() => {
+    if (!profile) return 0;
+    const fields = [profile.full_name, profile.phone, profile.city, profile.avatar_url];
+    return Math.round((fields.filter(Boolean).length / fields.length) * 100);
+  }, [profile]);
 
   return (
-    <div className="py-6 md:py-8">
+    <div className="py-5 md:py-8">
       <div className="container max-w-6xl">
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-semibold">مرحباً {profile?.full_name || "بك"} 👋</h1>
-            <p className="text-sm text-muted-foreground">نظرة عامة على نشاطك</p>
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+              {profile?.full_name?.charAt(0) || "؟"}
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold">مرحباً {profile?.full_name || "بك"}</h1>
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Clock size={10} /> عضو منذ {memberSince}
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <AiStar size={20} />
@@ -136,80 +136,112 @@ const CustomerDashboardPage = () => {
           </div>
         </div>
 
-        {/* Error Banner */}
         {loadError && (
-          <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-between mb-6 animate-fade-in">
+          <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-between mb-5 animate-fade-in">
             <div className="flex items-center gap-2">
               <AlertCircle size={16} className="text-destructive shrink-0" />
               <span className="text-sm text-destructive">{loadError}</span>
             </div>
-            <button onClick={() => window.location.reload()} className="text-xs text-destructive font-medium hover:underline whitespace-nowrap">إعادة المحاولة</button>
+            <button onClick={() => window.location.reload()} className="text-xs text-destructive font-medium hover:underline">إعادة المحاولة</button>
           </div>
         )}
 
-        {/* ── Two-Column Layout ── */}
+        {/* ══════ FINANCIAL OVERVIEW ══════ */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div className="rounded-2xl p-4 bg-card border border-border/30 group hover:border-primary/20 transition-colors">
+            <div className="flex items-center justify-between mb-2">
+              <Wallet size={16} strokeWidth={1.3} className="text-primary" />
+              <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">إجمالي</span>
+            </div>
+            <div className="text-xl font-bold">{loading ? "—" : `${formatCurrency(stats.totalDealValue)}`}</div>
+            <div className="text-[10px] text-muted-foreground">ر.س · قيمة الصفقات المكتملة</div>
+          </div>
+
+          <div className="rounded-2xl p-4 bg-card border border-border/30 group hover:border-primary/20 transition-colors">
+            <div className="flex items-center justify-between mb-2">
+              <Activity size={16} strokeWidth={1.3} className="text-primary" />
+              <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">نشط</span>
+            </div>
+            <div className="text-xl font-bold">{loading ? "—" : `${formatCurrency(stats.activeDealValue)}`}</div>
+            <div className="text-[10px] text-muted-foreground">ر.س · قيد التفاوض ({stats.activeDeals})</div>
+          </div>
+
+          <div className="rounded-2xl p-4 bg-card border border-border/30 group hover:border-primary/20 transition-colors">
+            <div className="flex items-center justify-between mb-2">
+              <BarChart3 size={16} strokeWidth={1.3} className="text-primary" />
+              <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">متوسط</span>
+            </div>
+            <div className="text-xl font-bold">{loading ? "—" : `${formatCurrency(stats.avgDealValue)}`}</div>
+            <div className="text-[10px] text-muted-foreground">ر.س · متوسط قيمة الصفقة</div>
+          </div>
+
+          <div className="rounded-2xl p-4 bg-card border border-border/30 group hover:border-primary/20 transition-colors">
+            <div className="flex items-center justify-between mb-2">
+              <TrendingUp size={16} strokeWidth={1.3} className="text-success" />
+              <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">نجاح</span>
+            </div>
+            <div className="text-xl font-bold">{loading ? "—" : `${stats.successRate}%`}</div>
+            <div className="text-[10px] text-muted-foreground">{stats.completedDeals} من {stats.totalDeals} صفقة</div>
+          </div>
+        </div>
+
+        {/* ══════ TWO-COLUMN LAYOUT ══════ */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* ═══ LEFT: Main Content (2/3) ═══ */}
-          <div className="lg:col-span-2 space-y-6">
+          {/* ═══ MAIN COLUMN (2/3) ═══ */}
+          <div className="lg:col-span-2 space-y-5">
 
-            {/* ── Summary Bar ── */}
+            {/* ── Activity Summary Row ── */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-2xl p-4 bg-card border border-border/30">
-                <div className="flex items-center gap-2 mb-1">
-                  <FileText size={14} strokeWidth={1.3} className="text-primary" />
-                  <span className="text-xs text-muted-foreground">إعلاناتي</span>
-                </div>
-                <div className="text-2xl font-semibold">{loading ? "—" : stats.totalListings}</div>
-                <div className="text-[10px] text-muted-foreground">{stats.published} منشور · {stats.drafts} مسودة</div>
+              <div className="rounded-xl p-3 bg-card border border-border/30 text-center">
+                <div className="text-lg font-bold">{loading ? "—" : stats.totalListings}</div>
+                <div className="text-[10px] text-muted-foreground">إعلان</div>
+                <div className="text-[9px] text-primary mt-0.5">{stats.published} منشور · {stats.draftCount} مسودة</div>
               </div>
-              <div className="rounded-2xl p-4 bg-card border border-border/30">
-                <div className="flex items-center gap-2 mb-1">
-                  <Activity size={14} strokeWidth={1.3} className="text-primary" />
-                  <span className="text-xs text-muted-foreground">صفقات نشطة</span>
-                </div>
-                <div className="text-2xl font-semibold">{loading ? "—" : stats.activeDeals}</div>
-                <div className="text-[10px] text-muted-foreground">قيد التفاوض</div>
+              <div className="rounded-xl p-3 bg-card border border-border/30 text-center">
+                <div className="text-lg font-bold">{loading ? "—" : stats.activeDeals}</div>
+                <div className="text-[10px] text-muted-foreground">صفقة نشطة</div>
+                <div className="text-[9px] text-primary mt-0.5">قيد التفاوض</div>
               </div>
-              <div className="rounded-2xl p-4 bg-card border border-border/30">
-                <div className="flex items-center gap-2 mb-1">
-                  <CheckCircle size={14} strokeWidth={1.3} className="text-success" />
-                  <span className="text-xs text-muted-foreground">مكتملة</span>
-                </div>
-                <div className="text-2xl font-semibold">{loading ? "—" : stats.completedDeals}</div>
-                <div className="text-[10px] text-muted-foreground">صفقة ناجحة</div>
+              <div className="rounded-xl p-3 bg-card border border-border/30 text-center">
+                <div className="text-lg font-bold">{loading ? "—" : stats.completedDeals}</div>
+                <div className="text-[10px] text-muted-foreground">صفقة مكتملة</div>
+                <div className="text-[9px] text-success mt-0.5">{stats.completedDeals > 0 ? "مبروك!" : "لم تكتمل بعد"}</div>
               </div>
             </div>
 
-            {/* ── Drafts Banner (if any) ── */}
+            {/* ── Drafts (if any) ── */}
             {!loading && drafts.length > 0 && (
               <section className="rounded-2xl border border-warning/20 bg-warning/5 overflow-hidden">
-                <div className="flex items-center justify-between p-4 pb-2">
-                  <h2 className="text-sm font-medium flex items-center gap-2">
-                    <Edit3 size={14} className="text-warning" />
+                <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                  <h2 className="text-xs font-medium flex items-center gap-2 text-warning">
+                    <Edit3 size={13} />
                     مسودات تحتاج إكمال
-                    <span className="text-[10px] bg-warning/15 text-warning px-1.5 py-0.5 rounded-md">{drafts.length}</span>
+                    <span className="text-[9px] bg-warning/15 px-1.5 py-0.5 rounded-md">{drafts.length}</span>
                   </h2>
                 </div>
                 <div className="divide-y divide-warning/10">
                   {drafts.map((d) => {
                     const progress = calcDraftProgress(d);
                     return (
-                      <Link key={d.id} to={`/listing/${d.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-warning/10 transition-colors group">
-                        <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center shrink-0">
-                          <FileText size={14} className="text-warning" />
+                      <Link key={d.id} to={`/listing/${d.id}`} className="flex items-center gap-3 px-4 py-2.5 hover:bg-warning/10 transition-colors group">
+                        <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center shrink-0">
+                          <FileText size={13} className="text-warning" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
-                            <div className="text-sm font-medium truncate">{d.title || "بدون عنوان"}</div>
-                            <span className={cn("text-[10px] font-medium shrink-0 mr-2", progress >= 80 ? "text-success" : progress >= 50 ? "text-warning" : "text-destructive")}>{progress}%</span>
+                            <span className="text-xs font-medium truncate">{d.title || "بدون عنوان"}</span>
+                            <span className={cn("text-[9px] font-medium shrink-0 mr-2",
+                              progress >= 80 ? "text-success" : progress >= 50 ? "text-warning" : "text-destructive"
+                            )}>{progress}%</span>
                           </div>
-                          <div className="w-full h-1.5 rounded-full bg-warning/10 overflow-hidden">
-                            <div className={cn("h-full rounded-full transition-all duration-500", progress >= 80 ? "bg-success" : progress >= 50 ? "bg-warning" : "bg-destructive")} style={{ width: `${progress}%` }} />
+                          <div className="w-full h-1 rounded-full bg-warning/10 overflow-hidden">
+                            <div className={cn("h-full rounded-full transition-all duration-500",
+                              progress >= 80 ? "bg-success" : progress >= 50 ? "bg-warning" : "bg-destructive"
+                            )} style={{ width: `${progress}%` }} />
                           </div>
-                          <div className="text-[10px] text-muted-foreground mt-1">{d.city || "لم تحدد المدينة"} {progress < 100 && "· أكمل البيانات للنشر"}</div>
                         </div>
-                        <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                        <ChevronLeft size={11} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                       </Link>
                     );
                   })}
@@ -217,49 +249,104 @@ const CustomerDashboardPage = () => {
               </section>
             )}
 
-            {/* ── Recent Activity (unified timeline) ── */}
+            {/* ── My Deals ── */}
             <section className="rounded-2xl border border-border/30 bg-card overflow-hidden">
-              <div className="flex items-center justify-between p-4 pb-3 border-b border-border/20">
-                <h2 className="text-sm font-medium flex items-center gap-2">
-                  <TrendingUp size={14} className="text-primary" />
-                  آخر النشاطات
+              <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                <h2 className="text-xs font-medium flex items-center gap-2">
+                  <MessageSquare size={13} className="text-primary" />
+                  صفقاتي
                 </h2>
-                <Link to="/marketplace" className="text-[10px] text-primary hover:underline">تصفح السوق</Link>
+                {deals.length > 4 && <span className="text-[9px] text-muted-foreground">{deals.length} صفقة</span>}
               </div>
               {loading ? (
-                <div className="flex justify-center py-8"><Loader2 size={18} className="animate-spin text-primary" /></div>
-              ) : recentActivity.length === 0 ? (
+                <div className="flex justify-center py-8"><Loader2 size={16} className="animate-spin text-primary" /></div>
+              ) : deals.length === 0 ? (
                 <div className="text-center py-8 px-4">
-                  <Briefcase size={24} className="mx-auto mb-2 text-muted-foreground/20" strokeWidth={1} />
-                  <p className="text-xs text-muted-foreground mb-2">لا يوجد نشاط بعد</p>
-                  <Link to="/create-listing" className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium">
-                    <Plus size={12} /> إنشاء إعلان
-                  </Link>
+                  <MessageSquare size={22} className="mx-auto mb-2 text-muted-foreground/20" strokeWidth={1} />
+                  <p className="text-xs text-muted-foreground">لا توجد صفقات بعد</p>
+                  <Link to="/marketplace" className="text-[10px] text-primary hover:underline mt-1 inline-block">تصفح السوق</Link>
                 </div>
               ) : (
                 <div className="divide-y divide-border/20">
-                  {recentActivity.map((item) => {
-                    const st = statusLabel(item.status);
-                    const isDeal = item.type === "deal";
+                  {recentDeals.map((deal) => {
+                    const st = statusBadge(deal.status);
+                    const isCompleted = deal.status === "completed";
                     return (
-                      <Link key={`${item.type}-${item.id}`} to={item.link} className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors group">
-                        <div className={cn(
-                          "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                          isDeal ? (item.status === "completed" ? "bg-success/10" : "bg-primary/10") : "bg-secondary"
+                      <Link key={deal.id} to={isCompleted ? `/agreement/${deal.id}` : `/negotiate/${deal.id}`}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors group">
+                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
+                          isCompleted ? "bg-[hsl(270,60%,95%)]" : "bg-primary/10"
                         )}>
-                          {isDeal
-                            ? (item.status === "completed" ? <Shield size={13} className="text-success" /> : <MessageSquare size={13} className="text-primary" />)
-                            : <FileText size={13} className="text-foreground/60" />
-                          }
+                          {isCompleted
+                            ? <CheckCircle size={13} className="text-[hsl(270,60%,45%)]" />
+                            : <MessageSquare size={13} className="text-primary" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate">{item.title}</div>
-                          <div className="text-[10px] text-muted-foreground">{item.subtitle}</div>
+                          <div className="text-xs font-medium truncate">
+                            صفقة #{deal.id.slice(0, 6)}
+                          </div>
+                          <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+                            <span>{new Date(deal.created_at).toLocaleDateString("ar-SA")}</span>
+                            {deal.agreed_price && (
+                              <>
+                                <span>·</span>
+                                <span className="font-medium text-foreground/70">{Number(deal.agreed_price).toLocaleString()} ر.س</span>
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className={cn("text-[10px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
-                          <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <span className={cn("text-[9px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
+                        <ChevronLeft size={11} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+
+            {/* ── My Listings ── */}
+            <section className="rounded-2xl border border-border/30 bg-card overflow-hidden">
+              <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                <h2 className="text-xs font-medium flex items-center gap-2">
+                  <FileText size={13} className="text-primary" />
+                  إعلاناتي المنشورة
+                </h2>
+                <Link to="/create-listing" className="flex items-center gap-1 text-[9px] text-primary hover:underline">
+                  <Plus size={10} /> إعلان جديد
+                </Link>
+              </div>
+              {loading ? (
+                <div className="flex justify-center py-8"><Loader2 size={16} className="animate-spin text-primary" /></div>
+              ) : recentListings.length === 0 ? (
+                <div className="text-center py-8 px-4">
+                  <FileText size={22} className="mx-auto mb-2 text-muted-foreground/20" strokeWidth={1} />
+                  <p className="text-xs text-muted-foreground mb-1">لا توجد إعلانات منشورة</p>
+                  <Link to="/create-listing" className="text-[10px] text-primary hover:underline">أنشئ إعلانك الأول</Link>
+                </div>
+              ) : (
+                <div className="divide-y divide-border/20">
+                  {recentListings.map((listing) => {
+                    const st = statusBadge(listing.status);
+                    return (
+                      <Link key={listing.id} to={`/listing/${listing.id}`}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors group">
+                        <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                          <FileText size={13} className="text-foreground/60" />
                         </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-medium truncate">{listing.title || "بدون عنوان"}</div>
+                          <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+                            {listing.city && <span>{listing.city}</span>}
+                            {listing.price && (
+                              <>
+                                <span>·</span>
+                                <span className="font-medium text-foreground/70">{Number(listing.price).toLocaleString()} ر.س</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <span className={cn("text-[9px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
+                        <ChevronLeft size={11} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                       </Link>
                     );
                   })}
@@ -268,84 +355,133 @@ const CustomerDashboardPage = () => {
             </section>
           </div>
 
-          {/* ═══ RIGHT: Sidebar (1/3) ═══ */}
+          {/* ═══ SIDEBAR (1/3) ═══ */}
           <div className="space-y-5">
 
-            {/* ── Trust Score Card ── */}
-            <div className="rounded-2xl border border-border/30 bg-card p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Shield size={14} className="text-primary" />
-                <h3 className="text-sm font-medium">مستوى الثقة</h3>
+            {/* ── Profile Card ── */}
+            <div className="rounded-2xl border border-border/30 bg-card p-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                  {profile?.full_name?.charAt(0) || "؟"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium truncate">{profile?.full_name || "—"}</div>
+                  <div className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    {profile?.is_verified
+                      ? <><UserCheck size={10} className="text-success" /> حساب موثّق</>
+                      : <><Shield size={10} className="text-warning" /> غير موثّق</>
+                    }
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className={cn("w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold border-[3px]", trustBg, trustColor,
-                  stats.trustScore >= 70 ? "border-success/30" : stats.trustScore >= 40 ? "border-warning/30" : "border-destructive/30"
+
+              {/* Profile completeness */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] text-muted-foreground">اكتمال الملف الشخصي</span>
+                  <span className={cn("text-[10px] font-medium",
+                    profileCompleteness >= 75 ? "text-success" : profileCompleteness >= 50 ? "text-warning" : "text-destructive"
+                  )}>{profileCompleteness}%</span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className={cn("h-full rounded-full transition-all duration-500",
+                    profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
+                  )} style={{ width: `${profileCompleteness}%` }} />
+                </div>
+              </div>
+
+              <div className="space-y-1.5 text-[10px]">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Phone size={10} /> {profile?.phone || "لم يُضاف"}
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <MapPin size={10} /> {profile?.city || "لم تُحدد"}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Trust Score ── */}
+            <div className="rounded-2xl border border-border/30 bg-card p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Shield size={13} className="text-primary" />
+                <h3 className="text-xs font-medium">مستوى الثقة</h3>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold border-[3px]",
+                  stats.trustScore >= 70 ? "bg-success/10 text-success border-success/30"
+                    : stats.trustScore >= 40 ? "bg-warning/10 text-warning border-warning/30"
+                    : "bg-destructive/10 text-destructive border-destructive/30"
                 )}>
                   {loading ? "—" : stats.trustScore}
                 </div>
                 <div>
-                  <div className={cn("text-sm font-medium", trustColor)}>{trustLabel}</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">
-                    {stats.completedDeals} صفقة مكتملة · {stats.published} إعلان
+                  <div className={cn("text-xs font-medium", trustColor)}>{trustLabel}</div>
+                  <div className="text-[9px] text-muted-foreground mt-0.5 space-y-0.5">
+                    <div className="flex items-center gap-1">
+                      <ArrowUpLeft size={8} className="text-success" />
+                      {stats.completedDeals} صفقة ناجحة
+                    </div>
+                    {profile && profile.cancelled_deals > 0 && (
+                      <div className="flex items-center gap-1">
+                        <ArrowDownLeft size={8} className="text-destructive" />
+                        {profile.cancelled_deals} صفقة ملغاة
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
             {/* ── Quick Actions ── */}
-            <div className="rounded-2xl border border-border/30 bg-card p-4 space-y-2">
-              <h3 className="text-sm font-medium mb-3">إجراءات سريعة</h3>
+            <div className="rounded-2xl border border-border/30 bg-card p-4 space-y-1.5">
+              <h3 className="text-xs font-medium mb-2">إجراءات سريعة</h3>
               {drafts.length > 0 && (
-                <Link to={`/listing/${drafts[0].id}`} className="flex items-center gap-3 p-3 rounded-xl bg-warning/5 hover:bg-warning/10 transition-colors group">
-                  <div className="w-8 h-8 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
-                    <Edit3 size={14} strokeWidth={1.5} className="text-warning" />
+                <Link to={`/listing/${drafts[0].id}`} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-warning/5 hover:bg-warning/10 transition-colors group">
+                  <div className="w-7 h-7 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
+                    <Edit3 size={12} className="text-warning" />
                   </div>
-                  <div className="flex-1">
-                    <div className="text-xs font-medium">إكمال المسودة</div>
-                    <div className="text-[10px] text-muted-foreground truncate">{drafts[0].title || "بدون عنوان"}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] font-medium">إكمال المسودة</div>
                   </div>
-                  <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
                 </Link>
               )}
-              <Link to="/create-listing" className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors group">
-                <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center shrink-0">
-                  <Plus size={14} strokeWidth={2} className="text-primary-foreground" />
+              <Link to="/create-listing" className="flex items-center gap-2.5 p-2.5 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors group">
+                <div className="w-7 h-7 rounded-lg gradient-primary flex items-center justify-center shrink-0">
+                  <Plus size={12} strokeWidth={2} className="text-primary-foreground" />
                 </div>
-                <div className="flex-1">
-                  <div className="text-xs font-medium">إنشاء إعلان جديد</div>
-                  <div className="text-[10px] text-muted-foreground">أضف نشاطك التجاري</div>
-                </div>
-                <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="flex-1"><div className="text-[10px] font-medium">إنشاء إعلان جديد</div></div>
+                <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
               </Link>
-              <Link to="/marketplace" className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors group">
-                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                  <Eye size={14} strokeWidth={1.5} className="text-foreground/60" />
+              <Link to="/marketplace" className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-muted/50 transition-colors group">
+                <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                  <Eye size={12} className="text-foreground/60" />
                 </div>
-                <div className="flex-1">
-                  <div className="text-xs font-medium">تصفح السوق</div>
-                  <div className="text-[10px] text-muted-foreground">اكتشف الفرص المتاحة</div>
-                </div>
-                <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="flex-1"><div className="text-[10px] font-medium">تصفح السوق</div></div>
+                <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
               </Link>
             </div>
 
             {/* ── Notifications ── */}
             {notifications.length > 0 && (
               <div className="rounded-2xl border border-border/30 bg-card p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-medium">الإشعارات {unreadCount > 0 && <span className="text-[10px] text-primary mr-1">({unreadCount})</span>}</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-medium">
+                    الإشعارات {unreadCount > 0 && <span className="text-[9px] text-primary mr-1">({unreadCount})</span>}
+                  </h3>
                   {unreadCount > 0 && (
-                    <button onClick={markAllAsRead} className="text-[10px] text-primary hover:underline">قراءة الكل</button>
+                    <button onClick={markAllAsRead} className="text-[9px] text-primary hover:underline">قراءة الكل</button>
                   )}
                 </div>
-                <div className="space-y-1.5">
-                  {notifications.slice(0, 4).map((n) => (
-                    <button key={n.id} onClick={() => markAsRead(n.id)} className={cn("w-full text-right p-2.5 rounded-lg transition-all text-xs", n.is_read ? "bg-transparent" : "bg-primary/[0.03]")}>
-                      <div className="flex items-start gap-2">
-                        {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />}
+                <div className="space-y-1">
+                  {notifications.slice(0, 3).map(n => (
+                    <button key={n.id} onClick={() => markAsRead(n.id)} className={cn("w-full text-right p-2 rounded-lg transition-all text-[10px]", !n.is_read && "bg-primary/[0.03]")}>
+                      <div className="flex items-start gap-1.5">
+                        {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1 shrink-0" />}
                         <div className="flex-1 min-w-0">
                           <div className="font-medium truncate">{n.title}</div>
-                          {n.body && <div className="text-muted-foreground mt-0.5 text-[10px] truncate">{n.body}</div>}
+                          {n.body && <div className="text-muted-foreground text-[9px] truncate">{n.body}</div>}
                         </div>
                       </div>
                     </button>
@@ -354,11 +490,11 @@ const CustomerDashboardPage = () => {
               </div>
             )}
 
-            {/* ── Contact CTA ── */}
+            {/* ── Help ── */}
             <Link to="/contact" className="block rounded-2xl border border-border/30 bg-card p-4 hover:border-primary/20 transition-colors group">
-              <div className="text-sm font-medium mb-1">تحتاج مساعدة؟</div>
-              <div className="text-[10px] text-muted-foreground">تواصل مع فريق الدعم أو استخدم المساعد الذكي</div>
-              <span className="text-[10px] text-primary mt-2 inline-block group-hover:underline">تواصل معنا ←</span>
+              <div className="text-xs font-medium mb-0.5">تحتاج مساعدة؟</div>
+              <div className="text-[9px] text-muted-foreground">تواصل مع فريق الدعم</div>
+              <span className="text-[9px] text-primary mt-1.5 inline-block group-hover:underline">تواصل معنا ←</span>
             </Link>
           </div>
         </div>
