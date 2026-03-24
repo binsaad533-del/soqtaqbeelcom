@@ -10,7 +10,7 @@ interface ChatAttachmentButtonProps {
   disabled?: boolean;
 }
 
-const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+const ACCEPT = "image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 export default function ChatAttachmentButton({ dealId, onFileSent, disabled }: ChatAttachmentButtonProps) {
   const [uploading, setUploading] = useState(false);
@@ -21,7 +21,9 @@ export default function ChatAttachmentButton({ dealId, onFileSent, disabled }: C
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const isImage = file.type.startsWith("image/");
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    const imageExts = ["jpg", "jpeg", "png", "webp", "heic", "heif", "gif", "bmp", "avif"];
+    const isImage = file.type.startsWith("image/") || imageExts.includes(ext);
     const validation = isImage ? validateImageFile(file) : validateDocFile(file);
     if (!validation.valid) {
       toast.error(validation.error || "ملف غير مدعوم");
