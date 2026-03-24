@@ -946,7 +946,15 @@ const CreateListingPage = () => {
                   </div>
                 </div>
 
-                <Button onClick={handlePublish} disabled={saving || loading} className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
+                {/* Photo validation warning */}
+                {publishAttempted && !publishValidation.hasPhotos && (
+                  <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-center gap-2">
+                    <AlertTriangle size={14} className="text-destructive shrink-0" />
+                    <p className="text-xs text-destructive">يجب رفع صورة واحدة على الأقل — عد إلى خطوة الصور والمستندات</p>
+                  </div>
+                )}
+
+                <Button onClick={handlePublish} disabled={saving || loading || (!canPublish && publishAttempted)} className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
                   {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
                   نشر الإعلان
                 </Button>
