@@ -6,8 +6,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -68,36 +66,34 @@ Deno.serve(async (req) => {
       details: { phone: phone.slice(-4) },
     });
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-
-    const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
-    if (!TWILIO_API_KEY) throw new Error("TWILIO_API_KEY is not configured");
+    const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
+    if (!TWILIO_ACCOUNT_SID) throw new Error("TWILIO_ACCOUNT_SID is not configured");
 
     const TWILIO_VERIFY_SERVICE_SID = Deno.env.get("TWILIO_VERIFY_SERVICE_SID");
     if (!TWILIO_VERIFY_SERVICE_SID) throw new Error("TWILIO_VERIFY_SERVICE_SID is not configured");
 
-    // Call Twilio Verify check via gateway
-    const response = await fetch(
-      `${GATEWAY_URL}/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/VerificationCheck`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-          "X-Connection-Api-Key": TWILIO_API_KEY,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          To: phone,
-          Code: code,
-        }),
-      }
-    );
+    const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_API_KEY");
+    if (!TWILIO_AUTH_TOKEN) throw new Error("TWILIO_API_KEY is not configured");
+
+    // Call Twilio Verify Check API directly
+    const checkUrl = `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/VerificationCheck`;
+
+    const response = await fetch(checkUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`)}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        To: phone,
+        Code: code,
+      }),
+    });
 
     const data = await response.json();
 
     if (!response.ok || data.status !== "approved") {
-      console.error("Twilio verify error:", JSON.stringify(data));
+      console.error("Twilio verify check error:", JSON.stringify(data));
       return new Response(
         JSON.stringify({ error: "الكود غير صحيح، جرّب مرة ثانية", verified: false }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
