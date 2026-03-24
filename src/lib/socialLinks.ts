@@ -3,6 +3,6 @@ export const SOCIAL_LINKS = {
   linkedin: "https://www.linkedin.com/company/taqbeel",
   snapchat: "https://www.snapchat.com/add/taqbeel",
   x: "https://x.com/taqbeel",
-  tiktok: "https://www.tiktok.com/@taqbeel",
+  tiktok: "https://www.tiktok.com/@soq_taqbeel",
   instagram: "https://www.instagram.com/taqbeel",
 } as const;
