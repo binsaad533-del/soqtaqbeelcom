@@ -506,15 +506,20 @@ const CreateListingPage = () => {
 
     setSaving(true);
     try {
-      const fields = Object.values(disclosure);
-      const filled = fields.filter((v) => v.trim() !== "").length;
-      const score = Math.round((filled / fields.length) * 100);
+      const transparencyForPublish = calculateTransparency({
+        ...disclosure,
+        price: disclosure.price ? Number(disclosure.price) : null,
+        annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+        primary_deal_type: dealStructure.primaryType || "full_takeover",
+        inventory: inventory.filter((item) => item.included),
+        photos,
+      });
 
       const { error } = await updateListing(listingId, {
         ...disclosure,
         price: disclosure.price ? Number(disclosure.price) : null,
         annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
-        disclosure_score: score,
+        disclosure_score: transparencyForPublish.score,
         inventory: inventory.filter((item) => item.included),
         deal_disclosures: dealStructure.requiredDisclosures,
         required_documents: dealStructure.requiredDocuments,
