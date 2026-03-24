@@ -22,12 +22,12 @@ const steps = [
 ];
 
 const photoGroups = [
-  { id: "interior", label: "صور داخلية للمحل", desc: "صور واضحة للمساحة الداخلية من زوايا مختلفة", min: 3 },
-  { id: "exterior", label: "واجهة المحل", desc: "صور للمدخل والواجهة الخارجية", min: 2 },
-  { id: "building", label: "المبنى", desc: "صور عامة للمبنى من الخارج", min: 1 },
-  { id: "street", label: "الشارع المحيط", desc: "صور للشارع والمحيط التجاري", min: 1 },
-  { id: "signage", label: "اللوحة / اللافتة", desc: "صورة واضحة للافتة المحل", min: 1 },
-  { id: "equipment", label: "المعدات والأجهزة", desc: "صور قريبة للمعدات والأثاث والأجهزة", min: 4 },
+  { id: "interior", label: "صور داخلية للمحل", desc: "صور واضحة للمساحة الداخلية من زوايا مختلفة", min: 3, emoji: "🏠" },
+  { id: "exterior", label: "واجهة المحل", desc: "صور للمدخل والواجهة الخارجية", min: 2, emoji: "🚪" },
+  { id: "building", label: "المبنى", desc: "صور عامة للمبنى من الخارج", min: 1, emoji: "🏢" },
+  { id: "street", label: "الشارع المحيط", desc: "صور للشارع والمحيط التجاري", min: 1, emoji: "🛣️" },
+  { id: "signage", label: "اللوحة / اللافتة", desc: "صورة واضحة للافتة المحل", min: 1, emoji: "🪧" },
+  { id: "equipment", label: "المعدات والأجهزة", desc: "صور قريبة للمعدات والأثاث والأجهزة", min: 4, emoji: "⚙️" },
 ];
 
 interface InventoryItem {
@@ -346,44 +346,81 @@ const CreateListingPage = () => {
           {/* Step 1: Photos */}
           {currentStep === 1 && (
             <div className="space-y-5">
-              <div>
-                <h2 className="font-medium mb-1">صور المشروع</h2>
-                <p className="text-sm text-muted-foreground mb-1">صور شاملة ومنظّمة تعزز جودة الإعلان وثقة المشتري</p>
-                <div className="flex items-center gap-2 mt-3 mb-5">
-                  <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full gradient-primary transition-all" style={{ width: `${Math.min(100, (totalPhotos / 12) * 100)}%` }} />
-                  </div>
-                  <span className="text-xs text-muted-foreground">{totalPhotos} صورة</span>
+              {/* Hero banner */}
+              <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-5 border border-primary/10 text-center">
+                <div className="text-3xl mb-2">✨📸</div>
+                <h2 className="font-semibold text-base mb-1">فقط ارفع الصور — مقبل يتولى الباقي!</h2>
+                <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+                  ارفع صور مشروعك وسيقوم الذكاء الاصطناعي تلقائياً باستخراج قائمة الأصول والمعدات وتحليل حالتها وتقدير قيمتها — بدون أي إدخال يدوي منك
+                </p>
+                <div className="flex items-center justify-center gap-4 mt-3">
+                  {[
+                    { icon: "🔍", text: "اكتشاف الأصول" },
+                    { icon: "📋", text: "جرد تلقائي" },
+                    { icon: "💰", text: "تقدير القيمة" },
+                  ].map((f, i) => (
+                    <div key={i} className="flex items-center gap-1 text-[10px] text-muted-foreground bg-card/80 px-2.5 py-1 rounded-lg">
+                      <span>{f.icon}</span>
+                      <span>{f.text}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="space-y-4">
-                {photoGroups.map((group) => (
-                  <div key={group.id} className="p-4 rounded-xl border border-border/50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="text-sm font-medium">{group.label}</div>
-                        <div className="text-xs text-muted-foreground">{group.desc} — {group.min} صور على الأقل</div>
+
+              {/* Progress */}
+              <div className="flex items-center gap-2">
+                <div className="h-2 flex-1 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full rounded-full gradient-primary transition-all duration-500" style={{ width: `${Math.min(100, (totalPhotos / 12) * 100)}%` }} />
+                </div>
+                <span className="text-xs font-medium text-primary">{totalPhotos} صورة</span>
+              </div>
+
+              {/* Photo groups - compact grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {photoGroups.map((group) => {
+                  const count = photos[group.id]?.length || 0;
+                  const done = count >= group.min;
+                  return (
+                    <div key={group.id} className={cn(
+                      "p-3.5 rounded-xl border transition-all",
+                      done ? "border-success/30 bg-success/5" : "border-border/50 bg-card hover:border-primary/30"
+                    )}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-lg">{group.emoji}</span>
+                          <div>
+                            <div className="text-xs font-medium">{group.label}</div>
+                            <div className="text-[10px] text-muted-foreground">{group.min} صور على الأقل</div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => { setActivePhotoGroup(group.id); fileInputRef.current?.click(); }}
+                          className={cn(
+                            "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all active:scale-[0.97]",
+                            done ? "bg-success/10 text-success" : "bg-primary/10 text-primary hover:bg-primary/20"
+                          )}
+                        >
+                          <Upload size={12} strokeWidth={1.5} />
+                          {count > 0 ? `${count} ✓` : "رفع"}
+                        </button>
                       </div>
-                      <button
-                        onClick={() => { setActivePhotoGroup(group.id); fileInputRef.current?.click(); }}
-                        className={cn(
-                          "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all active:scale-[0.97]",
-                          (photos[group.id]?.length || 0) >= group.min ? "bg-success/10 text-success" : "bg-accent text-accent-foreground"
-                        )}
-                      >
-                        <Upload size={14} strokeWidth={1.3} />
-                        {(photos[group.id]?.length || 0) > 0 ? `${photos[group.id].length} صورة` : "رفع"}
-                      </button>
+                      {photos[group.id]?.length > 0 && (
+                        <div className="flex gap-1.5 mt-2.5 overflow-x-auto pb-1">
+                          {photos[group.id].map((url, i) => (
+                            <img key={i} src={url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0 border border-border/30" />
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    {photos[group.id]?.length > 0 && (
-                      <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
-                        {photos[group.id].map((url, i) => (
-                          <img key={i} src={url} alt="" className="w-16 h-16 rounded-lg object-cover shrink-0 border border-border/30" />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
+              </div>
+
+              {/* Encouragement footer */}
+              <div className="text-center pt-2">
+                <p className="text-[11px] text-muted-foreground">
+                  💡 كلما زادت الصور، كان التحليل أدق والإعلان أقوى
+                </p>
               </div>
             </div>
           )}
