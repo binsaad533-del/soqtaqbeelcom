@@ -187,11 +187,13 @@ const CustomerDashboardPage = () => {
     : "—";
 
   /* ── Profile completeness ── */
+  const hasRealEmail = !!(userEmail && !userEmail.endsWith("@phone.souqtaqbeel.app"));
   const profileCompleteness = useMemo(() => {
     if (!profile) return 0;
-    const fields = [profile.full_name, profile.phone, profile.city, profile.avatar_url];
+    const fields = [profile.full_name, profile.phone, profile.avatar_url, hasRealEmail];
     return Math.round((fields.filter(Boolean).length / fields.length) * 100);
-  }, [profile]);
+  }, [profile, hasRealEmail]);
+  const isProfileComplete = profileCompleteness >= 100;
 
   return (
     <div className="py-5 md:py-8">
