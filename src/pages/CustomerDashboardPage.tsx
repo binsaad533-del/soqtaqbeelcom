@@ -6,6 +6,7 @@ import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import AiStar from "@/components/AiStar";
+import PhoneVerificationFlow from "@/components/PhoneVerificationFlow";
 import { cn } from "@/lib/utils";
 import {
   Plus, FileText, MessageSquare, Shield, AlertCircle,
@@ -188,11 +189,12 @@ const CustomerDashboardPage = () => {
 
   /* ── Profile completeness ── */
   const hasRealEmail = !!(userEmail && !userEmail.endsWith("@phone.souqtaqbeel.app"));
+  const isPhoneVerified = !!(profile as any)?.phone_verified;
   const profileCompleteness = useMemo(() => {
     if (!profile) return 0;
-    const fields = [profile.full_name, profile.phone, profile.avatar_url, hasRealEmail];
+    const fields = [profile.full_name, profile.phone, profile.avatar_url, hasRealEmail, isPhoneVerified];
     return Math.round((fields.filter(Boolean).length / fields.length) * 100);
-  }, [profile, hasRealEmail]);
+  }, [profile, hasRealEmail, isPhoneVerified]);
   const isProfileComplete = profileCompleteness >= 100;
 
   return (
@@ -333,12 +335,27 @@ const CustomerDashboardPage = () => {
                   )} style={{ width: `${profileCompleteness}%` }} />
                 </div>
                 <p className="text-[9px] text-muted-foreground mt-1">
-                  أكمل: {!profile?.full_name && "الاسم · "}{!profile?.phone && "الجوال · "}{!hasRealEmail && "الإيميل · "}{!profile?.avatar_url && "الصورة"}
+                  أكمل: {!profile?.full_name && "الاسم · "}{!profile?.phone && "الجوال · "}{!hasRealEmail && "الإيميل · "}{!profile?.avatar_url && "الصورة · "}{!isPhoneVerified && "توثيق الجوال"}
                 </p>
               </>
             )}
           </div>
         </div>
+
+        {/* ══════ PHONE VERIFICATION CARD ══════ */}
+        {!isPhoneVerified && profile?.phone && (
+          <div className="rounded-2xl border border-warning/30 bg-warning/5 px-5 py-4 mb-5 animate-fade-in">
+            <div className="flex items-center gap-2 mb-3">
+              <Shield size={16} className="text-warning" />
+              <h3 className="text-sm font-semibold text-foreground">وثّق رقم جوالك</h3>
+              <span className="text-[10px] bg-warning/15 text-warning px-2 py-0.5 rounded-full">مطلوب</span>
+            </div>
+            <PhoneVerificationFlow
+              initialPhone={profile.phone}
+              onVerified={() => window.location.reload()}
+            />
+          </div>
+        )}
 
         {/* ══════ FINANCIAL OVERVIEW ══════ */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">

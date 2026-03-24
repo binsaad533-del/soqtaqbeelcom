@@ -37,6 +37,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { calculateTransparency } from "@/lib/transparencyScore";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
 import { getRules, isFieldVisible, validateDisclosure, validateImages, FIELD_LABELS as RULE_FIELD_LABELS } from "@/lib/dealTypeFieldRules";
+import VerificationGate from "@/components/VerificationGate";
 
 const steps = [
   { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على الـAI" },
@@ -806,6 +807,7 @@ const CreateListingPage = () => {
   }
 
   return (
+    <VerificationGate message="يجب توثيق رقم جوالك قبل إضافة إعلان">
     <div className="py-8">
       <div className="container max-w-3xl">
         <h1 className="text-2xl font-medium mb-2">إضافة فرصة تقبيل</h1>
@@ -1743,6 +1745,7 @@ const CreateListingPage = () => {
         </div>
       )}
     </div>
+    </VerificationGate>
   );
 };
 

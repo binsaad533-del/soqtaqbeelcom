@@ -20,6 +20,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import CommissionBanner from "@/components/CommissionBanner";
 import { toast } from "sonner";
+import VerificationGate from "@/components/VerificationGate";
 
 // Parse SSE stream and extract text
 async function parseSSEStream(response: Response): Promise<string> {
@@ -367,6 +368,7 @@ const NegotiationPage = () => {
   const readinessPercent = Math.max(0, 100 - (deal.risk_score || 0));
 
   return (
+    <VerificationGate message="يجب توثيق رقم جوالك قبل بدء التفاوض">
     <div className="py-6">
       <div className="container max-w-6xl">
         {/* Breadcrumb */}
@@ -730,6 +732,7 @@ const NegotiationPage = () => {
         </div>
       </div>
     </div>
+    </VerificationGate>
   );
 };
 
