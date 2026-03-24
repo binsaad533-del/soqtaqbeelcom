@@ -193,18 +193,25 @@ const CustomerDashboardPage = () => {
                   </h2>
                 </div>
                 <div className="divide-y divide-warning/10">
-                  {drafts.map((d) => (
-                    <Link key={d.id} to={`/listing/${d.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-warning/10 transition-colors group">
-                      <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center shrink-0">
-                        <FileText size={14} className="text-warning" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">{d.title || "بدون عنوان"}</div>
-                        <div className="text-[10px] text-muted-foreground">{d.city || "لم تحدد المدينة"}</div>
-                      </div>
-                      <span className="text-[10px] text-warning font-medium opacity-0 group-hover:opacity-100 transition-opacity">إكمال ←</span>
-                    </Link>
-                  ))}
+                  {drafts.map((d) => {
+                    const progress = calcDraftProgress(d);
+                    return (
+                      <Link key={d.id} to={`/listing/${d.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-warning/10 transition-colors group">
+                        <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center shrink-0">
+                          <FileText size={14} className="text-warning" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-sm font-medium truncate">{d.title || "بدون عنوان"}</div>
+                            <span className={cn("text-[10px] font-medium shrink-0 mr-2", progress >= 80 ? "text-success" : progress >= 50 ? "text-warning" : "text-destructive")}>{progress}%</span>
+                          </div>
+                          <Progress value={progress} className="h-1.5 bg-warning/10 [&>div]:transition-all [&>div]:duration-500" indicatorClassName={cn(progress >= 80 ? "bg-success" : progress >= 50 ? "bg-warning" : "bg-destructive")} />
+                          <div className="text-[10px] text-muted-foreground mt-1">{d.city || "لم تحدد المدينة"} {progress < 100 && "· أكمل البيانات للنشر"}</div>
+                        </div>
+                        <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                      </Link>
+                    );
+                  })}
                 </div>
               </section>
             )}
