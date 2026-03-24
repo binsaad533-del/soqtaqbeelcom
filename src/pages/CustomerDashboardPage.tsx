@@ -191,24 +191,6 @@ const CustomerDashboardPage = () => {
           {/* ═══ MAIN COLUMN (2/3) ═══ */}
           <div className="lg:col-span-2 space-y-5">
 
-            {/* ── Activity Summary Row ── */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-xl p-3 bg-card border border-border/30 text-center">
-                <div className="text-lg font-bold">{loading ? "—" : stats.totalListings}</div>
-                <div className="text-[10px] text-muted-foreground">إعلان</div>
-                <div className="text-[9px] text-primary mt-0.5">{stats.published} منشور · {stats.draftCount} مسودة</div>
-              </div>
-              <div className="rounded-xl p-3 bg-card border border-border/30 text-center">
-                <div className="text-lg font-bold">{loading ? "—" : stats.activeDeals}</div>
-                <div className="text-[10px] text-muted-foreground">صفقة نشطة</div>
-                <div className="text-[9px] text-primary mt-0.5">قيد التفاوض</div>
-              </div>
-              <div className="rounded-xl p-3 bg-card border border-border/30 text-center">
-                <div className="text-lg font-bold">{loading ? "—" : stats.completedDeals}</div>
-                <div className="text-[10px] text-muted-foreground">صفقة مكتملة</div>
-                <div className="text-[9px] text-success mt-0.5">{stats.completedDeals > 0 ? "مبروك!" : "لم تكتمل بعد"}</div>
-              </div>
-            </div>
 
             {/* ── Drafts (if any) ── */}
             {!loading && drafts.length > 0 && (
@@ -398,38 +380,6 @@ const CustomerDashboardPage = () => {
               </div>
             </div>
 
-            {/* ── Trust Score ── */}
-            <div className="rounded-2xl border border-border/30 bg-card p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Shield size={13} className="text-primary" />
-                <h3 className="text-xs font-medium">مستوى الثقة</h3>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className={cn(
-                  "w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold border-[3px]",
-                  stats.trustScore >= 70 ? "bg-success/10 text-success border-success/30"
-                    : stats.trustScore >= 40 ? "bg-warning/10 text-warning border-warning/30"
-                    : "bg-destructive/10 text-destructive border-destructive/30"
-                )}>
-                  {loading ? "—" : stats.trustScore}
-                </div>
-                <div>
-                  <div className={cn("text-xs font-medium", trustColor)}>{trustLabel}</div>
-                  <div className="text-[9px] text-muted-foreground mt-0.5 space-y-0.5">
-                    <div className="flex items-center gap-1">
-                      <ArrowUpLeft size={8} className="text-success" />
-                      {stats.completedDeals} صفقة ناجحة
-                    </div>
-                    {profile && profile.cancelled_deals > 0 && (
-                      <div className="flex items-center gap-1">
-                        <ArrowDownLeft size={8} className="text-destructive" />
-                        {profile.cancelled_deals} صفقة ملغاة
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
 
             {/* ── Quick Actions ── */}
             <div className="rounded-2xl border border-border/30 bg-card p-4 space-y-1.5">
