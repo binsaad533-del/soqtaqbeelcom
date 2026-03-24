@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from "react";
+import heic2any from "heic2any";
 import { validateImageFile, validateDocFile, logAudit } from "@/lib/security";
 import { Check, Upload, Camera, FileText, ClipboardList, Eye, ArrowLeft, ArrowRight, Plus, Trash2, Loader2, Shield, AlertTriangle, Minus, Image as ImageIcon, Layers, DoorOpen, Building2, MapPin, Tag, Wrench, Sparkles } from "lucide-react";
 import AiStar from "@/components/AiStar";
@@ -10,187 +11,107 @@ import { toast } from "sonner";
 import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
 import { DEAL_TYPE_MAP, getRequiredDocuments } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
+...
+  const isHeicLikeFile = useCallback((file: File) => {
+    const name = file.name.toLowerCase();
+    return file.type === "image/heic" || file.type === "image/heif" || name.endsWith(".heic") || name.endsWith(".heif");
+  }, []);
 
-const steps = [
-  { label: "هيكل الصفقة والصور", icon: Camera, hint: "اختر نوع الصفقة وارفع الصور — مقبل يتكفّل بالباقي" },
-  { label: "التحليل والجرد والمستندات", icon: Eye, hint: "مقبل يحلل ويجرد تلقائياً — فقط راجع وأكّد" },
-  { label: "الإفصاح والنشر", icon: Check, hint: "أكمل البيانات وانشر بضغطة واحدة" },
-];
-
-const allPhotoGroups = [
-  { id: "interior", label: "صور داخلية للمحل", desc: "صور واضحة للمساحة الداخلية من زوايا مختلفة", min: 3, icon: "Camera", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup", "location_only"] },
-  { id: "exterior", label: "واجهة المحل", desc: "صور للمدخل والواجهة الخارجية", min: 2, icon: "DoorOpen", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup", "location_only"] },
-  { id: "building", label: "المبنى", desc: "صور عامة للمبنى من الخارج", min: 1, icon: "Building2", dealTypes: ["full_takeover", "transfer_no_liabilities", "location_only"] },
-  { id: "street", label: "الشارع المحيط", desc: "صور للشارع والمحيط التجاري", min: 1, icon: "MapPin", dealTypes: ["full_takeover", "transfer_no_liabilities", "location_only"] },
-  { id: "signage", label: "اللوحة / اللافتة", desc: "صورة واضحة للافتة المحل", min: 1, icon: "Tag", dealTypes: ["full_takeover", "transfer_no_liabilities"] },
-  { id: "equipment", label: "المعدات والأجهزة", desc: "صور قريبة للمعدات والأثاث والأجهزة", min: 4, icon: "Wrench", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup", "assets_only"] },
-  { id: "cr_doc", label: "صورة السجل التجاري", desc: "صورة واضحة للسجل التجاري", min: 1, icon: "FileText", dealTypes: ["cr_only"] },
-];
-
-interface InventoryItem {
-  id: string;
-  name: string;
-  qty: number;
-  condition: string;
-  category: string;
-  included: boolean;
-  confidence: "high" | "medium" | "low";
-  detectionNote: string;
-  photoIndices: number[];
-  isSameAssetMultipleAngles: boolean;
-  userConfirmed: boolean;
-}
-
-interface DedupAction {
-  description: string;
-  merged_count: number;
-}
-
-const CreateListingPage = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [dealStructure, setDealStructure] = useState<DealStructureSelection>({
-    selectedTypes: [],
-    primaryType: "",
-    conflicts: [],
-    requiredDisclosures: [],
-    requiredDocuments: [],
-    isValid: false,
-  });
-  const [photos, setPhotos] = useState<Record<string, string[]>>({});
-  const [localPreviews, setLocalPreviews] = useState<Record<string, string[]>>({});
-  const [uploadingGroup, setUploadingGroup] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number }>({ current: 0, total: 0 });
-  const [analyzing, setAnalyzing] = useState(false);
-  const [analyzed, setAnalyzed] = useState(false);
-  const [analyzeProgress, setAnalyzeProgress] = useState(0);
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [analysisSummary, setAnalysisSummary] = useState("");
-  const [dedupActions, setDedupActions] = useState<DedupAction[]>([]);
-  const [uploadedDocs, setUploadedDocs] = useState<Record<string, string[]>>({});
-  const [listingId, setListingId] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [showDealStructure, setShowDealStructure] = useState(true);
-
-  const [disclosure, setDisclosure] = useState({
-    business_activity: "",
-    city: "",
-    district: "",
-    price: "",
-    annual_rent: "",
-    lease_duration: "",
-    lease_paid_period: "",
-    lease_remaining: "",
-    liabilities: "",
-    overdue_salaries: "",
-    overdue_rent: "",
-    municipality_license: "",
-    civil_defense_license: "",
-    surveillance_cameras: "",
-  });
-
-  const { createListing, updateListing, uploadFile, loading } = useListings();
-  const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [activePhotoGroup, setActivePhotoGroup] = useState<string | null>(null);
-  const docInputRef = useRef<HTMLInputElement>(null);
-  const [activeDocType, setActiveDocType] = useState<string | null>(null);
-
-  const photoGroups = allPhotoGroups.filter(group => {
-    if (dealStructure.selectedTypes.length === 0) return true;
-    return dealStructure.selectedTypes.some(dt => group.dealTypes.includes(dt));
-  });
-
-  const ensureListing = useCallback(async () => {
-    if (listingId) return listingId;
-    const { data, error } = await createListing({
-      deal_type: dealStructure.primaryType || "full_takeover",
-      primary_deal_type: dealStructure.primaryType,
-      deal_options: dealStructure.selectedTypes.map((id, i) => ({
-        type_id: id,
-        priority: i,
-        is_primary: id === dealStructure.primaryType,
-      })),
-      status: "draft",
-    } as any);
-    if (error || !data) {
-      toast.error("حدث خطأ أثناء حفظ المسودة");
-      return null;
-    }
-    const id = (data as any).id;
-    setListingId(id);
-    return id;
-  }, [listingId, dealStructure, createListing]);
-
-  // Convert non-web-friendly images (HEIC, etc.) to JPEG using canvas
   const convertToJpeg = useCallback(async (file: File): Promise<File> => {
     const webFriendly = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (webFriendly.includes(file.type)) return file;
-    
-    // Try to convert via canvas (works for formats the browser can decode)
+
+    if (isHeicLikeFile(file)) {
+      const result = await heic2any({
+        blob: file,
+        toType: "image/jpeg",
+        quality: 0.9,
+      } as any);
+
+      const blob = Array.isArray(result) ? result[0] : result;
+      const newName = file.name.replace(/\.[^.]+$/i, ".jpg");
+      return new File([blob as BlobPart], newName, { type: "image/jpeg" });
+    }
+
     try {
       const bitmap = await createImageBitmap(file);
       const canvas = document.createElement("canvas");
       canvas.width = bitmap.width;
       canvas.height = bitmap.height;
-      const ctx = canvas.getContext("2d")!;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return file;
       ctx.drawImage(bitmap, 0, 0);
       bitmap.close();
-      
-      const blob = await new Promise<Blob>((resolve) => {
-        canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.9);
+
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, "image/jpeg", 0.92);
       });
-      
-      const newName = file.name.replace(/\.[^.]+$/, ".jpg");
+
+      if (!blob) return file;
+      const newName = file.name.replace(/\.[^.]+$/i, ".jpg");
       return new File([blob], newName, { type: "image/jpeg" });
     } catch {
-      // If browser can't decode (e.g. HEIC on non-Safari), return as-is
       return file;
     }
-  }, []);
+  }, [isHeicLikeFile]);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !activePhotoGroup) return;
     const id = await ensureListing();
     if (!id) return;
+
     const group = activePhotoGroup;
     const rawFiles = Array.from(e.target.files);
-    
-    // Create local previews immediately
-    const localUrls = rawFiles.map(f => URL.createObjectURL(f));
-    setLocalPreviews(prev => ({
-      ...prev,
-      [group]: [...(prev[group] || []), ...localUrls],
-    }));
-    
-    // Start upload with progress
     setUploadingGroup(group);
     setUploadProgress({ current: 0, total: rawFiles.length });
     setSaving(true);
-    
-    const urls: string[] = [];
-    for (let i = 0; i < rawFiles.length; i++) {
-      setUploadProgress({ current: i + 1, total: rawFiles.length });
-      const validation = validateImageFile(rawFiles[i]);
-      if (!validation.valid) {
-        toast.error(validation.error);
-        continue;
+
+    const preparedFiles: File[] = [];
+    const previewUrls: string[] = [];
+    const uploadedUrls: string[] = [];
+
+    try {
+      for (let i = 0; i < rawFiles.length; i++) {
+        setUploadProgress({ current: i + 1, total: rawFiles.length });
+        const originalFile = rawFiles[i];
+        const validation = validateImageFile(originalFile);
+        if (!validation.valid) {
+          toast.error(validation.error);
+          continue;
+        }
+
+        const preparedFile = await convertToJpeg(originalFile);
+        preparedFiles.push(preparedFile);
+        previewUrls.push(URL.createObjectURL(preparedFile));
+
+        const url = await uploadFile(id, preparedFile, `photos/${group}`);
+        if (url) uploadedUrls.push(url);
       }
-      // Convert HEIC and other non-web formats to JPEG
-      const file = await convertToJpeg(rawFiles[i]);
-      const url = await uploadFile(id, file, `photos/${group}`);
-      if (url) urls.push(url);
+
+      setLocalPreviews(prev => ({
+        ...prev,
+        [group]: [...(prev[group] || []), ...previewUrls],
+      }));
+
+      setPhotos(prev => ({
+        ...prev,
+        [group]: [...(prev[group] || []), ...uploadedUrls],
+      }));
+
+      const allPhotos = { ...photos, [group]: [...(photos[group] || []), ...uploadedUrls] };
+      await updateListing(id, { photos: allPhotos } as any);
+
+      if (uploadedUrls.length > 0) {
+        toast.success(`تم تجهيز ورفع ${uploadedUrls.length} صورة بنجاح`);
+      }
+    } catch (error) {
+      console.error("photo upload preparation failed", error);
+      toast.error("تعذّر تجهيز بعض الصور للرفع. جرّب صورة أخرى أو أعد المحاولة.");
+    } finally {
+      setSaving(false);
+      setUploadingGroup(null);
+      e.target.value = "";
     }
-    setPhotos(prev => ({
-      ...prev,
-      [group]: [...(prev[group] || []), ...urls],
-    }));
-    const allPhotos = { ...photos, [group]: [...(photos[group] || []), ...urls] };
-    await updateListing(id, { photos: allPhotos } as any);
-    setSaving(false);
-    setUploadingGroup(null);
-    toast.success(`تم رفع ${urls.length} صورة بنجاح`);
-    e.target.value = "";
   };
 
   const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

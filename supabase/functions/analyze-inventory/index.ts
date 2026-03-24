@@ -155,6 +155,13 @@ serve(async (req) => {
       }
       const t = await response.text();
       console.error("AI error:", response.status, t);
+
+      if (t.includes("Unsupported image format")) {
+        return new Response(JSON.stringify({ error: "بعض الصور المرفوعة بصيغة غير مدعومة للتحليل الذكي حالياً. أعد رفعها وسيتم تحويلها تلقائياً ثم جرّب مرة أخرى." }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       return new Response(JSON.stringify({ error: "حدث خطأ في تحليل الصور" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
