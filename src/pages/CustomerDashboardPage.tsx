@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { DEAL_TYPE_FIELD_RULES } from "@/lib/dealTypeFieldRules";
 import { toast } from "sonner";
+import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 
 /* ── Draft completion calculator ── */
 const calcDraftProgress = (listing: Listing): number => {
