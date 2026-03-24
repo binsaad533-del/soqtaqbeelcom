@@ -356,8 +356,8 @@ const CreateListingPage = () => {
                 <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed mb-1">
                   ارفع صور مشروعك وسيقوم الذكاء الاصطناعي تلقائياً باستخراج قائمة الأصول والمعدات وتحليل حالتها وتقدير قيمتها
                 </p>
-                <p className="text-sm font-semibold text-primary">
-                  بدون أي إدخال يدوي منك
+                <p className="text-sm font-semibold text-primary animate-fade-in [animation-delay:0.4s] [animation-fill-mode:backwards]">
+                  ✦ بدون أي إدخال يدوي منك ✦
                 </p>
                 <div className="flex items-center justify-center gap-4 mt-3">
                   {[
