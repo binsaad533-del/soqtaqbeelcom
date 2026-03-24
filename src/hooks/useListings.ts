@@ -113,11 +113,14 @@ export function useListings() {
   }, []);
 
   const getListing = useCallback(async (id: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("listings")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
+    if (error) {
+      console.error("[useListings] getListing failed:", { id, error: error.message, code: error.code });
+    }
     return data as unknown as Listing | null;
   }, []);
 
