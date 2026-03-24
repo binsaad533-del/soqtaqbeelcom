@@ -112,11 +112,7 @@ const LoginPage = () => {
       if (error) {
         setError(error.message);
       } else {
-        setSuccess(
-          loginMethod === "phone"
-            ? "تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن."
-            : "تم إنشاء الحساب بنجاح! تحقق من بريدك الإلكتروني للتفعيل."
-        );
+        navigate("/dashboard");
       }
     }
     setLoading(false);
