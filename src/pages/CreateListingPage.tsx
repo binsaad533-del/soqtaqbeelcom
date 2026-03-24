@@ -727,16 +727,12 @@ const CreateListingPage = () => {
     total += 1;
     if (analyzed) filled += 1;
     // Step 3: Required fields
-    const reqFields = activeRules.requiredFields;
+    const rules = getRules(dealStructure.primaryType || "full_takeover");
+    const reqFields = rules.requiredFields;
     total += reqFields.length;
     for (const f of reqFields) {
       if ((disclosure as Record<string, string>)[f]?.trim()) filled += 1;
     }
-    // Price always required
-    total += 1;
-    if (disclosure.price?.trim()) filled += 1;
-    return Math.round((filled / Math.max(total, 1)) * 100);
-  })();
 
   // ── Drag & drop handler ──
   const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>, groupId: string) => {
