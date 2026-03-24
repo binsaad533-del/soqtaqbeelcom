@@ -7,7 +7,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
 import {
-  Bell, Plus, FileText, MessageSquare, Shield, HelpCircle,
+  Bell, Plus, FileText, MessageSquare, Shield, HelpCircle, AlertCircle,
   ChevronLeft, Eye, CheckCircle, Upload, Loader2
 } from "lucide-react";
 
