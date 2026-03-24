@@ -584,11 +584,9 @@ const CreateListingPage = () => {
 
     const imgReq = getImageRequirement(dealStructure.primaryType);
     const hasPhotos = imgReq === "none" || imgReq === "optional" || totalPhotos > 0;
-    const hasActivity = disclosure.business_activity.trim() !== "";
-    const hasCity = disclosure.city.trim() !== "";
-    const hasPrice = disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0;
+    const errors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
 
-    if (!hasPhotos || !hasActivity || !hasCity || !hasPrice) {
+    if (!hasPhotos || Object.keys(errors).length > 0) {
       toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر");
       return;
     }
