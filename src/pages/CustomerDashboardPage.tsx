@@ -11,8 +11,40 @@ import {
   Eye, CheckCircle, Loader2, Activity,
   ArrowUpRight, ChevronLeft, TrendingUp, Briefcase, Edit3
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { DEAL_TYPE_FIELD_RULES } from "@/lib/dealTypeFieldRules";
 
-/* ── Status helpers ── */
+/* ── Draft completion calculator ── */
+const calcDraftProgress = (listing: Listing): number => {
+  const rules = DEAL_TYPE_FIELD_RULES[listing.deal_type] || DEAL_TYPE_FIELD_RULES["full_takeover"];
+  if (!rules) return 0;
+
+  const checks: boolean[] = [
+    !!listing.title,
+    !!listing.business_activity,
+    !!listing.city,
+    listing.price != null && listing.price > 0,
+  ];
+
+  // Check required fields from deal type rules
+  rules.requiredFields.forEach(f => {
+    if (!["business_activity", "city", "price"].includes(f)) {
+      checks.push(!!(listing as any)[f]);
+    }
+  });
+
+  // Photos check
+  const photos = listing.photos as Record<string, string[]> | null;
+  const hasPhotos = photos && Object.values(photos).some(arr => Array.isArray(arr) && arr.length > 0);
+  checks.push(!!hasPhotos);
+
+  // Documents check
+  const docs = listing.documents as any[] | null;
+  checks.push(Array.isArray(docs) && docs.length > 0);
+
+  const filled = checks.filter(Boolean).length;
+  return Math.round((filled / checks.length) * 100);
+};
 const statusLabel = (s: string) => {
   const map: Record<string, { label: string; color: string }> = {
     draft: { label: "مسودة", color: "bg-muted text-muted-foreground" },
