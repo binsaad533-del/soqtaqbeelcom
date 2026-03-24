@@ -237,13 +237,16 @@ const CreateListingPage = () => {
         }
       }
 
-      setPhotos((prev) => ({
-        ...prev,
-        [group]: [...(prev[group] || []), ...uploadedUrls],
-      }));
+      let updatedPhotos: Record<string, string[]> = {};
+      setPhotos((prev) => {
+        updatedPhotos = {
+          ...prev,
+          [group]: [...(prev[group] || []), ...uploadedUrls],
+        };
+        return updatedPhotos;
+      });
 
-      const allPhotos = { ...photos, [group]: [...(photos[group] || []), ...uploadedUrls] };
-      await updateListing(id, { photos: allPhotos } as never);
+      await updateListing(id, { photos: updatedPhotos } as never);
 
       if (uploadedUrls.length > 0) {
         toast.success(`تم تجهيز ورفع ${uploadedUrls.length} صورة بنجاح`);
