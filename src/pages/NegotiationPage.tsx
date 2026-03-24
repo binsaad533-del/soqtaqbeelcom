@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw } from "lucide-react";
+import ChatAttachmentButton from "@/components/chat/ChatAttachmentButton";
+import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
 import AiStar from "@/components/AiStar";
 import TrustBadge from "@/components/TrustBadge";
 import DealRiskIndicator from "@/components/DealRiskIndicator";
@@ -350,33 +352,14 @@ const NegotiationPage = () => {
               )}
               {messages.map((msg) => {
                 const isMe = msg.sender_id === user?.id;
-                const isAi = msg.sender_type === "ai" || msg.message_type === "ai_request" || msg.message_type === "ai_mediation";
                 return (
-                  <div key={msg.id} className={cn(
-                    "max-w-[80%]",
-                    isMe ? "mr-auto" : isAi ? "mx-auto max-w-[90%]" : "ml-auto"
-                  )}>
-                    <div className={cn(
-                      "rounded-2xl px-4 py-3 text-sm leading-relaxed",
-                      isMe ? "bg-primary/8 border border-primary/10" :
-                      isAi ? "bg-gradient-to-br from-accent/60 to-accent/30 border border-accent-foreground/10" :
-                      "bg-muted/60"
-                    )}>
-                      {isAi && (
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <AiStar size={14} />
-                          <span className="text-xs text-accent-foreground font-medium">AI — وسيط الصفقة</span>
-                        </div>
-                      )}
-                      <span className="whitespace-pre-line">{msg.message}</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 px-1">
-                      <span className="text-[10px] text-muted-foreground">
-                        {new Date(msg.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}
-                      </span>
-                      {isMe && <span className="text-[10px] text-primary/60">أنت</span>}
-                    </div>
-                  </div>
+                  <ChatMessageBubble
+                    key={msg.id}
+                    msg={msg}
+                    isMe={isMe}
+                    buyerId={deal.buyer_id}
+                    sellerId={deal.seller_id}
+                  />
                 );
               })}
               <div ref={chatEndRef} />
@@ -399,7 +382,29 @@ const NegotiationPage = () => {
             )}
 
             <div className="p-4 border-t border-border/30">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 relative">
+                <ChatAttachmentButton
+                  dealId={dealId!}
+                  onFileSent={async (message, type, metadata) => {
+                    if (!dealId || !user) return;
+                    const { data } = await supabase
+                      .from("negotiation_messages")
+                      .insert({
+                        deal_id: dealId,
+                        sender_id: user.id,
+                        message,
+                        message_type: type,
+                        metadata: metadata as any,
+                      })
+                      .select()
+                      .single();
+                    if (data) {
+                      const newMsg = data as unknown as NegotiationMessage;
+                      setMessages(prev => prev.some(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
+                    }
+                  }}
+                  disabled={sending}
+                />
                 <input
                   type="text"
                   value={input}
