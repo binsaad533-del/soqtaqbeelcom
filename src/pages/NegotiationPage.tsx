@@ -588,17 +588,51 @@ const NegotiationPage = () => {
                     )}
                   </div>
 
-                  {/* Risk factors as improvement steps */}
+                  {/* Interactive readiness steps */}
                   {(deal.risk_factors as string[] || []).length > 0 && (
                     <div className="mt-3 pt-3 border-t border-border/20">
                       <p className="text-[10px] text-muted-foreground mb-2">خطوات لتحسين الجاهزية:</p>
                       <div className="space-y-1.5">
-                        {(deal.risk_factors as string[]).map((factor, i) => (
-                          <div key={i} className="flex items-start gap-1.5 text-[10px] text-muted-foreground/80">
-                            <ChevronDown size={10} className="text-warning shrink-0 mt-0.5 rotate-[-90deg]" />
-                            <span>{factor}</span>
-                          </div>
-                        ))}
+                        {(deal.risk_factors as string[]).map((factor, i) => {
+                          const stepMap: Record<string, { label: string; action: string; path: string }> = {
+                            "مشتري غير موثق": { label: "وثّق حسابك", action: "verify", path: "/dashboard" },
+                            "بائع غير موثق": { label: "وثّق حسابك", action: "verify", path: "/dashboard" },
+                            "نوع الصفقة غير محدد": { label: "حدد النوع", action: "deal_type", path: `/listing/${deal.listing_id}` },
+                            "لا يوجد سعر متفق عليه": { label: "تفاوض على السعر", action: "chat", path: "" },
+                            "صفقة جديدة بدون رسائل": { label: "ابدأ المحادثة", action: "chat", path: "" },
+                          };
+                          const step = stepMap[factor];
+                          const isActionable = !!step;
+
+                          return (
+                            <div key={i} className="flex items-center gap-2 text-[10px] group">
+                              <div className="w-4 h-4 rounded-full bg-warning/15 flex items-center justify-center shrink-0">
+                                <div className="w-1.5 h-1.5 rounded-full bg-warning" />
+                              </div>
+                              <span className="flex-1 text-muted-foreground">{factor}</span>
+                              {isActionable && (
+                                step.action === "chat" ? (
+                                  <button
+                                    onClick={() => {
+                                      const chatInput = document.querySelector<HTMLInputElement>('input[placeholder="اكتب رسالتك..."]');
+                                      chatInput?.focus();
+                                    }}
+                                    className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover:opacity-100"
+                                  >
+                                    {step.label}
+                                  </button>
+                                ) : (
+                                  <Link
+                                    to={step.path}
+                                    className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover:opacity-100"
+                                  >
+                                    {step.label}
+                                  </Link>
+                                )
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
