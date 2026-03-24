@@ -420,6 +420,16 @@ const CreateListingPage = () => {
   const lowConfidenceItems = inventory.filter((item) => item.confidence === "low" && !item.userConfirmed);
   const medConfidenceItems = inventory.filter((item) => item.confidence === "medium" && !item.userConfirmed);
 
+  // ── Publish validation ──
+  const publishValidation = {
+    hasPhotos: totalPhotos > 0,
+    hasActivity: disclosure.business_activity.trim() !== "",
+    hasCity: disclosure.city.trim() !== "",
+    hasPrice: disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0,
+  };
+  const canPublish = publishValidation.hasPhotos && publishValidation.hasActivity && publishValidation.hasCity && publishValidation.hasPrice;
+  const [publishAttempted, setPublishAttempted] = useState(false);
+
   const getConfidenceBadge = (confidence: string) => {
     switch (confidence) {
       case "high":
