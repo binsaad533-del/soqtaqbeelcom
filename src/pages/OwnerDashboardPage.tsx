@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from "react";
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings, type Listing } from "@/hooks/useListings";
@@ -215,6 +216,112 @@ const OwnerDashboardPage = () => {
                 </div>
               ))}
             </div>
+
+            {/* Charts Section */}
+            {(() => {
+              // Group deals by month
+              const monthlyData = useMemo(() => {
+                const months: Record<string, { month: string; deals: number; completed: number; value: number; commission: number }> = {};
+                const now = new Date();
+                // Initialize last 6 months
+                for (let i = 5; i >= 0; i--) {
+                  const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                  const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                  const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+                  months[key] = { month: monthNames[d.getMonth()], deals: 0, completed: 0, value: 0, commission: 0 };
+                }
+                deals.forEach(d => {
+                  const date = new Date(d.created_at);
+                  const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                  if (months[key]) {
+                    months[key].deals++;
+                    if (['completed', 'finalized'].includes(d.status)) months[key].completed++;
+                    months[key].value += Number(d.agreed_price) || 0;
+                    months[key].commission += (Number(d.agreed_price) || 0) * 0.01;
+                  }
+                });
+                return Object.values(months);
+              }, [deals]);
+
+              return (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                  {/* Deals Chart */}
+                  <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-semibold flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <TrendingUp size={14} className="text-primary" strokeWidth={1.5} />
+                        </div>
+                        تطور الصفقات
+                      </h3>
+                      <span className="text-[10px] text-muted-foreground">آخر 6 أشهر</span>
+                    </div>
+                    <div className="h-[200px]" dir="ltr">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={monthlyData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="dealGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                            </linearGradient>
+                            <linearGradient id="completedGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.2} />
+                              <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                          <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={30} />
+                          <Tooltip
+                            contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }}
+                            formatter={(value: number, name: string) => [value, name === 'deals' ? 'إجمالي الصفقات' : 'مكتملة']}
+                            labelFormatter={(label) => label}
+                          />
+                          <Area type="monotone" dataKey="deals" stroke="hsl(var(--primary))" fill="url(#dealGrad)" strokeWidth={2} name="deals" />
+                          <Area type="monotone" dataKey="completed" stroke="hsl(var(--success))" fill="url(#completedGrad)" strokeWidth={2} name="completed" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex items-center justify-center gap-5 mt-3">
+                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-primary" /><span className="text-[10px] text-muted-foreground">إجمالي الصفقات</span></div>
+                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-success" /><span className="text-[10px] text-muted-foreground">مكتملة</span></div>
+                    </div>
+                  </div>
+
+                  {/* Commission Chart */}
+                  <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-semibold flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center">
+                          <Landmark size={14} className="text-success" strokeWidth={1.5} />
+                        </div>
+                        العمولات الشهرية
+                      </h3>
+                      <span className="text-[10px] text-muted-foreground">آخر 6 أشهر</span>
+                    </div>
+                    <div className="h-[200px]" dir="ltr">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={monthlyData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                          <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={40}
+                            tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} />
+                          <Tooltip
+                            contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }}
+                            formatter={(value: number) => [`${value.toLocaleString('en-US')} ر.س`, 'العمولة']}
+                            labelFormatter={(label) => label}
+                          />
+                          <Bar dataKey="commission" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={28} opacity={0.8} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex items-center justify-center gap-5 mt-3">
+                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-primary" /><span className="text-[10px] text-muted-foreground">العمولة المستحقة (1%)</span></div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Two-column layout: Alerts + Recent Activity */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
