@@ -8,28 +8,21 @@ import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
 import {
   Bell, Plus, FileText, MessageSquare, Shield, HelpCircle, AlertCircle,
-  ChevronLeft, Eye, CheckCircle, Upload, Loader2, TrendingUp, Star,
-  ArrowUpRight, Clock, Sparkles, BarChart3, Activity
+  ChevronLeft, Eye, CheckCircle, Loader2, Sparkles, Activity,
+  ArrowUpRight, Clock, User, Settings
 } from "lucide-react";
-
-const tabs = [
-  { label: "نظرة عامة", icon: BarChart3 },
-  { label: "إعلاناتي", icon: FileText },
-  { label: "المفاوضات", icon: MessageSquare },
-  { label: "الاتفاقيات", icon: Shield },
-  { label: "الدعم", icon: HelpCircle },
-];
 
 const CustomerDashboardPage = () => {
   const { profile, signOut, user } = useAuthContext();
   const { getMyListings } = useListings();
   const { getMyDeals } = useDeals();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
-  const [activeTab, setActiveTab] = useState(0);
   const [listings, setListings] = useState<Listing[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [dealFilter, setDealFilter] = useState<"all" | "negotiating" | "completed">("all");
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -58,18 +51,10 @@ const CustomerDashboardPage = () => {
     trustScore: profile?.trust_score ?? 50,
   }), [listings, deals, profile]);
 
-  const recentActivity = useMemo(() => {
-    const items: { id: string; type: string; label: string; date: string; status: string; link: string }[] = [];
-    listings.slice(0, 3).forEach(l => items.push({
-      id: l.id, type: "listing", label: l.title || "إعلان بدون عنوان",
-      date: l.created_at, status: l.status, link: `/listing/${l.id}`
-    }));
-    deals.slice(0, 3).forEach(d => items.push({
-      id: d.id, type: "deal", label: `صفقة #${d.id.slice(0, 8)}`,
-      date: d.created_at, status: d.status, link: `/negotiate/${d.id}`
-    }));
-    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
-  }, [listings, deals]);
+  const filteredDeals = useMemo(() => {
+    if (dealFilter === "all") return deals;
+    return deals.filter(d => d.status === dealFilter);
+  }, [deals, dealFilter]);
 
   const statusLabel = (s: string) => {
     const map: Record<string, { label: string; color: string }> = {
@@ -84,19 +69,22 @@ const CustomerDashboardPage = () => {
   };
 
   const trustColor = stats.trustScore >= 70 ? "text-success" : stats.trustScore >= 40 ? "text-warning" : "text-destructive";
-  const trustBg = stats.trustScore >= 70 ? "from-success/10 to-success/5" : stats.trustScore >= 40 ? "from-warning/10 to-warning/5" : "from-destructive/10 to-destructive/5";
 
   return (
     <div className="py-6 md:py-8">
-      <div className="container max-w-5xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+      <div className="container max-w-4xl space-y-6">
+
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-medium">مرحباً {profile?.full_name || "بك"} 👋</h1>
-            <p className="text-sm text-muted-foreground">إليك ملخص حسابك اليوم</p>
+            <h1 className="text-xl font-semibold">مرحباً {profile?.full_name || "بك"} 👋</h1>
+            <p className="text-sm text-muted-foreground">لوحة التحكم</p>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="relative p-2 rounded-xl hover:bg-muted transition-colors" onClick={() => setActiveTab(-1)}>
+          <div className="flex items-center gap-2">
+            <button
+              className="relative p-2 rounded-xl hover:bg-muted transition-colors"
+              onClick={() => setShowNotifications(!showNotifications)}
+            >
               <Bell size={18} strokeWidth={1.3} className="text-muted-foreground" />
               {unreadCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[9px] flex items-center justify-center font-medium">
@@ -111,7 +99,7 @@ const CustomerDashboardPage = () => {
 
         {/* Error Banner */}
         {loadError && (
-          <div className="mb-4 p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-between animate-fade-in">
+          <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-between animate-fade-in">
             <div className="flex items-center gap-2">
               <AlertCircle size={16} className="text-destructive shrink-0" />
               <span className="text-sm text-destructive">{loadError}</span>
@@ -120,42 +108,24 @@ const CustomerDashboardPage = () => {
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="flex gap-1 bg-muted/50 rounded-xl p-1 mb-6 overflow-x-auto">
-          {tabs.map((tab, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveTab(i)}
-              className={cn(
-                "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs whitespace-nowrap transition-all",
-                activeTab === i ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <tab.icon size={14} strokeWidth={1.3} />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* ══════════ Notifications ══════════ */}
-        {activeTab === -1 && (
-          <div className="space-y-3 animate-fade-in">
+        {/* Notifications Dropdown */}
+        {showNotifications && (
+          <div className="rounded-2xl border border-border/50 bg-card p-4 animate-fade-in space-y-2">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="font-medium">الإشعارات</h2>
+              <h2 className="text-sm font-medium">الإشعارات</h2>
               {unreadCount > 0 && (
-                <button onClick={markAllAsRead} className="text-xs text-primary hover:underline">تحديد الكل كمقروء</button>
+                <button onClick={markAllAsRead} className="text-[10px] text-primary hover:underline">تحديد الكل كمقروء</button>
               )}
             </div>
             {notifications.length === 0 ? (
-              <div className="text-center py-12 text-sm text-muted-foreground">لا توجد إشعارات</div>
-            ) : notifications.map((n) => (
-              <button key={n.id} onClick={() => markAsRead(n.id)} className={cn("w-full text-right p-3 rounded-xl border transition-all", n.is_read ? "border-border/30 bg-card" : "border-primary/20 bg-primary/[0.03]")}>
+              <p className="text-center py-6 text-xs text-muted-foreground">لا توجد إشعارات</p>
+            ) : notifications.slice(0, 5).map((n) => (
+              <button key={n.id} onClick={() => markAsRead(n.id)} className={cn("w-full text-right p-2.5 rounded-lg border transition-all text-xs", n.is_read ? "border-border/30 bg-card" : "border-primary/20 bg-primary/[0.03]")}>
                 <div className="flex items-start gap-2">
-                  {!n.is_read && <span className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />}
+                  {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1 shrink-0" />}
                   <div className="flex-1">
-                    <div className="text-sm font-medium">{n.title}</div>
-                    {n.body && <div className="text-xs text-muted-foreground mt-0.5">{n.body}</div>}
-                    <div className="text-[10px] text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString("en-US")}</div>
+                    <div className="font-medium">{n.title}</div>
+                    {n.body && <div className="text-muted-foreground mt-0.5 text-[10px]">{n.body}</div>}
                   </div>
                 </div>
               </button>
@@ -163,211 +133,171 @@ const CustomerDashboardPage = () => {
           </div>
         )}
 
-        {/* ══════════ Tab 0: Overview ══════════ */}
-        {activeTab === 0 && (
-          <div className="space-y-6 animate-fade-in">
-            {/* KPI Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { label: "إعلاناتي", value: stats.totalListings, sub: `${stats.published} منشور`, icon: FileText, gradient: "from-primary/10 to-primary/5" },
-                { label: "الصفقات النشطة", value: stats.activeDeals, sub: "قيد التفاوض", icon: Activity, gradient: "from-accent to-accent/50" },
-                { label: "المكتملة", value: stats.completedDeals, sub: "صفقة ناجحة", icon: CheckCircle, gradient: "from-success/10 to-success/5" },
-                { label: "الإشعارات", value: unreadCount, sub: "غير مقروءة", icon: Bell, gradient: unreadCount > 0 ? "from-destructive/10 to-destructive/5" : "from-muted to-muted/50" },
-              ].map((card, i) => (
-                <div key={i} className={cn("rounded-2xl p-4 bg-gradient-to-br border border-border/30 transition-all hover:shadow-soft", card.gradient)}>
-                  <card.icon size={18} strokeWidth={1.3} className="text-foreground/70 mb-3" />
-                  <div className="text-2xl font-semibold">{loading ? "—" : card.value}</div>
-                  <div className="text-xs text-foreground/80 font-medium mt-0.5">{card.label}</div>
-                  <div className="text-[10px] text-muted-foreground">{card.sub}</div>
-                </div>
-              ))}
+        {/* ── KPI Strip ── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: "إعلاناتي", value: stats.totalListings, sub: `${stats.published} منشور`, icon: FileText, gradient: "from-primary/10 to-primary/5" },
+            { label: "صفقات نشطة", value: stats.activeDeals, sub: "قيد التفاوض", icon: Activity, gradient: "from-accent to-accent/50" },
+            { label: "مكتملة", value: stats.completedDeals, sub: "صفقة ناجحة", icon: CheckCircle, gradient: "from-success/10 to-success/5" },
+            { label: "مستوى الثقة", value: loading ? "—" : stats.trustScore, sub: stats.trustScore >= 70 ? "ممتاز" : stats.trustScore >= 40 ? "جيد" : "يحتاج تحسين", icon: Shield, gradient: "from-secondary to-secondary/50" },
+          ].map((card, i) => (
+            <div key={i} className={cn("rounded-2xl p-4 bg-gradient-to-br border border-border/30 transition-all", card.gradient)}>
+              <card.icon size={16} strokeWidth={1.3} className={cn("mb-2", i === 3 ? trustColor : "text-foreground/70")} />
+              <div className="text-2xl font-semibold">{loading ? "—" : card.value}</div>
+              <div className="text-xs text-foreground/80 font-medium mt-0.5">{card.label}</div>
+              <div className="text-[10px] text-muted-foreground">{card.sub}</div>
             </div>
+          ))}
+        </div>
 
-            {/* Trust Score + Quick Actions */}
-            <div className="grid md:grid-cols-3 gap-4">
-              {/* Trust Score */}
-              <div className={cn("rounded-2xl p-5 bg-gradient-to-br border border-border/30 flex flex-col items-center justify-center text-center", trustBg)}>
-                <div className="relative w-20 h-20 mb-3">
-                  <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="hsl(var(--border))" strokeWidth="3" />
-                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"
-                      strokeDasharray={`${stats.trustScore}, 100`}
-                      className={cn("transition-all duration-1000", trustColor)}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className={cn("text-xl font-bold", trustColor)}>{loading ? "—" : stats.trustScore}</span>
-                  </div>
-                </div>
-                <div className="text-sm font-medium">مستوى الثقة</div>
-                <div className="text-[10px] text-muted-foreground mt-0.5">
-                  {stats.trustScore >= 70 ? "ممتاز — حسابك موثوق" : stats.trustScore >= 40 ? "جيد — يمكنك تحسينه" : "يحتاج تحسين"}
-                </div>
-              </div>
+        {/* ── Quick Actions ── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: "إنشاء إعلان", icon: Plus, link: "/create-listing", color: "gradient-primary text-primary-foreground" },
+            { label: "تصفح السوق", icon: Eye, link: "/marketplace", color: "bg-secondary text-secondary-foreground" },
+            { label: "تواصل معنا", icon: HelpCircle, link: "/contact", color: "bg-secondary text-secondary-foreground" },
+            { label: "حسابي", icon: User, link: "/dashboard", color: "bg-secondary text-secondary-foreground" },
+          ].map((action, i) => (
+            <Link key={i} to={action.link} className={cn("flex items-center gap-2 p-3 rounded-xl text-xs font-medium transition-all hover:shadow-soft active:scale-[0.98] justify-center", action.color)}>
+              <action.icon size={15} strokeWidth={1.5} />
+              {action.label}
+            </Link>
+          ))}
+        </div>
 
-              {/* Quick Actions */}
-              <div className="md:col-span-2 rounded-2xl border border-border/30 bg-card p-5">
-                <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
-                  <Sparkles size={14} className="text-primary" />
-                  إجراءات سريعة
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: "إنشاء إعلان جديد", icon: Plus, link: "/create-listing", color: "gradient-primary text-primary-foreground" },
-                    { label: "تصفح السوق", icon: Eye, link: "/marketplace", color: "bg-secondary text-secondary-foreground" },
-                    { label: "مفاوضاتي النشطة", icon: MessageSquare, link: "#", action: () => setActiveTab(2), color: "bg-secondary text-secondary-foreground" },
-                    { label: "تواصل مع الدعم", icon: HelpCircle, link: "/contact", color: "bg-secondary text-secondary-foreground" },
-                  ].map((action, i) => (
-                    action.action ? (
-                      <button key={i} onClick={action.action} className={cn("flex items-center gap-2.5 p-3.5 rounded-xl text-xs font-medium transition-all hover:shadow-soft active:scale-[0.98]", action.color)}>
-                        <action.icon size={16} strokeWidth={1.5} />
-                        {action.label}
-                      </button>
-                    ) : (
-                      <Link key={i} to={action.link} className={cn("flex items-center gap-2.5 p-3.5 rounded-xl text-xs font-medium transition-all hover:shadow-soft active:scale-[0.98]", action.color)}>
-                        <action.icon size={16} strokeWidth={1.5} />
-                        {action.label}
-                      </Link>
-                    )
-                  ))}
-                </div>
-              </div>
+        {/* ── My Listings (compact) ── */}
+        <section className="rounded-2xl border border-border/30 bg-card overflow-hidden">
+          <div className="flex items-center justify-between p-4 pb-3">
+            <h2 className="text-sm font-medium flex items-center gap-2">
+              <FileText size={14} className="text-primary" />
+              إعلاناتي
+            </h2>
+            <Link to="/create-listing" className="flex items-center gap-1 text-[10px] text-primary hover:underline">
+              <Plus size={12} /> إعلان جديد
+            </Link>
+          </div>
+          {loading ? (
+            <div className="flex justify-center py-8"><Loader2 size={18} className="animate-spin text-primary" /></div>
+          ) : listings.length === 0 ? (
+            <div className="text-center py-8 px-4">
+              <FileText size={24} className="mx-auto mb-2 text-muted-foreground/30" strokeWidth={1} />
+              <p className="text-xs text-muted-foreground mb-2">لم تنشئ أي إعلانات بعد</p>
+              <Link to="/create-listing" className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline">
+                <Plus size={10} /> أنشئ إعلانك الأول
+              </Link>
             </div>
-
-            {/* Recent Activity */}
-            <div className="rounded-2xl border border-border/30 bg-card p-5">
-              <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
-                <Clock size={14} className="text-primary" />
-                آخر النشاطات
-              </h3>
-              {loading ? (
-                <div className="flex justify-center py-8"><Loader2 size={20} className="animate-spin text-primary" /></div>
-              ) : recentActivity.length === 0 ? (
-                <div className="text-center py-8">
-                  <Activity size={28} className="mx-auto mb-2 text-muted-foreground/30" strokeWidth={1} />
-                  <p className="text-sm text-muted-foreground">لا توجد نشاطات حتى الآن</p>
-                  <Link to="/create-listing" className="inline-flex items-center gap-1.5 mt-3 text-xs text-primary hover:underline">
-                    <Plus size={12} /> ابدأ بإنشاء أول إعلان
+          ) : (
+            <div className="divide-y divide-border/30">
+              {listings.slice(0, 4).map((listing) => {
+                const st = statusLabel(listing.status);
+                return (
+                  <Link key={listing.id} to={`/listing/${listing.id}`} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors group">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{listing.title || "بدون عنوان"}</div>
+                      <div className="text-[10px] text-muted-foreground">{listing.city && `${listing.city} — `}{listing.price ? `${Number(listing.price).toLocaleString()} ر.س` : ""}</div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={cn("text-[10px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
+                      <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                   </Link>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {recentActivity.map((item) => {
-                    const st = statusLabel(item.status);
-                    return (
-                      <Link key={item.id} to={item.link} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors group">
-                        <div className="flex items-center gap-3">
-                          <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", item.type === "listing" ? "bg-primary/10" : "bg-accent")}>
-                            {item.type === "listing" ? <FileText size={14} className="text-primary" /> : <MessageSquare size={14} className="text-accent-foreground" />}
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium">{item.label}</div>
-                            <div className="text-[10px] text-muted-foreground">{new Date(item.date).toLocaleDateString("en-US")}</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={cn("text-[10px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
-                          <ArrowUpRight size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      </Link>
-                    );
-                  })}
+                );
+              })}
+              {listings.length > 4 && (
+                <div className="text-center py-2">
+                  <button onClick={() => {}} className="text-[10px] text-primary hover:underline">عرض الكل ({listings.length})</button>
                 </div>
               )}
             </div>
-          </div>
-        )}
+          )}
+        </section>
 
-        {/* ══════════ Tab 1: Listings ══════════ */}
-        {activeTab === 1 && (
-          <div className="space-y-3 animate-fade-in">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="font-medium">إعلاناتي</h2>
-              <Link to="/create-listing" className="flex items-center gap-1 text-xs text-primary hover:underline">
-                <Plus size={14} strokeWidth={1.3} />
-                إعلان جديد
-              </Link>
+        {/* ── My Deals (unified) ── */}
+        <section className="rounded-2xl border border-border/30 bg-card overflow-hidden">
+          <div className="flex items-center justify-between p-4 pb-3">
+            <h2 className="text-sm font-medium flex items-center gap-2">
+              <MessageSquare size={14} className="text-primary" />
+              صفقاتي
+            </h2>
+            <div className="flex gap-1">
+              {([
+                { key: "all" as const, label: "الكل" },
+                { key: "negotiating" as const, label: "نشطة" },
+                { key: "completed" as const, label: "مكتملة" },
+              ]).map(f => (
+                <button
+                  key={f.key}
+                  onClick={() => setDealFilter(f.key)}
+                  className={cn(
+                    "text-[10px] px-2.5 py-1 rounded-lg transition-colors",
+                    dealFilter === f.key ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
             </div>
-            {loading ? (
-              <div className="flex justify-center py-12"><Loader2 size={20} className="animate-spin text-primary" /></div>
-            ) : listings.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText size={32} className="mx-auto mb-3 text-muted-foreground/50" strokeWidth={1} />
-                <p className="text-sm text-muted-foreground mb-3">لم تنشئ أي إعلانات بعد</p>
-                <Link to="/create-listing" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl gradient-primary text-primary-foreground text-xs">
-                  <Plus size={14} /> أنشئ إعلانك الأول
-                </Link>
-              </div>
-            ) : listings.map((listing) => {
-              const st = statusLabel(listing.status);
-              return (
-                <Link key={listing.id} to={`/listing/${listing.id}`} className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card hover:shadow-soft transition-all">
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">{listing.title || "بدون عنوان"}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{listing.city && `${listing.city} — `}{listing.price ? `${Number(listing.price).toLocaleString()} ر.س` : "بدون سعر"}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={cn("text-[10px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
-                    <ChevronLeft size={14} className="text-muted-foreground" strokeWidth={1.3} />
-                  </div>
-                </Link>
-              );
-            })}
           </div>
-        )}
+          {loading ? (
+            <div className="flex justify-center py-8"><Loader2 size={18} className="animate-spin text-primary" /></div>
+          ) : filteredDeals.length === 0 ? (
+            <div className="text-center py-8 px-4">
+              <MessageSquare size={24} className="mx-auto mb-2 text-muted-foreground/30" strokeWidth={1} />
+              <p className="text-xs text-muted-foreground">
+                {dealFilter === "all" ? "لا توجد صفقات حتى الآن" : dealFilter === "negotiating" ? "لا توجد مفاوضات نشطة" : "لا توجد صفقات مكتملة"}
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border/30">
+              {filteredDeals.map((deal) => {
+                const st = statusLabel(deal.status);
+                const isCompleted = deal.status === "completed";
+                return (
+                  <Link
+                    key={deal.id}
+                    to={isCompleted ? `/agreement/${deal.id}` : `/negotiate/${deal.id}`}
+                    className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", isCompleted ? "bg-success/10" : "bg-primary/10")}>
+                        {isCompleted ? <Shield size={14} className="text-success" /> : <MessageSquare size={14} className="text-primary" />}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium truncate">
+                          {isCompleted ? `اتفاقية #${deal.id.slice(0, 8)}` : `صفقة #${deal.id.slice(0, 8)}`}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          {isCompleted && deal.completed_at
+                            ? new Date(deal.completed_at).toLocaleDateString("en-US")
+                            : new Date(deal.created_at).toLocaleDateString("en-US")}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={cn("text-[10px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
+                      <ArrowUpRight size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
-        {/* ══════════ Tab 2: Negotiations ══════════ */}
-        {activeTab === 2 && (
-          <div className="space-y-3 animate-fade-in">
-            <h2 className="font-medium mb-2">المفاوضات</h2>
-            {loading ? (
-              <div className="flex justify-center py-12"><Loader2 size={20} className="animate-spin text-primary" /></div>
-            ) : deals.filter(d => d.status === "negotiating").length === 0 ? (
-              <div className="text-center py-12 text-sm text-muted-foreground">لا توجد مفاوضات حالياً</div>
-            ) : deals.filter(d => d.status === "negotiating").map((deal) => (
-              <Link key={deal.id} to={`/negotiate/${deal.id}`} className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card hover:shadow-soft transition-all">
-                <div className="flex-1">
-                  <div className="text-sm font-medium">صفقة #{deal.id.slice(0, 8)}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{new Date(deal.created_at).toLocaleDateString("en-US")}</div>
-                </div>
-                <span className="text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary">نشطة</span>
-              </Link>
-            ))}
+        {/* ── Help CTA ── */}
+        <div className="rounded-2xl border border-border/30 bg-card p-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Sparkles size={18} className="text-primary" />
+            </div>
+            <div>
+              <div className="text-sm font-medium">هل تحتاج مساعدة؟</div>
+              <div className="text-[10px] text-muted-foreground">استخدم المساعد الذكي أو تواصل معنا</div>
+            </div>
           </div>
-        )}
+          <Link to="/contact" className="text-xs text-primary hover:underline">تواصل معنا</Link>
+        </div>
 
-        {/* ══════════ Tab 3: Agreements ══════════ */}
-        {activeTab === 3 && (
-          <div className="space-y-3 animate-fade-in">
-            <h2 className="font-medium mb-2">الاتفاقيات</h2>
-            {loading ? (
-              <div className="flex justify-center py-12"><Loader2 size={20} className="animate-spin text-primary" /></div>
-            ) : deals.filter(d => d.status === "completed").length === 0 ? (
-              <div className="text-center py-12 text-sm text-muted-foreground">لا توجد اتفاقيات مكتملة</div>
-            ) : deals.filter(d => d.status === "completed").map((deal) => (
-              <Link key={deal.id} to={`/agreement/${deal.id}`} className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card hover:shadow-soft transition-all">
-                <div className="flex-1">
-                  <div className="text-sm font-medium">اتفاقية #{deal.id.slice(0, 8)}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{deal.completed_at ? new Date(deal.completed_at).toLocaleDateString("en-US") : "—"}</div>
-                </div>
-                <Shield size={14} className="text-success" strokeWidth={1.3} />
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* ══════════ Tab 4: Support ══════════ */}
-        {activeTab === 4 && (
-          <div className="text-center py-12 animate-fade-in">
-            <HelpCircle size={32} className="mx-auto mb-3 text-muted-foreground/50" strokeWidth={1} />
-            <p className="text-sm text-muted-foreground mb-2">هل تحتاج مساعدة؟</p>
-            <p className="text-xs text-muted-foreground mb-4">استخدم المساعد الذكي أو تواصل معنا</p>
-            <Link to="/contact" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl gradient-primary text-primary-foreground text-xs">
-              تواصل معنا
-            </Link>
-          </div>
-        )}
       </div>
     </div>
   );
