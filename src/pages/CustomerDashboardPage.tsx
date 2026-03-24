@@ -9,10 +9,42 @@ import { cn } from "@/lib/utils";
 import {
   Plus, FileText, MessageSquare, Shield, AlertCircle,
   Eye, CheckCircle, Loader2, Activity,
-  ArrowUpRight, ChevronLeft, TrendingUp, Briefcase, Edit3
+  ChevronLeft, TrendingUp, Briefcase, Edit3
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { DEAL_TYPE_FIELD_RULES } from "@/lib/dealTypeFieldRules";
 
-/* ── Status helpers ── */
+/* ── Draft completion calculator ── */
+const calcDraftProgress = (listing: Listing): number => {
+  const rules = DEAL_TYPE_FIELD_RULES[listing.deal_type] || DEAL_TYPE_FIELD_RULES["full_takeover"];
+  if (!rules) return 0;
+
+  const checks: boolean[] = [
+    !!listing.title,
+    !!listing.business_activity,
+    !!listing.city,
+    listing.price != null && listing.price > 0,
+  ];
+
+  // Check required fields from deal type rules
+  rules.requiredFields.forEach(f => {
+    if (!["business_activity", "city", "price"].includes(f)) {
+      checks.push(!!(listing as any)[f]);
+    }
+  });
+
+  // Photos check
+  const photos = listing.photos as Record<string, string[]> | null;
+  const hasPhotos = photos && Object.values(photos).some(arr => Array.isArray(arr) && arr.length > 0);
+  checks.push(!!hasPhotos);
+
+  // Documents check
+  const docs = listing.documents as any[] | null;
+  checks.push(Array.isArray(docs) && docs.length > 0);
+
+  const filled = checks.filter(Boolean).length;
+  return Math.round((filled / checks.length) * 100);
+};
 const statusLabel = (s: string) => {
   const map: Record<string, { label: string; color: string }> = {
     draft: { label: "مسودة", color: "bg-muted text-muted-foreground" },
@@ -161,18 +193,27 @@ const CustomerDashboardPage = () => {
                   </h2>
                 </div>
                 <div className="divide-y divide-warning/10">
-                  {drafts.map((d) => (
-                    <Link key={d.id} to={`/listing/${d.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-warning/10 transition-colors group">
-                      <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center shrink-0">
-                        <FileText size={14} className="text-warning" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">{d.title || "بدون عنوان"}</div>
-                        <div className="text-[10px] text-muted-foreground">{d.city || "لم تحدد المدينة"}</div>
-                      </div>
-                      <span className="text-[10px] text-warning font-medium opacity-0 group-hover:opacity-100 transition-opacity">إكمال ←</span>
-                    </Link>
-                  ))}
+                  {drafts.map((d) => {
+                    const progress = calcDraftProgress(d);
+                    return (
+                      <Link key={d.id} to={`/listing/${d.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-warning/10 transition-colors group">
+                        <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center shrink-0">
+                          <FileText size={14} className="text-warning" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-sm font-medium truncate">{d.title || "بدون عنوان"}</div>
+                            <span className={cn("text-[10px] font-medium shrink-0 mr-2", progress >= 80 ? "text-success" : progress >= 50 ? "text-warning" : "text-destructive")}>{progress}%</span>
+                          </div>
+                          <div className="w-full h-1.5 rounded-full bg-warning/10 overflow-hidden">
+                            <div className={cn("h-full rounded-full transition-all duration-500", progress >= 80 ? "bg-success" : progress >= 50 ? "bg-warning" : "bg-destructive")} style={{ width: `${progress}%` }} />
+                          </div>
+                          <div className="text-[10px] text-muted-foreground mt-1">{d.city || "لم تحدد المدينة"} {progress < 100 && "· أكمل البيانات للنشر"}</div>
+                        </div>
+                        <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                      </Link>
+                    );
+                  })}
                 </div>
               </section>
             )}
