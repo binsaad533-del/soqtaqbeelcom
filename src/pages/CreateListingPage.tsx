@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { validateImageFile, validateDocFile, logAudit } from "@/lib/security";
-import { Check, Upload, Camera, FileText, ClipboardList, Eye, ArrowLeft, ArrowRight, Plus, Trash2, Loader2, Shield, AlertTriangle, Minus, Image as ImageIcon, Layers } from "lucide-react";
+import { Check, Upload, Camera, FileText, ClipboardList, Eye, ArrowLeft, ArrowRight, Plus, Trash2, Loader2, Shield, AlertTriangle, Minus, Image as ImageIcon, Layers, DoorOpen, Building2, MapPin, Tag, Wrench, Sparkles } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -22,12 +22,12 @@ const steps = [
 ];
 
 const photoGroups = [
-  { id: "interior", label: "صور داخلية للمحل", desc: "صور واضحة للمساحة الداخلية من زوايا مختلفة", min: 3, emoji: "🏠" },
-  { id: "exterior", label: "واجهة المحل", desc: "صور للمدخل والواجهة الخارجية", min: 2, emoji: "🚪" },
-  { id: "building", label: "المبنى", desc: "صور عامة للمبنى من الخارج", min: 1, emoji: "🏢" },
-  { id: "street", label: "الشارع المحيط", desc: "صور للشارع والمحيط التجاري", min: 1, emoji: "🛣️" },
-  { id: "signage", label: "اللوحة / اللافتة", desc: "صورة واضحة للافتة المحل", min: 1, emoji: "🪧" },
-  { id: "equipment", label: "المعدات والأجهزة", desc: "صور قريبة للمعدات والأثاث والأجهزة", min: 4, emoji: "⚙️" },
+  { id: "interior", label: "صور داخلية للمحل", desc: "صور واضحة للمساحة الداخلية من زوايا مختلفة", min: 3, icon: "Camera" },
+  { id: "exterior", label: "واجهة المحل", desc: "صور للمدخل والواجهة الخارجية", min: 2, icon: "DoorOpen" },
+  { id: "building", label: "المبنى", desc: "صور عامة للمبنى من الخارج", min: 1, icon: "Building2" },
+  { id: "street", label: "الشارع المحيط", desc: "صور للشارع والمحيط التجاري", min: 1, icon: "MapPin" },
+  { id: "signage", label: "اللوحة / اللافتة", desc: "صورة واضحة للافتة المحل", min: 1, icon: "Tag" },
+  { id: "equipment", label: "المعدات والأجهزة", desc: "صور قريبة للمعدات والأثاث والأجهزة", min: 4, icon: "Wrench" },
 ];
 
 interface InventoryItem {
@@ -387,7 +387,11 @@ const CreateListingPage = () => {
                     )}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-lg">{group.emoji}</span>
+                          {(() => {
+                            const iconMap: Record<string, any> = { Camera, DoorOpen, Building2, MapPin, Tag, Wrench };
+                            const Icon = iconMap[group.icon] || Camera;
+                            return <Icon size={18} strokeWidth={1.5} className="text-primary" />;
+                          })()}
                           <div>
                             <div className="text-xs font-medium">{group.label}</div>
                             <div className="text-[10px] text-muted-foreground">{group.min} صور على الأقل</div>
@@ -417,10 +421,13 @@ const CreateListingPage = () => {
               </div>
 
               {/* Encouragement footer */}
-              <div className="text-center pt-2">
-                <p className="text-[11px] text-muted-foreground">
-                  💡 كلما زادت الصور، كان التحليل أدق والإعلان أقوى
-                </p>
+              <div className="text-center pt-4 pb-1">
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/10">
+                  <Sparkles size={16} strokeWidth={1.5} className="text-primary" />
+                  <p className="text-sm font-medium text-foreground">
+                    كلما زادت الصور، كان التحليل أدق والإعلان أقوى
+                  </p>
+                </div>
               </div>
             </div>
           )}
