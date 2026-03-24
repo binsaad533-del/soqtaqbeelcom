@@ -219,6 +219,14 @@ export function validateDisclosure(
       if (!value || isNaN(Number(value)) || Number(value) <= 0) {
         errors[field] = "السعر مطلوب ويجب أن يكون رقماً أكبر من صفر";
       }
+    } else if (field === "city") {
+      if (!value || value.trim() === "") {
+        errors[field] = "المدينة مطلوبة";
+      } else if (isGibberish(value)) {
+        errors[field] = "اسم المدينة غير مفهوم — سيجعل الصفقة تبدو مشبوهة";
+      } else if (!isKnownCity(value)) {
+        errors[field] = "يرجى إدخال اسم مدينة سعودية صحيحة — الموقع غير المعروف سيجعل الصفقة مشبوهة";
+      }
     } else {
       if (!value || value.trim() === "") {
         errors[field] = `${FIELD_LABELS[field] || field} مطلوب`;
