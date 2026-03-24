@@ -64,9 +64,8 @@ Deno.serve(async (req) => {
     const TWILIO_VERIFY_SERVICE_SID = Deno.env.get("TWILIO_VERIFY_SERVICE_SID");
     if (!TWILIO_VERIFY_SERVICE_SID) throw new Error("TWILIO_VERIFY_SERVICE_SID is not configured");
 
-    // Get Twilio Auth Token from TWILIO_API_KEY (connector provides this)
-    const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_API_KEY");
-    if (!TWILIO_AUTH_TOKEN) throw new Error("TWILIO_API_KEY is not configured");
+    const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
+    if (!TWILIO_AUTH_TOKEN) throw new Error("TWILIO_AUTH_TOKEN is not configured");
 
     // Call Twilio Verify API directly (not through gateway - Verify uses different base URL)
     const verifyUrl = `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/Verifications`;
