@@ -8,6 +8,7 @@ const footerLinks = [
   { label: "الشروط", path: "/terms" },
   { label: "الخصوصية", path: "/privacy" },
   { label: "من نحن", path: "/about" },
+  { label: "كيف تعمل المنصة", path: "/how-it-works" },
   { label: "تواصل معنا", path: "/contact" },
 ];
 
