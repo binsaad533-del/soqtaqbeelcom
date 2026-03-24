@@ -1,10 +1,13 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
+import TransparencyIndicator from "@/components/TransparencyIndicator";
+import QuickPriceEdit from "@/components/QuickPriceEdit";
+import ListingEditDialog from "@/components/ListingEditDialog";
 import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals } from "@/hooks/useDeals";
@@ -30,6 +33,7 @@ const ListingDetailsPage = () => {
   const [sellerReviews, setSellerReviews] = useState<SellerReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [startingDeal, setStartingDeal] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -228,14 +232,38 @@ const ListingDetailsPage = () => {
           {/* Sidebar */}
           <div className="space-y-5">
             <div className="bg-card rounded-2xl p-6 shadow-soft sticky top-20">
+              {/* Owner edit buttons */}
+              {isOwner && (
+                <div className="flex gap-2 mb-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditDialogOpen(true)}
+                    className="flex-1 rounded-xl text-xs"
+                  >
+                    <Edit3 size={14} /> تعديل الإعلان
+                  </Button>
+                </div>
+              )}
+
               <h2 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || "فرصة تقبيل"}</h2>
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
                 <MapPin size={14} strokeWidth={1.3} />
                 {listing.district && `${listing.district}, `}{listing.city || "—"}
               </div>
 
-              <div className="text-2xl font-medium gradient-text mb-6">
-                {listing.price ? `${Number(listing.price).toLocaleString("en-US")}` : "—"} <span className="text-sm">ر.س</span>
+              <div className="mb-6">
+                <div className="text-2xl font-medium gradient-text">
+                  {listing.price ? `${Number(listing.price).toLocaleString("en-US")}` : "—"} <span className="text-sm">ر.س</span>
+                </div>
+                {isOwner && (
+                  <QuickPriceEdit
+                    listingId={listing.id}
+                    currentPrice={listing.price}
+                    onUpdated={(newPrice) => setListing((prev) => prev ? { ...prev, price: newPrice } : prev)}
+                    className="mt-1"
+                  />
+                )}
               </div>
 
               <div className="space-y-3 mb-6">
@@ -249,17 +277,8 @@ const ListingDetailsPage = () => {
                 {listing.liabilities && <InfoRow label="الالتزامات" value={listing.liabilities} />}
               </div>
 
-              {listing.disclosure_score !== null && listing.disclosure_score > 0 && (
-                <div className="mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
-                      <div className="h-full rounded-full gradient-primary" style={{ width: `${listing.disclosure_score}%` }} />
-                    </div>
-                    <span className="text-xs text-muted-foreground">شفافية {listing.disclosure_score}%</span>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground/70 mt-1">كلما زادت النسبة، زاد إفصاح البائع عن تفاصيل الفرصة</p>
-                </div>
-              )}
+              {/* Deal-type-aware Transparency Indicator */}
+              <TransparencyIndicator listing={listing} className="mb-4" />
 
               {/* Seller Trust Badge */}
               {sellerProfile && (
@@ -301,6 +320,18 @@ const ListingDetailsPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Dialog */}
+      {isOwner && listing && (
+        <ListingEditDialog
+          listing={listing}
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onUpdated={(updated) => {
+            setListing((prev) => prev ? { ...prev, ...updated } as Listing : prev);
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -378,17 +409,14 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
       {/* Alternative options */}
       {alternatives.length > 0 && (
         <div className="space-y-2">
-          <div className="text-xs text-muted-foreground font-medium">خيارات بديلة متاحة</div>
-          {alternatives.map((alt, idx) => {
-            const config = DEAL_TYPE_MAP[alt.type_id];
-            if (!config) return null;
+          <div className="text-xs text-muted-foreground font-medium">خيارات بديلة:</div>
+          {alternatives.map((alt) => {
+            const altConfig = DEAL_TYPE_MAP[alt.type_id];
+            if (!altConfig) return null;
             return (
-              <div key={alt.type_id} className="border border-border/50 rounded-xl p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">بديل {idx + 1}</span>
-                  <span className="text-sm">{config.label}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">{config.desc}</p>
+              <div key={alt.type_id} className="border border-border/30 rounded-lg p-3">
+                <div className="text-sm font-medium">{altConfig.label}</div>
+                <p className="text-xs text-muted-foreground mt-0.5">{altConfig.desc}</p>
               </div>
             );
           })}

@@ -34,6 +34,8 @@ import { toast } from "sonner";
 import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
+import { isFieldRelevant, calculateTransparency } from "@/lib/transparencyScore";
+import TransparencyIndicator from "@/components/TransparencyIndicator";
 
 const steps = [
   { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على مقبل" },
@@ -504,15 +506,20 @@ const CreateListingPage = () => {
 
     setSaving(true);
     try {
-      const fields = Object.values(disclosure);
-      const filled = fields.filter((v) => v.trim() !== "").length;
-      const score = Math.round((filled / fields.length) * 100);
+      const transparencyForPublish = calculateTransparency({
+        ...disclosure,
+        price: disclosure.price ? Number(disclosure.price) : null,
+        annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+        primary_deal_type: dealStructure.primaryType || "full_takeover",
+        inventory: inventory.filter((item) => item.included),
+        photos,
+      });
 
       const { error } = await updateListing(listingId, {
         ...disclosure,
         price: disclosure.price ? Number(disclosure.price) : null,
         annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
-        disclosure_score: score,
+        disclosure_score: transparencyForPublish.score,
         inventory: inventory.filter((item) => item.included),
         deal_disclosures: dealStructure.requiredDisclosures,
         required_documents: dealStructure.requiredDocuments,
@@ -552,11 +559,16 @@ const CreateListingPage = () => {
 
   const totalPhotos = photoGroups.reduce((sum, group) => sum + getGroupDisplayUrls(group.id).length, 0);
   const allPhotoUrls = Object.values(photos).flat();
-  const disclosureScore = (() => {
-    const fields = Object.values(disclosure);
-    const filled = fields.filter((v) => v.trim() !== "").length;
-    return Math.round((filled / fields.length) * 100);
-  })();
+  const dealTypeForTransparency = dealStructure.primaryType || "full_takeover";
+  const transparencyResult = calculateTransparency({
+    ...disclosure,
+    price: disclosure.price ? Number(disclosure.price) : null,
+    annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+    primary_deal_type: dealTypeForTransparency,
+    inventory,
+    photos,
+  });
+  const disclosureScore = transparencyResult.score;
 
   const dynamicDocTypes = dealStructure.requiredDocuments.length > 0
     ? dealStructure.requiredDocuments
@@ -1028,22 +1040,34 @@ const CreateListingPage = () => {
                     <FormField label="الحي" placeholder="حي النسيم" value={disclosure.district} onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))} />
                   </div>
                   <FormField label="السعر المطلوب *" placeholder="180000" suffix="ر.س" value={disclosure.price} onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))} error={publishAttempted && !publishValidation.hasPrice ? "السعر مطلوب ويجب أن يكون رقماً أكبر من صفر" : undefined} />
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} />
-                    <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_duration: v }))} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormField label="الفترة المدفوعة" placeholder="1.5 سنة" value={disclosure.lease_paid_period} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_paid_period: v }))} />
-                    <FormField label="المتبقي من العقد" placeholder="1.5 سنة" value={disclosure.lease_remaining} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_remaining: v }))} />
-                  </div>
-                  <FormField label="الالتزامات المالية" placeholder="لا توجد" value={disclosure.liabilities} onChange={(v) => setDisclosure((prev) => ({ ...prev, liabilities: v }))} />
-                  <FormField label="رواتب متأخرة" placeholder="لا يوجد" value={disclosure.overdue_salaries} onChange={(v) => setDisclosure((prev) => ({ ...prev, overdue_salaries: v }))} />
-                  <FormField label="إيجار متأخر" placeholder="لا يوجد" value={disclosure.overdue_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, overdue_rent: v }))} />
-                  <div className="grid grid-cols-2 gap-3">
-                    <SelectField label="رخصة البلدية" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.municipality_license} onChange={(v) => setDisclosure((prev) => ({ ...prev, municipality_license: v }))} />
-                    <SelectField label="الدفاع المدني" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.civil_defense_license} onChange={(v) => setDisclosure((prev) => ({ ...prev, civil_defense_license: v }))} />
-                  </div>
-                  <SelectField label="كاميرات مراقبة" options={["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"]} value={disclosure.surveillance_cameras} onChange={(v) => setDisclosure((prev) => ({ ...prev, surveillance_cameras: v }))} />
+                  {isFieldRelevant(dealTypeForTransparency, "annual_rent") && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} />
+                      <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_duration: v }))} />
+                    </div>
+                  )}
+                  {isFieldRelevant(dealTypeForTransparency, "lease_remaining") && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <FormField label="الفترة المدفوعة" placeholder="1.5 سنة" value={disclosure.lease_paid_period} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_paid_period: v }))} />
+                      <FormField label="المتبقي من العقد" placeholder="1.5 سنة" value={disclosure.lease_remaining} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_remaining: v }))} />
+                    </div>
+                  )}
+                  {isFieldRelevant(dealTypeForTransparency, "liabilities") && (
+                    <>
+                      <FormField label="الالتزامات المالية" placeholder="لا توجد" value={disclosure.liabilities} onChange={(v) => setDisclosure((prev) => ({ ...prev, liabilities: v }))} />
+                      <FormField label="رواتب متأخرة" placeholder="لا يوجد" value={disclosure.overdue_salaries} onChange={(v) => setDisclosure((prev) => ({ ...prev, overdue_salaries: v }))} />
+                      <FormField label="إيجار متأخر" placeholder="لا يوجد" value={disclosure.overdue_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, overdue_rent: v }))} />
+                    </>
+                  )}
+                  {isFieldRelevant(dealTypeForTransparency, "municipality_license") && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <SelectField label="رخصة البلدية" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.municipality_license} onChange={(v) => setDisclosure((prev) => ({ ...prev, municipality_license: v }))} />
+                      <SelectField label="الدفاع المدني" options={["سارية", "منتهية", "غير متوفرة"]} value={disclosure.civil_defense_license} onChange={(v) => setDisclosure((prev) => ({ ...prev, civil_defense_license: v }))} />
+                    </div>
+                  )}
+                  {isFieldRelevant(dealTypeForTransparency, "surveillance_cameras") && (
+                    <SelectField label="كاميرات مراقبة" options={["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"]} value={disclosure.surveillance_cameras} onChange={(v) => setDisclosure((prev) => ({ ...prev, surveillance_cameras: v }))} />
+                  )}
                 </div>
               </div>
 
@@ -1083,12 +1107,14 @@ const CreateListingPage = () => {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full gradient-primary" style={{ width: `${disclosureScore}%` }} />
-                  </div>
-                  <span className="text-xs text-muted-foreground">إفصاح {disclosureScore}%</span>
-                </div>
+                <TransparencyIndicator listing={{
+                  ...disclosure,
+                  price: disclosure.price ? Number(disclosure.price) : null,
+                  annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+                  primary_deal_type: dealTypeForTransparency,
+                  inventory,
+                  photos,
+                }} />
 
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div className="p-3 rounded-xl bg-muted/50">

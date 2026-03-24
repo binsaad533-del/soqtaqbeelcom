@@ -1,0 +1,83 @@
+import { useState } from "react";
+import { Loader2, Check, X, Edit3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useListings } from "@/hooks/useListings";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+interface QuickPriceEditProps {
+  listingId: string;
+  currentPrice: number | null;
+  onUpdated?: (newPrice: number) => void;
+  className?: string;
+}
+
+const QuickPriceEdit = ({ listingId, currentPrice, onUpdated, className }: QuickPriceEditProps) => {
+  const [editing, setEditing] = useState(false);
+  const [price, setPrice] = useState(currentPrice ? String(currentPrice) : "");
+  const [saving, setSaving] = useState(false);
+  const { updateListing } = useListings();
+
+  const handleSave = async () => {
+    const numPrice = Number(price);
+    if (!price || isNaN(numPrice) || numPrice <= 0) {
+      toast.error("يرجى إدخال سعر صالح");
+      return;
+    }
+    setSaving(true);
+    const { error } = await updateListing(listingId, { price: numPrice } as never);
+    setSaving(false);
+    if (error) {
+      toast.error("فشل تحديث السعر");
+    } else {
+      toast.success("تم تحديث السعر بنجاح");
+      setEditing(false);
+      onUpdated?.(numPrice);
+    }
+  };
+
+  if (!editing) {
+    return (
+      <button
+        onClick={() => setEditing(true)}
+        className={cn("flex items-center gap-1 text-xs text-primary hover:underline", className)}
+      >
+        <Edit3 size={12} /> تعديل السعر
+      </button>
+    );
+  }
+
+  return (
+    <div className={cn("flex items-center gap-2", className)}>
+      <div className="relative flex-1">
+        <input
+          type="number"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          autoFocus
+          className="w-full px-3 py-1.5 rounded-lg border border-primary/30 bg-background text-sm focus:outline-none focus:ring-1 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          placeholder="السعر الجديد"
+        />
+        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">ر.س</span>
+      </div>
+      <Button
+        size="sm"
+        onClick={handleSave}
+        disabled={saving}
+        className="h-8 px-3 rounded-lg gradient-primary text-primary-foreground"
+      >
+        {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => { setEditing(false); setPrice(currentPrice ? String(currentPrice) : ""); }}
+        className="h-8 px-2 rounded-lg"
+      >
+        <X size={14} />
+      </Button>
+    </div>
+  );
+};
+
+export default QuickPriceEdit;
