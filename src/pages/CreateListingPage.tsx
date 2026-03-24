@@ -676,17 +676,24 @@ const CreateListingPage = () => {
   const lowConfidenceItems = inventory.filter((item) => item.confidence === "low" && !item.userConfirmed);
   const medConfidenceItems = inventory.filter((item) => item.confidence === "medium" && !item.userConfirmed);
 
-  // ── Publish validation ──
+  // ── Publish validation — driven by deal-type schema ──
+  const activeRules = getRules(dealStructure.primaryType || "full_takeover");
   const imageReq = getImageRequirement(dealStructure.primaryType);
   const photosOk = imageReq === "none" || imageReq === "optional" || totalPhotos > 0;
-  const publishValidation = {
-    hasPhotos: photosOk,
-    hasActivity: disclosure.business_activity.trim() !== "",
-    hasCity: disclosure.city.trim() !== "",
-    hasPrice: disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0,
-  };
-  const canPublish = publishValidation.hasPhotos && publishValidation.hasActivity && publishValidation.hasCity && publishValidation.hasPrice;
+  const disclosureErrors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
+  const canPublish = photosOk && Object.keys(disclosureErrors).length === 0;
   const [publishAttempted, setPublishAttempted] = useState(false);
+
+  // Debug logging for schema verification
+  console.debug("[CreateListing] deal-type schema:", {
+    dealType: dealStructure.primaryType,
+    requiredFields: activeRules.requiredFields,
+    optionalFields: activeRules.optionalFields,
+    hiddenFields: activeRules.hiddenFields,
+    imageRequired: activeRules.imageRequired,
+    validationErrors: disclosureErrors,
+    canPublish,
+  });
 
   const getConfidenceBadge = (confidence: string) => {
     switch (confidence) {
