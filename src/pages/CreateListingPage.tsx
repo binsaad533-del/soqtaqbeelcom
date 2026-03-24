@@ -359,6 +359,9 @@ const CreateListingPage = () => {
                 <p className="text-sm font-semibold text-primary animate-fade-in [animation-delay:0.4s] [animation-fill-mode:backwards]">
                   ✦ بدون أي إدخال يدوي منك ✦
                 </p>
+                <p className="text-base font-bold animate-fade-in [animation-delay:0.8s] [animation-fill-mode:backwards] mt-1" style={{ color: 'hsl(var(--success))' }}>
+                  <span className="pulse inline-block">🚀</span> بدون ما تكتب سطر واحد
+                </p>
                 <div className="flex items-center justify-center gap-4 mt-3">
                   {[
                     { icon: Eye, text: "اكتشاف الأصول" },
