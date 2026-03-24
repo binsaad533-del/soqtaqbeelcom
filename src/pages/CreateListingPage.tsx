@@ -395,7 +395,12 @@ const CreateListingPage = () => {
       });
 
       if (uploadedUrls.length > 0) {
-        toast.success(`تم تجهيز ورفع ${uploadedUrls.length} صورة بنجاح`);
+        toast.success(`تم تجهيز ورفع ${uploadedUrls.length} ملف بنجاح`);
+
+        // Auto-trigger CR extraction for CR-only listings
+        if (isCrOnly && group === "cr_doc" && uploadedUrls.length > 0 && !crExtractionDone) {
+          handleCrExtraction(uploadedUrls[0]);
+        }
       }
     } finally {
       setSaving(false);
