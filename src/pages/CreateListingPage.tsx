@@ -12,13 +12,13 @@ import { DEAL_TYPE_MAP, getRequiredDocuments } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
 
 const steps = [
-  { label: "هيكل الصفقة", icon: Shield },
-  { label: "صور المشروع", icon: Camera },
-  { label: "تحليل الصور", icon: Eye },
-  { label: "مراجعة الجرد", icon: ClipboardList },
-  { label: "المستندات", icon: FileText },
-  { label: "بيانات الإفصاح", icon: ClipboardList },
-  { label: "المراجعة والنشر", icon: Check },
+  { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — مقبل يرتب الباقي" },
+  { label: "صور المشروع", icon: Camera, hint: "ارفع الصور فقط — مقبل يستخرج كل شيء" },
+  { label: "تحليل الصور", icon: Eye, hint: "مقبل يحلل الصور تلقائياً — استرخِ وشاهد" },
+  { label: "مراجعة الجرد", icon: ClipboardList, hint: "مقبل جهّز الجرد — فقط راجع وأكّد" },
+  { label: "المستندات", icon: FileText, hint: "ارفع المستندات — مقبل يقرأ ويستخرج البيانات" },
+  { label: "بيانات الإفصاح", icon: ClipboardList, hint: "مقبل يعبّئ البيانات — فقط تأكد منها" },
+  { label: "المراجعة والنشر", icon: Check, hint: "كل شيء جاهز — راجع وانشر بضغطة واحدة" },
 ];
 
 const photoGroups = [
@@ -332,6 +332,12 @@ const CreateListingPage = () => {
               {i < steps.length - 1 && <div className="w-3 h-px bg-border shrink-0" />}
             </div>
           ))}
+        </div>
+
+        {/* Step hint banner */}
+        <div className="flex items-center justify-center gap-2 mb-6 animate-fade-in" key={currentStep}>
+          <Sparkles size={14} strokeWidth={1.5} className="text-primary shrink-0" />
+          <span className="text-sm font-medium text-primary">{steps[currentStep].hint}</span>
         </div>
 
         {saving && (
