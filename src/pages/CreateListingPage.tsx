@@ -17,15 +17,12 @@ import {
   AlertTriangle,
   Minus,
   Image as ImageIcon,
-  Layers,
   DoorOpen,
   Building2,
   MapPin,
   Tag,
   Wrench,
   Sparkles,
-  CloudUpload,
-  CheckCircle2,
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
