@@ -336,12 +336,10 @@ const CustomerDashboardPage = () => {
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-medium truncate">{listing.title || "بدون عنوان"}</div>
                           <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
-                            {listing.city && <span>{listing.city}</span>}
+                            <span>{new Date(listing.created_at).toLocaleDateString("ar-SA")}</span>
+                            {listing.city && <><span>·</span><span>{listing.city}</span></>}
                             {listing.price && (
-                              <>
-                                <span>·</span>
-                                <span className="font-medium text-foreground/70">{Number(listing.price).toLocaleString()} ر.س</span>
-                              </>
+                              <><span>·</span><span className="font-medium text-foreground/70">{Number(listing.price).toLocaleString()} ر.س</span></>
                             )}
                           </div>
                         </div>
