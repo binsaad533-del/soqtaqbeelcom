@@ -373,6 +373,18 @@ const CreateListingPage = () => {
 
   const handlePublish = async () => {
     if (!listingId) return;
+    setPublishAttempted(true);
+
+    // Client-side strict validation
+    const hasPhotos = totalPhotos > 0;
+    const hasActivity = disclosure.business_activity.trim() !== "";
+    const hasCity = disclosure.city.trim() !== "";
+    const hasPrice = disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0;
+
+    if (!hasPhotos || !hasActivity || !hasCity || !hasPrice) {
+      toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر");
+      return;
+    }
 
     setSaving(true);
     const fields = Object.values(disclosure);
@@ -419,6 +431,16 @@ const CreateListingPage = () => {
   const primaryDealLabel = DEAL_TYPE_MAP[dealStructure.primaryType]?.label || dealStructure.primaryType;
   const lowConfidenceItems = inventory.filter((item) => item.confidence === "low" && !item.userConfirmed);
   const medConfidenceItems = inventory.filter((item) => item.confidence === "medium" && !item.userConfirmed);
+
+  // ── Publish validation ──
+  const publishValidation = {
+    hasPhotos: totalPhotos > 0,
+    hasActivity: disclosure.business_activity.trim() !== "",
+    hasCity: disclosure.city.trim() !== "",
+    hasPrice: disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0,
+  };
+  const canPublish = publishValidation.hasPhotos && publishValidation.hasActivity && publishValidation.hasCity && publishValidation.hasPrice;
+  const [publishAttempted, setPublishAttempted] = useState(false);
 
   const getConfidenceBadge = (confidence: string) => {
     switch (confidence) {
@@ -824,13 +846,29 @@ const CreateListingPage = () => {
                   </div>
                 )}
 
+                {/* Validation error banner */}
+                {publishAttempted && !canPublish && (
+                  <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-start gap-2">
+                    <AlertTriangle size={16} className="text-destructive shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-destructive">يرجى إكمال الحقول المطلوبة قبل النشر</p>
+                      <ul className="text-[11px] text-destructive/80 mt-1 space-y-0.5 list-disc list-inside">
+                        {!publishValidation.hasPhotos && <li>يجب رفع صورة واحدة على الأقل</li>}
+                        {!publishValidation.hasActivity && <li>نوع النشاط مطلوب</li>}
+                        {!publishValidation.hasCity && <li>المدينة مطلوبة</li>}
+                        {!publishValidation.hasPrice && <li>السعر مطلوب ويجب أن يكون رقماً صحيحاً</li>}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-3">
-                  <FormField label="نوع النشاط" placeholder="مثال: مطعم وجبات سريعة" value={disclosure.business_activity} onChange={(v) => setDisclosure((prev) => ({ ...prev, business_activity: v }))} />
+                  <FormField label="نوع النشاط *" placeholder="مثال: مطعم وجبات سريعة" value={disclosure.business_activity} onChange={(v) => setDisclosure((prev) => ({ ...prev, business_activity: v }))} error={publishAttempted && !publishValidation.hasActivity ? "نوع النشاط مطلوب" : undefined} />
                   <div className="grid grid-cols-2 gap-3">
-                    <FormField label="المدينة" placeholder="الرياض" value={disclosure.city} onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))} />
+                    <FormField label="المدينة *" placeholder="الرياض" value={disclosure.city} onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))} error={publishAttempted && !publishValidation.hasCity ? "المدينة مطلوبة" : undefined} />
                     <FormField label="الحي" placeholder="حي النسيم" value={disclosure.district} onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))} />
                   </div>
-                  <FormField label="السعر المطلوب" placeholder="180000" suffix="ر.س" value={disclosure.price} onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))} />
+                  <FormField label="السعر المطلوب *" placeholder="180000" suffix="ر.س" value={disclosure.price} onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))} error={publishAttempted && !publishValidation.hasPrice ? "السعر مطلوب ويجب أن يكون رقماً أكبر من صفر" : undefined} />
                   <div className="grid grid-cols-2 gap-3">
                     <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} />
                     <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_duration: v }))} />
@@ -908,7 +946,15 @@ const CreateListingPage = () => {
                   </div>
                 </div>
 
-                <Button onClick={handlePublish} disabled={saving || loading} className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
+                {/* Photo validation warning */}
+                {publishAttempted && !publishValidation.hasPhotos && (
+                  <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-center gap-2">
+                    <AlertTriangle size={14} className="text-destructive shrink-0" />
+                    <p className="text-xs text-destructive">يجب رفع صورة واحدة على الأقل — عد إلى خطوة الصور والمستندات</p>
+                  </div>
+                )}
+
+                <Button onClick={handlePublish} disabled={saving || loading || (!canPublish && publishAttempted)} className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
                   {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
                   نشر الإعلان
                 </Button>
@@ -980,7 +1026,7 @@ const ConfirmationCard = ({
   );
 };
 
-const FormField = ({ label, placeholder, suffix, value, onChange }: { label: string; placeholder: string; suffix?: string; value: string; onChange: (v: string) => void }) => (
+const FormField = ({ label, placeholder, suffix, value, onChange, error }: { label: string; placeholder: string; suffix?: string; value: string; onChange: (v: string) => void; error?: string }) => (
   <div>
     <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
     <div className="relative">
@@ -989,10 +1035,14 @@ const FormField = ({ label, placeholder, suffix, value, onChange }: { label: str
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20 transition-all"
+        className={cn(
+          "w-full px-3 py-2 rounded-lg border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 transition-all",
+          error ? "border-destructive/60 focus:border-destructive/60 focus:ring-destructive/30" : "border-border/50 focus:border-primary/30 focus:ring-primary/20"
+        )}
       />
       {suffix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{suffix}</span>}
     </div>
+    {error && <p className="text-[11px] text-destructive mt-1 flex items-center gap-1"><AlertTriangle size={11} /> {error}</p>}
   </div>
 );
 
