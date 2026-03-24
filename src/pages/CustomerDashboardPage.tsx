@@ -341,6 +341,21 @@ const CustomerDashboardPage = () => {
           </div>
         </div>
 
+        {/* ══════ PHONE VERIFICATION CARD ══════ */}
+        {!isPhoneVerified && profile?.phone && (
+          <div className="rounded-2xl border border-warning/30 bg-warning/5 px-5 py-4 mb-5 animate-fade-in">
+            <div className="flex items-center gap-2 mb-3">
+              <Shield size={16} className="text-warning" />
+              <h3 className="text-sm font-semibold text-foreground">وثّق رقم جوالك</h3>
+              <span className="text-[10px] bg-warning/15 text-warning px-2 py-0.5 rounded-full">مطلوب</span>
+            </div>
+            <PhoneVerificationFlow
+              initialPhone={profile.phone}
+              onVerified={() => window.location.reload()}
+            />
+          </div>
+        )}
+
         {/* ══════ FINANCIAL OVERVIEW ══════ */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           <div className="rounded-xl p-3 bg-card border border-border/30 hover:border-primary/20 transition-colors">
