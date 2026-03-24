@@ -9,8 +9,6 @@ export const DEAL_TYPE_LABELS: Record<string, string> = {
   business_transfer: "نقل أعمال",
   assets_setup: "أصول + تجهيز تشغيلي",
   assets_only: "أصول فقط",
-  cr_only: "سجل تجاري فقط",
-  location_only: "موقع فقط (نقل إيجار)",
   full: "تقبيل كامل",
   partial: "تقبيل جزئي",
 };
