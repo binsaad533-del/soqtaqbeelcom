@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo, DragEvent } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { heicTo, isHeic } from "heic-to";
 import { validateImageFile, validateDocFile, logAudit } from "@/lib/security";
 import {
@@ -855,12 +855,35 @@ const CreateListingPage = () => {
           <span className="text-sm font-medium text-primary">{steps[currentStep].hint}</span>
         </div>
 
-        {saving && (
-          <div className="flex items-center gap-2 text-xs text-primary mb-4">
-            <Loader2 size={14} className="animate-spin" />
-            جاري الحفظ...
+        {/* Auto-save status + Completion bar */}
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] text-muted-foreground">اكتمال البيانات</span>
+              <span className="text-[10px] font-medium text-primary">{completionPercent}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full gradient-primary transition-all duration-500"
+                style={{ width: `${completionPercent}%` }}
+              />
+            </div>
           </div>
-        )}
+          <div className="shrink-0">
+            {autoSaveStatus === "saving" && (
+              <div className="flex items-center gap-1.5 text-[10px] text-primary animate-fade-in">
+                <Loader2 size={12} className="animate-spin" />
+                جاري الحفظ...
+              </div>
+            )}
+            {autoSaveStatus === "saved" && (
+              <div className="flex items-center gap-1.5 text-[10px] text-success animate-fade-in">
+                <Check size={12} strokeWidth={2} />
+                تم الحفظ تلقائياً
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="bg-card rounded-2xl shadow-soft p-6 md:p-8 min-h-[400px]">
 
