@@ -365,7 +365,7 @@ const NegotiationPage = () => {
                       {isAi && (
                         <div className="flex items-center gap-1.5 mb-1.5">
                           <AiStar size={14} />
-                          <span className="text-xs text-accent-foreground font-medium">مقبل — وسيط الصفقة</span>
+                          <span className="text-xs text-accent-foreground font-medium">AI — وسيط الصفقة</span>
                         </div>
                       )}
                       <span className="whitespace-pre-line">{msg.message}</span>

@@ -20,7 +20,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const systemPrompt = `أنت "مقبل"، مساعد ذكي في منصة تقبيل المشاريع التجارية في السعودية.
+    const systemPrompt = `أنت المساعد الذكي في منصة تقبيل المشاريع التجارية في السعودية.
 مهمتك: تحويل طلب العميل بالعربية (فصحى أو عامية سعودية) إلى فلاتر بحث.
 
 الفلاتر المتاحة:

@@ -103,7 +103,7 @@ const SmartSearchBar = ({ onApplyFilters }: Props) => {
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           onKeyDown={handleKeyDown}
-          placeholder="أنا مقبل… وش تدور عليه؟"
+          placeholder="وش تدور عليه؟ الـAI يساعدك…"
           disabled={loading}
           className={cn(
             "w-full pr-10 pl-9 py-2.5 rounded-xl border text-sm transition-all",

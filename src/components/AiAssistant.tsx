@@ -5,8 +5,7 @@ import { usePageData } from "@/hooks/usePageData";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import muqbilImg from "@/assets/muqbil-character.png";
-import muqbilWaveImg from "@/assets/muqbil-wave.png";
+import AiStar from "@/components/AiStar";
 
 interface ChatMsg {
   id: string;
@@ -74,7 +73,7 @@ async function streamChat({
     }
     onDone();
   } catch (e) {
-    onError("فشل الاتصال بمقبل");
+    onError("فشل الاتصال بالمساعد الذكي");
   }
 }
 
@@ -149,7 +148,6 @@ const AiAssistant = () => {
     });
   }, [messages, buildContext]);
 
-  // Keep ref updated for voice callback
   const sendMessageRef = useRef(sendMessage);
   sendMessageRef.current = sendMessage;
 
@@ -174,14 +172,16 @@ const AiAssistant = () => {
 
   return (
     <>
-      {/* Proactive tooltip with مقبل peeking */}
+      {/* Proactive tooltip */}
       {(proactiveMessage || peeking) && !open && (
         <div
           className="fixed bottom-16 left-0 z-50 flex items-end gap-0 cursor-pointer animate-fade-in"
           onClick={handleOpen}
         >
-          <div className="relative -ml-6 transition-transform duration-500 ease-out hover:translate-x-2">
-            <img src={muqbilWaveImg} alt="مقبل" className="w-20 h-20 object-contain drop-shadow-md" width={80} height={80} />
+          <div className="relative -ml-2 transition-transform duration-500 ease-out hover:translate-x-2">
+            <div className="w-14 h-14 rounded-full gradient-primary flex items-center justify-center shadow-soft-lg">
+              <Sparkles size={24} className="text-primary-foreground" strokeWidth={1.5} />
+            </div>
           </div>
           {proactiveMessage && (
             <div className="max-w-60 mb-8 mr-2">
@@ -200,17 +200,17 @@ const AiAssistant = () => {
         </div>
       )}
 
-      {/* مقبل character button */}
+      {/* AI button */}
       {!open && !peeking && !proactiveMessage && (
         <button
           onClick={handleOpen}
-          className="fixed bottom-6 left-0 z-50 flex items-center gap-1.5 group transition-all duration-300"
+          className="fixed bottom-6 left-4 z-50 flex items-center gap-1.5 group transition-all duration-300"
         >
-          <div className="relative -ml-3 group-hover:ml-0 transition-all duration-300">
-            <img src={muqbilImg} alt="مقبل" className="w-14 h-14 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300" width={56} height={56} />
+          <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center shadow-soft-lg group-hover:scale-110 transition-transform duration-300">
+            <Sparkles size={20} className="text-primary-foreground" strokeWidth={1.5} />
           </div>
           <span className="text-[11px] font-medium text-foreground/70 bg-card/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full shadow-soft border border-border/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-            مقبل — مساعدك الذكي
+            المساعد الذكي
           </span>
         </button>
       )}
@@ -227,10 +227,12 @@ const AiAssistant = () => {
                     <ChevronLeft size={16} strokeWidth={1.5} />
                   </button>
                 )}
-                <img src={muqbilImg} alt="مقبل" className="w-10 h-10 object-contain" width={40} height={40} />
+                <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
+                  <Sparkles size={18} className="text-primary-foreground" strokeWidth={1.5} />
+                </div>
                 <div>
-                  <h3 className="text-sm font-medium">مقبل</h3>
-                  <p className="text-[10px] text-muted-foreground">شنب وطحطوح ومحلل فرص</p>
+                  <h3 className="text-sm font-medium">المساعد الذكي</h3>
+                  <p className="text-[10px] text-muted-foreground">مدعوم بالذكاء الاصطناعي</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -287,8 +289,8 @@ const AiAssistant = () => {
                     )}>
                       {msg.role === "assistant" && (
                         <div className="flex items-center gap-1.5 mb-1.5">
-                          <img src={muqbilImg} alt="مقبل" className="w-5 h-5 object-contain" width={20} height={20} />
-                          <span className="text-[10px] text-accent-foreground font-medium">مقبل</span>
+                          <AiStar size={14} />
+                          <span className="text-[10px] text-accent-foreground font-medium">AI</span>
                         </div>
                       )}
                       {msg.content}
@@ -301,7 +303,7 @@ const AiAssistant = () => {
                   <div className="ml-auto max-w-[85%]">
                     <div className="rounded-2xl px-3.5 py-2.5 bg-accent/50 border border-accent-foreground/10">
                       <div className="flex items-center gap-1.5 mb-1">
-                        <img src={muqbilImg} alt="مقبل" className="w-5 h-5 object-contain" width={20} height={20} />
+                        <AiStar size={14} />
                         <span className="text-[10px] text-accent-foreground font-medium">يفكر...</span>
                       </div>
                       <div className="flex gap-1">
