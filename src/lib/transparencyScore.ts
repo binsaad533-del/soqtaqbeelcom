@@ -43,21 +43,37 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
   const dealType = listing.primary_deal_type || listing.deal_type || "full_takeover";
   const rules = getRules(dealType);
 
-  // Only score required + optional (visible) fields
-  const scoredFields = [...rules.requiredFields, ...rules.optionalFields];
+  // Score required fields (primary weight: 60 points)
   const missing: string[] = [];
-  let filled = 0;
+  let requiredFilled = 0;
 
-  for (const field of scoredFields) {
+  for (const field of rules.requiredFields) {
     const value = (listing as any)[field];
     if (value !== null && value !== undefined && String(value).trim() !== "" && value !== 0) {
-      filled++;
-    } else if (rules.requiredFields.includes(field)) {
+      requiredFilled++;
+    } else {
       missing.push(FIELD_LABELS[field] || field);
     }
   }
 
-  // Bonus points for having photos and inventory
+  const requiredScore = rules.requiredFields.length > 0
+    ? (requiredFilled / rules.requiredFields.length) * 60
+    : 60;
+
+  // Score optional fields (secondary weight: 10 points)
+  let optionalFilled = 0;
+  for (const field of rules.optionalFields) {
+    const value = (listing as any)[field];
+    if (value !== null && value !== undefined && String(value).trim() !== "" && value !== 0) {
+      optionalFilled++;
+    }
+  }
+
+  const optionalScore = rules.optionalFields.length > 0
+    ? (optionalFilled / rules.optionalFields.length) * 10
+    : 10;
+
+  // Bonus points for photos, inventory, docs (up to 30 points)
   let bonusPoints = 0;
   let bonusTotal = 0;
 
@@ -84,17 +100,16 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
   if (docCount >= 2) bonusPoints += 5;
   else if (docCount >= 1) bonusPoints += 3;
 
-  const fieldScore = scoredFields.length > 0 ? (filled / scoredFields.length) * 70 : 70;
   const bonusScore = bonusTotal > 0 ? (bonusPoints / bonusTotal) * 30 : 30;
-  const totalScore = Math.round(fieldScore + bonusScore);
+  const totalScore = Math.round(requiredScore + optionalScore + bonusScore);
 
   let level: TransparencyLevel;
   let label: string;
 
-  if (totalScore >= 75) {
+  if (totalScore >= 70) {
     level = "high";
     label = "شفافية عالية";
-  } else if (totalScore >= 45) {
+  } else if (totalScore >= 40) {
     level = "medium";
     label = "شفافية متوسطة";
   } else {
@@ -108,7 +123,7 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
     label,
     missingFields: missing,
     totalRequired: rules.requiredFields.length,
-    filledRequired: filled,
+    filledRequired: requiredFilled,
   };
 }
 
