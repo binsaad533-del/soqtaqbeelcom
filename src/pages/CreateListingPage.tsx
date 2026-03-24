@@ -39,9 +39,9 @@ import TransparencyIndicator from "@/components/TransparencyIndicator";
 import { getRules, isFieldVisible, validateDisclosure, validateImages, FIELD_LABELS as RULE_FIELD_LABELS } from "@/lib/dealTypeFieldRules";
 
 const steps = [
-  { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على مقبل" },
-  { label: "الصور والمستندات", icon: Camera, hint: "ارفع الصور والمستندات فقط — مقبل يتكفّل بالباقي" },
-  { label: "التحليل الذكي", icon: Eye, hint: "مقبل يحلل ويجرد تلقائياً — فقط راجع وأكّد" },
+  { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على الـAI" },
+  { label: "الصور والمستندات", icon: Camera, hint: "ارفع الصور والمستندات فقط — الـAI يتكفّل بالباقي" },
+  { label: "التحليل الذكي", icon: Eye, hint: "الـAI يحلل ويجرد تلقائياً — فقط راجع وأكّد" },
   { label: "الإفصاح والنشر", icon: Check, hint: "أكمل البيانات وانشر بضغطة واحدة" },
 ];
 
@@ -822,7 +822,7 @@ const CreateListingPage = () => {
                   حدد نوع الصفقة وسيتم تخصيص المتطلبات تلقائياً حسب اختيارك
                 </p>
                 <p className="text-sm font-bold text-success animate-fade-in [animation-delay:0.4s] [animation-fill-mode:backwards]">
-                  ✦ مقبل يحدد كل شيء لك تلقائياً ✦
+                  ✦ الـAI يحدد كل شيء لك تلقائياً ✦
                 </p>
               </div>
 
@@ -842,7 +842,7 @@ const CreateListingPage = () => {
                   {isCrOnly ? <FileText size={20} strokeWidth={1.5} className="text-primary" /> : <Camera size={20} strokeWidth={1.5} className="text-primary" />}
                 </div>
                 <h2 className="font-semibold text-sm mb-1">
-                  {isCrOnly ? "ارفع صورة السجل التجاري — مقبل يستخرج البيانات تلقائياً!" : "فقط ارفع الصور والمستندات — مقبل يتولى الباقي!"}
+                  {isCrOnly ? "ارفع صورة السجل التجاري — الـAI يستخرج البيانات تلقائياً!" : "فقط ارفع الصور والمستندات — الـAI يتولى الباقي!"}
                 </h2>
                 <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed mb-1">
                   {isCrOnly ? "الذكاء الاصطناعي يقرأ السجل التجاري ويعبّئ البيانات نيابة عنك" : "الذكاء الاصطناعي يستخرج قائمة الأصول ويحلل حالتها تلقائياً"}
@@ -857,7 +857,7 @@ const CreateListingPage = () => {
                 <div className="flex flex-col items-center justify-center py-4 gap-3 animate-fade-in">
                   <Loader2 size={28} className="animate-spin text-primary" />
                   <p className="text-sm font-medium text-primary">جاري استخراج بيانات السجل التجاري...</p>
-                  <p className="text-xs text-muted-foreground">لا تحتاج تعمل شيء — مقبل يقرأ المستند</p>
+                  <p className="text-xs text-muted-foreground">لا تحتاج تعمل شيء — الـAI يقرأ المستند</p>
                 </div>
               )}
 
@@ -1053,7 +1053,7 @@ const CreateListingPage = () => {
                       <AiStar size={56} className="mb-6" />
                       <h2 className="font-medium mb-2">الذكاء الاصطناعي يحلّل الصور...</h2>
                       <p className="text-sm text-muted-foreground max-w-sm">جاري اكتشاف الأصول وتمييز زوايا التصوير</p>
-                      <p className="text-xs text-success mt-2 animate-fade-in">لا تحتاج تعمل شيء — مقبل يتكفّل</p>
+                      <p className="text-xs text-success mt-2 animate-fade-in">لا تحتاج تعمل شيء — الـAI يتكفّل</p>
                       <div className="mt-6 w-56">
                         <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                           <div className="h-full rounded-full gradient-primary transition-all duration-700" style={{ width: `${analyzeProgress}%` }} />
@@ -1065,7 +1065,7 @@ const CreateListingPage = () => {
                     <>
                       <AiStar size={48} className="mb-6" />
                       <h2 className="font-medium mb-2">تحليل الصور بالذكاء الاصطناعي</h2>
-                      <p className="text-sm text-muted-foreground max-w-sm mb-1">سيقوم مقبل بتحليل صورك واكتشاف الأصول تلقائياً</p>
+                      <p className="text-sm text-muted-foreground max-w-sm mb-1">سيقوم الـAI بتحليل صورك واكتشاف الأصول تلقائياً</p>
                       <p className="text-xs text-success mb-4 animate-fade-in">فقط اضغط الزر — والباقي علينا</p>
                       {allPhotoUrls.length === 0 && imageReq === "none" ? (
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -1237,7 +1237,7 @@ const CreateListingPage = () => {
                   <h2 className="font-medium text-sm">بيانات الإفصاح</h2>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {isCrOnly ? "راجع البيانات المستخرجة وأكمل ما يلزم — لا حاجة لحقول الأصول أو الإيجار" : "أكمل بيانات الإفصاح لتعزيز ثقة المشترين — مقبل يعبّئ ما يقدر تلقائياً"}
+                  {isCrOnly ? "راجع البيانات المستخرجة وأكمل ما يلزم — لا حاجة لحقول الأصول أو الإيجار" : "أكمل بيانات الإفصاح لتعزيز ثقة المشترين — الـAI يعبّئ ما يقدر تلقائياً"}
                 </p>
 
                 {/* CR extraction auto-fill notice */}
@@ -1446,7 +1446,7 @@ const CreateListingPage = () => {
                 <AiStar size={24} />
               </div>
               <h3 className="font-semibold text-lg mb-1">فحص الصفقة قبل النشر</h3>
-              <p className="text-xs text-muted-foreground">مقبل يحلل صفقتك ويعطيك توصية قبل النشر</p>
+              <p className="text-xs text-muted-foreground">الـAI يحلل صفقتك ويعطيك توصية قبل النشر</p>
             </div>
 
             {/* Listing Summary */}

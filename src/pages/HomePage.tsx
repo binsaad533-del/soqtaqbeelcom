@@ -56,7 +56,7 @@ const HomePage = () => {
               جرد، تقييم، بيانات، وتفاوض — كلها تلقائيًا بدون ما تكتب سطر واحد.
             </p>
             <p className="text-xs md:text-sm text-muted-foreground/70 mb-8">
-              فقط ارفع الصور والمستندات وخلّ مقبل يشتغل عنك.
+              فقط ارفع الصور والمستندات وخلّ الـAI يشتغل عنك.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft hover:shadow-soft-lg transition-shadow active:scale-[0.98]">

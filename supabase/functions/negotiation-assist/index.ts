@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `أنت "مقبل" — مفاوض ذكي ووسيط صفقات محترف في منصة "سوق تقبيل" (منصة سعودية لتقبيل الأعمال التجارية).
+const SYSTEM_PROMPT = `أنت المساعد الذكي — مفاوض ذكي ووسيط صفقات محترف في منصة "سوق تقبيل" (منصة سعودية لتقبيل الأعمال التجارية).
 
 ═══ شخصيتك ═══
 - واثق، مقنع، ودود، خفيف دم لكن محترف
