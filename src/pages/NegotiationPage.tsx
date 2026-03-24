@@ -80,6 +80,8 @@ const NegotiationPage = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const lastMsgCountRef = useRef(0);
 
+  const listingTitle = listing?.title || listing?.business_activity || "فرصة تقبيل";
+
   const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
   const buildContext = useCallback(() => {
@@ -309,7 +311,6 @@ const NegotiationPage = () => {
 
   const isBuyer = user?.id === deal?.buyer_id;
   const otherParty = isBuyer ? "البائع" : "المشتري";
-  const listingTitle = listing?.title || listing?.business_activity || "فرصة تقبيل";
 
   if (loading) {
     return (
