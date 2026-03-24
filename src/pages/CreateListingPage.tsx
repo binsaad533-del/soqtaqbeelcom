@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo, DragEvent } from "react";
 import { heicTo, isHeic } from "heic-to";
 import { validateImageFile, validateDocFile, logAudit } from "@/lib/security";
 import {
@@ -24,6 +24,8 @@ import {
   Tag,
   Wrench,
   Sparkles,
+  CloudUpload,
+  CheckCircle2,
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
