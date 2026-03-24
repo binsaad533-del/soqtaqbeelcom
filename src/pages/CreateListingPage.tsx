@@ -36,8 +36,9 @@ import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
 
 const steps = [
-  { label: "هيكل الصفقة والصور", icon: Camera, hint: "اختر نوع الصفقة وارفع الصور — مقبل يتكفّل بالباقي" },
-  { label: "التحليل والجرد والمستندات", icon: Eye, hint: "مقبل يحلل ويجرد تلقائياً — فقط راجع وأكّد" },
+  { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على مقبل" },
+  { label: "الصور والمستندات", icon: Camera, hint: "ارفع الصور والمستندات فقط — مقبل يتكفّل بالباقي" },
+  { label: "التحليل الذكي", icon: Eye, hint: "مقبل يحلل ويجرد تلقائياً — فقط راجع وأكّد" },
   { label: "الإفصاح والنشر", icon: Check, hint: "أكمل البيانات وانشر بضغطة واحدة" },
 ];
 
@@ -94,7 +95,6 @@ const CreateListingPage = () => {
   const [listingId, setListingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [showDealStructure, setShowDealStructure] = useState(true);
 
   const [disclosure, setDisclosure] = useState({
     business_activity: "",
@@ -154,7 +154,6 @@ const CreateListingPage = () => {
     if (file.type === "image/heic" || file.type === "image/heif" || name.endsWith(".heic") || name.endsWith(".heif")) {
       return true;
     }
-
     try {
       return await isHeic(file);
     } catch {
@@ -172,7 +171,6 @@ const CreateListingPage = () => {
         type: "image/jpeg",
         quality: 0.92,
       });
-
       const newName = file.name.replace(/\.[^.]+$/i, ".jpg");
       return new File([blob], newName, { type: "image/jpeg" });
     }
@@ -186,11 +184,9 @@ const CreateListingPage = () => {
       if (!ctx) return file;
       ctx.drawImage(bitmap, 0, 0);
       bitmap.close();
-
       const blob = await new Promise<Blob | null>((resolve) => {
         canvas.toBlob(resolve, "image/jpeg", 0.92);
       });
-
       if (!blob) return file;
       const newName = file.name.replace(/\.[^.]+$/i, ".jpg");
       return new File([blob], newName, { type: "image/jpeg" });
@@ -290,14 +286,14 @@ const CreateListingPage = () => {
   };
 
   const handleAnalyze = async () => {
-    const allPhotoUrls = Object.values(photos).flat();
+    const allPhotoUrlsForAnalysis = Object.values(photos).flat();
 
-    if (allPhotoUrls.length === 0) {
+    if (allPhotoUrlsForAnalysis.length === 0) {
       toast.error("يرجى رفع صور أولاً");
       return;
     }
 
-    const unsupportedUrls = allPhotoUrls.filter((url) => /\.(heic|heif)(\?|$)/i.test(url));
+    const unsupportedUrls = allPhotoUrlsForAnalysis.filter((url) => /\.(heic|heif)(\?|$)/i.test(url));
     if (unsupportedUrls.length > 0) {
       toast.error("هناك صور قديمة بصيغة HEIC غير قابلة للتحليل. أعد رفعها ليتم تحويلها تلقائياً.");
       return;
@@ -312,7 +308,7 @@ const CreateListingPage = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("analyze-inventory", {
-        body: { photoUrls: allPhotoUrls, photoGroups: photos },
+        body: { photoUrls: allPhotoUrlsForAnalysis, photoGroups: photos },
       });
 
       clearInterval(progressInterval);
@@ -355,7 +351,6 @@ const CreateListingPage = () => {
         toast.error("يرجى اختيار هيكل الصفقة أولاً");
         return;
       }
-
       const id = await ensureListing();
       if (id) {
         await updateListing(id, {
@@ -369,15 +364,10 @@ const CreateListingPage = () => {
         } as never);
       }
     }
-
     setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
   };
 
   const handleBack = () => {
-    if (currentStep === 0 && !showDealStructure) {
-      setShowDealStructure(true);
-      return;
-    }
     setCurrentStep((prev) => Math.max(0, prev - 1));
   };
 
@@ -456,7 +446,8 @@ const CreateListingPage = () => {
         <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif,.raw,.cr2,.nef,.arw,.dng" multiple className="hidden" onChange={handlePhotoUpload} />
         <input ref={docInputRef} type="file" accept="*/*" multiple className="hidden" onChange={handleDocUpload} />
 
-        <div className="flex items-center justify-between mb-8 pb-2 gap-2">
+        {/* 4-step progress */}
+        <div className="flex items-center justify-between mb-8 pb-2 gap-1">
           {steps.map((step, i) => (
             <div key={step.label} className="flex items-center gap-1 flex-1">
               <button
@@ -465,18 +456,20 @@ const CreateListingPage = () => {
                   if (i < currentStep) setCurrentStep(i);
                 }}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs whitespace-nowrap transition-all w-full justify-center",
+                  "flex items-center gap-1 px-2 py-2 rounded-xl text-[11px] whitespace-nowrap transition-all w-full justify-center",
                   i === currentStep ? "bg-primary/10 text-primary font-medium border border-primary/20" : i < currentStep ? "text-success cursor-pointer hover:bg-success/5" : "text-muted-foreground"
                 )}
               >
-                {i < currentStep ? <Check size={13} strokeWidth={2} /> : <step.icon size={13} strokeWidth={1.3} />}
-                <span>{step.label}</span>
+                {i < currentStep ? <Check size={12} strokeWidth={2} /> : <step.icon size={12} strokeWidth={1.3} />}
+                <span className="hidden sm:inline">{step.label}</span>
+                <span className="sm:hidden">{i + 1}</span>
               </button>
-              {i < steps.length - 1 && <div className="w-6 h-px bg-border shrink-0" />}
+              {i < steps.length - 1 && <div className="w-4 h-px bg-border shrink-0" />}
             </div>
           ))}
         </div>
 
+        {/* Step hint */}
         <div className="flex items-center justify-center gap-2 mb-6 animate-fade-in" key={currentStep}>
           <Sparkles size={14} strokeWidth={1.5} className="text-primary shrink-0" />
           <span className="text-sm font-medium text-primary">{steps[currentStep].hint}</span>
@@ -490,173 +483,154 @@ const CreateListingPage = () => {
         )}
 
         <div className="bg-card rounded-2xl shadow-soft p-6 md:p-8 min-h-[400px]">
+
+          {/* ── Step 0: Deal Structure ── */}
           {currentStep === 0 && (
             <div className="space-y-6">
-              <div>
-                <button onClick={() => setShowDealStructure((prev) => !prev)} className="flex items-center justify-between w-full text-right">
-                  <div className="flex items-center gap-2">
-                    <Shield size={18} strokeWidth={1.5} className="text-primary" />
-                    <h2 className="font-medium text-sm">هيكل الصفقة</h2>
-                    {dealStructure.isValid && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-success/10 text-success font-medium">
-                        <Check size={10} className="inline ml-0.5" />
-                        {primaryDealLabel}
-                      </span>
-                    )}
-                  </div>
-                  <ArrowLeft size={14} className={cn("text-muted-foreground transition-transform", showDealStructure && "rotate-90")} />
-                </button>
-
-                {showDealStructure && (
-                  <div className="mt-3 animate-fade-in">
-                    <DealStructureEngine
-                      value={dealStructure}
-                      onChange={(value) => {
-                        setDealStructure(value);
-                        if (value.isValid) {
-                          setTimeout(() => setShowDealStructure(false), 400);
-                        }
-                      }}
-                    />
-                  </div>
-                )}
+              <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-5 border border-primary/10 text-center">
+                <Shield size={28} strokeWidth={1.5} className="text-primary mx-auto mb-3" />
+                <h2 className="font-semibold text-sm mb-1">اختر هيكل الصفقة المناسب</h2>
+                <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed mb-2">
+                  حدد نوع الصفقة وسيتم تخصيص المتطلبات تلقائياً حسب اختيارك
+                </p>
+                <p className="text-sm font-bold text-success animate-fade-in [animation-delay:0.4s] [animation-fill-mode:backwards]">
+                  ✦ مقبل يحدد كل شيء لك تلقائياً ✦
+                </p>
               </div>
 
-              {dealStructure.isValid && (
-                <>
-                  <div className="border-t border-border/50" />
-
-                  <div className="space-y-5">
-                    <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-5 border border-primary/10 text-center">
-                      <div className="flex items-center justify-center gap-2 mb-2">
-                        <Sparkles size={20} strokeWidth={1.5} className="text-primary" />
-                        <Camera size={20} strokeWidth={1.5} className="text-primary" />
-                      </div>
-                      <h2 className="font-semibold text-sm mb-1">فقط ارفع الصور — مقبل يتولى الباقي!</h2>
-                      <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed mb-1">
-                        الذكاء الاصطناعي يستخرج قائمة الأصول ويحلل حالتها تلقائياً
-                      </p>
-                      <p className="text-sm font-semibold text-primary animate-fade-in [animation-delay:0.4s] [animation-fill-mode:backwards]">
-                        ✦ بدون أي إدخال يدوي منك ✦
-                      </p>
-                      <p className="text-sm font-bold text-success animate-fade-in [animation-delay:0.8s] [animation-fill-mode:backwards] mt-1">
-                        بدون ما تكتب سطر واحد
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 flex-1 rounded-full bg-muted overflow-hidden">
-                        <div className="h-full rounded-full gradient-primary transition-all duration-500" style={{ width: `${Math.min(100, (totalPhotos / 12) * 100)}%` }} />
-                      </div>
-                      <span className="text-xs font-medium text-primary">{totalPhotos} صورة</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {photoGroups.map((group) => {
-                        const displayUrls = getGroupDisplayUrls(group.id);
-                        const count = displayUrls.length;
-                        const done = count >= group.min;
-                        const iconMap: Record<string, typeof Camera> = {
-                          Camera,
-                          DoorOpen,
-                          Building2,
-                          MapPin,
-                          Tag,
-                          Wrench,
-                          FileText,
-                        };
-                        const Icon = iconMap[group.icon] || Camera;
-
-                        return (
-                          <div key={group.id} className={cn("p-3.5 rounded-xl border transition-all", done ? "border-success/30 bg-success/5" : "border-border/50 bg-card hover:border-primary/30")}>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2.5">
-                                <Icon size={18} strokeWidth={1.5} className="text-primary" />
-                                <div>
-                                  <div className="text-xs font-medium">{group.label}</div>
-                                  <div className="text-[10px] text-muted-foreground">{group.min} صور على الأقل</div>
-                                </div>
-                              </div>
-
-                              <button
-                                onClick={() => {
-                                  setActivePhotoGroup(group.id);
-                                  fileInputRef.current?.click();
-                                }}
-                                disabled={uploadingGroup === group.id}
-                                className={cn(
-                                  "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all active:scale-[0.97]",
-                                  uploadingGroup === group.id ? "bg-primary/20 text-primary cursor-wait" : done ? "bg-success/10 text-success" : "bg-primary/10 text-primary hover:bg-primary/20"
-                                )}
-                              >
-                                {uploadingGroup === group.id ? (
-                                  <>
-                                    <Loader2 size={12} className="animate-spin" />
-                                    {uploadProgress.current}/{uploadProgress.total}
-                                  </>
-                                ) : (
-                                  <>
-                                    <Upload size={12} strokeWidth={1.5} />
-                                    {count > 0 ? `${count} ✓` : "رفع"}
-                                  </>
-                                )}
-                              </button>
-                            </div>
-
-                            {uploadingGroup === group.id && uploadProgress.total > 0 && (
-                              <div className="mt-2.5 space-y-1.5 animate-fade-in">
-                                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                                  <div className="h-full rounded-full gradient-primary transition-all duration-500 ease-out" style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }} />
-                                </div>
-                                <p className="text-[10px] text-primary text-center">جاري تجهيز ورفع الصور بطريقة ذكية ولطيفة...</p>
-                              </div>
-                            )}
-
-                            {displayUrls.length > 0 && (
-                              <div className="flex gap-1.5 mt-2.5 overflow-x-auto pb-1">
-                                {displayUrls.map((url, i) => (
-                                  <div key={`${group.id}-${i}`} className="relative shrink-0 w-12 h-12 rounded-lg border border-border/30 overflow-hidden bg-muted/40">
-                                    <img
-                                      src={url}
-                                      alt={`معاينة ${group.label}`}
-                                      className="w-full h-full object-cover"
-                                      onError={(e) => {
-                                        const target = e.currentTarget;
-                                        target.style.display = "none";
-                                        const fallback = target.nextElementSibling as HTMLDivElement | null;
-                                        if (fallback) fallback.style.display = "flex";
-                                      }}
-                                    />
-                                    <div className="hidden absolute inset-0 items-center justify-center text-primary bg-primary/5">
-                                      <ImageIcon size={16} />
-                                    </div>
-                                    {uploadingGroup === group.id && i === displayUrls.length - 1 && (
-                                      <div className="absolute inset-0 bg-background/55 flex items-center justify-center">
-                                        <Loader2 size={14} className="animate-spin text-primary" />
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <div className="text-center pt-2 pb-1">
-                      <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/10">
-                        <Sparkles size={16} strokeWidth={1.5} className="text-primary" />
-                        <p className="text-sm font-medium text-foreground">كلما زادت الصور، كان التحليل أدق والإعلان أقوى</p>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
+              <DealStructureEngine
+                value={dealStructure}
+                onChange={(value) => setDealStructure(value)}
+              />
             </div>
           )}
 
+          {/* ── Step 1: Photos & Documents ── */}
           {currentStep === 1 && (
+            <div className="space-y-6">
+              <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-5 border border-primary/10 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Sparkles size={20} strokeWidth={1.5} className="text-primary" />
+                  <Camera size={20} strokeWidth={1.5} className="text-primary" />
+                </div>
+                <h2 className="font-semibold text-sm mb-1">فقط ارفع الصور والمستندات — مقبل يتولى الباقي!</h2>
+                <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed mb-1">
+                  الذكاء الاصطناعي يستخرج قائمة الأصول ويحلل حالتها تلقائياً
+                </p>
+                <p className="text-sm font-semibold text-primary animate-fade-in [animation-delay:0.4s] [animation-fill-mode:backwards]">
+                  ✦ بدون أي إدخال يدوي منك ✦
+                </p>
+              </div>
+
+              {/* Photos */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Camera size={16} strokeWidth={1.5} className="text-primary" />
+                  <h3 className="font-medium text-sm">الصور</h3>
+                  <div className="h-2 flex-1 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full gradient-primary transition-all duration-500" style={{ width: `${Math.min(100, (totalPhotos / 12) * 100)}%` }} />
+                  </div>
+                  <span className="text-xs font-medium text-primary">{totalPhotos} صورة</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {photoGroups.map((group) => {
+                    const displayUrls = getGroupDisplayUrls(group.id);
+                    const count = displayUrls.length;
+                    const done = count >= group.min;
+                    const iconMap: Record<string, typeof Camera> = { Camera, DoorOpen, Building2, MapPin, Tag, Wrench, FileText };
+                    const Icon = iconMap[group.icon] || Camera;
+
+                    return (
+                      <div key={group.id} className={cn("p-3.5 rounded-xl border transition-all", done ? "border-success/30 bg-success/5" : "border-border/50 bg-card hover:border-primary/30")}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <Icon size={18} strokeWidth={1.5} className="text-primary" />
+                            <div>
+                              <div className="text-xs font-medium">{group.label}</div>
+                              <div className="text-[10px] text-muted-foreground">{group.min} صور على الأقل</div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => { setActivePhotoGroup(group.id); fileInputRef.current?.click(); }}
+                            disabled={uploadingGroup === group.id}
+                            className={cn(
+                              "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all active:scale-[0.97]",
+                              uploadingGroup === group.id ? "bg-primary/20 text-primary cursor-wait" : done ? "bg-success/10 text-success" : "bg-primary/10 text-primary hover:bg-primary/20"
+                            )}
+                          >
+                            {uploadingGroup === group.id ? (
+                              <><Loader2 size={12} className="animate-spin" />{uploadProgress.current}/{uploadProgress.total}</>
+                            ) : (
+                              <><Upload size={12} strokeWidth={1.5} />{count > 0 ? `${count} ✓` : "رفع"}</>
+                            )}
+                          </button>
+                        </div>
+
+                        {uploadingGroup === group.id && uploadProgress.total > 0 && (
+                          <div className="mt-2.5 space-y-1.5 animate-fade-in">
+                            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                              <div className="h-full rounded-full gradient-primary transition-all duration-500 ease-out" style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }} />
+                            </div>
+                            <p className="text-[10px] text-primary text-center">جاري تجهيز ورفع الصور بطريقة ذكية ولطيفة...</p>
+                          </div>
+                        )}
+
+                        {displayUrls.length > 0 && (
+                          <div className="flex gap-1.5 mt-2.5 overflow-x-auto pb-1">
+                            {displayUrls.map((url, i) => (
+                              <div key={`${group.id}-${i}`} className="relative shrink-0 w-12 h-12 rounded-lg border border-border/30 overflow-hidden bg-muted/40">
+                                <img src={url} alt={`معاينة ${group.label}`} className="w-full h-full object-cover" onError={(e) => { const target = e.currentTarget; target.style.display = "none"; const fallback = target.nextElementSibling as HTMLDivElement | null; if (fallback) fallback.style.display = "flex"; }} />
+                                <div className="hidden absolute inset-0 items-center justify-center text-primary bg-primary/5"><ImageIcon size={16} /></div>
+                                {uploadingGroup === group.id && i === displayUrls.length - 1 && (
+                                  <div className="absolute inset-0 bg-background/55 flex items-center justify-center"><Loader2 size={14} className="animate-spin text-primary" /></div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="text-center pt-2 pb-1">
+                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/10">
+                    <Sparkles size={16} strokeWidth={1.5} className="text-primary" />
+                    <p className="text-sm font-medium text-foreground">كلما زادت الصور، كان التحليل أدق والإعلان أقوى</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Documents */}
+              <div className="border-t border-border/50 pt-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <FileText size={16} strokeWidth={1.5} className="text-primary" />
+                  <h3 className="font-medium text-sm">المستندات</h3>
+                  <span className="text-[10px] text-muted-foreground">(اختياري — يعزز ثقة المشتري)</span>
+                </div>
+                <div className="space-y-2">
+                  {dynamicDocTypes.map((doc) => (
+                    <div key={doc} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card hover:border-primary/20 transition-all">
+                      <div className="flex items-center gap-2.5">
+                        <FileText size={14} strokeWidth={1.3} className="text-muted-foreground" />
+                        <div>
+                          <span className="text-xs">{doc}</span>
+                          {uploadedDocs[doc]?.length > 0 && <span className="text-[10px] text-success mr-2">✓ {uploadedDocs[doc].length} ملف</span>}
+                        </div>
+                      </div>
+                      <button onClick={() => { setActiveDocType(doc); docInputRef.current?.click(); }} className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]">
+                        <Upload size={12} strokeWidth={1.3} /> رفع
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Step 2: AI Analysis ── */}
+          {currentStep === 2 && (
             <div className="space-y-6">
               {!analyzed ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -665,6 +639,7 @@ const CreateListingPage = () => {
                       <AiStar size={56} className="mb-6" />
                       <h2 className="font-medium mb-2">الذكاء الاصطناعي يحلّل الصور...</h2>
                       <p className="text-sm text-muted-foreground max-w-sm">جاري اكتشاف الأصول وتمييز زوايا التصوير</p>
+                      <p className="text-xs text-success mt-2 animate-fade-in">لا تحتاج تعمل شيء — مقبل يتكفّل</p>
                       <div className="mt-6 w-56">
                         <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                           <div className="h-full rounded-full gradient-primary transition-all duration-700" style={{ width: `${analyzeProgress}%` }} />
@@ -676,7 +651,8 @@ const CreateListingPage = () => {
                     <>
                       <AiStar size={48} className="mb-6" />
                       <h2 className="font-medium mb-2">تحليل الصور بالذكاء الاصطناعي</h2>
-                      <p className="text-sm text-muted-foreground max-w-sm mb-4">سيقوم مقبل بتحليل صورك واكتشاف الأصول تلقائياً</p>
+                      <p className="text-sm text-muted-foreground max-w-sm mb-1">سيقوم مقبل بتحليل صورك واكتشاف الأصول تلقائياً</p>
+                      <p className="text-xs text-success mb-4 animate-fade-in">فقط اضغط الزر — والباقي علينا</p>
                       {allPhotoUrls.length === 0 ? (
                         <div className="flex items-center gap-1.5 text-xs text-warning">
                           <AlertTriangle size={14} />
@@ -798,7 +774,6 @@ const CreateListingPage = () => {
                               ) : (
                                 <div className="text-sm cursor-pointer hover:text-primary transition-colors" onClick={() => setEditingItemId(item.id)}>{item.name}</div>
                               )}
-
                               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                                 <span className="text-xs text-muted-foreground">{item.category}</span>
                                 <span className="text-xs text-muted-foreground">— {item.condition}</span>
@@ -807,55 +782,16 @@ const CreateListingPage = () => {
                               </div>
                               {item.detectionNote && <div className="text-[10px] text-muted-foreground mt-0.5 italic">{item.detectionNote}</div>}
                             </div>
-
                             <div className="flex items-center gap-2 shrink-0 mr-3">
                               <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-1">
                                 <button onClick={() => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: Math.max(1, entry.qty - 1) } : entry))} className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Minus size={12} /></button>
-                                <input
-                                  type="number"
-                                  min="1"
-                                  value={item.qty}
-                                  onChange={(e) => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: Math.max(1, parseInt(e.target.value) || 1) } : entry))}
-                                  className="w-8 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                />
+                                <input type="number" min="1" value={item.qty} onChange={(e) => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: Math.max(1, parseInt(e.target.value) || 1) } : entry))} className="w-8 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                 <button onClick={() => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: entry.qty + 1 } : entry))} className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Plus size={12} /></button>
                               </div>
                               <button onClick={() => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, included: !entry.included } : entry))} className={cn("text-xs px-2.5 py-1 rounded-md transition-all active:scale-[0.97]", item.included ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{item.included ? "مشمول" : "مستثنى"}</button>
-                              <button onClick={() => setInventory((prev) => prev.filter((entry) => entry.id !== item.id))} className="p-1 text-muted-foreground hover:text-destructive transition-colors"><Trash2 size={14} strokeWidth={1.3} /></button>
+                              <button onClick={() => setInventory((prev) => prev.filter((entry) => entry.id !== item.id))} className="text-muted-foreground hover:text-destructive transition-colors p-1"><Trash2 size={13} /></button>
                             </div>
                           </div>
-
-                          {item.photoIndices.length > 0 && allPhotoUrls.length > 0 && (
-                            <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
-                              {item.photoIndices.filter((idx) => idx < allPhotoUrls.length).slice(0, 6).map((idx) => (
-                                <img key={idx} src={allPhotoUrls[idx]} alt="" className="w-10 h-10 rounded-md object-cover shrink-0 border border-border/30" />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-border/50 pt-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <FileText size={16} strokeWidth={1.5} className="text-primary" />
-                      <h3 className="font-medium text-sm">المستندات المطلوبة</h3>
-                      <span className="text-[10px] text-muted-foreground">({primaryDealLabel})</span>
-                    </div>
-                    <div className="space-y-2">
-                      {dynamicDocTypes.map((doc) => (
-                        <div key={doc} className="flex items-center justify-between p-3 rounded-xl border border-border/50">
-                          <div className="flex items-center gap-2">
-                            <FileText size={14} strokeWidth={1.3} className="text-muted-foreground" />
-                            <div>
-                              <span className="text-xs">{doc}</span>
-                              {uploadedDocs[doc]?.length > 0 && <span className="text-[10px] text-success mr-2">✓ {uploadedDocs[doc].length} ملف</span>}
-                            </div>
-                          </div>
-                          <button onClick={() => { setActiveDocType(doc); docInputRef.current?.click(); }} className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]">
-                            <Upload size={12} strokeWidth={1.3} /> رفع
-                          </button>
                         </div>
                       ))}
                     </div>
@@ -865,7 +801,8 @@ const CreateListingPage = () => {
             </div>
           )}
 
-          {currentStep === 2 && (
+          {/* ── Step 3: Disclosure & Publish ── */}
+          {currentStep === 3 && (
             <div className="space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-1">
@@ -980,12 +917,13 @@ const CreateListingPage = () => {
           )}
         </div>
 
+        {/* Navigation */}
         <div className="flex items-center justify-between mt-6">
-          <Button variant="outline" onClick={handleBack} disabled={currentStep === 0 && showDealStructure} className="rounded-xl active:scale-[0.98]">
+          <Button variant="outline" onClick={handleBack} disabled={currentStep === 0} className="rounded-xl active:scale-[0.98]">
             <ArrowRight size={16} strokeWidth={1.5} /> السابق
           </Button>
           {currentStep < steps.length - 1 && (
-            <Button onClick={handleNext} disabled={(currentStep === 0 && !dealStructure.isValid) || saving || (currentStep === 1 && analyzing)} className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
+            <Button onClick={handleNext} disabled={(currentStep === 0 && !dealStructure.isValid) || saving || (currentStep === 2 && analyzing)} className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
               التالي
               <ArrowLeft size={16} strokeWidth={1.5} />
             </Button>
@@ -1014,7 +952,6 @@ const ConfirmationCard = ({
     <div className="bg-card rounded-lg p-3 border border-border/50">
       <div className="text-sm font-medium mb-1">{item.name}</div>
       <div className="text-[11px] text-muted-foreground mb-2">{item.detectionNote}</div>
-
       {item.photoIndices.length > 0 && (
         <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
           {item.photoIndices.filter((idx) => idx < allPhotoUrls.length).slice(0, 6).map((idx) => (
@@ -1022,9 +959,7 @@ const ConfirmationCard = ({
           ))}
         </div>
       )}
-
       <p className="text-xs text-muted-foreground mb-2">هل هذه الصور لنفس الأصل أم لأصول متعددة؟</p>
-
       {!showQtyInput ? (
         <div className="flex gap-2">
           <button onClick={onConfirmSame} className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors active:scale-[0.97]">هذا نفس الأصل</button>
