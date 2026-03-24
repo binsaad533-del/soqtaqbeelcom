@@ -27,10 +27,20 @@ const SupervisorDashboardPage = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const [l, d] = await Promise.all([getAllListings(), getAllDeals()]);
-      setListings(l);
-      setDeals(d);
-      setLoading(false);
+      try {
+        const [l, d] = await Promise.all([
+          getAllListings().catch(() => [] as Listing[]),
+          getAllDeals().catch(() => [] as Deal[]),
+        ]);
+        setListings(l || []);
+        setDeals(d || []);
+      } catch (err) {
+        console.error("Supervisor dashboard load failed:", err);
+        setListings([]);
+        setDeals([]);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, [getAllListings, getAllDeals]);
