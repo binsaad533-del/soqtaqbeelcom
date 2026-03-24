@@ -100,8 +100,8 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
   if (docCount >= 2) bonusPoints += 5;
   else if (docCount >= 1) bonusPoints += 3;
 
-  const bonusScore = bonusTotal > 0 ? (bonusPoints / bonusTotal) * 30 : 30;
-  const totalScore = Math.round(requiredScore + optionalScore + bonusScore);
+  const bonusScore = bonusTotal > 0 ? (bonusPoints / bonusTotal) * 10 : 10;
+  const totalScore = Math.min(100, Math.round(requiredScore + optionalScore + bonusScore));
 
   let level: TransparencyLevel;
   let label: string;
