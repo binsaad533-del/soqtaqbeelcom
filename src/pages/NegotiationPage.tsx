@@ -5,7 +5,7 @@ import ChatAttachmentButton from "@/components/chat/ChatAttachmentButton";
 import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
 import AiStar from "@/components/AiStar";
 import TrustBadge from "@/components/TrustBadge";
-import DealRiskIndicator from "@/components/DealRiskIndicator";
+
 import LegalConfirmationPanel from "@/components/LegalConfirmationPanel";
 import SellerReviewForm from "@/components/SellerReviewForm";
 import CommissionPaymentPanel from "@/components/CommissionPaymentPanel";
@@ -353,8 +353,6 @@ const NegotiationPage = () => {
   }
 
   const isPostAgreement = deal.status === "completed" || deal.status === "finalized";
-  const [sidebarTab, setSidebarTab] = useState<"summary" | "actions">(isPostAgreement ? "actions" : "summary");
-  const [showAiToolbar, setShowAiToolbar] = useState(false);
 
   const statusLabel = deal.status === "negotiating" ? "جاري التفاوض" : deal.status === "completed" ? "مكتمل" : deal.status === "finalized" ? "مُقفل" : deal.status;
   const riskLabel = !deal.risk_score || deal.risk_score <= 25 ? "مرتفعة" : deal.risk_score <= 50 ? "متوسطة" : "منخفضة";
