@@ -92,6 +92,23 @@ interface DedupAction {
   merged_count: number;
 }
 
+interface CrExtractionResult {
+  cr_number?: string;
+  entity_name?: string;
+  business_activity?: string;
+  secondary_activities?: string[];
+  city?: string;
+  district?: string;
+  issue_date?: string;
+  expiry_date?: string;
+  status?: string;
+  entity_type?: string;
+  owner_name?: string;
+  extraction_confidence?: "high" | "medium" | "low";
+  extraction_notes?: string;
+  fields_confidence?: Record<string, string>;
+}
+
 const CreateListingPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [dealStructure, setDealStructure] = useState<DealStructureSelection>({
@@ -143,6 +160,13 @@ const CreateListingPage = () => {
   const [draftRestored, setDraftRestored] = useState(false);
   const [draftLoading, setDraftLoading] = useState(true);
   const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // CR-only extraction state
+  const [crExtraction, setCrExtraction] = useState<CrExtractionResult | null>(null);
+  const [crExtracting, setCrExtracting] = useState(false);
+  const [crExtractionDone, setCrExtractionDone] = useState(false);
+
+  const isCrOnly = dealStructure.primaryType === "cr_only";
 
   const photoGroups = allPhotoGroups.filter((group) => {
     if (dealStructure.selectedTypes.length === 0) return true;
@@ -371,7 +395,12 @@ const CreateListingPage = () => {
       });
 
       if (uploadedUrls.length > 0) {
-        toast.success(`تم تجهيز ورفع ${uploadedUrls.length} صورة بنجاح`);
+        toast.success(`تم تجهيز ورفع ${uploadedUrls.length} ملف بنجاح`);
+
+        // Auto-trigger CR extraction for CR-only listings
+        if (isCrOnly && group === "cr_doc" && uploadedUrls.length > 0 && !crExtractionDone) {
+          handleCrExtraction(uploadedUrls[0]);
+        }
       }
     } finally {
       setSaving(false);
@@ -409,6 +438,46 @@ const CreateListingPage = () => {
     setSaving(false);
     e.target.value = "";
   };
+
+  // ── CR document extraction ──
+  const handleCrExtraction = useCallback(async (documentUrl: string) => {
+    setCrExtracting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("extract-cr-data", {
+        body: { documentUrl },
+      });
+
+      if (error || !data || (data as { error?: string }).error) {
+        throw new Error((data as { error?: string })?.error || error?.message || "فشل استخراج البيانات");
+      }
+
+      const result = data as CrExtractionResult;
+      setCrExtraction(result);
+      setCrExtractionDone(true);
+
+      // Auto-fill disclosure fields from extraction
+      setDisclosure((prev) => ({
+        ...prev,
+        business_activity: result.business_activity || prev.business_activity,
+        city: result.city || prev.city,
+        district: result.district || prev.district,
+      }));
+
+      if (result.extraction_confidence === "high") {
+        toast.success("تم استخراج بيانات السجل التجاري بنجاح — راجع البيانات وأكّدها", { duration: 5000 });
+      } else if (result.extraction_confidence === "medium") {
+        toast.info("تم استخراج بعض البيانات — يرجى مراجعة وإكمال الحقول الناقصة", { duration: 5000 });
+      } else {
+        toast.warning("لم نتمكن من استخراج بيانات كافية من المستند — يرجى إكمال الحقول يدوياً", { duration: 6000 });
+      }
+    } catch (err) {
+      console.error("CR extraction failed:", err);
+      toast.error("تعذّر استخراج البيانات من السجل التجاري — يمكنك إكمال الحقول يدوياً");
+      setCrExtractionDone(true);
+    } finally {
+      setCrExtracting(false);
+    }
+  }, []);
 
   const handleAnalyze = async () => {
     const allPhotoUrlsForAnalysis = Object.values(photos).flat();
@@ -498,12 +567,22 @@ const CreateListingPage = () => {
       }
     }
     saveDraft();
-    setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
+    // For CR-only, skip AI analysis step (step 2) entirely
+    if (isCrOnly && currentStep === 1) {
+      setCurrentStep(3); // Jump directly to disclosure
+    } else {
+      setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
+    }
   };
 
   const handleBack = () => {
     saveDraft();
-    setCurrentStep((prev) => Math.max(0, prev - 1));
+    // For CR-only, skip AI analysis step when going back from disclosure
+    if (isCrOnly && currentStep === 3) {
+      setCurrentStep(1); // Jump back to photos/docs
+    } else {
+      setCurrentStep((prev) => Math.max(0, prev - 1));
+    }
   };
 
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
@@ -551,7 +630,9 @@ const CreateListingPage = () => {
         required_documents: dealStructure.requiredDocuments,
         status: "published",
         published_at: new Date().toISOString(),
-        title: `${disclosure.business_activity || "مشروع"} — ${disclosure.district || ""}, ${disclosure.city || ""}`,
+        title: isCrOnly
+          ? `سجل تجاري — ${crExtraction?.entity_name || disclosure.business_activity || "مشروع"}, ${disclosure.city || ""}`
+          : `${disclosure.business_activity || "مشروع"} — ${disclosure.district || ""}, ${disclosure.city || ""}`,
       } as never);
 
       if (error) {
@@ -724,16 +805,102 @@ const CreateListingPage = () => {
               <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-5 border border-primary/10 text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Sparkles size={20} strokeWidth={1.5} className="text-primary" />
-                  <Camera size={20} strokeWidth={1.5} className="text-primary" />
+                  {isCrOnly ? <FileText size={20} strokeWidth={1.5} className="text-primary" /> : <Camera size={20} strokeWidth={1.5} className="text-primary" />}
                 </div>
-                <h2 className="font-semibold text-sm mb-1">فقط ارفع الصور والمستندات — مقبل يتولى الباقي!</h2>
+                <h2 className="font-semibold text-sm mb-1">
+                  {isCrOnly ? "ارفع صورة السجل التجاري — مقبل يستخرج البيانات تلقائياً!" : "فقط ارفع الصور والمستندات — مقبل يتولى الباقي!"}
+                </h2>
                 <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed mb-1">
-                  الذكاء الاصطناعي يستخرج قائمة الأصول ويحلل حالتها تلقائياً
+                  {isCrOnly ? "الذكاء الاصطناعي يقرأ السجل التجاري ويعبّئ البيانات نيابة عنك" : "الذكاء الاصطناعي يستخرج قائمة الأصول ويحلل حالتها تلقائياً"}
                 </p>
                 <p className="text-sm font-semibold text-primary animate-fade-in [animation-delay:0.4s] [animation-fill-mode:backwards]">
                   ✦ بدون أي إدخال يدوي منك ✦
                 </p>
               </div>
+
+              {/* CR Extraction Status */}
+              {isCrOnly && crExtracting && (
+                <div className="flex flex-col items-center justify-center py-4 gap-3 animate-fade-in">
+                  <Loader2 size={28} className="animate-spin text-primary" />
+                  <p className="text-sm font-medium text-primary">جاري استخراج بيانات السجل التجاري...</p>
+                  <p className="text-xs text-muted-foreground">لا تحتاج تعمل شيء — مقبل يقرأ المستند</p>
+                </div>
+              )}
+
+              {isCrOnly && crExtractionDone && crExtraction && (
+                <div className={cn(
+                  "rounded-xl border p-4 space-y-3 animate-fade-in",
+                  crExtraction.extraction_confidence === "high" ? "bg-success/5 border-success/20" :
+                  crExtraction.extraction_confidence === "medium" ? "bg-warning/5 border-warning/20" :
+                  "bg-destructive/5 border-destructive/20"
+                )}>
+                  <div className="flex items-center gap-2">
+                    {crExtraction.extraction_confidence === "high" ? (
+                      <Check size={16} className="text-success" />
+                    ) : crExtraction.extraction_confidence === "medium" ? (
+                      <AlertTriangle size={14} className="text-warning" />
+                    ) : (
+                      <AlertTriangle size={14} className="text-destructive" />
+                    )}
+                    <p className="text-xs font-medium">
+                      {crExtraction.extraction_confidence === "high"
+                        ? "تم استخراج بيانات السجل التجاري بنجاح — راجع وأكّد"
+                        : crExtraction.extraction_confidence === "medium"
+                        ? "تم استخراج بعض البيانات — أكمل الحقول الناقصة"
+                        : "لم نتمكن من استخراج بيانات كافية — أكمل الحقول يدوياً"}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    {crExtraction.cr_number && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">رقم السجل: </span>
+                        <span className="font-medium">{crExtraction.cr_number}</span>
+                      </div>
+                    )}
+                    {crExtraction.entity_name && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">الاسم: </span>
+                        <span className="font-medium">{crExtraction.entity_name}</span>
+                      </div>
+                    )}
+                    {crExtraction.business_activity && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">النشاط: </span>
+                        <span className="font-medium">{crExtraction.business_activity}</span>
+                      </div>
+                    )}
+                    {crExtraction.city && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">المدينة: </span>
+                        <span className="font-medium">{crExtraction.city}</span>
+                      </div>
+                    )}
+                    {crExtraction.status && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">الحالة: </span>
+                        <span className="font-medium">{crExtraction.status}</span>
+                      </div>
+                    )}
+                    {crExtraction.expiry_date && (
+                      <div className="bg-background/50 rounded-lg p-2">
+                        <span className="text-muted-foreground">الانتهاء: </span>
+                        <span className="font-medium">{crExtraction.expiry_date}</span>
+                      </div>
+                    )}
+                  </div>
+                  {crExtraction.extraction_notes && (
+                    <p className="text-[10px] text-muted-foreground italic">{crExtraction.extraction_notes}</p>
+                  )}
+                </div>
+              )}
+
+              {isCrOnly && crExtractionDone && !crExtraction && (
+                <div className="rounded-xl bg-destructive/5 border border-destructive/20 p-4 text-center animate-fade-in">
+                  <AlertTriangle size={20} className="text-destructive mx-auto mb-2" />
+                  <p className="text-xs font-medium text-destructive">تعذّر استخراج البيانات من المستند</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">يمكنك إكمال الحقول يدوياً في الخطوة التالية</p>
+                </div>
+              )}
 
               {/* Photos */}
               <div className="space-y-4">
@@ -1035,7 +1202,20 @@ const CreateListingPage = () => {
                   <ClipboardList size={16} strokeWidth={1.5} className="text-primary" />
                   <h2 className="font-medium text-sm">بيانات الإفصاح</h2>
                 </div>
-                <p className="text-xs text-muted-foreground">أكمل بيانات الإفصاح لتعزيز ثقة المشترين — مقبل يعبّئ ما يقدر تلقائياً</p>
+                <p className="text-xs text-muted-foreground">
+                  {isCrOnly ? "راجع البيانات المستخرجة وأكمل ما يلزم — لا حاجة لحقول الأصول أو الإيجار" : "أكمل بيانات الإفصاح لتعزيز ثقة المشترين — مقبل يعبّئ ما يقدر تلقائياً"}
+                </p>
+
+                {/* CR extraction auto-fill notice */}
+                {isCrOnly && crExtractionDone && crExtraction && (
+                  <div className="bg-success/5 border border-success/20 rounded-xl p-3 flex items-start gap-2 animate-fade-in">
+                    <Check size={14} className="text-success shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-success">تم تعبئة الحقول تلقائياً من السجل التجاري</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">راجع البيانات وعدّلها إن لزم الأمر — ثم حدد السعر المطلوب</p>
+                    </div>
+                  </div>
+                )}
 
                 {dealStructure.requiredDisclosures.length > 0 && (
                   <div className="bg-warning/5 border border-warning/20 rounded-xl p-3">
