@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { DEAL_TYPE_FIELD_RULES } from "@/lib/dealTypeFieldRules";
 import { toast } from "sonner";
+import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 
 /* ── Draft completion calculator ── */
 const calcDraftProgress = (listing: Listing): number => {
@@ -83,7 +84,8 @@ const CustomerDashboardPage = () => {
         if (error) throw error;
         toast.success("تم إرسال رابط التحقق إلى بريدك الجديد");
       } else {
-        const { error } = await supabase.from("profiles").update({ [field]: value }).eq("user_id", profile.user_id);
+        const cleanValue = field === "phone" ? toDigitsOnly(value) : value;
+        const { error } = await supabase.from("profiles").update({ [field]: cleanValue }).eq("user_id", profile.user_id);
         if (error) throw error;
         toast.success("تم التحديث بنجاح");
       }
@@ -287,13 +289,13 @@ const CustomerDashboardPage = () => {
                 <Phone size={13} />
                 {editingField === "phone" ? (
                   <div className="flex items-center gap-1">
-                    <input dir="ltr" className="bg-muted/50 rounded px-2 py-0.5 w-28 border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="05XXXXXXXX" />
+                    <input dir="ltr" lang="en" inputMode="numeric" className="bg-muted/50 rounded px-2 py-0.5 w-28 border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus placeholder="05XXXXXXXX" />
                     <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
                     <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
                   </div>
                 ) : (
                   <>
-                    <span>{profile?.phone || "لم يُضاف"}</span>
+                    <span dir="ltr">{profile?.phone ? toEnglishNumerals(profile.phone) : "لم يُضاف"}</span>
                     <button onClick={() => startEdit("phone", profile?.phone || "")} className="opacity-0 group-hover/phone:opacity-100 text-muted-foreground hover:text-primary"><Pencil size={10} /></button>
                   </>
                 )}
