@@ -250,11 +250,14 @@ const ListingDetailsPage = () => {
               </div>
 
               {listing.disclosure_score !== null && listing.disclosure_score > 0 && (
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full gradient-primary" style={{ width: `${listing.disclosure_score}%` }} />
+                <div className="mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
+                      <div className="h-full rounded-full gradient-primary" style={{ width: `${listing.disclosure_score}%` }} />
+                    </div>
+                    <span className="text-xs text-muted-foreground">شفافية {listing.disclosure_score}%</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">إفصاح {listing.disclosure_score}%</span>
+                  <p className="text-[10px] text-muted-foreground/70 mt-1">كلما زادت النسبة، زاد إفصاح البائع عن تفاصيل الفرصة</p>
                 </div>
               )}
 
