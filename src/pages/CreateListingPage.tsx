@@ -310,7 +310,7 @@ const CreateListingPage = () => {
         <input ref={docInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" multiple className="hidden" onChange={handleDocUpload} />
 
         {/* Steps indicator */}
-        <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-2">
+        <div className="flex flex-wrap items-center gap-1 mb-8 pb-2">
           {steps.map((step, i) => (
             <div key={i} className="flex items-center gap-1">
               <div className={cn(
