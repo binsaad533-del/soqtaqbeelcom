@@ -160,6 +160,60 @@ describe("dealTypeFieldRules", () => {
       const rules = getRules("some_unknown_type");
       const ftRules = getRules("full_takeover");
       expect(rules.requiredFields).toEqual(ftRules.requiredFields);
+  });
+
+  // ── Gibberish detection ──
+  describe("isGibberish", () => {
+    it("detects repeated characters", () => {
+      expect(isGibberish("اااااا")).toBe(true);
+      expect(isGibberish("xxxxx")).toBe(true);
+    });
+
+    it("detects keyboard mashing", () => {
+      expect(isGibberish("asdfgh")).toBe(true);
+      expect(isGibberish("qwerty")).toBe(true);
+    });
+
+    it("detects no-letter content", () => {
+      expect(isGibberish("123456")).toBe(true);
+      expect(isGibberish("!!!???")).toBe(true);
+    });
+
+    it("accepts valid Arabic text", () => {
+      expect(isGibberish("مطعم وجبات سريعة")).toBe(false);
+      expect(isGibberish("محل تجاري")).toBe(false);
+      expect(isGibberish("مكيف اسبلت")).toBe(false);
+    });
+
+    it("accepts valid English text", () => {
+      expect(isGibberish("Restaurant")).toBe(false);
+    });
+
+    it("returns false for empty/short strings", () => {
+      expect(isGibberish("")).toBe(false);
+      expect(isGibberish("ab")).toBe(false);
     });
   });
+
+  // ── Gibberish in validation ──
+  describe("validateDisclosure rejects gibberish", () => {
+    it("rejects gibberish business_activity for full_takeover", () => {
+      const errors = validateDisclosure("full_takeover", {
+        business_activity: "اااااا",
+        city: "الرياض",
+        price: "5000",
+      });
+      expect(errors["business_activity"]).toContain("غير مفهوم");
+    });
+
+    it("accepts valid business_activity", () => {
+      const errors = validateDisclosure("full_takeover", {
+        business_activity: "مطعم وجبات سريعة",
+        city: "الرياض",
+        price: "5000",
+      });
+      expect(errors["business_activity"]).toBeUndefined();
+    });
+  });
+});
 });
