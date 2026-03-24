@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw } from "lucide-react";
+import ChatAttachmentButton from "@/components/chat/ChatAttachmentButton";
+import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
 import AiStar from "@/components/AiStar";
 import TrustBadge from "@/components/TrustBadge";
 import DealRiskIndicator from "@/components/DealRiskIndicator";
