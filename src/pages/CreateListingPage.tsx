@@ -34,6 +34,8 @@ import { toast } from "sonner";
 import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
+import { isFieldRelevant, calculateTransparency } from "@/lib/transparencyScore";
+import TransparencyIndicator from "@/components/TransparencyIndicator";
 
 const steps = [
   { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على مقبل" },
