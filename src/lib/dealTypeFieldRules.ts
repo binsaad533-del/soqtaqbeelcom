@@ -76,23 +76,6 @@ export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
     docsRequired: false,
   },
 
-  // ── Assets + CR ──
-  assets_cr: {
-    requiredFields: ["business_activity", "city", "price"],
-    optionalFields: ["district"],
-    hiddenFields: [...LEASE_FIELDS, ...LIABILITY_FIELDS, ...LICENSE_FIELDS],
-    imageRequired: true,
-    docsRequired: true,
-  },
-
-  // ── Assets + CR + Trade Name ──
-  assets_cr_name: {
-    requiredFields: ["business_activity", "city", "price"],
-    optionalFields: ["district"],
-    hiddenFields: [...LEASE_FIELDS, ...LIABILITY_FIELDS, ...LICENSE_FIELDS],
-    imageRequired: true,
-    docsRequired: true,
-  },
 };
 
 // Fallback for unknown deal types

@@ -169,8 +169,23 @@ export interface ConflictRule {
 
 export const CONFLICT_RULES: ConflictRule[] = [
   {
+    types: ["full_takeover", "transfer_no_liabilities"],
+    message: "التقبيل الكامل يشمل الالتزامات، بينما «نقل بدون التزامات» يستثنيها — لا يمكن الجمع بينهما. اختر واحداً فقط.",
+    severity: "critical",
+  },
+  {
     types: ["full_takeover", "assets_only"],
     message: "التقبيل الكامل يشمل الأصول بالفعل — اختيار «أصول فقط» كبديل قد يسبب التباساً. تأكد من التمييز الواضح بين الخيارين.",
+    severity: "warning",
+  },
+  {
+    types: ["full_takeover", "assets_setup"],
+    message: "التقبيل الكامل يشمل الأصول والتجهيز بالفعل — إضافة «أصول + تجهيز» كبديل قد يربك المشتري.",
+    severity: "warning",
+  },
+  {
+    types: ["assets_setup", "assets_only"],
+    message: "«أصول + تجهيز تشغيلي» يشمل الأصول بالفعل — إضافة «أصول فقط» قد تكون مكررة. تأكد أن هناك فرق واضح بين العرضين.",
     severity: "warning",
   },
 ];
