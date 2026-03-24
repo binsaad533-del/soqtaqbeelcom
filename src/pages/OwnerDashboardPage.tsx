@@ -468,7 +468,7 @@ const OwnerDashboardPage = () => {
                             </div>
                             <div>
                               <div className="text-xs font-medium">{listing?.title || "بدون عنوان"}</div>
-                              <div className="text-[10px] text-muted-foreground">{d.agreed_price ? `${Number(d.agreed_price).toLocaleString()} ر.س` : "—"} • {new Date(d.created_at).toLocaleDateString("ar-SA")}</div>
+                              <div className="text-[10px] text-muted-foreground">{d.agreed_price ? `${Number(d.agreed_price).toLocaleString()} ر.س` : "—"} • {new Date(d.created_at).toLocaleDateString("en-GB")}</div>
                             </div>
                           </div>
                           <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
