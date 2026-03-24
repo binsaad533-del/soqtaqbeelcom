@@ -144,12 +144,37 @@ export function isFieldRequired(dealType: string, field: string): boolean {
 }
 
 /**
+ * Known Saudi cities for location validation.
+ */
+const KNOWN_CITIES = [
+  "الرياض", "جدة", "مكة", "مكة المكرمة", "المدينة", "المدينة المنورة",
+  "الدمام", "الخبر", "الظهران", "الاحساء", "الأحساء", "القطيف", "الجبيل",
+  "تبوك", "بريدة", "عنيزة", "حائل", "أبها", "خميس مشيط", "الطائف",
+  "نجران", "جيزان", "جازان", "ينبع", "الباحة", "سكاكا", "عرعر",
+  "حفر الباطن", "الخرج", "القصيم", "المجمعة", "الزلفي", "شقراء",
+  "وادي الدواسر", "بيشة", "رابغ", "الليث", "القنفذة", "المذنب",
+  "الرس", "البكيرية", "محايل عسير", "صبيا", "أملج", "العلا",
+  "الدوادمي", "عفيف", "رفحاء", "طريف", "تيماء", "الوجه",
+  "ضباء", "حقل", "البدائع", "النماص", "رجال ألمع", "المويه",
+  "ظهران الجنوب", "سراة عبيدة", "شرورة", "الحوطة",
+];
+
+/**
+ * Check if a city name is a known Saudi city.
+ */
+export function isKnownCity(city: string): boolean {
+  if (!city) return false;
+  const normalized = city.trim();
+  return KNOWN_CITIES.some(c =>
+    c === normalized || normalized.includes(c) || c.includes(normalized)
+  );
+}
+
+/**
  * Detect if a text value is gibberish / nonsensical.
- * Checks for: too short meaningful content, repeated chars, no Arabic/English words,
- * random keyboard mashing patterns.
  */
 export function isGibberish(text: string): boolean {
-  if (!text || text.trim().length < 3) return false; // too short to judge
+  if (!text || text.trim().length < 3) return false;
   const trimmed = text.trim();
 
   // Single repeated character (e.g. "ااااا", "xxxxx")
@@ -193,6 +218,14 @@ export function validateDisclosure(
     if (field === "price") {
       if (!value || isNaN(Number(value)) || Number(value) <= 0) {
         errors[field] = "السعر مطلوب ويجب أن يكون رقماً أكبر من صفر";
+      }
+    } else if (field === "city") {
+      if (!value || value.trim() === "") {
+        errors[field] = "المدينة مطلوبة";
+      } else if (isGibberish(value)) {
+        errors[field] = "اسم المدينة غير مفهوم — سيجعل الصفقة تبدو مشبوهة";
+      } else if (!isKnownCity(value)) {
+        errors[field] = "يرجى إدخال اسم مدينة سعودية صحيحة — الموقع غير المعروف سيجعل الصفقة مشبوهة";
       }
     } else {
       if (!value || value.trim() === "") {
