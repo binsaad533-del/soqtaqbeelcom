@@ -5,6 +5,7 @@ import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
+import { t, STATUS_LABELS } from "@/lib/translations";
 import { FileText, MessageSquare, AlertTriangle, CheckCircle, Clock, ChevronLeft, Loader2, Eye } from "lucide-react";
 
 const tabs = [

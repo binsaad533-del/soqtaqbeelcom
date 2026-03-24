@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
 import { useParams, Link } from "react-router-dom";
 import {
   Check, Download, ArrowRight, FileText, Shield, Clock, AlertTriangle,
