@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { heicTo, isHeic } from "heic-to";
 import { validateImageFile, validateDocFile, logAudit } from "@/lib/security";
 import {
@@ -113,12 +113,15 @@ const CreateListingPage = () => {
     surveillance_cameras: "",
   });
 
-  const { createListing, updateListing, uploadFile, loading } = useListings();
+  const { createListing, updateListing, uploadFile, getMyDraft, loading } = useListings();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
   const [activePhotoGroup, setActivePhotoGroup] = useState<string | null>(null);
   const [activeDocType, setActiveDocType] = useState<string | null>(null);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [draftLoading, setDraftLoading] = useState(true);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const photoGroups = allPhotoGroups.filter((group) => {
     if (dealStructure.selectedTypes.length === 0) return true;
@@ -148,6 +151,97 @@ const CreateListingPage = () => {
     setListingId(id);
     return id;
   }, [listingId, dealStructure, createListing]);
+
+  // ── Draft restore on mount ──
+  useEffect(() => {
+    const restoreDraft = async () => {
+      try {
+        const draft = await getMyDraft();
+        if (draft) {
+          setListingId(draft.id);
+          if (draft.primary_deal_type) {
+            const selectedTypes = Array.isArray(draft.deal_options)
+              ? (draft.deal_options as Array<{ type_id: string; priority: number; is_primary: boolean }>).map((o) => o.type_id)
+              : [draft.primary_deal_type];
+            setDealStructure((prev) => ({
+              ...prev,
+              selectedTypes,
+              primaryType: draft.primary_deal_type || selectedTypes[0] || "",
+              isValid: selectedTypes.length > 0,
+            }));
+          }
+          if (draft.photos && typeof draft.photos === "object") {
+            setPhotos(draft.photos as Record<string, string[]>);
+            setLocalPreviews(draft.photos as Record<string, string[]>);
+          }
+          if (Array.isArray(draft.inventory) && draft.inventory.length > 0) {
+            setInventory(draft.inventory as InventoryItem[]);
+            setAnalyzed(true);
+          }
+          if (Array.isArray(draft.documents) && draft.documents.length > 0) {
+            // Restore docs grouped - keep as flat for now
+          }
+          setDisclosure((prev) => ({
+            ...prev,
+            business_activity: draft.business_activity || "",
+            city: draft.city || "",
+            district: draft.district || "",
+            price: draft.price != null ? String(draft.price) : "",
+            annual_rent: draft.annual_rent != null ? String(draft.annual_rent) : "",
+            lease_duration: draft.lease_duration || "",
+            lease_paid_period: draft.lease_paid_period || "",
+            lease_remaining: draft.lease_remaining || "",
+            liabilities: draft.liabilities || "",
+            overdue_salaries: draft.overdue_salaries || "",
+            overdue_rent: draft.overdue_rent || "",
+            municipality_license: draft.municipality_license || "",
+            civil_defense_license: draft.civil_defense_license || "",
+            surveillance_cameras: draft.surveillance_cameras || "",
+          }));
+          setDraftRestored(true);
+          toast.success("تم استعادة مسودتك السابقة تلقائياً", { icon: "📋" });
+        }
+      } catch (err) {
+        console.error("Draft restore failed", err);
+      } finally {
+        setDraftLoading(false);
+      }
+    };
+    restoreDraft();
+  }, [getMyDraft]);
+
+  // ── Auto-save every 30 seconds ──
+  const saveDraft = useCallback(async () => {
+    if (!listingId || saving) return;
+    try {
+      await updateListing(listingId, {
+        ...disclosure,
+        price: disclosure.price ? Number(disclosure.price) : null,
+        annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+        inventory: inventory.filter((item) => item.included),
+        deal_type: dealStructure.primaryType || "full_takeover",
+        primary_deal_type: dealStructure.primaryType,
+        deal_options: dealStructure.selectedTypes.map((id, i) => ({
+          type_id: id,
+          priority: i,
+          is_primary: id === dealStructure.primaryType,
+        })),
+        deal_disclosures: dealStructure.requiredDisclosures,
+        required_documents: dealStructure.requiredDocuments,
+      } as never);
+    } catch (err) {
+      console.error("Auto-save failed", err);
+    }
+  }, [listingId, saving, disclosure, inventory, dealStructure, updateListing]);
+
+  useEffect(() => {
+    autoSaveTimerRef.current = setInterval(() => {
+      saveDraft();
+    }, 30000);
+    return () => {
+      if (autoSaveTimerRef.current) clearInterval(autoSaveTimerRef.current);
+    };
+  }, [saveDraft]);
 
   const isHeicLikeFile = useCallback(async (file: File) => {
     const name = file.name.toLowerCase();
@@ -367,10 +461,12 @@ const CreateListingPage = () => {
         } as never);
       }
     }
+    saveDraft();
     setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
   };
 
   const handleBack = () => {
+    saveDraft();
     setCurrentStep((prev) => Math.max(0, prev - 1));
   };
 
@@ -458,15 +554,32 @@ const CreateListingPage = () => {
     }
   };
 
+  if (draftLoading) {
+    return (
+      <div className="py-20 flex flex-col items-center justify-center gap-3">
+        <Loader2 size={28} className="animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">جارٍ التحقق من المسودات السابقة...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="py-8">
       <div className="container max-w-3xl">
         <h1 className="text-2xl font-medium mb-2">إضافة فرصة تقبيل</h1>
         <p className="text-sm text-muted-foreground">أنشئ إعلان تقبيل احترافي بمساعدة الذكاء الاصطناعي</p>
-        <p className="text-sm font-bold text-primary animate-fade-in [animation-delay:0.5s] [animation-fill-mode:backwards] mb-8">
+        <p className="text-sm font-bold text-primary animate-fade-in [animation-delay:0.5s] [animation-fill-mode:backwards] mb-2">
           <Sparkles size={14} className="inline-block ml-1" />
           بدون ما تكتب سطر واحد
         </p>
+
+        {draftRestored && (
+          <div className="mb-4 bg-success/10 border border-success/30 rounded-xl px-4 py-2.5 flex items-center gap-2 animate-fade-in">
+            <Check size={16} className="text-success shrink-0" />
+            <p className="text-xs text-success font-medium">تم استعادة مسودتك السابقة — يمكنك المتابعة من حيث توقفت</p>
+            <button onClick={() => setDraftRestored(false)} className="mr-auto text-success/60 hover:text-success text-xs">✕</button>
+          </div>
+        )}
 
         <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif,.raw,.cr2,.nef,.arw,.dng" multiple className="hidden" onChange={handlePhotoUpload} />
         <input ref={docInputRef} type="file" accept="*/*" multiple className="hidden" onChange={handleDocUpload} />
