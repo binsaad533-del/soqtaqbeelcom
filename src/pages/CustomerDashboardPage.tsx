@@ -1,18 +1,21 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useNotifications } from "@/hooks/useNotifications";
+import { supabase } from "@/integrations/supabase/client";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
 import {
   Plus, FileText, MessageSquare, Shield, AlertCircle,
   Eye, CheckCircle, Loader2, Activity, ChevronLeft,
   TrendingUp, Edit3, Wallet, BarChart3, Clock,
-  ArrowUpLeft, ArrowDownLeft, UserCheck, MapPin, Phone
+  ArrowUpLeft, ArrowDownLeft, UserCheck, MapPin, Phone,
+  Camera, Mail, Pencil, Check, X as XIcon
 } from "lucide-react";
 import { DEAL_TYPE_FIELD_RULES } from "@/lib/dealTypeFieldRules";
+import { toast } from "sonner";
 
 /* ── Draft completion calculator ── */
 const calcDraftProgress = (listing: Listing): number => {
