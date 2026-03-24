@@ -265,7 +265,7 @@ const LoginPage = () => {
                   inputMode="email"
                   placeholder="example@email.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(toEnglishNumerals(e.target.value))}
                   className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors text-left"
                   dir="ltr"
                   lang="en"
