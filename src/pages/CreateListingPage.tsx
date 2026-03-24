@@ -604,8 +604,10 @@ const CreateListingPage = () => {
   const medConfidenceItems = inventory.filter((item) => item.confidence === "medium" && !item.userConfirmed);
 
   // ── Publish validation ──
+  const imageReq = getImageRequirement(dealStructure.primaryType);
+  const photosOk = imageReq === "none" || imageReq === "optional" || totalPhotos > 0;
   const publishValidation = {
-    hasPhotos: totalPhotos > 0,
+    hasPhotos: photosOk,
     hasActivity: disclosure.business_activity.trim() !== "",
     hasCity: disclosure.city.trim() !== "",
     hasPrice: disclosure.price.trim() !== "" && !isNaN(Number(disclosure.price)) && Number(disclosure.price) > 0,
