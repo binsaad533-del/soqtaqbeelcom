@@ -145,5 +145,5 @@ export function useListings() {
     return { data: listing, error };
   }, [user]);
 
-  return { createListing, updateListing, softDeleteListing, getMyListings, getPublishedListings, getAllListings, getListing, uploadFile, loading };
+  return { createListing, updateListing, softDeleteListing, getMyDraft, getMyListings, getPublishedListings, getAllListings, getListing, uploadFile, loading };
 }
