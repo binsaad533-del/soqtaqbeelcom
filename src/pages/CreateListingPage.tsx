@@ -154,7 +154,7 @@ const CreateListingPage = () => {
   const [crExtracting, setCrExtracting] = useState(false);
   const [crExtractionDone, setCrExtractionDone] = useState(false);
 
-  const isCrOnly = dealStructure.primaryType === "cr_only";
+  const isCrOnly = false; // cr_only deal type removed
 
   const photoGroups = allPhotoGroups.filter((group) => {
     if (dealStructure.selectedTypes.length === 0) return true;
