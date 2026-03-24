@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   Plus, FileText, MessageSquare, Shield, AlertCircle,
   Eye, CheckCircle, Loader2, Activity,
-  ArrowUpRight, ChevronLeft, TrendingUp, Briefcase, Edit3
+  ChevronLeft, TrendingUp, Briefcase, Edit3
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { DEAL_TYPE_FIELD_RULES } from "@/lib/dealTypeFieldRules";
