@@ -162,7 +162,14 @@ const CustomerDashboardPage = () => {
 
   const trustColor = stats.trustScore >= 70 ? "text-success" : stats.trustScore >= 40 ? "text-warning" : "text-destructive";
   const trustLabel = stats.trustScore >= 70 ? "ممتاز" : stats.trustScore >= 40 ? "جيد" : "يحتاج تحسين";
-  const memberSince = profile?.created_at ? new Date(profile.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "long" }) : "—";
+  const memberSince = profile?.created_at
+    ? (() => {
+        const d = new Date(profile.created_at);
+        const month = d.toLocaleDateString("ar-SA", { month: "long" });
+        const year = d.getFullYear();
+        return `${month} ${year}`;
+      })()
+    : "—";
 
   /* ── Profile completeness ── */
   const profileCompleteness = useMemo(() => {
