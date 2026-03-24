@@ -367,6 +367,7 @@ const NegotiationPage = () => {
   const readinessPercent = Math.max(0, 100 - (deal.risk_score || 0));
 
   return (
+    <VerificationGate message="يجب توثيق رقم جوالك قبل بدء التفاوض">
     <div className="py-6">
       <div className="container max-w-6xl">
         {/* Breadcrumb */}
