@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw } from "lucide-react";
+import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, ChevronDown, Info, FileCheck, CheckCircle2 } from "lucide-react";
 import ChatAttachmentButton from "@/components/chat/ChatAttachmentButton";
 import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
 import AiStar from "@/components/AiStar";
 import TrustBadge from "@/components/TrustBadge";
-import DealRiskIndicator from "@/components/DealRiskIndicator";
+
 import LegalConfirmationPanel from "@/components/LegalConfirmationPanel";
 import SellerReviewForm from "@/components/SellerReviewForm";
 import CommissionPaymentPanel from "@/components/CommissionPaymentPanel";
@@ -76,6 +76,8 @@ const NegotiationPage = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState("");
   const [showAiPanel, setShowAiPanel] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<"summary" | "actions">("summary");
+  const [showAiToolbar, setShowAiToolbar] = useState(false);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
   const lastMsgCountRef = useRef(0);
@@ -229,6 +231,13 @@ const NegotiationPage = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  // Auto-switch to actions tab when deal is completed/finalized
+  useEffect(() => {
+    if (deal && (deal.status === "completed" || deal.status === "finalized")) {
+      setSidebarTab("actions");
+    }
+  }, [deal?.status]);
+
   // Realtime messages + notifications
   useEffect(() => {
     if (!dealId) return;
@@ -350,96 +359,144 @@ const NegotiationPage = () => {
     );
   }
 
+  const isPostAgreement = deal.status === "completed" || deal.status === "finalized";
+
+  const statusLabel = deal.status === "negotiating" ? "جاري التفاوض" : deal.status === "completed" ? "مكتمل" : deal.status === "finalized" ? "مُقفل" : deal.status;
+  const riskLabel = !deal.risk_score || deal.risk_score <= 25 ? "مرتفعة" : deal.risk_score <= 50 ? "متوسطة" : "منخفضة";
+  const riskColor = !deal.risk_score || deal.risk_score <= 25 ? "text-emerald-600" : deal.risk_score <= 50 ? "text-amber-500" : "text-red-500";
+  const readinessPercent = Math.max(0, 100 - (deal.risk_score || 0));
+
   return (
-    <div className="py-8">
-      <div className="container max-w-5xl">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+    <div className="py-6">
+      <div className="container max-w-6xl">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
           <Link to={`/listing/${deal.listing_id}`} className="hover:text-foreground transition-colors flex items-center gap-1">
-            <ArrowRight size={14} strokeWidth={1.3} />
+            <ArrowRight size={12} strokeWidth={1.3} />
             العودة للإعلان
           </Link>
+          <span className="text-border">|</span>
+          <span>{listingTitle}</span>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Chat */}
-          <div className="lg:col-span-2 bg-card rounded-2xl shadow-soft flex flex-col" style={{ height: "75vh" }}>
-            <div className="p-4 border-b border-border/30">
-              <div className="flex items-center justify-between">
+        <div className="grid lg:grid-cols-3 gap-5">
+          {/* ═══════════ CHAT AREA ═══════════ */}
+          <div className="lg:col-span-2 bg-card rounded-2xl shadow-soft flex flex-col" style={{ height: "78vh" }}>
+            {/* Chat Header — compact */}
+            <div className="px-4 py-3 border-b border-border/20 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <MessageSquare size={14} className="text-primary" strokeWidth={1.5} />
+                </div>
                 <div>
-                  <h2 className="font-medium text-sm">التفاوض — {listingTitle}</h2>
-                  <p className="text-xs text-muted-foreground">
-                    {listing?.price ? `${Number(listing.price).toLocaleString("en-US")} ر.س` : ""} — {listing?.district && `${listing.district}, `}{listing?.city || ""}
+                  <h2 className="font-medium text-sm leading-tight">{listingTitle}</h2>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    {listing?.price ? `${Number(listing.price).toLocaleString("en-US")} ر.س` : ""} — {statusLabel}
                   </p>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Button onClick={handleAnalyze} variant="ghost" size="sm" className="h-7 gap-1 text-[11px] rounded-lg" disabled={aiLoading}>
-                    <Zap size={12} strokeWidth={1.5} />
-                    تحليل
-                  </Button>
-                  <Button onClick={handleAiIntervene} variant="ghost" size="sm" className="h-7 gap-1 text-[11px] rounded-lg" disabled={aiLoading}>
-                    <Sparkles size={12} strokeWidth={1.5} />
-                    وساطة
-                  </Button>
-                </div>
               </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {messages.length === 0 && (
-                <div className="text-center py-10 text-sm text-muted-foreground">
-                  <AiStar size={24} className="mx-auto mb-3" />
-                  <p>ابدأ المحادثة مع {otherParty}</p>
-                  <p className="text-[11px] mt-1 text-muted-foreground/70">المساعد الذكي سيساعدكم في التفاوض</p>
+              {deal.risk_score !== null && deal.risk_score !== undefined && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/50">
+                  <div className={`w-1.5 h-1.5 rounded-full ${riskColor.replace("text-", "bg-")}`} />
+                  <span className={`text-[10px] font-medium ${riskColor}`}>جاهزية {riskLabel}</span>
                 </div>
               )}
-              {messages.map((msg) => {
-                const isMe = msg.sender_id === user?.id;
-                return (
-                  <ChatMessageBubble
-                    key={msg.id}
-                    msg={msg}
-                    isMe={isMe}
-                    buyerId={deal.buyer_id}
-                    sellerId={deal.seller_id}
-                  />
-                );
-              })}
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {messages.length === 0 && (
+                <div className="text-center py-16 text-sm text-muted-foreground">
+                  <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mx-auto mb-4">
+                    <AiStar size={20} />
+                  </div>
+                  <p className="font-medium">ابدأ المحادثة مع {otherParty}</p>
+                  <p className="text-[11px] mt-1.5 text-muted-foreground/60 max-w-xs mx-auto">
+                    المساعد الذكي متاح لمساعدتك في أي وقت — اضغط ✨ أسفل الدردشة
+                  </p>
+                </div>
+              )}
+              {messages.map((msg) => (
+                <ChatMessageBubble key={msg.id} msg={msg} isMe={msg.sender_id === user?.id} buyerId={deal.buyer_id} sellerId={deal.seller_id} />
+              ))}
               <div ref={chatEndRef} />
             </div>
 
+            {/* AI Analysis inline (appears above input when triggered) */}
+            {showAiPanel && aiAnalysis && (
+              <div className="mx-4 mb-2 p-3 rounded-xl bg-accent/20 border border-accent/30">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles size={12} className="text-primary" />
+                    <span className="text-[10px] font-medium text-primary">تحليل المساعد الذكي</span>
+                  </div>
+                  <button onClick={() => setShowAiPanel(false)} className="text-[10px] text-muted-foreground hover:text-foreground">✕</button>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed whitespace-pre-line max-h-32 overflow-y-auto">{aiAnalysis}</p>
+              </div>
+            )}
+
             {/* AI Suggestions */}
             {aiSuggestions.length > 0 && (
-              <div className="px-4 pb-2 flex gap-1.5 flex-wrap">
-                <span className="text-[9px] text-muted-foreground/70 self-center ml-1">💡</span>
+              <div className="px-4 pb-1.5 flex gap-1.5 flex-wrap">
+                <span className="text-[9px] text-muted-foreground/60 self-center ml-1">💡</span>
                 {aiSuggestions.map((s, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSuggestionClick(s)}
-                    className="text-[10px] px-2.5 py-1 rounded-lg bg-accent/40 text-accent-foreground hover:bg-accent/60 transition-all truncate max-w-[200px]"
-                  >
+                  <button key={i} onClick={() => handleSuggestionClick(s)}
+                    className="text-[10px] px-2.5 py-1 rounded-lg bg-accent/30 text-accent-foreground hover:bg-accent/50 transition-all truncate max-w-[180px]">
                     {s}
                   </button>
                 ))}
               </div>
             )}
 
-            <div className="p-4 border-t border-border/30">
-              <div className="flex items-center gap-2 relative">
+            {/* AI Toolbar (expandable) */}
+            {showAiToolbar && (
+              <div className="px-4 pb-2 flex gap-1.5 animate-in slide-in-from-bottom-2 duration-200">
+                <button onClick={() => { handleAnalyze(); setShowAiToolbar(false); }} disabled={aiLoading}
+                  className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                  <Zap size={10} /> تحليل الموقف
+                </button>
+                <button onClick={() => { handleAiIntervene(); setShowAiToolbar(false); }} disabled={aiLoading}
+                  className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                  <MessageSquare size={10} /> وساطة
+                </button>
+                <button onClick={() => { handlePushClose(); setShowAiToolbar(false); }} disabled={aiLoading}
+                  className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all disabled:opacity-50">
+                  <Target size={10} /> دفع للإغلاق
+                </button>
+                <button onClick={() => { handleStallIntervention(); setShowAiToolbar(false); }} disabled={aiLoading}
+                  className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                  <RefreshCw size={10} /> تحريك
+                </button>
+              </div>
+            )}
+
+            {/* Input area with integrated AI button */}
+            <div className="p-3 border-t border-border/20">
+              {aiLoading && (
+                <div className="flex items-center gap-1.5 mb-2 px-1 text-[10px] text-primary">
+                  <Loader2 size={10} className="animate-spin" /> المساعد الذكي يعمل...
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowAiToolbar(!showAiToolbar)}
+                  className={cn(
+                    "h-9 w-9 rounded-xl flex items-center justify-center transition-all shrink-0",
+                    showAiToolbar ? "bg-primary/15 text-primary" : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  title="أدوات المساعد الذكي"
+                >
+                  <Sparkles size={15} strokeWidth={1.5} />
+                </button>
                 <ChatAttachmentButton
                   dealId={dealId!}
                   onFileSent={async (message, type, metadata) => {
                     if (!dealId || !user) return;
                     const { data } = await supabase
                       .from("negotiation_messages")
-                      .insert({
-                        deal_id: dealId,
-                        sender_id: user.id,
-                        message,
-                        message_type: type,
-                        metadata: metadata as any,
-                      })
-                      .select()
-                      .single();
+                      .insert({ deal_id: dealId, sender_id: user.id, message, message_type: type, metadata: metadata as any })
+                      .select().single();
                     if (data) {
                       const newMsg = data as unknown as NegotiationMessage;
                       setMessages(prev => prev.some(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
@@ -448,153 +505,183 @@ const NegotiationPage = () => {
                   disabled={sending}
                 />
                 <input
-                  type="text"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
+                  type="text" value={input} onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSend()}
                   placeholder="اكتب رسالتك..."
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-border/50 bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
+                  className="flex-1 px-4 py-2 rounded-xl border border-border/40 bg-background text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
                 />
-                <Button onClick={handleSend} disabled={sending} size="icon" className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.95]">
-                  {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} strokeWidth={1.5} />}
+                <Button onClick={handleSend} disabled={sending} size="icon" className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.95] h-9 w-9">
+                  {sending ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} strokeWidth={1.5} />}
                 </Button>
               </div>
             </div>
           </div>
 
-          {/* Sidebar */}
+          {/* ═══════════ SIDEBAR ═══════════ */}
           <div className="space-y-4">
-            {/* AI Analysis Panel */}
-            {showAiPanel && (
-              <div className="bg-gradient-to-b from-accent/30 to-card rounded-2xl p-4 shadow-soft border border-accent-foreground/10">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles size={14} className="text-primary" />
-                    <h3 className="font-medium text-xs">تحليل المفاوضة</h3>
+            {/* Tabs */}
+            <div className="flex bg-muted/40 rounded-xl p-0.5">
+              <button
+                onClick={() => setSidebarTab("summary")}
+                className={cn(
+                  "flex-1 text-[11px] py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5",
+                  sidebarTab === "summary" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Info size={12} strokeWidth={1.5} /> ملخص الصفقة
+              </button>
+              <button
+                onClick={() => setSidebarTab("actions")}
+                className={cn(
+                  "flex-1 text-[11px] py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5",
+                  sidebarTab === "actions" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <FileCheck size={12} strokeWidth={1.5} /> الإجراءات
+                {isPostAgreement && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />}
+              </button>
+            </div>
+
+            {/* ═══ TAB: Summary ═══ */}
+            {sidebarTab === "summary" && (
+              <div className="space-y-4 animate-in fade-in-0 duration-200">
+                {/* Deal Readiness Card (merged: status + risk) */}
+                <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium text-xs flex items-center gap-1.5">
+                      <CheckCircle2 size={13} className="text-primary" strokeWidth={1.5} />
+                      جاهزية الصفقة
+                    </h3>
+                    <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-md", 
+                      readinessPercent >= 70 ? "bg-emerald-50 text-emerald-600" : 
+                      readinessPercent >= 40 ? "bg-amber-50 text-amber-600" : "bg-red-50 text-red-500"
+                    )}>
+                      {readinessPercent}%
+                    </span>
                   </div>
-                  <button onClick={() => setShowAiPanel(false)} className="text-[10px] text-muted-foreground hover:text-foreground">✕</button>
+                  
+                  {/* Progress bar */}
+                  <div className="w-full h-1.5 rounded-full bg-muted/60 mb-3">
+                    <div
+                      className={cn("h-full rounded-full transition-all duration-500",
+                        readinessPercent >= 70 ? "bg-emerald-500" : readinessPercent >= 40 ? "bg-amber-400" : "bg-red-400"
+                      )}
+                      style={{ width: `${readinessPercent}%` }}
+                    />
+                  </div>
+
+                  {/* Status rows */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">الحالة</span>
+                      <span className="text-primary font-medium">{statusLabel}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">الرسائل</span>
+                      <span className="font-medium">{messages.length}</span>
+                    </div>
+                    {deal.agreed_price && (
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">السعر المتفق</span>
+                        <span className="font-medium">{Number(deal.agreed_price).toLocaleString("en-US")} ر.س</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Risk factors as improvement steps */}
+                  {(deal.risk_factors as string[] || []).length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-border/20">
+                      <p className="text-[10px] text-muted-foreground mb-2">خطوات لتحسين الجاهزية:</p>
+                      <div className="space-y-1.5">
+                        {(deal.risk_factors as string[]).map((factor, i) => (
+                          <div key={i} className="flex items-start gap-1.5 text-[10px] text-muted-foreground/80">
+                            <ChevronDown size={10} className="text-amber-400 shrink-0 mt-0.5 rotate-[-90deg]" />
+                            <span>{factor}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {aiLoading && !aiAnalysis ? (
-                  <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
-                    <Loader2 size={13} className="animate-spin" /> جاري التحليل...
+
+                {/* Other party trust — compact */}
+                {otherProfile && (
+                  <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Shield size={13} strokeWidth={1.5} className="text-primary" />
+                      <h3 className="font-medium text-xs">ملف {otherParty}</h3>
+                    </div>
+                    <TrustBadge score={otherProfile.trust_score} verificationLevel={otherProfile.verification_level} size="md" showScore />
+                    <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
+                      <span>✅ مكتملة: {otherProfile.completed_deals || 0}</span>
+                      <span>❌ ملغاة: {otherProfile.cancelled_deals || 0}</span>
+                    </div>
                   </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">{aiAnalysis}</p>
                 )}
               </div>
             )}
 
-            {/* AI Quick Actions */}
-            <div className="bg-card rounded-2xl p-4 shadow-soft border border-primary/10">
-              <div className="flex items-center gap-1.5 mb-3">
-                <AiStar size={16} animate={false} />
-                <h3 className="font-medium text-xs">أدوات المساعد الذكي</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-1.5">
-                <button onClick={handleAnalyze} disabled={aiLoading}
-                  className="flex items-center gap-1.5 text-[10px] px-2.5 py-2 rounded-lg bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                  <Zap size={11} /> تحليل الموقف
-                </button>
-                <button onClick={handleAiIntervene} disabled={aiLoading}
-                  className="flex items-center gap-1.5 text-[10px] px-2.5 py-2 rounded-lg bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                  <MessageSquare size={11} /> وساطة ذكية
-                </button>
-                <button onClick={handlePushClose} disabled={aiLoading}
-                  className="flex items-center gap-1.5 text-[10px] px-2.5 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all disabled:opacity-50">
-                  <Target size={11} /> دفع للإغلاق
-                </button>
-                <button onClick={handleStallIntervention} disabled={aiLoading}
-                  className="flex items-center gap-1.5 text-[10px] px-2.5 py-2 rounded-lg bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                  <RefreshCw size={11} /> تحريك التفاوض
-                </button>
-              </div>
-              {aiLoading && <div className="flex items-center gap-1.5 mt-2 text-[10px] text-primary"><Loader2 size={11} className="animate-spin" /> المساعد يعمل...</div>}
-            </div>
+            {/* ═══ TAB: Actions ═══ */}
+            {sidebarTab === "actions" && (
+              <div className="space-y-4 animate-in fade-in-0 duration-200">
+                {/* Legal Confirmation */}
+                {!isPostAgreement && (
+                  <div className="bg-card rounded-2xl p-4 shadow-soft border border-primary/15">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Scale size={13} strokeWidth={1.5} className="text-primary" />
+                      <h3 className="font-medium text-xs">التأكيد القانوني</h3>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+                      عند الاتفاق على السعر والشروط، يمكنكم البدء في التأكيد الرسمي.
+                    </p>
+                    <Button onClick={() => setShowLegalPanel(true)} variant="outline" className="w-full rounded-xl active:scale-[0.98] text-xs">
+                      بدء التأكيد القانوني
+                    </Button>
+                  </div>
+                )}
 
-            {/* Other party trust */}
-            {otherProfile && (
-              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <Shield size={14} strokeWidth={1.5} className="text-primary" />
-                  <h3 className="font-medium text-xs">مستوى ثقة {otherParty}</h3>
-                </div>
-                <TrustBadge score={otherProfile.trust_score} verificationLevel={otherProfile.verification_level} size="md" showScore />
-                <div className="mt-2 text-[10px] text-muted-foreground">
-                  صفقات مكتملة: {otherProfile.completed_deals || 0} • ملغاة: {otherProfile.cancelled_deals || 0}
-                </div>
-              </div>
-            )}
+                {/* Finalized state */}
+                {deal.status === "finalized" && (
+                  <div className="bg-gradient-to-b from-primary/5 to-card rounded-2xl p-4 shadow-soft border border-primary/15">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield size={13} strokeWidth={1.5} className="text-primary" />
+                      <h3 className="font-medium text-xs">الصفقة مُقفلة ✓</h3>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+                      تمت الموافقة من الطرفين. يمكنك الانتقال للاتفاقية.
+                    </p>
+                    <Button asChild className="w-full rounded-xl text-xs gradient-primary text-primary-foreground">
+                      <Link to={`/agreement/${dealId}`}>عرض الاتفاقية</Link>
+                    </Button>
+                  </div>
+                )}
 
-            {/* Deal risk */}
-            {deal.risk_score !== null && deal.risk_score !== undefined && (
-              <DealRiskIndicator riskScore={deal.risk_score} riskFactors={deal.risk_factors || []} />
-            )}
+                {/* Commission — only after agreement */}
+                {isPostAgreement && listing?.price && (
+                  <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
+                    <CommissionBanner dealAmount={deal.agreed_price || listing.price} showDetails />
+                  </div>
+                )}
 
-            {/* Deal Status */}
-            <div className="bg-gradient-to-b from-primary/5 to-card rounded-2xl p-4 shadow-soft border border-primary/10">
-              <div className="flex items-center gap-2 mb-3">
-                <AiStar size={16} animate={false} />
-                <h3 className="font-medium text-xs">حالة التفاوض</h3>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">الحالة</span>
-                  <span className="text-primary font-medium">{deal.status === "negotiating" ? "جاري التفاوض" : deal.status === "completed" ? "مكتمل" : deal.status === "finalized" ? "مُقفل" : deal.status}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">عدد الرسائل</span>
-                  <span className="font-medium">{messages.length}</span>
-                </div>
-                {deal.agreed_price && (
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">السعر المتفق</span>
-                    <span className="font-medium">{Number(deal.agreed_price).toLocaleString("en-US")} ر.س</span>
+                {/* Commission Payment */}
+                {commission && isPostAgreement && (
+                  <CommissionPaymentPanel commission={commission} isSeller={user?.id === deal.seller_id} onUpdate={loadData} />
+                )}
+
+                {/* Buyer Review */}
+                {isBuyer && isPostAgreement && deal.seller_id && (
+                  <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
+                )}
+
+                {/* Empty state for actions tab during negotiation */}
+                {!isPostAgreement && (
+                  <div className="text-center py-6">
+                    <p className="text-[11px] text-muted-foreground/60">
+                      أكمل التفاوض أولاً، ثم ستظهر هنا إجراءات العمولة والاتفاقية
+                    </p>
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Commission */}
-            {listing?.price && <CommissionBanner dealAmount={deal.agreed_price || listing.price} showDetails />}
-
-            {/* Legal Confirmation */}
-            {deal.status !== "completed" && deal.status !== "finalized" && (
-              <div className="bg-card rounded-2xl p-4 shadow-soft border border-primary/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <Scale size={14} strokeWidth={1.5} className="text-primary" />
-                  <h3 className="font-medium text-xs">التأكيد القانوني</h3>
-                </div>
-                <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
-                  قبل إنهاء الصفقة، يجب على الطرفين مراجعة الملخص والموافقة رسمياً.
-                </p>
-                <Button onClick={() => setShowLegalPanel(true)} variant="outline" className="w-full rounded-xl active:scale-[0.98] text-xs">
-                  بدء التأكيد القانوني
-                </Button>
-              </div>
-            )}
-            {deal.status === "finalized" && (
-              <div className="bg-card rounded-2xl p-4 shadow-soft border border-primary/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <Shield size={14} strokeWidth={1.5} className="text-primary" />
-                  <h3 className="font-medium text-xs">الصفقة مُقفلة</h3>
-                </div>
-                <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
-                  تمت الموافقة من الطرفين. يمكنك الانتقال للاتفاقية.
-                </p>
-                <Button asChild className="w-full rounded-xl text-xs gradient-primary text-primary-foreground">
-                  <Link to={`/agreement/${dealId}`}>عرض الاتفاقية</Link>
-                </Button>
-              </div>
-            )}
-
-            {/* Commission Payment */}
-            {commission && (deal.status === "completed" || deal.status === "finalized") && (
-              <CommissionPaymentPanel commission={commission} isSeller={user?.id === deal.seller_id} onUpdate={loadData} />
-            )}
-
-            {/* Buyer Review */}
-            {isBuyer && (deal.status === "completed" || deal.status === "finalized") && deal.seller_id && (
-              <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
             )}
           </div>
         </div>
