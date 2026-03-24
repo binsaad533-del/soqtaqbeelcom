@@ -57,8 +57,8 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
   }
 
   const requiredScore = rules.requiredFields.length > 0
-    ? (requiredFilled / rules.requiredFields.length) * 60
-    : 60;
+    ? (requiredFilled / rules.requiredFields.length) * 80
+    : 80;
 
   // Score optional fields (secondary weight: 10 points)
   let optionalFilled = 0;
