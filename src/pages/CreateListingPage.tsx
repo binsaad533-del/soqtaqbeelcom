@@ -577,8 +577,11 @@ const CreateListingPage = () => {
   };
 
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  const [dealCheckLoading, setDealCheckLoading] = useState(false);
+  const [dealCheckResult, setDealCheckResult] = useState<any>(null);
+  const [dealCheckError, setDealCheckError] = useState("");
 
-  const handlePublishClick = () => {
+  const handlePublishClick = async () => {
     if (!listingId) return;
     setPublishAttempted(true);
 
@@ -591,7 +594,38 @@ const CreateListingPage = () => {
       return;
     }
 
+    // Run deal check before showing confirmation
     setShowPublishConfirm(true);
+    setDealCheckLoading(true);
+    setDealCheckError("");
+    setDealCheckResult(null);
+
+    try {
+      const listingPayload = {
+        ...disclosure,
+        price: disclosure.price ? Number(disclosure.price) : null,
+        annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+        primary_deal_type: dealStructure.primaryType,
+        deal_type: dealStructure.primaryType,
+        inventory: inventory.filter((item) => item.included),
+        photos,
+        documents: Object.entries(uploadedDocs).map(([type, files]) => ({ type, files })),
+      };
+
+      const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
+        body: { listing: listingPayload },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+      if (!data?.success) throw new Error(data?.error || "فشل التحليل");
+
+      setDealCheckResult(data.analysis);
+    } catch (e: any) {
+      console.error("[DealCheck] Pre-publish check failed:", e);
+      setDealCheckError(e.message || "تعذّر إجراء الفحص — يمكنك المتابعة بالنشر");
+    } finally {
+      setDealCheckLoading(false);
+    }
   };
 
   const handlePublish = async () => {
@@ -617,6 +651,7 @@ const CreateListingPage = () => {
         inventory: inventory.filter((item) => item.included),
         deal_disclosures: dealStructure.requiredDisclosures,
         required_documents: dealStructure.requiredDocuments,
+        ai_structure_validation: dealCheckResult || null,
         status: "published",
         published_at: new Date().toISOString(),
         title: isCrOnly
@@ -1399,47 +1434,146 @@ const CreateListingPage = () => {
         </div>
       </div>
 
-      {/* Publish Confirmation Modal */}
+      {/* Publish Confirmation Modal with Deal Check */}
       {showPublishConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setShowPublishConfirm(false)}>
-          <div className="bg-card border border-border/50 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-5 animate-scale-in" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => !dealCheckLoading && setShowPublishConfirm(false)}>
+          <div className="bg-card border border-border/50 rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 space-y-5 animate-scale-in max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="text-center">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                <Shield size={24} className="text-primary" />
+                <AiStar size={24} />
               </div>
-              <h3 className="font-semibold text-lg mb-1">تأكيد نشر الإعلان</h3>
-              <p className="text-xs text-muted-foreground">راجع البيانات التالية قبل النشر النهائي</p>
+              <h3 className="font-semibold text-lg mb-1">فحص الصفقة قبل النشر</h3>
+              <p className="text-xs text-muted-foreground">مقبل يحلل صفقتك ويعطيك توصية قبل النشر</p>
             </div>
 
-            <div className="space-y-3 bg-muted/30 rounded-xl p-4">
-              <div className="flex items-center justify-between text-sm">
+            {/* Listing Summary */}
+            <div className="space-y-2 bg-muted/30 rounded-xl p-4 text-sm">
+              <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">العنوان</span>
                 <span className="font-medium text-foreground">{disclosure.business_activity || "—"}</span>
               </div>
               <div className="border-t border-border/30" />
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">المدينة</span>
                 <span className="font-medium text-foreground">{disclosure.city || "—"}</span>
               </div>
               <div className="border-t border-border/30" />
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">السعر</span>
                 <span className="font-medium text-foreground">{disclosure.price ? `${Number(disclosure.price).toLocaleString()} ر.س` : "—"}</span>
               </div>
               <div className="border-t border-border/30" />
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">عدد الصور</span>
                 <span className="font-medium text-foreground">{totalPhotos} صورة</span>
               </div>
             </div>
 
+            {/* Deal Check Loading */}
+            {dealCheckLoading && (
+              <div className="py-8 flex flex-col items-center gap-3">
+                <div className="relative">
+                  <AiStar size={28} />
+                  <Loader2 size={44} strokeWidth={1} className="absolute -top-2 -left-2 text-primary/30 animate-spin" />
+                </div>
+                <p className="text-sm font-medium">جاري فحص الصفقة...</p>
+                <p className="text-xs text-muted-foreground">يتم تحليل البيانات والأصول والسوق</p>
+              </div>
+            )}
+
+            {/* Deal Check Error — still allow publishing */}
+            {dealCheckError && !dealCheckLoading && (
+              <div className="bg-warning/10 border border-warning/30 rounded-xl p-3 flex items-start gap-2">
+                <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-medium text-warning">تعذّر إجراء الفحص التلقائي</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{dealCheckError}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">يمكنك المتابعة بالنشر بدون الفحص</p>
+                </div>
+              </div>
+            )}
+
+            {/* Deal Check Result */}
+            {dealCheckResult && !dealCheckLoading && (
+              <div className="space-y-3">
+                {/* Rating Banner */}
+                <div className={cn("rounded-xl p-3 border",
+                  dealCheckResult.ratingColor === "green" ? "bg-emerald-50 border-emerald-200" :
+                  dealCheckResult.ratingColor === "yellow" ? "bg-amber-50 border-amber-200" :
+                  dealCheckResult.ratingColor === "red" ? "bg-red-50 border-red-200" :
+                  dealCheckResult.ratingColor === "blue" ? "bg-blue-50 border-blue-200" :
+                  "bg-muted border-border"
+                )}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={cn("text-sm font-medium",
+                      dealCheckResult.ratingColor === "green" ? "text-emerald-700" :
+                      dealCheckResult.ratingColor === "yellow" ? "text-amber-700" :
+                      dealCheckResult.ratingColor === "red" ? "text-red-700" :
+                      dealCheckResult.ratingColor === "blue" ? "text-blue-700" :
+                      "text-foreground"
+                    )}>{dealCheckResult.rating}</span>
+                    <span className="text-[11px] text-muted-foreground">عدالة السعر: {dealCheckResult.fairnessVerdict}</span>
+                  </div>
+                </div>
+
+                {/* Recommendation */}
+                <div className="bg-primary/5 rounded-xl p-3 border border-primary/10">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <AiStar size={12} animate={false} />
+                    <span className="text-[11px] font-medium text-primary">التوصية</span>
+                  </div>
+                  <p className="text-xs leading-relaxed">{dealCheckResult.recommendation}</p>
+                </div>
+
+                {/* Key Risks */}
+                {dealCheckResult.risks?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium flex items-center gap-1.5 mb-2">
+                      <AlertTriangle size={12} strokeWidth={1.3} className="text-red-500/70" />
+                      المخاطر الرئيسية
+                    </h4>
+                    <ul className="space-y-1">
+                      {dealCheckResult.risks.slice(0, 3).map((risk: string, i: number) => (
+                        <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500/50 shrink-0" />
+                          {risk}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Strengths */}
+                {dealCheckResult.strengths?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium flex items-center gap-1.5 mb-2">
+                      <Check size={12} strokeWidth={1.3} className="text-emerald-600" />
+                      نقاط القوة
+                    </h4>
+                    <ul className="space-y-1">
+                      {dealCheckResult.strengths.slice(0, 3).map((s: string, i: number) => (
+                        <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500/60 shrink-0" />
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <p className="text-[10px] text-muted-foreground/60 text-center">
+                  التحليل الكامل سيظهر في صفحة الإعلان بعد النشر
+                </p>
+              </div>
+            )}
+
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setShowPublishConfirm(false)} className="flex-1 rounded-xl">
+              <Button variant="outline" onClick={() => setShowPublishConfirm(false)} disabled={dealCheckLoading} className="flex-1 rounded-xl">
                 إلغاء
               </Button>
-              <Button onClick={handlePublish} disabled={saving} className="flex-1 gradient-primary text-primary-foreground rounded-xl">
+              <Button onClick={handlePublish} disabled={saving || dealCheckLoading} className="flex-1 gradient-primary text-primary-foreground rounded-xl">
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
-                تأكيد النشر
+                {dealCheckResult ? "موافق — انشر الإعلان" : "تأكيد النشر"}
               </Button>
             </div>
           </div>

@@ -48,6 +48,7 @@ interface DealCheckAnalysis {
 
 interface DealCheckPanelProps {
   listing: any;
+  savedAnalysis?: any;
 }
 
 const RATING_CONFIG: Record<string, { bg: string; text: string; border: string }> = {
@@ -65,10 +66,10 @@ const FAIRNESS_ICONS: Record<string, string> = {
   "غير واضح": "⚪",
 };
 
-const DealCheckPanel = ({ listing }: DealCheckPanelProps) => {
-  const [open, setOpen] = useState(false);
+const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
+  const [open, setOpen] = useState(!!savedAnalysis);
   const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<DealCheckAnalysis | null>(null);
+  const [analysis, setAnalysis] = useState<DealCheckAnalysis | null>(savedAnalysis || null);
   const [error, setError] = useState("");
 
   const runDealCheck = async () => {
