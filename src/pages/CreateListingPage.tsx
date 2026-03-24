@@ -34,8 +34,9 @@ import { toast } from "sonner";
 import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
-import { isFieldRelevant, calculateTransparency } from "@/lib/transparencyScore";
+import { calculateTransparency } from "@/lib/transparencyScore";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
+import { getRules, isFieldVisible, isFieldRequired, validateDisclosure, validateImages, FIELD_LABELS as RULE_FIELD_LABELS } from "@/lib/dealTypeFieldRules";
 
 const steps = [
   { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على مقبل" },
