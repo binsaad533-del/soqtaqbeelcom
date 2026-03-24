@@ -6,6 +6,7 @@ import {
   validateDisclosure,
   validateImages,
   isGibberish,
+  isKnownCity,
 } from "@/lib/dealTypeFieldRules";
 
 describe("dealTypeFieldRules", () => {
