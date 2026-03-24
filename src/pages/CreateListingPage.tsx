@@ -96,7 +96,13 @@ const CreateListingPage = () => {
   const docInputRef = useRef<HTMLInputElement>(null);
   const [activeDocType, setActiveDocType] = useState<string | null>(null);
 
-  const ensureListing = useCallback(async () => {
+  // Filter photo groups based on selected deal types
+  const photoGroups = allPhotoGroups.filter(group => {
+    if (dealStructure.selectedTypes.length === 0) return true;
+    return dealStructure.selectedTypes.some(dt => group.dealTypes.includes(dt));
+  });
+
+
     if (listingId) return listingId;
     const { data, error } = await createListing({
       deal_type: dealStructure.primaryType || "full_takeover",
