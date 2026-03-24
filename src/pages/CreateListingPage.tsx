@@ -324,8 +324,8 @@ const CreateListingPage = () => {
           بدون ما تكتب سطر واحد
         </p>
 
-        <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
-        <input ref={docInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" multiple className="hidden" onChange={handleDocUpload} />
+        <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif,.raw,.cr2,.nef,.arw,.dng" multiple className="hidden" onChange={handlePhotoUpload} />
+        <input ref={docInputRef} type="file" accept="*/*" multiple className="hidden" onChange={handleDocUpload} />
 
         {/* Steps indicator - 3 steps */}
         <div className="flex items-center justify-between mb-8 pb-2">
