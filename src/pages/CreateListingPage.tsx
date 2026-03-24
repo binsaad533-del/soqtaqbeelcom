@@ -334,6 +334,12 @@ const CreateListingPage = () => {
           ))}
         </div>
 
+        {/* Step hint banner */}
+        <div className="flex items-center justify-center gap-2 mb-6 animate-fade-in" key={currentStep}>
+          <Sparkles size={14} strokeWidth={1.5} className="text-primary shrink-0" />
+          <span className="text-sm font-medium text-primary">{steps[currentStep].hint}</span>
+        </div>
+
         {saving && (
           <div className="flex items-center gap-2 text-xs text-primary mb-4">
             <Loader2 size={14} className="animate-spin" />
