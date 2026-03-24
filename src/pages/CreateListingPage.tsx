@@ -610,6 +610,12 @@ const CreateListingPage = () => {
         inventory: inventory.filter((item) => item.included),
         photos,
         documents: Object.entries(uploadedDocs).map(([type, files]) => ({ type, files })),
+        cr_extraction: crExtraction || undefined,
+        deal_options: dealStructure.selectedTypes.map((id, i) => ({
+          type_id: id,
+          priority: i,
+          is_primary: id === dealStructure.primaryType,
+        })),
       };
 
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
