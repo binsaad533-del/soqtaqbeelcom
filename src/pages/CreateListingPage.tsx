@@ -324,10 +324,12 @@ const CreateListingPage = () => {
           const preparedFile = isPdf ? originalFile : await convertToJpeg(originalFile);
           const previewUrl = isPdf ? "" : URL.createObjectURL(preparedFile);
 
-          setLocalPreviews((prev) => ({
-            ...prev,
-            [group]: [...(prev[group] || []), previewUrl],
-          }));
+          if (previewUrl) {
+            setLocalPreviews((prev) => ({
+              ...prev,
+              [group]: [...(prev[group] || []), previewUrl],
+            }));
+          }
 
           const url = await uploadFile(id, preparedFile, `photos/${group}`);
           if (url) uploadedUrls.push(url);
