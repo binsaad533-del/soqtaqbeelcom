@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
 import SocialIcons from "@/components/SocialIcons";
-import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown, Sparkles, ShieldCheck, Zap } from "lucide-react";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";
 import PasswordStrengthBar from "@/components/PasswordStrengthBar";
@@ -132,6 +132,24 @@ const LoginPage = () => {
           <p className="text-sm text-muted-foreground mt-2">
             {isLogin ? "تسجيل الدخول إلى حسابك" : "إنشاء حساب جديد"}
           </p>
+        </div>
+
+        {/* AI & ease-of-use highlights */}
+        <div className="flex items-center justify-center gap-4 mb-6 text-[11px] text-muted-foreground" dir="rtl">
+          <span className="flex items-center gap-1">
+            <Sparkles size={13} strokeWidth={1.4} className="text-primary/60" />
+            ذكاء اصطناعي
+          </span>
+          <span className="w-px h-3 bg-border/60" />
+          <span className="flex items-center gap-1">
+            <Zap size={13} strokeWidth={1.4} className="text-primary/60" />
+            سهولة الاستخدام
+          </span>
+          <span className="w-px h-3 bg-border/60" />
+          <span className="flex items-center gap-1">
+            <ShieldCheck size={13} strokeWidth={1.4} className="text-primary/60" />
+            صفقات آمنة
+          </span>
         </div>
 
         <div className="bg-card rounded-2xl p-6 shadow-soft">
@@ -347,7 +365,15 @@ const LoginPage = () => {
           </form>
         </div>
 
-        <div className="flex flex-col items-center gap-4 mt-6">
+        {/* Subtle AI tip */}
+        <div className="mt-5 mx-auto max-w-xs text-center">
+          <p className="text-[11px] text-muted-foreground/70 leading-relaxed">
+            <Sparkles size={11} strokeWidth={1.3} className="inline-block ml-1 text-primary/50 -mt-0.5" />
+            ارفع صور مشروعك… والذكاء الاصطناعي يكمل الباقي
+          </p>
+        </div>
+
+        <div className="flex flex-col items-center gap-4 mt-4">
           <SocialIcons />
           <p className="text-xs text-muted-foreground">
             <Link to="/" className="hover:text-foreground transition-colors">← العودة للرئيسية</Link>
