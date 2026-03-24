@@ -28,6 +28,7 @@ import {
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useListings } from "@/hooks/useListings";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -1123,18 +1124,39 @@ const CreateListingPage = () => {
                       ) : null;
                     })()}
                     <div className="flex flex-wrap gap-3 justify-center mt-3">
-                      <div className="text-center px-3 py-1.5 rounded-lg bg-success/5 border border-success/20">
-                        <div className="text-sm font-medium text-success">{inventory.filter((i) => i.confidence === "high").length}</div>
-                        <div className="text-[10px] text-success">ثقة عالية</div>
-                      </div>
-                      <div className="text-center px-3 py-1.5 rounded-lg bg-warning/5 border border-warning/20">
-                        <div className="text-sm font-medium text-warning">{inventory.filter((i) => i.confidence === "medium").length}</div>
-                        <div className="text-[10px] text-warning">ثقة متوسطة</div>
-                      </div>
-                      <div className="text-center px-3 py-1.5 rounded-lg bg-destructive/5 border border-destructive/20">
-                        <div className="text-sm font-medium text-destructive">{inventory.filter((i) => i.confidence === "low").length}</div>
-                        <div className="text-[10px] text-destructive">يحتاج تأكيد</div>
-                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="text-center px-3 py-1.5 rounded-lg bg-success/5 border border-success/20 cursor-help">
+                            <div className="text-sm font-medium text-success">{inventory.filter((i) => i.confidence === "high").length}</div>
+                            <div className="text-[10px] text-success">ثقة عالية</div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-[200px] text-center">
+                          <p className="text-xs">أصول تعرّف عليها النظام بوضوح تام من الصور</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="text-center px-3 py-1.5 rounded-lg bg-warning/5 border border-warning/20 cursor-help">
+                            <div className="text-sm font-medium text-warning">{inventory.filter((i) => i.confidence === "medium").length}</div>
+                            <div className="text-[10px] text-warning">ثقة متوسطة</div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-[200px] text-center">
+                          <p className="text-xs">أصول تعرّف عليها النظام لكن بدرجة أقل من اليقين، مثل أجهزة مغطاة جزئياً</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="text-center px-3 py-1.5 rounded-lg bg-destructive/5 border border-destructive/20 cursor-help">
+                            <div className="text-sm font-medium text-destructive">{inventory.filter((i) => i.confidence === "low").length}</div>
+                            <div className="text-[10px] text-destructive">يحتاج تأكيد</div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-[200px] text-center">
+                          <p className="text-xs">أصول لم يستطع النظام تحديدها بدقة ويحتاج تأكيدك اليدوي</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </div>
 
