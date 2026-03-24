@@ -89,7 +89,7 @@ const LoginPage = () => {
             : error.message
         );
       } else {
-        navigate("/dashboard");
+        navigate("/");
       }
     } else {
       if (!fullName.trim()) {
@@ -112,7 +112,7 @@ const LoginPage = () => {
       if (error) {
         setError(error.message);
       } else {
-        navigate("/dashboard");
+        navigate("/");
       }
     }
     setLoading(false);
