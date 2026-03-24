@@ -1,27 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   DEAL_TYPES,
   DEAL_TYPE_MAP,
+  CONFLICT_RULES,
   detectConflicts,
   getRequiredDisclosures,
   getRequiredDocuments,
-  type DealTypeConfig,
   type ConflictRule,
 } from "@/lib/dealStructureConfig";
 import { cn } from "@/lib/utils";
 import AiStar from "@/components/AiStar";
 import {
   Check,
-  GripVertical,
   AlertTriangle,
   ChevronDown,
   ChevronUp,
   Shield,
   FileText,
   Star,
-  Info,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export interface DealStructureSelection {
   selectedTypes: string[];
@@ -250,25 +247,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
         })}
       </div>
 
-      {/* Conflict warnings */}
-      {conflicts.length > 0 && (
-        <div className="space-y-2">
-          {conflicts.map((c, i) => (
-            <div
-              key={i}
-              className={cn(
-                "flex items-start gap-2 p-3 rounded-xl text-sm",
-                c.severity === "critical"
-                  ? "bg-destructive/10 text-destructive border border-destructive/20"
-                  : "bg-warning/10 text-warning border border-warning/20"
-              )}
-            >
-              <AlertTriangle size={16} className="shrink-0 mt-0.5" />
-              <span className="text-xs">{c.message}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* No conflict warnings - AI auto-resolves conflicts silently */}
 
       {/* Selected summary */}
       {selectedTypes.length > 0 && (
