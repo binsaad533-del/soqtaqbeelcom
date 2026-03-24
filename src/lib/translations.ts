@@ -42,7 +42,7 @@ export const SENDER_TYPE_LABELS: Record<string, string> = {
   buyer: "المشتري",
   seller: "البائع",
   system: "النظام",
-  ai: "مقبل",
+  ai: "AI",
 };
 
 /** User role → Arabic */
