@@ -478,11 +478,12 @@ const CreateListingPage = () => {
     setCurrentStep((prev) => Math.max(0, prev - 1));
   };
 
-  const handlePublish = async () => {
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+
+  const handlePublishClick = () => {
     if (!listingId) return;
     setPublishAttempted(true);
 
-    // Client-side strict validation
     const hasPhotos = totalPhotos > 0;
     const hasActivity = disclosure.business_activity.trim() !== "";
     const hasCity = disclosure.city.trim() !== "";
@@ -492,6 +493,13 @@ const CreateListingPage = () => {
       toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر");
       return;
     }
+
+    setShowPublishConfirm(true);
+  };
+
+  const handlePublish = async () => {
+    if (!listingId) return;
+    setShowPublishConfirm(false);
 
     setSaving(true);
     const fields = Object.values(disclosure);
@@ -1086,7 +1094,7 @@ const CreateListingPage = () => {
                   </div>
                 )}
 
-                <Button onClick={handlePublish} disabled={saving || loading || (!canPublish && publishAttempted)} className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
+                <Button onClick={handlePublishClick} disabled={saving || loading || (!canPublish && publishAttempted)} className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
                   {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
                   نشر الإعلان
                 </Button>
@@ -1108,6 +1116,53 @@ const CreateListingPage = () => {
           )}
         </div>
       </div>
+
+      {/* Publish Confirmation Modal */}
+      {showPublishConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setShowPublishConfirm(false)}>
+          <div className="bg-card border border-border/50 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-5 animate-scale-in" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <Shield size={24} className="text-primary" />
+              </div>
+              <h3 className="font-semibold text-lg mb-1">تأكيد نشر الإعلان</h3>
+              <p className="text-xs text-muted-foreground">راجع البيانات التالية قبل النشر النهائي</p>
+            </div>
+
+            <div className="space-y-3 bg-muted/30 rounded-xl p-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">العنوان</span>
+                <span className="font-medium text-foreground">{disclosure.business_activity || "—"}</span>
+              </div>
+              <div className="border-t border-border/30" />
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">المدينة</span>
+                <span className="font-medium text-foreground">{disclosure.city || "—"}</span>
+              </div>
+              <div className="border-t border-border/30" />
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">السعر</span>
+                <span className="font-medium text-foreground">{disclosure.price ? `${Number(disclosure.price).toLocaleString()} ر.س` : "—"}</span>
+              </div>
+              <div className="border-t border-border/30" />
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">عدد الصور</span>
+                <span className="font-medium text-foreground">{totalPhotos} صورة</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setShowPublishConfirm(false)} className="flex-1 rounded-xl">
+                إلغاء
+              </Button>
+              <Button onClick={handlePublish} disabled={saving} className="flex-1 gradient-primary text-primary-foreground rounded-xl">
+                {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
+                تأكيد النشر
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
