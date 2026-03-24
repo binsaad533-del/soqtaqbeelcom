@@ -21,13 +21,14 @@ const steps = [
   { label: "المراجعة والنشر", icon: Check, hint: "كل شيء جاهز — راجع وانشر بضغطة واحدة" },
 ];
 
-const photoGroups = [
-  { id: "interior", label: "صور داخلية للمحل", desc: "صور واضحة للمساحة الداخلية من زوايا مختلفة", min: 3, icon: "Camera" },
-  { id: "exterior", label: "واجهة المحل", desc: "صور للمدخل والواجهة الخارجية", min: 2, icon: "DoorOpen" },
-  { id: "building", label: "المبنى", desc: "صور عامة للمبنى من الخارج", min: 1, icon: "Building2" },
-  { id: "street", label: "الشارع المحيط", desc: "صور للشارع والمحيط التجاري", min: 1, icon: "MapPin" },
-  { id: "signage", label: "اللوحة / اللافتة", desc: "صورة واضحة للافتة المحل", min: 1, icon: "Tag" },
-  { id: "equipment", label: "المعدات والأجهزة", desc: "صور قريبة للمعدات والأثاث والأجهزة", min: 4, icon: "Wrench" },
+const allPhotoGroups = [
+  { id: "interior", label: "صور داخلية للمحل", desc: "صور واضحة للمساحة الداخلية من زوايا مختلفة", min: 3, icon: "Camera", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup", "location_only"] },
+  { id: "exterior", label: "واجهة المحل", desc: "صور للمدخل والواجهة الخارجية", min: 2, icon: "DoorOpen", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup", "location_only"] },
+  { id: "building", label: "المبنى", desc: "صور عامة للمبنى من الخارج", min: 1, icon: "Building2", dealTypes: ["full_takeover", "transfer_no_liabilities", "location_only"] },
+  { id: "street", label: "الشارع المحيط", desc: "صور للشارع والمحيط التجاري", min: 1, icon: "MapPin", dealTypes: ["full_takeover", "transfer_no_liabilities", "location_only"] },
+  { id: "signage", label: "اللوحة / اللافتة", desc: "صورة واضحة للافتة المحل", min: 1, icon: "Tag", dealTypes: ["full_takeover", "transfer_no_liabilities"] },
+  { id: "equipment", label: "المعدات والأجهزة", desc: "صور قريبة للمعدات والأثاث والأجهزة", min: 4, icon: "Wrench", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup", "assets_only"] },
+  { id: "cr_doc", label: "صورة السجل التجاري", desc: "صورة واضحة للسجل التجاري", min: 1, icon: "FileText", dealTypes: ["cr_only"] },
 ];
 
 interface InventoryItem {
