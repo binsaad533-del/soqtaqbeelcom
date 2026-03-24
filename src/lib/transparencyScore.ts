@@ -100,17 +100,16 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
   if (docCount >= 2) bonusPoints += 5;
   else if (docCount >= 1) bonusPoints += 3;
 
-  const fieldScore = scoredFields.length > 0 ? (filled / scoredFields.length) * 70 : 70;
   const bonusScore = bonusTotal > 0 ? (bonusPoints / bonusTotal) * 30 : 30;
-  const totalScore = Math.round(fieldScore + bonusScore);
+  const totalScore = Math.round(requiredScore + optionalScore + bonusScore);
 
   let level: TransparencyLevel;
   let label: string;
 
-  if (totalScore >= 75) {
+  if (totalScore >= 70) {
     level = "high";
     label = "شفافية عالية";
-  } else if (totalScore >= 45) {
+  } else if (totalScore >= 40) {
     level = "medium";
     label = "شفافية متوسطة";
   } else {
@@ -124,7 +123,7 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
     label,
     missingFields: missing,
     totalRequired: rules.requiredFields.length,
-    filledRequired: filled,
+    filledRequired: requiredFilled,
   };
 }
 
