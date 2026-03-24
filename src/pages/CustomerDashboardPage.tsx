@@ -6,6 +6,7 @@ import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import AiStar from "@/components/AiStar";
+import PhoneVerificationFlow from "@/components/PhoneVerificationFlow";
 import { cn } from "@/lib/utils";
 import {
   Plus, FileText, MessageSquare, Shield, AlertCircle,
