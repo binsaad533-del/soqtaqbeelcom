@@ -310,20 +310,26 @@ const CreateListingPage = () => {
         const originalFile = rawFiles[i];
         setUploadProgress({ current: i + 1, total: rawFiles.length });
 
-        const validation = validateImageFile(originalFile);
-        if (!validation.valid) {
-          toast.error(validation.error);
-          continue;
+        const isPdf = originalFile.type === "application/pdf" || originalFile.name.toLowerCase().endsWith(".pdf");
+
+        if (!isPdf) {
+          const validation = validateImageFile(originalFile);
+          if (!validation.valid) {
+            toast.error(validation.error);
+            continue;
+          }
         }
 
         try {
-          const preparedFile = await convertToJpeg(originalFile);
-          const previewUrl = URL.createObjectURL(preparedFile);
+          const preparedFile = isPdf ? originalFile : await convertToJpeg(originalFile);
+          const previewUrl = isPdf ? "" : URL.createObjectURL(preparedFile);
 
-          setLocalPreviews((prev) => ({
-            ...prev,
-            [group]: [...(prev[group] || []), previewUrl],
-          }));
+          if (previewUrl) {
+            setLocalPreviews((prev) => ({
+              ...prev,
+              [group]: [...(prev[group] || []), previewUrl],
+            }));
+          }
 
           const url = await uploadFile(id, preparedFile, `photos/${group}`);
           if (url) uploadedUrls.push(url);
@@ -628,7 +634,7 @@ const CreateListingPage = () => {
           </div>
         )}
 
-        <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif,.raw,.cr2,.nef,.arw,.dng" multiple className="hidden" onChange={handlePhotoUpload} />
+        <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif,.raw,.cr2,.nef,.arw,.dng,.pdf" multiple className="hidden" onChange={handlePhotoUpload} />
         <input ref={docInputRef} type="file" accept="*/*" multiple className="hidden" onChange={handleDocUpload} />
 
         {/* 4-step progress */}
