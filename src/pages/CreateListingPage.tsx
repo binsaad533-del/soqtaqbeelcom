@@ -1057,7 +1057,7 @@ const CreateListingPage = () => {
                     <div>
                       <p className="text-xs font-medium text-destructive">يرجى إكمال الحقول المطلوبة قبل النشر</p>
                       <ul className="text-[11px] text-destructive/80 mt-1 space-y-0.5 list-disc list-inside">
-                        {!publishValidation.hasPhotos && <li>يجب رفع صورة واحدة على الأقل</li>}
+                        {!publishValidation.hasPhotos && imageReq === "required" && <li>يجب رفع صورة واحدة على الأقل</li>}
                         {!publishValidation.hasActivity && <li>نوع النشاط مطلوب</li>}
                         {!publishValidation.hasCity && <li>المدينة مطلوبة</li>}
                         {!publishValidation.hasPrice && <li>السعر مطلوب ويجب أن يكون رقماً صحيحاً</li>}
