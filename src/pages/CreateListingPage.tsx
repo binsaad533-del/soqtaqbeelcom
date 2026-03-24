@@ -1522,42 +1522,42 @@ const CreateListingPage = () => {
                 )}
 
                 {/* ── Live Preview — How listing will appear in marketplace ── */}
-                <div className="border border-border/50 rounded-2xl overflow-hidden bg-card">
+                <div className="border border-border/50 rounded-2xl overflow-hidden bg-card transition-all duration-500 ease-out">
                   <div className="px-4 py-2.5 bg-muted/30 border-b border-border/30 flex items-center gap-2">
                     <Eye size={14} strokeWidth={1.5} className="text-primary" />
                     <span className="text-[11px] font-medium text-muted-foreground">معاينة الإعلان كما سيظهر للمشترين</span>
                   </div>
                   <div className="p-4">
                     {/* Preview card mimicking marketplace listing card */}
-                    <div className="rounded-xl border border-border/40 overflow-hidden bg-background shadow-soft">
+                    <div className="rounded-xl border border-border/40 overflow-hidden bg-background shadow-soft transition-shadow duration-300 hover:shadow-soft-lg">
                       {/* Image */}
-                      {allPhotoUrls.length > 0 ? (
-                        <div className="h-36 overflow-hidden bg-muted/30">
-                          <img src={allPhotoUrls[0]} alt="صورة الإعلان" className="w-full h-full object-cover" />
-                        </div>
-                      ) : (
-                        <div className="h-36 bg-muted/30 flex items-center justify-center">
-                          <ImageIcon size={32} strokeWidth={1} className="text-muted-foreground/30" />
-                        </div>
-                      )}
+                      <div className="h-36 overflow-hidden bg-muted/30 transition-all duration-500">
+                        {allPhotoUrls.length > 0 ? (
+                          <img src={allPhotoUrls[0]} alt="صورة الإعلان" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ImageIcon size={32} strokeWidth={1} className="text-muted-foreground/30" />
+                          </div>
+                        )}
+                      </div>
                       <div className="p-4 space-y-2">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-medium text-foreground truncate">
-                            {disclosure.business_activity || "اسم النشاط"}
+                          <h3 className="text-sm font-medium text-foreground truncate transition-all duration-300" key={disclosure.business_activity || "empty"}>
+                            <span className="inline-block animate-fade-in">{disclosure.business_activity || "اسم النشاط"}</span>
                           </h3>
-                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary font-medium shrink-0 mr-2">
+                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary font-medium shrink-0 mr-2 transition-all duration-300">
                             {primaryDealLabel}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <div className="flex items-center gap-1 text-[11px] text-muted-foreground transition-all duration-300" key={`${disclosure.district}-${disclosure.city}`}>
                           <MapPin size={11} strokeWidth={1.5} />
-                          <span>{disclosure.district || "الحي"}, {disclosure.city || "المدينة"}</span>
+                          <span className="inline-block animate-fade-in">{disclosure.district || "الحي"}, {disclosure.city || "المدينة"}</span>
                         </div>
                         <div className="flex items-center justify-between pt-1 border-t border-border/30">
-                          <span className="text-base font-semibold text-primary">
-                            {disclosure.price ? `${Number(disclosure.price).toLocaleString()} ر.س` : "—"}
+                          <span className="text-base font-semibold text-primary transition-all duration-300" key={disclosure.price || "no-price"}>
+                            <span className="inline-block animate-fade-in">{disclosure.price ? `${Number(disclosure.price).toLocaleString()} ر.س` : "—"}</span>
                           </span>
-                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground transition-all duration-300">
                             <span>{totalPhotos} صورة</span>
                             <span>·</span>
                             <span>{inventory.filter(i => i.included).length} أصل</span>
