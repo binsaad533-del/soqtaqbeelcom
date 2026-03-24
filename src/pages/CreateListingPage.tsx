@@ -651,6 +651,7 @@ const CreateListingPage = () => {
         inventory: inventory.filter((item) => item.included),
         deal_disclosures: dealStructure.requiredDisclosures,
         required_documents: dealStructure.requiredDocuments,
+        ai_structure_validation: dealCheckResult || null,
         status: "published",
         published_at: new Date().toISOString(),
         title: isCrOnly
