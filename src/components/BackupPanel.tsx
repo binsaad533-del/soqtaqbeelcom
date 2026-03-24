@@ -69,7 +69,7 @@ const BackupPanel = () => {
         <StatusCard
           icon={Clock}
           label="آخر نسخة ناجحة"
-          value={lastSuccess ? new Date(lastSuccess.started_at).toLocaleDateString("ar-SA") : "لا يوجد"}
+          value={lastSuccess ? new Date(lastSuccess.started_at).toLocaleDateString("en-GB") : "لا يوجد"}
           color="primary"
         />
         <StatusCard
@@ -188,7 +188,7 @@ const BackupPanel = () => {
                        log.backup_type === "automatic" ? "نسخ تلقائي" : log.backup_type}
                     </div>
                     <div className="text-[10px] text-muted-foreground">
-                      {new Date(log.started_at).toLocaleString("ar-SA")}
+                      {new Date(log.started_at).toLocaleString("en-GB")}
                       {log.size_bytes ? ` • ${formatSize(log.size_bytes)}` : ""}
                     </div>
                   </div>

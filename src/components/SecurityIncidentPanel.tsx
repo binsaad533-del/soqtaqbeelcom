@@ -220,7 +220,7 @@ const SecurityIncidentPanel = () => {
                         {incident.resolved_at && (
                           <p className="text-[10px] text-green-500 mt-1 flex items-center gap-1">
                             <Clock size={10} />
-                            {new Date(incident.resolved_at).toLocaleString("ar-SA")}
+                            {new Date(incident.resolved_at).toLocaleString("en-GB")}
                           </p>
                         )}
                       </div>

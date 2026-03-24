@@ -580,7 +580,7 @@ const AgreementPage = () => {
                     <div key={h.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-muted/30 text-sm">
                       <span className="text-muted-foreground">{ACTION_LABELS[h.action] || h.action}</span>
                       <span className="text-xs text-muted-foreground">
-                        {new Date(h.created_at).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}
+                        {new Date(h.created_at).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}
                       </span>
                     </div>
                   ))}
@@ -668,7 +668,7 @@ const ApprovalCard = ({
     )}
     {approvedAt && (
       <p className="text-[10px] text-muted-foreground mt-1">
-        {new Date(approvedAt).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}
+        {new Date(approvedAt).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}
       </p>
     )}
   </div>
