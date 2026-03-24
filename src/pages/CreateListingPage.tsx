@@ -310,15 +310,19 @@ const CreateListingPage = () => {
         const originalFile = rawFiles[i];
         setUploadProgress({ current: i + 1, total: rawFiles.length });
 
-        const validation = validateImageFile(originalFile);
-        if (!validation.valid) {
-          toast.error(validation.error);
-          continue;
+        const isPdf = originalFile.type === "application/pdf" || originalFile.name.toLowerCase().endsWith(".pdf");
+
+        if (!isPdf) {
+          const validation = validateImageFile(originalFile);
+          if (!validation.valid) {
+            toast.error(validation.error);
+            continue;
+          }
         }
 
         try {
-          const preparedFile = await convertToJpeg(originalFile);
-          const previewUrl = URL.createObjectURL(preparedFile);
+          const preparedFile = isPdf ? originalFile : await convertToJpeg(originalFile);
+          const previewUrl = isPdf ? "" : URL.createObjectURL(preparedFile);
 
           setLocalPreviews((prev) => ({
             ...prev,
