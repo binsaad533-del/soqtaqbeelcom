@@ -22,12 +22,12 @@ const steps = [
 ];
 
 const photoGroups = [
-  { id: "interior", label: "صور داخلية للمحل", desc: "صور واضحة للمساحة الداخلية من زوايا مختلفة", min: 3, emoji: "🏠" },
-  { id: "exterior", label: "واجهة المحل", desc: "صور للمدخل والواجهة الخارجية", min: 2, emoji: "🚪" },
-  { id: "building", label: "المبنى", desc: "صور عامة للمبنى من الخارج", min: 1, emoji: "🏢" },
-  { id: "street", label: "الشارع المحيط", desc: "صور للشارع والمحيط التجاري", min: 1, emoji: "🛣️" },
-  { id: "signage", label: "اللوحة / اللافتة", desc: "صورة واضحة للافتة المحل", min: 1, emoji: "🪧" },
-  { id: "equipment", label: "المعدات والأجهزة", desc: "صور قريبة للمعدات والأثاث والأجهزة", min: 4, emoji: "⚙️" },
+  { id: "interior", label: "صور داخلية للمحل", desc: "صور واضحة للمساحة الداخلية من زوايا مختلفة", min: 3, icon: "Camera" },
+  { id: "exterior", label: "واجهة المحل", desc: "صور للمدخل والواجهة الخارجية", min: 2, icon: "DoorOpen" },
+  { id: "building", label: "المبنى", desc: "صور عامة للمبنى من الخارج", min: 1, icon: "Building2" },
+  { id: "street", label: "الشارع المحيط", desc: "صور للشارع والمحيط التجاري", min: 1, icon: "MapPin" },
+  { id: "signage", label: "اللوحة / اللافتة", desc: "صورة واضحة للافتة المحل", min: 1, icon: "Tag" },
+  { id: "equipment", label: "المعدات والأجهزة", desc: "صور قريبة للمعدات والأثاث والأجهزة", min: 4, icon: "Wrench" },
 ];
 
 interface InventoryItem {
