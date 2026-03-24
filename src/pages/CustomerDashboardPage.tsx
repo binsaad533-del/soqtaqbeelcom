@@ -175,25 +175,6 @@ const CustomerDashboardPage = () => {
     <div className="py-5 md:py-8">
       <div className="container max-w-6xl">
 
-        {/* ── Header ── */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-              {profile?.full_name?.charAt(0) || "؟"}
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold">مرحباً {profile?.full_name || "بك"}</h1>
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Clock size={10} /> عضو منذ {memberSince}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <AiStar size={20} />
-            <button onClick={signOut} className="text-xs text-muted-foreground hover:text-foreground transition-colors border border-border/50 rounded-lg px-3 py-1.5">خروج</button>
-          </div>
-        </div>
-
         {loadError && (
           <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-between mb-5 animate-fade-in">
             <div className="flex items-center gap-2">
@@ -204,107 +185,235 @@ const CustomerDashboardPage = () => {
           </div>
         )}
 
+        {/* ══════ MERGED HEADER + PROFILE ══════ */}
+        <div className="rounded-2xl border border-border/30 bg-card p-4 mb-5">
+          <div className="flex items-center gap-4">
+            {/* Avatar with upload */}
+            <label className="relative w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg cursor-pointer group overflow-hidden shrink-0">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
+              ) : (
+                profile?.full_name?.charAt(0) || "؟"
+              )}
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                <Camera size={16} className="text-white" />
+              </div>
+              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
+            </label>
+
+            {/* Name + verification + member since */}
+            <div className="flex-1 min-w-0">
+              {editingField === "full_name" ? (
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <input className="text-base font-semibold bg-muted/50 rounded px-2 py-0.5 w-48 border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
+                  <button onClick={() => saveField("full_name", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={14} /></button>
+                  <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={14} /></button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 group/name mb-0.5">
+                  <h1 className="text-base font-semibold truncate">مرحباً {profile?.full_name || "بك"}</h1>
+                  <button onClick={() => startEdit("full_name", profile?.full_name || "")} className="opacity-0 group-hover/name:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={11} /></button>
+                </div>
+              )}
+              <div className="flex items-center gap-3 text-[10px] text-muted-foreground flex-wrap">
+                <span className="flex items-center gap-1">
+                  {profile?.is_verified
+                    ? <><UserCheck size={10} className="text-success" /> موثّق</>
+                    : <><Shield size={10} className="text-warning" /> غير موثّق</>
+                  }
+                </span>
+                <span className="flex items-center gap-1"><Clock size={10} /> عضو منذ {memberSince}</span>
+              </div>
+            </div>
+
+            {/* Profile info fields (compact inline) */}
+            <div className="hidden md:flex items-center gap-4 text-[10px]">
+              {/* Email */}
+              <div className="flex items-center gap-1.5 group/email">
+                <Mail size={11} className="text-muted-foreground" />
+                {editingField === "email" ? (
+                  <div className="flex items-center gap-1">
+                    <input type="email" dir="ltr" className="bg-muted/50 rounded px-1.5 py-0.5 w-36 border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="email@example.com" />
+                    <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={10} /></button>
+                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={10} /></button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-muted-foreground truncate max-w-[140px]" dir="ltr">{userEmail || "لم يُضاف"}</span>
+                    <button onClick={() => startEdit("email", userEmail || "")} className="opacity-0 group-hover/email:opacity-100 text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
+                  </>
+                )}
+              </div>
+              {/* Phone */}
+              <div className="flex items-center gap-1.5 group/phone">
+                <Phone size={11} className="text-muted-foreground" />
+                {editingField === "phone" ? (
+                  <div className="flex items-center gap-1">
+                    <input dir="ltr" className="bg-muted/50 rounded px-1.5 py-0.5 w-28 border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="05XXXXXXXX" />
+                    <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success"><Check size={10} /></button>
+                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={10} /></button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-muted-foreground">{profile?.phone || "لم يُضاف"}</span>
+                    <button onClick={() => startEdit("phone", profile?.phone || "")} className="opacity-0 group-hover/phone:opacity-100 text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
+                  </>
+                )}
+              </div>
+              {/* City */}
+              <div className="flex items-center gap-1.5 group/city">
+                <MapPin size={11} className="text-muted-foreground" />
+                {editingField === "city" ? (
+                  <div className="flex items-center gap-1">
+                    <input className="bg-muted/50 rounded px-1.5 py-0.5 w-20 border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="الرياض" />
+                    <button onClick={() => saveField("city", editValue)} disabled={saving} className="text-success"><Check size={10} /></button>
+                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={10} /></button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-muted-foreground">{profile?.city || "لم تُحدد"}</span>
+                    <button onClick={() => startEdit("city", profile?.city || "")} className="opacity-0 group-hover/city:opacity-100 text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 shrink-0">
+              <AiStar size={20} />
+              <button onClick={signOut} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors border border-border/50 rounded-lg px-2.5 py-1">خروج</button>
+            </div>
+          </div>
+
+          {/* Mobile-only profile fields */}
+          <div className="flex md:hidden items-center gap-4 mt-3 pt-3 border-t border-border/20 text-[10px] flex-wrap">
+            <div className="flex items-center gap-1.5 group/email">
+              <Mail size={10} className="text-muted-foreground" />
+              <span className="text-muted-foreground truncate" dir="ltr">{userEmail || "لم يُضاف"}</span>
+              <button onClick={() => startEdit("email", userEmail || "")} className="text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
+            </div>
+            <div className="flex items-center gap-1.5 group/phone">
+              <Phone size={10} className="text-muted-foreground" />
+              <span className="text-muted-foreground">{profile?.phone || "لم يُضاف"}</span>
+              <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
+            </div>
+            <div className="flex items-center gap-1.5 group/city">
+              <MapPin size={10} className="text-muted-foreground" />
+              <span className="text-muted-foreground">{profile?.city || "لم تُحدد"}</span>
+              <button onClick={() => startEdit("city", profile?.city || "")} className="text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
+            </div>
+          </div>
+
+          {/* Profile completeness bar */}
+          {profileCompleteness < 100 && (
+            <div className="mt-3 pt-3 border-t border-border/20">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] text-muted-foreground">اكتمال الملف الشخصي</span>
+                <span className={cn("text-[10px] font-medium",
+                  profileCompleteness >= 75 ? "text-success" : profileCompleteness >= 50 ? "text-warning" : "text-destructive"
+                )}>{profileCompleteness}%</span>
+              </div>
+              <div className="w-full h-1 rounded-full bg-muted overflow-hidden">
+                <div className={cn("h-full rounded-full transition-all duration-500",
+                  profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
+                )} style={{ width: `${profileCompleteness}%` }} />
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* ══════ FINANCIAL OVERVIEW ══════ */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <div className="rounded-2xl p-4 bg-card border border-border/30 group hover:border-primary/20 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <Wallet size={16} strokeWidth={1.3} className="text-primary" />
-              <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">إجمالي</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+          <div className="rounded-xl p-3 bg-card border border-border/30 hover:border-primary/20 transition-colors">
+            <div className="flex items-center justify-between mb-1.5">
+              <Wallet size={14} strokeWidth={1.3} className="text-primary" />
+              <span className="text-[8px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">إجمالي</span>
             </div>
-            <div className="text-xl font-bold">{loading ? "—" : `${formatCurrency(stats.totalDealValue)}`}</div>
-            <div className="text-[10px] text-muted-foreground">ر.س · قيمة الصفقات المكتملة</div>
+            <div className="text-lg font-bold leading-tight">{loading ? "—" : `${formatCurrency(stats.totalDealValue)}`}</div>
+            <div className="text-[9px] text-muted-foreground">ر.س · الصفقات المكتملة</div>
           </div>
-
-          <div className="rounded-2xl p-4 bg-card border border-border/30 group hover:border-primary/20 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <Activity size={16} strokeWidth={1.3} className="text-primary" />
-              <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">نشط</span>
+          <div className="rounded-xl p-3 bg-card border border-border/30 hover:border-primary/20 transition-colors">
+            <div className="flex items-center justify-between mb-1.5">
+              <Activity size={14} strokeWidth={1.3} className="text-primary" />
+              <span className="text-[8px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">نشط</span>
             </div>
-            <div className="text-xl font-bold">{loading ? "—" : `${formatCurrency(stats.activeDealValue)}`}</div>
-            <div className="text-[10px] text-muted-foreground">ر.س · قيد التفاوض ({stats.activeDeals})</div>
+            <div className="text-lg font-bold leading-tight">{loading ? "—" : `${formatCurrency(stats.activeDealValue)}`}</div>
+            <div className="text-[9px] text-muted-foreground">ر.س · قيد التفاوض ({stats.activeDeals})</div>
           </div>
-
-          <div className="rounded-2xl p-4 bg-card border border-border/30 group hover:border-primary/20 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <BarChart3 size={16} strokeWidth={1.3} className="text-primary" />
-              <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">متوسط</span>
+          <div className="rounded-xl p-3 bg-card border border-border/30 hover:border-primary/20 transition-colors">
+            <div className="flex items-center justify-between mb-1.5">
+              <BarChart3 size={14} strokeWidth={1.3} className="text-primary" />
+              <span className="text-[8px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">متوسط</span>
             </div>
-            <div className="text-xl font-bold">{loading ? "—" : `${formatCurrency(stats.avgDealValue)}`}</div>
-            <div className="text-[10px] text-muted-foreground">ر.س · متوسط قيمة الصفقة</div>
+            <div className="text-lg font-bold leading-tight">{loading ? "—" : `${formatCurrency(stats.avgDealValue)}`}</div>
+            <div className="text-[9px] text-muted-foreground">ر.س · متوسط قيمة الصفقة</div>
           </div>
-
-          <div className="rounded-2xl p-4 bg-card border border-border/30 group hover:border-primary/20 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <TrendingUp size={16} strokeWidth={1.3} className="text-success" />
-              <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">نجاح</span>
+          <div className="rounded-xl p-3 bg-card border border-border/30 hover:border-primary/20 transition-colors">
+            <div className="flex items-center justify-between mb-1.5">
+              <TrendingUp size={14} strokeWidth={1.3} className="text-success" />
+              <span className="text-[8px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">نجاح</span>
             </div>
-            <div className="text-xl font-bold">{loading ? "—" : `${stats.successRate}%`}</div>
-            <div className="text-[10px] text-muted-foreground">{stats.completedDeals} من {stats.totalDeals} صفقة</div>
+            <div className="text-lg font-bold leading-tight">{loading ? "—" : `${stats.successRate}%`}</div>
+            <div className="text-[9px] text-muted-foreground">{stats.completedDeals} من {stats.totalDeals} صفقة</div>
           </div>
         </div>
 
-        {/* ══════ TWO-COLUMN LAYOUT ══════ */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ══════ DRAFTS (compact inline) ══════ */}
+        {!loading && drafts.length > 0 && (
+          <div className="rounded-xl border border-warning/20 bg-warning/[0.03] p-3 mb-5">
+            <div className="flex items-center gap-2 mb-2">
+              <Edit3 size={12} className="text-warning" />
+              <span className="text-[10px] font-medium text-warning">مسودات تحتاج إكمال</span>
+              <span className="text-[8px] bg-warning/15 text-warning px-1.5 py-0.5 rounded-md">{drafts.length}</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {drafts.map((d) => {
+                const progress = calcDraftProgress(d);
+                return (
+                  <Link key={d.id} to={`/listing/${d.id}`} className="flex items-center gap-2.5 p-2 rounded-lg bg-card border border-border/20 hover:border-warning/30 transition-colors group">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-[10px] font-medium truncate">{d.title || "بدون عنوان"}</span>
+                        <span className={cn("text-[8px] font-medium shrink-0 mr-1",
+                          progress >= 80 ? "text-success" : progress >= 50 ? "text-warning" : "text-destructive"
+                        )}>{progress}%</span>
+                      </div>
+                      <div className="w-full h-0.5 rounded-full bg-warning/10 overflow-hidden">
+                        <div className={cn("h-full rounded-full",
+                          progress >= 80 ? "bg-success" : progress >= 50 ? "bg-warning" : "bg-destructive"
+                        )} style={{ width: `${progress}%` }} />
+                      </div>
+                    </div>
+                    <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100 shrink-0" />
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ══════ TWO-COLUMN: DEALS + LISTINGS | ACTIONS + NOTIFICATIONS ══════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
           {/* ═══ MAIN COLUMN (2/3) ═══ */}
-          <div className="lg:col-span-2 space-y-5">
-
-
-            {/* ── Drafts (if any) ── */}
-            {!loading && drafts.length > 0 && (
-              <section className="rounded-2xl border border-warning/20 bg-warning/5 overflow-hidden">
-                <div className="flex items-center justify-between px-4 pt-3 pb-2">
-                  <h2 className="text-xs font-medium flex items-center gap-2 text-warning">
-                    <Edit3 size={13} />
-                    مسودات تحتاج إكمال
-                    <span className="text-[9px] bg-warning/15 px-1.5 py-0.5 rounded-md">{drafts.length}</span>
-                  </h2>
-                </div>
-                <div className="divide-y divide-warning/10">
-                  {drafts.map((d) => {
-                    const progress = calcDraftProgress(d);
-                    return (
-                      <Link key={d.id} to={`/listing/${d.id}`} className="flex items-center gap-3 px-4 py-2.5 hover:bg-warning/10 transition-colors group">
-                        <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center shrink-0">
-                          <FileText size={13} className="text-warning" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-medium truncate">{d.title || "بدون عنوان"}</span>
-                            <span className={cn("text-[9px] font-medium shrink-0 mr-2",
-                              progress >= 80 ? "text-success" : progress >= 50 ? "text-warning" : "text-destructive"
-                            )}>{progress}%</span>
-                          </div>
-                          <div className="w-full h-1 rounded-full bg-warning/10 overflow-hidden">
-                            <div className={cn("h-full rounded-full transition-all duration-500",
-                              progress >= 80 ? "bg-success" : progress >= 50 ? "bg-warning" : "bg-destructive"
-                            )} style={{ width: `${progress}%` }} />
-                          </div>
-                        </div>
-                        <ChevronLeft size={11} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-                      </Link>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
+          <div className="lg:col-span-2 space-y-4">
 
             {/* ── My Deals ── */}
-            <section className="rounded-2xl border border-border/30 bg-card overflow-hidden">
-              <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                <h2 className="text-xs font-medium flex items-center gap-2">
-                  <MessageSquare size={13} className="text-primary" />
+            <section className="rounded-xl border border-border/30 bg-card overflow-hidden">
+              <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5">
+                <h2 className="text-[11px] font-medium flex items-center gap-1.5">
+                  <MessageSquare size={12} className="text-primary" />
                   صفقاتي
                 </h2>
                 {deals.length > 4 && <span className="text-[9px] text-muted-foreground">{deals.length} صفقة</span>}
               </div>
               {loading ? (
-                <div className="flex justify-center py-8"><Loader2 size={16} className="animate-spin text-primary" /></div>
+                <div className="flex justify-center py-6"><Loader2 size={14} className="animate-spin text-primary" /></div>
               ) : deals.length === 0 ? (
-                <div className="text-center py-8 px-4">
-                  <MessageSquare size={22} className="mx-auto mb-2 text-muted-foreground/20" strokeWidth={1} />
-                  <p className="text-xs text-muted-foreground">لا توجد صفقات بعد</p>
-                  <Link to="/marketplace" className="text-[10px] text-primary hover:underline mt-1 inline-block">تصفح السوق</Link>
+                <div className="text-center py-6 px-4">
+                  <MessageSquare size={18} className="mx-auto mb-1.5 text-muted-foreground/20" strokeWidth={1} />
+                  <p className="text-[10px] text-muted-foreground">لا توجد صفقات بعد</p>
+                  <Link to="/marketplace" className="text-[9px] text-primary hover:underline mt-0.5 inline-block">تصفح السوق</Link>
                 </div>
               ) : (
                 <div className="divide-y divide-border/20">
@@ -313,30 +422,23 @@ const CustomerDashboardPage = () => {
                     const isCompleted = deal.status === "completed";
                     return (
                       <Link key={deal.id} to={isCompleted ? `/agreement/${deal.id}` : `/negotiate/${deal.id}`}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors group">
-                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
+                        className="flex items-center gap-2.5 px-3.5 py-2 hover:bg-muted/30 transition-colors group">
+                        <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center shrink-0",
                           isCompleted ? "bg-[hsl(270,60%,95%)]" : "bg-primary/10"
                         )}>
                           {isCompleted
-                            ? <CheckCircle size={13} className="text-[hsl(270,60%,45%)]" />
-                            : <MessageSquare size={13} className="text-primary" />}
+                            ? <CheckCircle size={11} className="text-[hsl(270,60%,45%)]" />
+                            : <MessageSquare size={11} className="text-primary" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium truncate">
-                            صفقة #{deal.id.slice(0, 6)}
-                          </div>
-                          <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+                          <div className="text-[10px] font-medium truncate">صفقة #{deal.id.slice(0, 6)}</div>
+                          <div className="flex items-center gap-1.5 text-[8px] text-muted-foreground">
                             <span>{new Date(deal.created_at).toLocaleDateString("ar-SA")}</span>
-                            {deal.agreed_price && (
-                              <>
-                                <span>·</span>
-                                <span className="font-medium text-foreground/70">{Number(deal.agreed_price).toLocaleString()} ر.س</span>
-                              </>
-                            )}
+                            {deal.agreed_price && <><span>·</span><span className="font-medium text-foreground/70">{Number(deal.agreed_price).toLocaleString()} ر.س</span></>}
                           </div>
                         </div>
-                        <span className={cn("text-[9px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
-                        <ChevronLeft size={11} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <span className={cn("text-[8px] px-1.5 py-0.5 rounded-md", st.color)}>{st.label}</span>
+                        <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
                       </Link>
                     );
                   })}
@@ -345,23 +447,23 @@ const CustomerDashboardPage = () => {
             </section>
 
             {/* ── My Listings ── */}
-            <section className="rounded-2xl border border-border/30 bg-card overflow-hidden">
-              <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                <h2 className="text-xs font-medium flex items-center gap-2">
-                  <FileText size={13} className="text-primary" />
+            <section className="rounded-xl border border-border/30 bg-card overflow-hidden">
+              <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5">
+                <h2 className="text-[11px] font-medium flex items-center gap-1.5">
+                  <FileText size={12} className="text-primary" />
                   إعلاناتي المنشورة
                 </h2>
                 <Link to="/create-listing" className="flex items-center gap-1 text-[9px] text-primary hover:underline">
-                  <Plus size={10} /> إعلان جديد
+                  <Plus size={9} /> إعلان جديد
                 </Link>
               </div>
               {loading ? (
-                <div className="flex justify-center py-8"><Loader2 size={16} className="animate-spin text-primary" /></div>
+                <div className="flex justify-center py-6"><Loader2 size={14} className="animate-spin text-primary" /></div>
               ) : recentListings.length === 0 ? (
-                <div className="text-center py-8 px-4">
-                  <FileText size={22} className="mx-auto mb-2 text-muted-foreground/20" strokeWidth={1} />
-                  <p className="text-xs text-muted-foreground mb-1">لا توجد إعلانات منشورة</p>
-                  <Link to="/create-listing" className="text-[10px] text-primary hover:underline">أنشئ إعلانك الأول</Link>
+                <div className="text-center py-6 px-4">
+                  <FileText size={18} className="mx-auto mb-1.5 text-muted-foreground/20" strokeWidth={1} />
+                  <p className="text-[10px] text-muted-foreground mb-0.5">لا توجد إعلانات منشورة</p>
+                  <Link to="/create-listing" className="text-[9px] text-primary hover:underline">أنشئ إعلانك الأول</Link>
                 </div>
               ) : (
                 <div className="divide-y divide-border/20">
@@ -369,22 +471,20 @@ const CustomerDashboardPage = () => {
                     const st = statusBadge(listing.status);
                     return (
                       <Link key={listing.id} to={`/listing/${listing.id}`}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors group">
-                        <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                          <FileText size={13} className="text-foreground/60" />
+                        className="flex items-center gap-2.5 px-3.5 py-2 hover:bg-muted/30 transition-colors group">
+                        <div className="w-6 h-6 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                          <FileText size={11} className="text-foreground/60" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium truncate">{listing.title || "بدون عنوان"}</div>
-                          <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+                          <div className="text-[10px] font-medium truncate">{listing.title || "بدون عنوان"}</div>
+                          <div className="flex items-center gap-1.5 text-[8px] text-muted-foreground">
                             <span>{new Date(listing.created_at).toLocaleDateString("ar-SA")}</span>
                             {listing.city && <><span>·</span><span>{listing.city}</span></>}
-                            {listing.price && (
-                              <><span>·</span><span className="font-medium text-foreground/70">{Number(listing.price).toLocaleString()} ر.س</span></>
-                            )}
+                            {listing.price && <><span>·</span><span className="font-medium text-foreground/70">{Number(listing.price).toLocaleString()} ر.س</span></>}
                           </div>
                         </div>
-                        <span className={cn("text-[9px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
-                        <ChevronLeft size={11} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <span className={cn("text-[8px] px-1.5 py-0.5 rounded-md", st.color)}>{st.label}</span>
+                        <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
                       </Link>
                     );
                   })}
@@ -394,165 +494,55 @@ const CustomerDashboardPage = () => {
           </div>
 
           {/* ═══ SIDEBAR (1/3) ═══ */}
-          <div className="space-y-5">
-
-            {/* ── Profile Card (Actionable) ── */}
-            <div className="rounded-2xl border border-border/30 bg-card p-4">
-              <div className="flex items-center gap-3 mb-4">
-                {/* Avatar with upload */}
-                <label className="relative w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold cursor-pointer group overflow-hidden shrink-0">
-                  {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
-                  ) : (
-                    profile?.full_name?.charAt(0) || "؟"
-                  )}
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                    <Camera size={14} className="text-white" />
-                  </div>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
-                </label>
-                <div className="flex-1 min-w-0">
-                  {editingField === "full_name" ? (
-                    <div className="flex items-center gap-1">
-                      <input className="text-sm font-medium bg-muted/50 rounded px-1.5 py-0.5 w-full border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
-                      <button onClick={() => saveField("full_name", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={12} /></button>
-                      <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={12} /></button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 group/name">
-                      <span className="text-sm font-medium truncate">{profile?.full_name || "—"}</span>
-                      <button onClick={() => startEdit("full_name", profile?.full_name || "")} className="opacity-0 group-hover/name:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={10} /></button>
-                    </div>
-                  )}
-                  <div className="text-[10px] text-muted-foreground flex items-center gap-1">
-                    {profile?.is_verified
-                      ? <><UserCheck size={10} className="text-success" /> حساب موثّق</>
-                      : <><Shield size={10} className="text-warning" /> غير موثّق</>
-                    }
-                  </div>
-                </div>
-              </div>
-
-              {/* Profile completeness */}
-              <div className="mb-3">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] text-muted-foreground">اكتمال الملف الشخصي</span>
-                  <span className={cn("text-[10px] font-medium",
-                    profileCompleteness >= 75 ? "text-success" : profileCompleteness >= 50 ? "text-warning" : "text-destructive"
-                  )}>{profileCompleteness}%</span>
-                </div>
-                <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className={cn("h-full rounded-full transition-all duration-500",
-                    profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
-                  )} style={{ width: `${profileCompleteness}%` }} />
-                </div>
-              </div>
-
-              {/* Editable fields */}
-              <div className="space-y-2 text-[10px]">
-                {/* Email */}
-                <div className="flex items-center gap-2 group/email">
-                  <Mail size={10} className="text-muted-foreground shrink-0" />
-                  {editingField === "email" ? (
-                    <div className="flex items-center gap-1 flex-1">
-                      <input type="email" className="bg-muted/50 rounded px-1.5 py-0.5 w-full border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="example@email.com" dir="ltr" />
-                      <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={10} /></button>
-                      <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={10} /></button>
-                    </div>
-                  ) : (
-                    <>
-                      <span className="text-muted-foreground truncate flex-1" dir="ltr">{userEmail || "لم يُضاف"}</span>
-                      <button onClick={() => startEdit("email", userEmail || "")} className="opacity-0 group-hover/email:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
-                    </>
-                  )}
-                </div>
-
-                {/* Phone */}
-                <div className="flex items-center gap-2 group/phone">
-                  <Phone size={10} className="text-muted-foreground shrink-0" />
-                  {editingField === "phone" ? (
-                    <div className="flex items-center gap-1 flex-1">
-                      <input className="bg-muted/50 rounded px-1.5 py-0.5 w-full border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus dir="ltr" placeholder="05XXXXXXXX" />
-                      <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={10} /></button>
-                      <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={10} /></button>
-                    </div>
-                  ) : (
-                    <>
-                      <span className="text-muted-foreground truncate flex-1">{profile?.phone || "لم يُضاف"}</span>
-                      <button onClick={() => startEdit("phone", profile?.phone || "")} className="opacity-0 group-hover/phone:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
-                    </>
-                  )}
-                </div>
-
-                {/* City */}
-                <div className="flex items-center gap-2 group/city">
-                  <MapPin size={10} className="text-muted-foreground shrink-0" />
-                  {editingField === "city" ? (
-                    <div className="flex items-center gap-1 flex-1">
-                      <input className="bg-muted/50 rounded px-1.5 py-0.5 w-full border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="الرياض" />
-                      <button onClick={() => saveField("city", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={10} /></button>
-                      <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={10} /></button>
-                    </div>
-                  ) : (
-                    <>
-                      <span className="text-muted-foreground truncate flex-1">{profile?.city || "لم تُحدد"}</span>
-                      <button onClick={() => startEdit("city", profile?.city || "")} className="opacity-0 group-hover/city:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={9} /></button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
+          <div className="space-y-4">
 
             {/* ── Quick Actions ── */}
-            <div className="rounded-2xl border border-border/30 bg-card p-4 space-y-1.5">
-              <h3 className="text-xs font-medium mb-2">إجراءات سريعة</h3>
+            <div className="rounded-xl border border-border/30 bg-card p-3 space-y-1">
+              <h3 className="text-[11px] font-medium mb-1.5">إجراءات سريعة</h3>
               {drafts.length > 0 && (
-                <Link to={`/listing/${drafts[0].id}`} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-warning/5 hover:bg-warning/10 transition-colors group">
-                  <div className="w-7 h-7 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
-                    <Edit3 size={12} className="text-warning" />
+                <Link to={`/listing/${drafts[0].id}`} className="flex items-center gap-2 p-2 rounded-lg bg-warning/5 hover:bg-warning/10 transition-colors group">
+                  <div className="w-6 h-6 rounded-md bg-warning/15 flex items-center justify-center shrink-0">
+                    <Edit3 size={11} className="text-warning" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[10px] font-medium">إكمال المسودة</div>
-                  </div>
-                  <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
+                  <span className="text-[10px] font-medium flex-1">إكمال المسودة</span>
+                  <ChevronLeft size={9} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
                 </Link>
               )}
-              <Link to="/create-listing" className="flex items-center gap-2.5 p-2.5 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors group">
-                <div className="w-7 h-7 rounded-lg gradient-primary flex items-center justify-center shrink-0">
-                  <Plus size={12} strokeWidth={2} className="text-primary-foreground" />
+              <Link to="/create-listing" className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors group">
+                <div className="w-6 h-6 rounded-md gradient-primary flex items-center justify-center shrink-0">
+                  <Plus size={11} strokeWidth={2} className="text-primary-foreground" />
                 </div>
-                <div className="flex-1"><div className="text-[10px] font-medium">إنشاء إعلان جديد</div></div>
-                <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
+                <span className="text-[10px] font-medium flex-1">إنشاء إعلان جديد</span>
+                <ChevronLeft size={9} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
               </Link>
-              <Link to="/marketplace" className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-muted/50 transition-colors group">
-                <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                  <Eye size={12} className="text-foreground/60" />
+              <Link to="/marketplace" className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
+                <div className="w-6 h-6 rounded-md bg-secondary flex items-center justify-center shrink-0">
+                  <Eye size={11} className="text-foreground/60" />
                 </div>
-                <div className="flex-1"><div className="text-[10px] font-medium">تصفح السوق</div></div>
-                <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
+                <span className="text-[10px] font-medium flex-1">تصفح السوق</span>
+                <ChevronLeft size={9} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
               </Link>
             </div>
 
             {/* ── Notifications ── */}
             {notifications.length > 0 && (
-              <div className="rounded-2xl border border-border/30 bg-card p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-medium">
+              <div className="rounded-xl border border-border/30 bg-card p-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <h3 className="text-[11px] font-medium">
                     الإشعارات {unreadCount > 0 && <span className="text-[9px] text-primary mr-1">({unreadCount})</span>}
                   </h3>
                   {unreadCount > 0 && (
                     <button onClick={markAllAsRead} className="text-[9px] text-primary hover:underline">قراءة الكل</button>
                   )}
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {notifications.slice(0, 3).map(n => (
-                    <button key={n.id} onClick={() => markAsRead(n.id)} className={cn("w-full text-right p-2 rounded-lg transition-all text-[10px]", !n.is_read && "bg-primary/[0.03]")}>
+                    <button key={n.id} onClick={() => markAsRead(n.id)} className={cn("w-full text-right p-1.5 rounded-lg transition-all text-[10px]", !n.is_read && "bg-primary/[0.03]")}>
                       <div className="flex items-start gap-1.5">
                         {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1 shrink-0" />}
                         <div className="flex-1 min-w-0">
                           <div className="font-medium truncate">{n.title}</div>
-                          {n.body && <div className="text-muted-foreground text-[9px] truncate">{n.body}</div>}
+                          {n.body && <div className="text-muted-foreground text-[8px] truncate">{n.body}</div>}
                         </div>
                       </div>
                     </button>
@@ -562,10 +552,10 @@ const CustomerDashboardPage = () => {
             )}
 
             {/* ── Help ── */}
-            <Link to="/contact" className="block rounded-2xl border border-border/30 bg-card p-4 hover:border-primary/20 transition-colors group">
-              <div className="text-xs font-medium mb-0.5">تحتاج مساعدة؟</div>
+            <Link to="/contact" className="block rounded-xl border border-border/30 bg-card p-3 hover:border-primary/20 transition-colors group">
+              <div className="text-[11px] font-medium mb-0.5">تحتاج مساعدة؟</div>
               <div className="text-[9px] text-muted-foreground">تواصل مع فريق الدعم</div>
-              <span className="text-[9px] text-primary mt-1.5 inline-block group-hover:underline">تواصل معنا ←</span>
+              <span className="text-[9px] text-primary mt-1 inline-block group-hover:underline">تواصل معنا ←</span>
             </Link>
           </div>
         </div>
