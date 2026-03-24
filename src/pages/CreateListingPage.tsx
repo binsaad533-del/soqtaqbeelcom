@@ -577,7 +577,12 @@ const CreateListingPage = () => {
 
   const handleBack = () => {
     saveDraft();
-    setCurrentStep((prev) => Math.max(0, prev - 1));
+    // For CR-only, skip AI analysis step when going back from disclosure
+    if (isCrOnly && currentStep === 3) {
+      setCurrentStep(1); // Jump back to photos/docs
+    } else {
+      setCurrentStep((prev) => Math.max(0, prev - 1));
+    }
   };
 
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
