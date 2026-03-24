@@ -151,6 +151,8 @@ const CreateListingPage = () => {
   const [draftRestored, setDraftRestored] = useState(false);
   const [draftLoading, setDraftLoading] = useState(true);
   const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [draggingGroup, setDraggingGroup] = useState<string | null>(null);
 
   // CR-only extraction state
   const [crExtraction, setCrExtraction] = useState<CrExtractionResult | null>(null);
