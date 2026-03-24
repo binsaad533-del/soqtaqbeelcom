@@ -17,7 +17,6 @@ import {
   AlertTriangle,
   Minus,
   Image as ImageIcon,
-  Layers,
   DoorOpen,
   Building2,
   MapPin,
@@ -149,6 +148,8 @@ const CreateListingPage = () => {
   const [draftRestored, setDraftRestored] = useState(false);
   const [draftLoading, setDraftLoading] = useState(true);
   const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [draggingGroup, setDraggingGroup] = useState<string | null>(null);
 
   // CR-only extraction state
   const [crExtraction, setCrExtraction] = useState<CrExtractionResult | null>(null);
@@ -247,6 +248,7 @@ const CreateListingPage = () => {
   // ── Auto-save every 30 seconds ──
   const saveDraft = useCallback(async () => {
     if (!listingId || saving) return;
+    setAutoSaveStatus("saving");
     try {
       await updateListing(listingId, {
         ...disclosure,
@@ -263,8 +265,11 @@ const CreateListingPage = () => {
         deal_disclosures: dealStructure.requiredDisclosures,
         required_documents: dealStructure.requiredDocuments,
       } as never);
+      setAutoSaveStatus("saved");
+      setTimeout(() => setAutoSaveStatus("idle"), 3000);
     } catch (err) {
       console.error("Auto-save failed", err);
+      setAutoSaveStatus("idle");
     }
   }, [listingId, saving, disclosure, inventory, dealStructure, updateListing]);
 
@@ -705,6 +710,49 @@ const CreateListingPage = () => {
   });
   const disclosureScore = transparencyResult.score;
 
+  // ── Completion percentage ──
+  const completionPercent = (() => {
+    let total = 0;
+    let filled = 0;
+    // Step 0: Deal structure
+    total += 1;
+    if (dealStructure.isValid) filled += 1;
+    // Step 1: Photos
+    total += 1;
+    if (totalPhotos > 0) filled += 1;
+    // Step 2: Analysis
+    total += 1;
+    if (analyzed) filled += 1;
+    // Step 3: Required fields
+    const rules = getRules(dealStructure.primaryType || "full_takeover");
+    const reqFields = rules.requiredFields;
+    total += reqFields.length;
+    for (const f of reqFields) {
+      if ((disclosure as Record<string, string>)[f]?.trim()) filled += 1;
+    }
+    // Price always required
+    total += 1;
+    if (disclosure.price?.trim()) filled += 1;
+    return Math.round((filled / Math.max(total, 1)) * 100);
+  })();
+
+  // ── Drag & drop handler ──
+  const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>, groupId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggingGroup(null);
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+    setActivePhotoGroup(groupId);
+    // Create a synthetic event-like object to reuse handlePhotoUpload logic
+    const dt = new DataTransfer();
+    Array.from(files).forEach(f => dt.items.add(f));
+    if (fileInputRef.current) {
+      fileInputRef.current.files = dt.files;
+      fileInputRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }, []);
+
   const dynamicDocTypes = dealStructure.requiredDocuments.length > 0
     ? dealStructure.requiredDocuments
     : ["عقد الإيجار", "السجل التجاري", "رخصة البلدية", "رخصة الدفاع المدني", "فواتير شراء المعدات", "مستندات أخرى"];
@@ -804,12 +852,35 @@ const CreateListingPage = () => {
           <span className="text-sm font-medium text-primary">{steps[currentStep].hint}</span>
         </div>
 
-        {saving && (
-          <div className="flex items-center gap-2 text-xs text-primary mb-4">
-            <Loader2 size={14} className="animate-spin" />
-            جاري الحفظ...
+        {/* Auto-save status + Completion bar */}
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] text-muted-foreground">اكتمال البيانات</span>
+              <span className="text-[10px] font-medium text-primary">{completionPercent}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full gradient-primary transition-all duration-500"
+                style={{ width: `${completionPercent}%` }}
+              />
+            </div>
           </div>
-        )}
+          <div className="shrink-0">
+            {autoSaveStatus === "saving" && (
+              <div className="flex items-center gap-1.5 text-[10px] text-primary animate-fade-in">
+                <Loader2 size={12} className="animate-spin" />
+                جاري الحفظ...
+              </div>
+            )}
+            {autoSaveStatus === "saved" && (
+              <div className="flex items-center gap-1.5 text-[10px] text-success animate-fade-in">
+                <Check size={12} strokeWidth={2} />
+                تم الحفظ تلقائياً
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="bg-card rounded-2xl shadow-soft p-6 md:p-8 min-h-[400px]">
 
@@ -957,7 +1028,17 @@ const CreateListingPage = () => {
                     const Icon = iconMap[group.icon] || Camera;
 
                     return (
-                      <div key={group.id} className={cn("p-3.5 rounded-xl border transition-all", done ? "border-success/30 bg-success/5" : "border-border/50 bg-card hover:border-primary/30")}>
+                      <div
+                        key={group.id}
+                        className={cn(
+                          "p-3.5 rounded-xl border transition-all",
+                          done ? "border-success/30 bg-success/5" : "border-border/50 bg-card hover:border-primary/30",
+                          draggingGroup === group.id && "border-primary border-dashed bg-primary/5 scale-[1.01]"
+                        )}
+                        onDragOver={(e) => { e.preventDefault(); setDraggingGroup(group.id); }}
+                        onDragLeave={() => setDraggingGroup(null)}
+                        onDrop={(e) => handleDrop(e, group.id)}
+                      >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
                             <Icon size={18} strokeWidth={1.5} className="text-primary" />
@@ -1009,11 +1090,15 @@ const CreateListingPage = () => {
                   })}
                 </div>
 
-                <div className="text-center pt-2 pb-1">
+                <div className="text-center pt-2 pb-1 space-y-2">
                   <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/10">
                     <Sparkles size={16} strokeWidth={1.5} className="text-primary" />
                     <p className="text-sm font-medium text-foreground">كلما زادت الصور، كان التحليل أدق والإعلان أقوى</p>
                   </div>
+                  <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
+                    <Upload size={10} strokeWidth={1.5} />
+                    يمكنك سحب الصور وإفلاتها مباشرة على أي مجموعة
+                  </p>
                 </div>
               </div>
 
@@ -1435,6 +1520,53 @@ const CreateListingPage = () => {
                     <p className="text-xs text-destructive">يجب رفع صورة واحدة على الأقل — عد إلى خطوة الصور والمستندات</p>
                   </div>
                 )}
+
+                {/* ── Live Preview — How listing will appear in marketplace ── */}
+                <div className="border border-border/50 rounded-2xl overflow-hidden bg-card">
+                  <div className="px-4 py-2.5 bg-muted/30 border-b border-border/30 flex items-center gap-2">
+                    <Eye size={14} strokeWidth={1.5} className="text-primary" />
+                    <span className="text-[11px] font-medium text-muted-foreground">معاينة الإعلان كما سيظهر للمشترين</span>
+                  </div>
+                  <div className="p-4">
+                    {/* Preview card mimicking marketplace listing card */}
+                    <div className="rounded-xl border border-border/40 overflow-hidden bg-background shadow-soft">
+                      {/* Image */}
+                      {allPhotoUrls.length > 0 ? (
+                        <div className="h-36 overflow-hidden bg-muted/30">
+                          <img src={allPhotoUrls[0]} alt="صورة الإعلان" className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="h-36 bg-muted/30 flex items-center justify-center">
+                          <ImageIcon size={32} strokeWidth={1} className="text-muted-foreground/30" />
+                        </div>
+                      )}
+                      <div className="p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-medium text-foreground truncate">
+                            {disclosure.business_activity || "اسم النشاط"}
+                          </h3>
+                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary font-medium shrink-0 mr-2">
+                            {primaryDealLabel}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                          <MapPin size={11} strokeWidth={1.5} />
+                          <span>{disclosure.district || "الحي"}, {disclosure.city || "المدينة"}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-1 border-t border-border/30">
+                          <span className="text-base font-semibold text-primary">
+                            {disclosure.price ? `${Number(disclosure.price).toLocaleString()} ر.س` : "—"}
+                          </span>
+                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                            <span>{totalPhotos} صورة</span>
+                            <span>·</span>
+                            <span>{inventory.filter(i => i.included).length} أصل</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 <Button onClick={handlePublishClick} disabled={saving || loading || (!canPublish && publishAttempted)} className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
                   {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
