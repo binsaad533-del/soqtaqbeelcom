@@ -48,6 +48,7 @@ interface DealCheckAnalysis {
 
 interface DealCheckPanelProps {
   listing: any;
+  savedAnalysis?: any;
 }
 
 const RATING_CONFIG: Record<string, { bg: string; text: string; border: string }> = {
