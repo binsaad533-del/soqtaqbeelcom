@@ -43,11 +43,19 @@ export function useAuth() {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
         setState((prev) => ({ ...prev, session }));
         if (session?.user) {
           // defer to avoid deadlock
           setTimeout(() => fetchUserData(session.user), 0);
+          // Update last_activity on sign-in
+          if (event === "SIGNED_IN") {
+            supabase
+              .from("profiles")
+              .update({ last_activity: new Date().toISOString() })
+              .eq("user_id", session.user.id)
+              .then();
+          }
         } else {
           setState({ user: null, session: null, role: null, profile: null, loading: false });
         }
