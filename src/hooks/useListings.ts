@@ -71,6 +71,20 @@ export function useListings() {
     return { data: listing, error };
   }, []);
 
+  const getMyDraft = useCallback(async () => {
+    if (!user) return null;
+    const { data } = await supabase
+      .from("listings")
+      .select("*")
+      .eq("owner_id", user.id)
+      .eq("status", "draft")
+      .is("deleted_at", null)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    return data as unknown as Listing | null;
+  }, [user]);
+
   const getMyListings = useCallback(async () => {
     if (!user) return [];
     const { data } = await supabase
