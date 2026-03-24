@@ -246,10 +246,14 @@ const CustomerDashboardPage = () => {
 
             {/* Inline info items - all on one line */}
             <div className="flex items-center gap-4 text-xs text-muted-foreground flex-1 min-w-0 flex-wrap md:flex-nowrap">
-              <span className="flex items-center gap-1.5 shrink-0">
-                {profile?.is_verified
-                  ? <><UserCheck size={13} className="text-success" /> موثّق</>
-                  : <><Shield size={13} className="text-warning" /> غير موثّق</>
+              <span className={cn("flex items-center gap-1.5 shrink-0 px-2 py-0.5 rounded-full text-[10px] font-medium",
+                isProfileComplete
+                  ? "bg-success/15 text-success border border-success/30"
+                  : "bg-warning/15 text-warning border border-warning/30"
+              )}>
+                {isProfileComplete
+                  ? <><UserCheck size={13} /> موثّق</>
+                  : <><Shield size={13} /> غير موثّق</>
                 }
               </span>
 
