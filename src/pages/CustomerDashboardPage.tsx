@@ -313,21 +313,31 @@ const CustomerDashboardPage = () => {
 
 
           {/* Profile completeness bar */}
-          {profileCompleteness < 100 && (
-            <div className="mt-3 pt-3 border-t border-border/20">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-muted-foreground">اكتمال الملف الشخصي</span>
-                <span className={cn("text-xs font-medium",
-                  profileCompleteness >= 75 ? "text-success" : profileCompleteness >= 50 ? "text-warning" : "text-destructive"
-                )}>{profileCompleteness}%</span>
-              </div>
-              <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
-                <div className={cn("h-full rounded-full transition-all duration-500",
-                  profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
-                )} style={{ width: `${profileCompleteness}%` }} />
-              </div>
+          <div className="mt-3 pt-3 border-t border-border/20">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-muted-foreground">اكتمال الملف الشخصي</span>
+              <span className={cn("text-xs font-medium",
+                isProfileComplete ? "text-success" : profileCompleteness >= 50 ? "text-warning" : "text-destructive"
+              )}>{profileCompleteness}%</span>
             </div>
-          )}
+            {isProfileComplete ? (
+              <div className="flex items-center gap-1.5 text-xs text-success">
+                <CheckCircle size={13} />
+                <span className="font-medium">ملفك الشخصي مكتمل — حسابك موثّق</span>
+              </div>
+            ) : (
+              <>
+                <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className={cn("h-full rounded-full transition-all duration-500",
+                    profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
+                  )} style={{ width: `${profileCompleteness}%` }} />
+                </div>
+                <p className="text-[9px] text-muted-foreground mt-1">
+                  أكمل: {!profile?.full_name && "الاسم · "}{!profile?.phone && "الجوال · "}{!hasRealEmail && "الإيميل · "}{!profile?.avatar_url && "الصورة"}
+                </p>
+              </>
+            )}
+          </div>
         </div>
 
         {/* ══════ FINANCIAL OVERVIEW ══════ */}
