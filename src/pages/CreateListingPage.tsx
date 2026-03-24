@@ -152,7 +152,98 @@ const CreateListingPage = () => {
     return id;
   }, [listingId, dealStructure, createListing]);
 
-  const isHeicLikeFile = useCallback(async (file: File) => {
+  // ── Draft restore on mount ──
+  useEffect(() => {
+    const restoreDraft = async () => {
+      try {
+        const draft = await getMyDraft();
+        if (draft) {
+          setListingId(draft.id);
+          if (draft.primary_deal_type) {
+            const selectedTypes = Array.isArray(draft.deal_options)
+              ? (draft.deal_options as Array<{ type_id: string; priority: number; is_primary: boolean }>).map((o) => o.type_id)
+              : [draft.primary_deal_type];
+            setDealStructure((prev) => ({
+              ...prev,
+              selectedTypes,
+              primaryType: draft.primary_deal_type || selectedTypes[0] || "",
+              isValid: selectedTypes.length > 0,
+            }));
+          }
+          if (draft.photos && typeof draft.photos === "object") {
+            setPhotos(draft.photos as Record<string, string[]>);
+            setLocalPreviews(draft.photos as Record<string, string[]>);
+          }
+          if (Array.isArray(draft.inventory) && draft.inventory.length > 0) {
+            setInventory(draft.inventory as InventoryItem[]);
+            setAnalyzed(true);
+          }
+          if (Array.isArray(draft.documents) && draft.documents.length > 0) {
+            // Restore docs grouped - keep as flat for now
+          }
+          setDisclosure((prev) => ({
+            ...prev,
+            business_activity: draft.business_activity || "",
+            city: draft.city || "",
+            district: draft.district || "",
+            price: draft.price != null ? String(draft.price) : "",
+            annual_rent: draft.annual_rent != null ? String(draft.annual_rent) : "",
+            lease_duration: draft.lease_duration || "",
+            lease_paid_period: draft.lease_paid_period || "",
+            lease_remaining: draft.lease_remaining || "",
+            liabilities: draft.liabilities || "",
+            overdue_salaries: draft.overdue_salaries || "",
+            overdue_rent: draft.overdue_rent || "",
+            municipality_license: draft.municipality_license || "",
+            civil_defense_license: draft.civil_defense_license || "",
+            surveillance_cameras: draft.surveillance_cameras || "",
+          }));
+          setDraftRestored(true);
+          toast.success("تم استعادة مسودتك السابقة تلقائياً", { icon: "📋" });
+        }
+      } catch (err) {
+        console.error("Draft restore failed", err);
+      } finally {
+        setDraftLoading(false);
+      }
+    };
+    restoreDraft();
+  }, [getMyDraft]);
+
+  // ── Auto-save every 30 seconds ──
+  const saveDraft = useCallback(async () => {
+    if (!listingId || saving) return;
+    try {
+      await updateListing(listingId, {
+        ...disclosure,
+        price: disclosure.price ? Number(disclosure.price) : null,
+        annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+        inventory: inventory.filter((item) => item.included),
+        deal_type: dealStructure.primaryType || "full_takeover",
+        primary_deal_type: dealStructure.primaryType,
+        deal_options: dealStructure.selectedTypes.map((id, i) => ({
+          type_id: id,
+          priority: i,
+          is_primary: id === dealStructure.primaryType,
+        })),
+        deal_disclosures: dealStructure.requiredDisclosures,
+        required_documents: dealStructure.requiredDocuments,
+      } as never);
+    } catch (err) {
+      console.error("Auto-save failed", err);
+    }
+  }, [listingId, saving, disclosure, inventory, dealStructure, updateListing]);
+
+  useEffect(() => {
+    autoSaveTimerRef.current = setInterval(() => {
+      saveDraft();
+    }, 30000);
+    return () => {
+      if (autoSaveTimerRef.current) clearInterval(autoSaveTimerRef.current);
+    };
+  }, [saveDraft]);
+
+
     const name = file.name.toLowerCase();
     if (file.type === "image/heic" || file.type === "image/heif" || name.endsWith(".heic") || name.endsWith(".heif")) {
       return true;
