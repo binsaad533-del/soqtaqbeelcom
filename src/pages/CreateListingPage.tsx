@@ -806,6 +806,7 @@ const CreateListingPage = () => {
   }
 
   return (
+    <VerificationGate message="يجب توثيق رقم جوالك قبل إضافة إعلان">
     <div className="py-8">
       <div className="container max-w-3xl">
         <h1 className="text-2xl font-medium mb-2">إضافة فرصة تقبيل</h1>
