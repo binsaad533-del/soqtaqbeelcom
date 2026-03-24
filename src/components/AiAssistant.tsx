@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Sparkles, ChevronLeft, Zap, Bot } from "lucide-react";
+import { X, Send, Sparkles, ChevronLeft, Zap } from "lucide-react";
 import { useAiContext, type AiSuggestion } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
 
