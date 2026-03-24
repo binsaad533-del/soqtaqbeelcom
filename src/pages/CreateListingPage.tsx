@@ -396,6 +396,14 @@ const CreateListingPage = () => {
       return;
     }
 
+    const MAX_ANALYSIS_IMAGES = 20;
+    const totalImages = allPhotoUrlsForAnalysis.length;
+    const limitedUrls = allPhotoUrlsForAnalysis.slice(0, MAX_ANALYSIS_IMAGES);
+
+    if (totalImages > MAX_ANALYSIS_IMAGES) {
+      toast.info(`لديك ${totalImages} صورة — سيتم تحليل أول ${MAX_ANALYSIS_IMAGES} صورة فقط. الصور المتبقية لن تُحلل.`, { duration: 6000 });
+    }
+
     setAnalyzing(true);
     setAnalyzeProgress(10);
 
@@ -405,7 +413,7 @@ const CreateListingPage = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("analyze-inventory", {
-        body: { photoUrls: allPhotoUrlsForAnalysis, photoGroups: photos },
+        body: { photoUrls: limitedUrls, photoGroups: photos },
       });
 
       clearInterval(progressInterval);
@@ -797,10 +805,18 @@ const CreateListingPage = () => {
                           يرجى رفع صور في الخطوة السابقة أولاً
                         </div>
                       ) : (
-                        <Button onClick={handleAnalyze} className="gradient-primary text-primary-foreground rounded-xl">
-                          <Eye size={16} strokeWidth={1.5} />
-                          ابدأ التحليل الذكي ({allPhotoUrls.length} صورة)
-                        </Button>
+                        <>
+                          {allPhotoUrls.length > 20 && (
+                            <div className="bg-warning/10 border border-warning/30 rounded-xl px-4 py-2.5 flex items-start gap-2 mb-4 max-w-sm text-right">
+                              <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
+                              <p className="text-xs text-warning">لديك {allPhotoUrls.length} صورة — سيتم تحليل أول 20 صورة فقط. الصور المتبقية ستُحفظ لكن لن تُحلل.</p>
+                            </div>
+                          )}
+                          <Button onClick={handleAnalyze} className="gradient-primary text-primary-foreground rounded-xl">
+                            <Eye size={16} strokeWidth={1.5} />
+                            ابدأ التحليل الذكي ({Math.min(allPhotoUrls.length, 20)} من {allPhotoUrls.length} صورة)
+                          </Button>
+                        </>
                       )}
                     </>
                   )}
