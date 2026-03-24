@@ -1107,12 +1107,14 @@ const CreateListingPage = () => {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full gradient-primary" style={{ width: `${disclosureScore}%` }} />
-                  </div>
-                  <span className="text-xs text-muted-foreground">إفصاح {disclosureScore}%</span>
-                </div>
+                <TransparencyIndicator listing={{
+                  ...disclosure,
+                  price: disclosure.price ? Number(disclosure.price) : null,
+                  annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+                  primary_deal_type: dealTypeForTransparency,
+                  inventory,
+                  photos,
+                }} />
 
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div className="p-3 rounded-xl bg-muted/50">
