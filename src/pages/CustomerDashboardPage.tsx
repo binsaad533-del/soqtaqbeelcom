@@ -32,10 +32,20 @@ const CustomerDashboardPage = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const [l, d] = await Promise.all([getMyListings(), getMyDeals()]);
-      setListings(l);
-      setDeals(d);
-      setLoading(false);
+      try {
+        const [l, d] = await Promise.all([
+          getMyListings().catch(() => [] as Listing[]),
+          getMyDeals().catch(() => [] as Deal[]),
+        ]);
+        setListings(l || []);
+        setDeals(d || []);
+      } catch (err) {
+        console.error("Dashboard data load failed:", err);
+        setListings([]);
+        setDeals([]);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, [getMyListings, getMyDeals]);

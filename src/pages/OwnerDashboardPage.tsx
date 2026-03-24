@@ -55,11 +55,20 @@ const OwnerDashboardPage = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [l, d, p, r, c] = await Promise.all([
-      getAllListings(), getAllDeals(), getAllProfiles(), getAllRoles(), getAllCommissions(),
-    ]);
-    setListings(l); setDeals(d); setProfiles(p); setRoles(r); setCommissions(c);
-    setLoading(false);
+    try {
+      const [l, d, p, r, c] = await Promise.all([
+        getAllListings().catch(() => []),
+        getAllDeals().catch(() => []),
+        getAllProfiles().catch(() => []),
+        getAllRoles().catch(() => []),
+        getAllCommissions().catch(() => []),
+      ]);
+      setListings(l || []); setDeals(d || []); setProfiles(p || []); setRoles(r || []); setCommissions(c || []);
+    } catch (err) {
+      console.error("Owner dashboard load failed:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [getAllListings, getAllDeals, getAllProfiles, getAllRoles, getAllCommissions]);
 
   useEffect(() => { load(); }, [load]);
