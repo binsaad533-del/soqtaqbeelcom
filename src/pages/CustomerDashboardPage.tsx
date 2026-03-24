@@ -11,7 +11,6 @@ import {
   Eye, CheckCircle, Loader2, Activity,
   ChevronLeft, TrendingUp, Briefcase, Edit3
 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import { DEAL_TYPE_FIELD_RULES } from "@/lib/dealTypeFieldRules";
 
 /* ── Draft completion calculator ── */
@@ -258,7 +257,7 @@ const CustomerDashboardPage = () => {
                           <div className="text-[10px] text-muted-foreground">{item.subtitle}</div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className={cn("text-[10px] px-2 py-0.5 rounded-md inline-flex items-center gap-1", st.color)}><span className="text-[8px]">{st.icon}</span>{st.label}</span>
+                          <span className={cn("text-[10px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
                           <ChevronLeft size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                       </Link>
