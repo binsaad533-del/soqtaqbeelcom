@@ -364,7 +364,6 @@ const OwnerDashboardPage = () => {
                 </div>
               </div>
             </div>
-            </div>
           </div>
         )}
 
