@@ -31,7 +31,10 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline" }: Ph
   const { sendOtp, verifyOtp, sending, verifying } = usePhoneVerification();
 
   const [step, setStep] = useState<Step>("phone");
-  const [phone, setPhone] = useState(initialPhone?.replace(/^\+\d{1,3}/, "") || "");
+  const [phone, setPhone] = useState(() => {
+    const raw = initialPhone?.replace(/^\+\d{1,3}/, "").replace(/^0+/, "") || "";
+    return toDigitsOnly(raw).slice(0, 9);
+  });
   const [countryCode, setCountryCode] = useState("+966");
   const [showCodes, setShowCodes] = useState(false);
   const [otpCode, setOtpCode] = useState("");
