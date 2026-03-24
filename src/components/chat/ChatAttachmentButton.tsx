@@ -10,7 +10,7 @@ interface ChatAttachmentButtonProps {
   disabled?: boolean;
 }
 
-const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+const ACCEPT = "image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 export default function ChatAttachmentButton({ dealId, onFileSent, disabled }: ChatAttachmentButtonProps) {
   const [uploading, setUploading] = useState(false);
