@@ -347,23 +347,32 @@ const CreateListingPage = () => {
           {currentStep === 1 && (
             <div className="space-y-5">
               {/* Hero banner */}
-              <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-5 border border-primary/10 text-center">
-                <div className="text-3xl mb-2">✨📸</div>
-                <h2 className="font-semibold text-base mb-1">فقط ارفع الصور — مقبل يتولى الباقي!</h2>
-                <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-                  ارفع صور مشروعك وسيقوم الذكاء الاصطناعي تلقائياً باستخراج قائمة الأصول والمعدات وتحليل حالتها وتقدير قيمتها — بدون أي إدخال يدوي منك
+              <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-6 border border-primary/10 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Sparkles size={22} strokeWidth={1.5} className="text-primary" />
+                  <Camera size={22} strokeWidth={1.5} className="text-primary" />
+                </div>
+                <h2 className="font-semibold text-base mb-2">فقط ارفع الصور — مقبل يتولى الباقي!</h2>
+                <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed mb-1">
+                  ارفع صور مشروعك وسيقوم الذكاء الاصطناعي تلقائياً باستخراج قائمة الأصول والمعدات وتحليل حالتها وتقدير قيمتها
+                </p>
+                <p className="text-sm font-semibold text-primary">
+                  بدون أي إدخال يدوي منك
                 </p>
                 <div className="flex items-center justify-center gap-4 mt-3">
                   {[
-                    { icon: "🔍", text: "اكتشاف الأصول" },
-                    { icon: "📋", text: "جرد تلقائي" },
-                    { icon: "💰", text: "تقدير القيمة" },
-                  ].map((f, i) => (
-                    <div key={i} className="flex items-center gap-1 text-[10px] text-muted-foreground bg-card/80 px-2.5 py-1 rounded-lg">
-                      <span>{f.icon}</span>
-                      <span>{f.text}</span>
-                    </div>
-                  ))}
+                    { icon: Eye, text: "اكتشاف الأصول" },
+                    { icon: ClipboardList, text: "جرد تلقائي" },
+                    { icon: Layers, text: "تقدير القيمة" },
+                  ].map((f, i) => {
+                    const Icon = f.icon;
+                    return (
+                      <div key={i} className="flex items-center gap-1.5 text-[11px] text-muted-foreground bg-card/80 px-3 py-1.5 rounded-lg border border-border/30">
+                        <Icon size={13} strokeWidth={1.5} className="text-primary" />
+                        <span>{f.text}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
