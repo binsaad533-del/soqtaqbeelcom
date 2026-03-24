@@ -554,15 +554,32 @@ const CreateListingPage = () => {
     }
   };
 
+  if (draftLoading) {
+    return (
+      <div className="py-20 flex flex-col items-center justify-center gap-3">
+        <Loader2 size={28} className="animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">جارٍ التحقق من المسودات السابقة...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="py-8">
       <div className="container max-w-3xl">
         <h1 className="text-2xl font-medium mb-2">إضافة فرصة تقبيل</h1>
         <p className="text-sm text-muted-foreground">أنشئ إعلان تقبيل احترافي بمساعدة الذكاء الاصطناعي</p>
-        <p className="text-sm font-bold text-primary animate-fade-in [animation-delay:0.5s] [animation-fill-mode:backwards] mb-8">
+        <p className="text-sm font-bold text-primary animate-fade-in [animation-delay:0.5s] [animation-fill-mode:backwards] mb-2">
           <Sparkles size={14} className="inline-block ml-1" />
           بدون ما تكتب سطر واحد
         </p>
+
+        {draftRestored && (
+          <div className="mb-4 bg-success/10 border border-success/30 rounded-xl px-4 py-2.5 flex items-center gap-2 animate-fade-in">
+            <Check size={16} className="text-success shrink-0" />
+            <p className="text-xs text-success font-medium">تم استعادة مسودتك السابقة — يمكنك المتابعة من حيث توقفت</p>
+            <button onClick={() => setDraftRestored(false)} className="mr-auto text-success/60 hover:text-success text-xs">✕</button>
+          </div>
+        )
 
         <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif,.raw,.cr2,.nef,.arw,.dng" multiple className="hidden" onChange={handlePhotoUpload} />
         <input ref={docInputRef} type="file" accept="*/*" multiple className="hidden" onChange={handleDocUpload} />
