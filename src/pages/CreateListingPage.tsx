@@ -713,6 +713,48 @@ const CreateListingPage = () => {
   });
   const disclosureScore = transparencyResult.score;
 
+  // ── Completion percentage ──
+  const completionPercent = (() => {
+    let total = 0;
+    let filled = 0;
+    // Step 0: Deal structure
+    total += 1;
+    if (dealStructure.isValid) filled += 1;
+    // Step 1: Photos
+    total += 1;
+    if (totalPhotos > 0) filled += 1;
+    // Step 2: Analysis
+    total += 1;
+    if (analyzed) filled += 1;
+    // Step 3: Required fields
+    const reqFields = activeRules.requiredFields;
+    total += reqFields.length;
+    for (const f of reqFields) {
+      if ((disclosure as Record<string, string>)[f]?.trim()) filled += 1;
+    }
+    // Price always required
+    total += 1;
+    if (disclosure.price?.trim()) filled += 1;
+    return Math.round((filled / Math.max(total, 1)) * 100);
+  })();
+
+  // ── Drag & drop handler ──
+  const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>, groupId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggingGroup(null);
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+    setActivePhotoGroup(groupId);
+    // Create a synthetic event-like object to reuse handlePhotoUpload logic
+    const dt = new DataTransfer();
+    Array.from(files).forEach(f => dt.items.add(f));
+    if (fileInputRef.current) {
+      fileInputRef.current.files = dt.files;
+      fileInputRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }, []);
+
   const dynamicDocTypes = dealStructure.requiredDocuments.length > 0
     ? dealStructure.requiredDocuments
     : ["عقد الإيجار", "السجل التجاري", "رخصة البلدية", "رخصة الدفاع المدني", "فواتير شراء المعدات", "مستندات أخرى"];
