@@ -502,27 +502,40 @@ const CreateListingPage = () => {
     setShowPublishConfirm(false);
 
     setSaving(true);
-    const fields = Object.values(disclosure);
-    const filled = fields.filter((v) => v.trim() !== "").length;
-    const score = Math.round((filled / fields.length) * 100);
+    try {
+      const fields = Object.values(disclosure);
+      const filled = fields.filter((v) => v.trim() !== "").length;
+      const score = Math.round((filled / fields.length) * 100);
 
-    await updateListing(listingId, {
-      ...disclosure,
-      price: disclosure.price ? Number(disclosure.price) : null,
-      annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
-      disclosure_score: score,
-      inventory: inventory.filter((item) => item.included),
-      deal_disclosures: dealStructure.requiredDisclosures,
-      required_documents: dealStructure.requiredDocuments,
-      status: "published",
-      published_at: new Date().toISOString(),
-      title: `${disclosure.business_activity || "مشروع"} — ${disclosure.district || ""}, ${disclosure.city || ""}`,
-    } as never);
+      const { error } = await updateListing(listingId, {
+        ...disclosure,
+        price: disclosure.price ? Number(disclosure.price) : null,
+        annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
+        disclosure_score: score,
+        inventory: inventory.filter((item) => item.included),
+        deal_disclosures: dealStructure.requiredDisclosures,
+        required_documents: dealStructure.requiredDocuments,
+        status: "published",
+        published_at: new Date().toISOString(),
+        title: `${disclosure.business_activity || "مشروع"} — ${disclosure.district || ""}, ${disclosure.city || ""}`,
+      } as never);
 
-    await logAudit("listing_published", "listing", listingId, { title: disclosure.business_activity });
-    setSaving(false);
-    toast.success("تم نشر الإعلان بنجاح!");
-    navigate("/dashboard");
+      if (error) {
+        console.error("Publish failed:", error);
+        toast.error("فشل نشر الإعلان — يرجى المحاولة مرة أخرى");
+        setSaving(false);
+        return;
+      }
+
+      await logAudit("listing_published", "listing", listingId, { title: disclosure.business_activity }).catch(() => {});
+      setSaving(false);
+      toast.success("تم نشر الإعلان بنجاح! 🎉");
+      navigate(`/listing/${listingId}`);
+    } catch (err) {
+      console.error("Publish error:", err);
+      toast.error("حدث خطأ غير متوقع أثناء النشر — يرجى المحاولة مرة أخرى");
+      setSaving(false);
+    }
   };
 
   const getGroupDisplayUrls = useCallback((groupId: string) => {
