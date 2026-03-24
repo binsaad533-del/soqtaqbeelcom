@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   Plus, FileText, MessageSquare, Shield, AlertCircle,
   Eye, CheckCircle, Loader2, Activity,
-  ArrowUpRight, ChevronLeft, TrendingUp, Briefcase
+  ArrowUpRight, ChevronLeft, TrendingUp, Briefcase, Edit3
 } from "lucide-react";
 
 /* ── Status helpers ── */
