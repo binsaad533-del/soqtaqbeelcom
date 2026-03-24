@@ -166,6 +166,36 @@
   .shadow-soft-hover {
     box-shadow: 0 12px 40px -8px hsla(210, 40%, 60%, 0.2), 0 4px 12px -3px hsla(210, 40%, 60%, 0.1);
   }
+  .dark .gradient-primary {
+    background: linear-gradient(135deg, hsl(210 100% 55%), hsl(200 85% 50%));
+  }
+
+  .dark .gradient-surface {
+    background: linear-gradient(180deg, hsl(220 20% 12%), hsl(220 18% 14%));
+  }
+
+  .dark .gradient-hero {
+    background: linear-gradient(135deg, hsl(220 20% 11%), hsl(215 22% 13%), hsl(220 18% 12%));
+  }
+
+  .dark .gradient-text {
+    background: linear-gradient(135deg, hsl(210 100% 60%), hsl(200 85% 55%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dark .shadow-soft {
+    box-shadow: 0 2px 12px -2px hsla(220, 20%, 5%, 0.3), 0 1px 4px -1px hsla(220, 20%, 5%, 0.2);
+  }
+
+  .dark .shadow-soft-lg {
+    box-shadow: 0 8px 30px -6px hsla(220, 20%, 5%, 0.4), 0 2px 8px -2px hsla(220, 20%, 5%, 0.25);
+  }
+
+  .dark .shadow-soft-hover {
+    box-shadow: 0 12px 40px -8px hsla(220, 20%, 5%, 0.5), 0 4px 12px -3px hsla(220, 20%, 5%, 0.3);
+  }
 }
 
 /* AI Star Animation */
