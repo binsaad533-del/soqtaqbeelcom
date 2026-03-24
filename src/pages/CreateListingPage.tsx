@@ -1106,7 +1106,7 @@ const CreateListingPage = () => {
                     {(() => {
                       const included = inventory.filter(i => i.included);
                       const excluded = inventory.filter(i => !i.included);
-                      const totalQty = included.reduce((sum, i) => sum + (i.quantity || 1), 0);
+                      const totalQty = included.reduce((sum, i) => sum + (i.qty || 1), 0);
                       const categories = [...new Set(included.map(i => i.category).filter(Boolean))];
                       const parts: string[] = [];
                       if (included.length > 0) {
