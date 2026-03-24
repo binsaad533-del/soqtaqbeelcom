@@ -102,7 +102,7 @@ const CreateListingPage = () => {
     return dealStructure.selectedTypes.some(dt => group.dealTypes.includes(dt));
   });
 
-
+  const ensureListing = useCallback(async () => {
     if (listingId) return listingId;
     const { data, error } = await createListing({
       deal_type: dealStructure.primaryType || "full_takeover",
