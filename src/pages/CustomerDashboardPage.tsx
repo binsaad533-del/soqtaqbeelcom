@@ -46,15 +46,15 @@ const calcDraftProgress = (listing: Listing): number => {
   return Math.round((filled / checks.length) * 100);
 };
 const statusLabel = (s: string) => {
-  const map: Record<string, { label: string; color: string; icon: string }> = {
-    draft: { label: "مسودة", color: "bg-muted text-muted-foreground border border-border/50", icon: "✏️" },
-    published: { label: "منشور", color: "bg-success/10 text-success border border-success/20", icon: "✅" },
-    under_review: { label: "قيد المراجعة", color: "bg-warning/10 text-warning border border-warning/20", icon: "⏳" },
-    negotiating: { label: "تفاوض", color: "bg-primary/10 text-primary border border-primary/20", icon: "💬" },
-    completed: { label: "مكتمل", color: "bg-accent text-accent-foreground border border-accent", icon: "🎉" },
-    rejected: { label: "مرفوض", color: "bg-destructive/10 text-destructive border border-destructive/20", icon: "❌" },
+  const map: Record<string, { label: string; color: string }> = {
+    draft: { label: "مسودة", color: "bg-muted text-muted-foreground" },
+    published: { label: "منشور", color: "bg-success/15 text-success border border-success/25" },
+    under_review: { label: "قيد المراجعة", color: "bg-warning/15 text-warning border border-warning/25" },
+    negotiating: { label: "تفاوض", color: "bg-primary/15 text-primary border border-primary/25" },
+    completed: { label: "مكتمل", color: "bg-[hsl(270,60%,95%)] text-[hsl(270,60%,45%)] border border-[hsl(270,60%,80%)]" },
+    rejected: { label: "مرفوض", color: "bg-destructive/15 text-destructive border border-destructive/25" },
   };
-  return map[s] || { label: s, color: "bg-muted text-muted-foreground border border-border/50", icon: "•" };
+  return map[s] || { label: s, color: "bg-muted text-muted-foreground" };
 };
 
 const CustomerDashboardPage = () => {
