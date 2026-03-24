@@ -43,21 +43,37 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
   const dealType = listing.primary_deal_type || listing.deal_type || "full_takeover";
   const rules = getRules(dealType);
 
-  // Only score required + optional (visible) fields
-  const scoredFields = [...rules.requiredFields, ...rules.optionalFields];
+  // Score required fields (primary weight: 60 points)
   const missing: string[] = [];
-  let filled = 0;
+  let requiredFilled = 0;
 
-  for (const field of scoredFields) {
+  for (const field of rules.requiredFields) {
     const value = (listing as any)[field];
     if (value !== null && value !== undefined && String(value).trim() !== "" && value !== 0) {
-      filled++;
-    } else if (rules.requiredFields.includes(field)) {
+      requiredFilled++;
+    } else {
       missing.push(FIELD_LABELS[field] || field);
     }
   }
 
-  // Bonus points for having photos and inventory
+  const requiredScore = rules.requiredFields.length > 0
+    ? (requiredFilled / rules.requiredFields.length) * 60
+    : 60;
+
+  // Score optional fields (secondary weight: 10 points)
+  let optionalFilled = 0;
+  for (const field of rules.optionalFields) {
+    const value = (listing as any)[field];
+    if (value !== null && value !== undefined && String(value).trim() !== "" && value !== 0) {
+      optionalFilled++;
+    }
+  }
+
+  const optionalScore = rules.optionalFields.length > 0
+    ? (optionalFilled / rules.optionalFields.length) * 10
+    : 10;
+
+  // Bonus points for photos, inventory, docs (up to 30 points)
   let bonusPoints = 0;
   let bonusTotal = 0;
 
