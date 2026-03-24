@@ -466,6 +466,7 @@ const CreateListingPage = () => {
   };
 
   const handleBack = () => {
+    saveDraft();
     setCurrentStep((prev) => Math.max(0, prev - 1));
   };
 
