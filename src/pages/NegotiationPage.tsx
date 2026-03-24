@@ -231,6 +231,13 @@ const NegotiationPage = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  // Auto-switch to actions tab when deal is completed/finalized
+  useEffect(() => {
+    if (deal && (deal.status === "completed" || deal.status === "finalized")) {
+      setSidebarTab("actions");
+    }
+  }, [deal?.status]);
+
   // Realtime messages + notifications
   useEffect(() => {
     if (!dealId) return;
