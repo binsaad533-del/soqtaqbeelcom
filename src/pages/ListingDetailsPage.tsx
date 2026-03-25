@@ -27,6 +27,7 @@ const ListingDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const { recordView } = useListingSocial();
   const { getListing } = useListings();
   const { createDeal, getMyDeals } = useDeals();
   const { getProfile } = useProfiles();
