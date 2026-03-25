@@ -1654,24 +1654,8 @@ const CreateListingPage = () => {
                     if (disclosure.district) preFilledFields.push({ label: "الحي", value: disclosure.district, key: "district" });
                     if (disclosure.price) preFilledFields.push({ label: "السعر", value: `${Number(disclosure.price).toLocaleString("en-US")} ر.س`, key: "price" });
                     
-                    return preFilledFields.length > 0 ? (
-                      <div className="bg-primary/5 border border-primary/15 rounded-xl p-3 space-y-2">
-                        <div className="flex items-center gap-1.5">
-                          <Check size={12} className="text-primary" />
-                          <span className="text-[11px] font-medium text-primary">بيانات تم إدخالها مسبقاً</span>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {preFilledFields.map((f) => (
-                            <div key={f.key} className="flex items-center gap-1.5 bg-background/60 rounded-lg px-2.5 py-1.5 border border-border/30">
-                              <span className="text-[10px] text-muted-foreground">{f.label}:</span>
-                              <span className="text-xs font-medium">{f.value}</span>
-                              <button onClick={() => setDisclosure((prev) => ({ ...prev, [f.key]: "" }))} className="text-muted-foreground/50 hover:text-destructive transition-colors mr-1"><X size={10} /></button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null;
-                  })()}
+                    return null;
+                  })()
 
                   {/* Only show empty fields as editable */}
                   {isFieldVisible(dealTypeForTransparency, "business_activity") && !disclosure.business_activity && (
