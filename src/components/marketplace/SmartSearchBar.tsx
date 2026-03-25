@@ -180,14 +180,6 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
             <X size={15} />
           </button>
         )}
-        {!query && !loading && (
-          <button
-            onClick={() => inputRef.current?.focus()}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40"
-          >
-            <Sparkles size={14} />
-          </button>
-        )}
       </div>
 
       {/* Suggestions dropdown */}
