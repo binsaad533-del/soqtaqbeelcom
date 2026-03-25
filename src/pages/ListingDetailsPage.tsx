@@ -217,7 +217,7 @@ const ListingDetailsPage = () => {
                       <span className="text-sm">{item.name}</span>
                       <div className="flex items-center gap-4">
                         <span className="text-sm text-muted-foreground">{item.qty} وحدة</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-md ${item.condition === "جيدة" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-md ${item.condition === "جديد" || item.condition === "شبه جديد" ? "bg-success/10 text-success" : item.condition === "تالف" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}>
                           {item.condition}
                         </span>
                       </div>
