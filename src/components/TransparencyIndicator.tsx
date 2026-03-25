@@ -1,6 +1,6 @@
-import { Shield, TrendingUp, Eye, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { Shield, Eye, ChevronDown, ChevronUp, Sparkles, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { calculateTransparency, type TransparencyResult } from "@/lib/transparencyScore";
+import { calculateTransparency } from "@/lib/transparencyScore";
 import { useState } from "react";
 
 interface TransparencyIndicatorProps {
@@ -10,22 +10,25 @@ interface TransparencyIndicatorProps {
   onFieldClick?: (fieldKey: string) => void;
 }
 
-const LEVEL_STYLES = {
-  high: { bg: "bg-success/10", border: "border-success/30", text: "text-success", barClass: "bg-success", badgeBg: "bg-success/15" },
-  medium: { bg: "bg-warning/10", border: "border-warning/30", text: "text-warning", barClass: "bg-warning", badgeBg: "bg-warning/15" },
-  low: { bg: "bg-destructive/10", border: "border-destructive/30", text: "text-destructive", barClass: "bg-destructive", badgeBg: "bg-destructive/15" },
+/* ── 4-tier color system based on score ── */
+const getScoreStyle = (score: number) => {
+  if (score >= 80) return { bg: "bg-success/10", border: "border-success/30", text: "text-success", barClass: "bg-success", badgeBg: "bg-success/15", tier: "trusted" as const };
+  if (score >= 60) return { bg: "bg-yellow-500/10", border: "border-yellow-500/30", text: "text-yellow-600 dark:text-yellow-400", barClass: "bg-yellow-500", badgeBg: "bg-yellow-500/15", tier: "yellow" as const };
+  if (score >= 40) return { bg: "bg-orange-500/10", border: "border-orange-500/30", text: "text-orange-600 dark:text-orange-400", barClass: "bg-orange-500", badgeBg: "bg-orange-500/15", tier: "orange" as const };
+  return { bg: "bg-destructive/10", border: "border-destructive/30", text: "text-destructive", barClass: "bg-destructive", badgeBg: "bg-destructive/15", tier: "red" as const };
 };
 
-const IMPACT_MESSAGES: Record<string, { message: string; icon: typeof TrendingUp }> = {
-  high: { message: "إعلانك سيظهر بشارة \"موثوق\" — الإعلانات الموثوقة تحصل على تواصل أكثر بـ 3 أضعاف", icon: TrendingUp },
-  medium: { message: "أكمل بعض الحقول لتحصل على شارة \"موثوق\" وترتيب أعلى في نتائج البحث", icon: TrendingUp },
-  low: { message: "الإعلانات منخفضة الشفافية قد تُرفض أو تحصل على مشاهدات أقل بكثير", icon: TrendingUp },
+const TIER_BADGE: Record<string, { badge: string; label: string }> = {
+  trusted: { badge: "✓ موثوق", label: "إعلانك سيظهر بشارة \"موثوق\" — الإعلانات الموثوقة تحصل على تواصل أكثر بـ 3 أضعاف" },
+  yellow: { badge: "⚠ يحتاج تحسين", label: "أكمل بعض الحقول لتحصل على شارة \"موثوق\" وترتيب أعلى في نتائج البحث" },
+  orange: { badge: "⚠ ضعيف", label: "أضف المزيد من البيانات والصور لتحسين ظهور إعلانك وبناء ثقة المشتري" },
+  red: { badge: "✗ غير مكتمل", label: "الإعلانات منخفضة الشفافية قد تُرفض أو تحصل على مشاهدات أقل بكثير" },
 };
 
 const TransparencyIndicator = ({ listing, compact = false, className, onFieldClick }: TransparencyIndicatorProps) => {
   const result = calculateTransparency(listing);
-  const style = LEVEL_STYLES[result.level];
-  const impact = IMPACT_MESSAGES[result.level];
+  const style = getScoreStyle(result.score);
+  const tierInfo = TIER_BADGE[style.tier];
   const [expanded, setExpanded] = useState(false);
 
   if (compact) {
@@ -66,8 +69,8 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
       {/* Badge preview */}
       <div className="px-3 pb-2">
         <div className={cn("rounded-lg p-2 flex items-center gap-2", style.badgeBg)}>
-          <div className={cn("w-6 h-6 rounded-full flex items-center justify-center shrink-0", result.level === "high" ? "bg-success/20" : result.level === "medium" ? "bg-warning/20" : "bg-destructive/20")}>
-            {result.level === "high" ? (
+          <div className={cn("w-6 h-6 rounded-full flex items-center justify-center shrink-0", style.tier === "trusted" ? "bg-success/20" : style.tier === "yellow" ? "bg-yellow-500/20" : style.tier === "orange" ? "bg-orange-500/20" : "bg-destructive/20")}>
+            {style.tier === "trusted" ? (
               <Shield size={12} className="text-success" />
             ) : (
               <Eye size={12} className={style.text} />
@@ -76,7 +79,7 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-medium text-muted-foreground">شارة إعلانك في السوق</p>
             <p className={cn("text-[11px] font-semibold", style.text)}>
-              {result.level === "high" ? "✓ موثوق" : result.level === "medium" ? "⚠ يحتاج تحسين" : "✗ غير مكتمل"}
+              {style.tier === "trusted" ? "✓ موثوق" : style.tier === "yellow" ? "⚠ يحتاج تحسين" : style.tier === "orange" ? "⚠ ضعيف" : "✗ غير مكتمل"}
             </p>
           </div>
         </div>
@@ -85,8 +88,8 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
       {/* Impact message */}
       <div className="px-3 pb-2">
         <div className="flex items-start gap-1.5 bg-background/40 rounded-lg p-2">
-          <impact.icon size={12} className={cn("shrink-0 mt-0.5", style.text)} />
-          <p className="text-[10px] leading-relaxed text-muted-foreground">{impact.message}</p>
+          <TrendingUp size={12} className={cn("shrink-0 mt-0.5", style.text)} />
+          <p className="text-[10px] leading-relaxed text-muted-foreground">{tierInfo.label}</p>
         </div>
       </div>
 
