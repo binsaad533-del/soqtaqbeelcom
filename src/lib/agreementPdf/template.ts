@@ -151,7 +151,7 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, pageNumber: 
   const footer = createNode(`
     <footer style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid hsl(214 32% 91%);font-size:10px;color:hsl(215 16% 45%);line-height:1.8;">
       <div>
-        منصة سوق تقبيل مملوكة ومدارة بواسطة شركة Ain Jasaas — شركة عين جساس للمقاولات<br />
+        منصة سوق تقبيل مملوكة ومدارة بواسطة شركة Ain Jasaas — شركة عين جساس<br />
         سجل تجاري: ${escapeHtml(BANK_DETAILS.nationalId)}
       </div>
       <div style="text-align:left;white-space:nowrap;">صفحة ${pageNumber}</div>
@@ -376,7 +376,7 @@ const buildSections = (data: AgreementPdfData) => {
             <div style="border:1px solid hsl(214 32% 91%);border-radius:20px;padding:16px;background:hsl(210 40% 98%);display:grid;gap:8px;">
               <div style="font-size:12px;font-weight:700;color:hsl(215 28% 17%);">تعليمات السداد</div>
               <div style="font-size:11px;line-height:1.9;color:hsl(215 16% 45%);">يرجى تحويل العمولة إلى حساب الشركة التالي ثم رفع إثبات السداد عبر المنصة لاستكمال التحقق.</div>
-              <div style="font-size:11px;line-height:1.9;color:hsl(215 16% 45%);">الحساب باسم شركة Ain Jasaas / شركة عين جساس للمقاولات.</div>
+              <div style="font-size:11px;line-height:1.9;color:hsl(215 16% 45%);">الحساب باسم شركة Ain Jasaas / شركة عين جساس.</div>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
@@ -386,7 +386,7 @@ const buildSections = (data: AgreementPdfData) => {
               { label: "رقم الحساب", value: BANK_DETAILS.accountNumber },
               { label: "رقم الآيبان (IBAN)", value: BANK_DETAILS.iban },
               { label: "السجل التجاري", value: BANK_DETAILS.nationalId },
-              { label: "ملكية المنصة", value: "Ain Jasaas — شركة عين جساس للمقاولات" },
+              { label: "ملكية المنصة", value: "Ain Jasaas — شركة عين جساس" },
             ]
               .map(
                 ({ label, value }) => `
