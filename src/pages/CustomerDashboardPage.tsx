@@ -233,6 +233,53 @@ const CustomerDashboardPage = () => {
           ))}
         </div>
 
+        {/* ═══ MONTHLY CHART ═══ */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 animate-reveal" style={{ animationDelay: '320ms' }}>
+            <h3 className="text-xs font-medium text-muted-foreground mb-4">الصفقات الشهرية</h3>
+            <div className="h-[160px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={monthlyChart} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="fillCompleted" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.2} />
+                      <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }} />
+                  <Area type="monotone" dataKey="total" name="إجمالي" stroke="hsl(var(--primary))" fill="url(#fillTotal)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="completed" name="مكتملة" stroke="hsl(var(--success))" fill="url(#fillCompleted)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 animate-reveal" style={{ animationDelay: '380ms' }}>
+            <h3 className="text-xs font-medium text-muted-foreground mb-4">قيمة الصفقات الشهرية (ر.س)</h3>
+            <div className="h-[160px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={monthlyChart} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="fillValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--warning))" stopOpacity={0.2} />
+                      <stop offset="100%" stopColor="hsl(var(--warning))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : String(v)} />
+                  <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }} formatter={(v: number) => [v.toLocaleString('en-US') + ' ر.س', 'القيمة']} />
+                  <Area type="monotone" dataKey="value" name="القيمة" stroke="hsl(var(--warning))" fill="url(#fillValue)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
         {/* ═══ SMART SUGGESTIONS ═══ */}
         {suggestions.length > 0 && (
           <div className="flex gap-2 mb-6 overflow-x-auto pb-1 animate-reveal" style={{ animationDelay: '350ms' }}>
