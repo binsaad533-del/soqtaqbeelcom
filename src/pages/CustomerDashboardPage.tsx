@@ -257,6 +257,142 @@ const CustomerDashboardPage = () => {
           </div>
         )}
 
+        {/* ═══ PROFILE & QUICK INFO BAR ═══ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6 animate-reveal" style={{ animationDelay: '80ms' }}>
+          {/* Profile card */}
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+            <div className="flex items-center gap-3 mb-4">
+              <label className="relative w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-base cursor-pointer group overflow-hidden ring-2 ring-background shadow-sm shrink-0">
+                {profile?.avatar_url
+                  ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
+                  : (profile?.full_name?.charAt(0) || "؟")}
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                  <Camera size={14} className="text-white" />
+                </div>
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
+              </label>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold truncate">{profile?.full_name || "مستخدم"}</div>
+                <span className={cn("text-[10px] flex items-center gap-1", isPhoneVerified ? "text-success" : "text-warning")}>
+                  {isPhoneVerified ? <><UserCheck size={10} /> موثّق</> : <><Shield size={10} /> غير موثّق</>}
+                </span>
+              </div>
+              <div className="relative w-11 h-11 shrink-0">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15" fill="none" className="stroke-muted" strokeWidth="2.5" />
+                  <circle cx="18" cy="18" r="15" fill="none" className="stroke-primary" strokeWidth="2.5" strokeDasharray={`${profileCompleteness} ${100 - profileCompleteness}`} strokeLinecap="round" />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold">{profileCompleteness}%</span>
+              </div>
+            </div>
+            <div className="space-y-2.5 text-[11px]">
+              <div className="flex items-center justify-between gap-2">
+                <Mail size={11} className="text-muted-foreground shrink-0" />
+                {editingField === "email" ? (
+                  <div className="flex items-center gap-1 flex-1">
+                    <input type="email" dir="ltr" className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-[11px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
+                    <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
+                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
+                  </div>
+                ) : (
+                  <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-muted-foreground hover:text-primary truncate flex items-center gap-1" dir="ltr">
+                    {hasRealEmail ? <span className="truncate max-w-[140px]">{userEmail}</span> : <span className="text-warning">إضافة بريد</span>}
+                    <Pencil size={9} className="shrink-0 opacity-40" />
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <Phone size={11} className="text-muted-foreground shrink-0" />
+                {editingField === "phone" ? (
+                  <div className="flex items-center gap-1 flex-1">
+                    <input dir="ltr" inputMode="numeric" className="bg-muted/50 rounded-lg px-2 py-1 w-24 border border-border/50 text-[11px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus />
+                    <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
+                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
+                  </div>
+                ) : (
+                  <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-muted-foreground hover:text-primary flex items-center gap-1" dir="ltr">
+                    {profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">إضافة جوال</span>}
+                    <Pencil size={9} className="shrink-0 opacity-40" />
+                  </button>
+                )}
+              </div>
+            </div>
+            {!isPhoneVerified && profile?.phone && (
+              <div className="mt-3 pt-3 border-t border-border/20">
+                <PhoneVerificationFlow initialPhone={profile.phone} onVerified={() => window.location.reload()} />
+              </div>
+            )}
+          </div>
+
+          {/* Activity feed */}
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold flex items-center gap-1.5">
+                <Activity size={13} className="text-success" /> النشاط المباشر
+              </h3>
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[9px] text-muted-foreground">مباشر</span>
+              </span>
+            </div>
+            {feed.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground text-center py-4">لا يوجد نشاط حالياً</p>
+            ) : (
+              <div className="space-y-2.5">
+                {feed.slice(0, 5).map(f => (
+                  <div key={f.id} className="flex items-center gap-2 text-[11px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                    <span className="text-muted-foreground flex-1 truncate">{f.text}</span>
+                    <span className="text-[9px] text-muted-foreground/40 shrink-0">{f.time}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Notifications */}
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold flex items-center gap-1.5">
+                <Bell size={13} /> الإشعارات
+                {unreadCount > 0 && <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{unreadCount}</span>}
+              </h3>
+              {unreadCount > 0 && <button onClick={markAllAsRead} className="text-[10px] text-primary hover:underline">قراءة الكل</button>}
+            </div>
+            {notifications.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground text-center py-4">لا توجد إشعارات</p>
+            ) : (
+              <div className="space-y-2">
+                {notifications.slice(0, 5).map(n => (
+                  <button key={n.id} onClick={() => markAsRead(n.id)} className="w-full text-right flex items-start gap-2 text-[11px] hover:bg-muted/30 p-2 rounded-lg transition-colors">
+                    {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />}
+                    <div className="flex-1 min-w-0">
+                      <span className={cn("block truncate", n.is_read ? "text-muted-foreground" : "text-foreground font-medium")}>{n.title}</span>
+                      {n.body && <span className="text-[10px] text-muted-foreground truncate block">{n.body}</span>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Quick actions */}
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+            <h3 className="text-xs font-semibold mb-3">إجراءات سريعة</h3>
+            <div className="space-y-1.5">
+              <Link to="/create-listing" className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors text-xs text-primary">
+                <Plus size={13} /> إضافة إعلان جديد
+              </Link>
+              <Link to="/marketplace" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-muted/40 transition-colors text-xs text-muted-foreground">
+                <Eye size={13} /> تصفح السوق
+              </Link>
+              <Link to="/contact" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-muted/40 transition-colors text-xs text-muted-foreground">
+                <MessageSquare size={13} /> تواصل مع الدعم
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* ═══ KPI ROW ═══ */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
           {[
@@ -373,152 +509,7 @@ const CustomerDashboardPage = () => {
         )}
 
         {/* ═══ MAIN CONTENT ═══ */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-reveal" style={{ animationDelay: '420ms' }}>
-
-          {/* ── Sidebar (1 col) — first in DOM = right in RTL, top on mobile ── */}
-          <div className="space-y-4">
-
-            {/* Profile card */}
-            <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-              <div className="flex items-center gap-3 mb-4">
-                <label className="relative w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-base cursor-pointer group overflow-hidden ring-2 ring-background shadow-sm shrink-0">
-                  {profile?.avatar_url
-                    ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
-                    : (profile?.full_name?.charAt(0) || "؟")}
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                    <Camera size={14} className="text-white" />
-                  </div>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
-                </label>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold truncate">{profile?.full_name || "مستخدم"}</div>
-                  <span className={cn("text-[10px] flex items-center gap-1", isPhoneVerified ? "text-success" : "text-warning")}>
-                    {isPhoneVerified ? <><UserCheck size={10} /> موثّق</> : <><Shield size={10} /> غير موثّق</>}
-                  </span>
-                </div>
-                <div className="relative w-11 h-11 shrink-0">
-                  <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="15" fill="none" className="stroke-muted" strokeWidth="2.5" />
-                    <circle cx="18" cy="18" r="15" fill="none" className="stroke-primary" strokeWidth="2.5" strokeDasharray={`${profileCompleteness} ${100 - profileCompleteness}`} strokeLinecap="round" />
-                  </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold">{profileCompleteness}%</span>
-                </div>
-              </div>
-
-              {/* Editable fields */}
-              <div className="space-y-2.5 text-[11px]">
-                {/* Email */}
-                <div className="flex items-center justify-between gap-2">
-                  <Mail size={11} className="text-muted-foreground shrink-0" />
-                  {editingField === "email" ? (
-                    <div className="flex items-center gap-1 flex-1">
-                      <input type="email" dir="ltr" className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-[11px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
-                      <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
-                      <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
-                    </div>
-                  ) : (
-                    <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-muted-foreground hover:text-primary truncate flex items-center gap-1" dir="ltr">
-                      {hasRealEmail ? <span className="truncate max-w-[140px]">{userEmail}</span> : <span className="text-warning">إضافة بريد</span>}
-                      <Pencil size={9} className="shrink-0 opacity-40" />
-                    </button>
-                  )}
-                </div>
-                {/* Phone */}
-                <div className="flex items-center justify-between gap-2">
-                  <Phone size={11} className="text-muted-foreground shrink-0" />
-                  {editingField === "phone" ? (
-                    <div className="flex items-center gap-1 flex-1">
-                      <input dir="ltr" inputMode="numeric" className="bg-muted/50 rounded-lg px-2 py-1 w-24 border border-border/50 text-[11px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus />
-                      <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
-                      <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
-                    </div>
-                  ) : (
-                    <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-muted-foreground hover:text-primary flex items-center gap-1" dir="ltr">
-                      {profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">إضافة جوال</span>}
-                      <Pencil size={9} className="shrink-0 opacity-40" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {!isPhoneVerified && profile?.phone && (
-                <div className="mt-3 pt-3 border-t border-border/20">
-                  <PhoneVerificationFlow initialPhone={profile.phone} onVerified={() => window.location.reload()} />
-                </div>
-              )}
-            </div>
-
-            {/* Activity feed */}
-            <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold flex items-center gap-1.5">
-                  <Activity size={13} className="text-success" /> النشاط المباشر
-                </h3>
-                <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                  <span className="text-[9px] text-muted-foreground">مباشر</span>
-                </span>
-              </div>
-              {feed.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground text-center py-4">لا يوجد نشاط حالياً</p>
-              ) : (
-                <div className="space-y-2.5">
-                  {feed.slice(0, 5).map(f => (
-                    <div key={f.id} className="flex items-center gap-2 text-[11px]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                      <span className="text-muted-foreground flex-1 truncate">{f.text}</span>
-                      <span className="text-[9px] text-muted-foreground/40 shrink-0">{f.time}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Notifications */}
-            <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold flex items-center gap-1.5">
-                  <Bell size={13} /> الإشعارات
-                  {unreadCount > 0 && <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{unreadCount}</span>}
-                </h3>
-                {unreadCount > 0 && <button onClick={markAllAsRead} className="text-[10px] text-primary hover:underline">قراءة الكل</button>}
-              </div>
-              {notifications.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground text-center py-4">لا توجد إشعارات</p>
-              ) : (
-                <div className="space-y-2">
-                  {notifications.slice(0, 5).map(n => (
-                    <button key={n.id} onClick={() => markAsRead(n.id)} className="w-full text-right flex items-start gap-2 text-[11px] hover:bg-muted/30 p-2 rounded-lg transition-colors">
-                      {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />}
-                      <div className="flex-1 min-w-0">
-                        <span className={cn("block truncate", n.is_read ? "text-muted-foreground" : "text-foreground font-medium")}>{n.title}</span>
-                        {n.body && <span className="text-[10px] text-muted-foreground truncate block">{n.body}</span>}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Quick actions */}
-            <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-              <h3 className="text-xs font-semibold mb-3">إجراءات سريعة</h3>
-              <div className="space-y-1.5">
-                <Link to="/create-listing" className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors text-xs text-primary">
-                  <Plus size={13} /> إضافة إعلان جديد
-                </Link>
-                <Link to="/marketplace" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-muted/40 transition-colors text-xs text-muted-foreground">
-                  <Eye size={13} /> تصفح السوق
-                </Link>
-                <Link to="/contact" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-muted/40 transition-colors text-xs text-muted-foreground">
-                  <MessageSquare size={13} /> تواصل مع الدعم
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Main content area (2 cols) ── */}
-          <div className="lg:col-span-2 space-y-5">
+        <div className="space-y-5 animate-reveal" style={{ animationDelay: '420ms' }}>
 
             {/* Tabs + Search */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -656,7 +647,6 @@ const CustomerDashboardPage = () => {
                 )}
               </div>
             )}
-          </div>
         </div>
       </div>
     </div>
