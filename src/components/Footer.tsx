@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import SocialIcons from "./SocialIcons";
+import logoIcon from "@/assets/logo-icon.png";
 
 const footerLinks = [
   { label: "الرئيسية", path: "/" },
@@ -33,6 +34,11 @@ const Footer = () => {
               )}
             </span>
           ))}
+        </div>
+
+        {/* Logo icon */}
+        <div className="flex justify-center">
+          <img src={logoIcon} alt="سوق تقبيل" className="h-8 w-auto opacity-60" />
         </div>
 
         {/* Social Icons */}
