@@ -27,21 +27,44 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
     getSellerOffers(listingId).then(setOffers);
   }, [listingId, getSellerOffers]);
 
+  const hasAccepted = offers.some(o => o.status === "accepted");
+
   const handleAccept = async (offer: ListingOffer) => {
+    if (hasAccepted) {
+      toast.error("لا يمكن قبول أكثر من عرض واحد");
+      return;
+    }
     setRespondingId(offer.id);
     const { error } = await respondToOffer(offer.id, "accepted");
     if (error) {
       toast.error("فشل قبول العرض");
+      setRespondingId(null);
+      return;
+    }
+
+    // Auto-reject all other pending offers
+    const otherPending = offers.filter(o => o.id !== offer.id && o.status === "pending");
+    for (const other of otherPending) {
+      await respondToOffer(other.id, "rejected");
+    }
+
+    toast.success("تم قبول العرض ✅ ورفض العروض الأخرى تلقائياً");
+
+    // Create a deal with agreed price
+    const { data: dealData } = await createDeal(listingId, listingOwnerId, offer.buyer_id, offer.offered_price);
+    if (dealData) {
+      setOffers(prev => prev.map(o =>
+        o.id === offer.id
+          ? { ...o, status: "accepted", deal_id: dealData.id }
+          : { ...o, status: o.status === "pending" ? "rejected" : o.status }
+      ));
+      navigate(`/negotiate/${dealData.id}`);
     } else {
-      toast.success("تم قبول العرض ✅");
-      // Create a deal
-      const { data: dealData } = await createDeal(listingId, listingOwnerId, offer.buyer_id, offer.offered_price);
-      if (dealData) {
-        setOffers(prev => prev.map(o => o.id === offer.id ? { ...o, status: "accepted", deal_id: dealData.id } : o));
-        navigate(`/negotiate/${dealData.id}`);
-      } else {
-        setOffers(prev => prev.map(o => o.id === offer.id ? { ...o, status: "accepted" } : o));
-      }
+      setOffers(prev => prev.map(o =>
+        o.id === offer.id
+          ? { ...o, status: "accepted" }
+          : { ...o, status: o.status === "pending" ? "rejected" : o.status }
+      ));
     }
     setRespondingId(null);
   };
