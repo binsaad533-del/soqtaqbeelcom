@@ -103,7 +103,38 @@ const NegotiationPage = () => {
     const isBuyer = user?.id === deal.buyer_id;
     parts.push(`المستخدم الحالي: ${isBuyer ? "المشتري" : "البائع"}`);
     if (profile?.full_name) parts.push(`اسم المستخدم: ${profile.full_name}`);
+
+    // ── Market analysis data ──
+    if (listing.ai_summary) parts.push(`\nتحليل الذكاء الاصطناعي للإعلان:\n${listing.ai_summary}`);
+    if (listing.ai_rating) parts.push(`تقييم الذكاء الاصطناعي: ${listing.ai_rating}`);
+    if (listing.ai_structure_validation) {
+      try {
+        const validation = typeof listing.ai_structure_validation === 'string' 
+          ? JSON.parse(listing.ai_structure_validation) 
+          : listing.ai_structure_validation;
+        if (validation?.market_comparison) {
+          parts.push(`\nبيانات مقارنة السوق:`);
+          const mc = validation.market_comparison;
+          if (mc.estimated_range) parts.push(`النطاق السعري المقدّر: ${mc.estimated_range}`);
+          if (mc.position) parts.push(`موقع السعر من السوق: ${mc.position}`);
+          if (mc.sources) parts.push(`مصادر المقارنة: ${JSON.stringify(mc.sources)}`);
+          if (mc.summary) parts.push(`ملخص المقارنة: ${mc.summary}`);
+        }
+        if (validation?.risks && Array.isArray(validation.risks)) {
+          parts.push(`المخاطر المكتشفة: ${validation.risks.join("، ")}`);
+        }
+        if (validation?.strengths && Array.isArray(validation.strengths)) {
+          parts.push(`نقاط القوة: ${validation.strengths.join("، ")}`);
+        }
+      } catch {}
+    }
     
+    // Inventory summary
+    if (listing.inventory && Array.isArray(listing.inventory) && listing.inventory.length > 0) {
+      const totalValue = listing.inventory.reduce((sum: number, item: any) => sum + ((item.quantity || 0) * (item.unit_price || 0)), 0);
+      parts.push(`\nالمخزون: ${listing.inventory.length} عنصر، القيمة التقديرية: ${totalValue.toLocaleString("en-US")} ريال`);
+    }
+
     // Last few messages for context
     const recentMsgs = messages.slice(-8);
     if (recentMsgs.length > 0) {
@@ -162,6 +193,20 @@ const NegotiationPage = () => {
     try {
       const text = await callAI("analyze");
       setAiAnalysis(text || "تعذر التحليل");
+    } catch {
+      setAiAnalysis("حدث خطأ");
+    }
+    setAiLoading(false);
+  }, [callAI]);
+
+  // Market analysis
+  const handleMarketAnalysis = useCallback(async () => {
+    setShowAiPanel(true);
+    setAiLoading(true);
+    setAiAnalysis("");
+    try {
+      const text = await callAI("market_analysis");
+      setAiAnalysis(text || "تعذر تحليل السوق");
     } catch {
       setAiAnalysis("حدث خطأ");
     }
