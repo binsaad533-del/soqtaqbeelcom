@@ -224,7 +224,58 @@ const ListingDetailsPage = () => {
               ))}
             </div>
 
-            {/* Deal Structure Panel */}
+            {/* Social actions bar */}
+            <div className="flex items-center justify-between bg-card rounded-xl px-4 py-2.5 shadow-soft">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Eye size={14} strokeWidth={1.3} />
+                  <span className="text-xs tabular-nums">{viewCount}</span>
+                  <span className="text-[10px]">مشاهدة</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Heart size={14} strokeWidth={1.3} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "text-red-400" : ""} />
+                  <span className="text-xs tabular-nums">{likeCount}</span>
+                  <span className="text-[10px]">إعجاب</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={async () => {
+                    if (!listing) return;
+                    const result = await toggleLike(listing.id);
+                    if (result !== null) {
+                      setIsLiked(result);
+                      setLikeCount(prev => result ? prev + 1 : Math.max(0, prev - 1));
+                    }
+                  }}
+                  className={cn(
+                    "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
+                    isLiked ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500"
+                  )}
+                  title="إعجاب"
+                >
+                  <Heart size={14} strokeWidth={1.5} fill={isLiked ? "currentColor" : "none"} />
+                </button>
+                <button
+                  onClick={() => {
+                    if (!listing) return;
+                    const url = `${window.location.origin}/listing/${listing.id}`;
+                    if (navigator.share) {
+                      navigator.share({ title: listing.title || "فرصة تقبيل", url });
+                    } else {
+                      navigator.clipboard.writeText(url);
+                      toast.success("تم نسخ رابط الإعلان");
+                    }
+                  }}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
+                  title="مشاركة"
+                >
+                  <Share2 size={14} strokeWidth={1.5} />
+                </button>
+              </div>
+            </div>
+
+
             {primaryConfig && (
               <DealStructureDisplay
                 primaryConfig={primaryConfig}
