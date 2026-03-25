@@ -32,6 +32,7 @@ import NotFound from "./pages/NotFound";
 import AgreementsArchivePage from "./pages/AgreementsArchivePage";
 import SellerProfilePage from "./pages/SellerProfilePage";
 import HelpCenterPage from "./pages/HelpCenterPage";
+import BlogPage from "./pages/BlogPage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <LanguageProvider>
         <AuthProvider>
           <ErrorBoundary>
           <SessionGuard />
@@ -60,6 +62,7 @@ const App = () => (
               <Route path="/marketplace" element={<MarketplacePage />} />
               <Route path="/seller/:id" element={<SellerProfilePage />} />
               <Route path="/help" element={<HelpCenterPage />} />
+              <Route path="/blog" element={<BlogPage />} />
               <Route path="/listing/:id" element={<ListingDetailsPage />} />
               <Route
                 path="/create-listing"
@@ -116,6 +119,7 @@ const App = () => (
           </Layout>
           </ErrorBoundary>
         </AuthProvider>
+        </LanguageProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
