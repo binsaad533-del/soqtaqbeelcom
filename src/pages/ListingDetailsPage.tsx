@@ -133,17 +133,10 @@ const ListingDetailsPage = () => {
   const alternativeOptions = dealOptions.filter(o => !o.is_primary);
 
   return (
-    <div className="py-8">
-      <div className="container">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link to="/marketplace" className="hover:text-foreground transition-colors">السوق</Link>
-          <span>/</span>
-          <span className="text-foreground">{listing.title || listing.business_activity || "فرصة تقبيل"}</span>
-        </div>
-
-        {/* Active deal banner */}
-        {myActiveDeal && (
-          <div className="sticky top-0 z-40 mb-4 p-3 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-3 backdrop-blur-sm">
+    <>
+      {myActiveDeal && (
+        <div className="fixed top-0 left-0 right-0 z-50 p-3 bg-primary/10 border-b border-primary/20 backdrop-blur-md">
+          <div className="container flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <MessageCircle size={14} className="text-primary" />
               <span className="text-xs text-foreground font-medium">
@@ -160,7 +153,15 @@ const ListingDetailsPage = () => {
               </Link>
             </Button>
           </div>
-        )}
+        </div>
+      )}
+    <div className={myActiveDeal ? "pt-20" : "py-8"}>
+      <div className="container">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+          <Link to="/marketplace" className="hover:text-foreground transition-colors">السوق</Link>
+          <span>/</span>
+          <span className="text-foreground">{listing.title || listing.business_activity || "فرصة تقبيل"}</span>
+        </div>
 
         {isSimulation && (
           <div className="mb-5 rounded-2xl bg-amber-50 border border-amber-200 p-5" dir="rtl">
