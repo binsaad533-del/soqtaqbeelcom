@@ -81,6 +81,14 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
     }
   }, [phone, fullPhone, sendOtp]);
 
+  // Auto-send OTP when skipPhoneStep
+  useEffect(() => {
+    if (skipPhoneStep && phone.length >= 9) {
+      handleSendOtp();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [skipPhoneStep]);
+
   const handleVerifyOtp = useCallback(async () => {
     if (otpCode.length !== 6) return;
     setError("");
