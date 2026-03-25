@@ -137,11 +137,11 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
               value={price}
               onChange={(e) => handlePriceChange(e.target.value)}
               placeholder={listingPrice ? `السعر المطلوب: ${Number(listingPrice).toLocaleString("en-US")}` : "اكتب سعرك"}
-              className="w-full px-3 py-2.5 rounded-xl border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
-              dir="ltr"
+              className="w-full pe-10 ps-3 py-2.5 rounded-xl border border-border/50 bg-background text-sm text-right focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
+              dir="rtl"
               lang="en"
             />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ر.س</span>
+            <span className="absolute start-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">ر.س</span>
           </div>
 
           <textarea
