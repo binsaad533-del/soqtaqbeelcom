@@ -136,7 +136,6 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         if (!e.latLng) return;
         marker.setPosition(e.latLng);
         marker.setVisible(true);
-        onLocationChange(e.latLng.lat(), e.latLng.lng());
         reverseGeocode(e.latLng);
       });
 
@@ -144,7 +143,6 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
       marker.addListener("dragend", () => {
         const pos = marker.getPosition();
         if (!pos) return;
-        onLocationChange(pos.lat(), pos.lng());
         reverseGeocode(pos);
       });
 
