@@ -450,6 +450,8 @@ const LoginPage = () => {
               </p>
             )}
           </form>
+            </>
+          )}
         </div>
 
         {/* Subtle AI tip */}
