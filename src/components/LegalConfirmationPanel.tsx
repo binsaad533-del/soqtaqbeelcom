@@ -87,13 +87,19 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
 
   useEffect(() => { loadStatus(); }, [loadStatus]);
 
-  // Track section views based on step navigation
+  // Track section views automatically as users navigate through the review flow.
+  // Previously some sections only counted if the user clicked specific cards,
+  // which blocked final approval even after fully reading the screens.
   useEffect(() => {
     if (step === "summary") {
       understanding.markViewed("deal_summary");
+      understanding.markViewed("included_items");
+      understanding.markViewed("excluded_items");
     }
+
     if (step === "risks") {
       understanding.markViewed("liabilities");
+      understanding.markViewed("documents");
     }
   }, [step, understanding.markViewed]);
 

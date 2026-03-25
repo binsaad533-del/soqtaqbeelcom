@@ -1171,6 +1171,14 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_deal_confirmation_status: {
+        Args: { _deal_id: string }
+        Returns: {
+          buyer_confirmed: boolean
+          current_user_confirmed: boolean
+          seller_confirmed: boolean
+        }[]
+      }
       get_listing_offers_summary: {
         Args: { _listing_id: string }
         Returns: Json
