@@ -315,21 +315,33 @@ const CustomerDashboardPage = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] text-muted-foreground mb-0.5">رقم الجوال</div>
-                  {!isPhoneVerified && profile?.phone ? (
-                    <div>
-                      <span className="text-xs" dir="ltr">{toEnglishNumerals(profile.phone)}</span>
-                      <span className="text-[10px] text-warning mr-2">— يحتاج توثيق</span>
-                    </div>
-                  ) : isPhoneVerified ? (
-                    <div className="flex items-center gap-1.5 text-xs" dir="ltr">
-                      <span>{toEnglishNumerals(profile?.phone || "")}</span>
-                      <CheckCircle size={11} className="text-success shrink-0" />
+                  {editingField === "phone" ? (
+                    <div className="flex items-center gap-1.5">
+                      <input dir="ltr" inputMode="numeric" className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus />
+                      <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success"><Check size={13} /></button>
+                      <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={13} /></button>
                     </div>
                   ) : (
-                    <span className="text-xs text-warning">أضف رقم جوالك</span>
+                    <div className="flex items-center gap-1.5">
+                      <button onClick={() => startEdit("phone", profile?.phone || "")} className="flex items-center gap-1.5 group/phone text-xs" dir="ltr">
+                        {profile?.phone
+                          ? <span>{toEnglishNumerals(profile.phone)}</span>
+                          : <span className="text-warning">أضف رقم جوالك</span>}
+                        <Pencil size={9} className="text-muted-foreground opacity-0 group-hover/phone:opacity-60 transition-opacity shrink-0" />
+                      </button>
+                      {isPhoneVerified && <CheckCircle size={11} className="text-success shrink-0" />}
+                      {!isPhoneVerified && profile?.phone && <span className="text-[10px] text-warning">يحتاج توثيق ↓</span>}
+                    </div>
                   )}
                 </div>
               </div>
+
+              {/* Phone verification inline */}
+              {!isPhoneVerified && profile?.phone && (
+                <div className="pr-10">
+                  <PhoneVerificationFlow initialPhone={profile.phone} onVerified={() => window.location.reload()} mode="inline" />
+                </div>
+              )}
 
 
               {/* Registration date */}
