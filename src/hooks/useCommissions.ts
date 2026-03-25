@@ -46,7 +46,7 @@ export const COMMISSION_STATUS_COLORS: Record<CommissionStatus, string> = {
 export const COMMISSION_RATE = 0.01; // 1%
 
 export const BANK_DETAILS = {
-  beneficiary: "شركة عين جساس للمقاولات",
+  beneficiary: "شركة عين جساس",
   bank: "مصرف الراجحي",
   accountNumber: "611000010006086026222",
   iban: "SA4180000611608016026222",
