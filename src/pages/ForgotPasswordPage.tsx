@@ -68,7 +68,7 @@ const ForgotPasswordPage = () => {
       <div className="min-h-screen flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-md text-center">
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="سوق تقبيل" className="h-14 md:h-16 w-auto" />
+            <img src={logoIconGold} alt="سوق تقبيل" className="h-14 md:h-16 w-auto" />
           </div>
           <div className="bg-card rounded-2xl p-8 shadow-soft">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
@@ -99,7 +99,7 @@ const ForgotPasswordPage = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="سوق تقبيل" className="h-14 md:h-16 w-auto mx-auto" />
+            <img src={logoIconGold} alt="سوق تقبيل" className="h-14 md:h-16 w-auto mx-auto" />
           </div>
           <h1 className="text-2xl font-medium gradient-text">نسيت كلمة المرور</h1>
           <p className="text-sm text-muted-foreground mt-2">
