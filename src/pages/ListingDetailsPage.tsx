@@ -8,6 +8,8 @@ import DealCheckPanel from "@/components/DealCheckPanel";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
 import QuickPriceEdit from "@/components/QuickPriceEdit";
 import ListingEditDialog from "@/components/ListingEditDialog";
+import ListingOfferForm from "@/components/ListingOfferForm";
+import SellerOffersPanel from "@/components/SellerOffersPanel";
 import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals } from "@/hooks/useDeals";
