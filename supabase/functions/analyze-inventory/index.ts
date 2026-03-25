@@ -109,7 +109,7 @@ serve(async (req) => {
                         name: { type: "string", description: "اسم الأصل بالعربية" },
                         category: { type: "string", description: "فئة الأصل (معدات مطبخ، تبريد، أثاث، أجهزة، ديكور، تكييف، إضاءة، أخرى)" },
                         quantity: { type: "number", description: "عدد القطع المكتشفة" },
-                        condition: { type: "string", enum: ["ممتازة", "جيدة", "متوسطة", "ضعيفة", "غير واضح"], description: "حالة الأصل" },
+                        condition: { type: "string", enum: ["جديد", "شبه جديد", "جيد", "تالف"], description: "حالة الأصل" },
                         confidence: { type: "string", enum: ["high", "medium", "low"], description: "مستوى الثقة في التصنيف" },
                         detection_note: { type: "string", description: "ملاحظة قصيرة عن سبب التصنيف (مثال: ظهرت 3 وحدات في نفس الإطار، أو نفس الأصل من زاويتين)" },
                         photo_indices: { type: "array", items: { type: "number" }, description: "أرقام الصور التي ظهر فيها هذا الأصل (0-indexed)" },
