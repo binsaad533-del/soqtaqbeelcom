@@ -11,7 +11,8 @@ import MarketplaceFilters, { defaultFilters, type FilterState } from "@/componen
 import MobileFilterSheet from "@/components/marketplace/MobileFilterSheet";
 import SmartSearchBar from "@/components/marketplace/SmartSearchBar";
 import ComparePanel, { type CompareItem } from "@/components/marketplace/ComparePanel";
-import { MapPin, Eye, ShieldCheck, TrendingUp, GitCompareArrows, Check, Lightbulb } from "lucide-react";
+import { MapPin, Eye, ShieldCheck, GitCompareArrows, Check, Lightbulb } from "lucide-react";
+import MarketplaceTicker from "@/components/marketplace/MarketplaceTicker";
 import { toast } from "sonner";
 
 interface EnrichedListing extends Listing {
@@ -174,11 +175,8 @@ const MarketplacePage = () => {
           </div>
         </div>
 
-        {/* Incentive */}
-        <div className="bg-primary/5 rounded-xl px-4 py-2.5 mb-5 flex items-center gap-2">
-          <TrendingUp size={14} className="text-primary shrink-0" />
-          <p className="text-[11px] text-muted-foreground">البائعون الملتزمون بالسداد والموثّقون يظهرون أولاً في النتائج</p>
-        </div>
+        {/* Live Market Ticker */}
+        <MarketplaceTicker />
 
         {/* Mobile: Smart search */}
         {isMobile && <SmartSearchBar onApplyFilters={handleSmartSearch} resultCount={filtered.length} />}
