@@ -148,9 +148,9 @@ export default function ChatAttachmentButton({ dealId, onFileSent, disabled }: C
               <img src={preview.url} alt="" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate">{preview.file.name}</p>
+              <p className="text-xs font-medium truncate">{preview.displayName}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">
-                {(preview.file.size / 1024).toFixed(0)} KB
+                {(preview.displaySize / 1024).toFixed(0)} KB
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <button
