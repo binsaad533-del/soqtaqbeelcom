@@ -211,139 +211,128 @@ const CustomerDashboardPage = () => {
           </div>
         )}
 
-        {/* ══════ MERGED HEADER + PROFILE ══════ */}
-        <div className="rounded-2xl border border-border/30 bg-card px-5 py-4 mb-5">
-          <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
+        {/* ══════ PROFILE HEADER ══════ */}
+        <div className="rounded-2xl border border-border/30 bg-card px-4 py-3 mb-5">
+          {/* Row 1: Avatar + Name + Badge + Meta */}
+          <div className="flex items-center gap-3">
             {/* Avatar */}
-            <label className="relative w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg cursor-pointer group overflow-hidden shrink-0">
+            <label className="relative w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm cursor-pointer group overflow-hidden shrink-0">
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
               ) : (
                 profile?.full_name?.charAt(0) || "؟"
               )}
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                <Camera size={14} className="text-white" />
+                <Camera size={12} className="text-white" />
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
             </label>
 
-            {/* Name */}
-            <div className="min-w-0 shrink-0">
+            {/* Name + badge */}
+            <div className="flex items-center gap-2 min-w-0">
               {editingField === "full_name" ? (
                 <div className="flex items-center gap-1.5">
-                  <input className="text-sm font-semibold bg-muted/50 rounded px-2 py-0.5 w-40 border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
-                  <button onClick={() => saveField("full_name", editValue)} disabled={saving} className="text-success"><Check size={14} /></button>
-                  <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={14} /></button>
+                  <input className="text-xs font-semibold bg-muted/50 rounded px-2 py-0.5 w-32 border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
+                  <button onClick={() => saveField("full_name", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
+                  <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
                 </div>
               ) : (
                 <div className="flex items-center gap-1.5 group/name">
-                  <h1 className="text-sm font-semibold">مرحباً {profile?.full_name || "بك"}</h1>
-                  <button onClick={() => startEdit("full_name", profile?.full_name || "")} className="opacity-0 group-hover/name:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={11} /></button>
+                  <h1 className="text-xs font-semibold truncate">مرحباً {profile?.full_name || "بك"}</h1>
+                  <button onClick={() => startEdit("full_name", profile?.full_name || "")} className="opacity-0 group-hover/name:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={10} /></button>
                 </div>
               )}
-            </div>
-
-            {/* Separator */}
-            <div className="hidden md:block w-px h-6 bg-border/40" />
-
-            {/* Inline info items - all on one line */}
-            <div className="flex items-center gap-4 text-xs text-muted-foreground flex-1 min-w-0 flex-wrap md:flex-nowrap">
-              <span className={cn("flex items-center gap-1.5 shrink-0 px-2 py-0.5 rounded-full text-[10px] font-medium",
+              <span className={cn("flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-medium",
                 isProfileComplete
-                  ? "bg-success/15 text-success border border-success/30"
-                  : "bg-warning/15 text-warning border border-warning/30"
+                  ? "bg-success/15 text-success"
+                  : "bg-warning/15 text-warning"
               )}>
-                {isProfileComplete
-                  ? <><UserCheck size={13} /> موثّق</>
-                  : <><Shield size={13} /> غير موثّق</>
-                }
+                {isProfileComplete ? <><UserCheck size={11} /> موثّق</> : <><Shield size={11} /> غير موثّق</>}
               </span>
-
-              <span className="hidden md:inline text-border/50">|</span>
-
-              <span className="flex items-center gap-1.5 shrink-0">
-                <Clock size={13} /> انضم: {memberSince}
-              </span>
-
-              <span className="hidden md:inline text-border/50">|</span>
-
-              <span className="flex items-center gap-1.5 shrink-0">
-                <Clock size={13} /> آخر دخول: {lastLoginFormatted}
-              </span>
-
-              <span className="hidden md:inline text-border/50">|</span>
-
-              {/* Email */}
-              <div className="flex items-center gap-1.5 min-w-0">
-                <Mail size={13} className="shrink-0" />
-                {editingField === "email" ? (
-                  <div className="flex items-center gap-1">
-                    <input type="email" dir="ltr" lang="en" className="bg-muted/50 rounded px-2 py-0.5 w-44 border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="email@example.com" />
-                    <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
-                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
-                  </div>
-                ) : (
-                  <>
-                    <span className="truncate" dir="ltr">
-                      {hasRealEmail ? userEmail : <span className="text-warning">لم يُضاف</span>}
-                    </span>
-                    <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-primary hover:text-primary/80 shrink-0"><Pencil size={10} /></button>
-                  </>
-                )}
-              </div>
-
-              <span className="hidden md:inline text-border/50">|</span>
-
-              {/* Phone */}
-              <div className="flex items-center gap-1.5 shrink-0">
-                <Phone size={13} />
-                {editingField === "phone" ? (
-                  <div className="flex items-center gap-1">
-                    <input dir="ltr" lang="en" inputMode="numeric" className="bg-muted/50 rounded px-2 py-0.5 w-28 border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus placeholder="05XXXXXXXX" />
-                    <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
-                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
-                  </div>
-                ) : (
-                  <>
-                    <span dir="ltr">{profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">لم يُضاف</span>}</span>
-                    <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-primary hover:text-primary/80"><Pencil size={10} /></button>
-                  </>
-                )}
-              </div>
             </div>
-          </div>
 
+            {/* Meta info */}
+            <div className="hidden md:flex items-center gap-3 text-[10px] text-muted-foreground mr-auto">
+              <span className="flex items-center gap-1"><Clock size={11} /> {memberSince}</span>
+              <span className="text-border/40">·</span>
+              <span className="flex items-center gap-1"><Clock size={11} /> آخر دخول: {lastLoginFormatted}</span>
+            </div>
 
-          {/* Profile completeness bar */}
-          <div className="mt-3 pt-3 border-t border-border/20">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-muted-foreground">اكتمال الملف الشخصي</span>
-              <span className={cn("text-xs font-medium",
-                isProfileComplete ? "text-success" : profileCompleteness >= 50 ? "text-warning" : "text-destructive"
+            {/* Completeness % */}
+            {!isProfileComplete && (
+              <span className={cn("text-[10px] font-medium shrink-0",
+                profileCompleteness >= 50 ? "text-warning" : "text-destructive"
               )}>{profileCompleteness}%</span>
-            </div>
-            {isProfileComplete ? (
-              <div className="flex items-center gap-1.5 text-xs text-success">
-                <CheckCircle size={13} />
-                <span className="font-medium">ملفك الشخصي مكتمل — حسابك موثّق</span>
-              </div>
-            ) : (
-              <>
-                <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className={cn("h-full rounded-full transition-all duration-500",
-                    profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
-                  )} style={{ width: `${profileCompleteness}%` }} />
-                </div>
-                <p className="text-[9px] text-muted-foreground mt-1">
-                  أكمل: {!profile?.full_name && "الاسم · "}{!profile?.phone && "الجوال · "}{!hasRealEmail && "الإيميل · "}{!profile?.avatar_url && "الصورة · "}{!isPhoneVerified && "توثيق الجوال"}
-                </p>
-              </>
             )}
           </div>
 
-          {/* ══════ PHONE VERIFICATION (inline) ══════ */}
+          {/* Row 2: Contact info + completeness bar */}
+          <div className="mt-2 pt-2 border-t border-border/15 flex items-center gap-4 text-[11px] text-muted-foreground flex-wrap">
+            {/* Email */}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Mail size={11} className="shrink-0" />
+              {editingField === "email" ? (
+                <div className="flex items-center gap-1">
+                  <input type="email" dir="ltr" lang="en" className="bg-muted/50 rounded px-1.5 py-0.5 w-36 border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="email@example.com" />
+                  <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={11} /></button>
+                  <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={11} /></button>
+                </div>
+              ) : (
+                <>
+                  <span className="truncate text-[10px]" dir="ltr">
+                    {hasRealEmail ? userEmail : <span className="text-warning">لم يُضاف</span>}
+                  </span>
+                  <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-primary hover:text-primary/80 shrink-0"><Pencil size={9} /></button>
+                </>
+              )}
+            </div>
+
+            <span className="text-border/40">·</span>
+
+            {/* Phone */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Phone size={11} />
+              {editingField === "phone" ? (
+                <div className="flex items-center gap-1">
+                  <input dir="ltr" lang="en" inputMode="numeric" className="bg-muted/50 rounded px-1.5 py-0.5 w-24 border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus placeholder="05XXXXXXXX" />
+                  <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success"><Check size={11} /></button>
+                  <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={11} /></button>
+                </div>
+              ) : (
+                <>
+                  <span className="text-[10px]" dir="ltr">{profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">لم يُضاف</span>}</span>
+                  <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-primary hover:text-primary/80"><Pencil size={9} /></button>
+                </>
+              )}
+            </div>
+
+            {/* Completeness bar (inline) */}
+            {!isProfileComplete && (
+              <>
+                <span className="text-border/40">·</span>
+                <div className="flex items-center gap-2 flex-1 min-w-[100px]">
+                  <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
+                    <div className={cn("h-full rounded-full transition-all duration-500",
+                      profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
+                    )} style={{ width: `${profileCompleteness}%` }} />
+                  </div>
+                  <span className="text-[9px] text-muted-foreground whitespace-nowrap">
+                    أكمل: {!hasRealEmail && "الإيميل"}{!hasRealEmail && !isPhoneVerified && " · "}{!isPhoneVerified && "التوثيق"}
+                  </span>
+                </div>
+              </>
+            )}
+
+            {isProfileComplete && (
+              <span className="flex items-center gap-1 text-[10px] text-success mr-auto">
+                <CheckCircle size={11} /> مكتمل
+              </span>
+            )}
+          </div>
+
+          {/* Row 3: Phone verification (only when needed) */}
           {!isPhoneVerified && profile?.phone && (
-            <div className="mt-3 pt-3 border-t border-warning/20">
+            <div className="mt-2 pt-2 border-t border-warning/15">
               <PhoneVerificationFlow
                 initialPhone={profile.phone}
                 onVerified={() => window.location.reload()}
