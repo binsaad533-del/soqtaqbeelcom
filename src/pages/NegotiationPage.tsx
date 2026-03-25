@@ -59,6 +59,7 @@ const NegotiationPage = () => {
   const { getMessages, sendMessage } = useDeals();
   const { getListing } = useListings();
   const { monitorChat, calculateDealRisk } = useFraudEngine();
+  const navigate = useNavigate();
   const { getProfile } = useProfiles();
   const { getCommission } = useCommissions();
 
