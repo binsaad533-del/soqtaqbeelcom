@@ -30,6 +30,8 @@ import HowItWorksPage from "./pages/HowItWorksPage";
 import InstallPage from "./pages/InstallPage";
 import NotFound from "./pages/NotFound";
 import AgreementsArchivePage from "./pages/AgreementsArchivePage";
+import SellerProfilePage from "./pages/SellerProfilePage";
+import HelpCenterPage from "./pages/HelpCenterPage";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +58,8 @@ const App = () => (
               <Route path="/about" element={<AboutPage />} />
               <Route path="/how-it-works" element={<HowItWorksPage />} />
               <Route path="/marketplace" element={<MarketplacePage />} />
+              <Route path="/seller/:id" element={<SellerProfilePage />} />
+              <Route path="/help" element={<HelpCenterPage />} />
               <Route path="/listing/:id" element={<ListingDetailsPage />} />
               <Route
                 path="/create-listing"
