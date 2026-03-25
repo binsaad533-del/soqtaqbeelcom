@@ -31,7 +31,7 @@ const defaultFilters: FilterState = {
   dealType: "الكل",
   city: "الكل",
   activity: "الكل",
-  priceRange: [0, 5000000],
+  priceRange: [0, 3000000],
   search: "",
 };
 
@@ -87,7 +87,7 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
     filters.city === "الكل" &&
     filters.activity === "الكل" &&
     filters.priceRange[0] === 0 &&
-    filters.priceRange[1] === 5000000 &&
+    filters.priceRange[1] === 3000000 &&
     filters.search === "";
 
   const filteredCities = citySearch
@@ -199,7 +199,7 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
         <div className="px-1">
           <Slider
             min={0}
-            max={5000000}
+            max={3000000}
             step={50000}
             value={filters.priceRange}
             onValueChange={(v) => set("priceRange", v as [number, number])}
