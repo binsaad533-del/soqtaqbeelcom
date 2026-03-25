@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -6,6 +6,7 @@ import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import { useCommissions, type Commission, COMMISSION_STATUS_LABELS, COMMISSION_STATUS_COLORS, type CommissionStatus } from "@/hooks/useCommissions";
+import { supabase } from "@/integrations/supabase/client";
 import TrustBadge from "@/components/TrustBadge";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import {
   Users, FileText, Handshake, Settings, BarChart3, Search,
   Loader2, AlertTriangle, Landmark, ChevronLeft, ShieldCheck,
   ArrowUpDown, ImageOff, Bell, Shield, TrendingUp, Eye,
+  Activity, RefreshCw, UserCheck
 } from "lucide-react";
 import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 import { toast } from "sonner";
@@ -53,6 +55,9 @@ const OwnerDashboardPage = () => {
   const [dealFilter, setDealFilter] = useState<"all" | "paid" | "unpaid">("all");
   const [dealSort, setDealSort] = useState<"date" | "value">("date");
 
+  /* ── Realtime feed ── */
+  const [feed, setFeed] = useState<{ id: string; text: string; time: string; type: string }[]>([]);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -73,6 +78,34 @@ const OwnerDashboardPage = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  /* ── Realtime subscriptions ── */
+  useEffect(() => {
+    const ch = supabase.channel("owner-dash-live")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "deals" }, () => {
+        setFeed(prev => [{ id: crypto.randomUUID(), text: "صفقة جديدة تم إنشاؤها", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "deal" }, ...prev].slice(0, 10));
+        load();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "listings" }, (p) => {
+        const text = p.eventType === "INSERT" ? "إعلان جديد" : "تحديث إعلان";
+        setFeed(prev => [{ id: crypto.randomUUID(), text, time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "listing" }, ...prev].slice(0, 10));
+        load();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "deal_commissions" }, () => {
+        setFeed(prev => [{ id: crypto.randomUUID(), text: "تحديث عمولة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "commission" }, ...prev].slice(0, 10));
+        load();
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "security_incidents" }, () => {
+        setFeed(prev => [{ id: crypto.randomUUID(), text: "⚠️ حادثة أمنية جديدة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "incident" }, ...prev].slice(0, 10));
+        toast.warning("تنبيه: حادثة أمنية جديدة");
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "crm_leads" }, () => {
+        setFeed(prev => [{ id: crypto.randomUUID(), text: "عميل محتمل جديد", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "crm" }, ...prev].slice(0, 10));
+        toast.info("عميل محتمل جديد");
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [load]);
+
   const getUserRole = (userId: string) => roles.find((r: any) => r.user_id === userId)?.role || "customer";
   const getProfileName = (userId: string | null) => {
     if (!userId) return "—";
@@ -86,18 +119,14 @@ const OwnerDashboardPage = () => {
   const totalCollected = useMemo(() => commissions.filter(c => c.payment_status === "verified").reduce((s, c) => s + c.commission_amount, 0), [commissions]);
   const totalUncollected = totalCommissionDue - totalCollected;
 
-  // Smart Alerts
   const unpaidCompleted = useMemo(() => commissions.filter(c => !["verified", "paid_proof_uploaded"].includes(c.payment_status)), [commissions]);
   const listingsNoPhotos = useMemo(() => listings.filter(l => {
     const photos = l.photos as any;
     if (!photos) return true;
-    if (typeof photos === "object" && !Array.isArray(photos)) {
-      return Object.values(photos).flat().length === 0;
-    }
+    if (typeof photos === "object" && !Array.isArray(photos)) return Object.values(photos).flat().length === 0;
     return true;
   }), [listings]);
 
-  // Deal table with commission data
   const dealTableData = useMemo(() => {
     const listingMap = new Map(listings.map(l => [l.id, l]));
     const commMap = new Map(commissions.map(c => [c.deal_id, c]));
@@ -118,17 +147,14 @@ const OwnerDashboardPage = () => {
 
     if (dealFilter === "paid") rows = rows.filter(r => r.commissionStatus === "verified");
     if (dealFilter === "unpaid") rows = rows.filter(r => r.commissionStatus !== "verified");
-
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       rows = rows.filter(r => r.listingTitle.toLowerCase().includes(q) || r.sellerName.toLowerCase().includes(q) || r.buyerName.toLowerCase().includes(q));
     }
-
     rows.sort((a, b) => {
       if (dealSort === "value") return (Number(b.agreed_price) || 0) - (Number(a.agreed_price) || 0);
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-
     return rows;
   }, [deals, listings, commissions, profiles, dealFilter, dealSort, searchQuery]);
 
@@ -149,44 +175,66 @@ const OwnerDashboardPage = () => {
     return profiles.filter(p => p.full_name?.toLowerCase().includes(q) || p.phone?.includes(searchQuery));
   }, [profiles, searchQuery]);
 
+  /* ── Monthly chart data ── */
+  const monthlyData = useMemo(() => {
+    const months: Record<string, { month: string; deals: number; completed: number; value: number; commission: number }> = {};
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+      months[key] = { month: monthNames[d.getMonth()], deals: 0, completed: 0, value: 0, commission: 0 };
+    }
+    deals.forEach(d => {
+      const date = new Date(d.created_at);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (months[key]) {
+        months[key].deals++;
+        if (['completed', 'finalized'].includes(d.status)) months[key].completed++;
+        months[key].value += Number(d.agreed_price) || 0;
+        months[key].commission += (Number(d.agreed_price) || 0) * 0.01;
+      }
+    });
+    return Object.values(months);
+  }, [deals]);
+
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={24} className="animate-spin text-primary" /></div>;
 
   return (
     <div className="py-6">
       <div className="container max-w-6xl">
         {/* Header */}
-         <div className="flex items-center justify-between mb-6">
-           <div>
-             <h1 className="text-xl font-semibold">لوحة تحكم المنصة</h1>
-             <p className="text-sm text-muted-foreground">مرحباً {profile?.full_name}</p>
-           </div>
-           <Link to="/monitoring" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors bg-muted/50 px-3 py-2 rounded-xl">
-             <Eye size={13} strokeWidth={1.5} />
-             المراقبة المباشرة
-           </Link>
-         </div>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-xl font-semibold">لوحة تحكم المنصة</h1>
+            <p className="text-sm text-muted-foreground">مرحباً {profile?.full_name}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={load} className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors">
+              <RefreshCw size={13} className="text-muted-foreground" />
+            </button>
+            <Link to="/monitoring" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors bg-muted/50 px-3 py-2 rounded-xl">
+              <Eye size={13} strokeWidth={1.5} /> المراقبة المباشرة
+            </Link>
+          </div>
+        </div>
 
         {/* Tabs */}
         <div className="flex gap-1 bg-muted/40 rounded-xl p-1 mb-6 overflow-x-auto">
           {TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }}
-              className={cn(
-                "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs whitespace-nowrap transition-all",
-                activeTab === tab.id ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
+            <button key={tab.id} onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }}
+              className={cn("flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs whitespace-nowrap transition-all",
+                activeTab === tab.id ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground")}>
               <tab.icon size={14} strokeWidth={1.3} />
               {tab.label}
             </button>
           ))}
         </div>
 
-        {/* ===== OVERVIEW ===== */}
+        {/* ═══ OVERVIEW ═══ */}
         {activeTab === "overview" && (
           <div className="space-y-6">
-            {/* KPI Grid - Row 1: Counts */}
+            {/* KPI Row 1: Counts */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: "إجمالي المستخدمين", value: profiles.length, icon: Users, accent: "text-primary" },
@@ -206,7 +254,7 @@ const OwnerDashboardPage = () => {
               ))}
             </div>
 
-            {/* KPI Grid - Row 2: Financial */}
+            {/* KPI Row 2: Financial */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: "إجمالي قيمة الصفقات", value: `${totalDealValue.toLocaleString("en-US")} ر.س`, icon: BarChart3, accent: "text-primary" },
@@ -226,298 +274,238 @@ const OwnerDashboardPage = () => {
               ))}
             </div>
 
-            {/* Charts Section */}
-            {(() => {
-              // Group deals by month
-              const monthlyData = useMemo(() => {
-                const months: Record<string, { month: string; deals: number; completed: number; value: number; commission: number }> = {};
-                const now = new Date();
-                // Initialize last 6 months
-                for (let i = 5; i >= 0; i--) {
-                  const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                  const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-                  const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-                  months[key] = { month: monthNames[d.getMonth()], deals: 0, completed: 0, value: 0, commission: 0 };
-                }
-                deals.forEach(d => {
-                  const date = new Date(d.created_at);
-                  const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                  if (months[key]) {
-                    months[key].deals++;
-                    if (['completed', 'finalized'].includes(d.status)) months[key].completed++;
-                    months[key].value += Number(d.agreed_price) || 0;
-                    months[key].commission += (Number(d.agreed_price) || 0) * 0.01;
-                  }
-                });
-                return Object.values(months);
-              }, [deals]);
-
-              return (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                  {/* Deals Chart */}
-                  <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-semibold flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <TrendingUp size={14} className="text-primary" strokeWidth={1.5} />
-                        </div>
-                        تطور الصفقات
-                      </h3>
-                      <span className="text-[10px] text-muted-foreground">آخر 6 أشهر</span>
-                    </div>
-                    <div className="h-[200px]" dir="ltr">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={monthlyData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="dealGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                            </linearGradient>
-                            <linearGradient id="completedGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.2} />
-                              <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                          <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                          <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={30} />
-                          <Tooltip
-                            contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }}
-                            formatter={(value: number, name: string) => [value, name === 'deals' ? 'إجمالي الصفقات' : 'مكتملة']}
-                            labelFormatter={(label) => label}
-                          />
-                          <Area type="monotone" dataKey="deals" stroke="hsl(var(--primary))" fill="url(#dealGrad)" strokeWidth={2} name="deals" />
-                          <Area type="monotone" dataKey="completed" stroke="hsl(var(--success))" fill="url(#completedGrad)" strokeWidth={2} name="completed" />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="flex items-center justify-center gap-5 mt-3">
-                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-primary" /><span className="text-[10px] text-muted-foreground">إجمالي الصفقات</span></div>
-                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-success" /><span className="text-[10px] text-muted-foreground">مكتملة</span></div>
-                    </div>
-                  </div>
-
-                  {/* Commission Chart */}
-                  <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-semibold flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center">
-                          <Landmark size={14} className="text-success" strokeWidth={1.5} />
-                        </div>
-                        العمولات الشهرية
-                      </h3>
-                      <span className="text-[10px] text-muted-foreground">آخر 6 أشهر</span>
-                    </div>
-                    <div className="h-[200px]" dir="ltr">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={monthlyData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                          <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                          <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={40}
-                            tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} />
-                          <Tooltip
-                            contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }}
-                            formatter={(value: number) => [`${value.toLocaleString('en-US')} ر.س`, 'العمولة']}
-                            labelFormatter={(label) => label}
-                          />
-                          <Bar dataKey="commission" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={28} opacity={0.8} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="flex items-center justify-center gap-5 mt-3">
-                      <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-primary" /><span className="text-[10px] text-muted-foreground">العمولة المستحقة (1%)</span></div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Two-column layout: Alerts + Recent Activity */}
+            {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {/* Left Column: Smart Alerts + Quick Stats */}
-              <div className="space-y-4">
-                {/* Smart Alerts */}
-                <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-                  <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
-                    <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center">
-                      <Bell size={14} className="text-warning" strokeWidth={1.5} />
-                    </div>
-                    تنبيهات ذكية
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center"><TrendingUp size={14} className="text-primary" strokeWidth={1.5} /></div>
+                    تطور الصفقات
                   </h3>
-                  <div className="space-y-2.5">
-                    {unpaidCompleted.length > 0 && (
-                      <div className="flex items-center gap-3 p-3.5 rounded-xl bg-destructive/5 border border-destructive/10">
-                        <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
-                          <AlertTriangle size={14} className="text-destructive" />
-                        </div>
-                        <div className="flex-1">
-                          <span className="text-xs font-medium text-destructive">{unpaidCompleted.length} صفقة مكتملة لم تُدفع عمولتها</span>
-                          <p className="text-[10px] text-destructive/70 mt-0.5">يجب متابعة تحصيل العمولات</p>
-                        </div>
-                        <button onClick={() => setActiveTab("deals")} className="text-[10px] text-destructive bg-destructive/10 px-3 py-1.5 rounded-lg hover:bg-destructive/20 transition-colors font-medium">عرض</button>
-                      </div>
-                    )}
-                    {listingsNoPhotos.length > 0 && (
-                      <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/50 border border-border/40">
-                        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                          <ImageOff size={14} className="text-muted-foreground" />
-                        </div>
-                        <div className="flex-1">
-                          <span className="text-xs font-medium">{listingsNoPhotos.length} إعلان بدون صور أو بيانات ناقصة</span>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">الإعلانات بالصور تحصل على تفاعل أعلى</p>
-                        </div>
-                      </div>
-                    )}
-                    {unpaidCompleted.length === 0 && listingsNoPhotos.length === 0 && (
-                      <div className="text-center py-6 text-muted-foreground">
-                        <ShieldCheck size={20} className="mx-auto mb-2 text-success" />
-                        <p className="text-xs">لا توجد تنبيهات — كل شيء على ما يرام</p>
-                      </div>
-                    )}
-                  </div>
+                  <span className="text-[10px] text-muted-foreground">آخر 6 أشهر</span>
                 </div>
-
-                {/* Platform Performance Summary */}
-                <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-                  <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
-                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <BarChart3 size={14} className="text-primary" strokeWidth={1.5} />
-                    </div>
-                    أداء المنصة
-                  </h3>
-                  <div className="space-y-3">
-                    {[
-                      { label: "معدل إكمال الصفقات", value: deals.length > 0 ? Math.round((completedDeals.length / deals.length) * 100) : 0, suffix: "%" },
-                      { label: "نسبة تحصيل العمولات", value: totalCommissionDue > 0 ? Math.round((totalCollected / totalCommissionDue) * 100) : 0, suffix: "%" },
-                      { label: "المستخدمون النشطون", value: profiles.length > 0 ? Math.round((profiles.filter(p => p.is_active && !p.is_suspended).length / profiles.length) * 100) : 0, suffix: "%" },
-                    ].map((stat, i) => (
-                      <div key={i}>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-[11px] text-muted-foreground">{stat.label}</span>
-                          <span className="text-xs font-semibold">{stat.value}{stat.suffix}</span>
-                        </div>
-                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div className="h-full bg-primary/60 rounded-full transition-all duration-500" style={{ width: `${Math.min(stat.value, 100)}%` }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                <div className="h-[200px]" dir="ltr">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={monthlyData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="dealGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="completedGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                      <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={30} />
+                      <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }}
+                        formatter={(value: number, name: string) => [value, name === 'deals' ? 'إجمالي الصفقات' : 'مكتملة']} />
+                      <Area type="monotone" dataKey="deals" stroke="hsl(var(--primary))" fill="url(#dealGrad)" strokeWidth={2} name="deals" />
+                      <Area type="monotone" dataKey="completed" stroke="hsl(var(--success))" fill="url(#completedGrad)" strokeWidth={2} name="completed" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex items-center justify-center gap-5 mt-3">
+                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-primary" /><span className="text-[10px] text-muted-foreground">إجمالي الصفقات</span></div>
+                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-success" /><span className="text-[10px] text-muted-foreground">مكتملة</span></div>
                 </div>
               </div>
 
-              {/* Right Column: Recent Listings + Deals */}
-              <div className="space-y-4">
-                {/* Recent Listings */}
-                <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <FileText size={14} className="text-primary" strokeWidth={1.5} />
-                      </div>
-                      آخر الإعلانات
-                    </h3>
-                    <button onClick={() => setActiveTab("listings")} className="text-[10px] text-primary hover:underline">عرض الكل</button>
-                  </div>
-                  <div className="space-y-2">
-                    {listings.slice(0, 5).map(l => (
-                      <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/60 transition-all group">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                            <FileText size={14} className="text-muted-foreground" strokeWidth={1.3} />
-                          </div>
-                          <div>
-                            <div className="text-xs font-medium group-hover:text-primary transition-colors">{l.title || "بدون عنوان"}</div>
-                            <div className="text-[10px] text-muted-foreground">{l.city || "—"} {l.price ? `• ${Number(l.price).toLocaleString()} ر.س` : ""}</div>
-                          </div>
-                        </div>
-                        <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", l.status === "published" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>
-                          {l.status === "published" ? "منشور" : "مسودة"}
-                        </span>
-                      </Link>
-                    ))}
-                    {listings.length === 0 && <p className="text-center text-xs text-muted-foreground py-8">لا توجد إعلانات</p>}
-                  </div>
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center"><Landmark size={14} className="text-success" strokeWidth={1.5} /></div>
+                    العمولات الشهرية
+                  </h3>
+                  <span className="text-[10px] text-muted-foreground">آخر 6 أشهر</span>
                 </div>
+                <div className="h-[200px]" dir="ltr">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={monthlyData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                      <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={40}
+                        tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} />
+                      <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }}
+                        formatter={(value: number) => [`${value.toLocaleString('en-US')} ر.س`, 'العمولة']} />
+                      <Bar dataKey="commission" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={28} opacity={0.8} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
 
-                {/* Recent Deals */}
-                <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center">
-                        <Handshake size={14} className="text-success" strokeWidth={1.5} />
+            {/* Alerts + Activity + Recent */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              {/* Alerts */}
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
+                  <div className="w-7 h-7 rounded-lg bg-warning/10 flex items-center justify-center"><Bell size={14} className="text-warning" strokeWidth={1.5} /></div>
+                  تنبيهات ذكية
+                </h3>
+                <div className="space-y-2.5">
+                  {unpaidCompleted.length > 0 && (
+                    <div className="flex items-start gap-3 p-3 rounded-xl bg-destructive/5 border border-destructive/10">
+                      <AlertTriangle size={14} className="text-destructive mt-0.5 shrink-0" />
+                      <div>
+                        <span className="text-xs font-medium text-destructive">{unpaidCompleted.length} عمولة غير محصلة</span>
+                        <button onClick={() => setActiveTab("deals")} className="block text-[10px] text-destructive/70 hover:underline mt-0.5">عرض التفاصيل</button>
                       </div>
-                      آخر الصفقات
-                    </h3>
-                    <button onClick={() => setActiveTab("deals")} className="text-[10px] text-primary hover:underline">عرض الكل</button>
+                    </div>
+                  )}
+                  {listingsNoPhotos.length > 0 && (
+                    <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
+                      <ImageOff size={14} className="text-muted-foreground mt-0.5 shrink-0" />
+                      <span className="text-xs text-muted-foreground">{listingsNoPhotos.length} إعلان بدون صور</span>
+                    </div>
+                  )}
+                  {unpaidCompleted.length === 0 && listingsNoPhotos.length === 0 && (
+                    <div className="text-center py-4">
+                      <ShieldCheck size={20} className="mx-auto mb-2 text-success" />
+                      <p className="text-xs text-muted-foreground">كل شيء على ما يرام</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Live activity */}
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <Activity size={14} className="text-success" /> النشاط المباشر
+                  </h3>
+                  <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" /><span className="text-[9px] text-muted-foreground">مباشر</span></span>
+                </div>
+                {feed.length === 0 ? (
+                  <p className="text-[11px] text-muted-foreground text-center py-4">لا يوجد نشاط حالياً</p>
+                ) : (
+                  <div className="space-y-2.5">
+                    {feed.slice(0, 6).map(f => (
+                      <div key={f.id} className="flex items-center gap-2 text-[11px]">
+                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0",
+                          f.type === "incident" ? "bg-destructive" : f.type === "deal" ? "bg-success" : f.type === "crm" ? "bg-warning" : "bg-primary"
+                        )} />
+                        <span className="text-muted-foreground flex-1 truncate">{f.text}</span>
+                        <span className="text-[9px] text-muted-foreground/40 shrink-0">{f.time}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="space-y-2">
-                    {deals.slice(0, 5).map(d => {
-                      const listing = listings.find(l => l.id === d.listing_id);
-                      const statusMap: Record<string, { label: string; cls: string }> = {
-                        negotiating: { label: "قيد التفاوض", cls: "bg-warning/10 text-warning" },
-                        completed: { label: "مكتملة", cls: "bg-success/10 text-success" },
-                        finalized: { label: "نهائية", cls: "bg-primary/10 text-primary" },
-                        cancelled: { label: "ملغاة", cls: "bg-destructive/10 text-destructive" },
-                      };
-                      const st = statusMap[d.status] || { label: d.status, cls: "bg-muted text-muted-foreground" };
-                      return (
-                        <div key={d.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                              <Handshake size={14} className="text-muted-foreground" strokeWidth={1.3} />
-                            </div>
-                            <div>
-                              <div className="text-xs font-medium">{listing?.title || "بدون عنوان"}</div>
-                              <div className="text-[10px] text-muted-foreground">{d.agreed_price ? `${Number(d.agreed_price).toLocaleString()} ر.س` : "—"} • {new Date(d.created_at).toLocaleDateString("en-GB")}</div>
-                            </div>
-                          </div>
-                          <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
+                )}
+              </div>
+
+              {/* Performance */}
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center"><BarChart3 size={14} className="text-primary" strokeWidth={1.5} /></div>
+                  أداء المنصة
+                </h3>
+                <div className="space-y-3">
+                  {[
+                    { label: "معدل إكمال الصفقات", value: deals.length > 0 ? Math.round((completedDeals.length / deals.length) * 100) : 0 },
+                    { label: "نسبة تحصيل العمولات", value: totalCommissionDue > 0 ? Math.round((totalCollected / totalCommissionDue) * 100) : 0 },
+                    { label: "المستخدمون النشطون", value: profiles.length > 0 ? Math.round((profiles.filter(p => p.is_active && !p.is_suspended).length / profiles.length) * 100) : 0 },
+                  ].map((stat, i) => (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[11px] text-muted-foreground">{stat.label}</span>
+                        <span className="text-xs font-semibold">{stat.value}%</span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary/60 rounded-full transition-all duration-500" style={{ width: `${Math.min(stat.value, 100)}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Recent listings + deals */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center"><FileText size={14} className="text-primary" strokeWidth={1.5} /></div>
+                    آخر الإعلانات
+                  </h3>
+                  <button onClick={() => setActiveTab("listings")} className="text-[10px] text-primary hover:underline">عرض الكل</button>
+                </div>
+                <div className="space-y-2">
+                  {listings.slice(0, 5).map(l => (
+                    <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/60 transition-all group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0"><FileText size={14} className="text-muted-foreground" strokeWidth={1.3} /></div>
+                        <div>
+                          <div className="text-xs font-medium group-hover:text-primary transition-colors">{l.title || "بدون عنوان"}</div>
+                          <div className="text-[10px] text-muted-foreground">{l.city || "—"} {l.price ? `· ${Number(l.price).toLocaleString("en-US")} ر.س` : ""}</div>
                         </div>
-                      );
-                    })}
-                    {deals.length === 0 && <p className="text-center text-xs text-muted-foreground py-8">لا توجد صفقات</p>}
-                  </div>
+                      </div>
+                      <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", l.status === "published" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>
+                        {l.status === "published" ? "منشور" : "مسودة"}
+                      </span>
+                    </Link>
+                  ))}
+                  {listings.length === 0 && <p className="text-center text-xs text-muted-foreground py-8">لا توجد إعلانات</p>}
+                </div>
+              </div>
+
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center"><Handshake size={14} className="text-success" strokeWidth={1.5} /></div>
+                    آخر الصفقات
+                  </h3>
+                  <button onClick={() => setActiveTab("deals")} className="text-[10px] text-primary hover:underline">عرض الكل</button>
+                </div>
+                <div className="space-y-2">
+                  {deals.slice(0, 5).map(d => {
+                    const stMap: Record<string, { label: string; cls: string }> = {
+                      negotiating: { label: "قيد التفاوض", cls: "bg-warning/10 text-warning" },
+                      completed: { label: "مكتملة", cls: "bg-success/10 text-success" },
+                      finalized: { label: "نهائية", cls: "bg-primary/10 text-primary" },
+                      cancelled: { label: "ملغاة", cls: "bg-destructive/10 text-destructive" },
+                    };
+                    const st = stMap[d.status] || { label: d.status, cls: "bg-muted text-muted-foreground" };
+                    return (
+                      <div key={d.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0"><Handshake size={14} className="text-muted-foreground" strokeWidth={1.3} /></div>
+                          <div>
+                            <div className="text-xs font-medium">{getProfileName(d.seller_id)} ← {getProfileName(d.buyer_id)}</div>
+                            <div className="text-[10px] text-muted-foreground">{d.agreed_price ? `${Number(d.agreed_price).toLocaleString("en-US")} ر.س` : "—"} · {new Date(d.created_at).toLocaleDateString("en-GB")}</div>
+                          </div>
+                        </div>
+                        <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
+                      </div>
+                    );
+                  })}
+                  {deals.length === 0 && <p className="text-center text-xs text-muted-foreground py-8">لا توجد صفقات</p>}
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* ===== DEALS & COMMISSIONS TABLE ===== */}
+        {/* ═══ DEALS TABLE ═══ */}
         {activeTab === "deals" && (
           <div className="space-y-4">
-            {/* Controls */}
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
               <div className="relative w-full sm:w-64">
                 <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="بحث بالاسم أو المشروع..."
-                  className="pr-9 text-sm rounded-xl"
-                />
+                <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="بحث بالاسم أو المشروع..." className="pr-9 text-sm rounded-xl" />
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1 bg-muted/40 rounded-lg p-0.5">
-                  {([
-                    { id: "all" as const, label: "الكل" },
-                    { id: "paid" as const, label: "مدفوعة" },
-                    { id: "unpaid" as const, label: "غير مدفوعة" },
-                  ]).map(f => (
-                    <button key={f.id} onClick={() => setDealFilter(f.id)}
-                      className={cn("px-3 py-1 rounded-md text-[11px] transition-all", dealFilter === f.id ? "bg-card shadow-sm text-foreground" : "text-muted-foreground")}>
-                      {f.label}
-                    </button>
+                  {([{ id: "all" as const, label: "الكل" }, { id: "paid" as const, label: "مدفوعة" }, { id: "unpaid" as const, label: "غير مدفوعة" }]).map(f => (
+                    <button key={f.id} onClick={() => setDealFilter(f.id)} className={cn("px-3 py-1 rounded-md text-[11px] transition-all", dealFilter === f.id ? "bg-card shadow-sm text-foreground" : "text-muted-foreground")}>{f.label}</button>
                   ))}
                 </div>
-                <button onClick={() => setDealSort(s => s === "date" ? "value" : "date")}
-                  className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] text-muted-foreground hover:text-foreground transition-colors">
+                <button onClick={() => setDealSort(s => s === "date" ? "value" : "date")} className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] text-muted-foreground hover:text-foreground transition-colors">
                   <ArrowUpDown size={12} /> {dealSort === "date" ? "التاريخ" : "القيمة"}
                 </button>
               </div>
             </div>
-
-            {/* Table */}
             <div className="rounded-xl border border-border/40 bg-card overflow-hidden">
               <Table>
                 <TableHeader>
@@ -547,29 +535,21 @@ const OwnerDashboardPage = () => {
                             {COMMISSION_STATUS_LABELS[s] || "غير مدفوعة"}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground"><TableCell className="text-xs text-muted-foreground">{new Date(row.created_at).toLocaleDateString("en-US")}</TableCell></TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{new Date(row.created_at).toLocaleDateString("en-GB")}</TableCell>
                         <TableCell>
                           {row.commission && s !== "verified" && (s === "paid_unverified" || s === "paid_proof_uploaded") && (
                             <Button size="sm" variant="ghost" onClick={() => handleVerify(row.commission!.id)} className="h-7 text-[10px] gap-1">
                               <ShieldCheck size={12} /> تحقق
                             </Button>
                           )}
-                          {row.commission && s === "verified" && (
-                            <span className="text-[10px] text-primary">✓ تم</span>
-                          )}
-                          {!row.commission && ["completed", "finalized"].includes(row.status) && (
-                            <span className="text-[10px] text-muted-foreground">بانتظار</span>
-                          )}
+                          {row.commission && s === "verified" && <span className="text-[10px] text-success">✓ تم</span>}
+                          {!row.commission && ["completed", "finalized"].includes(row.status) && <span className="text-[10px] text-muted-foreground">بانتظار</span>}
                         </TableCell>
                       </TableRow>
                     );
                   })}
                   {dealTableData.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center text-sm text-muted-foreground py-12">
-                        لا توجد صفقات
-                      </TableCell>
-                    </TableRow>
+                    <TableRow><TableCell colSpan={8} className="text-center text-sm text-muted-foreground py-12">لا توجد صفقات</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
@@ -578,11 +558,11 @@ const OwnerDashboardPage = () => {
           </div>
         )}
 
-        {/* ===== USERS ===== */}
+        {/* ═══ USERS ═══ */}
         {activeTab === "users" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="text-sm font-medium">{profiles.length} مستخدم • {profiles.filter(p => p.is_active && !p.is_suspended).length} نشط</div>
+              <div className="text-sm font-medium">{profiles.length} مستخدم · {profiles.filter(p => p.is_active && !p.is_suspended).length} نشط</div>
               <div className="relative w-64">
                 <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="بحث..." className="pr-9 text-sm rounded-xl" />
@@ -590,24 +570,21 @@ const OwnerDashboardPage = () => {
             </div>
             <div className="space-y-2">
               {filteredProfiles.map(p => (
-                <div key={p.id} className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-card">
+                <div key={p.id} className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">{p.full_name?.charAt(0) || "?"}</div>
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">{p.full_name?.charAt(0) || "?"}</div>
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{p.full_name || "—"}</span>
                         <TrustBadge score={p.trust_score} verificationLevel={p.verification_level} size="sm" />
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {p.phone || "—"} • {getUserRole(p.user_id) === "platform_owner" ? "مالك" : getUserRole(p.user_id) === "supervisor" ? "مشرف" : "عميل"} • {p.city || "—"}
+                        {p.phone || "—"} · {getUserRole(p.user_id) === "platform_owner" ? "مالك" : getUserRole(p.user_id) === "supervisor" ? "مشرف" : "عميل"} · {p.city || "—"}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Link to={`#`} className="text-[10px] text-muted-foreground hover:text-foreground"><Eye size={13} /></Link>
-                    <button onClick={() => toggleSuspend(p)}
-                      className={cn("text-[10px] px-2 py-0.5 rounded-md transition-colors",
-                        p.is_suspended ? "bg-destructive/10 text-destructive" : "text-muted-foreground hover:bg-destructive/10 hover:text-destructive")}>
+                    <button onClick={() => toggleSuspend(p)} className={cn("text-[10px] px-2.5 py-1 rounded-lg transition-colors", p.is_suspended ? "bg-destructive/10 text-destructive" : "text-muted-foreground hover:bg-destructive/10 hover:text-destructive")}>
                       {p.is_suspended ? "معلّق" : "تعليق"}
                     </button>
                   </div>
@@ -618,11 +595,11 @@ const OwnerDashboardPage = () => {
           </div>
         )}
 
-        {/* ===== LISTINGS ===== */}
+        {/* ═══ LISTINGS ═══ */}
         {activeTab === "listings" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="text-sm font-medium">{listings.length} إعلان • {listings.filter(l => l.status === "published").length} منشور</div>
+              <div className="text-sm font-medium">{listings.length} إعلان · {listings.filter(l => l.status === "published").length} منشور</div>
               <div className="relative w-64">
                 <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="بحث..." className="pr-9 text-sm rounded-xl" />
@@ -630,10 +607,10 @@ const OwnerDashboardPage = () => {
             </div>
             <div className="space-y-2">
               {listings.filter(l => !searchQuery || l.title?.toLowerCase().includes(searchQuery.toLowerCase())).map(l => (
-                <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all">
+                <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all">
                   <div className="flex-1">
                     <div className="text-sm">{l.title || "بدون عنوان"}</div>
-                    <div className="text-[11px] text-muted-foreground">{l.city} • {l.business_activity || "—"} • {l.price ? `${Number(l.price).toLocaleString()} ر.س` : "—"}</div>
+                    <div className="text-[11px] text-muted-foreground">{l.city} · {l.business_activity || "—"} · {l.price ? `${Number(l.price).toLocaleString("en-US")} ر.س` : "—"}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={cn("text-[10px] px-2 py-0.5 rounded-md", l.status === "published" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
@@ -648,13 +625,9 @@ const OwnerDashboardPage = () => {
           </div>
         )}
 
-        {/* ===== CRM ===== */}
         {activeTab === "crm" && <CrmDashboard />}
-
-        {/* ===== SECURITY ===== */}
         {activeTab === "security" && <SecurityIncidentPanel />}
 
-        {/* ===== SETTINGS ===== */}
         {activeTab === "settings" && (
           <div className="space-y-2">
             {[
