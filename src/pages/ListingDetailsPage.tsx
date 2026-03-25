@@ -284,53 +284,48 @@ const ListingDetailsPage = () => {
               />
             )}
 
-            {/* Summary */}
-            {(listing.description || listing.ai_summary) && (
-              <div className="border-b border-border/20 pb-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <AiStar size={20} animate={false} />
-                  <h2 className="font-medium">ملخص الفرصة</h2>
+            {/* Details Card */}
+            <div className="bg-card rounded-2xl p-6 shadow-soft space-y-5">
+              {/* Summary */}
+              {(listing.description || listing.ai_summary) && (
+                <div className="border-b border-border/20 pb-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <AiStar size={20} animate={false} />
+                    <h2 className="font-medium">ملخص الفرصة</h2>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {listing.ai_summary || listing.description}
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {listing.ai_summary || listing.description}
-                </p>
-              </div>
-            )}
+              )}
 
-            {/* Inventory */}
-            {inventory.length > 0 && (
-              <ExpandableSection title="جرد الأصول المؤكّد" itemCount={inventory.length} threshold={5}>
-                <div className="space-y-2">
-                  {inventory.map((item, i) => (
-                    <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
-                      <span className="text-sm">{item.name}</span>
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm text-muted-foreground">{item.qty} وحدة</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-md ${item.condition === "جديد" || item.condition === "شبه جديد" ? "bg-success/10 text-success" : item.condition === "تالف" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}>
-                          {item.condition}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ExpandableSection>
-            )}
-
-            {/* Documents */}
-            {documents.length > 0 && (
-              <ExpandableSection title="المستندات الداعمة" icon={<FileText size={16} strokeWidth={1.3} />} itemCount={documents.length} threshold={5}>
-                <div className="space-y-2">
-                  {documents.map((doc, i) => (
-                    <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
-                      <span className="text-sm">{doc.name}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-md ${doc.status === "مرفق" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                        {doc.status}
+              {/* Inventory */}
+              {inventory.length > 0 && (
+                <CollapsibleList title="جرد الأصول المؤكّد" items={inventory} threshold={5} renderItem={(item, i) => (
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                    <span className="text-sm">{item.name}</span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-muted-foreground">{item.qty} وحدة</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-md ${item.condition === "جديد" || item.condition === "شبه جديد" ? "bg-success/10 text-success" : item.condition === "تالف" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}>
+                        {item.condition}
                       </span>
                     </div>
-                  ))}
-                </div>
-              </ExpandableSection>
-            )}
+                  </div>
+                )} />
+              )}
+
+              {/* Documents */}
+              {documents.length > 0 && (
+                <CollapsibleList title="المستندات الداعمة" icon={<FileText size={16} strokeWidth={1.3} />} items={documents} threshold={5} renderItem={(doc, i) => (
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                    <span className="text-sm">{doc.name}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-md ${doc.status === "مرفق" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                      {doc.status}
+                    </span>
+                  </div>
+                )} />
+              )}
+            </div>
 
             <DealCheckPanel listing={listing} savedAnalysis={listing.ai_structure_validation} />
           </div>
