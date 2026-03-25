@@ -594,31 +594,7 @@ const NegotiationPage = () => {
 
           {/* ═══════════ SIDEBAR ═══════════ */}
           <div className="space-y-4">
-            {/* Tabs */}
-            <div className="flex bg-muted/40 rounded-xl p-0.5">
-              <button
-                onClick={() => setSidebarTab("summary")}
-                className={cn(
-                  "flex-1 text-[11px] py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5",
-                  sidebarTab === "summary" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Info size={12} strokeWidth={1.5} /> ملخص الصفقة
-              </button>
-              <button
-                onClick={() => setSidebarTab("actions")}
-                className={cn(
-                  "flex-1 text-[11px] py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5",
-                  sidebarTab === "actions" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <FileCheck size={12} strokeWidth={1.5} /> الإجراءات
-                {isPostAgreement && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />}
-              </button>
-            </div>
-
-            {/* ═══ TAB: Summary ═══ */}
-            {sidebarTab === "summary" && (
+            {/* ═══ Sidebar Content ═══ */}
               <div className="space-y-4 animate-in fade-in-0 duration-200">
                 {/* Deal Readiness Card (merged: status + risk) */}
                 <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
@@ -736,27 +712,7 @@ const NegotiationPage = () => {
                     </div>
                   </div>
                 )}
-              </div>
-            )}
 
-            {/* ═══ TAB: Actions ═══ */}
-            {sidebarTab === "actions" && (
-              <div className="space-y-4 animate-in fade-in-0 duration-200">
-                {/* Legal Confirmation */}
-                {!isPostAgreement && (
-                  <div className="bg-card rounded-2xl p-4 shadow-soft border border-primary/15">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Scale size={13} strokeWidth={1.5} className="text-primary" />
-                      <h3 className="font-medium text-xs">التأكيد القانوني</h3>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
-                      عند الاتفاق على السعر والشروط، يمكنكم البدء في التأكيد الرسمي.
-                    </p>
-                    <Button onClick={() => setShowLegalPanel(true)} variant="outline" className="w-full rounded-xl active:scale-[0.98] text-xs">
-                      بدء التأكيد القانوني
-                    </Button>
-                  </div>
-                )}
 
                 {/* Finalized state */}
                 {deal.status === "finalized" && (
@@ -790,17 +746,7 @@ const NegotiationPage = () => {
                 {isBuyer && isPostAgreement && deal.seller_id && (
                   <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
                 )}
-
-                {/* Empty state for actions tab during negotiation */}
-                {!isPostAgreement && (
-                  <div className="text-center py-6">
-                    <p className="text-[11px] text-muted-foreground/60">
-                      أكمل التفاوض أولاً، ثم ستظهر هنا إجراءات العمولة والاتفاقية
-                    </p>
-                  </div>
-                )}
               </div>
-            )}
           </div>
         </div>
       </div>
