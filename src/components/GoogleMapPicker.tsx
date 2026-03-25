@@ -167,7 +167,9 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         map.setZoom(15);
         marker.setPosition(place.geometry.location);
         marker.setVisible(true);
-        onLocationChange(place.geometry.location.lat(), place.geometry.location.lng(), place.formatted_address);
+        const details = extractPlaceDetails(place.address_components || []);
+        details.address = place.formatted_address;
+        onLocationChange(place.geometry.location.lat(), place.geometry.location.lng(), place.formatted_address, details);
         setSelectedAddress(place.formatted_address || null);
       });
 
