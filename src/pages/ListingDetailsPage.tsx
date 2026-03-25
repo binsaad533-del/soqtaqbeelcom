@@ -22,6 +22,7 @@ import SarSymbol from "@/components/SarSymbol";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
+import ReportListingDialog from "@/components/ReportListingDialog";
 
 
 const ListingDetailsPage = () => {
@@ -401,6 +402,13 @@ const ListingDetailsPage = () => {
               {/* Seller Reviews */}
               {sellerReviews.length > 0 && (
                 <SellerReviewsSummary reviews={sellerReviews} className="mt-4" />
+              )}
+
+              {/* Report */}
+              {!isOwner && !isSimulation && (
+                <div className="mt-4 flex justify-center">
+                  <ReportListingDialog listingId={listing.id} />
+                </div>
               )}
             </div>
           </div>

@@ -6,6 +6,7 @@ import AiAssistant from "./AiAssistant";
 import Footer from "./Footer";
 import NotificationBell from "./NotificationBell";
 import ThemeToggle from "./ThemeToggle";
+import LanguageToggle from "./LanguageToggle";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 
@@ -74,7 +75,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
+            <LanguageToggle />
             <ThemeToggle />
             {user ? (
               <>

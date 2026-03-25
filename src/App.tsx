@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SessionGuard from "./components/SessionGuard";
@@ -32,6 +33,7 @@ import NotFound from "./pages/NotFound";
 import AgreementsArchivePage from "./pages/AgreementsArchivePage";
 import SellerProfilePage from "./pages/SellerProfilePage";
 import HelpCenterPage from "./pages/HelpCenterPage";
+import BlogPage from "./pages/BlogPage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <LanguageProvider>
         <AuthProvider>
           <ErrorBoundary>
           <SessionGuard />
@@ -60,6 +63,7 @@ const App = () => (
               <Route path="/marketplace" element={<MarketplacePage />} />
               <Route path="/seller/:id" element={<SellerProfilePage />} />
               <Route path="/help" element={<HelpCenterPage />} />
+              <Route path="/blog" element={<BlogPage />} />
               <Route path="/listing/:id" element={<ListingDetailsPage />} />
               <Route
                 path="/create-listing"
@@ -116,6 +120,7 @@ const App = () => (
           </Layout>
           </ErrorBoundary>
         </AuthProvider>
+        </LanguageProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
