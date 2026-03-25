@@ -657,12 +657,6 @@ const NegotiationPage = () => {
                 </div>
               )}
 
-              {/* Commission */}
-              {isPostAgreement && listing?.price && (
-                <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
-                  <CommissionBanner dealAmount={deal.agreed_price || listing.price} showDetails />
-                </div>
-              )}
 
               {commission && isPostAgreement && (
                 <CommissionPaymentPanel commission={commission} isSeller={user?.id === deal.seller_id} onUpdate={loadData} />
@@ -670,6 +664,13 @@ const NegotiationPage = () => {
 
               {isBuyer && isPostAgreement && deal.seller_id && (
                 <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
+              )}
+
+              {/* Commission — compact footer */}
+              {isPostAgreement && listing?.price && (
+                <div className="pt-2 mt-auto">
+                  <CommissionBanner dealAmount={deal.agreed_price || listing.price} showDetails className="!p-2.5 !rounded-lg text-[10px]" />
+                </div>
               )}
             </div>
           </div>
