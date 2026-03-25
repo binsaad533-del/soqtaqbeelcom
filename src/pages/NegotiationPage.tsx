@@ -485,15 +485,14 @@ const NegotiationPage = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">الموقع</span>
                       {listing.location_lat && listing.location_lng ? (
-                        <a
-                          href={`https://www.google.com/maps?q=${listing.location_lat},${listing.location_lng}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-medium text-primary hover:underline flex items-center gap-1"
+                        <button
+                          type="button"
+                          onClick={() => window.open(`https://www.google.com/maps?q=${listing.location_lat},${listing.location_lng}`, '_blank', 'noopener,noreferrer')}
+                          className="font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 text-xs"
                         >
                           {listing.city}{listing.district ? ` — ${listing.district}` : ""}
                           <MapPin size={11} strokeWidth={1.5} />
-                        </a>
+                        </button>
                       ) : (
                         <span className="font-medium">{listing.city}{listing.district ? ` — ${listing.district}` : ""}</span>
                       )}
