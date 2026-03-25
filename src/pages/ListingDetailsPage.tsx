@@ -134,27 +134,6 @@ const ListingDetailsPage = () => {
 
   return (
     <>
-      {myActiveDeal && (
-        <div className="fixed top-0 left-0 right-0 z-50 p-3 bg-primary/10 border-b border-primary/20 backdrop-blur-md">
-          <div className="container flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <MessageCircle size={14} className="text-primary" />
-              <span className="text-xs text-foreground font-medium">
-                لديك صفقة جارية على هذا الإعلان
-              </span>
-              <span className="text-[10px] text-muted-foreground">
-                ({myActiveDeal.status === "negotiating" ? "جاري التفاوض" : myActiveDeal.status === "finalized" ? "مُقفل" : myActiveDeal.status})
-              </span>
-            </div>
-            <Button asChild size="sm" className="rounded-xl text-xs gap-1.5">
-              <Link to={`/negotiate/${myActiveDeal.id}`}>
-                <ArrowLeft size={12} />
-                الانتقال للمفاوضات
-              </Link>
-            </Button>
-          </div>
-        </div>
-      )}
       <div className={myActiveDeal ? "pt-20" : "py-8"}>
       <div className="container">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
