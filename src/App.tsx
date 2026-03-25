@@ -79,6 +79,14 @@ const App = () => (
                 }
               />
               <Route
+                path="/agreements-archive"
+                element={
+                  <ProtectedRoute>
+                    <AgreementsArchivePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
