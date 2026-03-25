@@ -441,7 +441,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
 
 /* ─── Sub-components ─── */
 
-const Row = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
+const Row = ({ label, value, highlight }: { label: string; value: React.ReactNode; highlight?: boolean }) => (
   <div className="flex items-center justify-between text-xs">
     <span className="text-muted-foreground">{label}</span>
     <span className={cn("font-medium", highlight && "text-primary")}>{value}</span>
