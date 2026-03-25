@@ -252,7 +252,7 @@ const CustomerDashboardPage = () => {
               return (
                 <Link key={draft.id} to="/create-listing" className="flex items-center justify-between p-4 rounded-xl bg-muted/50 border border-border/40 hover:bg-muted/70 transition-all group mb-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
                       <FileText size={16} className="text-primary" strokeWidth={1.5} />
                     </div>
                     <div>
