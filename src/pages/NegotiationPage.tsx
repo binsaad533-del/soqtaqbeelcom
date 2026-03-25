@@ -461,6 +461,15 @@ const NegotiationPage = () => {
                   <p className="text-[11px] mt-1.5 text-muted-foreground/60 max-w-xs mx-auto">
                     المساعد الذكي متاح لمساعدتك في أي وقت — اضغط ✨ أسفل الدردشة
                   </p>
+                  {!isPostAgreement && deal.status === "negotiating" && (
+                    <Button
+                      onClick={() => setShowLegalPanel(true)}
+                      className="mt-4 rounded-xl text-xs gradient-primary text-primary-foreground gap-1.5"
+                    >
+                      <Scale size={14} strokeWidth={1.5} />
+                      متفقون؟ انتقل للتأكيد القانوني
+                    </Button>
+                  )}
                 </div>
               )}
               {messages.map((msg) => (
