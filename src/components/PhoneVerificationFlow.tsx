@@ -4,7 +4,6 @@ import { usePhoneVerification } from "@/hooks/usePhoneVerification";
 import { toDigitsOnly } from "@/lib/arabicNumerals";
 import AiStar from "@/components/AiStar";
 import { Phone, ChevronDown, CheckCircle, AlertCircle } from "lucide-react";
-import { Phone, ChevronDown, CheckCircle, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const COUNTRY_CODES = [
