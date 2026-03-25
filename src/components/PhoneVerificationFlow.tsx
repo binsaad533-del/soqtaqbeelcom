@@ -151,7 +151,7 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
   return (
     <div className={cn("space-y-3", mode === "modal" && "p-1")} dir="rtl">
 
-      {step === "phone" && (
+      {step === "phone" && !skipPhoneStep && (
         <div className="flex items-end gap-2 flex-wrap sm:flex-nowrap">
           {/* Country code */}
           <div className="relative">
@@ -264,13 +264,17 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
             ) : (
               <button onClick={handleResend} disabled={sending} className="text-primary hover:underline">إعادة الإرسال</button>
             )}
-            <span className="text-border/50">|</span>
-            <button
-              onClick={() => { setStep("phone"); setOtpCode(""); setError(""); setAiMessage("عدّل رقمك وأرسل كود جديد"); }}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              تغيير الرقم
-            </button>
+            {!skipPhoneStep && (
+              <>
+                <span className="text-border/50">|</span>
+                <button
+                  onClick={() => { setStep("phone"); setOtpCode(""); setError(""); setAiMessage("عدّل رقمك وأرسل كود جديد"); }}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  تغيير الرقم
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
