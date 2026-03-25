@@ -113,7 +113,7 @@ export default function ChatAttachmentButton({ dealId, onFileSent, disabled }: C
                 <button
                   onClick={handleSendPreview}
                   disabled={uploading}
-                  className="text-[11px] px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-1"
+                  className="text-[11px] px-3 py-1.5 rounded-lg bg-gradient-to-l from-primary to-primary/70 text-primary-foreground hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-1"
                 >
                   {uploading ? <Loader2 size={12} className="animate-spin" /> : null}
                   إرسال
