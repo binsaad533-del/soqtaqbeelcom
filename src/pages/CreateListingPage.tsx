@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { useListings } from "@/hooks/useListings";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
@@ -147,6 +148,8 @@ const CreateListingPage = () => {
   });
 
   const { createListing, updateListing, uploadFile, getMyDraft, loading } = useListings();
+  const { profile } = useAuthContext();
+  const sellerName = profile?.full_name || "";
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
@@ -631,7 +634,7 @@ const CreateListingPage = () => {
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: { listing: buildListingPayload(), perspective: "seller" },
+        body: { listing: buildListingPayload(), perspective: "seller", sellerName },
       });
       if (fnError) throw new Error(fnError.message);
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
@@ -670,7 +673,7 @@ const CreateListingPage = () => {
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: { listing: buildListingPayload(), perspective: "seller" },
+        body: { listing: buildListingPayload(), perspective: "seller", sellerName },
       });
       if (fnError) throw new Error(fnError.message);
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");

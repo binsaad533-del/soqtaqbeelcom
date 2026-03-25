@@ -65,15 +65,19 @@ function buildDealTypeContext(listing: any): string {
   return context;
 }
 
-const SELLER_PERSPECTIVE = `
+function buildSellerPerspective(sellerName?: string): string {
+  const nameGreeting = sellerName ? `- خاطب البائع باسمه "${sellerName}" عند التوصيات والإرشادات (مثل: "يا ${sellerName}، ننصحك...")` : '- خاطب البائع بضمير المخاطب ("إعلانك"، "سعرك"، "صفقتك")';
+  return `
 ## منظور التحليل: البائع (قبل النشر)
-- خاطب البائع مباشرةً بضمير المخاطب ("إعلانك"، "سعرك"، "صفقتك")
+${nameGreeting}
+- لا تستخدم عبارة "يا بائع" أبداً — استخدم الاسم إن وُجد أو ضمير المخاطب
 - قدّم توصيات عملية لتحسين الإعلان قبل النشر
 - وصِّ بسعر أقل بـ 10% من متوسط السوق لجذب المشترين بسرعة
 - في التوصية والإرشادات: اقترح تحسينات على البيانات والصور والسعر
-- نبّه البائع إلى النقاط التي قد تُثير تساؤلات المشترين
-- في negotiationGuidance: قدّم نصائح للبائع حول كيف يتفاوض ويدافع عن سعره
-- مثال على التوصية: "ننصحك بتسعير صفقتك بـ X ريال (أقل بـ 10% من متوسط السوق) لتسريع البيع"`;
+- نبّه إلى النقاط التي قد تُثير تساؤلات المشترين
+- في negotiationGuidance: قدّم نصائح حول كيف يتفاوض ويدافع عن سعره
+- مثال على التوصية: "${sellerName ? `يا ${sellerName}، ننصحك` : 'ننصحك'} بتسعير صفقتك بـ X ريال (أقل بـ 10% من متوسط السوق) لتسريع البيع"`;
+}
 
 const BUYER_PERSPECTIVE = `
 ## منظور التحليل: المشتري (بعد النشر)
@@ -85,8 +89,8 @@ const BUYER_PERSPECTIVE = `
 - في negotiationGuidance: قدّم نصائح للمشتري حول كيف يتفاوض ويحصل على سعر أفضل
 - مثال: "يمكنك التفاوض لخفض السعر إلى X ريال بناءً على حالة الأصول"`;
 
-function buildSystemPrompt(perspective: "seller" | "buyer"): string {
-  const perspectiveBlock = perspective === "seller" ? SELLER_PERSPECTIVE : BUYER_PERSPECTIVE;
+function buildSystemPrompt(perspective: "seller" | "buyer", sellerName?: string): string {
+  const perspectiveBlock = perspective === "seller" ? buildSellerPerspective(sellerName) : BUYER_PERSPECTIVE;
   
   return `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية قصيرة وقوية لكل صفقة.
 
@@ -151,7 +155,7 @@ serve(async (req) => {
   }
 
   try {
-    const { listing, perspective: rawPerspective } = await req.json();
+    const { listing, perspective: rawPerspective, sellerName } = await req.json();
     const perspective: "seller" | "buyer" = rawPerspective === "seller" ? "seller" : "buyer";
 
     if (!listing) {
@@ -180,7 +184,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: buildSystemPrompt(perspective) },
+          { role: "system", content: buildSystemPrompt(perspective, sellerName) },
           { role: "user", content: userPrompt },
         ],
         tools: [
