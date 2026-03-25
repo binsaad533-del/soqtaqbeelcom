@@ -250,7 +250,7 @@ const CustomerDashboardPage = () => {
               const daysSince = Math.floor((Date.now() - new Date(draft.updated_at).getTime()) / 86400000);
               const timeLabel = daysSince === 0 ? "اليوم" : daysSince === 1 ? "أمس" : `منذ ${daysSince} يوم`;
               return (
-                <Link key={draft.id} to="/create-listing" className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/15 hover:bg-primary/10 transition-all group mb-2">
+                <Link key={draft.id} to="/create-listing" className="flex items-center justify-between p-4 rounded-xl bg-muted/50 border border-border/40 hover:bg-muted/70 transition-all group mb-2">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
                       <FileText size={16} className="text-primary" strokeWidth={1.5} />
