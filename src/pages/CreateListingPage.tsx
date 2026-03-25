@@ -1311,10 +1311,10 @@ const CreateListingPage = () => {
                 </div>
               ) : (
                 <>
-                  <div className="rounded-xl bg-success/5 border border-success/20 p-4 text-center">
+                  <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 text-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
-                        <Check size={18} strokeWidth={1.5} className="text-success" />
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Check size={18} strokeWidth={1.5} className="text-primary" />
                       </div>
                       <h2 className="font-medium text-sm">اكتمل التحليل — تم اكتشاف {inventory.length} أصل</h2>
                     </div>
