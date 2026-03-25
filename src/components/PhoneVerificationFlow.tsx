@@ -218,7 +218,7 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline" }: Ph
               <InputOTP
                 maxLength={6}
                 value={otpCode}
-                onChange={setOtpCode}
+                onChange={(val) => setOtpCode(toDigitsOnly(val))}
               >
                 <InputOTPGroup>
                   <InputOTPSlot index={0} className="h-8 w-8 text-xs" />

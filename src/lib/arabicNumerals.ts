@@ -1,10 +1,10 @@
 /**
- * Convert Arabic/Eastern numerals (٠١٢٣٤٥٦٧٨٩) to English (0123456789)
+ * Convert Arabic/Eastern numerals (٠-٩) and Persian numerals (۰-۹) to English (0-9)
  */
 export function toEnglishNumerals(str: string): string {
-  return str.replace(/[٠-٩]/g, (d) =>
-    String("٠١٢٣٤٥٦٧٨٩".indexOf(d))
-  );
+  return str
+    .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+    .replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
 }
 
 /**
