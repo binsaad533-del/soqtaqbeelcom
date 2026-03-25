@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
 import { useParams, Link } from "react-router-dom";
 import {
@@ -73,10 +73,55 @@ const AgreementPage = () => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const agreementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadData();
   }, [id]);
+
+  const handleDownloadPdf = async () => {
+    if (!agreementRef.current) return;
+    setPdfLoading(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const canvas = await html2canvas(agreementRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgData = canvas.toDataURL("image/png");
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const title = agreement?.deal_title || agreement?.agreement_number || "agreement";
+      pdf.save(`اتفاقية-${title}.pdf`);
+      toast.success("تم تحميل الاتفاقية بنجاح");
+    } catch {
+      toast.error("حدث خطأ أثناء إنشاء ملف PDF");
+    } finally {
+      setPdfLoading(false);
+    }
+  };
 
   const loadData = async () => {
     if (!id) return;
@@ -614,8 +659,8 @@ const AgreementPage = () => {
                 اعتماد الاتفاقية (بائع)
               </Button>
             )}
-            <Button variant="outline" className="rounded-xl active:scale-[0.98]">
-              <Download size={16} strokeWidth={1.5} />
+            <Button variant="outline" className="rounded-xl active:scale-[0.98]" onClick={handleDownloadPdf} disabled={pdfLoading}>
+              {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} strokeWidth={1.5} />}
               تنزيل PDF
             </Button>
           </div>
