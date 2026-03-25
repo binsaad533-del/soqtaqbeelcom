@@ -622,6 +622,7 @@ const CustomerDashboardPage = () => {
                 />
               </div>
               )}
+            </div>
 
             {/* Status filter chips */}
             {activeTab === "deals" && (
