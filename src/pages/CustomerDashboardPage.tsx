@@ -459,80 +459,81 @@ const CustomerDashboardPage = () => {
           ))}
         </div>
 
-        {/* ═══ MONTHLY CHART ═══ */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 animate-reveal" style={{ animationDelay: '320ms' }}>
-            <h3 className="text-xs font-medium text-muted-foreground mb-4">الصفقات الشهرية</h3>
-            <div className="h-[160px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthlyChart} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="fillCompleted" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }} />
-                  <Area type="monotone" dataKey="total" name="إجمالي" stroke="hsl(var(--primary))" fill="url(#fillTotal)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="completed" name="مكتملة" stroke="hsl(var(--success))" fill="url(#fillCompleted)" strokeWidth={2} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 animate-reveal" style={{ animationDelay: '380ms' }}>
-            <h3 className="text-xs font-medium text-muted-foreground mb-4">قيمة الصفقات الشهرية (ر.س)</h3>
-            <div className="h-[160px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthlyChart} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="fillValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--warning))" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="hsl(var(--warning))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : String(v)} />
-                  <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }} formatter={(v: number) => [v.toLocaleString('en-US') + ' ر.س', 'القيمة']} />
-                  <Area type="monotone" dataKey="value" name="القيمة" stroke="hsl(var(--warning))" fill="url(#fillValue)" strokeWidth={2} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          </div>
-          {/* Pie Chart */}
-          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 animate-reveal" style={{ animationDelay: '440ms' }}>
-            <h3 className="text-xs font-medium text-muted-foreground mb-4">توزيع حالات الصفقات</h3>
-            <div className="h-[160px] flex items-center justify-center">
-              {statusPie.length === 0 ? (
-                <p className="text-xs text-muted-foreground">لا توجد صفقات</p>
-              ) : (
+        {/* ═══ CHARTS — COMPACT SINGLE CARD ═══ */}
+        <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 mb-6 animate-reveal" style={{ animationDelay: '320ms' }}>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <h3 className="text-[10px] font-medium text-muted-foreground mb-2">الصفقات الشهرية</h3>
+              <div className="h-[110px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={statusPie} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value" paddingAngle={3} strokeWidth={0}>
-                      {statusPie.map((entry, idx) => (
-                        <Cell key={idx} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }} />
-                  </PieChart>
+                  <AreaChart data={monthlyChart} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="fillCompleted" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.2} />
+                        <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="name" tick={{ fontSize: 8, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 8, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} allowDecimals={false} width={25} />
+                    <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 10, direction: 'rtl' }} />
+                    <Area type="monotone" dataKey="total" name="إجمالي" stroke="hsl(var(--primary))" fill="url(#fillTotal)" strokeWidth={1.5} />
+                    <Area type="monotone" dataKey="completed" name="مكتملة" stroke="hsl(var(--success))" fill="url(#fillCompleted)" strokeWidth={1.5} />
+                  </AreaChart>
                 </ResponsiveContainer>
-              )}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3 justify-center mt-2">
-              {statusPie.map((s, i) => (
-                <div key={i} className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full" style={{ background: s.color }} />
-                  <span className="text-[10px] text-muted-foreground">{s.name} ({s.value})</span>
-                </div>
-              ))}
+            <div>
+              <h3 className="text-[10px] font-medium text-muted-foreground mb-2">قيمة الصفقات (ر.س)</h3>
+              <div className="h-[110px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={monthlyChart} margin={{ top: 0, right: 0, left: -15, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="fillValue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--warning))" stopOpacity={0.2} />
+                        <stop offset="100%" stopColor="hsl(var(--warning))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="name" tick={{ fontSize: 8, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 8, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : String(v)} width={30} />
+                    <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 10, direction: 'rtl' }} formatter={(v: number) => [v.toLocaleString('en-US') + ' ر.س', 'القيمة']} />
+                    <Area type="monotone" dataKey="value" name="القيمة" stroke="hsl(var(--warning))" fill="url(#fillValue)" strokeWidth={1.5} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div className="flex flex-col items-center">
+              <h3 className="text-[10px] font-medium text-muted-foreground mb-2 self-end">توزيع الحالات</h3>
+              <div className="h-[90px] w-[90px]">
+                {statusPie.length === 0 ? (
+                  <p className="text-[10px] text-muted-foreground text-center pt-8">لا توجد</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={statusPie} cx="50%" cy="50%" innerRadius={25} outerRadius={40} dataKey="value" paddingAngle={3} strokeWidth={0}>
+                        {statusPie.map((entry, idx) => (
+                          <Cell key={idx} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 10, direction: 'rtl' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2 justify-center mt-1">
+                {statusPie.map((s, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color }} />
+                    <span className="text-[9px] text-muted-foreground">{s.name} ({s.value})</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
+        </div>
 
         {/* ═══ SMART SUGGESTIONS ═══ */}
         {suggestions.length > 0 && (
