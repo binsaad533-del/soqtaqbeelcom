@@ -114,7 +114,7 @@ const HomePage = () => {
                 style={{ opacity: 0, animationDelay: `${i * 120}ms` }}
                 className="group bg-card rounded-2xl p-5 shadow-soft hover:shadow-soft-lg hover:scale-[1.03] hover:-translate-y-1 transition-all duration-300 cursor-default"
               >
-                <span className="inline-flex w-8 h-8 rounded-lg bg-primary/10 text-primary items-center justify-center font-medium text-sm mb-3 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                <span className="inline-flex w-8 h-8 rounded-lg bg-primary/10 text-primary items-center justify-center font-medium text-sm mb-3 group-hover:bg-gradient-to-l group-hover:from-primary group-hover:to-primary/70 group-hover:text-primary-foreground transition-all duration-300">
                   {item.num}
                 </span>
                 <h3 className="font-medium mb-1.5 group-hover:text-primary transition-colors duration-300">{item.title}</h3>
