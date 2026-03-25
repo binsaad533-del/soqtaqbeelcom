@@ -426,50 +426,201 @@ const NegotiationPage = () => {
           <span>{listingTitle}</span>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-5">
-          {/* ═══════════ CHAT AREA ═══════════ */}
-          <div className="lg:col-span-2 bg-card rounded-2xl shadow-soft flex flex-col" style={{ height: "78vh" }}>
-            {/* Chat Header — compact */}
-            <div className="px-4 py-3 border-b border-border/20 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <MessageSquare size={14} className="text-primary" strokeWidth={1.5} />
+        <div className="grid lg:grid-cols-5 gap-5">
+          {/* ═══════════ DEAL SUMMARY (3 cols) ═══════════ */}
+          <div className="lg:col-span-3 order-2 lg:order-1">
+            <div className="space-y-4">
+              {/* Deal Readiness Card */}
+              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-medium text-xs flex items-center gap-1.5">
+                    <CheckCircle2 size={13} className="text-primary" strokeWidth={1.5} />
+                    جاهزية الصفقة
+                  </h3>
+                  <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-md", 
+                    readinessPercent >= 70 ? "bg-success/10 text-success" : 
+                    readinessPercent >= 40 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
+                  )}>
+                    {readinessPercent}%
+                  </span>
+                </div>
+                
+                <div className="w-full h-1.5 rounded-full bg-muted/60 mb-3">
+                  <div
+                    className={cn("h-full rounded-full transition-all duration-500",
+                      readinessPercent >= 70 ? "bg-success" : readinessPercent >= 40 ? "bg-warning" : "bg-destructive"
+                    )}
+                    style={{ width: `${readinessPercent}%` }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">الحالة</span>
+                    <span className="text-primary font-medium">{statusLabel}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">الرسائل</span>
+                    <span className="font-medium">{messages.length}</span>
+                  </div>
+                  {deal.agreed_price && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">السعر المتفق</span>
+                      <span className="font-medium">{Number(deal.agreed_price).toLocaleString("en-US")} ر.س</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Interactive readiness steps */}
+                {(() => {
+                  const allSteps = [
+                    { key: "buyer_verified", label: "توثيق المشتري", factor: "مشتري غير موثق", action: "verify" as const, path: "/dashboard", done: profile?.is_verified === true || (profile?.verification_level !== "none") },
+                    { key: "seller_verified", label: "توثيق البائع", factor: "بائع غير موثق", action: "verify" as const, path: "/dashboard", done: otherProfile?.is_verified === true || (otherProfile?.verification_level && otherProfile.verification_level !== "none") },
+                    { key: "deal_type", label: "تحديد نوع الصفقة", factor: "نوع الصفقة غير محدد", action: "deal_type" as const, path: `/listing/${deal.listing_id}`, done: !!deal.deal_type },
+                    { key: "has_messages", label: "بدء المحادثة", factor: "صفقة جديدة بدون رسائل", action: "chat" as const, path: "", done: messages.length > 0 },
+                    { key: "agreed_price", label: "الاتفاق على السعر", factor: "لا يوجد سعر متفق عليه", action: "chat" as const, path: "", done: !!deal.agreed_price },
+                  ];
+                  const riskFactors = (deal.risk_factors as string[]) || [];
+                  const relevantSteps = allSteps.filter(s => riskFactors.includes(s.factor) || s.done);
+                  if (relevantSteps.length === 0) return null;
+
+                  return (
+                    <div className="mt-3 pt-3 border-t border-border/20">
+                      <p className="text-[10px] text-muted-foreground mb-2">خطوات الجاهزية:</p>
+                      <div className="space-y-1.5">
+                        {relevantSteps.map((step) => (
+                          <div key={step.key} className="flex items-center gap-2 text-[10px] group">
+                            {step.done ? (
+                              <div className="w-4 h-4 rounded-full bg-success/15 flex items-center justify-center shrink-0">
+                                <CheckCircle2 size={10} className="text-success" strokeWidth={2} />
+                              </div>
+                            ) : (
+                              <div className="w-4 h-4 rounded-full bg-warning/15 flex items-center justify-center shrink-0">
+                                <div className="w-1.5 h-1.5 rounded-full bg-warning" />
+                              </div>
+                            )}
+                            <span className={cn("flex-1", step.done ? "text-muted-foreground/50 line-through" : "text-muted-foreground")}>
+                              {step.done ? step.label : step.factor}
+                            </span>
+                            {!step.done && (
+                              step.action === "chat" ? (
+                                <button
+                                  onClick={() => {
+                                    const chatInput = document.querySelector<HTMLInputElement>('input[placeholder="اكتب رسالتك..."]');
+                                    chatInput?.focus();
+                                  }}
+                                  className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover:opacity-100"
+                                >
+                                  {step.label}
+                                </button>
+                              ) : (
+                                <Link
+                                  to={step.path}
+                                  className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover:opacity-100"
+                                >
+                                  {step.label}
+                                </Link>
+                              )
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* CTA: Legal confirmation */}
+              {!isPostAgreement && deal.status === "negotiating" && (
+                <button
+                  onClick={() => setShowLegalPanel(true)}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-l from-primary/10 to-primary/5 border border-primary/20 text-primary text-xs font-medium hover:from-primary/15 hover:to-primary/10 transition-all active:scale-[0.98]"
+                >
+                  <Scale size={13} strokeWidth={1.5} />
+                  متفقون؟ انتقل للتأكيد القانوني وإتمام الصفقة
+                  <ArrowRight size={13} strokeWidth={1.5} className="rotate-180" />
+                </button>
+              )}
+
+              {/* Other party trust */}
+              {otherProfile && (
+                <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Shield size={13} strokeWidth={1.5} className="text-primary" />
+                    <h3 className="font-medium text-xs">ملف {otherParty}</h3>
+                  </div>
+                  <TrustBadge score={otherProfile.trust_score} verificationLevel={otherProfile.verification_level} size="md" showScore />
+                  <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
+                    <span>✅ مكتملة: {otherProfile.completed_deals || 0}</span>
+                    <span>❌ ملغاة: {otherProfile.cancelled_deals || 0}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Finalized state */}
+              {deal.status === "finalized" && (
+                <div className="bg-gradient-to-b from-primary/5 to-card rounded-2xl p-4 shadow-soft border border-primary/15">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Shield size={13} strokeWidth={1.5} className="text-primary" />
+                    <h3 className="font-medium text-xs">الصفقة مُقفلة ✓</h3>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+                    تمت الموافقة من الطرفين. يمكنك الانتقال للاتفاقية.
+                  </p>
+                  <Button asChild className="w-full rounded-xl text-xs gradient-primary text-primary-foreground">
+                    <Link to={`/agreement/${dealId}`}>عرض الاتفاقية</Link>
+                  </Button>
+                </div>
+              )}
+
+              {/* Commission */}
+              {isPostAgreement && listing?.price && (
+                <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
+                  <CommissionBanner dealAmount={deal.agreed_price || listing.price} showDetails />
+                </div>
+              )}
+
+              {commission && isPostAgreement && (
+                <CommissionPaymentPanel commission={commission} isSeller={user?.id === deal.seller_id} onUpdate={loadData} />
+              )}
+
+              {isBuyer && isPostAgreement && deal.seller_id && (
+                <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
+              )}
+            </div>
+          </div>
+
+          {/* ═══════════ CHAT (2 cols, compact) ═══════════ */}
+          <div className="lg:col-span-2 order-1 lg:order-2 bg-card rounded-2xl shadow-soft flex flex-col" style={{ height: "65vh" }}>
+            {/* Chat Header */}
+            <div className="px-4 py-2.5 border-b border-border/20 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                  <MessageSquare size={12} className="text-primary" strokeWidth={1.5} />
                 </div>
                 <div>
-                  <h2 className="font-medium text-sm leading-tight">{listingTitle}</h2>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                  <h2 className="font-medium text-xs leading-tight">{listingTitle}</h2>
+                  <p className="text-[9px] text-muted-foreground">
                     {listing?.price ? `${Number(listing.price).toLocaleString("en-US")} ر.س` : ""} — {statusLabel}
                   </p>
                 </div>
               </div>
               {deal.risk_score !== null && deal.risk_score !== undefined && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/50">
-                  <div className={`w-1.5 h-1.5 rounded-full ${riskColor.replace("text-", "bg-")}`} />
-                  <span className={`text-[10px] font-medium ${riskColor}`}>جاهزية {riskLabel}</span>
-                </div>
+                <div className={`w-1.5 h-1.5 rounded-full ${riskColor.replace("text-", "bg-")}`} />
               )}
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
               {messages.length === 0 && (
-                <div className="text-center py-16 text-sm text-muted-foreground">
-                  <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mx-auto mb-4">
-                    <AiStar size={20} />
+                <div className="text-center py-10 text-sm text-muted-foreground">
+                  <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center mx-auto mb-3">
+                    <AiStar size={16} />
                   </div>
-                  <p className="font-medium">ابدأ المحادثة مع {otherParty}</p>
-                  <p className="text-[11px] mt-1.5 text-muted-foreground/60 max-w-xs mx-auto">
-                    المساعد الذكي متاح لمساعدتك في أي وقت — اضغط ✨ أسفل الدردشة
+                  <p className="font-medium text-xs">ابدأ المحادثة مع {otherParty}</p>
+                  <p className="text-[10px] mt-1 text-muted-foreground/60 max-w-[200px] mx-auto">
+                    اضغط ✨ لاستخدام المساعد الذكي
                   </p>
-                  {!isPostAgreement && deal.status === "negotiating" && (
-                    <Button
-                      onClick={() => setShowLegalPanel(true)}
-                      className="mt-4 rounded-xl text-xs gradient-primary text-primary-foreground gap-1.5"
-                    >
-                      <Scale size={14} strokeWidth={1.5} />
-                      متفقون؟ انتقل للتأكيد القانوني
-                    </Button>
-                  )}
                 </div>
               )}
               {messages.map((msg) => (
@@ -478,91 +629,76 @@ const NegotiationPage = () => {
               <div ref={chatEndRef} />
             </div>
 
-            {/* AI Analysis inline (appears above input when triggered) */}
+            {/* AI Analysis inline */}
             {showAiPanel && aiAnalysis && (
-              <div className="mx-4 mb-2 p-3 rounded-xl bg-accent/20 border border-accent/30">
-                <div className="flex items-center justify-between mb-1.5">
+              <div className="mx-3 mb-1.5 p-2.5 rounded-xl bg-accent/20 border border-accent/30">
+                <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-1.5">
-                    <Sparkles size={12} className="text-primary" />
-                    <span className="text-[10px] font-medium text-primary">تحليل المساعد الذكي</span>
+                    <Sparkles size={10} className="text-primary" />
+                    <span className="text-[9px] font-medium text-primary">تحليل المساعد</span>
                   </div>
-                  <button onClick={() => setShowAiPanel(false)} className="text-[10px] text-muted-foreground hover:text-foreground">✕</button>
+                  <button onClick={() => setShowAiPanel(false)} className="text-[9px] text-muted-foreground hover:text-foreground">✕</button>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed whitespace-pre-line max-h-32 overflow-y-auto">{aiAnalysis}</p>
+                <p className="text-[10px] text-muted-foreground leading-relaxed whitespace-pre-line max-h-24 overflow-y-auto">{aiAnalysis}</p>
               </div>
             )}
 
             {/* AI Suggestions */}
             {aiSuggestions.length > 0 && (
-              <div className="px-4 pb-1.5 flex gap-1.5 flex-wrap">
-                <span className="text-[9px] text-muted-foreground/60 self-center ml-1">💡</span>
+              <div className="px-3 pb-1 flex gap-1 flex-wrap">
+                <span className="text-[8px] text-muted-foreground/60 self-center">💡</span>
                 {aiSuggestions.map((s, i) => (
                   <button key={i} onClick={() => handleSuggestionClick(s)}
-                    className="text-[10px] px-2.5 py-1 rounded-lg bg-accent/30 text-accent-foreground hover:bg-accent/50 transition-all truncate max-w-[180px]">
+                    className="text-[9px] px-2 py-0.5 rounded-lg bg-accent/30 text-accent-foreground hover:bg-accent/50 transition-all truncate max-w-[140px]">
                     {s}
                   </button>
                 ))}
               </div>
             )}
 
-            {/* AI Toolbar (expandable) */}
+            {/* AI Toolbar */}
             {showAiToolbar && (
-              <div className="px-4 pb-2 flex gap-1.5 animate-in slide-in-from-bottom-2 duration-200">
+              <div className="px-3 pb-1.5 flex gap-1 flex-wrap animate-in slide-in-from-bottom-2 duration-200">
                 <button onClick={() => { handleAnalyze(); setShowAiToolbar(false); }} disabled={aiLoading}
-                  className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                  <Zap size={10} /> تحليل الموقف
+                  className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                  <Zap size={9} /> تحليل
                 </button>
                 <button onClick={() => { handleAiIntervene(); setShowAiToolbar(false); }} disabled={aiLoading}
-                  className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                  <MessageSquare size={10} /> وساطة
+                  className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                  <MessageSquare size={9} /> وساطة
                 </button>
                 <button onClick={() => { handlePushClose(); setShowAiToolbar(false); }} disabled={aiLoading}
-                  className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all disabled:opacity-50">
-                  <Target size={10} /> دفع للإغلاق
+                  className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all disabled:opacity-50">
+                  <Target size={9} /> إغلاق
                 </button>
                 <button onClick={() => { handleStallIntervention(); setShowAiToolbar(false); }} disabled={aiLoading}
-                  className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                  <RefreshCw size={10} /> تحريك
+                  className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                  <RefreshCw size={9} /> تحريك
                 </button>
                 <button onClick={() => { handleMarketAnalysis(); setShowAiToolbar(false); }} disabled={aiLoading}
-                  className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                  <TrendingUp size={10} /> تحليل السوق
+                  className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                  <TrendingUp size={9} /> السوق
                 </button>
               </div>
             )}
 
-            {/* Input area with integrated AI button */}
-            <div className="p-3 border-t border-border/20">
+            {/* Input area */}
+            <div className="p-2.5 border-t border-border/20">
               {aiLoading && (
-                <div className="flex items-center gap-1.5 mb-2 px-1 text-[10px] text-primary">
-                  <Loader2 size={10} className="animate-spin" /> المساعد الذكي يعمل...
+                <div className="flex items-center gap-1.5 mb-1.5 px-1 text-[9px] text-primary">
+                  <Loader2 size={9} className="animate-spin" /> المساعد يعمل...
                 </div>
               )}
-
-              {/* Proceed to legal confirmation - prominent CTA */}
-              {!isPostAgreement && deal.status === "negotiating" && messages.length > 0 && (
-                <div className="px-4 pb-2">
-                  <button
-                    onClick={() => setShowLegalPanel(true)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-l from-primary/10 to-primary/5 border border-primary/20 text-primary text-xs font-medium hover:from-primary/15 hover:to-primary/10 transition-all active:scale-[0.98]"
-                  >
-                    <Scale size={13} strokeWidth={1.5} />
-                    متفقون؟ انتقل للتأكيد القانوني وإتمام الصفقة
-                    <ArrowRight size={13} strokeWidth={1.5} className="rotate-180" />
-                  </button>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setShowAiToolbar(!showAiToolbar)}
                   className={cn(
-                    "h-9 w-9 rounded-xl flex items-center justify-center transition-all shrink-0",
+                    "h-8 w-8 rounded-xl flex items-center justify-center transition-all shrink-0",
                     showAiToolbar ? "bg-primary/15 text-primary" : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                   title="أدوات المساعد الذكي"
                 >
-                  <Sparkles size={15} strokeWidth={1.5} />
+                  <Sparkles size={13} strokeWidth={1.5} />
                 </button>
                 <ChatAttachmentButton
                   dealId={dealId!}
@@ -583,170 +719,13 @@ const NegotiationPage = () => {
                   type="text" value={input} onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSend()}
                   placeholder="اكتب رسالتك..."
-                  className="flex-1 px-4 py-2 rounded-xl border border-border/40 bg-background text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
+                  className="flex-1 px-3 py-1.5 rounded-xl border border-border/40 bg-background text-xs placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
                 />
-                <Button onClick={handleSend} disabled={sending} size="icon" className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.95] h-9 w-9">
-                  {sending ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} strokeWidth={1.5} />}
+                <Button onClick={handleSend} disabled={sending} size="icon" className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.95] h-8 w-8">
+                  {sending ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} strokeWidth={1.5} />}
                 </Button>
               </div>
             </div>
-          </div>
-
-          {/* ═══════════ SIDEBAR ═══════════ */}
-          <div className="space-y-4">
-            {/* ═══ Sidebar Content ═══ */}
-              <div className="space-y-4 animate-in fade-in-0 duration-200">
-                {/* Deal Readiness Card (merged: status + risk) */}
-                <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium text-xs flex items-center gap-1.5">
-                      <CheckCircle2 size={13} className="text-primary" strokeWidth={1.5} />
-                      جاهزية الصفقة
-                    </h3>
-                    <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-md", 
-                      readinessPercent >= 70 ? "bg-success/10 text-success" : 
-                      readinessPercent >= 40 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
-                    )}>
-                      {readinessPercent}%
-                    </span>
-                  </div>
-                  
-                  {/* Progress bar */}
-                  <div className="w-full h-1.5 rounded-full bg-muted/60 mb-3">
-                    <div
-                      className={cn("h-full rounded-full transition-all duration-500",
-                        readinessPercent >= 70 ? "bg-success" : readinessPercent >= 40 ? "bg-warning" : "bg-destructive"
-                      )}
-                      style={{ width: `${readinessPercent}%` }}
-                    />
-                  </div>
-
-                  {/* Status rows */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">الحالة</span>
-                      <span className="text-primary font-medium">{statusLabel}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">الرسائل</span>
-                      <span className="font-medium">{messages.length}</span>
-                    </div>
-                    {deal.agreed_price && (
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">السعر المتفق</span>
-                        <span className="font-medium">{Number(deal.agreed_price).toLocaleString("en-US")} ر.س</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Interactive readiness steps */}
-                  {(() => {
-                    const allSteps = [
-                      { key: "buyer_verified", label: "توثيق المشتري", factor: "مشتري غير موثق", action: "verify", path: "/dashboard", done: profile?.is_verified === true || (profile?.verification_level !== "none") },
-                      { key: "seller_verified", label: "توثيق البائع", factor: "بائع غير موثق", action: "verify", path: "/dashboard", done: otherProfile?.is_verified === true || (otherProfile?.verification_level && otherProfile.verification_level !== "none") },
-                      { key: "deal_type", label: "تحديد نوع الصفقة", factor: "نوع الصفقة غير محدد", action: "deal_type", path: `/listing/${deal.listing_id}`, done: !!deal.deal_type },
-                      { key: "has_messages", label: "بدء المحادثة", factor: "صفقة جديدة بدون رسائل", action: "chat", path: "", done: messages.length > 0 },
-                      { key: "agreed_price", label: "الاتفاق على السعر", factor: "لا يوجد سعر متفق عليه", action: "chat", path: "", done: !!deal.agreed_price },
-                    ];
-                    const riskFactors = (deal.risk_factors as string[]) || [];
-                    const relevantSteps = allSteps.filter(s => riskFactors.includes(s.factor) || s.done);
-                    if (relevantSteps.length === 0) return null;
-
-                    return (
-                      <div className="mt-3 pt-3 border-t border-border/20">
-                        <p className="text-[10px] text-muted-foreground mb-2">خطوات الجاهزية:</p>
-                        <div className="space-y-1.5">
-                          {relevantSteps.map((step) => (
-                            <div key={step.key} className="flex items-center gap-2 text-[10px] group">
-                              {step.done ? (
-                                <div className="w-4 h-4 rounded-full bg-success/15 flex items-center justify-center shrink-0">
-                                  <CheckCircle2 size={10} className="text-success" strokeWidth={2} />
-                                </div>
-                              ) : (
-                                <div className="w-4 h-4 rounded-full bg-warning/15 flex items-center justify-center shrink-0">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-warning" />
-                                </div>
-                              )}
-                              <span className={cn("flex-1", step.done ? "text-muted-foreground/50 line-through" : "text-muted-foreground")}>
-                                {step.done ? step.label : step.factor}
-                              </span>
-                              {!step.done && (
-                                step.action === "chat" ? (
-                                  <button
-                                    onClick={() => {
-                                      const chatInput = document.querySelector<HTMLInputElement>('input[placeholder="اكتب رسالتك..."]');
-                                      chatInput?.focus();
-                                    }}
-                                    className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover:opacity-100"
-                                  >
-                                    {step.label}
-                                  </button>
-                                ) : (
-                                  <Link
-                                    to={step.path}
-                                    className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover:opacity-100"
-                                  >
-                                    {step.label}
-                                  </Link>
-                                )
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-
-                {/* Other party trust — compact */}
-                {otherProfile && (
-                  <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Shield size={13} strokeWidth={1.5} className="text-primary" />
-                      <h3 className="font-medium text-xs">ملف {otherParty}</h3>
-                    </div>
-                    <TrustBadge score={otherProfile.trust_score} verificationLevel={otherProfile.verification_level} size="md" showScore />
-                    <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
-                      <span>✅ مكتملة: {otherProfile.completed_deals || 0}</span>
-                      <span>❌ ملغاة: {otherProfile.cancelled_deals || 0}</span>
-                    </div>
-                  </div>
-                )}
-
-
-                {/* Finalized state */}
-                {deal.status === "finalized" && (
-                  <div className="bg-gradient-to-b from-primary/5 to-card rounded-2xl p-4 shadow-soft border border-primary/15">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Shield size={13} strokeWidth={1.5} className="text-primary" />
-                      <h3 className="font-medium text-xs">الصفقة مُقفلة ✓</h3>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
-                      تمت الموافقة من الطرفين. يمكنك الانتقال للاتفاقية.
-                    </p>
-                    <Button asChild className="w-full rounded-xl text-xs gradient-primary text-primary-foreground">
-                      <Link to={`/agreement/${dealId}`}>عرض الاتفاقية</Link>
-                    </Button>
-                  </div>
-                )}
-
-                {/* Commission — only after agreement */}
-                {isPostAgreement && listing?.price && (
-                  <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
-                    <CommissionBanner dealAmount={deal.agreed_price || listing.price} showDetails />
-                  </div>
-                )}
-
-                {/* Commission Payment */}
-                {commission && isPostAgreement && (
-                  <CommissionPaymentPanel commission={commission} isSeller={user?.id === deal.seller_id} onUpdate={loadData} />
-                )}
-
-                {/* Buyer Review */}
-                {isBuyer && isPostAgreement && deal.seller_id && (
-                  <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
-                )}
-              </div>
           </div>
         </div>
       </div>
