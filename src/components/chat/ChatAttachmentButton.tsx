@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { Paperclip, Image, FileText, Loader2, X } from "lucide-react";
+import { Paperclip, Loader2, X } from "lucide-react";
+import { heicTo, isHeic } from "heic-to";
 import { supabase } from "@/integrations/supabase/client";
 import { validateImageFile, validateDocFile } from "@/lib/security";
 import { toast } from "sonner";
@@ -10,14 +11,52 @@ interface ChatAttachmentButtonProps {
   disabled?: boolean;
 }
 
+interface PreviewState {
+  file: File;
+  url: string;
+  displayName: string;
+  displaySize: number;
+}
+
 const ACCEPT = "image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+const WEB_PREVIEWABLE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/bmp"];
 
 export default function ChatAttachmentButton({ dealId, onFileSent, disabled }: ChatAttachmentButtonProps) {
   const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<{ file: File; url: string } | null>(null);
+  const [preview, setPreview] = useState<PreviewState | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const isHeicLikeFile = async (file: File) => {
+    const name = file.name.toLowerCase();
+    if (file.type === "image/heic" || file.type === "image/heif" || name.endsWith(".heic") || name.endsWith(".heif")) {
+      return true;
+    }
+
+    try {
+      return await isHeic(file);
+    } catch {
+      return false;
+    }
+  };
+
+  const convertToPreviewableImage = async (file: File): Promise<File> => {
+    if (WEB_PREVIEWABLE_TYPES.includes(file.type)) return file;
+
+    if (await isHeicLikeFile(file)) {
+      const blob = await heicTo({
+        blob: file,
+        type: "image/jpeg",
+        quality: 0.92,
+      });
+      const convertedBlob = Array.isArray(blob) ? blob[0] : blob;
+      const newName = file.name.replace(/\.[^.]+$/i, ".jpg");
+      return new File([convertedBlob], newName, { type: "image/jpeg" });
+    }
+
+    return file;
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -31,8 +70,14 @@ export default function ChatAttachmentButton({ dealId, onFileSent, disabled }: C
     }
 
     if (isImage) {
-      const url = URL.createObjectURL(file);
-      setPreview({ file, url });
+      try {
+        const previewableFile = await convertToPreviewableImage(file);
+        const url = URL.createObjectURL(previewableFile);
+        setPreview({ file: previewableFile, url, displayName: file.name, displaySize: file.size });
+      } catch (error) {
+        console.error("[ChatAttachment] Preview conversion failed:", error);
+        toast.error("تعذر تجهيز معاينة الصورة");
+      }
     } else {
       uploadAndSend(file);
     }
@@ -40,7 +85,7 @@ export default function ChatAttachmentButton({ dealId, onFileSent, disabled }: C
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const uploadAndSend = async (file: File) => {
+  const uploadAndSend = async (file: File, displayName?: string, displaySize?: number) => {
     setUploading(true);
     try {
       const ext = file.name.split(".").pop() || "bin";
@@ -52,30 +97,28 @@ export default function ChatAttachmentButton({ dealId, onFileSent, disabled }: C
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("chat-attachments")
-        .getPublicUrl(path);
-
-      // Since bucket is private, we'll use signed URL
       const { data: signedData, error: signedError } = await supabase.storage
         .from("chat-attachments")
-        .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
+        .createSignedUrl(path, 60 * 60 * 24 * 365);
 
       if (signedError) throw signedError;
 
       const fileUrl = signedData.signedUrl;
       const isImage = file.type.startsWith("image/");
+      const resolvedName = displayName || file.name;
+      const resolvedSize = displaySize || file.size;
       const messageType = isImage ? "image" : "document";
-      const label = isImage ? "📷 صورة" : `📎 ${file.name}`;
+      const label = isImage ? "📷 صورة" : `📎 ${resolvedName}`;
 
       await onFileSent(label, messageType, {
         file_url: fileUrl,
-        file_name: file.name,
+        file_name: resolvedName,
         file_type: file.type,
-        file_size: file.size,
+        file_size: resolvedSize,
         storage_path: path,
       });
 
+      if (preview) URL.revokeObjectURL(preview.url);
       setPreview(null);
     } catch (err: any) {
       console.error("[ChatAttachment] Upload failed:", err);
@@ -85,7 +128,7 @@ export default function ChatAttachmentButton({ dealId, onFileSent, disabled }: C
   };
 
   const handleSendPreview = () => {
-    if (preview) uploadAndSend(preview.file);
+    if (preview) uploadAndSend(preview.file, preview.displayName, preview.displaySize);
   };
 
   const cancelPreview = () => {
