@@ -515,6 +515,10 @@ const NegotiationPage = () => {
                   className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
                   <RefreshCw size={10} /> تحريك
                 </button>
+                <button onClick={() => { handleMarketAnalysis(); setShowAiToolbar(false); }} disabled={aiLoading}
+                  className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                  <TrendingUp size={10} /> تحليل السوق
+                </button>
               </div>
             )}
 
