@@ -651,8 +651,8 @@ const NegotiationPage = () => {
             </div>
           </div>
 
-          {/* ═══════════ CHAT (2 cols, compact) ═══════════ */}
-          <div className="lg:col-span-2 order-1 lg:order-1 bg-card rounded-2xl shadow-soft flex flex-col" style={{ height: "65vh" }}>
+          {/* ═══════════ CHAT (3 cols, LEFT in RTL) ═══════════ */}
+          <div className="lg:col-span-3 order-1 lg:order-2 bg-card rounded-2xl shadow-soft flex flex-col" style={{ height: "65vh" }}>
             {/* Chat Header */}
             <div className="px-4 py-2.5 border-b border-border/20 flex items-center justify-between">
               <div className="flex items-center gap-2">
