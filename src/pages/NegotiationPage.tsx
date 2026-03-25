@@ -626,20 +626,6 @@ const NegotiationPage = () => {
                 </div>
               )}
 
-              {/* Other party trust */}
-              {otherProfile && (
-                <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Shield size={13} strokeWidth={1.5} className="text-primary" />
-                    <h3 className="font-medium text-xs">ملف {otherParty}</h3>
-                  </div>
-                  <TrustBadge score={otherProfile.trust_score} verificationLevel={otherProfile.verification_level} size="md" showScore />
-                  <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
-                    <span>✅ مكتملة: {otherProfile.completed_deals || 0}</span>
-                    <span>❌ ملغاة: {otherProfile.cancelled_deals || 0}</span>
-                  </div>
-                </div>
-              )}
 
               {/* Finalized state */}
               {deal.status === "finalized" && (
