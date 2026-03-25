@@ -23,6 +23,7 @@ import {
   Tag,
   Wrench,
   Sparkles,
+  Save,
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import AiInlineStar from "@/components/AiInlineStar";
@@ -1890,18 +1891,34 @@ const CreateListingPage = () => {
 
         {/* Navigation */}
         <div className="flex items-center justify-between mt-6">
-          {currentStep > 0 && (
-            <Button variant="outline" onClick={handleBack} className="rounded-xl active:scale-[0.98]">
-              <ArrowRight size={16} strokeWidth={1.5} /> السابق
+          <div className="flex items-center gap-2">
+            {currentStep > 0 && (
+              <Button variant="outline" onClick={handleBack} className="rounded-xl active:scale-[0.98]">
+                <ArrowRight size={16} strokeWidth={1.5} /> السابق
+              </Button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              onClick={async () => {
+                await saveDraft();
+                toast.success("تم حفظ المسودة — يمكنك إكمالها لاحقاً من لوحة التحكم", { icon: "💾", duration: 4000 });
+                navigate("/dashboard");
+              }}
+              disabled={saving || !listingId}
+              className="rounded-xl text-muted-foreground hover:text-foreground active:scale-[0.98]"
+            >
+              <Save size={15} strokeWidth={1.5} />
+              حفظ والمتابعة لاحقاً
             </Button>
-          )}
-          {currentStep === 0 && <div />}
-          {currentStep < steps.length - 1 && (
-            <Button onClick={handleNext} disabled={(currentStep === 0 && !dealStructure.isValid) || saving || (currentStep === 2 && analyzing)} className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
-              التالي
-              <ArrowLeft size={16} strokeWidth={1.5} />
-            </Button>
-          )}
+            {currentStep < steps.length - 1 && (
+              <Button onClick={handleNext} disabled={(currentStep === 0 && !dealStructure.isValid) || saving || (currentStep === 2 && analyzing)} className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
+                التالي
+                <ArrowLeft size={16} strokeWidth={1.5} />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
