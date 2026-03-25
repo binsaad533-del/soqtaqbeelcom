@@ -1850,7 +1850,7 @@ const FormField = ({ label, placeholder, suffix, value, onChange, error }: { lab
         type="text"
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(toEnglishNumerals(e.target.value))}
         className={cn(
           "w-full px-3 py-2 rounded-lg border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 transition-all",
           error ? "border-destructive/60 focus:border-destructive/60 focus:ring-destructive/30" : "border-border/50 focus:border-primary/30 focus:ring-primary/20"
