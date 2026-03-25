@@ -57,6 +57,7 @@ const CustomerDashboardPage = () => {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showPhoneVerify, setShowPhoneVerify] = useState(false);
 
   const userEmail = user?.email || null;
   const hasRealEmail = !!(userEmail && !userEmail.endsWith("@phone.souqtaqbeel.app"));
