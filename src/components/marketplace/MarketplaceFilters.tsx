@@ -116,16 +116,6 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
         )}
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" strokeWidth={1.3} />
-        <input
-          value={filters.search}
-          onChange={e => set("search", e.target.value)}
-          placeholder="ابحث عن مشروع..."
-          className="w-full pr-10 pl-4 py-2.5 rounded-xl border border-border/50 bg-card text-sm focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
-        />
-      </div>
 
       {/* Deal Type Tabs */}
       <Section label="نوع العملية">
