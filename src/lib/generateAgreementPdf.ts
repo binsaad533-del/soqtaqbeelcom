@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import QRCode from "qrcode";
 import logoUrl from "@/assets/logo.png";
 import { PAGE_HEIGHT_PX, PAGE_WIDTH_PX, buildAgreementPdfPages } from "@/lib/agreementPdf/template";
 import type { AgreementPdfData } from "@/lib/agreementPdf/types";
@@ -48,6 +49,18 @@ const safeFileName = (title: string) => title.replace(/[\\/:*?"<>|]/g, "-");
 export async function generateAgreementPdf(data: AgreementPdfData) {
   const pdf = new jsPDF("p", "mm", "a4");
   const html2canvas = (await import("html2canvas")).default;
+
+  // Generate QR code linking to the agreement page
+  const agreementUrl = `${window.location.origin}/agreement/${data.agreementNumber}`;
+  let qrDataUrl = "";
+  try {
+    qrDataUrl = await QRCode.toDataURL(agreementUrl, {
+      width: 100,
+      margin: 1,
+      color: { dark: "#2563a0", light: "#ffffff" },
+    });
+  } catch { /* QR is optional */ }
+
   const [logoBase64] = await Promise.all([loadLogoBase64(), ensureFontLoaded()]);
 
   const mount = document.createElement("div");
@@ -65,7 +78,7 @@ export async function generateAgreementPdf(data: AgreementPdfData) {
   document.body.appendChild(mount);
 
   try {
-    const pages = buildAgreementPdfPages({ data, logoBase64, mount });
+    const pages = buildAgreementPdfPages({ data, logoBase64, qrDataUrl, mount });
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
     for (const [index, page] of pages.entries()) {
