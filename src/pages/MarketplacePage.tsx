@@ -17,6 +17,7 @@ import ComparePanel, { type CompareItem } from "@/components/marketplace/Compare
 import { MapPin, Eye, ShieldCheck, GitCompareArrows, Check, Lightbulb, Heart, Share2 } from "lucide-react";
 import MarketplaceTicker from "@/components/marketplace/MarketplaceTicker";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 
 interface EnrichedListing extends Listing {
   sellerProfile?: Profile | null;

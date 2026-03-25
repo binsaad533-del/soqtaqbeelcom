@@ -18,6 +18,7 @@ import { useProfiles } from "@/hooks/useProfiles";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
