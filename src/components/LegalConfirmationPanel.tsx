@@ -218,7 +218,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
   }
 
   return (
-    <div className="space-y-5">
+    <div ref={contentRef} className="space-y-5">
       {/* Header */}
       <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
         <div className="flex items-center gap-3 mb-2">
