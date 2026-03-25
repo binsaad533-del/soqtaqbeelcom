@@ -1854,10 +1854,14 @@ const CreateListingPage = () => {
           <div className="bg-card border border-border/50 rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 space-y-5 animate-scale-in max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="text-center">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                <AiStar size={24} />
+                {dealCheckResult ? <Check size={24} strokeWidth={1.5} className="text-primary" /> : <AiStar size={24} />}
               </div>
-              <h3 className="font-semibold text-lg mb-1">فحص الصفقة قبل النشر</h3>
-              <p className="text-xs text-muted-foreground">الـAI يحلل صفقتك ويعطيك توصية قبل النشر</p>
+              <h3 className="font-semibold text-lg mb-1">
+                {dealCheckResult ? "تأكيد نشر الإعلان" : "فحص الصفقة قبل النشر"}
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                {dealCheckResult ? "تمت مراجعة الصفقة — هل تريد المتابعة بالنشر؟" : "الـAI يحلل صفقتك ويعطيك توصية قبل النشر"}
+              </p>
             </div>
 
             {/* Listing Summary */}
@@ -1876,14 +1880,9 @@ const CreateListingPage = () => {
                 <span className="text-muted-foreground">السعر</span>
                 <span className="font-medium text-foreground">{disclosure.price ? `${Number(disclosure.price).toLocaleString()} ر.س` : "—"}</span>
               </div>
-              <div className="border-t border-border/30" />
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">عدد الصور</span>
-                <span className="font-medium text-foreground">{totalPhotos} صورة</span>
-              </div>
             </div>
 
-            {/* Deal Check Loading */}
+            {/* Deal Check Loading (only if not already done inline) */}
             {dealCheckLoading && (
               <div className="py-8 flex flex-col items-center gap-3">
                 <div className="relative">
@@ -1894,6 +1893,53 @@ const CreateListingPage = () => {
                 <p className="text-xs text-muted-foreground">يتم تحليل البيانات والأصول والسوق</p>
               </div>
             )}
+
+            {/* Deal Check Error */}
+            {dealCheckError && !dealCheckLoading && (
+              <div className="bg-warning/10 border border-warning/30 rounded-xl p-3 flex items-start gap-2">
+                <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-medium text-warning">تعذّر إجراء الفحص التلقائي</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{dealCheckError}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">يمكنك المتابعة بالنشر بدون الفحص</p>
+                </div>
+              </div>
+            )}
+
+            {/* Deal Check Result Summary */}
+            {dealCheckResult && !dealCheckLoading && (
+              <div className={cn("rounded-xl p-3 border",
+                dealCheckResult.ratingColor === "green" ? "bg-emerald-50 border-emerald-200" :
+                dealCheckResult.ratingColor === "yellow" ? "bg-amber-50 border-amber-200" :
+                dealCheckResult.ratingColor === "red" ? "bg-red-50 border-red-200" :
+                dealCheckResult.ratingColor === "blue" ? "bg-blue-50 border-blue-200" :
+                "bg-muted border-border"
+              )}>
+                <div className="flex items-center justify-between">
+                  <span className={cn("text-sm font-medium",
+                    dealCheckResult.ratingColor === "green" ? "text-emerald-700" :
+                    dealCheckResult.ratingColor === "yellow" ? "text-amber-700" :
+                    dealCheckResult.ratingColor === "red" ? "text-red-700" :
+                    dealCheckResult.ratingColor === "blue" ? "text-blue-700" :
+                    "text-foreground"
+                  )}>{dealCheckResult.rating}</span>
+                  <span className="text-[11px] text-muted-foreground">عدالة السعر: {dealCheckResult.fairnessVerdict}</span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setShowPublishConfirm(false)} disabled={dealCheckLoading} className="flex-1 rounded-xl">
+                إلغاء
+              </Button>
+              <Button onClick={handlePublish} disabled={saving || dealCheckLoading} className="flex-1 gradient-primary text-primary-foreground rounded-xl">
+                {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
+                {dealCheckResult ? "موافق — انشر الإعلان" : "تأكيد النشر"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
             {/* Deal Check Error — still allow publishing */}
             {dealCheckError && !dealCheckLoading && (
