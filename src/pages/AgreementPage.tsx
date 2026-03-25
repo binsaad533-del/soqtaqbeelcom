@@ -402,7 +402,7 @@ const AgreementPage = () => {
           </div>
         )}
 
-        <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
+        <div ref={agreementRef} className="bg-card rounded-2xl shadow-soft overflow-hidden">
           {/* Header */}
           <div className="p-6 border-b border-border/20 bg-gradient-to-l from-primary/5 to-transparent">
             <div className="flex items-center justify-between mb-4">
