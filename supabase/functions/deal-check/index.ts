@@ -155,7 +155,7 @@ serve(async (req) => {
   }
 
   try {
-    const { listing, perspective: rawPerspective } = await req.json();
+    const { listing, perspective: rawPerspective, sellerName } = await req.json();
     const perspective: "seller" | "buyer" = rawPerspective === "seller" ? "seller" : "buyer";
 
     if (!listing) {
@@ -184,7 +184,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: buildSystemPrompt(perspective) },
+          { role: "system", content: buildSystemPrompt(perspective, sellerName) },
           { role: "user", content: userPrompt },
         ],
         tools: [
