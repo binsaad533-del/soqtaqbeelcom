@@ -332,6 +332,9 @@ const ListingDetailsPage = () => {
                     ownerId={listing.owner_id}
                     className="mb-4"
                   />
+                  <p className="text-[11px] text-muted-foreground text-center mb-2">
+                    💡 تقديم العروض العامة يزيد من شفافية الصفقة ويعطيك أفضلية
+                  </p>
                   <Button
                     onClick={handleStartNegotiation}
                     disabled={startingDeal}
@@ -339,7 +342,7 @@ const ListingDetailsPage = () => {
                     className="w-full rounded-xl active:scale-[0.98]"
                   >
                     {startingDeal ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} strokeWidth={1.5} />}
-                    ابدأ التفاوض مباشرة
+                    تواصل على الخاص
                   </Button>
                 </>
               )}
