@@ -37,6 +37,7 @@ const ListingDetailsPage = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [startingDeal, setStartingDeal] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [myActiveDeal, setMyActiveDeal] = useState<any>(null);
 
   const loadListing = async () => {
     if (!id) return;
@@ -65,7 +66,14 @@ const ListingDetailsPage = () => {
 
   useEffect(() => {
     loadListing();
-  }, [id, getListing]);
+    // Check if the current user has an active deal on this listing
+    if (user && id) {
+      getMyDeals().then(deals => {
+        const active = deals.find(d => d.listing_id === id && !["cancelled", "completed"].includes(d.status));
+        setMyActiveDeal(active || null);
+      });
+    }
+  }, [id, getListing, user]);
 
   const handleStartNegotiation = async () => {
     if (!user) { navigate("/login"); return; }
