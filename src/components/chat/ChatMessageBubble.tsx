@@ -58,11 +58,10 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
               )}
             </div>
           ) : isDoc && meta.file_url ? (
-            <a
-              href={meta.file_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/30 hover:bg-background/80 transition-colors"
+            <button
+              type="button"
+              onClick={() => window.open(meta.file_url, '_blank', 'noopener,noreferrer')}
+              className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/30 hover:bg-background/80 transition-colors w-full text-right"
             >
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                 <FileText size={18} className="text-primary" />
@@ -74,7 +73,7 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
                 </p>
               </div>
               <Download size={14} className="text-muted-foreground shrink-0" />
-            </a>
+            </button>
           ) : (
             <span className="whitespace-pre-line">{msg.message}</span>
           )}
