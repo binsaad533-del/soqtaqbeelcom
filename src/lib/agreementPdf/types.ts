@@ -1,0 +1,30 @@
+export interface AgreementPdfData {
+  agreementNumber: string;
+  version: number;
+  createdAt: string;
+  dealTitle: string | null;
+  dealType: string;
+  location: string | null;
+  businessActivity: string | null;
+  buyerName: string | null;
+  buyerContact: string | null;
+  sellerName: string | null;
+  sellerContact: string | null;
+  financialTerms: { agreedPrice?: number; currency?: string; paymentNote?: string } | null;
+  includedAssets: string[];
+  excludedAssets: string[];
+  leaseDetails: { annualRent?: string; remaining?: string } | null;
+  liabilities: { financialLiabilities?: string; delayedSalaries?: string; unpaidRent?: string } | null;
+  licenseStatus: { municipality?: string; civilDefense?: string; cameras?: string } | null;
+  documentsReferenced: string[];
+  declarations: { buyerDeclares?: string; sellerDeclares?: string; platformNote?: string } | null;
+  importantNotes: string[];
+  amendmentReason: string | null;
+  buyerApproved: boolean;
+  buyerApprovedAt: string | null;
+  sellerApproved: boolean;
+  sellerApprovedAt: string | null;
+  commissionAmount?: number | null;
+  commissionRate?: number | null;
+  dealAmount?: number | null;
+}
