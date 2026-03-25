@@ -205,10 +205,14 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
 
   if (deal.locked || deal.status === "finalized") {
     return (
-      <div className="bg-card rounded-2xl p-8 shadow-soft border border-primary/20 text-center">
-        <CheckCircle2 size={40} className="text-primary mx-auto mb-4" />
-        <h2 className="text-lg font-semibold mb-2">تمت الموافقة النهائية</h2>
+      <div className="bg-card rounded-2xl p-8 shadow-soft border border-primary/20 text-center space-y-4">
+        <CheckCircle2 size={40} className="text-primary mx-auto" />
+        <h2 className="text-lg font-semibold">تمت الموافقة النهائية</h2>
         <p className="text-sm text-muted-foreground">تمت موافقة الطرفين وتم قفل الصفقة بنجاح.</p>
+        <Button onClick={handleExportPdf} disabled={pdfLoading} variant="outline" className="rounded-xl gap-2">
+          {pdfLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+          تحميل وثيقة التأكيد PDF
+        </Button>
       </div>
     );
   }
