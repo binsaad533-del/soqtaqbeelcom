@@ -134,7 +134,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
                 <Button
                   size="sm"
                   onClick={() => handleAccept(offer)}
-                  disabled={loading || respondingId === offer.id}
+                  disabled={loading || respondingId === offer.id || hasAccepted}
                   className="flex-1 rounded-xl text-xs gap-1 bg-success hover:bg-success/90 text-success-foreground"
                 >
                   {respondingId === offer.id ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
