@@ -57,6 +57,7 @@ const CustomerDashboardPage = () => {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showPhoneVerify, setShowPhoneVerify] = useState(false);
 
   const userEmail = user?.email || null;
   const hasRealEmail = !!(userEmail && !userEmail.endsWith("@phone.souqtaqbeel.app"));
@@ -317,7 +318,7 @@ const CustomerDashboardPage = () => {
                   <div className="text-[10px] text-muted-foreground mb-0.5">رقم الجوال</div>
                   {editingField === "phone" ? (
                     <div className="flex items-center gap-1.5">
-                      <input dir="ltr" inputMode="numeric" className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus />
+                      <input dir="ltr" lang="en" inputMode="numeric" className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus />
                       <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success"><Check size={13} /></button>
                       <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={13} /></button>
                     </div>
@@ -330,14 +331,21 @@ const CustomerDashboardPage = () => {
                         <Pencil size={9} className="text-muted-foreground opacity-0 group-hover/phone:opacity-60 transition-opacity shrink-0" />
                       </button>
                       {isPhoneVerified && <CheckCircle size={11} className="text-success shrink-0" />}
-                      {!isPhoneVerified && profile?.phone && <span className="text-[10px] text-warning">يحتاج توثيق ↓</span>}
+                      {!isPhoneVerified && profile?.phone && (
+                        <button
+                          onClick={() => setShowPhoneVerify(v => !v)}
+                          className="text-[10px] text-primary hover:underline"
+                        >
+                          توثيق
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Phone verification inline */}
-              {!isPhoneVerified && profile?.phone && (
+              {/* Phone verification (collapsible) */}
+              {!isPhoneVerified && profile?.phone && showPhoneVerify && (
                 <div className="pr-10">
                   <PhoneVerificationFlow initialPhone={profile.phone} onVerified={() => window.location.reload()} mode="inline" />
                 </div>
