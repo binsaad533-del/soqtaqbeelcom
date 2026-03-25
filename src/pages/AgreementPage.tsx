@@ -148,8 +148,14 @@ const AgreementPage = () => {
     setLoading(false);
   };
 
+  const hasAgreedPrice = !!(deal?.agreed_price && Number(deal.agreed_price) > 0);
+
   const generateAgreement = async () => {
     if (!deal) return;
+    if (!hasAgreedPrice) {
+      toast.error("لا يمكن إنشاء الاتفاقية بدون سعر متفق عليه — يرجى الاتفاق على السعر أولاً في مرحلة التفاوض");
+      return;
+    }
     setGenerating(true);
     try {
       const listing = await getListing(deal.listing_id);
@@ -319,16 +325,22 @@ const AgreementPage = () => {
       <div className="py-8">
         <div className="container max-w-2xl">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-            <Link to={`/negotiate/${id}`} className="hover:text-foreground transition-colors flex items-center gap-1">
+            <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
               <ArrowRight size={14} strokeWidth={1.3} />
-              العودة للتفاوض
+              العودة للوحة التحكم
             </Link>
           </div>
           <div className="bg-card rounded-2xl shadow-soft p-8 text-center">
             <AiStar size={40} className="mx-auto mb-4" />
             <h2 className="text-lg font-medium mb-2">لم يتم إنشاء الاتفاقية بعد</h2>
-            <p className="text-sm text-muted-foreground mb-6">عند الاتفاق على شروط الصفقة، يمكنك إنشاء الاتفاقية الرسمية</p>
-            <Button onClick={generateAgreement} disabled={generating} className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
+            <p className="text-sm text-muted-foreground mb-4">عند الاتفاق على شروط الصفقة، يمكنك إنشاء الاتفاقية الرسمية</p>
+            {!hasAgreedPrice && (
+              <div className="flex items-center justify-center gap-2 text-xs text-warning bg-warning/10 rounded-xl px-4 py-2.5 mb-4">
+                <AlertTriangle size={14} strokeWidth={1.5} />
+                <span>يجب الاتفاق على السعر أولاً في مرحلة التفاوض قبل إنشاء الاتفاقية</span>
+              </div>
+            )}
+            <Button onClick={generateAgreement} disabled={generating || !hasAgreedPrice} className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
               {generating ? (
                 <span className="flex items-center gap-2"><Loader2 size={14} className="animate-spin" />جاري إنشاء الاتفاقية...</span>
               ) : (
