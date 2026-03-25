@@ -40,6 +40,7 @@ import TransparencyIndicator from "@/components/TransparencyIndicator";
 import { getRules, isFieldVisible, validateDisclosure, validateImages, FIELD_LABELS as RULE_FIELD_LABELS } from "@/lib/dealTypeFieldRules";
 import VerificationGate from "@/components/VerificationGate";
 import GoogleMapPicker from "@/components/GoogleMapPicker";
+import { toEnglishNumerals } from "@/lib/arabicNumerals";
 
 const steps = [
   { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على الـAI ✦" },
