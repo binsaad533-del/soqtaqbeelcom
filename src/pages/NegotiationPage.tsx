@@ -430,100 +430,88 @@ const NegotiationPage = () => {
           {/* ═══════════ DEAL SUMMARY (3 cols) ═══════════ */}
           <div className="lg:col-span-3 order-2 lg:order-2">
             <div className="space-y-4">
-              {/* Deal Overview Card */}
-              <div className="bg-card rounded-2xl shadow-soft border border-border/20 overflow-hidden">
-                {/* Header with listing photo */}
-                <div className="relative h-28 bg-gradient-to-b from-primary/8 to-transparent">
-                  {listing?.photos && Array.isArray(listing.photos) && (listing.photos as string[]).length > 0 ? (
-                    <img src={(listing.photos as string[])[0]} alt="" className="w-full h-full object-cover opacity-40" />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-bl from-primary/10 to-accent/5" />
+              {/* Deal Summary Card - Simple */}
+              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
+                <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <FileCheck size={14} className="text-primary" strokeWidth={1.5} />
+                  ملخص الصفقة
+                </h3>
+
+                <div className="space-y-2.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">الإعلان</span>
+                    <Link to={`/listing/${deal.listing_id}`} className="font-medium text-primary hover:underline truncate max-w-[60%] text-left">
+                      {listingTitle}
+                    </Link>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">الحالة</span>
+                    <span className={cn("font-medium px-2 py-0.5 rounded-full text-[10px]",
+                      deal.status === "negotiating" ? "bg-primary/10 text-primary" :
+                      deal.status === "finalized" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+                    )}>{statusLabel}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">السعر المطلوب</span>
+                    <span className="font-bold">{listing?.price ? `${Number(listing.price).toLocaleString("en-US")} ر.س` : "—"}</span>
+                  </div>
+
+                  {deal.agreed_price && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">السعر المتفق</span>
+                      <span className="font-bold text-success">{Number(deal.agreed_price).toLocaleString("en-US")} ر.س</span>
+                    </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
-                  <div className="absolute bottom-3 right-4 left-4">
-                    <h3 className="font-semibold text-sm leading-tight line-clamp-1">{listingTitle}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full",
-                        readinessPercent >= 70 ? "bg-success/15 text-success" :
-                        readinessPercent >= 40 ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive"
-                      )}>
-                        جاهزية {readinessPercent}%
-                      </span>
-                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{statusLabel}</span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Key metrics grid */}
-                <div className="grid grid-cols-3 gap-px bg-border/10 border-b border-border/10">
-                  <div className="bg-card p-3 text-center">
-                    <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
-                      <Banknote size={11} strokeWidth={1.5} />
-                      <span className="text-[9px]">السعر المطلوب</span>
-                    </div>
-                    <p className="text-xs font-bold">{listing?.price ? `${Number(listing.price).toLocaleString("en-US")}` : "—"}</p>
-                    <p className="text-[8px] text-muted-foreground">ر.س</p>
-                  </div>
-                  <div className="bg-card p-3 text-center">
-                    <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
-                      <TrendingUp size={11} strokeWidth={1.5} />
-                      <span className="text-[9px]">السعر المتفق</span>
-                    </div>
-                    <p className="text-xs font-bold">{deal.agreed_price ? `${Number(deal.agreed_price).toLocaleString("en-US")}` : "—"}</p>
-                    <p className="text-[8px] text-muted-foreground">ر.س</p>
-                  </div>
-                  <div className="bg-card p-3 text-center">
-                    <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
-                      <MessageSquare size={11} strokeWidth={1.5} />
-                      <span className="text-[9px]">الرسائل</span>
-                    </div>
-                    <p className="text-xs font-bold">{messages.length}</p>
-                    <p className="text-[8px] text-muted-foreground">رسالة</p>
-                  </div>
-                </div>
-
-                {/* Deal details */}
-                <div className="p-3 space-y-2 text-[11px]">
                   {listing?.city && (
-                    <div className="flex items-center gap-2">
-                      <MapPin size={12} className="text-muted-foreground shrink-0" strokeWidth={1.5} />
-                      <span className="text-muted-foreground">الموقع:</span>
-                      <span className="font-medium mr-auto">{listing.city}{listing.district ? ` — ${listing.district}` : ""}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">الموقع</span>
+                      <span className="font-medium">{listing.city}{listing.district ? ` — ${listing.district}` : ""}</span>
                     </div>
                   )}
+
                   {listing?.deal_type && (
-                    <div className="flex items-center gap-2">
-                      <Tag size={12} className="text-muted-foreground shrink-0" strokeWidth={1.5} />
-                      <span className="text-muted-foreground">نوع الصفقة:</span>
-                      <span className="font-medium mr-auto">{listing.deal_type}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">نوع الصفقة</span>
+                      <span className="font-medium">
+                        {listing.deal_type === "full" ? "تقبيل كامل" :
+                         listing.deal_type === "assets_only" ? "بيع أصول فقط" :
+                         listing.deal_type === "lease_transfer" ? "تنازل عن عقد إيجار" :
+                         listing.deal_type === "brand_transfer" ? "تنازل عن علامة تجارية" :
+                         listing.deal_type}
+                      </span>
                     </div>
                   )}
+
                   {listing?.business_activity && (
-                    <div className="flex items-center gap-2">
-                      <Building2 size={12} className="text-muted-foreground shrink-0" strokeWidth={1.5} />
-                      <span className="text-muted-foreground">النشاط:</span>
-                      <span className="font-medium mr-auto">{listing.business_activity}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">النشاط</span>
+                      <span className="font-medium">{listing.business_activity}</span>
                     </div>
                   )}
-                  {listing?.category && (
-                    <div className="flex items-center gap-2">
-                      <Info size={12} className="text-muted-foreground shrink-0" strokeWidth={1.5} />
-                      <span className="text-muted-foreground">التصنيف:</span>
-                      <span className="font-medium mr-auto">{listing.category}</span>
-                    </div>
-                  )}
-                  {deal.created_at && (
-                    <div className="flex items-center gap-2">
-                      <Calendar size={12} className="text-muted-foreground shrink-0" strokeWidth={1.5} />
-                      <span className="text-muted-foreground">بدء الصفقة:</span>
-                      <span className="font-medium mr-auto">{new Date(deal.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" })}</span>
-                    </div>
-                  )}
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">الرسائل</span>
+                    <span className="font-medium">{messages.length}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">تاريخ البدء</span>
+                    <span className="font-medium">{new Date(deal.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" })}</span>
+                  </div>
                 </div>
 
-                {/* Readiness progress bar */}
-                <div className="px-3 pb-1">
-                  <div className="w-full h-1 rounded-full bg-muted/60">
+                {/* Readiness bar */}
+                <div className="mt-3 pt-3 border-t border-border/20">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] text-muted-foreground">جاهزية الصفقة</span>
+                    <span className={cn("text-[10px] font-semibold",
+                      readinessPercent >= 70 ? "text-success" : readinessPercent >= 40 ? "text-warning" : "text-destructive"
+                    )}>{readinessPercent}%</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-muted/60">
                     <div
                       className={cn("h-full rounded-full transition-all duration-500",
                         readinessPercent >= 70 ? "bg-success" : readinessPercent >= 40 ? "bg-warning" : "bg-destructive"
@@ -531,74 +519,44 @@ const NegotiationPage = () => {
                       style={{ width: `${readinessPercent}%` }}
                     />
                   </div>
+
+                  {/* Incomplete steps only */}
+                  {(() => {
+                    const allSteps = [
+                      { key: "buyer_verified", label: "توثيق المشتري", factor: "مشتري غير موثق", action: "verify" as const, path: "/dashboard", done: profile?.is_verified === true || (profile?.verification_level !== "none") },
+                      { key: "seller_verified", label: "توثيق البائع", factor: "بائع غير موثق", action: "verify" as const, path: "/dashboard", done: otherProfile?.is_verified === true || (otherProfile?.verification_level && otherProfile.verification_level !== "none") },
+                      { key: "deal_type", label: "تحديد نوع الصفقة", factor: "نوع الصفقة غير محدد", action: "deal_type" as const, path: `/listing/${deal.listing_id}`, done: !!deal.deal_type },
+                      { key: "has_messages", label: "بدء المحادثة", factor: "صفقة جديدة بدون رسائل", action: "chat" as const, path: "", done: messages.length > 0 },
+                      { key: "agreed_price", label: "الاتفاق على السعر", factor: "لا يوجد سعر متفق عليه", action: "chat" as const, path: "", done: !!deal.agreed_price },
+                    ];
+                    const riskFactors = (deal.risk_factors as string[]) || [];
+                    const incomplete = allSteps.filter(s => riskFactors.includes(s.factor) && !s.done);
+                    if (incomplete.length === 0) return null;
+
+                    return (
+                      <div className="mt-2 space-y-1">
+                        {incomplete.map((step) => (
+                          <div key={step.key} className="flex items-center gap-2 text-[10px]">
+                            <div className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" />
+                            <span className="flex-1 text-muted-foreground">{step.factor}</span>
+                            {step.action === "chat" ? (
+                              <button
+                                onClick={() => document.querySelector<HTMLInputElement>('input[placeholder="اكتب رسالتك..."]')?.focus()}
+                                className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                              >
+                                {step.label}
+                              </button>
+                            ) : (
+                              <Link to={step.path} className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                                {step.label}
+                              </Link>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
-
-                {/* Readiness steps (collapsible) */}
-                {(() => {
-                  const allSteps = [
-                    { key: "buyer_verified", label: "توثيق المشتري", factor: "مشتري غير موثق", action: "verify" as const, path: "/dashboard", done: profile?.is_verified === true || (profile?.verification_level !== "none") },
-                    { key: "seller_verified", label: "توثيق البائع", factor: "بائع غير موثق", action: "verify" as const, path: "/dashboard", done: otherProfile?.is_verified === true || (otherProfile?.verification_level && otherProfile.verification_level !== "none") },
-                    { key: "deal_type", label: "تحديد نوع الصفقة", factor: "نوع الصفقة غير محدد", action: "deal_type" as const, path: `/listing/${deal.listing_id}`, done: !!deal.deal_type },
-                    { key: "has_messages", label: "بدء المحادثة", factor: "صفقة جديدة بدون رسائل", action: "chat" as const, path: "", done: messages.length > 0 },
-                    { key: "agreed_price", label: "الاتفاق على السعر", factor: "لا يوجد سعر متفق عليه", action: "chat" as const, path: "", done: !!deal.agreed_price },
-                  ];
-                  const riskFactors = (deal.risk_factors as string[]) || [];
-                  const relevantSteps = allSteps.filter(s => riskFactors.includes(s.factor) || s.done);
-                  if (relevantSteps.length === 0) return null;
-                  const incomplete = relevantSteps.filter(s => !s.done);
-
-                  return (
-                    <div className="px-3 pb-3 pt-2">
-                      <details className="group">
-                        <summary className="flex items-center gap-1.5 cursor-pointer text-[10px] text-muted-foreground hover:text-foreground transition-colors list-none">
-                          <ChevronDown size={12} className="transition-transform group-open:rotate-180" strokeWidth={1.5} />
-                          <span>خطوات الجاهزية</span>
-                          {incomplete.length > 0 && (
-                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-warning/10 text-warning font-medium">{incomplete.length} متبقية</span>
-                          )}
-                        </summary>
-                        <div className="mt-2 space-y-1.5">
-                          {relevantSteps.map((step) => (
-                            <div key={step.key} className="flex items-center gap-2 text-[10px] group/step">
-                              {step.done ? (
-                                <div className="w-4 h-4 rounded-full bg-success/15 flex items-center justify-center shrink-0">
-                                  <CheckCircle2 size={10} className="text-success" strokeWidth={2} />
-                                </div>
-                              ) : (
-                                <div className="w-4 h-4 rounded-full bg-warning/15 flex items-center justify-center shrink-0">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-warning" />
-                                </div>
-                              )}
-                              <span className={cn("flex-1", step.done ? "text-muted-foreground/50 line-through" : "text-muted-foreground")}>
-                                {step.done ? step.label : step.factor}
-                              </span>
-                              {!step.done && (
-                                step.action === "chat" ? (
-                                  <button
-                                    onClick={() => {
-                                      const chatInput = document.querySelector<HTMLInputElement>('input[placeholder="اكتب رسالتك..."]');
-                                      chatInput?.focus();
-                                    }}
-                                    className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover/step:opacity-100"
-                                  >
-                                    {step.label}
-                                  </button>
-                                ) : (
-                                  <Link
-                                    to={step.path}
-                                    className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover/step:opacity-100"
-                                  >
-                                    {step.label}
-                                  </Link>
-                                )
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </details>
-                    </div>
-                  );
-                })()}
               </div>
 
               {/* CTA: Legal confirmation */}
