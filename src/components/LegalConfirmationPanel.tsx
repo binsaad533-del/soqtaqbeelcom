@@ -405,6 +405,10 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
           >
             {loading ? "جاري التأكيد..." : "تأكيد الموافقة النهائية"}
           </Button>
+          <Button onClick={handleExportPdf} disabled={pdfLoading} variant="outline" size="sm" className="w-full mt-2 rounded-xl gap-2">
+            {pdfLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            تحميل وثيقة التأكيد PDF
+          </Button>
         </div>
       ) : (
         <div className="bg-card rounded-2xl p-6 shadow-soft border border-primary/20 text-center space-y-3">
