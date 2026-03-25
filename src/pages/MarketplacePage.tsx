@@ -104,10 +104,7 @@ const MarketplacePage = () => {
       if (filters.activity !== "الكل" && l.category !== filters.activity && !l.business_activity?.includes(filters.activity)) return false;
       if (filters.dealType !== "الكل") {
         const dt = l.primary_deal_type || l.deal_type || "";
-        if (filters.dealType === "تقبيل_كامل" && !dt.includes("تقبيل") && !dt.includes("full")) return false;
-        if (filters.dealType === "تقبيل_معدات" && !dt.includes("معدات") && !dt.includes("assets")) return false;
-        if (filters.dealType === "تقبيل_مع_سجل" && !dt.includes("سجل") && !dt.includes("with_cr")) return false;
-        if (filters.dealType === "تقبيل_بدون_سجل" && !dt.includes("بدون") && !dt.includes("no_cr")) return false;
+        if (!dt.includes(filters.dealType)) return false;
       }
       if (l.price != null) {
         if (l.price < filters.priceRange[0] || l.price > filters.priceRange[1]) return false;
