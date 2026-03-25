@@ -368,7 +368,7 @@ const buildSections = (data: AgreementPdfData) => {
             ${group
               .map(
                 (url) => `
-                  <div style="border:1px solid hsl(214 32% 91%);border-radius:16px;overflow:hidden;background:hsl(210 40% 98%);">
+                  <div style="border:0.5px solid hsl(214 32% 91%);border-radius:16px;overflow:hidden;background:hsl(210 40% 98%);">
                     <img src="${url}" alt="صورة أصل" style="width:100%;height:180px;object-fit:cover;display:block;" crossorigin="anonymous" />
                   </div>`,
               )
