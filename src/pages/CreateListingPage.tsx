@@ -128,6 +128,7 @@ const CreateListingPage = () => {
   const [saving, setSaving] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [locationLat, setLocationLat] = useState<number | null>(null);
+  const [locationLng, setLocationLng] = useState<number | null>(null);
   const [sellerNote, setSellerNote] = useState("");
   const SELLER_NOTE_MAX = 300;
 
