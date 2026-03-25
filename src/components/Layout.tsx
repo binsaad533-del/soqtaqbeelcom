@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { User, Menu, X, LogIn, LogOut, Plus } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logoIcon from "@/assets/logo-icon.png";
 import { useState, useEffect } from "react";
 import AiAssistant from "./AiAssistant";
 import Footer from "./Footer";
@@ -47,7 +47,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <div className="container h-full flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img src={logo} alt="سوق تقبيل" className="h-8 md:h-9 w-auto" />
+            <img src={logoIcon} alt="سوق تقبيل" className="h-7 md:h-8 w-auto" />
           </Link>
 
           {/* Center nav */}
