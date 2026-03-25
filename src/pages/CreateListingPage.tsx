@@ -1392,13 +1392,13 @@ const CreateListingPage = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => setInventoryPricingMode("per_item")}
-                          className={cn("flex-1 text-xs py-2 px-3 rounded-lg transition-all", inventoryPricingMode === "per_item" ? "bg-primary/10 text-primary border border-primary/30 font-medium" : "bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted")}
+                          className={cn("flex-1 text-xs py-2 px-3 rounded-lg transition-all", inventoryPricingMode === "per_item" ? "bg-primary/15 text-primary border border-primary/40 font-medium shadow-sm" : "bg-card text-muted-foreground border border-border/40 hover:border-primary/20 hover:text-foreground")}
                         >
                           تسعير لكل قطعة
                         </button>
                         <button
                           onClick={() => setInventoryPricingMode("bulk")}
-                          className={cn("flex-1 text-xs py-2 px-3 rounded-lg transition-all", inventoryPricingMode === "bulk" ? "bg-primary/10 text-primary border border-primary/30 font-medium" : "bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted")}
+                          className={cn("flex-1 text-xs py-2 px-3 rounded-lg transition-all", inventoryPricingMode === "bulk" ? "bg-primary/15 text-primary border border-primary/40 font-medium shadow-sm" : "bg-card text-muted-foreground border border-border/40 hover:border-primary/20 hover:text-foreground")}
                         >
                           سعر إجمالي للأصول
                         </button>
