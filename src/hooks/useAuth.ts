@@ -55,6 +55,16 @@ export function useAuth() {
               .update({ last_activity: new Date().toISOString() })
               .eq("user_id", session.user.id)
               .then();
+            // Log session
+            supabase
+              .from("session_logs" as any)
+              .insert({
+                user_id: session.user.id,
+                event_type: "sign_in",
+                user_agent: navigator.userAgent,
+                device_info: /Mobile/i.test(navigator.userAgent) ? "mobile" : "desktop",
+              })
+              .then();
           }
         } else {
           setState({ user: null, session: null, role: null, profile: null, loading: false });
