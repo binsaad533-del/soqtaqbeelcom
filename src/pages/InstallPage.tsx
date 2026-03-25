@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Download, Smartphone, Share, MoreVertical, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSEO } from "@/hooks/useSEO";
-import { cn } from "@/lib/utils";
+
 
 const InstallPage = () => {
   useSEO({
@@ -37,8 +37,8 @@ const InstallPage = () => {
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
-    (deferredPrompt as { prompt: () => void }).prompt();
-    const result = await (deferredPrompt as { userChoice: Promise<{ outcome: string }> }).userChoice;
+    (deferredPrompt as unknown as { prompt: () => void }).prompt();
+    const result = await (deferredPrompt as unknown as { userChoice: Promise<{ outcome: string }> }).userChoice;
     if (result.outcome === "accepted") setIsInstalled(true);
     setDeferredPrompt(null);
   };
