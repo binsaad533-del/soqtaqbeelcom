@@ -31,7 +31,7 @@ export const EmailChangeEmail = ({
     <Preview>تأكيد تغيير البريد الإلكتروني — سوق تقبيل</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Text style={logo}>TAQ/BEEL</Text>
+        <Text style={logo}>SOQ TAQBEEL</Text>
         <Heading style={h1}>تأكيد تغيير البريد الإلكتروني</Heading>
         <Text style={text}>
           طلبت تغيير بريدك الإلكتروني من {email} إلى {newEmail}. اضغط الزر أدناه لتأكيد التغيير.
