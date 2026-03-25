@@ -88,8 +88,8 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
       {/* Impact message */}
       <div className="px-3 pb-2">
         <div className="flex items-start gap-1.5 bg-background/40 rounded-lg p-2">
-          <impact.icon size={12} className={cn("shrink-0 mt-0.5", style.text)} />
-          <p className="text-[10px] leading-relaxed text-muted-foreground">{impact.message}</p>
+          <TrendingUp size={12} className={cn("shrink-0 mt-0.5", style.text)} />
+          <p className="text-[10px] leading-relaxed text-muted-foreground">{tierInfo.label}</p>
         </div>
       </div>
 
