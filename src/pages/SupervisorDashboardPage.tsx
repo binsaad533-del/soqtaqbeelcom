@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 
 type Tab = "overview" | "listings" | "deals" | "users" | "reports";
 

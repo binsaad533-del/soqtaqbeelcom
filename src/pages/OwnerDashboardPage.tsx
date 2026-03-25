@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 import CrmDashboard from "@/components/crm/CrmDashboard";
 
 type Tab = "overview" | "crm" | "deals" | "users" | "listings" | "security" | "settings";
