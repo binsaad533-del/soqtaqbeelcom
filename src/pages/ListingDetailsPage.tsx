@@ -12,6 +12,7 @@ import ListingOfferForm from "@/components/ListingOfferForm";
 import SellerOffersPanel from "@/components/SellerOffersPanel";
 import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
+import { useListingSocial } from "@/hooks/useListingSocial";
 import { useDeals } from "@/hooks/useDeals";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
