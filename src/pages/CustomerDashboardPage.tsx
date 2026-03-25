@@ -331,12 +331,6 @@ const CustomerDashboardPage = () => {
                 </div>
               </div>
 
-              {/* Phone verification inline */}
-              {!isPhoneVerified && (
-                <div className="pr-10">
-                  <PhoneVerificationFlow initialPhone={profile?.phone || ""} onVerified={() => window.location.reload()} />
-                </div>
-              )}
 
               {/* Registration date */}
               <div className="flex items-center gap-3">
