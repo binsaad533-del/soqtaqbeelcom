@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo.png";
+import logoIconGold from "@/assets/logo-icon-gold.png";
 import { Lock, Eye, EyeOff, CheckCircle, Sparkles } from "lucide-react";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";
@@ -73,7 +73,7 @@ const ResetPasswordPage = () => {
       <div className="min-h-screen flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-md text-center">
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="سوق تقبيل" className="h-14 md:h-16 w-auto" />
+            <img src={logoIconGold} alt="سوق تقبيل" className="h-14 md:h-16 w-auto" />
           </div>
           <div className="bg-card rounded-2xl p-8 shadow-soft">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-50 flex items-center justify-center">
@@ -94,7 +94,7 @@ const ResetPasswordPage = () => {
       <div className="min-h-screen flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-md text-center">
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="سوق تقبيل" className="h-14 md:h-16 w-auto" />
+            <img src={logoIconGold} alt="سوق تقبيل" className="h-14 md:h-16 w-auto" />
           </div>
           <div className="bg-card rounded-2xl p-8 shadow-soft">
             <h2 className="text-lg font-medium text-foreground mb-2">رابط غير صالح</h2>
@@ -119,7 +119,7 @@ const ResetPasswordPage = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="سوق تقبيل" className="h-14 md:h-16 w-auto mx-auto" />
+            <img src={logoIconGold} alt="سوق تقبيل" className="h-14 md:h-16 w-auto mx-auto" />
           </div>
           <h1 className="text-2xl font-medium gradient-text">تعيين كلمة مرور جديدة</h1>
           <p className="text-sm text-muted-foreground mt-2">أدخل كلمة المرور الجديدة</p>
