@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
@@ -9,11 +9,10 @@ import PhoneVerificationFlow from "@/components/PhoneVerificationFlow";
 import { cn } from "@/lib/utils";
 import {
   Plus, FileText, MessageSquare, AlertCircle,
-  CheckCircle, Loader2, Activity, ChevronLeft,
-  Wallet, Clock, DollarSign, Pause,
-  Eye, Mail, Camera, Pencil, Check, X as XIcon,
-  Phone, UserCheck, Shield, Bell, ArrowUpLeft,
-  LayoutDashboard, Store
+  CheckCircle, Loader2, Activity, Wallet, Clock,
+  DollarSign, Pause, Eye, Mail, Camera, Pencil,
+  Check, X as XIcon, Phone, UserCheck, Shield, Bell,
+  Store, ArrowUpLeft, Search, Briefcase
 } from "lucide-react";
 import { toast } from "sonner";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
@@ -37,10 +36,23 @@ const statusBadge = (s: string) => {
 const fmtCurrency = (n: number) =>
   n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n.toLocaleString();
 
+/* ── Tile wrapper ── */
+const Tile = ({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) => (
+  <div
+    onClick={onClick}
+    className={cn(
+      "bg-card rounded-2xl shadow-soft p-4 flex flex-col justify-between overflow-hidden",
+      onClick && "cursor-pointer hover:shadow-soft-lg transition-shadow",
+      className
+    )}
+  >
+    {children}
+  </div>
+);
+
 const CustomerDashboardPage = () => {
   const { profile, user } = useAuthContext();
-  const navigate = useNavigate();
-  const { getMyListings, updateListing } = useListings();
+  const { getMyListings } = useListings();
   const { getMyDeals } = useDeals();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
@@ -48,7 +60,7 @@ const CustomerDashboardPage = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [tab, setTab] = useState<"deals" | "listings">("deals");
+  const [stageFilter, setStageFilter] = useState<string | null>(null);
 
   /* ── Profile editing ── */
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -116,10 +128,10 @@ const CustomerDashboardPage = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "deals" }, (p) => {
         const d = p.new as any;
         if (d?.buyer_id === user.id || d?.seller_id === user.id)
-          setFeed(prev => [{ id: crypto.randomUUID(), text: p.eventType === "INSERT" ? "صفقة جديدة" : "تحديث صفقة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }) }, ...prev].slice(0, 5));
+          setFeed(prev => [{ id: crypto.randomUUID(), text: p.eventType === "INSERT" ? "صفقة جديدة" : "تحديث صفقة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }) }, ...prev].slice(0, 4));
       })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "negotiation_messages" }, () => {
-        setFeed(prev => [{ id: crypto.randomUUID(), text: "رسالة تفاوض جديدة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }) }, ...prev].slice(0, 5));
+        setFeed(prev => [{ id: crypto.randomUUID(), text: "رسالة تفاوض جديدة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }) }, ...prev].slice(0, 4));
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -141,340 +153,272 @@ const CustomerDashboardPage = () => {
 
   const dealLink = (d: Deal) => ["completed", "finalized"].includes(d.status) ? `/agreement/${d.id}` : `/negotiate/${d.id}`;
 
-  const memberSince = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "long" })
-    : "—";
+  const stages = [
+    { key: "new", label: "جديدة", icon: Briefcase, count: deals.filter(d => d.status === "new").length },
+    { key: "under_review", label: "مراجعة", icon: Search, count: deals.filter(d => d.status === "under_review").length },
+    { key: "negotiating", label: "تفاوض", icon: MessageSquare, count: deals.filter(d => d.status === "negotiating").length },
+    { key: "agreement", label: "اتفاقية", icon: FileText, count: deals.filter(d => d.status === "agreement").length },
+    { key: "completed", label: "مغلقة", icon: CheckCircle, count: deals.filter(d => ["completed", "finalized"].includes(d.status)).length },
+  ];
+
+  const displayDeals = stageFilter
+    ? deals.filter(d => stageFilter === "completed" ? ["completed", "finalized"].includes(d.status) : d.status === stageFilter)
+    : deals;
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={22} className="animate-spin text-primary" /></div>;
   }
 
-  const kpis = [
-    { label: "صفقات نشطة", value: stats.active, icon: Activity, accent: "text-primary bg-primary/10" },
-    { label: "بانتظار الرد", value: stats.waiting, icon: Pause, accent: "text-warning bg-warning/10" },
-    { label: "مكتملة", value: stats.completed, icon: CheckCircle, accent: "text-success bg-success/10" },
-    { label: "إجمالي القيمة", value: `${fmtCurrency(stats.totalVal)} ر.س`, icon: Wallet, accent: "text-primary bg-primary/10" },
-    { label: "عمولة المنصة (1%)", value: `${fmtCurrency(stats.commission)} ر.س`, icon: DollarSign, accent: "text-muted-foreground bg-muted" },
-  ];
-
   return (
-    <div className="min-h-[80vh] bg-background">
-      <div className="container max-w-7xl py-6 md:py-8">
+    <div className="min-h-[80vh] bg-background py-5 md:py-7">
+      <div className="container max-w-[1200px]">
 
         {loadError && (
-          <div className="p-3 rounded-lg bg-destructive/10 flex items-center justify-between mb-5">
+          <div className="p-3 rounded-lg bg-destructive/10 flex items-center justify-between mb-4">
             <div className="flex items-center gap-2"><AlertCircle size={14} className="text-destructive" /><span className="text-xs text-destructive">{loadError}</span></div>
             <button onClick={() => window.location.reload()} className="text-xs text-destructive hover:underline">إعادة المحاولة</button>
           </div>
         )}
 
-        {/* ═══ HEADER ═══ */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <label className="relative w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm cursor-pointer group overflow-hidden shrink-0 ring-2 ring-background shadow-sm">
-              {profile?.avatar_url
-                ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
-                : (profile?.full_name?.charAt(0) || "؟")}
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                <Camera size={12} className="text-white" />
-              </div>
-              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
-            </label>
-            <div>
-              <h1 className="text-lg font-semibold leading-tight">مرحباً، {profile?.full_name || "مستخدم"}</h1>
-              <p className="text-xs text-muted-foreground">لوحة التحكم · عضو منذ {memberSince}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link to="/create-listing" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
-              <Plus size={14} />
-              إعلان جديد
-            </Link>
-          </div>
-        </div>
+        {/* ═══ TILE GRID ═══ */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[minmax(140px,1fr)]">
 
-        {/* ═══ KPI CARDS ═══ */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
-          {kpis.map((kpi, i) => (
-            <div key={i} className="bg-card rounded-xl p-4 shadow-soft hover:shadow-soft-lg transition-shadow">
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", kpi.accent)}>
-                  <kpi.icon size={15} strokeWidth={1.5} />
+          {/* ── KPI tiles (5) ── */}
+          {([
+            { label: "صفقات نشطة", value: stats.active, icon: Activity, accent: "text-primary" },
+            { label: "بانتظار الرد", value: stats.waiting, icon: Pause, accent: "text-warning" },
+            { label: "مكتملة", value: stats.completed, icon: CheckCircle, accent: "text-success" },
+            { label: "إجمالي القيمة", value: `${fmtCurrency(stats.totalVal)}`, icon: Wallet, accent: "text-primary", sub: "ر.س" },
+            { label: "العمولة (1%)", value: `${fmtCurrency(stats.commission)}`, icon: DollarSign, accent: "text-muted-foreground", sub: "ر.س" },
+          ] as const).map((kpi, i) => (
+            <Tile key={`kpi-${i}`}>
+              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", `${kpi.accent}/10`)}>
+                <kpi.icon size={15} strokeWidth={1.5} className={kpi.accent} />
+              </div>
+              <div className="mt-auto">
+                <div className="text-2xl font-bold leading-none">
+                  {kpi.value}
+                  {"sub" in kpi && <span className="text-xs font-normal text-muted-foreground mr-1">{kpi.sub}</span>}
                 </div>
+                <div className="text-[11px] text-muted-foreground mt-1">{kpi.label}</div>
               </div>
-              <div className="text-xl font-bold">{kpi.value}</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">{kpi.label}</div>
-            </div>
+            </Tile>
           ))}
-        </div>
 
-        {/* ═══ PROFILE COMPLETION ═══ */}
-        {profileCompleteness < 100 && (
-          <div className="bg-card rounded-xl p-4 mb-6 shadow-soft">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium">اكتمال الملف الشخصي</span>
-              <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full",
-                profileCompleteness >= 75 ? "bg-success/15 text-success" : profileCompleteness >= 50 ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive"
-              )}>{profileCompleteness}%</span>
+          {/* ── Profile tile ── */}
+          <Tile className="row-span-2">
+            <div className="flex flex-col items-center text-center mb-3">
+              <label className="relative w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg cursor-pointer group overflow-hidden ring-2 ring-background shadow-sm mb-2">
+                {profile?.avatar_url
+                  ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
+                  : (profile?.full_name?.charAt(0) || "؟")}
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                  <Camera size={14} className="text-white" />
+                </div>
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
+              </label>
+              <span className="text-sm font-semibold">{profile?.full_name || "مستخدم"}</span>
+              <span className={cn("text-[10px] flex items-center gap-1 mt-0.5", isPhoneVerified ? "text-success" : "text-warning")}>
+                {isPhoneVerified ? <><UserCheck size={10} /> موثّق</> : <><Shield size={10} /> غير موثّق</>}
+              </span>
             </div>
-            <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden mb-2">
-              <div className={cn("h-full rounded-full transition-all", profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive")} style={{ width: `${profileCompleteness}%` }} />
+
+            {/* Progress ring */}
+            <div className="flex items-center justify-center mb-3">
+              <div className="relative w-16 h-16">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15.5" fill="none" className="stroke-muted" strokeWidth="2.5" />
+                  <circle cx="18" cy="18" r="15.5" fill="none" className="stroke-primary" strokeWidth="2.5" strokeDasharray={`${profileCompleteness} ${100 - profileCompleteness}`} strokeLinecap="round" />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">{profileCompleteness}%</span>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-2 text-[10px]">
-              {!profile?.full_name && <span className="px-2 py-0.5 rounded-md bg-warning/10 text-warning">الاسم مطلوب</span>}
-              {!profile?.phone && <span className="px-2 py-0.5 rounded-md bg-warning/10 text-warning">رقم الجوال</span>}
-              {!hasRealEmail && <span className="px-2 py-0.5 rounded-md bg-warning/10 text-warning">البريد الإلكتروني</span>}
-              {!profile?.avatar_url && <span className="px-2 py-0.5 rounded-md bg-warning/10 text-warning">الصورة الشخصية</span>}
-              {!isPhoneVerified && profile?.phone && <span className="px-2 py-0.5 rounded-md bg-warning/10 text-warning">توثيق الجوال</span>}
+
+            {/* Editable fields */}
+            <div className="space-y-2 text-[10px]">
+              {/* Name */}
+              <div className="flex items-center justify-between">
+                <Mail size={10} className="text-muted-foreground shrink-0" />
+                {editingField === "email" ? (
+                  <div className="flex items-center gap-1">
+                    <input type="email" dir="ltr" className="bg-muted/50 rounded px-1.5 py-0.5 w-full border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
+                    <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={10} /></button>
+                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={10} /></button>
+                  </div>
+                ) : (
+                  <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-muted-foreground hover:text-primary truncate flex items-center gap-1" dir="ltr">
+                    {hasRealEmail ? <span className="truncate max-w-[100px]">{userEmail}</span> : <span className="text-warning">إضافة بريد</span>}
+                    <Pencil size={8} className="shrink-0 opacity-50" />
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center justify-between">
+                <Phone size={10} className="text-muted-foreground shrink-0" />
+                {editingField === "phone" ? (
+                  <div className="flex items-center gap-1">
+                    <input dir="ltr" inputMode="numeric" className="bg-muted/50 rounded px-1.5 py-0.5 w-20 border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus />
+                    <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success"><Check size={10} /></button>
+                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={10} /></button>
+                  </div>
+                ) : (
+                  <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-muted-foreground hover:text-primary flex items-center gap-1" dir="ltr">
+                    {profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">إضافة جوال</span>}
+                    <Pencil size={8} className="shrink-0 opacity-50" />
+                  </button>
+                )}
+              </div>
             </div>
+
             {!isPhoneVerified && profile?.phone && (
-              <div className="mt-3 pt-3 border-t border-border/20">
+              <div className="mt-2 pt-2 border-t border-border/15">
                 <PhoneVerificationFlow initialPhone={profile.phone} onVerified={() => window.location.reload()} />
               </div>
             )}
-          </div>
-        )}
+          </Tile>
 
-        {/* ═══ MAIN GRID ═══ */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-          {/* ── LEFT: Main content (2 cols) ── */}
-          <div className="lg:col-span-2 space-y-5">
-
-            {/* Tab bar */}
-            <div className="bg-card rounded-xl shadow-soft overflow-hidden">
-              <div className="flex border-b border-border/20">
-                <button onClick={() => setTab("deals")} className={cn("flex-1 px-4 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5",
-                  tab === "deals" ? "text-primary border-b-2 border-primary -mb-px" : "text-muted-foreground hover:text-foreground"
-                )}>
-                  <MessageSquare size={13} strokeWidth={1.5} />
-                  صفقاتي
-                  <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full", tab === "deals" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>{deals.length}</span>
-                </button>
-                <button onClick={() => setTab("listings")} className={cn("flex-1 px-4 py-3 text-xs font-medium transition-colors flex items-center justify-center gap-1.5",
-                  tab === "listings" ? "text-primary border-b-2 border-primary -mb-px" : "text-muted-foreground hover:text-foreground"
-                )}>
-                  <FileText size={13} strokeWidth={1.5} />
-                  إعلاناتي
-                  <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full", tab === "listings" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>{listings.length}</span>
-                </button>
+          {/* ── Stage filter tiles (5) ── */}
+          {stages.map(stage => (
+            <Tile
+              key={stage.key}
+              onClick={() => setStageFilter(stageFilter === stage.key ? null : stage.key)}
+              className={cn(stageFilter === stage.key && "ring-2 ring-primary/40")}
+            >
+              <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center">
+                <stage.icon size={14} strokeWidth={1.5} className="text-muted-foreground" />
               </div>
+              <div className="mt-auto">
+                <div className="text-2xl font-bold leading-none">{stage.count}</div>
+                <div className="text-[11px] text-muted-foreground mt-1">{stage.label}</div>
+              </div>
+            </Tile>
+          ))}
 
-              {/* Deals */}
-              {tab === "deals" && (
-                deals.length === 0 ? (
-                  <div className="text-center py-16 px-4">
-                    <MessageSquare size={32} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
-                    <p className="text-sm text-muted-foreground mb-2">لا توجد صفقات بعد</p>
-                    <Link to="/marketplace" className="text-xs text-primary hover:underline">تصفح السوق وابدأ أول صفقة</Link>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-border/10">
-                    {deals.map(deal => {
-                      const st = statusBadge(deal.status);
-                      return (
-                        <Link key={deal.id} to={dealLink(deal)} className="flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors group">
-                          <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0", st.cls)}>
-                            <MessageSquare size={14} strokeWidth={1.5} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium">صفقة #{deal.id.slice(0, 6)}</div>
-                            <div className="text-xs text-muted-foreground mt-0.5">
-                              {deal.agreed_price ? `${Number(deal.agreed_price).toLocaleString()} ر.س` : "بدون سعر"}
-                              <span className="mx-1.5">·</span>
-                              {new Date(deal.updated_at).toLocaleDateString("ar-SA", { month: "short", day: "numeric" })}
-                            </div>
-                          </div>
-                          <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium shrink-0", st.cls)}>{st.label}</span>
-                          <ChevronLeft size={14} className="text-muted-foreground/30 group-hover:text-muted-foreground transition-colors shrink-0" />
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )
-              )}
-
-              {/* Listings */}
-              {tab === "listings" && (
-                <>
-                  <div className="flex items-center justify-between px-5 py-3 border-b border-border/10 bg-muted/20">
-                    <span className="text-[11px] text-muted-foreground">{listings.length} إعلان</span>
-                    <Link to="/create-listing" className="text-[11px] text-primary hover:underline flex items-center gap-1"><Plus size={11} /> إضافة</Link>
-                  </div>
-                  {listings.length === 0 ? (
-                    <div className="text-center py-16 px-4">
-                      <FileText size={32} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
-                      <p className="text-sm text-muted-foreground mb-2">لا توجد إعلانات</p>
-                      <Link to="/create-listing" className="text-xs text-primary hover:underline">أنشئ إعلانك الأول</Link>
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-border/10">
-                      {listings.map(listing => {
-                        const st = statusBadge(listing.status);
-                        return (
-                          <Link key={listing.id} to={`/listing/${listing.id}`} className="flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors group">
-                            <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
-                              <Store size={14} strokeWidth={1.5} className="text-muted-foreground" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium truncate">{listing.title || "بدون عنوان"}</div>
-                              <div className="text-xs text-muted-foreground mt-0.5">
-                                {listing.city || "—"}
-                                {listing.price ? <><span className="mx-1.5">·</span>{Number(listing.price).toLocaleString()} ر.س</> : null}
-                              </div>
-                            </div>
-                            <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium shrink-0", st.cls)}>{st.label}</span>
-                            <ChevronLeft size={14} className="text-muted-foreground/30 group-hover:text-muted-foreground transition-colors shrink-0" />
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </>
-              )}
+          {/* ── Activity tile ── */}
+          <Tile>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-semibold flex items-center gap-1">
+                <Activity size={12} className="text-success" /> النشاط
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[9px] text-muted-foreground">مباشر</span>
+              </span>
             </div>
-          </div>
-
-          {/* ── RIGHT: Sidebar ── */}
-          <div className="space-y-4">
-
-            {/* Profile Card */}
-            <div className="bg-card rounded-xl p-5 shadow-soft">
-              <h3 className="text-xs font-semibold text-muted-foreground mb-4">الملف الشخصي</h3>
-
-              <div className="space-y-3">
-                {/* Name */}
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-muted-foreground">الاسم</span>
-                  {editingField === "full_name" ? (
-                    <div className="flex items-center gap-1">
-                      <input className="text-xs bg-muted/50 rounded-md px-2 py-1 w-28 border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
-                      <button onClick={() => saveField("full_name", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={12} /></button>
-                      <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={12} /></button>
-                    </div>
-                  ) : (
-                    <button onClick={() => startEdit("full_name", profile?.full_name || "")} className="text-xs font-medium flex items-center gap-1 hover:text-primary transition-colors group/n">
-                      {profile?.full_name || <span className="text-warning">لم يُضاف</span>}
-                      <Pencil size={10} className="text-muted-foreground/30 group-hover/n:text-primary" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Email */}
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-muted-foreground">البريد</span>
-                  {editingField === "email" ? (
-                    <div className="flex items-center gap-1">
-                      <input type="email" dir="ltr" className="text-xs bg-muted/50 rounded-md px-2 py-1 w-36 border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
-                      <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={12} /></button>
-                      <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={12} /></button>
-                    </div>
-                  ) : (
-                    <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-xs flex items-center gap-1 hover:text-primary transition-colors group/e" dir="ltr">
-                      {hasRealEmail ? <span className="truncate max-w-[140px]">{userEmail}</span> : <span className="text-warning">لم يُضاف</span>}
-                      <Pencil size={10} className="text-muted-foreground/30 group-hover/e:text-primary" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Phone */}
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-muted-foreground">الجوال</span>
-                  {editingField === "phone" ? (
-                    <div className="flex items-center gap-1">
-                      <input dir="ltr" inputMode="numeric" className="text-xs bg-muted/50 rounded-md px-2 py-1 w-28 border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus />
-                      <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success hover:text-success/80"><Check size={12} /></button>
-                      <button onClick={cancelEdit} className="text-muted-foreground hover:text-foreground"><XIcon size={12} /></button>
-                    </div>
-                  ) : (
-                    <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-xs flex items-center gap-1 hover:text-primary transition-colors group/p" dir="ltr">
-                      {profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">لم يُضاف</span>}
-                      <Pencil size={10} className="text-muted-foreground/30 group-hover/p:text-primary" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Verification */}
-                <div className="flex items-center justify-between pt-2 border-t border-border/15">
-                  <span className="text-[11px] text-muted-foreground">الحالة</span>
-                  <span className={cn("text-[11px] flex items-center gap-1 font-medium",
-                    isPhoneVerified ? "text-success" : "text-warning"
-                  )}>
-                    {isPhoneVerified ? <><UserCheck size={12} /> موثّق</> : <><Shield size={12} /> غير موثّق</>}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Live Activity */}
-            <div className="bg-card rounded-xl p-5 shadow-soft">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-semibold flex items-center gap-1.5">
-                  <Activity size={13} className="text-success" />
-                  النشاط المباشر
-                </h3>
-                <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                  <span className="text-[10px] text-muted-foreground">مباشر</span>
-                </span>
-              </div>
+            <div className="flex-1 flex flex-col justify-center">
               {feed.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-6">لا يوجد نشاط حالياً</p>
+                <p className="text-[10px] text-muted-foreground text-center">لا يوجد نشاط</p>
               ) : (
-                <div className="space-y-2.5">
-                  {feed.map(f => (
-                    <div key={f.id} className="flex items-center gap-2.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                      <span className="text-xs text-muted-foreground flex-1 truncate">{f.text}</span>
-                      <span className="text-[10px] text-muted-foreground/40 shrink-0">{f.time}</span>
+                <div className="space-y-2">
+                  {feed.slice(0, 3).map(f => (
+                    <div key={f.id} className="flex items-center gap-1.5 text-[10px]">
+                      <span className="w-1 h-1 rounded-full bg-primary shrink-0" />
+                      <span className="text-muted-foreground flex-1 truncate">{f.text}</span>
+                      <span className="text-[8px] text-muted-foreground/40">{f.time}</span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
+          </Tile>
 
-            {/* Notifications */}
-            {notifications.length > 0 && (
-              <div className="bg-card rounded-xl p-5 shadow-soft">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-semibold flex items-center gap-1.5">
-                    <Bell size={13} />
-                    الإشعارات
-                    {unreadCount > 0 && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{unreadCount}</span>}
-                  </h3>
-                  {unreadCount > 0 && <button onClick={markAllAsRead} className="text-[10px] text-primary hover:underline">قراءة الكل</button>}
-                </div>
+          {/* ── Notifications tile ── */}
+          <Tile>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-semibold flex items-center gap-1.5">
+                <Bell size={12} />
+                إشعارات
+                {unreadCount > 0 && <span className="text-[9px] bg-primary/10 text-primary px-1.5 rounded-full">{unreadCount}</span>}
+              </span>
+              {unreadCount > 0 && <button onClick={markAllAsRead} className="text-[9px] text-primary">قراءة</button>}
+            </div>
+            <div className="flex-1 flex flex-col justify-center">
+              {notifications.length === 0 ? (
+                <p className="text-[10px] text-muted-foreground text-center">لا توجد إشعارات</p>
+              ) : (
                 <div className="space-y-1.5">
-                  {notifications.slice(0, 4).map(n => (
-                    <button key={n.id} onClick={() => markAsRead(n.id)} className={cn("w-full text-right px-3 py-2.5 rounded-lg transition-all text-xs", !n.is_read ? "bg-primary/[0.04] hover:bg-primary/[0.07]" : "hover:bg-muted/30")}>
-                      <div className="flex items-start gap-2">
-                        {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />}
-                        <div className="min-w-0 flex-1">
-                          <div className="font-medium truncate text-[11px]">{n.title}</div>
-                          {n.body && <div className="text-muted-foreground text-[10px] truncate mt-0.5">{n.body}</div>}
-                        </div>
-                      </div>
+                  {notifications.slice(0, 3).map(n => (
+                    <button key={n.id} onClick={() => markAsRead(n.id)} className="w-full text-right flex items-start gap-1.5 text-[10px]">
+                      {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1 shrink-0" />}
+                      <span className="truncate text-muted-foreground">{n.title}</span>
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Quick Actions */}
-            <div className="bg-card rounded-xl p-5 shadow-soft">
-              <h3 className="text-xs font-semibold mb-3">إجراءات سريعة</h3>
-              <div className="space-y-1.5">
-                <Link to="/marketplace" className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/30 transition-colors">
-                  <Eye size={14} className="text-muted-foreground" />
-                  <span className="text-xs">تصفح السوق</span>
-                </Link>
-                <Link to="/contact" className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-muted/30 transition-colors">
-                  <Mail size={14} className="text-muted-foreground" />
-                  <span className="text-xs">تواصل مع الدعم</span>
-                </Link>
-              </div>
+              )}
             </div>
-          </div>
+          </Tile>
+
+          {/* ── Quick actions tile ── */}
+          <Tile>
+            <span className="text-[11px] font-semibold mb-2">إجراءات</span>
+            <div className="flex-1 flex flex-col justify-center space-y-1.5">
+              <Link to="/create-listing" className="flex items-center gap-2 px-2 py-2 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors text-xs">
+                <Plus size={13} className="text-primary" /> إعلان جديد
+              </Link>
+              <Link to="/marketplace" className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-muted/30 transition-colors text-xs">
+                <Eye size={13} className="text-muted-foreground" /> تصفح السوق
+              </Link>
+              <Link to="/contact" className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-muted/30 transition-colors text-xs">
+                <Mail size={13} className="text-muted-foreground" /> الدعم
+              </Link>
+            </div>
+          </Tile>
+
+          {/* ── Deal cards ── */}
+          {displayDeals.length === 0 && (
+            <Tile className="col-span-2 md:col-span-4 flex items-center justify-center">
+              <div className="text-center">
+                <MessageSquare size={28} className="mx-auto mb-2 text-muted-foreground/15" strokeWidth={1} />
+                <p className="text-xs text-muted-foreground mb-1">{stageFilter ? "لا توجد صفقات في هذه المرحلة" : "لا توجد صفقات بعد"}</p>
+                {stageFilter ? (
+                  <button onClick={() => setStageFilter(null)} className="text-[10px] text-primary hover:underline">عرض الكل</button>
+                ) : (
+                  <Link to="/marketplace" className="text-[10px] text-primary hover:underline">تصفح السوق</Link>
+                )}
+              </div>
+            </Tile>
+          )}
+
+          {displayDeals.map(deal => {
+            const st = statusBadge(deal.status);
+            return (
+              <Link key={deal.id} to={dealLink(deal)} className="bg-card rounded-2xl shadow-soft p-4 flex flex-col justify-between hover:shadow-soft-lg transition-shadow min-h-[140px]">
+                <div className="flex items-center justify-between">
+                  <span className={cn("text-[9px] px-2 py-0.5 rounded-md font-medium", st.cls)}>{st.label}</span>
+                  <ArrowUpLeft size={12} className="text-muted-foreground/30" />
+                </div>
+                <div className="mt-auto">
+                  <div className="text-sm font-semibold">#{deal.id.slice(0, 6)}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {deal.agreed_price ? `${Number(deal.agreed_price).toLocaleString()} ر.س` : "—"}
+                  </div>
+                  <div className="text-[9px] text-muted-foreground/50 mt-1">
+                    {new Date(deal.updated_at).toLocaleDateString("ar-SA", { month: "short", day: "numeric" })}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+
+          {/* ── Listing cards ── */}
+          {listings.map(listing => {
+            const st = statusBadge(listing.status);
+            return (
+              <Link key={listing.id} to={`/listing/${listing.id}`} className="bg-card rounded-2xl shadow-soft p-4 flex flex-col justify-between hover:shadow-soft-lg transition-shadow min-h-[140px]">
+                <div className="flex items-center justify-between">
+                  <span className={cn("text-[9px] px-2 py-0.5 rounded-md font-medium", st.cls)}>{st.label}</span>
+                  <Store size={12} className="text-muted-foreground/30" />
+                </div>
+                <div className="mt-auto">
+                  <div className="text-sm font-semibold truncate">{listing.title || "بدون عنوان"}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {listing.city || "—"}
+                    {listing.price ? ` · ${Number(listing.price).toLocaleString()} ر.س` : ""}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+
         </div>
       </div>
     </div>
