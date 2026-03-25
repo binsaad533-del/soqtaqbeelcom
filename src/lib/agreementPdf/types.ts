@@ -20,6 +20,7 @@ export interface AgreementPdfData {
   declarations: { buyerDeclares?: string; sellerDeclares?: string; platformNote?: string } | null;
   importantNotes: string[];
   amendmentReason: string | null;
+  assetPhotos?: string[];
   buyerApproved: boolean;
   buyerApprovedAt: string | null;
   sellerApproved: boolean;

@@ -362,6 +362,29 @@ const buildSections = (data: AgreementPdfData) => {
     );
   }
 
+  // ── Asset Photos ──
+  if (data.assetPhotos && data.assetPhotos.length > 0) {
+    const photosPerPage = 4;
+    chunk(data.assetPhotos, photosPerPage).forEach((group, index) => {
+      sections.push(
+        section(
+          index === 0 ? "صور الأصول والموقع" : "صور الأصول والموقع — متابعة",
+          `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
+            ${group
+              .map(
+                (url) => `
+                  <div style="border:1px solid hsl(214 32% 91%);border-radius:16px;overflow:hidden;background:hsl(210 40% 98%);">
+                    <img src="${url}" alt="صورة أصل" style="width:100%;height:180px;object-fit:cover;display:block;" crossorigin="anonymous" />
+                  </div>`,
+              )
+              .join("")}
+          </div>`,
+          "highlight",
+        ),
+      );
+    });
+  }
+
   sections.push(
     section(
       "عمولة المنصة وبيانات الحساب البنكي",

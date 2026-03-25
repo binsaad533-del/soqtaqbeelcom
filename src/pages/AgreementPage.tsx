@@ -72,9 +72,18 @@ const AgreementPage = () => {
   }, [id]);
 
   const handleDownloadPdf = async () => {
-    if (!agreement) return;
+    if (!agreement || !deal) return;
     setPdfLoading(true);
     try {
+      // Fetch listing photos
+      let assetPhotos: string[] = [];
+      try {
+        const listing = await getListing(deal.listing_id);
+        if (listing?.photos) {
+          assetPhotos = Object.values(listing.photos).flat().filter(Boolean) as string[];
+        }
+      } catch { /* photos are optional */ }
+
       await generateAgreementPdf({
         agreementNumber: agreement.agreement_number,
         version: agreement.version,
@@ -101,6 +110,7 @@ const AgreementPage = () => {
         buyerApprovedAt: agreement.buyer_approved_at,
         sellerApproved: agreement.seller_approved,
         sellerApprovedAt: agreement.seller_approved_at,
+        assetPhotos,
         commissionAmount: commission?.commission_amount ?? null,
         commissionRate: commission?.commission_rate ?? null,
         dealAmount: commission?.deal_amount ?? null,
