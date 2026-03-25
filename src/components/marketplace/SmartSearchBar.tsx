@@ -168,7 +168,9 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
       {displayMessage && (
         <div className={cn(
           "flex items-start gap-2 rounded-xl px-3.5 py-2.5 animate-reveal",
-          resultCount === 0 && hasSearched ? "bg-destructive/8" : "bg-primary/5"
+          resultCount === 0 && hasSearched
+            ? "bg-gradient-to-l from-destructive/15 via-destructive/8 to-transparent"
+            : "bg-gradient-to-l from-primary/10 via-primary/5 to-transparent"
         )}>
           <AiStar size={14} className="mt-0.5 shrink-0" />
           <p className="text-xs text-foreground/80 leading-relaxed">{displayMessage}</p>
