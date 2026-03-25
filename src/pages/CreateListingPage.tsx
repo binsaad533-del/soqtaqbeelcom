@@ -238,6 +238,9 @@ const CreateListingPage = () => {
             civil_defense_license: draft.civil_defense_license || "",
             surveillance_cameras: draft.surveillance_cameras || "",
           }));
+          // Restore location
+          if ((draft as any).location_lat) setLocationLat((draft as any).location_lat);
+          if ((draft as any).location_lng) setLocationLng((draft as any).location_lng);
           setDraftRestored(true);
           toast.success("تم استعادة مسودتك السابقة تلقائياً", { icon: "📋" });
         }
@@ -269,6 +272,8 @@ const CreateListingPage = () => {
         })),
         deal_disclosures: dealStructure.requiredDisclosures,
         required_documents: dealStructure.requiredDocuments,
+        location_lat: locationLat,
+        location_lng: locationLng,
       } as never);
       setAutoSaveStatus("saved");
       setTimeout(() => setAutoSaveStatus("idle"), 3000);
@@ -276,7 +281,7 @@ const CreateListingPage = () => {
       console.error("Auto-save failed", err);
       setAutoSaveStatus("idle");
     }
-  }, [listingId, saving, disclosure, inventory, dealStructure, updateListing]);
+  }, [listingId, saving, disclosure, inventory, dealStructure, updateListing, locationLat, locationLng]);
 
   useEffect(() => {
     autoSaveTimerRef.current = setInterval(() => {
