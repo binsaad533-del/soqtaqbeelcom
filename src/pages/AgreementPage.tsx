@@ -65,13 +65,13 @@ const AgreementPage = () => {
   const { getCommission } = useCommissions();
   const [agreement, setAgreement] = useState<AgreementRecord | null>(null);
   const [allVersions, setAllVersions] = useState<AgreementRecord[]>([]);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  
   const [deal, setDeal] = useState<any>(null);
   const [commission, setCommission] = useState<Commission | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [approving, setApproving] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
+  
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -657,14 +657,6 @@ const AgreementPage = () => {
   );
 };
 
-const ACTION_LABELS: Record<string, string> = {
-  agreement_created: "تم إنشاء الاتفاقية",
-  agreement_amended: "تم تعديل الاتفاقية",
-  buyer_approved: "اعتماد المشتري",
-  seller_approved: "اعتماد البائع",
-  negotiation_started: "بدء التفاوض",
-  deal_completed: "اكتمال الصفقة",
-};
 
 const ApprovalCard = ({
   label, name, approved, approvedAt, onApprove, loading, disabled,
