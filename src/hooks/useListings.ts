@@ -41,6 +41,10 @@ export interface Listing {
   ai_structure_validation: any | null;
   deleted_at: string | null;
   deleted_by: string | null;
+  location_lat: number | null;
+  location_lng: number | null;
+  fraud_flags: any[];
+  fraud_score: number | null;
 }
 
 export function useListings() {
