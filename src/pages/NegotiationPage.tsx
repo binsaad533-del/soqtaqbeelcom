@@ -594,31 +594,7 @@ const NegotiationPage = () => {
 
           {/* ═══════════ SIDEBAR ═══════════ */}
           <div className="space-y-4">
-            {/* Tabs */}
-            <div className="flex bg-muted/40 rounded-xl p-0.5">
-              <button
-                onClick={() => setSidebarTab("summary")}
-                className={cn(
-                  "flex-1 text-[11px] py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5",
-                  sidebarTab === "summary" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Info size={12} strokeWidth={1.5} /> ملخص الصفقة
-              </button>
-              <button
-                onClick={() => setSidebarTab("actions")}
-                className={cn(
-                  "flex-1 text-[11px] py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5",
-                  sidebarTab === "actions" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <FileCheck size={12} strokeWidth={1.5} /> الإجراءات
-                {isPostAgreement && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />}
-              </button>
-            </div>
-
-            {/* ═══ TAB: Summary ═══ */}
-            {sidebarTab === "summary" && (
+            {/* ═══ Sidebar Content ═══ */}
               <div className="space-y-4 animate-in fade-in-0 duration-200">
                 {/* Deal Readiness Card (merged: status + risk) */}
                 <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
