@@ -8,9 +8,9 @@ import { toast } from "sonner";
 const dealTypes = [
   { id: "الكل", label: "الكل" },
   { id: "full_takeover", label: "تقبيل كامل" },
-  { id: "transfer_no_liabilities", label: "نقل أعمال بدون التزامات" },
-  { id: "assets_setup", label: "أصول + تجهيز تشغيلي" },
-  { id: "assets_only", label: "أصول فقط" },
+  { id: "transfer_no_liabilities", label: "تقبيل نقل أعمال بدون التزامات سابقة" },
+  { id: "assets_setup", label: "تقبيل أصول + تجهيز تشغيلي (بدون سجل تجاري)" },
+  { id: "assets_only", label: "تقبيل أصول فقط" },
 ];
 
 const cities = ["الكل", "📍 بالقرب مني", "الرياض", "جدة", "الدمام", "مكة", "المدينة"];
