@@ -434,7 +434,7 @@ const CustomerDashboardPage = () => {
                   <button key={n.id} onClick={() => markAsRead(n.id)} className="w-full text-right flex items-start gap-2 text-[11px] hover:bg-muted/30 p-2 rounded-lg transition-colors">
                     {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />}
                     <div className="flex-1 min-w-0">
-                      <span className={cn("block truncate", n.is_read ? "text-muted-foreground" : "text-foreground font-medium")}>{n.title}</span>
+                      <span className={cn("block truncate", n.is_read ? "text-muted-foreground" : "text-foreground font-medium", n.type === "deal" && "text-success")}>{n.title}</span>
                       {n.body && <span className="text-[10px] text-muted-foreground truncate block">{n.body}</span>}
                     </div>
                   </button>
