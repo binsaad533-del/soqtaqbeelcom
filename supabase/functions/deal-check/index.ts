@@ -89,8 +89,8 @@ const BUYER_PERSPECTIVE = `
 - في negotiationGuidance: قدّم نصائح للمشتري حول كيف يتفاوض ويحصل على سعر أفضل
 - مثال: "يمكنك التفاوض لخفض السعر إلى X ريال بناءً على حالة الأصول"`;
 
-function buildSystemPrompt(perspective: "seller" | "buyer"): string {
-  const perspectiveBlock = perspective === "seller" ? SELLER_PERSPECTIVE : BUYER_PERSPECTIVE;
+function buildSystemPrompt(perspective: "seller" | "buyer", sellerName?: string): string {
+  const perspectiveBlock = perspective === "seller" ? buildSellerPerspective(sellerName) : BUYER_PERSPECTIVE;
   
   return `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية قصيرة وقوية لكل صفقة.
 
