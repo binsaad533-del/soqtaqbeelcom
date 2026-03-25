@@ -739,6 +739,7 @@ const CustomerDashboardPage = () => {
                 )}
               </div>
             )}
+            {activeTab === "security" && <SecuritySettingsPanel />}
         </div>
       </div>
     </div>
