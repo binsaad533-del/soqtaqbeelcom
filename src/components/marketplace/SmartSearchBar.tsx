@@ -21,9 +21,10 @@ interface Props {
 const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [aiMessage, setAiMessage] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [appliedLabel, setAppliedLabel] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const filteredSuggestions = query
