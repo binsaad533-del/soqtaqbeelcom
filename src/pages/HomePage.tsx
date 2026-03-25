@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import AiStar from "@/components/AiStar";
+import AiInlineStar from "@/components/AiInlineStar";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 import { useEffect, useRef } from "react";
@@ -45,18 +46,18 @@ const HomePage = () => {
             <div className="flex justify-center mb-6">
               <img src={logo} alt="سوق تقبيل" className="h-16 md:h-20 w-auto mx-auto" />
             </div>
-            <p className="text-sm font-medium text-primary mb-3 tracking-wide">أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع</p>
+            <p className="text-sm font-medium text-primary mb-3 tracking-wide">أول منصة سعودية بالذكاء الاصطناعي <AiInlineStar size={13} /> لتقبيل المشاريع</p>
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
               ارفع صور مشروعك…
               <br />
-              <span className="gradient-text">والذكاء الاصطناعي يكمل الباقي</span>
+              <span className="gradient-text">والذكاء الاصطناعي يكمل الباقي <AiInlineStar size={20} /></span>
             </h1>
 
             <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
               جرد، تقييم، بيانات، وتفاوض — كلها تلقائيًا بدون ما تكتب سطر واحد.
             </p>
             <p className="text-xs md:text-sm text-muted-foreground/70 mb-8">
-              فقط ارفع الصور والمستندات وخلّ الـAI يشتغل عنك.
+              فقط ارفع الصور والمستندات وخلّ الـAI <AiInlineStar size={11} /> يشتغل عنك.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft hover:shadow-soft-lg transition-shadow active:scale-[0.98]">
@@ -93,7 +94,7 @@ const HomePage = () => {
       <section className="py-16 md:py-24 border-t border-border/50">
         <div className="container">
           <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
-            <h2 className="text-2xl md:text-3xl font-medium mb-4">منصة بالذكاء الاصطناعي لإتمام الصفقات… مو مجرد عرض</h2>
+            <h2 className="text-2xl md:text-3xl font-medium mb-4">منصة بالذكاء الاصطناعي <AiInlineStar size={18} /> لإتمام الصفقات… مو مجرد عرض</h2>
             <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               كل الأدوات اللي تحتاجها لتقييم، عرض، وتوثيق الصفقات في مكان واحد — بطريقة ذكية وسريعة وواضحة.
             </p>
