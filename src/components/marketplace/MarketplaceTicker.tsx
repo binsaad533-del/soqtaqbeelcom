@@ -228,7 +228,7 @@ const MarketplaceTicker = () => {
   return (
     <div
       ref={containerRef}
-      className="relative mb-5 overflow-hidden rounded-xl bg-card border border-border/40"
+      className="sticky top-[52px] z-40 relative mb-5 overflow-hidden rounded-xl bg-card border border-border/40"
       onMouseEnter={() => {
         pausedRef.current = true;
       }}
