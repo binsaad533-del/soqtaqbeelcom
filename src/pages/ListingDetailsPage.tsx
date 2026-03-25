@@ -391,7 +391,7 @@ const ListingDetailsPage = () => {
                 {listing.lease_remaining && <InfoRow label="المتبقي" value={listing.lease_remaining} />}
                 {listing.municipality_license && <InfoRow label="رخصة البلدية" value={listing.municipality_license} />}
                 {listing.civil_defense_license && <InfoRow label="الدفاع المدني" value={listing.civil_defense_license} />}
-                {listing.surveillance_cameras && <InfoRow label="كاميرات المراقبة" value={listing.surveillance_cameras} />}
+                
                 {listing.liabilities && <InfoRow label="الالتزامات" value={listing.liabilities} />}
               </div>
 
