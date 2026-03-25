@@ -1,6 +1,6 @@
 import { Shield, Eye, ChevronDown, ChevronUp, Sparkles, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { calculateTransparency, type TransparencyResult } from "@/lib/transparencyScore";
+import { calculateTransparency } from "@/lib/transparencyScore";
 import { useState } from "react";
 
 interface TransparencyIndicatorProps {
@@ -69,8 +69,8 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
       {/* Badge preview */}
       <div className="px-3 pb-2">
         <div className={cn("rounded-lg p-2 flex items-center gap-2", style.badgeBg)}>
-          <div className={cn("w-6 h-6 rounded-full flex items-center justify-center shrink-0", result.level === "high" ? "bg-success/20" : result.level === "medium" ? "bg-warning/20" : "bg-destructive/20")}>
-            {result.level === "high" ? (
+          <div className={cn("w-6 h-6 rounded-full flex items-center justify-center shrink-0", style.tier === "trusted" ? "bg-success/20" : style.tier === "yellow" ? "bg-yellow-500/20" : style.tier === "orange" ? "bg-orange-500/20" : "bg-destructive/20")}>
+            {style.tier === "trusted" ? (
               <Shield size={12} className="text-success" />
             ) : (
               <Eye size={12} className={style.text} />
@@ -79,7 +79,7 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-medium text-muted-foreground">شارة إعلانك في السوق</p>
             <p className={cn("text-[11px] font-semibold", style.text)}>
-              {result.level === "high" ? "✓ موثوق" : result.level === "medium" ? "⚠ يحتاج تحسين" : "✗ غير مكتمل"}
+              {style.tier === "trusted" ? "✓ موثوق" : style.tier === "yellow" ? "⚠ يحتاج تحسين" : style.tier === "orange" ? "⚠ ضعيف" : "✗ غير مكتمل"}
             </p>
           </div>
         </div>
