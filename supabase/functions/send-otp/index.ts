@@ -87,12 +87,17 @@ Deno.serve(async (req) => {
       return { response, data, channel };
     };
 
-    // Try SMS first, then fallback to voice call when SMS is blocked/unavailable
+    // Try SMS first, then fallback to WhatsApp, then voice call
     let attempt = await sendVerification("sms");
 
-    if (!attempt.response.ok && attempt.data?.code === 60410) {
-      console.warn("SMS verification blocked by provider, falling back to voice call", JSON.stringify(attempt.data));
-      attempt = await sendVerification("call");
+    if (!attempt.response.ok && (attempt.data?.code === 60410 || attempt.data?.code === 60203)) {
+      console.warn("SMS blocked, falling back to WhatsApp", JSON.stringify(attempt.data));
+      attempt = await sendVerification("whatsapp" as "sms");
+
+      if (!attempt.response.ok) {
+        console.warn("WhatsApp failed, falling back to voice call", JSON.stringify(attempt.data));
+        attempt = await sendVerification("call");
+      }
     }
 
     if (!attempt.response.ok) {
