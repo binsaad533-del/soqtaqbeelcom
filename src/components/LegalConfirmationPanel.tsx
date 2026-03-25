@@ -407,14 +407,18 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
           </Button>
         </div>
       ) : (
-        <div className="bg-card rounded-2xl p-6 shadow-soft border border-primary/20 text-center">
-          <CheckCircle2 size={28} className="text-primary mx-auto mb-2" />
-          <h3 className="font-medium text-sm mb-1">تم تسجيل موافقتك</h3>
+        <div className="bg-card rounded-2xl p-6 shadow-soft border border-primary/20 text-center space-y-3">
+          <CheckCircle2 size={28} className="text-primary mx-auto" />
+          <h3 className="font-medium text-sm">تم تسجيل موافقتك</h3>
           <p className="text-xs text-muted-foreground">
             {buyerConfirmed && sellerConfirmed
               ? "تمت الموافقة من الطرفين — سيتم قفل الصفقة وإنشاء العقد تلقائياً."
               : "في انتظار موافقة الطرف الآخر لإتمام الصفقة."}
           </p>
+          <Button onClick={handleExportPdf} disabled={pdfLoading} variant="outline" size="sm" className="rounded-xl gap-2">
+            {pdfLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            تحميل وثيقة التأكيد PDF
+          </Button>
         </div>
       )}
 
