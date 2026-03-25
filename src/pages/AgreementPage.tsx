@@ -599,11 +599,6 @@ const AgreementPage = () => {
               />
             </div>
           )}
-          {!commission && deal?.agreed_price && (
-            <div className="border-t border-border/20 p-5">
-              <CommissionBanner dealAmount={deal.agreed_price} showDetails />
-            </div>
-          )}
 
           {/* Actions */}
           <div className="p-5 border-t border-border/20 flex gap-3">
