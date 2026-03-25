@@ -105,10 +105,12 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
   const allChecked = activeConfirmations.every(c => checked[c]);
 
   const handleStepChange = (newStep: "summary" | "risks" | "confirm") => {
-    if (newStep === "confirm" && !understanding.canProceed) {
-      setShowScoreWarning(true);
+    if (newStep === "confirm") {
+      setShowScoreWarning(!understanding.canProceed);
+      setStep(newStep);
       return;
     }
+
     setShowScoreWarning(false);
     setStep(newStep);
   };
