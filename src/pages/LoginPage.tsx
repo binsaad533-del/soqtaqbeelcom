@@ -188,6 +188,50 @@ const LoginPage = () => {
         </div>
 
         <div className="bg-card rounded-2xl p-6 shadow-soft">
+          {mfaRequired ? (
+            /* MFA Verification Step */
+            <div className="space-y-4" dir="rtl">
+              <div className="text-center space-y-2">
+                <ShieldCheck size={32} className="mx-auto text-primary" />
+                <h2 className="text-base font-medium text-foreground">التحقق بخطوتين</h2>
+                <p className="text-xs text-muted-foreground">أدخل رمز المصادقة من تطبيقك</p>
+              </div>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={mfaCode}
+                onChange={e => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="000000"
+                className="w-full px-4 py-3 rounded-xl border border-border/50 bg-muted/50 text-sm text-center tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-primary/20"
+                dir="ltr"
+                autoFocus
+              />
+              {error && <div className="bg-destructive/5 text-destructive text-xs p-3 rounded-xl">{error}</div>}
+              <button
+                onClick={async () => {
+                  if (!mfaFactorId || mfaCode.length !== 6) return;
+                  setMfaVerifying(true);
+                  setError("");
+                  const { data: challenge, error: chalErr } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
+                  if (chalErr) { setError(chalErr.message); setMfaVerifying(false); return; }
+                  const { error: verErr } = await supabase.auth.mfa.verify({ factorId: mfaFactorId, challengeId: challenge.id, code: mfaCode });
+                  if (verErr) { setError("رمز غير صحيح"); setMfaVerifying(false); return; }
+                  setMfaVerifying(false);
+                  navigate("/");
+                }}
+                disabled={mfaCode.length !== 6 || mfaVerifying}
+                className="w-full py-3 rounded-xl text-sm font-medium text-primary-foreground transition-all disabled:opacity-50"
+                style={{ background: "var(--gradient-primary)" }}
+              >
+                {mfaVerifying ? "جاري التحقق..." : "تأكيد"}
+              </button>
+              <button onClick={() => { setMfaRequired(false); setMfaCode(""); setError(""); }} className="w-full text-xs text-muted-foreground hover:text-foreground">
+                العودة لتسجيل الدخول
+              </button>
+            </div>
+          ) : (
+            <>
           {/* Login / Register toggle */}
           <div className="flex bg-muted rounded-xl p-1 mb-5">
             <button
