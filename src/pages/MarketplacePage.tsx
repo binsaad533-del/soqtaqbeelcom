@@ -322,9 +322,9 @@ const ListingCard = ({ listing, isComparing, onToggleCompare }: {
             </span>
             {(() => {
               const tr = calculateTransparency(listing);
-              const badgeColor = tr.level === "high" ? "text-success" : tr.level === "medium" ? "text-warning" : "text-destructive";
-              const barColor = tr.level === "high" ? "bg-success" : tr.level === "medium" ? "bg-warning" : "bg-destructive";
-              const badgeLabel = tr.level === "high" ? "✓ موثوق" : tr.level === "medium" ? "⚠ متوسط" : "✗ ناقص";
+              const badgeColor = tr.score >= 80 ? "text-success" : tr.score >= 60 ? "text-yellow-600 dark:text-yellow-400" : tr.score >= 40 ? "text-orange-600 dark:text-orange-400" : "text-destructive";
+              const barColor = tr.score >= 80 ? "bg-success" : tr.score >= 60 ? "bg-yellow-500" : tr.score >= 40 ? "bg-orange-500" : "bg-destructive";
+              const badgeLabel = tr.score >= 80 ? "✓ موثوق" : tr.score >= 60 ? "⚠ متوسط" : tr.score >= 40 ? "⚠ ضعيف" : "✗ ناقص";
               return (
                 <div className="flex items-center gap-1.5" title={`شفافية الإعلان: ${tr.score}%`}>
                   <span className={cn("text-[9px] font-semibold", badgeColor)}>{badgeLabel}</span>
