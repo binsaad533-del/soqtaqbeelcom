@@ -1386,8 +1386,9 @@ const CreateListingPage = () => {
 
                     {/* ── Pricing Mode Toggle ── */}
                     <div className="bg-muted/30 border border-border/40 rounded-xl p-3">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="mb-2">
                         <span className="text-xs font-medium text-foreground">تسعير الأصول</span>
+                        <span className="text-[10px] text-muted-foreground mr-1">— اختياري، يمكنك تركه وسيقوم الذكاء الاصطناعي بتقديره في خطوة التحليل</span>
                       </div>
                       <div className="flex gap-2">
                         <button
