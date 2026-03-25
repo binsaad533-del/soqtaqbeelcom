@@ -244,101 +244,127 @@ const CustomerDashboardPage = () => {
 
         {/* ═══ PROFILE & QUICK INFO BAR ═══ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6 animate-reveal" style={{ animationDelay: '80ms' }}>
-          {/* Combined Profile & Personal Dashboard */}
+          {/* Personal Info Card */}
           <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-3 mb-4">
-              <label className="relative w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg cursor-pointer group overflow-hidden ring-2 ring-background shadow-sm shrink-0">
+            {/* Avatar + Name + Badge */}
+            <div className="flex items-center gap-3 mb-5">
+              <label className="relative w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl cursor-pointer group overflow-hidden ring-2 ring-background shadow-sm shrink-0">
                 {profile?.avatar_url
                   ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
                   : (profile?.full_name?.charAt(0) || "؟")}
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                  <Camera size={14} className="text-white" />
+                  <Camera size={16} className="text-white" />
                 </div>
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
               </label>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold truncate">{profile?.full_name || "مستخدم"}</div>
-                <span className={cn("text-[10px] flex items-center gap-1 mt-0.5", isPhoneVerified ? "text-success" : "text-warning")}>
-                  {isPhoneVerified ? <><UserCheck size={10} /> موثّق</> : <><Shield size={10} /> غير موثّق</>}
+                {editingField === "full_name" ? (
+                  <div className="flex items-center gap-1.5">
+                    <input className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
+                    <button onClick={() => saveField("full_name", editValue)} disabled={saving} className="text-success"><Check size={14} /></button>
+                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={14} /></button>
+                  </div>
+                ) : (
+                  <button onClick={() => startEdit("full_name", profile?.full_name || "")} className="flex items-center gap-1.5 group/name">
+                    <span className="text-sm font-semibold truncate">{profile?.full_name || "أضف اسمك"}</span>
+                    <Pencil size={10} className="text-muted-foreground opacity-0 group-hover/name:opacity-60 transition-opacity shrink-0" />
+                  </button>
+                )}
+                <span className={cn(
+                  "inline-flex items-center gap-1 mt-1 text-[11px] font-medium px-2 py-0.5 rounded-full",
+                  (isPhoneVerified && hasRealEmail) ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
+                )}>
+                  {(isPhoneVerified && hasRealEmail)
+                    ? <><UserCheck size={11} /> موثّق</>
+                    : <><Shield size={11} /> غير موثّق</>}
                 </span>
-                <p className="text-[10px] text-muted-foreground mt-1">مرحباً بك في لوحة التحكم</p>
-              </div>
-              <div className="relative w-12 h-12 shrink-0">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15" fill="none" className="stroke-muted" strokeWidth="2.5" />
-                  <circle cx="18" cy="18" r="15" fill="none" className="stroke-primary" strokeWidth="2.5" strokeDasharray={`${profileCompleteness} ${100 - profileCompleteness}`} strokeLinecap="round" />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold">{profileCompleteness}%</span>
               </div>
             </div>
 
-            {/* Contact info */}
-            <div className="space-y-2 text-[11px] mb-3">
-              <div className="flex items-center justify-between gap-2">
-                <Mail size={11} className="text-muted-foreground shrink-0" />
-                {editingField === "email" ? (
-                  <div className="flex items-center gap-1 flex-1">
-                    <input type="email" dir="ltr" className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-[11px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
-                    <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
-                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
-                  </div>
-                ) : (
-                  <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-muted-foreground hover:text-primary truncate flex items-center gap-1" dir="ltr">
-                    {hasRealEmail ? <span className="truncate max-w-[140px]">{userEmail}</span> : <span className="text-warning">إضافة بريد</span>}
-                    <Pencil size={9} className="shrink-0 opacity-40" />
-                  </button>
-                )}
+            {/* Info rows */}
+            <div className="space-y-3">
+              {/* Email */}
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
+                  <Mail size={13} className="text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] text-muted-foreground mb-0.5">البريد الإلكتروني</div>
+                  {editingField === "email" ? (
+                    <div className="flex items-center gap-1.5">
+                      <input type="email" dir="ltr" className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
+                      <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={13} /></button>
+                      <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={13} /></button>
+                    </div>
+                  ) : (
+                    <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="flex items-center gap-1.5 group/email text-xs" dir="ltr">
+                      {hasRealEmail
+                        ? <span className="truncate max-w-[180px]">{userEmail}</span>
+                        : <span className="text-warning">أضف بريدك الإلكتروني</span>}
+                      <Pencil size={9} className="text-muted-foreground opacity-0 group-hover/email:opacity-60 transition-opacity shrink-0" />
+                      {hasRealEmail && <CheckCircle size={11} className="text-success shrink-0" />}
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center justify-between gap-2">
-                <Phone size={11} className="text-muted-foreground shrink-0" />
-                {editingField === "phone" ? (
-                  <div className="flex items-center gap-1 flex-1">
-                    <input dir="ltr" inputMode="numeric" className="bg-muted/50 rounded-lg px-2 py-1 w-24 border border-border/50 text-[11px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus />
-                    <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
-                    <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
-                  </div>
-                ) : (
-                  <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-muted-foreground hover:text-primary flex items-center gap-1" dir="ltr">
-                    {profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">إضافة جوال</span>}
-                    <Pencil size={9} className="shrink-0 opacity-40" />
-                  </button>
-                )}
-              </div>
-            </div>
 
-            {!isPhoneVerified && profile?.phone && (
-              <div className="pt-3 border-t border-border/20">
-                <PhoneVerificationFlow initialPhone={profile.phone} onVerified={() => window.location.reload()} />
+              {/* Phone */}
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
+                  <Phone size={13} className="text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] text-muted-foreground mb-0.5">رقم الجوال</div>
+                  {!isPhoneVerified && profile?.phone ? (
+                    <div>
+                      <span className="text-xs" dir="ltr">{toEnglishNumerals(profile.phone)}</span>
+                      <span className="text-[10px] text-warning mr-2">— يحتاج توثيق</span>
+                    </div>
+                  ) : isPhoneVerified ? (
+                    <div className="flex items-center gap-1.5 text-xs" dir="ltr">
+                      <span>{toEnglishNumerals(profile?.phone || "")}</span>
+                      <CheckCircle size={11} className="text-success shrink-0" />
+                    </div>
+                  ) : (
+                    <span className="text-xs text-warning">أضف رقم جوالك</span>
+                  )}
+                </div>
               </div>
-            )}
 
-            {/* Mini stats */}
-            <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border/20">
-              <div className="text-center">
-                <div className="text-sm font-bold text-primary">{stats.active}</div>
-                <div className="text-[9px] text-muted-foreground">نشطة</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm font-bold text-success">{stats.completed}</div>
-                <div className="text-[9px] text-muted-foreground">مكتملة</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm font-bold">{deals.length + listings.length}</div>
-                <div className="text-[9px] text-muted-foreground">إجمالي</div>
-              </div>
-            </div>
+              {/* Phone verification inline */}
+              {!isPhoneVerified && (
+                <div className="pr-10">
+                  <PhoneVerificationFlow initialPhone={profile?.phone || ""} onVerified={() => window.location.reload()} />
+                </div>
+              )}
 
-            {/* Quick actions */}
-            <div className="flex gap-2 mt-3 pt-3 border-t border-border/20">
-              <Link to="/create-listing" className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors text-[10px] text-primary">
-                <Plus size={11} /> إعلان جديد
-              </Link>
-              <Link to="/marketplace" className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl hover:bg-muted/40 transition-colors text-[10px] text-muted-foreground">
-                <Eye size={11} /> السوق
-              </Link>
-              <button onClick={loadData} className="flex items-center justify-center gap-1 py-2 px-3 rounded-xl hover:bg-muted/40 transition-colors text-[10px] text-muted-foreground">
-                <RefreshCw size={11} />
-              </button>
+              {/* Registration date */}
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
+                  <Clock size={13} className="text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] text-muted-foreground mb-0.5">تاريخ التسجيل</div>
+                  <span className="text-xs" dir="ltr">
+                    {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Last activity */}
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
+                  <Activity size={13} className="text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] text-muted-foreground mb-0.5">آخر دخول</div>
+                  <span className="text-xs" dir="ltr">
+                    {profile?.last_activity
+                      ? new Date(profile.last_activity).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                      : "—"}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
