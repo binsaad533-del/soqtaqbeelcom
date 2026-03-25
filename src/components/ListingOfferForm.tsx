@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send, Loader2, Check, DollarSign, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useListingOffers, type OffersSummary, type ListingOffer } from "@/hooks/useListingOffers";
@@ -27,9 +27,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
   const [loaded, setLoaded] = useState(false);
 
   // Load summary + my offer on mount
-  useState(() => {
-    if (loaded) return;
-    setLoaded(true);
+  useEffect(() => {
     getOffersSummary(listingId).then(setSummary);
     if (user && user.id !== ownerId) {
       getMyOffer(listingId).then((offer) => {
@@ -39,7 +37,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
         }
       });
     }
-  });
+  }, [listingId, user, ownerId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isOwner = user?.id === ownerId;
 
