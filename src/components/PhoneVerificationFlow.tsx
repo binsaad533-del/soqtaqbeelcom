@@ -27,11 +27,11 @@ interface PhoneVerificationProps {
 
 type Step = "phone" | "otp" | "success";
 
-const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline" }: PhoneVerificationProps) => {
+const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skipPhoneStep = false }: PhoneVerificationProps) => {
   const { profile } = useAuthContext();
   const { sendOtp, verifyOtp, sending, verifying } = usePhoneVerification();
 
-  const [step, setStep] = useState<Step>("phone");
+  const [step, setStep] = useState<Step>(skipPhoneStep ? "otp" : "phone");
   const [phone, setPhone] = useState(() => {
     const raw = initialPhone?.replace(/^\+\d{1,3}/, "").replace(/^0+/, "") || "";
     return toDigitsOnly(raw).slice(0, 9);
