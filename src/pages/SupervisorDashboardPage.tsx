@@ -217,7 +217,7 @@ const SupervisorDashboardPage = () => {
                             </div>
                             <div>
                               <div className="text-xs font-medium group-hover:text-primary transition-colors">{l.title || "بدون عنوان"}</div>
-                              <div className="text-[10px] text-muted-foreground">{l.city || "—"} {l.price ? `· ${Number(l.price).toLocaleString("en-US")} ر.س` : ""}</div>
+                              <div className="text-[10px] text-muted-foreground">{l.city || "—"} {l.price ? <>· {Number(l.price).toLocaleString("en-US")} <SarSymbol size={8} /></> : ""}</div>
                             </div>
                           </div>
                           <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
@@ -250,7 +250,7 @@ const SupervisorDashboardPage = () => {
                               <div className="text-xs font-medium">صفقة #{d.id.slice(0, 6)}</div>
                               <div className="text-[10px] text-muted-foreground">
                                 {getProfileName(d.seller_id)} ← {getProfileName(d.buyer_id)}
-                                {d.agreed_price ? ` · ${Number(d.agreed_price).toLocaleString("en-US")} ر.س` : ""}
+                                {d.agreed_price ? <> · {Number(d.agreed_price).toLocaleString("en-US")} <SarSymbol size={8} /></> : ""}
                               </div>
                             </div>
                           </div>

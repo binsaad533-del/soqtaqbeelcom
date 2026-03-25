@@ -258,10 +258,10 @@ const OwnerDashboardPage = () => {
             {/* KPI Row 2: Financial */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "إجمالي قيمة الصفقات", value: `${totalDealValue.toLocaleString("en-US")} ر.س`, icon: BarChart3, accent: "text-primary" },
-                { label: "العمولة المستحقة (1%)", value: `${totalCommissionDue.toLocaleString("en-US")} ر.س`, icon: Landmark, accent: "text-primary" },
-                { label: "العمولة المحصلة", value: `${totalCollected.toLocaleString("en-US")} ر.س`, icon: ShieldCheck, accent: "text-success" },
-                { label: "العمولة غير المحصلة", value: `${totalUncollected.toLocaleString("en-US")} ر.س`, icon: AlertTriangle, accent: totalUncollected > 0 ? "text-warning" : "text-muted-foreground" },
+                { label: "إجمالي قيمة الصفقات", value: <>{totalDealValue.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: BarChart3, accent: "text-primary" },
+                { label: "العمولة المستحقة (1%)", value: <>{totalCommissionDue.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: Landmark, accent: "text-primary" },
+                { label: "العمولة المحصلة", value: <>{totalCollected.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: ShieldCheck, accent: "text-success" },
+                { label: "العمولة غير المحصلة", value: <>{totalUncollected.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: AlertTriangle, accent: totalUncollected > 0 ? "text-warning" : "text-muted-foreground" },
               ].map((s, i) => (
                 <div key={i} className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 hover:shadow-soft-lg transition-all">
                   <div className="flex items-center justify-between mb-3">
@@ -330,7 +330,7 @@ const OwnerDashboardPage = () => {
                       <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={40}
                         tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} />
                       <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }}
-                        formatter={(value: number) => [`${value.toLocaleString('en-US')} ر.س`, 'العمولة']} />
+                        formatter={(value: number) => [`${value.toLocaleString('en-US')} ﷼`, 'العمولة']} />
                       <Bar dataKey="commission" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={28} opacity={0.8} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -439,7 +439,7 @@ const OwnerDashboardPage = () => {
                         <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0"><FileText size={14} className="text-muted-foreground" strokeWidth={1.3} /></div>
                         <div>
                           <div className="text-xs font-medium group-hover:text-primary transition-colors">{l.title || "بدون عنوان"}</div>
-                          <div className="text-[10px] text-muted-foreground">{l.city || "—"} {l.price ? `· ${Number(l.price).toLocaleString("en-US")} ر.س` : ""}</div>
+                          <div className="text-[10px] text-muted-foreground">{l.city || "—"} {l.price ? <>· {Number(l.price).toLocaleString("en-US")} <SarSymbol size={8} /></> : ""}</div>
                         </div>
                       </div>
                       <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", l.status === "published" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>
@@ -474,7 +474,7 @@ const OwnerDashboardPage = () => {
                           <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0"><Handshake size={14} className="text-muted-foreground" strokeWidth={1.3} /></div>
                           <div>
                             <div className="text-xs font-medium">{getProfileName(d.seller_id)} ← {getProfileName(d.buyer_id)}</div>
-                            <div className="text-[10px] text-muted-foreground">{d.agreed_price ? `${Number(d.agreed_price).toLocaleString("en-US")} ر.س` : "—"} · {new Date(d.created_at).toLocaleDateString("en-GB")}</div>
+                            <div className="text-[10px] text-muted-foreground">{d.agreed_price ? <>{Number(d.agreed_price).toLocaleString("en-US")} <SarSymbol size={8} /></> : "—"} · {new Date(d.created_at).toLocaleDateString("en-GB")}</div>
                           </div>
                         </div>
                         <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
@@ -529,8 +529,8 @@ const OwnerDashboardPage = () => {
                         <TableCell className="text-xs font-medium">{row.listingTitle}</TableCell>
                         <TableCell className="text-xs">{row.sellerName}</TableCell>
                         <TableCell className="text-xs">{row.buyerName}</TableCell>
-                        <TableCell className="text-xs">{Number(row.agreed_price || 0).toLocaleString("en-US")} ر.س</TableCell>
-                        <TableCell className="text-xs">{row.commissionAmount.toLocaleString("en-US")} ر.س</TableCell>
+                        <TableCell className="text-xs">{Number(row.agreed_price || 0).toLocaleString("en-US")} <SarSymbol size={9} /></TableCell>
+                        <TableCell className="text-xs">{row.commissionAmount.toLocaleString("en-US")} <SarSymbol size={9} /></TableCell>
                         <TableCell>
                           <Badge variant="outline" className={cn("text-[10px]", COMMISSION_STATUS_COLORS[s] || "")}>
                             {COMMISSION_STATUS_LABELS[s] || "غير مدفوعة"}
@@ -611,7 +611,7 @@ const OwnerDashboardPage = () => {
                 <Link key={l.id} to={`/listing/${l.id}`} className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all">
                   <div className="flex-1">
                     <div className="text-sm">{l.title || "بدون عنوان"}</div>
-                    <div className="text-[11px] text-muted-foreground">{l.city} · {l.business_activity || "—"} · {l.price ? `${Number(l.price).toLocaleString("en-US")} ر.س` : "—"}</div>
+                    <div className="text-[11px] text-muted-foreground">{l.city} · {l.business_activity || "—"} · {l.price ? <>{Number(l.price).toLocaleString("en-US")} <SarSymbol size={9} /></> : "—"}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={cn("text-[10px] px-2 py-0.5 rounded-md", l.status === "published" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
