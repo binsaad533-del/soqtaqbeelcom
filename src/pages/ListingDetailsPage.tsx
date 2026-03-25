@@ -404,6 +404,8 @@ const ListingDetailsPage = () => {
         />
       )}
     </div>
+    </div>
+    </>
   );
 };
 
