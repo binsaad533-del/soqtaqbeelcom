@@ -548,7 +548,7 @@ const NegotiationPage = () => {
                   >
                     <Scale size={13} strokeWidth={1.5} />
                     متفقون؟ انتقل للتأكيد القانوني وإتمام الصفقة
-                    <ArrowLeft size={13} strokeWidth={1.5} />
+                    <ArrowRight size={13} strokeWidth={1.5} className="rotate-180" />
                   </button>
                 </div>
               )}
