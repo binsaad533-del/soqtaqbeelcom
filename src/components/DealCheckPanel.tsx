@@ -79,7 +79,7 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: { listing },
+        body: { listing, perspective: "buyer" },
       });
 
       if (fnError) throw new Error(fnError.message);

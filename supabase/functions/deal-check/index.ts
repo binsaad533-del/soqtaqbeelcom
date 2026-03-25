@@ -65,7 +65,32 @@ function buildDealTypeContext(listing: any): string {
   return context;
 }
 
-const SYSTEM_PROMPT = `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية قصيرة وقوية لكل صفقة.
+const SELLER_PERSPECTIVE = `
+## منظور التحليل: البائع (قبل النشر)
+- خاطب البائع مباشرةً بضمير المخاطب ("إعلانك"، "سعرك"، "صفقتك")
+- قدّم توصيات عملية لتحسين الإعلان قبل النشر
+- وصِّ بسعر أقل بـ 10% من متوسط السوق لجذب المشترين بسرعة
+- في التوصية والإرشادات: اقترح تحسينات على البيانات والصور والسعر
+- نبّه البائع إلى النقاط التي قد تُثير تساؤلات المشترين
+- في negotiationGuidance: قدّم نصائح للبائع حول كيف يتفاوض ويدافع عن سعره
+- مثال على التوصية: "ننصحك بتسعير صفقتك بـ X ريال (أقل بـ 10% من متوسط السوق) لتسريع البيع"`;
+
+const BUYER_PERSPECTIVE = `
+## منظور التحليل: المشتري (بعد النشر)
+- خاطب المشتري مباشرةً بضمير المخاطب ("هذه الصفقة أمامك"، "يمكنك"، "انتبه")
+- ساعد المشتري على اتخاذ قرار الشراء
+- قيّم ما إذا كان السعر المعروض عادلاً بالنسبة للمشتري
+- في التوصية: وضّح للمشتري هل يستحق الدخول في هذه الصفقة أم لا
+- نبّه المشتري إلى المخاطر والنقاط التي يجب فحصها ميدانياً
+- في negotiationGuidance: قدّم نصائح للمشتري حول كيف يتفاوض ويحصل على سعر أفضل
+- مثال: "يمكنك التفاوض لخفض السعر إلى X ريال بناءً على حالة الأصول"`;
+
+function buildSystemPrompt(perspective: "seller" | "buyer"): string {
+  const perspectiveBlock = perspective === "seller" ? SELLER_PERSPECTIVE : BUYER_PERSPECTIVE;
+  
+  return `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية قصيرة وقوية لكل صفقة.
+
+${perspectiveBlock}
 
 ## قاعدة أساسية — احترام نوع الصفقة:
 - يجب أن يكون تحليلك محصوراً بنطاق نوع الصفقة المحدد
@@ -118,6 +143,7 @@ const SYSTEM_PROMPT = `أنت محلل صفقات تجارية خبير متخص
 أنتج JSON بالهيكل المطلوب. لكل حقل تحليل:
 - إذا كان خارج نطاق الصفقة، اكتب "خارج نطاق هذه الصفقة" بدل تحليل مفصل
 - missingInfo يجب أن تحتوي فقط على معلومات ناقصة ضمن نطاق الصفقة المحدد`;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -125,7 +151,8 @@ serve(async (req) => {
   }
 
   try {
-    const { listing } = await req.json();
+    const { listing, perspective: rawPerspective } = await req.json();
+    const perspective: "seller" | "buyer" = rawPerspective === "seller" ? "seller" : "buyer";
 
     if (!listing) {
       return new Response(
@@ -153,7 +180,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: buildSystemPrompt(perspective) },
           { role: "user", content: userPrompt },
         ],
         tools: [
