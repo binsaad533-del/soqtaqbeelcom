@@ -104,7 +104,12 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
       const map = new google.maps.Map(mapRef.current, {
         center,
         zoom,
-        mapTypeControl: false,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+          style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+          position: google.maps.ControlPosition.TOP_LEFT,
+          mapTypeIds: [google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID],
+        },
         streetViewControl: false,
         fullscreenControl: false,
         zoomControl: true,
