@@ -4,7 +4,8 @@ import { generateAgreementPdf } from "@/lib/generateAgreementPdf";
 import { useParams, Link } from "react-router-dom";
 import {
   Check, Download, ArrowRight, FileText, Shield, AlertTriangle,
-  Lock, History, ChevronDown, ChevronUp, Loader2, Copy, CheckCircle2
+  Lock, History, ChevronDown, ChevronUp, Loader2, Copy, CheckCircle2,
+  PartyPopper
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
@@ -50,21 +51,18 @@ interface AgreementRecord {
   created_at: string;
 }
 
-
 const AgreementPage = () => {
-  const { id } = useParams(); // deal ID
+  const { id } = useParams();
   const { user } = useAuthContext();
   const { getListing } = useListings();
   const { getCommission } = useCommissions();
   const [agreement, setAgreement] = useState<AgreementRecord | null>(null);
   const [allVersions, setAllVersions] = useState<AgreementRecord[]>([]);
-  
   const [deal, setDeal] = useState<any>(null);
   const [commission, setCommission] = useState<Commission | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [approving, setApproving] = useState(false);
-  
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -119,19 +117,12 @@ const AgreementPage = () => {
     if (!id) return;
     setLoading(true);
     try {
-      // Load deal
       const { data: dealData } = await supabase
-        .from("deals")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
+        .from("deals").select("*").eq("id", id).maybeSingle();
       setDeal(dealData);
 
-      // Load agreements
       const { data: agreements } = await supabase
-        .from("deal_agreements")
-        .select("*")
-        .eq("deal_id", id)
+        .from("deal_agreements").select("*").eq("deal_id", id)
         .order("version", { ascending: false });
 
       if (agreements && agreements.length > 0) {
@@ -139,11 +130,8 @@ const AgreementPage = () => {
         setAllVersions(agreements as unknown as AgreementRecord[]);
       }
 
-
-      // Load commission
       const commData = await getCommission(id);
       setCommission(commData);
-
     } catch (e) {
       console.error("Failed to load agreement:", e);
     }
@@ -154,20 +142,11 @@ const AgreementPage = () => {
     if (!deal) return;
     setGenerating(true);
     try {
-      // Load listing data for context
       const listing = await getListing(deal.listing_id);
-
-      // Get profiles for buyer/seller
       const { data: buyerProfile } = await supabase
-        .from("profiles")
-        .select("full_name, phone")
-        .eq("user_id", deal.buyer_id)
-        .maybeSingle();
+        .from("profiles").select("full_name, phone").eq("user_id", deal.buyer_id).maybeSingle();
       const { data: sellerProfile } = await supabase
-        .from("profiles")
-        .select("full_name, phone")
-        .eq("user_id", deal.seller_id)
-        .maybeSingle();
+        .from("profiles").select("full_name, phone").eq("user_id", deal.seller_id).maybeSingle();
 
       const agreementData = {
         dealId: id,
@@ -212,9 +191,7 @@ const AgreementPage = () => {
         },
       };
 
-      const { data, error } = await supabase.functions.invoke("generate-agreement", {
-        body: agreementData,
-      });
+      const { data, error } = await supabase.functions.invoke("generate-agreement", { body: agreementData });
       if (error) throw error;
       if (data?.agreement) {
         setAgreement(data.agreement as AgreementRecord);
@@ -260,9 +237,7 @@ const AgreementPage = () => {
         : { seller_approved: true, seller_approved_at: new Date().toISOString() };
 
       const { error } = await supabase
-        .from("deal_agreements")
-        .update(updateField)
-        .eq("id", agreement.id);
+        .from("deal_agreements").update(updateField).eq("id", agreement.id);
       if (error) throw error;
 
       const updatedAgreement = { ...agreement, ...updateField };
@@ -275,19 +250,13 @@ const AgreementPage = () => {
         details: { agreement_id: agreement.id, version: agreement.version },
       });
 
-      // If both parties have now approved, send completion emails
       if (updatedAgreement.buyer_approved && updatedAgreement.seller_approved && deal) {
-        // Get both profiles
         const [buyerProfile, sellerProfile] = await Promise.all([
           supabase.from("profiles").select("full_name, user_id").eq("user_id", deal.buyer_id).maybeSingle(),
           supabase.from("profiles").select("full_name, user_id").eq("user_id", deal.seller_id).maybeSingle(),
         ]);
-
-        // Get emails from auth (user metadata)
         const buyerName = buyerProfile.data?.full_name || "المشتري";
         const sellerName = sellerProfile.data?.full_name || "البائع";
-
-        // Send to current user at minimum
         if (user?.email) {
           const currentRole = user.id === deal.buyer_id ? "buyer" : "seller";
           const otherName = currentRole === "buyer" ? sellerName : buyerName;
@@ -335,7 +304,6 @@ const AgreementPage = () => {
     );
   }
 
-  // No agreement yet
   if (!agreement) {
     return (
       <div className="py-8">
@@ -364,6 +332,8 @@ const AgreementPage = () => {
   }
 
   const bothApproved = agreement.buyer_approved && agreement.seller_approved;
+  const agreedPrice = agreement.financial_terms?.agreedPrice || 0;
+  const currency = agreement.financial_terms?.currency || "ر.س";
 
   return (
     <div className="py-8">
@@ -375,22 +345,25 @@ const AgreementPage = () => {
           </Link>
         </div>
 
+        {/* Congratulations Banner — only when both approved */}
         {bothApproved && (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-              <Lock size={18} strokeWidth={1.3} className="text-emerald-600" />
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 mb-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-3">
+              <PartyPopper size={28} strokeWidth={1.3} className="text-emerald-600" />
             </div>
-            <div>
-              <p className="text-sm font-medium text-emerald-800">الاتفاقية مكتملة ومحفوظة</p>
-              <p className="text-xs text-emerald-600">هذه الاتفاقية محفوظة بشكل دائم ولا يمكن حذفها أو تعديلها</p>
-            </div>
+            <h2 className="text-lg font-semibold text-emerald-800 mb-1">🎉 مبارك! تمت الموافقة على الاتفاقية</h2>
+            <p className="text-sm text-emerald-600 mb-4">تم اعتماد الاتفاقية من كلا الطرفين — يمكنكم الآن تحميل الوثيقة الرسمية</p>
+            <Button onClick={handleDownloadPdf} disabled={pdfLoading} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white active:scale-[0.98]">
+              {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} strokeWidth={1.5} />}
+              تحميل وثيقة الاتفاقية PDF
+            </Button>
           </div>
         )}
 
         <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
           {/* Header */}
           <div className="p-6 border-b border-border/20 bg-gradient-to-l from-primary/5 to-transparent">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <AiStar size={28} />
                 <div>
@@ -400,7 +373,7 @@ const AgreementPage = () => {
               </div>
               {bothApproved && (
                 <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <Shield size={16} strokeWidth={1.3} className="text-emerald-600" />
+                  <Lock size={16} strokeWidth={1.3} className="text-emerald-600" />
                 </div>
               )}
             </div>
@@ -417,43 +390,47 @@ const AgreementPage = () => {
           </div>
 
           <div className="p-6 space-y-6">
-            {/* Approval Status */}
+            {/* Parties + Approval — unified cards with approve action */}
             <div className="grid grid-cols-2 gap-3">
-              <ApprovalCard
-                label="المشتري" name={agreement.buyer_name}
-                approved={agreement.buyer_approved} approvedAt={agreement.buyer_approved_at}
-                onApprove={() => handleApprove("buyer")} loading={approving}
-                disabled={bothApproved || !isBuyer || agreement.buyer_approved}
+              <PartyApprovalCard
+                label="البائع"
+                name={agreement.seller_name}
+                contact={agreement.seller_contact}
+                approved={agreement.seller_approved}
+                approvedAt={agreement.seller_approved_at}
+                canApprove={!bothApproved && isSeller && !agreement.seller_approved}
+                onApprove={() => handleApprove("seller")}
+                loading={approving}
               />
-              <ApprovalCard
-                label="البائع" name={agreement.seller_name}
-                approved={agreement.seller_approved} approvedAt={agreement.seller_approved_at}
-                onApprove={() => handleApprove("seller")} loading={approving}
-                disabled={bothApproved || !isSeller || agreement.seller_approved}
+              <PartyApprovalCard
+                label="المشتري"
+                name={agreement.buyer_name}
+                contact={agreement.buyer_contact}
+                approved={agreement.buyer_approved}
+                approvedAt={agreement.buyer_approved_at}
+                canApprove={!bothApproved && isBuyer && !agreement.buyer_approved}
+                onApprove={() => handleApprove("buyer")}
+                loading={approving}
               />
             </div>
 
-            <Section title="أطراف الاتفاقية">
-              <InfoRow label="المشتري" value={agreement.buyer_name || "—"} />
-              <InfoRow label="تواصل المشتري" value={agreement.buyer_contact || "—"} />
-              <InfoRow label="البائع" value={agreement.seller_name || "—"} />
-              <InfoRow label="تواصل البائع" value={agreement.seller_contact || "—"} />
-            </Section>
-
-            <Section title="تفاصيل الصفقة">
-              <InfoRow label="عنوان الصفقة" value={agreement.deal_title || "—"} />
-              <InfoRow label="نوع الصفقة" value={t(agreement.deal_type, DEAL_TYPE_LABELS)} />
-              <InfoRow label="الموقع" value={agreement.location || "—"} />
-              <InfoRow label="النشاط التجاري" value={agreement.business_activity || "—"} />
-            </Section>
-
-            <Section title="الشروط المالية">
-              <InfoRow label="السعر المتفق عليه" value={`${(agreement.financial_terms?.agreedPrice || 0).toLocaleString("en-US")} ${agreement.financial_terms?.currency || "ر.س"}`} />
+            {/* Price highlight */}
+            <div className="text-center bg-primary/5 border border-primary/10 rounded-xl p-4">
+              <p className="text-xs text-muted-foreground mb-1">السعر المتفق عليه</p>
+              <p className="text-xl font-bold text-primary">{Number(agreedPrice).toLocaleString("en-US")} {currency}</p>
               {agreement.financial_terms?.paymentNote && (
-                <InfoRow label="ملاحظة الدفع" value={agreement.financial_terms.paymentNote} />
+                <p className="text-[11px] text-muted-foreground mt-1">{agreement.financial_terms.paymentNote}</p>
               )}
+            </div>
+
+            {/* Deal Details */}
+            <Section title="تفاصيل الصفقة">
+              <InfoRow label="نوع الصفقة" value={t(agreement.deal_type, DEAL_TYPE_LABELS)} />
+              <InfoRow label="النشاط التجاري" value={agreement.business_activity || "—"} />
+              <InfoRow label="الموقع" value={agreement.location || "—"} />
             </Section>
 
+            {/* Assets */}
             {(agreement.included_assets || []).length > 0 && (
               <Section title="الأصول المشمولة">
                 <ul className="space-y-1.5">
@@ -480,9 +457,13 @@ const AgreementPage = () => {
               </Section>
             )}
 
-            <Section title="تفاصيل الإيجار">
+            {/* Lease + Liabilities + Licenses — compact */}
+            <Section title="تفاصيل الإيجار والتراخيص">
               <InfoRow label="الإيجار السنوي" value={agreement.lease_details?.annualRent || "—"} />
               <InfoRow label="المتبقي من العقد" value={agreement.lease_details?.remaining || "—"} />
+              <InfoRow label="رخصة البلدية" value={agreement.license_status?.municipality || "—"} />
+              <InfoRow label="الدفاع المدني" value={agreement.license_status?.civilDefense || "—"} />
+              <InfoRow label="كاميرات المراقبة" value={agreement.license_status?.cameras || "—"} />
             </Section>
 
             <Section title="الالتزامات المفصح عنها">
@@ -491,12 +472,7 @@ const AgreementPage = () => {
               <InfoRow label="إيجار متأخر" value={agreement.liabilities?.unpaidRent || "—"} />
             </Section>
 
-            <Section title="حالة التراخيص">
-              <InfoRow label="رخصة البلدية" value={agreement.license_status?.municipality || "—"} />
-              <InfoRow label="الدفاع المدني" value={agreement.license_status?.civilDefense || "—"} />
-              <InfoRow label="كاميرات المراقبة" value={agreement.license_status?.cameras || "—"} />
-            </Section>
-
+            {/* Documents */}
             {(agreement.documents_referenced || []).length > 0 && (
               <Section title="المستندات المرجعية">
                 <div className="space-y-1.5">
@@ -511,28 +487,12 @@ const AgreementPage = () => {
             )}
 
             {/* Declarations */}
-            <Section title="الإقرارات">
-              <div className="space-y-3">
-                {agreement.declarations?.buyerDeclares && (
-                  <div className="text-sm text-muted-foreground bg-muted/30 rounded-xl p-3">
-                    <span className="text-xs text-foreground font-medium block mb-1">إقرار المشتري:</span>
-                    {agreement.declarations.buyerDeclares}
-                  </div>
-                )}
-                {agreement.declarations?.sellerDeclares && (
-                  <div className="text-sm text-muted-foreground bg-muted/30 rounded-xl p-3">
-                    <span className="text-xs text-foreground font-medium block mb-1">إقرار البائع:</span>
-                    {agreement.declarations.sellerDeclares}
-                  </div>
-                )}
-                {agreement.declarations?.platformNote && (
-                  <div className="text-sm text-muted-foreground bg-primary/5 rounded-xl p-3 border border-primary/10">
-                    <span className="text-xs text-primary font-medium block mb-1">ملاحظة المنصة:</span>
-                    {agreement.declarations.platformNote}
-                  </div>
-                )}
+            {agreement.declarations?.platformNote && (
+              <div className="text-sm text-muted-foreground bg-primary/5 rounded-xl p-3 border border-primary/10">
+                <span className="text-xs text-primary font-medium block mb-1">ملاحظة المنصة:</span>
+                {agreement.declarations.platformNote}
               </div>
-            </Section>
+            )}
 
             {(agreement.important_notes || []).length > 0 && (
               <Section title="ملاحظات مهمة">
@@ -554,6 +514,7 @@ const AgreementPage = () => {
               </div>
             )}
 
+            {/* Footer branding */}
             <div className="pt-4 border-t border-border/20 text-center">
               <div className="flex items-center justify-center gap-2 mb-1">
                 <AiStar size={16} animate={false} />
@@ -586,7 +547,7 @@ const AgreementPage = () => {
                         <span className="font-medium">الإصدار {v.version}</span>
                         {v.amendment_reason && <span className="text-xs text-muted-foreground mr-2">— {v.amendment_reason}</span>}
                       </div>
-                      <span className="text-xs text-muted-foreground"><span className="text-xs text-muted-foreground">{new Date(v.created_at).toLocaleDateString("en-US")}</span></span>
+                      <span className="text-xs text-muted-foreground">{new Date(v.created_at).toLocaleDateString("en-US")}</span>
                     </div>
                   ))}
                 </div>
@@ -594,39 +555,14 @@ const AgreementPage = () => {
             </div>
           )}
 
-
           {/* Commission Section */}
           {commission && (
             <div className="border-t border-border/20 p-5">
-              <CommissionPaymentPanel
-                commission={commission}
-                isSeller={isSeller}
-                onUpdate={loadData}
-              />
+              <CommissionPaymentPanel commission={commission} isSeller={isSeller} onUpdate={loadData} />
             </div>
           )}
 
-          {/* Actions */}
-          <div className="p-5 border-t border-border/20 flex gap-3">
-            {!bothApproved && isBuyer && !agreement.buyer_approved && (
-              <Button onClick={() => handleApprove("buyer")} disabled={approving} className="flex-1 gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
-                <Check size={16} strokeWidth={1.5} />
-                اعتماد الاتفاقية (مشتري)
-              </Button>
-            )}
-            {!bothApproved && isSeller && !agreement.seller_approved && (
-              <Button onClick={() => handleApprove("seller")} disabled={approving} className="flex-1 gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
-                <Check size={16} strokeWidth={1.5} />
-                اعتماد الاتفاقية (بائع)
-              </Button>
-            )}
-            <Button variant="outline" className="rounded-xl active:scale-[0.98]" onClick={handleDownloadPdf} disabled={pdfLoading}>
-              {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} strokeWidth={1.5} />}
-              تنزيل PDF
-            </Button>
-          </div>
-
-          {/* Commission — compact footer */}
+          {/* Commission banner if no commission record yet */}
           {!commission && deal?.agreed_price && (
             <div className="border-t border-border/15 px-5 py-3">
               <CommissionBanner dealAmount={deal.agreed_price} showDetails className="!p-2.5 !rounded-lg text-[10px]" />
@@ -643,31 +579,37 @@ const AgreementPage = () => {
   );
 };
 
-
-const ApprovalCard = ({
-  label, name, approved, approvedAt, onApprove, loading, disabled,
+/* ── Unified Party + Approval Card ── */
+const PartyApprovalCard = ({
+  label, name, contact, approved, approvedAt, canApprove, onApprove, loading,
 }: {
-  label: string; name: string | null; approved: boolean; approvedAt: string | null;
-  onApprove: () => void; loading: boolean; disabled: boolean;
+  label: string; name: string | null; contact: string | null;
+  approved: boolean; approvedAt: string | null;
+  canApprove: boolean; onApprove: () => void; loading: boolean;
 }) => (
   <div className={cn(
-    "rounded-xl p-3 border text-center transition-colors",
+    "rounded-xl p-4 border transition-colors",
     approved ? "bg-emerald-50 border-emerald-200" : "bg-muted/30 border-border/30"
   )}>
     <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
-    <p className="text-sm font-medium mb-2">{name || "—"}</p>
+    <p className="text-sm font-semibold mb-0.5">{name || "—"}</p>
+    {contact && <p className="text-[11px] text-muted-foreground mb-3" dir="ltr">{contact}</p>}
+
     {approved ? (
-      <div className="flex items-center justify-center gap-1 text-emerald-600">
-        <CheckCircle2 size={14} strokeWidth={1.3} />
-        <span className="text-xs">تم الاعتماد</span>
+      <div className="flex items-center gap-1.5 text-emerald-600">
+        <CheckCircle2 size={15} strokeWidth={1.3} />
+        <span className="text-xs font-medium">تم الاعتماد</span>
       </div>
-    ) : (
-      <Button size="sm" variant="outline" onClick={onApprove} disabled={loading || disabled} className="text-xs rounded-lg h-7 px-3">
-        {loading ? <Loader2 size={12} className="animate-spin" /> : "اعتماد"}
+    ) : canApprove ? (
+      <Button size="sm" onClick={onApprove} disabled={loading} className="w-full rounded-lg h-8 text-xs gradient-primary text-primary-foreground active:scale-[0.98]">
+        {loading ? <Loader2 size={13} className="animate-spin" /> : <><Check size={13} strokeWidth={1.5} /> اعتماد الاتفاقية</>}
       </Button>
+    ) : (
+      <span className="text-[11px] text-amber-600">في انتظار الاعتماد</span>
     )}
+
     {approvedAt && (
-      <p className="text-[10px] text-muted-foreground mt-1">
+      <p className="text-[10px] text-muted-foreground mt-1.5">
         {new Date(approvedAt).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}
       </p>
     )}
