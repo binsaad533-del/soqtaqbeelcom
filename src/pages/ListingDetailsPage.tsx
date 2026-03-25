@@ -286,8 +286,8 @@ const ListingDetailsPage = () => {
 
             {/* Summary */}
             {(listing.description || listing.ai_summary) && (
-              <div className="bg-card rounded-2xl p-6 shadow-soft">
-                <div className="flex items-center gap-2 mb-4">
+              <div className="border-b border-border/20 pb-5">
+                <div className="flex items-center gap-2 mb-3">
                   <AiStar size={20} animate={false} />
                   <h2 className="font-medium">ملخص الفرصة</h2>
                 </div>
@@ -299,8 +299,7 @@ const ListingDetailsPage = () => {
 
             {/* Inventory */}
             {inventory.length > 0 && (
-              <div className="bg-card rounded-2xl p-6 shadow-soft">
-                <h3 className="font-medium mb-4">جرد الأصول المؤكّد</h3>
+              <ExpandableSection title="جرد الأصول المؤكّد" itemCount={inventory.length} threshold={5}>
                 <div className="space-y-2">
                   {inventory.map((item, i) => (
                     <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
@@ -314,16 +313,12 @@ const ListingDetailsPage = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </ExpandableSection>
             )}
 
             {/* Documents */}
             {documents.length > 0 && (
-              <div className="bg-card rounded-2xl p-6 shadow-soft">
-                <h3 className="font-medium mb-4 flex items-center gap-2">
-                  <FileText size={16} strokeWidth={1.3} />
-                  المستندات الداعمة
-                </h3>
+              <ExpandableSection title="المستندات الداعمة" icon={<FileText size={16} strokeWidth={1.3} />} itemCount={documents.length} threshold={5}>
                 <div className="space-y-2">
                   {documents.map((doc, i) => (
                     <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
@@ -334,7 +329,7 @@ const ListingDetailsPage = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </ExpandableSection>
             )}
 
             <DealCheckPanel listing={listing} savedAnalysis={listing.ai_structure_validation} />
