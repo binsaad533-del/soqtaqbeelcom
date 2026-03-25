@@ -243,11 +243,11 @@ const CustomerDashboardPage = () => {
         )}
 
         {/* ═══ PROFILE & QUICK INFO BAR ═══ */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6 animate-reveal" style={{ animationDelay: '80ms' }}>
-          {/* Profile card */}
-          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6 animate-reveal" style={{ animationDelay: '80ms' }}>
+          {/* Combined Profile & Personal Dashboard */}
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <label className="relative w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-base cursor-pointer group overflow-hidden ring-2 ring-background shadow-sm shrink-0">
+              <label className="relative w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg cursor-pointer group overflow-hidden ring-2 ring-background shadow-sm shrink-0">
                 {profile?.avatar_url
                   ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
                   : (profile?.full_name?.charAt(0) || "؟")}
@@ -258,11 +258,12 @@ const CustomerDashboardPage = () => {
               </label>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold truncate">{profile?.full_name || "مستخدم"}</div>
-                <span className={cn("text-[10px] flex items-center gap-1", isPhoneVerified ? "text-success" : "text-warning")}>
+                <span className={cn("text-[10px] flex items-center gap-1 mt-0.5", isPhoneVerified ? "text-success" : "text-warning")}>
                   {isPhoneVerified ? <><UserCheck size={10} /> موثّق</> : <><Shield size={10} /> غير موثّق</>}
                 </span>
+                <p className="text-[10px] text-muted-foreground mt-1">مرحباً بك في لوحة التحكم</p>
               </div>
-              <div className="relative w-11 h-11 shrink-0">
+              <div className="relative w-12 h-12 shrink-0">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                   <circle cx="18" cy="18" r="15" fill="none" className="stroke-muted" strokeWidth="2.5" />
                   <circle cx="18" cy="18" r="15" fill="none" className="stroke-primary" strokeWidth="2.5" strokeDasharray={`${profileCompleteness} ${100 - profileCompleteness}`} strokeLinecap="round" />
@@ -270,7 +271,9 @@ const CustomerDashboardPage = () => {
                 <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold">{profileCompleteness}%</span>
               </div>
             </div>
-            <div className="space-y-2.5 text-[11px]">
+
+            {/* Contact info */}
+            <div className="space-y-2 text-[11px] mb-3">
               <div className="flex items-center justify-between gap-2">
                 <Mail size={11} className="text-muted-foreground shrink-0" />
                 {editingField === "email" ? (
@@ -302,37 +305,41 @@ const CustomerDashboardPage = () => {
                 )}
               </div>
             </div>
+
             {!isPhoneVerified && profile?.phone && (
-              <div className="mt-3 pt-3 border-t border-border/20">
+              <div className="pt-3 border-t border-border/20">
                 <PhoneVerificationFlow initialPhone={profile.phone} onVerified={() => window.location.reload()} />
               </div>
             )}
-          </div>
 
-          {/* Activity feed */}
-          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold flex items-center gap-1.5">
-                <Activity size={13} className="text-success" /> النشاط المباشر
-              </h3>
-              <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                <span className="text-[9px] text-muted-foreground">مباشر</span>
-              </span>
-            </div>
-            {feed.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground text-center py-4">لا يوجد نشاط حالياً</p>
-            ) : (
-              <div className="space-y-2.5">
-                {feed.slice(0, 5).map(f => (
-                  <div key={f.id} className="flex items-center gap-2 text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                    <span className="text-muted-foreground flex-1 truncate">{f.text}</span>
-                    <span className="text-[9px] text-muted-foreground/40 shrink-0">{f.time}</span>
-                  </div>
-                ))}
+            {/* Mini stats */}
+            <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border/20">
+              <div className="text-center">
+                <div className="text-sm font-bold text-primary">{stats.active}</div>
+                <div className="text-[9px] text-muted-foreground">نشطة</div>
               </div>
-            )}
+              <div className="text-center">
+                <div className="text-sm font-bold text-success">{stats.completed}</div>
+                <div className="text-[9px] text-muted-foreground">مكتملة</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm font-bold">{deals.length + listings.length}</div>
+                <div className="text-[9px] text-muted-foreground">إجمالي</div>
+              </div>
+            </div>
+
+            {/* Quick actions */}
+            <div className="flex gap-2 mt-3 pt-3 border-t border-border/20">
+              <Link to="/create-listing" className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors text-[10px] text-primary">
+                <Plus size={11} /> إعلان جديد
+              </Link>
+              <Link to="/marketplace" className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl hover:bg-muted/40 transition-colors text-[10px] text-muted-foreground">
+                <Eye size={11} /> السوق
+              </Link>
+              <button onClick={loadData} className="flex items-center justify-center gap-1 py-2 px-3 rounded-xl hover:bg-muted/40 transition-colors text-[10px] text-muted-foreground">
+                <RefreshCw size={11} />
+              </button>
+            </div>
           </div>
 
           {/* Notifications */}
@@ -361,20 +368,30 @@ const CustomerDashboardPage = () => {
             )}
           </div>
 
-          {/* Quick actions */}
+          {/* Activity feed */}
           <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-            <h3 className="text-xs font-semibold mb-3">إجراءات سريعة</h3>
-            <div className="space-y-1.5">
-              <Link to="/create-listing" className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors text-xs text-primary">
-                <Plus size={13} /> إضافة إعلان جديد
-              </Link>
-              <Link to="/marketplace" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-muted/40 transition-colors text-xs text-muted-foreground">
-                <Eye size={13} /> تصفح السوق
-              </Link>
-              <Link to="/contact" className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-muted/40 transition-colors text-xs text-muted-foreground">
-                <MessageSquare size={13} /> تواصل مع الدعم
-              </Link>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold flex items-center gap-1.5">
+                <Activity size={13} className="text-success" /> النشاط المباشر
+              </h3>
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[9px] text-muted-foreground">مباشر</span>
+              </span>
             </div>
+            {feed.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground text-center py-4">لا يوجد نشاط حالياً</p>
+            ) : (
+              <div className="space-y-2.5">
+                {feed.slice(0, 5).map(f => (
+                  <div key={f.id} className="flex items-center gap-2 text-[11px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                    <span className="text-muted-foreground flex-1 truncate">{f.text}</span>
+                    <span className="text-[9px] text-muted-foreground/40 shrink-0">{f.time}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
