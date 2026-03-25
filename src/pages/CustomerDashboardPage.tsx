@@ -17,6 +17,7 @@ import {
   ArrowUpRight, RefreshCw, Mail, Search
 } from "lucide-react";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 
 /* ── Status helpers ── */
@@ -263,7 +264,7 @@ const CustomerDashboardPage = () => {
                       </p>
                       <p className="text-[11px] text-muted-foreground">
                         {draft.city ? `${draft.city} · ` : ""}
-                        {draft.price ? `${Number(draft.price).toLocaleString("en-US")} ر.س` : "بدون سعر بعد"}
+                        {draft.price ? <>{Number(draft.price).toLocaleString("en-US")} <SarSymbol size={9} /></> : "بدون سعر بعد"}
                         {" — "}
                         أكمل بيانات الإعلان وانشره 🚀
                       </p>
@@ -477,8 +478,8 @@ const CustomerDashboardPage = () => {
             { label: "صفقات نشطة", value: stats.active, icon: TrendingUp, accent: "text-primary" },
             { label: "بانتظار الرد", value: stats.waiting, icon: Clock, accent: "text-warning" },
             { label: "مكتملة", value: stats.completed, icon: CheckCircle, accent: "text-success" },
-            { label: "إجمالي القيمة", value: fmtCurrency(stats.totalVal), icon: Wallet, accent: "text-primary", sub: "ر.س" },
-            { label: "العمولة (1%)", value: fmtCurrency(stats.commission), icon: DollarSign, accent: "text-muted-foreground", sub: "ر.س" },
+            { label: "إجمالي القيمة", value: fmtCurrency(stats.totalVal), icon: Wallet, accent: "text-primary", sub: "﷼" },
+            { label: "العمولة (1%)", value: fmtCurrency(stats.commission), icon: DollarSign, accent: "text-muted-foreground", sub: "﷼" },
           ].map((kpi, i) => (
             <div key={i} className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-200 animate-reveal" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="flex items-center justify-between mb-3">
@@ -523,7 +524,7 @@ const CustomerDashboardPage = () => {
               </div>
             </div>
             <div>
-              <h3 className="text-[10px] font-medium text-muted-foreground mb-2">قيمة الصفقات (ر.س)</h3>
+              <h3 className="text-[10px] font-medium text-muted-foreground mb-2">قيمة الصفقات (﷼)</h3>
               <div className="h-[110px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={monthlyChart} margin={{ top: 0, right: 0, left: -15, bottom: 0 }}>
@@ -535,7 +536,7 @@ const CustomerDashboardPage = () => {
                     </defs>
                     <XAxis dataKey="name" tick={{ fontSize: 8, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 8, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : String(v)} width={30} />
-                    <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 10, direction: 'rtl' }} formatter={(v: number) => [v.toLocaleString('en-US') + ' ر.س', 'القيمة']} />
+                    <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 10, direction: 'rtl' }} formatter={(v: number) => [v.toLocaleString('en-US') + ' ﷼', 'القيمة']} />
                     <Area type="monotone" dataKey="value" name="القيمة" stroke="hsl(var(--warning))" fill="url(#fillValue)" strokeWidth={1.5} />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -673,7 +674,7 @@ const CustomerDashboardPage = () => {
                           <div>
                             <div className="text-sm font-medium group-hover:text-primary transition-colors">صفقة #{deal.id.slice(0, 6)}</div>
                             <div className="text-[11px] text-muted-foreground mt-0.5">
-                              {deal.agreed_price ? `${Number(deal.agreed_price).toLocaleString("en-US")} ر.س` : "بدون سعر"}
+                              {deal.agreed_price ? <>{Number(deal.agreed_price).toLocaleString("en-US")} <SarSymbol size={9} /></> : "بدون سعر"}
                               {" · "}
                               {new Date(deal.updated_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                             </div>
@@ -716,7 +717,7 @@ const CustomerDashboardPage = () => {
                             <div className="text-sm font-medium group-hover:text-primary transition-colors">{listing.title || listing.business_activity || "بدون عنوان"}</div>
                             <div className="text-[11px] text-muted-foreground mt-0.5">
                               {listing.city || "—"}
-                              {listing.price ? ` · ${Number(listing.price).toLocaleString("en-US")} ر.س` : ""}
+                              {listing.price ? <> · {Number(listing.price).toLocaleString("en-US")} <SarSymbol size={9} /></> : ""}
                             </div>
                           </div>
                         </div>
