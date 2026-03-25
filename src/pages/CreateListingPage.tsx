@@ -124,6 +124,8 @@ const CreateListingPage = () => {
   const [listingId, setListingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [locationLat, setLocationLat] = useState<number | null>(null);
+  const [locationLng, setLocationLng] = useState<number | null>(null);
 
   const [disclosure, setDisclosure] = useState({
     business_activity: "",
