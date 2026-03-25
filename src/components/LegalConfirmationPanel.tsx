@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { Shield, CheckCircle2, Clock, User, Phone, Mail, ImageIcon } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Shield, CheckCircle2, Clock, User, Phone, Mail, ImageIcon, Download, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
