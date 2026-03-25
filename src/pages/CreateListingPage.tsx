@@ -24,6 +24,7 @@ import {
   Wrench,
   Sparkles,
   Save,
+  X,
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import AiInlineStar from "@/components/AiInlineStar";
@@ -1648,8 +1649,34 @@ const CreateListingPage = () => {
                 )}
 
                 <div className="space-y-3">
-                  {/* Render fields dynamically from deal-type schema */}
-                  {isFieldVisible(dealTypeForTransparency, "business_activity") && (
+                  {/* Pre-filled fields summary */}
+                  {(() => {
+                    const preFilledFields: { label: string; value: string; key: string }[] = [];
+                    if (disclosure.business_activity && isFieldVisible(dealTypeForTransparency, "business_activity")) preFilledFields.push({ label: "النشاط", value: disclosure.business_activity, key: "business_activity" });
+                    if (disclosure.city && isFieldVisible(dealTypeForTransparency, "city")) preFilledFields.push({ label: "المدينة", value: disclosure.city, key: "city" });
+                    if (disclosure.district) preFilledFields.push({ label: "الحي", value: disclosure.district, key: "district" });
+                    
+                    return preFilledFields.length > 0 ? (
+                      <div className="bg-primary/5 border border-primary/15 rounded-xl p-3 space-y-2">
+                        <div className="flex items-center gap-1.5">
+                          <Check size={12} className="text-primary" />
+                          <span className="text-[11px] font-medium text-primary">تم تعبئتها من المراحل السابقة</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {preFilledFields.map((f) => (
+                            <div key={f.key} className="flex items-center gap-1.5 bg-background/60 rounded-lg px-2.5 py-1.5 border border-border/30">
+                              <span className="text-[10px] text-muted-foreground">{f.label}:</span>
+                              <span className="text-xs font-medium">{f.value}</span>
+                              <button onClick={() => setDisclosure((prev) => ({ ...prev, [f.key]: "" }))} className="text-muted-foreground/50 hover:text-destructive transition-colors mr-1"><X size={10} /></button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
+
+                  {/* Only show empty fields as editable */}
+                  {isFieldVisible(dealTypeForTransparency, "business_activity") && !disclosure.business_activity && (
                     <FormField
                       label={`نوع النشاط${activeRules.requiredFields.includes("business_activity") ? " *" : ""}`}
                       placeholder="مثال: مطعم وجبات سريعة"
@@ -1658,17 +1685,15 @@ const CreateListingPage = () => {
                       error={publishAttempted && disclosureErrors["business_activity"]}
                     />
                   )}
-                  <div className="grid grid-cols-2 gap-3">
-                    {isFieldVisible(dealTypeForTransparency, "city") && (
-                      <FormField
-                        label={`المدينة${activeRules.requiredFields.includes("city") ? " *" : ""}`}
-                        placeholder="الرياض"
-                        value={disclosure.city}
-                        onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))}
-                        error={publishAttempted && disclosureErrors["city"]}
-                      />
-                    )}
-                  </div>
+                  {isFieldVisible(dealTypeForTransparency, "city") && !disclosure.city && (
+                    <FormField
+                      label={`المدينة${activeRules.requiredFields.includes("city") ? " *" : ""}`}
+                      placeholder="الرياض"
+                      value={disclosure.city}
+                      onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))}
+                      error={publishAttempted && disclosureErrors["city"]}
+                    />
+                  )}
                   <FormField
                     label="السعر المطلوب *"
                     placeholder="180000"
