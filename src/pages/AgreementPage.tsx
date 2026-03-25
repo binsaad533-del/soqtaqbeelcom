@@ -357,13 +357,13 @@ const AgreementPage = () => {
 
         {/* Congratulations Banner — only when both approved */}
         {bothApproved && (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 mb-4 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-3">
-              <PartyPopper size={28} strokeWidth={1.3} className="text-emerald-600" />
+          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 mb-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+              <PartyPopper size={28} strokeWidth={1.3} className="text-primary" />
             </div>
-            <h2 className="text-lg font-semibold text-emerald-800 mb-1">🎉 مبارك! تمت الموافقة على الاتفاقية</h2>
-            <p className="text-sm text-emerald-600 mb-4">تم اعتماد الاتفاقية من كلا الطرفين — يمكنكم الآن تحميل الوثيقة الرسمية</p>
-            <Button onClick={handleDownloadPdf} disabled={pdfLoading} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white active:scale-[0.98]">
+            <h2 className="text-lg font-semibold text-primary mb-1">🎉 مبارك! تمت الموافقة على الاتفاقية</h2>
+            <p className="text-sm text-primary/70 mb-4">تم اعتماد الاتفاقية من كلا الطرفين — يمكنكم الآن تحميل الوثيقة الرسمية</p>
+            <Button onClick={handleDownloadPdf} disabled={pdfLoading} className="rounded-xl gradient-primary text-primary-foreground active:scale-[0.98]">
               {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} strokeWidth={1.5} />}
               تحميل وثيقة الاتفاقية PDF
             </Button>
@@ -382,14 +382,14 @@ const AgreementPage = () => {
                 </div>
               </div>
               {bothApproved && (
-                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <Lock size={16} strokeWidth={1.3} className="text-emerald-600" />
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Lock size={16} strokeWidth={1.3} className="text-primary" />
                 </div>
               )}
             </div>
             <div className="flex flex-wrap items-center gap-3 text-[11px]">
               <button onClick={copyAgreementNumber} className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
-                {copied ? <CheckCircle2 size={11} className="text-emerald-500" /> : <Copy size={11} />}
+                {copied ? <CheckCircle2 size={11} className="text-primary" /> : <Copy size={11} />}
                 <span className="font-mono">{agreement.agreement_number}</span>
               </button>
               <span className="text-muted-foreground">الإصدار {agreement.version}</span>
@@ -446,7 +446,7 @@ const AgreementPage = () => {
                 <ul className="space-y-1.5">
                   {(agreement.included_assets as string[]).map((item, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500/60 shrink-0" />
+                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 shrink-0" />
                       {item}
                     </li>
                   ))}
@@ -459,7 +459,7 @@ const AgreementPage = () => {
                 <ul className="space-y-1.5">
                   {(agreement.excluded_assets as string[]).map((item, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500/60 shrink-0" />
+                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/40 shrink-0" />
                       {item}
                     </li>
                   ))}
@@ -509,7 +509,7 @@ const AgreementPage = () => {
                 <ul className="space-y-1.5">
                   {(agreement.important_notes as string[]).map((note, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <AlertTriangle size={13} strokeWidth={1.3} className="text-amber-500 mt-0.5 shrink-0" />
+                      <AlertTriangle size={13} strokeWidth={1.3} className="text-primary/60 mt-0.5 shrink-0" />
                       {note}
                     </li>
                   ))}
@@ -518,9 +518,9 @@ const AgreementPage = () => {
             )}
 
             {agreement.amendment_reason && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <p className="text-xs font-medium text-amber-800 mb-1">سبب التعديل:</p>
-                <p className="text-sm text-amber-700">{agreement.amendment_reason}</p>
+              <div className="bg-primary/5 border border-primary/15 rounded-xl p-4">
+                <p className="text-xs font-medium text-primary mb-1">سبب التعديل:</p>
+                <p className="text-sm text-primary/70">{agreement.amendment_reason}</p>
               </div>
             )}
 
@@ -599,14 +599,14 @@ const PartyApprovalCard = ({
 }) => (
   <div className={cn(
     "rounded-xl p-4 border transition-colors",
-    approved ? "bg-emerald-50 border-emerald-200" : "bg-muted/30 border-border/30"
+    approved ? "bg-primary/5 border-primary/20" : "bg-muted/30 border-border/30"
   )}>
     <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
     <p className="text-sm font-semibold mb-0.5">{name || "—"}</p>
     {contact && <p className="text-[11px] text-muted-foreground mb-3" dir="ltr">{contact}</p>}
 
     {approved ? (
-      <div className="flex items-center gap-1.5 text-emerald-600">
+      <div className="flex items-center gap-1.5 text-primary">
         <CheckCircle2 size={15} strokeWidth={1.3} />
         <span className="text-xs font-medium">تم الاعتماد</span>
       </div>
@@ -615,7 +615,7 @@ const PartyApprovalCard = ({
         {loading ? <Loader2 size={13} className="animate-spin" /> : <><Check size={13} strokeWidth={1.5} /> اعتماد الاتفاقية</>}
       </Button>
     ) : (
-      <span className="text-[11px] text-amber-600">في انتظار الاعتماد</span>
+      <span className="text-[11px] text-primary/60">في انتظار الاعتماد</span>
     )}
 
     {approvedAt && (
