@@ -164,7 +164,7 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, pageNumber: 
 
 const buildSections = (data: AgreementPdfData, qrDataUrl = "") => {
   const agreedPrice = data.financialTerms?.agreedPrice || 0;
-  const currency = data.financialTerms?.currency || "ر.س";
+  const currency = data.financialTerms?.currency || "﷼";
   const dealAmount = data.dealAmount || agreedPrice;
   const commissionAmount = data.commissionAmount ?? calculateCommission(dealAmount);
   const commissionRate = data.commissionRate ?? COMMISSION_RATE;
@@ -391,7 +391,7 @@ const buildSections = (data: AgreementPdfData, qrDataUrl = "") => {
           <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:12px;">
             <div style="border-radius:20px;padding:16px;background:linear-gradient(135deg, hsl(212 84% 42%), hsl(196 85% 45%));color:white;display:grid;gap:8px;">
               <div style="font-size:10px;opacity:0.86;">المبلغ المستحق للمنصة</div>
-              <div style="font-size:22px;font-weight:600;line-height:1.2;">${formatPrice(commissionAmount)} ر.س</div>
+              <div style="font-size:22px;font-weight:600;line-height:1.2;">${formatPrice(commissionAmount)} ﷼</div>
               <div style="font-size:11px;opacity:0.92;">${commissionRate * 100}% من قيمة الصفقة ${formatPrice(dealAmount)} ${escapeHtml(currency)}</div>
             </div>
             <div style="border:0.5px solid hsl(214 32% 91%);border-radius:20px;padding:16px;background:hsl(210 40% 98%);display:grid;gap:8px;">
