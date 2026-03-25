@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { Shield, CheckCircle2, Clock, User, Phone, Mail, ImageIcon } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Shield, CheckCircle2, Clock, User, Phone, Mail, ImageIcon, Download, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
@@ -113,6 +114,9 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
   const activeConfirmations = isSeller ? SELLER_CONFIRMATIONS : REQUIRED_CONFIRMATIONS;
   const allChecked = activeConfirmations.every(c => checked[c]);
 
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
   const handleSubmit = async () => {
     const snapshot = {
       deal_type: primaryTypeId,
@@ -125,9 +129,55 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
       Object.keys(checked).filter(k => checked[k]),
       snapshot,
     );
-    if (!result.error) {
+    if (result.error) {
+      toast.error("حدث خطأ أثناء تسجيل الموافقة، يرجى المحاولة مرة أخرى");
+    } else {
+      toast.success("تم تسجيل موافقتك بنجاح");
       setSubmitted(true);
       await loadStatus();
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (!contentRef.current) return;
+    setPdfLoading(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const canvas = await html2canvas(contentRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgData = canvas.toDataURL("image/png");
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const title = listing?.title || listing?.business_activity || "agreement";
+      pdf.save(`وثيقة-تأكيد-${title}.pdf`);
+      toast.success("تم تحميل الوثيقة بنجاح");
+    } catch {
+      toast.error("حدث خطأ أثناء إنشاء ملف PDF");
+    } finally {
+      setPdfLoading(false);
     }
   };
 
@@ -155,16 +205,20 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
 
   if (deal.locked || deal.status === "finalized") {
     return (
-      <div className="bg-card rounded-2xl p-8 shadow-soft border border-primary/20 text-center">
-        <CheckCircle2 size={40} className="text-primary mx-auto mb-4" />
-        <h2 className="text-lg font-semibold mb-2">تمت الموافقة النهائية</h2>
+      <div className="bg-card rounded-2xl p-8 shadow-soft border border-primary/20 text-center space-y-4">
+        <CheckCircle2 size={40} className="text-primary mx-auto" />
+        <h2 className="text-lg font-semibold">تمت الموافقة النهائية</h2>
         <p className="text-sm text-muted-foreground">تمت موافقة الطرفين وتم قفل الصفقة بنجاح.</p>
+        <Button onClick={handleExportPdf} disabled={pdfLoading} variant="outline" className="rounded-xl gap-2">
+          {pdfLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+          تحميل وثيقة التأكيد PDF
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-5">
+    <div ref={contentRef} className="space-y-5">
       {/* Header */}
       <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
         <div className="flex items-center gap-3 mb-2">
@@ -353,14 +407,18 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
           </Button>
         </div>
       ) : (
-        <div className="bg-card rounded-2xl p-6 shadow-soft border border-primary/20 text-center">
-          <CheckCircle2 size={28} className="text-primary mx-auto mb-2" />
-          <h3 className="font-medium text-sm mb-1">تم تسجيل موافقتك</h3>
+        <div className="bg-card rounded-2xl p-6 shadow-soft border border-primary/20 text-center space-y-3">
+          <CheckCircle2 size={28} className="text-primary mx-auto" />
+          <h3 className="font-medium text-sm">تم تسجيل موافقتك</h3>
           <p className="text-xs text-muted-foreground">
             {buyerConfirmed && sellerConfirmed
               ? "تمت الموافقة من الطرفين — سيتم قفل الصفقة وإنشاء العقد تلقائياً."
               : "في انتظار موافقة الطرف الآخر لإتمام الصفقة."}
           </p>
+          <Button onClick={handleExportPdf} disabled={pdfLoading} variant="outline" size="sm" className="rounded-xl gap-2">
+            {pdfLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            تحميل وثيقة التأكيد PDF
+          </Button>
         </div>
       )}
 

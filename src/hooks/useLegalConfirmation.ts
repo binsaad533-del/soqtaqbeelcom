@@ -97,11 +97,10 @@ export function useLegalConfirmation() {
       .from("legal_confirmations")
       .insert({
         deal_id: dealId,
-        user_id: user.id,
         party_role: partyRole,
         confirmations: confirmations as any,
         deal_snapshot: dealSnapshot as any,
-        ip_address: null, // captured server-side ideally
+        ip_address: null,
         user_agent: navigator.userAgent,
         version: nextVersion,
       } as any)
