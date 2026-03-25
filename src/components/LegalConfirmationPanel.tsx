@@ -114,6 +114,9 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
   const activeConfirmations = isSeller ? SELLER_CONFIRMATIONS : REQUIRED_CONFIRMATIONS;
   const allChecked = activeConfirmations.every(c => checked[c]);
 
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
   const handleSubmit = async () => {
     const snapshot = {
       deal_type: primaryTypeId,
@@ -126,9 +129,55 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
       Object.keys(checked).filter(k => checked[k]),
       snapshot,
     );
-    if (!result.error) {
+    if (result.error) {
+      toast.error("حدث خطأ أثناء تسجيل الموافقة، يرجى المحاولة مرة أخرى");
+    } else {
+      toast.success("تم تسجيل موافقتك بنجاح");
       setSubmitted(true);
       await loadStatus();
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (!contentRef.current) return;
+    setPdfLoading(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const canvas = await html2canvas(contentRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgData = canvas.toDataURL("image/png");
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const title = listing?.title || listing?.business_activity || "agreement";
+      pdf.save(`وثيقة-تأكيد-${title}.pdf`);
+      toast.success("تم تحميل الوثيقة بنجاح");
+    } catch {
+      toast.error("حدث خطأ أثناء إنشاء ملف PDF");
+    } finally {
+      setPdfLoading(false);
     }
   };
 
