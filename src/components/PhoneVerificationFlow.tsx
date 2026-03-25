@@ -52,13 +52,6 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
     }
   }, [profile]);
 
-  // Auto-send OTP when skipPhoneStep
-  useEffect(() => {
-    if (skipPhoneStep && step === "otp" && phone.length >= 9 && resendTimer === 0) {
-      handleSendOtp();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [skipPhoneStep]);
 
   // Resend timer
   useEffect(() => {
