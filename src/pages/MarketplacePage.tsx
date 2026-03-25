@@ -11,7 +11,7 @@ import MarketplaceFilters, { defaultFilters, type FilterState } from "@/componen
 import MobileFilterSheet from "@/components/marketplace/MobileFilterSheet";
 import SmartSearchBar from "@/components/marketplace/SmartSearchBar";
 import ComparePanel, { type CompareItem } from "@/components/marketplace/ComparePanel";
-import { MapPin, Eye, ShieldCheck, TrendingUp, GitCompareArrows, Check } from "lucide-react";
+import { MapPin, Eye, ShieldCheck, TrendingUp, GitCompareArrows, Check, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 
 interface EnrichedListing extends Listing {
@@ -28,9 +28,11 @@ const MarketplacePage = () => {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [compareItems, setCompareItems] = useState<CompareItem[]>([]);
+  const [similarActivities, setSimilarActivities] = useState<string[]>([]);
 
-  const handleSmartSearch = (partial: Partial<FilterState>, _message: string) => {
+  const handleSmartSearch = (partial: Partial<FilterState>, _message: string, similar?: string[]) => {
     setFilters(prev => ({ ...prev, ...partial }));
+    setSimilarActivities(similar || []);
   };
 
   const toggleCompare = useCallback((listing: EnrichedListing) => {
@@ -122,6 +124,37 @@ const MarketplacePage = () => {
     return result;
   }, [enrichedListings, filters]);
 
+  // Similar results: listings matching similar activities but NOT the main filter
+  const similarResults = useMemo(() => {
+    if (similarActivities.length === 0 || filters.activity === "الكل") return [];
+
+    return enrichedListings.filter(l => {
+      // Exclude listings already in main results
+      if (l.category === filters.activity || l.business_activity?.includes(filters.activity)) return false;
+      // Check if matches any similar activity
+      const matchesSimilar = similarActivities.some(sa =>
+        l.category === sa || l.business_activity?.includes(sa)
+      );
+      if (!matchesSimilar) return false;
+      // Apply other filters (city, price, deal type)
+      if (filters.city !== "الكل" && filters.city !== "📍 بالقرب مني" && l.city !== filters.city) return false;
+      if (filters.dealType !== "الكل") {
+        const dt = l.primary_deal_type || l.deal_type || "";
+        if (filters.dealType === "تقبيل_كامل" && !dt.includes("تقبيل") && !dt.includes("full")) return false;
+        if (filters.dealType === "بيع_معدات" && !dt.includes("معدات") && !dt.includes("assets")) return false;
+        if (filters.dealType === "بيع_مع_سجل" && !dt.includes("سجل") && !dt.includes("with_cr")) return false;
+        if (filters.dealType === "بيع_بدون_سجل" && !dt.includes("بدون") && !dt.includes("no_cr")) return false;
+      }
+      if (l.price != null) {
+        if (l.price < filters.priceRange[0] || l.price > filters.priceRange[1]) return false;
+      }
+      return true;
+    }).sort((a, b) => {
+      if (a.visibilityTier !== b.visibilityTier) return a.visibilityTier - b.visibilityTier;
+      return (b.sellerProfile?.trust_score ?? 50) - (a.sellerProfile?.trust_score ?? 50);
+    }).slice(0, 6);
+  }, [enrichedListings, filters, similarActivities]);
+
   const compareIds = useMemo(() => new Set(compareItems.map(i => i.id)), [compareItems]);
 
   return (
@@ -164,25 +197,60 @@ const MarketplacePage = () => {
           )}
 
           {/* Listings grid */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 space-y-6">
             {loading ? (
               <div className="text-center py-16 text-sm text-muted-foreground">جاري التحميل...</div>
-            ) : filtered.length === 0 ? (
+            ) : filtered.length === 0 && similarResults.length === 0 ? (
               <div className="text-center py-16">
                 <AiStar size={32} className="mx-auto mb-4" />
                 <p className="text-sm text-muted-foreground">لا توجد نتائج مطابقة</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filtered.map(listing => (
-                  <ListingCard
-                    key={listing.id}
-                    listing={listing}
-                    isComparing={compareIds.has(listing.id)}
-                    onToggleCompare={() => toggleCompare(listing)}
-                  />
-                ))}
-              </div>
+              <>
+                {/* Exact results */}
+                {filtered.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filtered.map(listing => (
+                      <ListingCard
+                        key={listing.id}
+                        listing={listing}
+                        isComparing={compareIds.has(listing.id)}
+                        onToggleCompare={() => toggleCompare(listing)}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {filtered.length === 0 && similarResults.length > 0 && (
+                  <div className="text-center py-8">
+                    <AiStar size={28} className="mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">لا توجد نتائج مطابقة تماماً لبحثك</p>
+                  </div>
+                )}
+
+                {/* Similar results section */}
+                {similarResults.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3 px-1">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Lightbulb size={14} className="text-amber-500" />
+                        <span className="text-xs font-medium">فرص مشابهة قد تهمّك</span>
+                      </div>
+                      <div className="flex-1 h-px bg-border/50" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-90">
+                      {similarResults.map(listing => (
+                        <ListingCard
+                          key={listing.id}
+                          listing={listing}
+                          isComparing={compareIds.has(listing.id)}
+                          onToggleCompare={() => toggleCompare(listing)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
