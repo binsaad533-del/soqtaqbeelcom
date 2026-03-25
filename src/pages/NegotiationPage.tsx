@@ -712,12 +712,8 @@ const NegotiationPage = () => {
                     </div>
                   </div>
                 )}
-              </div>
-            )}
 
-            {/* ═══ TAB: Actions ═══ */}
-            {sidebarTab === "actions" && (
-              <div className="space-y-4 animate-in fade-in-0 duration-200">
+
                 {/* Legal Confirmation */}
                 {!isPostAgreement && (
                   <div className="bg-card rounded-2xl p-4 shadow-soft border border-primary/15">
