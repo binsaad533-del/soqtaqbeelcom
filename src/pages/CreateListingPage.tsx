@@ -1406,13 +1406,13 @@ const CreateListingPage = () => {
                       </div>
                       {inventoryPricingMode === "bulk" && (
                         <div className="mt-3">
-                          <label className="text-[11px] text-muted-foreground mb-1 block">السعر الإجمالي لجميع الأصول (ر.س) — ضع القيمة التقديرية لجميع الأصول مجتمعة</label>
+                          <label className="text-[11px] text-muted-foreground mb-1 block">السعر الإجمالي لجميع الأصول (ر.س)</label>
                           <input
                             type="text"
                             inputMode="numeric"
                             lang="en"
                             dir="ltr"
-                            placeholder="مثال: 50,000"
+                            placeholder="ضع القيمة التقديرية لجميع الأصول مجتمعة"
                             value={bulkInventoryPrice}
                             onChange={(e) => setBulkInventoryPrice(toEnglishNumerals(e.target.value).replace(/[^\d]/g, ""))}
                             className="w-full text-sm bg-background border border-border/50 rounded-lg px-3 py-2 outline-none focus:border-primary/50 transition-colors [direction:ltr] text-left"
