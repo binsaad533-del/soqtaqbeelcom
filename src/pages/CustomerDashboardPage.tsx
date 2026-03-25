@@ -1,50 +1,54 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
-import AiStar from "@/components/AiStar";
 import PhoneVerificationFlow from "@/components/PhoneVerificationFlow";
 import { cn } from "@/lib/utils";
 import {
   Plus, FileText, MessageSquare, Shield, AlertCircle,
   Eye, CheckCircle, Loader2, Activity, ChevronLeft,
-  TrendingUp, Edit3, Wallet, BarChart3, Clock,
-  ArrowUpLeft, ArrowDownLeft, UserCheck, MapPin, Phone,
-  Camera, Mail, Pencil, Check, X as XIcon
+  TrendingUp, Edit3, Wallet, Clock,
+  UserCheck, Phone, Camera, Mail, Pencil, Check, X as XIcon,
+  Sparkles, ArrowRight, Zap, BarChart3, DollarSign,
+  Pause, Play, RefreshCw
 } from "lucide-react";
-import { DEAL_TYPE_FIELD_RULES } from "@/lib/dealTypeFieldRules";
+import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 import { toast } from "sonner";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 
-/* ── Draft completion calculator ── */
-const calcDraftProgress = (listing: Listing): number => {
-  const rules = DEAL_TYPE_FIELD_RULES[listing.deal_type] || DEAL_TYPE_FIELD_RULES["full_takeover"];
-  if (!rules) return 0;
-  const checks: boolean[] = [
-    !!listing.title, !!listing.business_activity, !!listing.city,
-    listing.price != null && listing.price > 0,
-  ];
-  rules.requiredFields.forEach(f => {
-    if (!["business_activity", "city", "price"].includes(f)) checks.push(!!(listing as any)[f]);
-  });
-  const photos = listing.photos as Record<string, string[]> | null;
-  checks.push(!!(photos && Object.values(photos).some(arr => Array.isArray(arr) && arr.length > 0)));
-  const docs = listing.documents as any[] | null;
-  checks.push(Array.isArray(docs) && docs.length > 0);
-  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+/* ── Status mapping for pipeline ── */
+const PIPELINE_STAGES = [
+  { key: "new", label: "جديدة", color: "bg-muted" },
+  { key: "under_review", label: "مراجعة", color: "bg-warning/15" },
+  { key: "negotiating", label: "تفاوض", color: "bg-primary/15" },
+  { key: "agreement", label: "اتفاقية", color: "bg-accent/30" },
+  { key: "completed", label: "مغلقة", color: "bg-success/15" },
+] as const;
+
+type StageKey = typeof PIPELINE_STAGES[number]["key"];
+
+const mapDealToStage = (deal: Deal): StageKey => {
+  const s = deal.status;
+  if (s === "completed" || s === "finalized") return "completed";
+  if (s === "agreement" || s === "locked") return "agreement";
+  if (s === "negotiating") return "negotiating";
+  if (s === "under_review" || s === "review") return "under_review";
+  return "new";
 };
 
 const statusBadge = (s: string) => {
   const map: Record<string, { label: string; color: string }> = {
     draft: { label: "مسودة", color: "bg-muted text-muted-foreground" },
-    published: { label: "منشور", color: "bg-success/15 text-success border border-success/25" },
-    under_review: { label: "مراجعة", color: "bg-warning/15 text-warning border border-warning/25" },
-    negotiating: { label: "تفاوض", color: "bg-primary/15 text-primary border border-primary/25" },
-    completed: { label: "مكتمل", color: "bg-[hsl(270,60%,95%)] text-[hsl(270,60%,45%)] border border-[hsl(270,60%,80%)]" },
-    rejected: { label: "مرفوض", color: "bg-destructive/15 text-destructive border border-destructive/25" },
+    published: { label: "منشور", color: "bg-success/15 text-success" },
+    under_review: { label: "مراجعة", color: "bg-warning/15 text-warning" },
+    negotiating: { label: "تفاوض", color: "bg-primary/15 text-primary" },
+    completed: { label: "مكتمل", color: "bg-success/15 text-success" },
+    finalized: { label: "مكتمل", color: "bg-success/15 text-success" },
+    new: { label: "جديدة", color: "bg-muted text-muted-foreground" },
+    agreement: { label: "اتفاقية", color: "bg-accent/30 text-accent-foreground" },
   };
   return map[s] || { label: s, color: "bg-muted text-muted-foreground" };
 };
@@ -53,27 +57,35 @@ const formatCurrency = (n: number) =>
   n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(0)}K` : n.toString();
 
 const CustomerDashboardPage = () => {
-  const { profile, signOut, user } = useAuthContext();
-  const { getMyListings } = useListings();
+  const { profile, user } = useAuthContext();
+  const navigate = useNavigate();
+  const { getMyListings, updateListing } = useListings();
   const { getMyDeals } = useDeals();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [listings, setListings] = useState<Listing[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
-  /* ── Profile editing state ── */
+  /* ── Profile editing ── */
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
 
+  /* ── AI Moqbel panel ── */
+  const [moqbelOpen, setMoqbelOpen] = useState(false);
+  const [moqbelMsg, setMoqbelMsg] = useState("");
+  const [moqbelLoading, setMoqbelLoading] = useState(false);
+  const [moqbelResponse, setMoqbelResponse] = useState("");
+
   const userEmail = user?.email || null;
+  const hasRealEmail = !!(userEmail && !userEmail.endsWith("@phone.souqtaqbeel.app"));
 
   const startEdit = (field: string, currentValue: string) => {
     setEditingField(field);
     setEditValue(currentValue || "");
   };
-
   const cancelEdit = () => { setEditingField(null); setEditValue(""); };
 
   const saveField = useCallback(async (field: string, value: string) => {
@@ -133,356 +145,441 @@ const CustomerDashboardPage = () => {
     load();
   }, [getMyListings, getMyDeals]);
 
-  /* ── Computed data ── */
+  /* ── Live activity feed via realtime ── */
+  const [activityFeed, setActivityFeed] = useState<Array<{ id: string; text: string; time: string; type: string }>>([]);
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("dashboard-activity")
+      .on("postgres_changes", { event: "*", schema: "public", table: "deals" }, (payload) => {
+        const d = payload.new as any;
+        if (d?.buyer_id === user.id || d?.seller_id === user.id) {
+          setActivityFeed(prev => [{
+            id: crypto.randomUUID(),
+            text: payload.eventType === "INSERT" ? "صفقة جديدة تم إنشاؤها" : `تحديث صفقة: ${statusBadge(d.status).label}`,
+            time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }),
+            type: payload.eventType === "INSERT" ? "new" : "update"
+          }, ...prev].slice(0, 10));
+        }
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "negotiation_messages" }, (payload) => {
+        const m = payload.new as any;
+        setActivityFeed(prev => [{
+          id: crypto.randomUUID(),
+          text: "رسالة تفاوض جديدة",
+          time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }),
+          type: "message"
+        }, ...prev].slice(0, 10));
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "listings" }, (payload) => {
+        const l = payload.new as any;
+        if (l?.owner_id === user.id) {
+          setActivityFeed(prev => [{
+            id: crypto.randomUUID(),
+            text: payload.eventType === "UPDATE" ? "تم تحديث إعلانك" : "إعلان جديد",
+            time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }),
+            type: "listing"
+          }, ...prev].slice(0, 10));
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  /* ── Computed stats ── */
   const stats = useMemo(() => {
-    const published = listings.filter(l => l.status === "published").length;
-    const draftCount = listings.filter(l => l.status === "draft").length;
-    const activeDeals = deals.filter(d => d.status === "negotiating");
-    const completedDeals = deals.filter(d => d.status === "completed");
-    const totalDealValue = completedDeals.reduce((sum, d) => sum + (d.agreed_price || 0), 0);
-    const activeDealValue = activeDeals.reduce((sum, d) => sum + (d.agreed_price || 0), 0);
-    const totalListingValue = listings.reduce((sum, l) => sum + (l.price || 0), 0);
-    const avgDealValue = completedDeals.length ? totalDealValue / completedDeals.length : 0;
-    const successRate = deals.length ? Math.round((completedDeals.length / deals.length) * 100) : 0;
-    const trustScore = profile?.trust_score ?? 50;
-    return {
-      published, draftCount, totalListings: listings.length,
-      activeDeals: activeDeals.length, completedDeals: completedDeals.length,
-      totalDealValue, activeDealValue, totalListingValue, avgDealValue,
-      successRate, trustScore, totalDeals: deals.length,
+    const activeDeals = deals.filter(d => !["completed", "finalized", "cancelled"].includes(d.status));
+    const waitingDeals = deals.filter(d => d.status === "under_review" || d.status === "review");
+    const completedDeals = deals.filter(d => d.status === "completed" || d.status === "finalized");
+    const totalValue = deals.reduce((s, d) => s + (d.agreed_price || 0), 0);
+    const commission = totalValue * 0.01;
+    return { activeDeals: activeDeals.length, waiting: waitingDeals.length, completed: completedDeals.length, totalValue, commission };
+  }, [deals]);
+
+  /* ── Pipeline data ── */
+  const pipeline = useMemo(() => {
+    const map: Record<StageKey, Deal[]> = { new: [], under_review: [], negotiating: [], agreement: [], completed: [] };
+    deals.forEach(d => { map[mapDealToStage(d)].push(d); });
+    return map;
+  }, [deals]);
+
+  const handleDragEnd = useCallback(async (result: DropResult) => {
+    if (!result.destination) return;
+    const dealId = result.draggableId;
+    const newStage = result.destination.droppableId as StageKey;
+    const statusMap: Record<StageKey, string> = {
+      new: "new", under_review: "under_review", negotiating: "negotiating", agreement: "agreement", completed: "completed"
     };
-  }, [listings, deals, profile]);
+    const { error } = await supabase.from("deals").update({ status: statusMap[newStage] }).eq("id", dealId);
+    if (error) { toast.error("فشل تحديث الحالة"); return; }
+    setDeals(prev => prev.map(d => d.id === dealId ? { ...d, status: statusMap[newStage] } : d));
+    toast.success("تم تحديث حالة الصفقة");
+  }, []);
 
-  const drafts = useMemo(() => listings.filter(l => l.status === "draft"), [listings]);
+  /* ── Moqbel AI ── */
+  const askMoqbel = useCallback(async (prompt: string) => {
+    setMoqbelLoading(true);
+    setMoqbelResponse("");
+    try {
+      const context = `صفقات المستخدم: ${deals.length}، نشطة: ${stats.activeDeals}، مكتملة: ${stats.completed}، إجمالي القيمة: ${stats.totalValue} ر.س`;
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: prompt }],
+          context,
+        }),
+      });
+      if (!resp.ok || !resp.body) throw new Error("Failed");
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let fullText = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let nl: number;
+        while ((nl = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, nl);
+          buffer = buffer.slice(nl + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const json = line.slice(6).trim();
+          if (json === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(json);
+            const c = parsed.choices?.[0]?.delta?.content;
+            if (c) { fullText += c; setMoqbelResponse(fullText); }
+          } catch {}
+        }
+      }
+    } catch {
+      setMoqbelResponse("عذراً، حدث خطأ. حاول مرة أخرى.");
+    } finally {
+      setMoqbelLoading(false);
+    }
+  }, [deals, stats]);
 
-  const recentDeals = useMemo(() =>
-    [...deals].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 4),
-    [deals]);
+  /* ── Inline price edit for listings ── */
+  const [editingPrice, setEditingPrice] = useState<string | null>(null);
+  const [priceValue, setPriceValue] = useState("");
 
-  const recentListings = useMemo(() =>
-    listings.filter(l => l.status !== "draft").sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 4),
-    [listings]);
+  const savePrice = useCallback(async (listingId: string) => {
+    const num = Number(priceValue);
+    if (!priceValue || isNaN(num) || num <= 0) { toast.error("سعر غير صالح"); return; }
+    const { error } = await updateListing(listingId, { price: num } as never);
+    if (error) { toast.error("فشل التحديث"); return; }
+    setListings(prev => prev.map(l => l.id === listingId ? { ...l, price: num } : l));
+    setEditingPrice(null);
+    toast.success("تم تحديث السعر");
+  }, [priceValue, updateListing]);
 
-  const trustColor = stats.trustScore >= 70 ? "text-success" : stats.trustScore >= 40 ? "text-warning" : "text-destructive";
-  const trustLabel = stats.trustScore >= 70 ? "ممتاز" : stats.trustScore >= 40 ? "جيد" : "يحتاج تحسين";
-  const memberSince = profile?.created_at
-    ? (() => {
-        const d = new Date(profile.created_at);
-        const day = d.getDate();
-        const month = d.toLocaleDateString("ar-SA", { month: "long" });
-        const year = d.getFullYear();
-        return `${day} ${month} ${year}`;
-      })()
-    : "—";
-
-  const lastLoginFormatted = profile?.last_activity
-    ? (() => {
-        const d = new Date(profile.last_activity);
-        const day = d.getDate();
-        const month = d.toLocaleDateString("ar-SA", { month: "long" });
-        const year = d.getFullYear();
-        const hours = String(d.getHours()).padStart(2, "0");
-        const minutes = String(d.getMinutes()).padStart(2, "0");
-        return `${day} ${month} ${year} - ${hours}:${minutes}`;
-      })()
-    : "—";
-
-  /* ── Profile completeness ── */
-  const hasRealEmail = !!(userEmail && !userEmail.endsWith("@phone.souqtaqbeel.app"));
   const isPhoneVerified = !!(profile as any)?.phone_verified;
   const profileCompleteness = useMemo(() => {
     if (!profile) return 0;
     const fields = [profile.full_name, profile.phone, profile.avatar_url, hasRealEmail, isPhoneVerified];
     return Math.round((fields.filter(Boolean).length / fields.length) * 100);
   }, [profile, hasRealEmail, isPhoneVerified]);
-  const isProfileComplete = profileCompleteness >= 100;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 size={24} className="animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="py-5 md:py-8">
-      <div className="container max-w-6xl">
+      <div className="container max-w-7xl">
 
         {loadError && (
-          <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-between mb-5 animate-fade-in">
+          <div className="p-3 rounded-xl bg-destructive/10 flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <AlertCircle size={16} className="text-destructive shrink-0" />
-              <span className="text-sm text-destructive">{loadError}</span>
+              <AlertCircle size={14} className="text-destructive" />
+              <span className="text-xs text-destructive">{loadError}</span>
             </div>
             <button onClick={() => window.location.reload()} className="text-xs text-destructive font-medium hover:underline">إعادة المحاولة</button>
           </div>
         )}
 
-        {/* ══════ PROFILE CARD (vertical centered) ══════ */}
-        <div className="max-w-xs mx-auto rounded-2xl border border-border/30 bg-card px-5 py-5 mb-5 text-center">
-          {/* Avatar */}
-          <label className="relative w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg cursor-pointer group overflow-hidden mb-3">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
-            ) : (
-              profile?.full_name?.charAt(0) || "؟"
-            )}
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-              <Camera size={14} className="text-white" />
-            </div>
-            <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
-          </label>
-
-          {/* Name */}
-          <div className="mb-1">
-            {editingField === "full_name" ? (
-              <div className="flex items-center justify-center gap-1.5">
-                <input className="text-sm font-semibold bg-muted/50 rounded px-2 py-0.5 w-32 border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary text-center" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
-                <button onClick={() => saveField("full_name", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
-                <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center gap-1.5 group/name">
-                <h1 className="text-sm font-semibold">{profile?.full_name || "مستخدم"}</h1>
-                <button onClick={() => startEdit("full_name", profile?.full_name || "")} className="opacity-0 group-hover/name:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={10} /></button>
-              </div>
-            )}
+        {/* ══════ HEADER ══════ */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-xl font-semibold">
+              مرحباً{profile?.full_name ? ` ${profile.full_name}` : ""} 👋
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">لوحة التحكم · ملخص نشاطك وصفقاتك</p>
           </div>
-
-          {/* Badge */}
-          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-medium mb-3",
-            isProfileComplete
-              ? "bg-success/15 text-success"
-              : "bg-warning/15 text-warning"
-          )}>
-            {isProfileComplete ? <><UserCheck size={11} /> موثّق</> : <><Shield size={11} /> غير موثّق</>}
-          </span>
-
-          {/* Info rows */}
-          <div className="space-y-1.5 text-[10px] text-muted-foreground mb-3">
-            {/* Email */}
-            <div className="flex items-center justify-center gap-1.5">
-              <Mail size={11} className="shrink-0" />
-              {editingField === "email" ? (
-                <div className="flex items-center gap-1">
-                  <input type="email" dir="ltr" lang="en" className="bg-muted/50 rounded px-1.5 py-0.5 w-36 border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus placeholder="email@example.com" />
-                  <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={11} /></button>
-                  <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={11} /></button>
-                </div>
-              ) : (
-                <>
-                  <span className="truncate" dir="ltr">{hasRealEmail ? userEmail : <span className="text-warning">لم يُضاف</span>}</span>
-                  <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-primary hover:text-primary/80"><Pencil size={9} /></button>
-                </>
-              )}
-            </div>
-
-            {/* Phone */}
-            <div className="flex items-center justify-center gap-1.5">
-              <Phone size={11} className="shrink-0" />
-              {editingField === "phone" ? (
-                <div className="flex items-center gap-1">
-                  <input dir="ltr" lang="en" inputMode="numeric" className="bg-muted/50 rounded px-1.5 py-0.5 w-24 border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus placeholder="05XXXXXXXX" />
-                  <button onClick={() => saveField("phone", editValue)} disabled={saving} className="text-success"><Check size={11} /></button>
-                  <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={11} /></button>
-                </div>
-              ) : (
-                <>
-                  <span dir="ltr">{profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">لم يُضاف</span>}</span>
-                  <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-primary hover:text-primary/80"><Pencil size={9} /></button>
-                </>
-              )}
-            </div>
-
-            {/* Dates */}
-            <div className="flex items-center justify-center gap-1">
-              <Clock size={10} /> انضم: {memberSince}
-            </div>
+          <div className="flex items-center gap-2">
+            <Link to="/create-listing" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
+              <Plus size={14} /> إعلان جديد
+            </Link>
           </div>
+        </div>
 
-          {/* Completeness */}
-          {!isProfileComplete && (
-            <div className="mb-3">
-              <div className="flex items-center justify-between text-[9px] mb-1">
-                <span className="text-muted-foreground">اكتمال الملف</span>
-                <span className={cn("font-medium", profileCompleteness >= 50 ? "text-warning" : "text-destructive")}>{profileCompleteness}%</span>
+        {/* ══════ PERSONAL SUMMARY STATS ══════ */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+          {[
+            { label: "صفقات نشطة", value: stats.activeDeals, icon: Activity, accent: "text-primary", filter: "active" },
+            { label: "بانتظار الرد", value: stats.waiting, icon: Pause, accent: "text-warning", filter: "waiting" },
+            { label: "مكتملة", value: stats.completed, icon: CheckCircle, accent: "text-success", filter: "completed" },
+            { label: "إجمالي القيمة", value: `${formatCurrency(stats.totalValue)} ر.س`, icon: Wallet, accent: "text-primary", filter: "value" },
+            { label: "عمولة المنصة (1%)", value: `${formatCurrency(stats.commission)} ر.س`, icon: DollarSign, accent: "text-muted-foreground", filter: "commission" },
+          ].map((stat, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveSection(activeSection === stat.filter ? null : stat.filter)}
+              className={cn(
+                "rounded-xl p-3.5 bg-card border transition-all text-right group cursor-pointer",
+                activeSection === stat.filter ? "border-primary/30 ring-1 ring-primary/10" : "border-border/20 hover:border-primary/15"
+              )}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <stat.icon size={14} strokeWidth={1.4} className={stat.accent} />
+                <span className="text-[10px] text-muted-foreground">{stat.label}</span>
               </div>
-              <div className="w-full h-1 rounded-full bg-muted overflow-hidden">
-                <div className={cn("h-full rounded-full transition-all duration-500",
+              <div className="text-lg font-bold">{stat.value}</div>
+            </button>
+          ))}
+        </div>
+
+        {/* ══════ PROFILE COMPACT (only if incomplete) ══════ */}
+        {profileCompleteness < 100 && (
+          <div className="rounded-xl border border-warning/20 bg-warning/[0.03] p-4 mb-6 flex items-center gap-4">
+            <label className="relative w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm cursor-pointer group overflow-hidden shrink-0">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
+              ) : (profile?.full_name?.charAt(0) || "؟")}
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                <Camera size={12} className="text-white" />
+              </div>
+              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
+            </label>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-medium">أكمل ملفك الشخصي</span>
+                <span className={cn("text-[9px] px-1.5 py-0.5 rounded-full font-medium",
+                  profileCompleteness >= 60 ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive"
+                )}>{profileCompleteness}%</span>
+              </div>
+              <div className="w-full h-1 rounded-full bg-muted overflow-hidden mb-1.5">
+                <div className={cn("h-full rounded-full transition-all",
                   profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
                 )} style={{ width: `${profileCompleteness}%` }} />
               </div>
-            </div>
-          )}
-
-          {/* Phone verification */}
-          {!isPhoneVerified && profile?.phone && (
-            <div className="pt-3 border-t border-warning/15 text-right">
-              <PhoneVerificationFlow
-                initialPhone={profile.phone}
-                onVerified={() => window.location.reload()}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* ══════ FINANCIAL OVERVIEW ══════ */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-          <div className="rounded-xl p-3 bg-card border border-border/30 hover:border-primary/20 transition-colors">
-            <div className="flex items-center justify-between mb-1.5">
-              <Wallet size={14} strokeWidth={1.3} className="text-primary" />
-              <span className="text-[8px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">إجمالي</span>
-            </div>
-            <div className="text-lg font-bold leading-tight">{loading ? "—" : `${formatCurrency(stats.totalDealValue)}`}</div>
-            <div className="text-[9px] text-muted-foreground">ر.س · الصفقات المكتملة</div>
-          </div>
-          <div className="rounded-xl p-3 bg-card border border-border/30 hover:border-primary/20 transition-colors">
-            <div className="flex items-center justify-between mb-1.5">
-              <Activity size={14} strokeWidth={1.3} className="text-primary" />
-              <span className="text-[8px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">نشط</span>
-            </div>
-            <div className="text-lg font-bold leading-tight">{loading ? "—" : `${formatCurrency(stats.activeDealValue)}`}</div>
-            <div className="text-[9px] text-muted-foreground">ر.س · قيد التفاوض ({stats.activeDeals})</div>
-          </div>
-          <div className="rounded-xl p-3 bg-card border border-border/30 hover:border-primary/20 transition-colors">
-            <div className="flex items-center justify-between mb-1.5">
-              <BarChart3 size={14} strokeWidth={1.3} className="text-primary" />
-              <span className="text-[8px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">متوسط</span>
-            </div>
-            <div className="text-lg font-bold leading-tight">{loading ? "—" : `${formatCurrency(stats.avgDealValue)}`}</div>
-            <div className="text-[9px] text-muted-foreground">ر.س · متوسط قيمة الصفقة</div>
-          </div>
-          <div className="rounded-xl p-3 bg-card border border-border/30 hover:border-primary/20 transition-colors">
-            <div className="flex items-center justify-between mb-1.5">
-              <TrendingUp size={14} strokeWidth={1.3} className="text-success" />
-              <span className="text-[8px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">نجاح</span>
-            </div>
-            <div className="text-lg font-bold leading-tight">{loading ? "—" : `${stats.successRate}%`}</div>
-            <div className="text-[9px] text-muted-foreground">{stats.completedDeals} من {stats.totalDeals} صفقة</div>
-          </div>
-        </div>
-
-        {/* ══════ DRAFTS (compact inline) ══════ */}
-        {!loading && drafts.length > 0 && (
-          <div className="rounded-xl border border-warning/20 bg-warning/[0.03] p-3 mb-5">
-            <div className="flex items-center gap-2 mb-2">
-              <Edit3 size={12} className="text-warning" />
-              <span className="text-[10px] font-medium text-warning">مسودات تحتاج إكمال</span>
-              <span className="text-[8px] bg-warning/15 text-warning px-1.5 py-0.5 rounded-md">{drafts.length}</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {drafts.map((d) => {
-                const progress = calcDraftProgress(d);
-                return (
-                  <Link key={d.id} to={`/listing/${d.id}`} className="flex items-center gap-2.5 p-2 rounded-lg bg-card border border-border/20 hover:border-warning/30 transition-colors group">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-[10px] font-medium truncate">{d.title || "بدون عنوان"}</span>
-                        <span className={cn("text-[8px] font-medium shrink-0 mr-1",
-                          progress >= 80 ? "text-success" : progress >= 50 ? "text-warning" : "text-destructive"
-                        )}>{progress}%</span>
-                      </div>
-                      <div className="w-full h-0.5 rounded-full bg-warning/10 overflow-hidden">
-                        <div className={cn("h-full rounded-full",
-                          progress >= 80 ? "bg-success" : progress >= 50 ? "bg-warning" : "bg-destructive"
-                        )} style={{ width: `${progress}%` }} />
-                      </div>
-                    </div>
-                    <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100 shrink-0" />
-                  </Link>
-                );
-              })}
+              <div className="flex flex-wrap gap-2 text-[9px] text-muted-foreground">
+                {!profile?.full_name && <span className="text-warning">• الاسم</span>}
+                {!profile?.phone && <span className="text-warning">• الجوال</span>}
+                {!hasRealEmail && <span className="text-warning">• البريد</span>}
+                {!profile?.avatar_url && <span className="text-warning">• الصورة</span>}
+                {!isPhoneVerified && profile?.phone && <span className="text-warning">• توثيق الجوال</span>}
+              </div>
+              {!isPhoneVerified && profile?.phone && (
+                <div className="mt-2">
+                  <PhoneVerificationFlow initialPhone={profile.phone} onVerified={() => window.location.reload()} />
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* ══════ TWO-COLUMN: DEALS + LISTINGS | ACTIONS + NOTIFICATIONS ══════ */}
+        {/* ══════ DEAL PIPELINE (Kanban) ══════ */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <BarChart3 size={15} className="text-primary" />
+              مسار الصفقات
+            </h2>
+            <span className="text-[10px] text-muted-foreground">{deals.length} صفقة</span>
+          </div>
+
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 min-h-[180px]">
+              {PIPELINE_STAGES.map((stage) => (
+                <Droppable droppableId={stage.key} key={stage.key}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={cn(
+                        "rounded-xl p-2 min-h-[160px] transition-colors",
+                        snapshot.isDraggingOver ? "bg-primary/5 ring-1 ring-primary/20" : "bg-muted/30"
+                      )}
+                    >
+                      <div className="flex items-center justify-between mb-2 px-1">
+                        <span className="text-[10px] font-medium">{stage.label}</span>
+                        <span className={cn("text-[9px] px-1.5 py-0.5 rounded-full font-medium", stage.color)}>
+                          {pipeline[stage.key].length}
+                        </span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {pipeline[stage.key].map((deal, idx) => (
+                          <Draggable key={deal.id} draggableId={deal.id} index={idx}>
+                            {(prov, snap) => (
+                              <div
+                                ref={prov.innerRef}
+                                {...prov.draggableProps}
+                                {...prov.dragHandleProps}
+                                onClick={() => navigate(deal.status === "completed" || deal.status === "finalized" ? `/agreement/${deal.id}` : `/negotiate/${deal.id}`)}
+                                className={cn(
+                                  "rounded-lg bg-card p-2.5 cursor-pointer transition-all text-right",
+                                  snap.isDragging ? "shadow-lg ring-1 ring-primary/20 rotate-1" : "hover:shadow-sm border border-border/15"
+                                )}
+                              >
+                                <div className="text-[10px] font-medium truncate mb-1">
+                                  صفقة #{deal.id.slice(0, 6)}
+                                </div>
+                                {deal.agreed_price && (
+                                  <div className="text-[9px] text-muted-foreground">
+                                    {Number(deal.agreed_price).toLocaleString()} ر.س
+                                  </div>
+                                )}
+                                <div className="text-[8px] text-muted-foreground mt-1">
+                                  {new Date(deal.updated_at).toLocaleDateString("en-GB")}
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                      </div>
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              ))}
+            </div>
+          </DragDropContext>
+        </div>
+
+        {/* ══════ MAIN GRID: Deals + Listings | AI + Activity ══════ */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-          {/* ═══ MAIN COLUMN (2/3) ═══ */}
-          <div className="lg:col-span-2 space-y-4">
+          {/* ═══ LEFT (2/3): My Deals + Listings ═══ */}
+          <div className="lg:col-span-2 space-y-5">
 
-            {/* ── My Deals ── */}
-            <section className="rounded-xl border border-border/30 bg-card overflow-hidden">
-              <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5">
-                <h2 className="text-[11px] font-medium flex items-center gap-1.5">
-                  <MessageSquare size={12} className="text-primary" />
+            {/* ── My Deals Table ── */}
+            <section className="rounded-xl bg-card border border-border/15 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3">
+                <h2 className="text-xs font-semibold flex items-center gap-1.5">
+                  <MessageSquare size={13} className="text-primary" />
                   صفقاتي
                 </h2>
-                {deals.length > 4 && <span className="text-[9px] text-muted-foreground">{deals.length} صفقة</span>}
+                <span className="text-[9px] text-muted-foreground">{deals.length} صفقة</span>
               </div>
-              {loading ? (
-                <div className="flex justify-center py-6"><Loader2 size={14} className="animate-spin text-primary" /></div>
-              ) : deals.length === 0 ? (
-                <div className="text-center py-6 px-4">
-                  <MessageSquare size={18} className="mx-auto mb-1.5 text-muted-foreground/20" strokeWidth={1} />
-                  <p className="text-[10px] text-muted-foreground">لا توجد صفقات بعد</p>
-                  <Link to="/marketplace" className="text-[9px] text-primary hover:underline mt-0.5 inline-block">تصفح السوق</Link>
+
+              {deals.length === 0 ? (
+                <div className="text-center py-8 px-4">
+                  <MessageSquare size={20} className="mx-auto mb-2 text-muted-foreground/20" strokeWidth={1} />
+                  <p className="text-xs text-muted-foreground mb-1">لا توجد صفقات بعد</p>
+                  <Link to="/marketplace" className="text-xs text-primary hover:underline">تصفح السوق</Link>
                 </div>
               ) : (
-                <div className="divide-y divide-border/20">
-                  {recentDeals.map((deal) => {
-                    const st = statusBadge(deal.status);
-                    const isCompleted = deal.status === "completed";
-                    return (
-                      <Link key={deal.id} to={isCompleted ? `/agreement/${deal.id}` : `/negotiate/${deal.id}`}
-                        className="flex items-center gap-2.5 px-3.5 py-2 hover:bg-muted/30 transition-colors group">
-                        <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center shrink-0",
-                          isCompleted ? "bg-[hsl(270,60%,95%)]" : "bg-primary/10"
-                        )}>
-                          {isCompleted
-                            ? <CheckCircle size={11} className="text-[hsl(270,60%,45%)]" />
-                            : <MessageSquare size={11} className="text-primary" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[10px] font-medium truncate">صفقة #{deal.id.slice(0, 6)}</div>
-                          <div className="flex items-center gap-1.5 text-[8px] text-muted-foreground">
-                            <span>{new Date(deal.created_at).toLocaleDateString("en-GB")}</span>
-                            {deal.agreed_price && <><span>·</span><span className="font-medium text-foreground/70">{Number(deal.agreed_price).toLocaleString()} ر.س</span></>}
-                          </div>
-                        </div>
-                        <span className={cn("text-[8px] px-1.5 py-0.5 rounded-md", st.color)}>{st.label}</span>
-                        <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
-                      </Link>
-                    );
-                  })}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-border/10">
+                        <th className="text-right px-4 py-2 text-[10px] text-muted-foreground font-medium">الصفقة</th>
+                        <th className="text-right px-4 py-2 text-[10px] text-muted-foreground font-medium">السعر</th>
+                        <th className="text-right px-4 py-2 text-[10px] text-muted-foreground font-medium">الحالة</th>
+                        <th className="text-right px-4 py-2 text-[10px] text-muted-foreground font-medium">آخر نشاط</th>
+                        <th className="px-4 py-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/10">
+                      {deals.map((deal) => {
+                        const st = statusBadge(deal.status);
+                        return (
+                          <tr key={deal.id} className="hover:bg-muted/20 transition-colors">
+                            <td className="px-4 py-2.5 font-medium">#{deal.id.slice(0, 6)}</td>
+                            <td className="px-4 py-2.5 text-muted-foreground">
+                              {deal.agreed_price ? `${Number(deal.agreed_price).toLocaleString()} ر.س` : "—"}
+                            </td>
+                            <td className="px-4 py-2.5">
+                              <span className={cn("text-[9px] px-2 py-0.5 rounded-md", st.color)}>{st.label}</span>
+                            </td>
+                            <td className="px-4 py-2.5 text-muted-foreground text-[10px]">
+                              {new Date(deal.updated_at).toLocaleDateString("en-GB")}
+                            </td>
+                            <td className="px-4 py-2.5">
+                              <Link
+                                to={deal.status === "completed" || deal.status === "finalized" ? `/agreement/${deal.id}` : `/negotiate/${deal.id}`}
+                                className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                              >
+                                عرض <ArrowRight size={10} />
+                              </Link>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </section>
 
             {/* ── My Listings ── */}
-            <section className="rounded-xl border border-border/30 bg-card overflow-hidden">
-              <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5">
-                <h2 className="text-[11px] font-medium flex items-center gap-1.5">
-                  <FileText size={12} className="text-primary" />
-                  إعلاناتي المنشورة
+            <section className="rounded-xl bg-card border border-border/15 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3">
+                <h2 className="text-xs font-semibold flex items-center gap-1.5">
+                  <FileText size={13} className="text-primary" />
+                  إعلاناتي
                 </h2>
-                <Link to="/create-listing" className="flex items-center gap-1 text-[9px] text-primary hover:underline">
-                  <Plus size={9} /> إعلان جديد
+                <Link to="/create-listing" className="flex items-center gap-1 text-[10px] text-primary hover:underline">
+                  <Plus size={10} /> إعلان جديد
                 </Link>
               </div>
-              {loading ? (
-                <div className="flex justify-center py-6"><Loader2 size={14} className="animate-spin text-primary" /></div>
-              ) : recentListings.length === 0 ? (
-                <div className="text-center py-6 px-4">
-                  <FileText size={18} className="mx-auto mb-1.5 text-muted-foreground/20" strokeWidth={1} />
-                  <p className="text-[10px] text-muted-foreground mb-0.5">لا توجد إعلانات منشورة</p>
-                  <Link to="/create-listing" className="text-[9px] text-primary hover:underline">أنشئ إعلانك الأول</Link>
+
+              {listings.length === 0 ? (
+                <div className="text-center py-8 px-4">
+                  <FileText size={20} className="mx-auto mb-2 text-muted-foreground/20" strokeWidth={1} />
+                  <p className="text-xs text-muted-foreground mb-1">لا توجد إعلانات</p>
+                  <Link to="/create-listing" className="text-xs text-primary hover:underline">أنشئ إعلانك الأول</Link>
                 </div>
               ) : (
-                <div className="divide-y divide-border/20">
-                  {recentListings.map((listing) => {
+                <div className="divide-y divide-border/10">
+                  {listings.map((listing) => {
                     const st = statusBadge(listing.status);
                     return (
-                      <Link key={listing.id} to={`/listing/${listing.id}`}
-                        className="flex items-center gap-2.5 px-3.5 py-2 hover:bg-muted/30 transition-colors group">
-                        <div className="w-6 h-6 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                          <FileText size={11} className="text-foreground/60" />
-                        </div>
+                      <div key={listing.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/20 transition-colors group">
                         <div className="flex-1 min-w-0">
-                          <div className="text-[10px] font-medium truncate">{listing.title || "بدون عنوان"}</div>
-                          <div className="flex items-center gap-1.5 text-[8px] text-muted-foreground">
-                            <span>{new Date(listing.created_at).toLocaleDateString("en-GB")}</span>
-                            {listing.city && <><span>·</span><span>{listing.city}</span></>}
-                            {listing.price && <><span>·</span><span className="font-medium text-foreground/70">{Number(listing.price).toLocaleString()} ر.س</span></>}
+                          <div className="text-xs font-medium truncate">{listing.title || "بدون عنوان"}</div>
+                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+                            {listing.city && <span>{listing.city}</span>}
+                            <span>·</span>
+                            {editingPrice === listing.id ? (
+                              <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                                <input
+                                  dir="ltr" lang="en" inputMode="numeric"
+                                  className="w-20 px-1.5 py-0.5 rounded border border-primary/30 bg-background text-[10px] focus:outline-none focus:ring-1 focus:ring-primary/20"
+                                  value={priceValue}
+                                  onChange={e => setPriceValue(toDigitsOnly(e.target.value))}
+                                  autoFocus
+                                  onKeyDown={e => e.key === "Enter" && savePrice(listing.id)}
+                                />
+                                <button onClick={() => savePrice(listing.id)} className="text-success"><Check size={11} /></button>
+                                <button onClick={() => setEditingPrice(null)} className="text-muted-foreground"><XIcon size={11} /></button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setEditingPrice(listing.id); setPriceValue(listing.price ? String(listing.price) : ""); }}
+                                className="flex items-center gap-0.5 hover:text-primary transition-colors"
+                              >
+                                <span>{listing.price ? `${Number(listing.price).toLocaleString()} ر.س` : "بدون سعر"}</span>
+                                <Pencil size={9} className="opacity-0 group-hover:opacity-100" />
+                              </button>
+                            )}
                           </div>
                         </div>
-                        <span className={cn("text-[8px] px-1.5 py-0.5 rounded-md", st.color)}>{st.label}</span>
-                        <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
-                      </Link>
+                        <span className={cn("text-[9px] px-2 py-0.5 rounded-md shrink-0", st.color)}>{st.label}</span>
+                        <Link to={`/listing/${listing.id}`} className="text-[10px] text-primary hover:underline shrink-0 flex items-center gap-1">
+                          عرض <ChevronLeft size={10} />
+                        </Link>
+                      </div>
                     );
                   })}
                 </div>
@@ -490,70 +587,182 @@ const CustomerDashboardPage = () => {
             </section>
           </div>
 
-          {/* ═══ SIDEBAR (1/3) ═══ */}
-          <div className="space-y-4">
+          {/* ═══ RIGHT (1/3): AI Moqbel + Activity Feed + Actions ═══ */}
+          <div className="space-y-5">
 
-            {/* ── Quick Actions ── */}
-            <div className="rounded-xl border border-border/30 bg-card p-3 space-y-1">
-              <h3 className="text-[11px] font-medium mb-1.5">إجراءات سريعة</h3>
-              {drafts.length > 0 && (
-                <Link to={`/listing/${drafts[0].id}`} className="flex items-center gap-2 p-2 rounded-lg bg-warning/5 hover:bg-warning/10 transition-colors group">
-                  <div className="w-6 h-6 rounded-md bg-warning/15 flex items-center justify-center shrink-0">
-                    <Edit3 size={11} className="text-warning" />
+            {/* ── AI Moqbel Panel ── */}
+            <section className="rounded-xl bg-card border border-border/15 overflow-hidden">
+              <div className="px-4 py-3 flex items-center justify-between">
+                <h2 className="text-xs font-semibold flex items-center gap-1.5">
+                  <Sparkles size={13} className="text-primary" />
+                  مقبل · المساعد الذكي
+                </h2>
+                <button
+                  onClick={() => setMoqbelOpen(!moqbelOpen)}
+                  className="text-[9px] text-primary hover:underline"
+                >
+                  {moqbelOpen ? "إغلاق" : "فتح"}
+                </button>
+              </div>
+
+              {/* Quick insights */}
+              <div className="px-4 pb-3 space-y-1.5">
+                {stats.activeDeals > 0 && (
+                  <div className="flex items-start gap-2 p-2 rounded-lg bg-primary/[0.04]">
+                    <Zap size={12} className="text-primary mt-0.5 shrink-0" />
+                    <span className="text-[10px] text-muted-foreground">
+                      لديك {stats.activeDeals} صفقة نشطة بقيمة إجمالية {formatCurrency(stats.totalValue)} ر.س
+                    </span>
                   </div>
-                  <span className="text-[10px] font-medium flex-1">إكمال المسودة</span>
-                  <ChevronLeft size={9} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
-                </Link>
+                )}
+                {stats.waiting > 0 && (
+                  <div className="flex items-start gap-2 p-2 rounded-lg bg-warning/[0.04]">
+                    <Clock size={12} className="text-warning mt-0.5 shrink-0" />
+                    <span className="text-[10px] text-muted-foreground">
+                      {stats.waiting} صفقة بانتظار ردك
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick action buttons */}
+              <div className="px-4 pb-3 space-y-1.5">
+                <button
+                  onClick={() => askMoqbel("حلل صفقاتي الحالية وقدم لي تقييم للأسعار ونصائح عملية")}
+                  disabled={moqbelLoading}
+                  className="w-full flex items-center gap-2 p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors text-right"
+                >
+                  <TrendingUp size={12} className="text-primary shrink-0" />
+                  <span className="text-[10px]">تحليل الأسعار والسوق</span>
+                </button>
+                <button
+                  onClick={() => askMoqbel("ما مستوى المخاطر في صفقاتي الحالية؟ وما نصيحتك؟")}
+                  disabled={moqbelLoading}
+                  className="w-full flex items-center gap-2 p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors text-right"
+                >
+                  <Shield size={12} className="text-warning shrink-0" />
+                  <span className="text-[10px]">تقييم المخاطر</span>
+                </button>
+                <button
+                  onClick={() => askMoqbel("فاوض نيابة عني واقترح أفضل استراتيجية تفاوض لصفقاتي")}
+                  disabled={moqbelLoading}
+                  className="w-full flex items-center gap-2 p-2 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors text-right"
+                >
+                  <Sparkles size={12} className="text-primary shrink-0" />
+                  <span className="text-[10px] font-medium text-primary">خل مقبل يفاوض عنك</span>
+                </button>
+              </div>
+
+              {/* AI Response */}
+              {(moqbelLoading || moqbelResponse) && (
+                <div className="px-4 pb-3">
+                  <div className="rounded-lg bg-muted/20 p-3 text-[10px] leading-relaxed text-muted-foreground max-h-48 overflow-y-auto">
+                    {moqbelLoading && !moqbelResponse && (
+                      <div className="flex items-center gap-2">
+                        <Loader2 size={12} className="animate-spin text-primary" />
+                        <span>مقبل يفكر...</span>
+                      </div>
+                    )}
+                    {moqbelResponse && <div className="whitespace-pre-wrap">{moqbelResponse}</div>}
+                  </div>
+                </div>
               )}
-              <Link to="/create-listing" className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors group">
-                <div className="w-6 h-6 rounded-md gradient-primary flex items-center justify-center shrink-0">
-                  <Plus size={11} strokeWidth={2} className="text-primary-foreground" />
+
+              {/* Chat input (expanded) */}
+              {moqbelOpen && (
+                <div className="px-4 pb-3">
+                  <div className="flex gap-1.5">
+                    <input
+                      value={moqbelMsg}
+                      onChange={e => setMoqbelMsg(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter" && moqbelMsg.trim()) { askMoqbel(moqbelMsg); setMoqbelMsg(""); } }}
+                      placeholder="اسأل مقبل..."
+                      className="flex-1 px-3 py-1.5 rounded-lg border border-border/30 bg-background text-xs focus:outline-none focus:ring-1 focus:ring-primary/20"
+                    />
+                    <button
+                      onClick={() => { if (moqbelMsg.trim()) { askMoqbel(moqbelMsg); setMoqbelMsg(""); } }}
+                      disabled={moqbelLoading || !moqbelMsg.trim()}
+                      className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs disabled:opacity-50"
+                    >
+                      <ArrowRight size={12} />
+                    </button>
+                  </div>
                 </div>
-                <span className="text-[10px] font-medium flex-1">إنشاء إعلان جديد</span>
-                <ChevronLeft size={9} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
-              </Link>
-              <Link to="/marketplace" className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
-                <div className="w-6 h-6 rounded-md bg-secondary flex items-center justify-center shrink-0">
-                  <Eye size={11} className="text-foreground/60" />
+              )}
+            </section>
+
+            {/* ── Live Activity Feed ── */}
+            <section className="rounded-xl bg-card border border-border/15 overflow-hidden">
+              <div className="px-4 py-3 flex items-center justify-between">
+                <h2 className="text-xs font-semibold flex items-center gap-1.5">
+                  <Activity size={13} className="text-success" />
+                  النشاط المباشر
+                </h2>
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                  <span className="text-[9px] text-muted-foreground">مباشر</span>
                 </div>
-                <span className="text-[10px] font-medium flex-1">تصفح السوق</span>
-                <ChevronLeft size={9} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
-              </Link>
-            </div>
+              </div>
+              <div className="px-4 pb-3">
+                {activityFeed.length === 0 ? (
+                  <p className="text-[10px] text-muted-foreground text-center py-4">لا يوجد نشاط حتى الآن</p>
+                ) : (
+                  <div className="space-y-1.5 max-h-52 overflow-y-auto">
+                    {activityFeed.map(item => (
+                      <div key={item.id} className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-muted/20 transition-colors">
+                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0",
+                          item.type === "new" ? "bg-success" : item.type === "message" ? "bg-primary" : "bg-warning"
+                        )} />
+                        <span className="text-[10px] text-muted-foreground flex-1">{item.text}</span>
+                        <span className="text-[8px] text-muted-foreground/60 shrink-0">{item.time}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
 
             {/* ── Notifications ── */}
             {notifications.length > 0 && (
-              <div className="rounded-xl border border-border/30 bg-card p-3">
-                <div className="flex items-center justify-between mb-1.5">
-                  <h3 className="text-[11px] font-medium">
+              <section className="rounded-xl bg-card border border-border/15 overflow-hidden">
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <h2 className="text-xs font-semibold">
                     الإشعارات {unreadCount > 0 && <span className="text-[9px] text-primary mr-1">({unreadCount})</span>}
-                  </h3>
+                  </h2>
                   {unreadCount > 0 && (
                     <button onClick={markAllAsRead} className="text-[9px] text-primary hover:underline">قراءة الكل</button>
                   )}
                 </div>
-                <div className="space-y-0.5">
-                  {notifications.slice(0, 3).map(n => (
-                    <button key={n.id} onClick={() => markAsRead(n.id)} className={cn("w-full text-right p-1.5 rounded-lg transition-all text-[10px]", !n.is_read && "bg-primary/[0.03]")}>
+                <div className="px-4 pb-3 space-y-1">
+                  {notifications.slice(0, 4).map(n => (
+                    <button key={n.id} onClick={() => markAsRead(n.id)} className={cn("w-full text-right p-2 rounded-lg transition-all text-[10px]", !n.is_read && "bg-primary/[0.03]")}>
                       <div className="flex items-start gap-1.5">
                         {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1 shrink-0" />}
                         <div className="flex-1 min-w-0">
                           <div className="font-medium truncate">{n.title}</div>
-                          {n.body && <div className="text-muted-foreground text-[8px] truncate">{n.body}</div>}
+                          {n.body && <div className="text-muted-foreground text-[9px] truncate">{n.body}</div>}
                         </div>
                       </div>
                     </button>
                   ))}
                 </div>
-              </div>
+              </section>
             )}
 
-            {/* ── Help ── */}
-            <Link to="/contact" className="block rounded-xl border border-border/30 bg-card p-3 hover:border-primary/20 transition-colors group">
-              <div className="text-[11px] font-medium mb-0.5">تحتاج مساعدة؟</div>
-              <div className="text-[9px] text-muted-foreground">تواصل مع فريق الدعم</div>
-              <span className="text-[9px] text-primary mt-1 inline-block group-hover:underline">تواصل معنا ←</span>
-            </Link>
+            {/* ── Quick Actions ── */}
+            <div className="rounded-xl bg-card border border-border/15 p-3 space-y-1.5">
+              <h3 className="text-xs font-semibold mb-2">إجراءات سريعة</h3>
+              <Link to="/marketplace" className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/30 transition-colors group">
+                <Eye size={12} className="text-muted-foreground" />
+                <span className="text-[10px] flex-1">تصفح السوق</span>
+                <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
+              </Link>
+              <Link to="/contact" className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/30 transition-colors group">
+                <Mail size={12} className="text-muted-foreground" />
+                <span className="text-[10px] flex-1">تواصل مع الدعم</span>
+                <ChevronLeft size={10} className="text-muted-foreground opacity-0 group-hover:opacity-100" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
