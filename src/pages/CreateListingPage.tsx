@@ -39,6 +39,7 @@ import { calculateTransparency } from "@/lib/transparencyScore";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
 import { getRules, isFieldVisible, validateDisclosure, validateImages, FIELD_LABELS as RULE_FIELD_LABELS } from "@/lib/dealTypeFieldRules";
 import VerificationGate from "@/components/VerificationGate";
+import GoogleMapPicker from "@/components/GoogleMapPicker";
 
 const steps = [
   { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على الـAI ✦" },
@@ -1138,6 +1139,28 @@ const CreateListingPage = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Location Map Picker */}
+              <div className="border-t border-border/50 pt-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <MapPin size={16} strokeWidth={1.5} className="text-primary" />
+                  <h3 className="font-medium text-sm">موقع المشروع على الخريطة</h3>
+                  <span className="text-[10px] text-muted-foreground">(اختياري — يساعد المشترين القريبين)</span>
+                </div>
+                <GoogleMapPicker
+                  lat={locationLat}
+                  lng={locationLng}
+                  onLocationChange={(lat, lng) => {
+                    if (lat === 0 && lng === 0) {
+                      setLocationLat(null);
+                      setLocationLng(null);
+                    } else {
+                      setLocationLat(lat);
+                      setLocationLng(lng);
+                    }
+                  }}
+                />
               </div>
             </div>
           )}
