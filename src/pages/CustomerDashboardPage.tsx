@@ -224,8 +224,9 @@ const CustomerDashboardPage = () => {
     if (deals.some(d => d.status === "negotiating")) s.push({ text: "لديك صفقات بانتظار ردك", link: "#", icon: MessageSquare, priority: "high" });
     if (listings.length === 0) s.push({ text: "أنشئ أول إعلان لك", link: "/create-listing", icon: Plus, priority: "medium" });
     if (listings.some(l => l.status === "draft")) s.push({ text: "لديك إعلانات مسودة - انشرها", link: "#", icon: FileText, priority: "medium" });
-    return s.slice(0, 3);
-  }, [profileCompleteness, deals, listings]);
+    if (stats.completed > 0) s.push({ text: "أرشيف الاتفاقيات", link: "/agreements-archive", icon: FileText, priority: "medium" });
+    return s.slice(0, 4);
+  }, [profileCompleteness, deals, listings, stats.completed]);
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={22} className="animate-spin text-primary" /></div>;
