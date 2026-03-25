@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
@@ -95,6 +96,18 @@ const LoginPage = () => {
     if (isLogin) {
       const { error } = await signIn(authEmail, password);
       if (error) {
+        // Check if MFA is required
+        if (error.message?.includes("mfa") || (error as any).status === 400) {
+          // Check for MFA factors
+          const { data: factorsData } = await supabase.auth.mfa.listFactors();
+          const verified = factorsData?.totp?.filter(f => f.status === "verified") || [];
+          if (verified.length > 0) {
+            setMfaRequired(true);
+            setMfaFactorId(verified[0].id);
+            setLoading(false);
+            return;
+          }
+        }
         reportFailedLogin(authEmail);
         setError(
           error.message === "Invalid login credentials"
@@ -102,6 +115,15 @@ const LoginPage = () => {
             : error.message
         );
       } else {
+        // Check if user has MFA factors after login
+        const { data: factorsData } = await supabase.auth.mfa.listFactors();
+        const verified = factorsData?.totp?.filter(f => f.status === "verified") || [];
+        if (verified.length > 0) {
+          setMfaRequired(true);
+          setMfaFactorId(verified[0].id);
+          setLoading(false);
+          return;
+        }
         navigate("/");
       }
     } else {
