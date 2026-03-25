@@ -667,9 +667,9 @@ const NegotiationPage = () => {
               )}
 
               {/* Commission — compact footer */}
-              {isPostAgreement && listing?.price && (
+              {listing?.price && (
                 <div className="pt-2 mt-auto">
-                  <CommissionBanner dealAmount={deal.agreed_price || listing.price} showDetails className="!p-2.5 !rounded-lg text-[10px]" />
+                  <CommissionBanner dealAmount={deal.agreed_price || listing.price} className="!p-2 !rounded-lg text-[9px] opacity-70" />
                 </div>
               )}
             </div>
