@@ -50,13 +50,6 @@ interface AgreementRecord {
   created_at: string;
 }
 
-interface HistoryEntry {
-  id: string;
-  action: string;
-  actor_id: string | null;
-  details: Record<string, any>;
-  created_at: string;
-}
 
 const AgreementPage = () => {
   const { id } = useParams(); // deal ID
