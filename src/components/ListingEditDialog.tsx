@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { isFieldRelevant } from "@/lib/transparencyScore";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import GoogleMapPicker, { type PlaceDetails } from "@/components/GoogleMapPicker";
 
 interface ListingEditDialogProps {
   listing: Listing;
@@ -353,45 +354,18 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated }: ListingEd
 
           {/* ══════ TAB: الموقع ══════ */}
           <TabsContent value="location" className="space-y-4 mt-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">خط العرض (Latitude)</label>
-                <input
-                  type="number"
-                  step="any"
-                  value={locationLat ?? ""}
-                  onChange={(e) => setLocationLat(e.target.value ? Number(e.target.value) : null)}
-                  placeholder="24.7136"
-                  className={inputCls}
-                  dir="ltr"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">خط الطول (Longitude)</label>
-                <input
-                  type="number"
-                  step="any"
-                  value={locationLng ?? ""}
-                  onChange={(e) => setLocationLng(e.target.value ? Number(e.target.value) : null)}
-                  placeholder="46.6753"
-                  className={inputCls}
-                  dir="ltr"
-                />
-              </div>
-            </div>
-
-            {locationLat && locationLng && (
-              <div className="rounded-xl overflow-hidden border border-border/30">
-                <iframe
-                  src={`https://maps.google.com/maps?q=${locationLat},${locationLng}&z=15&output=embed`}
-                  className="w-full h-48"
-                  loading="lazy"
-                />
-              </div>
-            )}
-
+            <GoogleMapPicker
+              lat={locationLat}
+              lng={locationLng}
+              onLocationChange={(lat, lng, _address, details) => {
+                setLocationLat(lat || null);
+                setLocationLng(lng || null);
+                if (details?.city) set("city", details.city);
+                if (details?.district) set("district", details.district);
+              }}
+            />
             <p className="text-[11px] text-muted-foreground/60">
-              يمكنك نسخ الإحداثيات من خرائط قوقل ولصقها هنا
+              ابحث عن الموقع أو اضغط على الخريطة أو اسحب الدبوس لتحديد الموقع الدقيق
             </p>
           </TabsContent>
 
