@@ -43,9 +43,10 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
   const dealType = listing.primary_deal_type || listing.deal_type || "full_takeover";
   const rules = getRules(dealType);
 
-  // Score required fields (primary weight: 60 points)
+  // --- Required text fields (weight: 40 points) ---
   const missing: string[] = [];
   let requiredFilled = 0;
+  let totalRequired = rules.requiredFields.length;
 
   for (const field of rules.requiredFields) {
     const value = (listing as any)[field];
@@ -56,11 +57,47 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
     }
   }
 
-  const requiredScore = rules.requiredFields.length > 0
-    ? (requiredFilled / rules.requiredFields.length) * 80
-    : 80;
+  const requiredScore = totalRequired > 0
+    ? (requiredFilled / totalRequired) * 40
+    : 40;
 
-  // Score optional fields (secondary weight: 10 points)
+  // --- Photos as a required item (weight: 20 points) ---
+  let photosScore = 0;
+  const includesAssets = rules.imageRequired || !rules.hiddenFields.includes("annual_rent");
+  if (includesAssets) {
+    totalRequired++;
+    const photoCount = listing.photos ? Object.values(listing.photos).flat().length : 0;
+    if (photoCount >= 6) { photosScore = 20; requiredFilled++; }
+    else if (photoCount >= 3) { photosScore = 15; requiredFilled++; }
+    else if (photoCount >= 1) { photosScore = 10; requiredFilled++; }
+    else { missing.push("صور الإعلان"); }
+  } else {
+    photosScore = 20; // not applicable, full score
+  }
+
+  // --- Invoices / maintenance contracts as required (weight: 20 points) ---
+  let docsScore = 0;
+  const hasAssetScope = rules.imageRequired; // asset-related deals
+  if (hasAssetScope) {
+    totalRequired++;
+    const docs = listing.documents || [];
+    const hasInvoices = docs.some((d: any) => {
+      const name = (d?.name || d?.type || "").toLowerCase();
+      return name.includes("فاتور") || name.includes("invoice") || name.includes("فواتير");
+    });
+    const hasMaintenanceContracts = docs.some((d: any) => {
+      const name = (d?.name || d?.type || "").toLowerCase();
+      return name.includes("صيانة") || name.includes("maintenance") || name.includes("عقد صيانة");
+    });
+
+    if (hasInvoices && hasMaintenanceContracts) { docsScore = 20; requiredFilled++; }
+    else if (hasInvoices || hasMaintenanceContracts) { docsScore = 10; }
+    else { missing.push("فواتير الشراء أو عقود الصيانة"); }
+  } else {
+    docsScore = 20; // not applicable
+  }
+
+  // --- Optional fields (weight: 10 points) ---
   let optionalFilled = 0;
   for (const field of rules.optionalFields) {
     const value = (listing as any)[field];
@@ -68,48 +105,29 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
       optionalFilled++;
     }
   }
-
   const optionalScore = rules.optionalFields.length > 0
     ? (optionalFilled / rules.optionalFields.length) * 10
     : 10;
 
-  // Bonus points for photos, inventory, docs (up to 30 points)
-  let bonusPoints = 0;
-  let bonusTotal = 0;
-
-  // Photos bonus (up to 15 points) — skip for CR-only
-  if (rules.imageRequired || !rules.hiddenFields.includes("annual_rent")) {
-    bonusTotal += 15;
-    const photoCount = listing.photos ? Object.values(listing.photos).flat().length : 0;
-    if (photoCount >= 6) bonusPoints += 15;
-    else if (photoCount >= 3) bonusPoints += 10;
-    else if (photoCount >= 1) bonusPoints += 5;
-  }
-
-  // Inventory bonus for asset-related deals (up to 10 points)
-  if (rules.imageRequired) {
-    bonusTotal += 10;
+  // --- Inventory bonus (weight: 10 points) ---
+  let inventoryScore = 0;
+  if (hasAssetScope) {
     const invCount = listing.inventory?.length || 0;
-    if (invCount >= 5) bonusPoints += 10;
-    else if (invCount >= 1) bonusPoints += 5;
+    if (invCount >= 5) inventoryScore = 10;
+    else if (invCount >= 1) inventoryScore = 5;
+  } else {
+    inventoryScore = 10;
   }
 
-  // Documents bonus (up to 5 points)
-  bonusTotal += 5;
-  const docCount = listing.documents?.length || 0;
-  if (docCount >= 2) bonusPoints += 5;
-  else if (docCount >= 1) bonusPoints += 3;
-
-  const bonusScore = bonusTotal > 0 ? (bonusPoints / bonusTotal) * 10 : 10;
-  const totalScore = Math.min(100, Math.round(requiredScore + optionalScore + bonusScore));
+  const totalScore = Math.min(100, Math.round(requiredScore + photosScore + docsScore + optionalScore + inventoryScore));
 
   let level: TransparencyLevel;
   let label: string;
 
-  if (totalScore >= 70) {
+  if (totalScore >= 85) {
     level = "high";
     label = "شفافية عالية";
-  } else if (totalScore >= 40) {
+  } else if (totalScore >= 50) {
     level = "medium";
     label = "شفافية متوسطة";
   } else {
@@ -122,7 +140,7 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
     level,
     label,
     missingFields: missing,
-    totalRequired: rules.requiredFields.length,
+    totalRequired,
     filledRequired: requiredFilled,
   };
 }
