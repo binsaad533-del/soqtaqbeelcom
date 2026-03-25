@@ -355,43 +355,7 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
         </div>
       )}
 
-      {/* Top-left action buttons */}
-      <div className="absolute top-2 left-2 z-10 flex items-center gap-1">
-        {/* Compare */}
-        <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleCompare(); }}
-          className={cn(
-            "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
-            isComparing
-              ? "bg-primary text-primary-foreground shadow-soft"
-              : "bg-card/80 backdrop-blur text-muted-foreground hover:bg-card hover:text-primary border border-border/50"
-          )}
-          title={isComparing ? "إزالة من المقارنة" : "إضافة للمقارنة"}
-        >
-          {isComparing ? <Check size={12} strokeWidth={2} /> : <GitCompareArrows size={12} strokeWidth={1.5} />}
-        </button>
-        {/* Like */}
-        <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleLike(); }}
-          className={cn(
-            "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
-            isLiked
-              ? "bg-red-500/15 text-red-500"
-              : "bg-card/80 backdrop-blur text-muted-foreground hover:bg-card hover:text-red-500 border border-border/50"
-          )}
-          title="إعجاب"
-        >
-          <Heart size={12} strokeWidth={1.5} fill={isLiked ? "currentColor" : "none"} />
-        </button>
-        {/* Share */}
-        <button
-          onClick={handleShare}
-          className="w-7 h-7 rounded-lg flex items-center justify-center bg-card/80 backdrop-blur text-muted-foreground hover:bg-card hover:text-primary border border-border/50 transition-all"
-          title="مشاركة"
-        >
-          <Share2 size={12} strokeWidth={1.5} />
-        </button>
-      </div>
+
 
       <Link to={`/listing/${listing.id}`}>
         <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center relative">
@@ -464,15 +428,46 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
             })()}
           </div>
 
-          {/* Social stats bar */}
-          <div className="flex items-center gap-3 pt-2 border-t border-border/10">
-            <div className="flex items-center gap-1 text-muted-foreground/60">
-              <Eye size={11} strokeWidth={1.3} />
-              <span className="text-[10px] tabular-nums">{viewCount}</span>
+          {/* Social stats + actions bar */}
+          <div className="flex items-center justify-between pt-2 border-t border-border/10">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 text-muted-foreground/60">
+                <Eye size={10} strokeWidth={1.3} />
+                <span className="text-[10px] tabular-nums">{viewCount}</span>
+              </div>
+              <div className="flex items-center gap-1 text-muted-foreground/60">
+                <Heart size={10} strokeWidth={1.3} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "text-red-400" : ""} />
+                <span className="text-[10px] tabular-nums">{likeCount}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1 text-muted-foreground/60">
-              <Heart size={11} strokeWidth={1.3} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "text-red-400" : ""} />
-              <span className="text-[10px] tabular-nums">{likeCount}</span>
+            <div className="flex items-center gap-0.5">
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleCompare(); }}
+                className={cn(
+                  "w-5 h-5 rounded flex items-center justify-center transition-all",
+                  isComparing ? "text-primary" : "text-muted-foreground/50 hover:text-primary"
+                )}
+                title={isComparing ? "إزالة من المقارنة" : "مقارنة"}
+              >
+                {isComparing ? <Check size={10} strokeWidth={2} /> : <GitCompareArrows size={10} strokeWidth={1.5} />}
+              </button>
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleLike(); }}
+                className={cn(
+                  "w-5 h-5 rounded flex items-center justify-center transition-all",
+                  isLiked ? "text-red-500" : "text-muted-foreground/50 hover:text-red-500"
+                )}
+                title="إعجاب"
+              >
+                <Heart size={10} strokeWidth={1.5} fill={isLiked ? "currentColor" : "none"} />
+              </button>
+              <button
+                onClick={handleShare}
+                className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/50 hover:text-primary transition-all"
+                title="مشاركة"
+              >
+                <Share2 size={10} strokeWidth={1.5} />
+              </button>
             </div>
           </div>
         </div>

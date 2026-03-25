@@ -1,5 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
@@ -13,6 +13,7 @@ import SellerOffersPanel from "@/components/SellerOffersPanel";
 import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useListingSocial } from "@/hooks/useListingSocial";
+import { cn } from "@/lib/utils";
 import { useDeals } from "@/hooks/useDeals";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
@@ -29,7 +30,7 @@ const ListingDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthContext();
-  const { recordView } = useListingSocial();
+  const { recordView, toggleLike, getLikesAndViews } = useListingSocial();
   const { getListing } = useListings();
   const { createDeal, getMyDeals } = useDeals();
   const { getProfile } = useProfiles();
@@ -42,6 +43,9 @@ const ListingDetailsPage = () => {
   const [startingDeal, setStartingDeal] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [myActiveDeal, setMyActiveDeal] = useState<any>(null);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [viewCount, setViewCount] = useState(0);
 
   const loadListing = async () => {
     if (!id) return;
@@ -53,12 +57,16 @@ const ListingDetailsPage = () => {
       console.log("[ListingDetails] Listing loaded:", { id, found: !!data, status: data?.status });
       setListing(data);
       if (data) {
-        const [profile, reviews] = await Promise.all([
+        const [profile, reviews, social] = await Promise.all([
           getProfile(data.owner_id),
           getSellerReviews(data.owner_id),
+          getLikesAndViews([data.id]),
         ]);
         setSellerProfile(profile);
         setSellerReviews(reviews);
+        setViewCount(social.views[data.id] || 0);
+        setLikeCount(social.likes[data.id] || 0);
+        setIsLiked(social.userLikes.has(data.id));
       }
     } catch (err: any) {
       console.error("[ListingDetails] Load failed:", { id, error: err?.message });
@@ -216,7 +224,58 @@ const ListingDetailsPage = () => {
               ))}
             </div>
 
-            {/* Deal Structure Panel */}
+            {/* Social actions bar */}
+            <div className="flex items-center justify-between bg-card rounded-xl px-4 py-2.5 shadow-soft">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Eye size={14} strokeWidth={1.3} />
+                  <span className="text-xs tabular-nums">{viewCount}</span>
+                  <span className="text-[10px]">مشاهدة</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Heart size={14} strokeWidth={1.3} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "text-red-400" : ""} />
+                  <span className="text-xs tabular-nums">{likeCount}</span>
+                  <span className="text-[10px]">إعجاب</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={async () => {
+                    if (!listing) return;
+                    const result = await toggleLike(listing.id);
+                    if (result !== null) {
+                      setIsLiked(result);
+                      setLikeCount(prev => result ? prev + 1 : Math.max(0, prev - 1));
+                    }
+                  }}
+                  className={cn(
+                    "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
+                    isLiked ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500"
+                  )}
+                  title="إعجاب"
+                >
+                  <Heart size={14} strokeWidth={1.5} fill={isLiked ? "currentColor" : "none"} />
+                </button>
+                <button
+                  onClick={() => {
+                    if (!listing) return;
+                    const url = `${window.location.origin}/listing/${listing.id}`;
+                    if (navigator.share) {
+                      navigator.share({ title: listing.title || "فرصة تقبيل", url });
+                    } else {
+                      navigator.clipboard.writeText(url);
+                      toast.success("تم نسخ رابط الإعلان");
+                    }
+                  }}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
+                  title="مشاركة"
+                >
+                  <Share2 size={14} strokeWidth={1.5} />
+                </button>
+              </div>
+            </div>
+
+
             {primaryConfig && (
               <DealStructureDisplay
                 primaryConfig={primaryConfig}
