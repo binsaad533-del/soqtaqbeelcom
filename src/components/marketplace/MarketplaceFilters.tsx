@@ -155,8 +155,17 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
         </div>
         <div className="flex flex-wrap gap-1.5">
           {filteredCities.map(c => (
-            <Chip key={c} active={filters.city === c} onClick={() => set("city", c)}>
-              {c}
+            <Chip key={c} active={filters.city === c} onClick={() => handleCityClick(c)}>
+              {c === "📍 بالقرب مني" && geoLoading ? (
+                <span className="flex items-center gap-1">
+                  <Loader2 size={11} className="animate-spin" />
+                  جاري التحديد...
+                </span>
+              ) : c === "📍 بالقرب مني" && filters.city === c && filters.nearbyCities?.length ? (
+                <span>📍 {filters.nearbyCities[0]}</span>
+              ) : (
+                c
+              )}
             </Chip>
           ))}
         </div>
