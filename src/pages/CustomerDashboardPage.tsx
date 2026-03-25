@@ -269,8 +269,8 @@ const CustomerDashboardPage = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-primary font-medium group-hover:underline">أكمل الإعلان</span>
-                    <ChevronLeft size={14} className="text-primary/50" />
+                    <span className="text-xs text-warning font-medium group-hover:underline">أكمل الإعلان</span>
+                    <ChevronLeft size={14} className="text-warning/50" />
                   </div>
                 </Link>
               );
