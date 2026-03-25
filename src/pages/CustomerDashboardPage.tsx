@@ -211,65 +211,50 @@ const CustomerDashboardPage = () => {
           </div>
         )}
 
-        {/* ══════ PROFILE HEADER ══════ */}
-        <div className="rounded-2xl border border-border/30 bg-card px-4 py-3 mb-5">
-          {/* Row 1: Avatar + Name + Badge + Meta */}
-          <div className="flex items-center gap-3">
-            {/* Avatar */}
-            <label className="relative w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm cursor-pointer group overflow-hidden shrink-0">
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
-              ) : (
-                profile?.full_name?.charAt(0) || "؟"
-              )}
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                <Camera size={12} className="text-white" />
+        {/* ══════ PROFILE CARD (vertical centered) ══════ */}
+        <div className="max-w-xs mx-auto rounded-2xl border border-border/30 bg-card px-5 py-5 mb-5 text-center">
+          {/* Avatar */}
+          <label className="relative w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg cursor-pointer group overflow-hidden mb-3">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
+            ) : (
+              profile?.full_name?.charAt(0) || "؟"
+            )}
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+              <Camera size={14} className="text-white" />
+            </div>
+            <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
+          </label>
+
+          {/* Name */}
+          <div className="mb-1">
+            {editingField === "full_name" ? (
+              <div className="flex items-center justify-center gap-1.5">
+                <input className="text-sm font-semibold bg-muted/50 rounded px-2 py-0.5 w-32 border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary text-center" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
+                <button onClick={() => saveField("full_name", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
+                <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
               </div>
-              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={saving} />
-            </label>
-
-            {/* Name + badge */}
-            <div className="flex items-center gap-2 min-w-0">
-              {editingField === "full_name" ? (
-                <div className="flex items-center gap-1.5">
-                  <input className="text-xs font-semibold bg-muted/50 rounded px-2 py-0.5 w-32 border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
-                  <button onClick={() => saveField("full_name", editValue)} disabled={saving} className="text-success"><Check size={12} /></button>
-                  <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={12} /></button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5 group/name">
-                  <h1 className="text-xs font-semibold truncate">مرحباً {profile?.full_name || "بك"}</h1>
-                  <button onClick={() => startEdit("full_name", profile?.full_name || "")} className="opacity-0 group-hover/name:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={10} /></button>
-                </div>
-              )}
-              <span className={cn("flex items-center gap-1 shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-medium",
-                isProfileComplete
-                  ? "bg-success/15 text-success"
-                  : "bg-warning/15 text-warning"
-              )}>
-                {isProfileComplete ? <><UserCheck size={11} /> موثّق</> : <><Shield size={11} /> غير موثّق</>}
-              </span>
-            </div>
-
-            {/* Meta info */}
-            <div className="hidden md:flex items-center gap-3 text-[10px] text-muted-foreground mr-auto">
-              <span className="flex items-center gap-1"><Clock size={11} /> {memberSince}</span>
-              <span className="text-border/40">·</span>
-              <span className="flex items-center gap-1"><Clock size={11} /> آخر دخول: {lastLoginFormatted}</span>
-            </div>
-
-            {/* Completeness % */}
-            {!isProfileComplete && (
-              <span className={cn("text-[10px] font-medium shrink-0",
-                profileCompleteness >= 50 ? "text-warning" : "text-destructive"
-              )}>{profileCompleteness}%</span>
+            ) : (
+              <div className="flex items-center justify-center gap-1.5 group/name">
+                <h1 className="text-sm font-semibold">{profile?.full_name || "مستخدم"}</h1>
+                <button onClick={() => startEdit("full_name", profile?.full_name || "")} className="opacity-0 group-hover/name:opacity-100 transition-opacity text-muted-foreground hover:text-primary"><Pencil size={10} /></button>
+              </div>
             )}
           </div>
 
-          {/* Row 2: Contact info + completeness bar */}
-          <div className="mt-2 pt-2 border-t border-border/15 flex items-center gap-4 text-[11px] text-muted-foreground flex-wrap">
+          {/* Badge */}
+          <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-medium mb-3",
+            isProfileComplete
+              ? "bg-success/15 text-success"
+              : "bg-warning/15 text-warning"
+          )}>
+            {isProfileComplete ? <><UserCheck size={11} /> موثّق</> : <><Shield size={11} /> غير موثّق</>}
+          </span>
+
+          {/* Info rows */}
+          <div className="space-y-1.5 text-[10px] text-muted-foreground mb-3">
             {/* Email */}
-            <div className="flex items-center gap-1.5 min-w-0">
+            <div className="flex items-center justify-center gap-1.5">
               <Mail size={11} className="shrink-0" />
               {editingField === "email" ? (
                 <div className="flex items-center gap-1">
@@ -279,19 +264,15 @@ const CustomerDashboardPage = () => {
                 </div>
               ) : (
                 <>
-                  <span className="truncate text-[10px]" dir="ltr">
-                    {hasRealEmail ? userEmail : <span className="text-warning">لم يُضاف</span>}
-                  </span>
-                  <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-primary hover:text-primary/80 shrink-0"><Pencil size={9} /></button>
+                  <span className="truncate" dir="ltr">{hasRealEmail ? userEmail : <span className="text-warning">لم يُضاف</span>}</span>
+                  <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="text-primary hover:text-primary/80"><Pencil size={9} /></button>
                 </>
               )}
             </div>
 
-            <span className="text-border/40">·</span>
-
             {/* Phone */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Phone size={11} />
+            <div className="flex items-center justify-center gap-1.5">
+              <Phone size={11} className="shrink-0" />
               {editingField === "phone" ? (
                 <div className="flex items-center gap-1">
                   <input dir="ltr" lang="en" inputMode="numeric" className="bg-muted/50 rounded px-1.5 py-0.5 w-24 border border-border/50 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus placeholder="05XXXXXXXX" />
@@ -300,39 +281,36 @@ const CustomerDashboardPage = () => {
                 </div>
               ) : (
                 <>
-                  <span className="text-[10px]" dir="ltr">{profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">لم يُضاف</span>}</span>
+                  <span dir="ltr">{profile?.phone ? toEnglishNumerals(profile.phone) : <span className="text-warning">لم يُضاف</span>}</span>
                   <button onClick={() => startEdit("phone", profile?.phone || "")} className="text-primary hover:text-primary/80"><Pencil size={9} /></button>
                 </>
               )}
             </div>
 
-            {/* Completeness bar (inline) */}
-            {!isProfileComplete && (
-              <>
-                <span className="text-border/40">·</span>
-                <div className="flex items-center gap-2 flex-1 min-w-[100px]">
-                  <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
-                    <div className={cn("h-full rounded-full transition-all duration-500",
-                      profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
-                    )} style={{ width: `${profileCompleteness}%` }} />
-                  </div>
-                  <span className="text-[9px] text-muted-foreground whitespace-nowrap">
-                    أكمل: {!hasRealEmail && "الإيميل"}{!hasRealEmail && !isPhoneVerified && " · "}{!isPhoneVerified && "التوثيق"}
-                  </span>
-                </div>
-              </>
-            )}
-
-            {isProfileComplete && (
-              <span className="flex items-center gap-1 text-[10px] text-success mr-auto">
-                <CheckCircle size={11} /> مكتمل
-              </span>
-            )}
+            {/* Dates */}
+            <div className="flex items-center justify-center gap-1">
+              <Clock size={10} /> انضم: {memberSince}
+            </div>
           </div>
 
-          {/* Row 3: Phone verification (only when needed) */}
+          {/* Completeness */}
+          {!isProfileComplete && (
+            <div className="mb-3">
+              <div className="flex items-center justify-between text-[9px] mb-1">
+                <span className="text-muted-foreground">اكتمال الملف</span>
+                <span className={cn("font-medium", profileCompleteness >= 50 ? "text-warning" : "text-destructive")}>{profileCompleteness}%</span>
+              </div>
+              <div className="w-full h-1 rounded-full bg-muted overflow-hidden">
+                <div className={cn("h-full rounded-full transition-all duration-500",
+                  profileCompleteness >= 75 ? "bg-success" : profileCompleteness >= 50 ? "bg-warning" : "bg-destructive"
+                )} style={{ width: `${profileCompleteness}%` }} />
+              </div>
+            </div>
+          )}
+
+          {/* Phone verification */}
           {!isPhoneVerified && profile?.phone && (
-            <div className="mt-2 pt-2 border-t border-warning/15">
+            <div className="pt-3 border-t border-warning/15 text-right">
               <PhoneVerificationFlow
                 initialPhone={profile.phone}
                 onVerified={() => window.location.reload()}
