@@ -15,9 +15,10 @@ const suggestions = [
 
 interface Props {
   onApplyFilters: (filters: Partial<FilterState>, message: string) => void;
+  resultCount?: number;
 }
 
-const SmartSearchBar = ({ onApplyFilters }: Props) => {
+const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
