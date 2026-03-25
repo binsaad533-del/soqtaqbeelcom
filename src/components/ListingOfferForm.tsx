@@ -24,7 +24,6 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
   const [submitted, setSubmitted] = useState(false);
   const [myOffer, setMyOffer] = useState<ListingOffer | null>(null);
   const [summary, setSummary] = useState<OffersSummary | null>(null);
-  const [loaded, setLoaded] = useState(false);
 
   // Load summary + my offer on mount
   useEffect(() => {
