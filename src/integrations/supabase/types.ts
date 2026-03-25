@@ -604,7 +604,7 @@ export type Database = {
           ip_address?: string | null
           party_role: string
           user_agent?: string | null
-          user_id: string
+          user_id?: string
           version?: number
         }
         Update: {
