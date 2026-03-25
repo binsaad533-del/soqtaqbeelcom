@@ -152,6 +152,22 @@ const CustomerDashboardPage = () => {
 
   const dealLink = (d: Deal) => ["completed", "finalized"].includes(d.status) ? `/agreement/${d.id}` : `/negotiate/${d.id}`;
 
+  /* ── Monthly chart data ── */
+  const monthlyChart = useMemo(() => {
+    const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+    const now = new Date();
+    const data: { name: string; total: number; completed: number; value: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const m = d.getMonth();
+      const y = d.getFullYear();
+      const inMonth = deals.filter(deal => { const c = new Date(deal.created_at); return c.getMonth() === m && c.getFullYear() === y; });
+      const comp = inMonth.filter(deal => ["completed", "finalized"].includes(deal.status));
+      data.push({ name: months[m], total: inMonth.length, completed: comp.length, value: inMonth.reduce((s, deal) => s + (Number(deal.agreed_price) || 0), 0) });
+    }
+    return data;
+  }, [deals]);
+
   /* ── Smart suggestions ── */
   const suggestions = useMemo(() => {
     const s: { text: string; link: string; icon: any; priority: "high" | "medium" }[] = [];
