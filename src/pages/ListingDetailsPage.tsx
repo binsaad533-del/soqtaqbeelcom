@@ -1,5 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, GitCompareArrows } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
@@ -13,6 +13,7 @@ import SellerOffersPanel from "@/components/SellerOffersPanel";
 import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useListingSocial } from "@/hooks/useListingSocial";
+import { cn } from "@/lib/utils";
 import { useDeals } from "@/hooks/useDeals";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
@@ -29,7 +30,7 @@ const ListingDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthContext();
-  const { recordView } = useListingSocial();
+  const { recordView, toggleLike, getLikesAndViews } = useListingSocial();
   const { getListing } = useListings();
   const { createDeal, getMyDeals } = useDeals();
   const { getProfile } = useProfiles();
@@ -42,6 +43,9 @@ const ListingDetailsPage = () => {
   const [startingDeal, setStartingDeal] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [myActiveDeal, setMyActiveDeal] = useState<any>(null);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [viewCount, setViewCount] = useState(0);
 
   const loadListing = async () => {
     if (!id) return;
