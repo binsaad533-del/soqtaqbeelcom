@@ -1374,11 +1374,51 @@ const CreateListingPage = () => {
                           photoIndices: [],
                           isSameAssetMultipleAngles: false,
                           userConfirmed: true,
+                          unitPrice: null,
                         }])}
                         className="flex items-center gap-1 text-xs text-primary hover:underline"
                       >
                         <Plus size={14} strokeWidth={1.3} /> أضف عنصراً
                       </button>
+                    </div>
+
+                    {/* ── Pricing Mode Toggle ── */}
+                    <div className="bg-muted/30 border border-border/40 rounded-xl p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-foreground">تسعير الأصول</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setInventoryPricingMode("per_item")}
+                          className={cn("flex-1 text-xs py-2 px-3 rounded-lg transition-all", inventoryPricingMode === "per_item" ? "bg-primary/10 text-primary border border-primary/30 font-medium" : "bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted")}
+                        >
+                          تسعير لكل قطعة
+                        </button>
+                        <button
+                          onClick={() => setInventoryPricingMode("bulk")}
+                          className={cn("flex-1 text-xs py-2 px-3 rounded-lg transition-all", inventoryPricingMode === "bulk" ? "bg-primary/10 text-primary border border-primary/30 font-medium" : "bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted")}
+                        >
+                          سعر إجمالي للأصول
+                        </button>
+                      </div>
+                      {inventoryPricingMode === "bulk" && (
+                        <div className="mt-3">
+                          <label className="text-[11px] text-muted-foreground mb-1 block">السعر الإجمالي لجميع الأصول (ر.س)</label>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="مثال: 50,000"
+                            value={bulkInventoryPrice}
+                            onChange={(e) => setBulkInventoryPrice(toEnglishNumerals(e.target.value.replace(/[^\d]/g, "")))}
+                            className="w-full text-sm bg-background border border-border/50 rounded-lg px-3 py-2 outline-none focus:border-primary/50 transition-colors [direction:ltr] text-left"
+                          />
+                          {bulkInventoryPrice && (
+                            <div className="text-[11px] text-primary mt-1 font-medium">
+                              {Number(bulkInventoryPrice).toLocaleString("en-US")} ر.س
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {lowConfidenceItems.length > 0 && (
@@ -1418,7 +1458,9 @@ const CreateListingPage = () => {
                     )}
 
                     <div className="space-y-2">
-                      {inventory.map((item) => (
+                      {inventory.map((item) => {
+                        const itemTotal = (item.unitPrice || 0) * item.qty;
+                        return (
                         <div key={item.id} className={cn("p-3 rounded-xl border transition-all", item.included ? "border-border/50 bg-card" : "border-border/30 bg-muted/30 opacity-60")}>
                           <div className="flex items-center justify-between">
                             <div className="flex-1 min-w-0">
@@ -1444,6 +1486,25 @@ const CreateListingPage = () => {
                               {item.detectionNote && <div className="text-[10px] text-muted-foreground mt-0.5 italic">{item.detectionNote}</div>}
                             </div>
                             <div className="flex items-center gap-2 shrink-0 mr-3">
+                              {inventoryPricingMode === "per_item" && item.included && (
+                                <div className="flex items-center gap-1">
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    placeholder="السعر"
+                                    value={item.unitPrice ? String(item.unitPrice) : ""}
+                                    onChange={(e) => {
+                                      const val = toEnglishNumerals(e.target.value.replace(/[^\d]/g, ""));
+                                      setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, unitPrice: val ? Number(val) : null } : entry));
+                                    }}
+                                    className="w-16 text-[11px] bg-muted/50 border border-border/30 rounded px-1.5 py-1 outline-none focus:border-primary/50 transition-colors [direction:ltr] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  />
+                                  <span className="text-[10px] text-muted-foreground">ر.س</span>
+                                  {item.unitPrice && item.qty > 1 && (
+                                    <span className="text-[10px] text-primary font-medium">= {itemTotal.toLocaleString("en-US")}</span>
+                                  )}
+                                </div>
+                              )}
                               <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-1">
                                 <button onClick={() => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: Math.max(1, entry.qty - 1) } : entry))} className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Minus size={12} /></button>
                                 <input type="number" min="1" value={item.qty} onChange={(e) => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: Math.max(1, parseInt(e.target.value) || 1) } : entry))} className="w-8 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
@@ -1454,8 +1515,46 @@ const CreateListingPage = () => {
                             </div>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
+
+                    {/* ── Inventory Total ── */}
+                    {inventory.filter(i => i.included).length > 0 && (
+                      <div className="bg-primary/5 border border-primary/15 rounded-xl p-3">
+                        {inventoryPricingMode === "per_item" ? (() => {
+                          const includedItems = inventory.filter(i => i.included);
+                          const pricedItems = includedItems.filter(i => i.unitPrice && i.unitPrice > 0);
+                          const totalPrice = pricedItems.reduce((sum, i) => sum + (i.unitPrice || 0) * i.qty, 0);
+                          const categories = [...new Set(pricedItems.map(i => i.category))];
+                          return (
+                            <div className="space-y-2">
+                              {categories.length > 1 && categories.map(cat => {
+                                const catTotal = pricedItems.filter(i => i.category === cat).reduce((s, i) => s + (i.unitPrice || 0) * i.qty, 0);
+                                return catTotal > 0 ? (
+                                  <div key={cat} className="flex items-center justify-between text-[11px]">
+                                    <span className="text-muted-foreground">{cat}</span>
+                                    <span className="text-foreground">{catTotal.toLocaleString("en-US")} ر.س</span>
+                                  </div>
+                                ) : null;
+                              })}
+                              <div className="flex items-center justify-between text-sm font-medium border-t border-primary/10 pt-2">
+                                <span className="text-foreground">إجمالي الأصول المسعّرة ({pricedItems.length} من {includedItems.length})</span>
+                                <span className="text-primary">{totalPrice > 0 ? `${totalPrice.toLocaleString("en-US")} ر.س` : "لم يتم تحديد أسعار"}</span>
+                              </div>
+                              {pricedItems.length < includedItems.length && pricedItems.length > 0 && (
+                                <p className="text-[10px] text-muted-foreground">{includedItems.length - pricedItems.length} عنصر بدون سعر — يمكنك إضافته لاحقاً</p>
+                              )}
+                            </div>
+                          );
+                        })() : (
+                          <div className="flex items-center justify-between text-sm font-medium">
+                            <span className="text-foreground">السعر الإجمالي للأصول</span>
+                            <span className="text-primary">{bulkInventoryPrice ? `${Number(bulkInventoryPrice).toLocaleString("en-US")} ر.س` : "لم يتم التحديد"}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </>
               )}

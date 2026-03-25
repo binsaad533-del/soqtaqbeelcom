@@ -56,6 +56,9 @@ function normalizeNumber(value: unknown): number | null {
 }
 
 function normalizeListingForAnalysis(listing: any) {
+  const inventoryPricingMode = listing?.inventory_pricing_mode || "per_item";
+  const bulkInventoryPrice = normalizeNumber(listing?.bulk_inventory_price);
+
   const inventory = Array.isArray(listing?.inventory)
     ? listing.inventory
         .map((item: any) => ({
@@ -63,10 +66,15 @@ function normalizeListingForAnalysis(listing: any) {
           qty: normalizeNumber(item?.qty),
           condition: normalizeText(item?.condition),
           category: normalizeText(item?.category),
+          unitPrice: normalizeNumber(item?.unitPrice),
         }))
         .filter((item: any) => item.name)
         .sort((a: any, b: any) => JSON.stringify(a).localeCompare(JSON.stringify(b), "ar"))
     : [];
+
+  const inventoryTotalPrice = inventoryPricingMode === "bulk"
+    ? bulkInventoryPrice
+    : inventory.reduce((sum: number, item: any) => sum + ((item.unitPrice || 0) * (item.qty || 1)), 0) || null;
 
   const documents = Array.isArray(listing?.documents)
     ? listing.documents
