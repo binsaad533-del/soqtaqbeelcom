@@ -45,7 +45,7 @@ const HomePage = () => {
       <section className="gradient-hero py-20 md:py-32 relative overflow-hidden">
         <div className="container relative z-10">
           <div className="max-w-2xl mx-auto text-center animate-reveal">
-            <div className="flex flex-col items-center mb-6">
+            <div className="flex flex-col items-center mb-8 -mt-4">
               <img src={logoIconGold} alt="سوق تقبيل" className="h-28 md:h-36 w-auto" />
               <span className="text-lg md:text-xl font-semibold tracking-[0.3em] text-foreground/70 mt-3 uppercase">SOQ TAQBEEL</span>
             </div>
