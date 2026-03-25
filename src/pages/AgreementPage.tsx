@@ -148,8 +148,14 @@ const AgreementPage = () => {
     setLoading(false);
   };
 
+  const hasAgreedPrice = !!(deal?.agreed_price && Number(deal.agreed_price) > 0);
+
   const generateAgreement = async () => {
     if (!deal) return;
+    if (!hasAgreedPrice) {
+      toast.error("لا يمكن إنشاء الاتفاقية بدون سعر متفق عليه — يرجى الاتفاق على السعر أولاً في مرحلة التفاوض");
+      return;
+    }
     setGenerating(true);
     try {
       const listing = await getListing(deal.listing_id);
@@ -319,9 +325,9 @@ const AgreementPage = () => {
       <div className="py-8">
         <div className="container max-w-2xl">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-            <Link to={`/negotiate/${id}`} className="hover:text-foreground transition-colors flex items-center gap-1">
+            <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
               <ArrowRight size={14} strokeWidth={1.3} />
-              العودة للتفاوض
+              العودة للوحة التحكم
             </Link>
           </div>
           <div className="bg-card rounded-2xl shadow-soft p-8 text-center">
