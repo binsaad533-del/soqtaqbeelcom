@@ -49,7 +49,7 @@ const CustomerDashboardPage = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"deals" | "listings">("deals");
+  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "security">("deals");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dealStatusFilter, setDealStatusFilter] = useState<string>("all");
@@ -597,6 +597,7 @@ const CustomerDashboardPage = () => {
                 {[
                   { id: "deals" as const, label: "صفقاتي", icon: Briefcase, count: deals.length },
                   { id: "listings" as const, label: "إعلاناتي", icon: Store, count: listings.length },
+                  { id: "security" as const, label: "الأمان", icon: Shield, count: undefined },
                 ].map(tab => (
                   <button key={tab.id} onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }} className={cn(
                     "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs transition-all",
@@ -604,7 +605,7 @@ const CustomerDashboardPage = () => {
                   )}>
                     <tab.icon size={13} strokeWidth={1.3} />
                     {tab.label}
-                    <span className="text-[10px] bg-muted/60 px-1.5 py-0.5 rounded-md">{tab.count}</span>
+                    {tab.count !== undefined && <span className="text-[10px] bg-muted/60 px-1.5 py-0.5 rounded-md">{tab.count}</span>}
                   </button>
                 ))}
               </div>
