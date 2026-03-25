@@ -22,6 +22,7 @@ interface PhoneVerificationProps {
   onVerified?: () => void;
   initialPhone?: string;
   mode?: "modal" | "inline";
+  skipPhoneStep?: boolean;
 }
 
 type Step = "phone" | "otp" | "success";
