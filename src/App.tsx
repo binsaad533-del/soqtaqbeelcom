@@ -8,6 +8,7 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SessionGuard from "./components/SessionGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
+import OnboardingTour from "./components/OnboardingTour";
 import HomePage from "./pages/HomePage";
 import MarketplacePage from "./pages/MarketplacePage";
 import ListingDetailsPage from "./pages/ListingDetailsPage";
@@ -26,6 +27,7 @@ import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
 import HowItWorksPage from "./pages/HowItWorksPage";
+import InstallPage from "./pages/InstallPage";
 import NotFound from "./pages/NotFound";
 import AgreementsArchivePage from "./pages/AgreementsArchivePage";
 
@@ -40,6 +42,7 @@ const App = () => (
         <AuthProvider>
           <ErrorBoundary>
           <SessionGuard />
+          <OnboardingTour />
           <Layout>
             <Routes>
               <Route path="/" element={<HomePage />} />
