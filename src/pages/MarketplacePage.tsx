@@ -407,7 +407,7 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
         <div className="p-4">
           {/* Seller info with online status */}
           {seller && (
-            <div className="flex items-center justify-between mb-2">
+            <Link to={`/seller/${seller.user_id}`} onClick={e => e.stopPropagation()} className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <TrustBadge score={seller.trust_score} verificationLevel={seller.verification_level} size="sm" showScore showBadges badges={badges.slice(0, 2)} />
               </div>
@@ -420,7 +420,7 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
                   {isOnline ? "متواجد" : "غير متواجد"}
                 </span>
               </div>
-            </div>
+            </Link>
           )}
 
           <div className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">
