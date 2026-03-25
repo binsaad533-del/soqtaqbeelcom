@@ -7,10 +7,10 @@ import { toast } from "sonner";
 
 const dealTypes = [
   { id: "الكل", label: "الكل" },
-  { id: "تقبيل_كامل", label: "تقبيل كامل" },
-  { id: "تقبيل_معدات", label: "تقبيل معدات" },
-  { id: "تقبيل_مع_سجل", label: "تقبيل مع سجل" },
-  { id: "تقبيل_بدون_سجل", label: "تقبيل بدون سجل" },
+  { id: "full_takeover", label: "تقبيل كامل" },
+  { id: "transfer_no_liabilities", label: "نقل أعمال بدون التزامات" },
+  { id: "assets_setup", label: "أصول + تجهيز تشغيلي" },
+  { id: "assets_only", label: "أصول فقط" },
 ];
 
 const cities = ["الكل", "📍 بالقرب مني", "الرياض", "جدة", "الدمام", "مكة", "المدينة"];
