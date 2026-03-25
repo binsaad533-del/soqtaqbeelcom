@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { Search, MapPin, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, MapPin, RotateCcw, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { requestGeolocation, findNearestCity, getNearbyCities } from "@/lib/saudiCities";
+import { toast } from "sonner";
 
 const dealTypes = [
   { id: "الكل", label: "الكل" },
@@ -22,6 +24,7 @@ export interface FilterState {
   activity: string;
   priceRange: [number, number];
   search: string;
+  nearbyCities?: string[];
 }
 
 const defaultFilters: FilterState = {
