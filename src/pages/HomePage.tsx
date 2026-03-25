@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import AiInlineStar from "@/components/AiInlineStar";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/logo.png";
+import logoIcon from "@/assets/logo-soq-taqbeel.png";
 import { useEffect, useRef } from "react";
 import { useSEO } from "@/hooks/useSEO";
 
