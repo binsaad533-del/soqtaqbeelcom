@@ -916,6 +916,8 @@ export type Database = {
           id: string
           is_active: boolean
           notified_at: string | null
+          notify_email: string | null
+          notify_phone: string | null
           search_query: string
           user_id: string
         }
@@ -925,6 +927,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           notified_at?: string | null
+          notify_email?: string | null
+          notify_phone?: string | null
           search_query: string
           user_id: string
         }
@@ -934,6 +938,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           notified_at?: string | null
+          notify_email?: string | null
+          notify_phone?: string | null
           search_query?: string
           user_id?: string
         }
