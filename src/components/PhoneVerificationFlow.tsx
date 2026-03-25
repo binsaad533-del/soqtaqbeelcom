@@ -104,9 +104,14 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
       if (attempts >= 2) {
         setError("تجاوزت عدد المحاولات، أعد إرسال الكود");
         setAiMessage("خلصت المحاولات، أرسل كود جديد 🔄");
-        setStep("phone");
         setAttempts(0);
         setOtpCode("");
+        if (skipPhoneStep) {
+          // Re-send OTP automatically instead of going to phone step
+          handleSendOtp();
+        } else {
+          setStep("phone");
+        }
       } else {
         setError(result.error || "الكود غلط، جرّب مرة ثانية");
         setAiMessage("الكود غلط، جرّب مرة ثانية 🤔");
