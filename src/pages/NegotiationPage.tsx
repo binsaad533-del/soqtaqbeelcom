@@ -261,6 +261,21 @@ const NegotiationPage = () => {
     setLoading(true);
     const { data: dealData } = await supabase.from("deals").select("*").eq("id", dealId).maybeSingle();
     if (!dealData) { setLoading(false); return; }
+
+    // Sync agreed_price from accepted offer if missing
+    if (!dealData.agreed_price) {
+      const { data: acceptedOffer } = await supabase
+        .from("listing_offers")
+        .select("offered_price")
+        .eq("listing_id", dealData.listing_id)
+        .eq("status", "accepted")
+        .maybeSingle();
+      if (acceptedOffer?.offered_price) {
+        dealData.agreed_price = acceptedOffer.offered_price;
+        await supabase.from("deals").update({ agreed_price: acceptedOffer.offered_price }).eq("id", dealId);
+      }
+    }
+
     setDeal(dealData);
     const listingData = await getListing(dealData.listing_id);
     setListing(listingData);
