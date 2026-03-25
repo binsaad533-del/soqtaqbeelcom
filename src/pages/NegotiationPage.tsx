@@ -199,6 +199,20 @@ const NegotiationPage = () => {
     setAiLoading(false);
   }, [callAI]);
 
+  // Market analysis
+  const handleMarketAnalysis = useCallback(async () => {
+    setShowAiPanel(true);
+    setAiLoading(true);
+    setAiAnalysis("");
+    try {
+      const text = await callAI("market_analysis");
+      setAiAnalysis(text || "تعذر تحليل السوق");
+    } catch {
+      setAiAnalysis("حدث خطأ");
+    }
+    setAiLoading(false);
+  }, [callAI]);
+
   // Push close
   const handlePushClose = useCallback(async () => {
     if (!dealId || !user) return;
