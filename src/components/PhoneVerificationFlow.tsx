@@ -139,161 +139,141 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline" }: Ph
   }
 
   return (
-    <div className={cn("space-y-5", mode === "modal" && "p-1")} dir="rtl">
+    <div className={cn("space-y-3", mode === "modal" && "p-1")} dir="rtl">
       {/* AI Assistant Message */}
-      <div className="flex items-start gap-3 bg-primary/5 rounded-xl p-3">
-        <AiStar size={24} animate={sending || verifying} />
-        <p className="text-sm text-foreground/80 leading-relaxed">{aiMessage}</p>
+      <div className="flex items-center gap-2 bg-primary/5 rounded-lg px-3 py-2">
+        <AiStar size={16} animate={sending || verifying} />
+        <p className="text-xs text-foreground/80 leading-relaxed">{aiMessage}</p>
       </div>
 
       {step === "phone" && (
-        <>
-          {/* Phone input */}
-          <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">رقم الجوال</label>
-            <div className="flex gap-2">
-              {/* Country code */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowCodes(!showCodes)}
-                  className="flex items-center gap-1 h-full px-3 py-3 bg-muted/50 rounded-xl text-sm transition-colors whitespace-nowrap hover:bg-muted"
-                >
-                  <span className="text-base leading-none">{selectedCountry?.flag}</span>
-                  <span className="text-xs text-muted-foreground" dir="ltr">{countryCode}</span>
-                  <ChevronDown size={12} className="text-muted-foreground" />
-                </button>
+        <div className="flex items-end gap-2 flex-wrap sm:flex-nowrap">
+          {/* Country code */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowCodes(!showCodes)}
+              className="flex items-center gap-1 px-2.5 py-2 bg-muted/50 rounded-lg text-xs transition-colors whitespace-nowrap hover:bg-muted h-9"
+            >
+              <span className="text-sm leading-none">{selectedCountry?.flag}</span>
+              <span className="text-[10px] text-muted-foreground" dir="ltr">{countryCode}</span>
+              <ChevronDown size={10} className="text-muted-foreground" />
+            </button>
 
-                {showCodes && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowCodes(false)} />
-                    <div className="absolute top-full mt-1 right-0 z-50 bg-card rounded-xl shadow-lg py-1 min-w-[180px] max-h-[220px] overflow-y-auto">
-                      {COUNTRY_CODES.map((c) => (
-                        <button
-                          key={c.code}
-                          type="button"
-                          onClick={() => { setCountryCode(c.code); setShowCodes(false); }}
-                          className={cn(
-                            "w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50 transition-colors",
-                            c.code === countryCode && "bg-primary/5 text-primary"
-                          )}
-                        >
-                          <span className="text-base">{c.flag}</span>
-                          <span className="flex-1 text-right text-xs">{c.name}</span>
-                          <span className="text-xs text-muted-foreground" dir="ltr">{c.code}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+            {showCodes && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowCodes(false)} />
+                <div className="absolute top-full mt-1 right-0 z-50 bg-card rounded-lg shadow-lg py-1 min-w-[160px] max-h-[180px] overflow-y-auto border border-border/30">
+                  {COUNTRY_CODES.map((c) => (
+                    <button
+                      key={c.code}
+                      type="button"
+                      onClick={() => { setCountryCode(c.code); setShowCodes(false); }}
+                      className={cn(
+                        "w-full flex items-center gap-2 px-2.5 py-1.5 text-xs hover:bg-muted/50 transition-colors",
+                        c.code === countryCode && "bg-primary/5 text-primary"
+                      )}
+                    >
+                      <span className="text-sm">{c.flag}</span>
+                      <span className="flex-1 text-right text-[10px]">{c.name}</span>
+                      <span className="text-[10px] text-muted-foreground" dir="ltr">{c.code}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
 
-              {/* Phone number */}
-              <div className="relative flex-1">
-                <Phone size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  placeholder="5XXXXXXXX"
-                  value={phone}
-                  onChange={(e) => handlePhoneChange(e.target.value)}
-                  className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all tracking-wider text-left"
-                  dir="ltr"
-                  lang="en"
-                />
-              </div>
-            </div>
+          {/* Phone number */}
+          <div className="relative flex-1 min-w-[140px]">
+            <Phone size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="tel"
+              inputMode="numeric"
+              placeholder="5XXXXXXXX"
+              value={phone}
+              onChange={(e) => handlePhoneChange(e.target.value)}
+              className="w-full pr-8 pl-3 py-2 bg-muted/50 rounded-lg text-xs h-9 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all tracking-wider text-left"
+              dir="ltr"
+              lang="en"
+            />
           </div>
 
           {/* Send button */}
           <button
             onClick={handleSendOtp}
             disabled={sending || phone.length < 9}
-            className="w-full py-3 rounded-xl text-sm font-medium text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-50"
+            className="h-9 px-4 rounded-lg text-xs font-medium text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-50 whitespace-nowrap shrink-0"
             style={{ background: "var(--gradient-primary)" }}
           >
             {sending ? (
-              <span className="flex items-center justify-center gap-2">
-                <AiStar size={18} animate />
-                جاري الإرسال...
+              <span className="flex items-center gap-1.5">
+                <AiStar size={14} animate />
+                إرسال...
               </span>
-            ) : "أرسل رمز التحقق"}
+            ) : "أرسل الكود"}
           </button>
-        </>
+        </div>
       )}
 
       {step === "otp" && (
-        <>
-          {/* OTP input */}
-          <div className="space-y-3">
-            <label className="text-xs text-muted-foreground">أدخل رمز التحقق المكوّن من 6 أرقام</label>
-            <div className="flex justify-center" dir="ltr">
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+            <div className="flex-1" dir="ltr">
               <InputOTP
                 maxLength={6}
                 value={otpCode}
                 onChange={setOtpCode}
               >
                 <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
+                  <InputOTPSlot index={0} className="h-8 w-8 text-xs" />
+                  <InputOTPSlot index={1} className="h-8 w-8 text-xs" />
+                  <InputOTPSlot index={2} className="h-8 w-8 text-xs" />
+                  <InputOTPSlot index={3} className="h-8 w-8 text-xs" />
+                  <InputOTPSlot index={4} className="h-8 w-8 text-xs" />
+                  <InputOTPSlot index={5} className="h-8 w-8 text-xs" />
                 </InputOTPGroup>
               </InputOTP>
             </div>
-            <p className="text-center text-xs text-muted-foreground">
-              تم الإرسال إلى <span dir="ltr" className="font-mono">{fullPhone}</span>
-            </p>
+
+            <button
+              onClick={handleVerifyOtp}
+              disabled={verifying || otpCode.length !== 6}
+              className="h-8 px-4 rounded-lg text-xs font-medium text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-50 whitespace-nowrap shrink-0"
+              style={{ background: "var(--gradient-primary)" }}
+            >
+              {verifying ? (
+                <span className="flex items-center gap-1.5">
+                  <AiStar size={14} animate />
+                  تحقق...
+                </span>
+              ) : "تحقق"}
+            </button>
           </div>
 
-          {/* Verify button */}
-          <button
-            onClick={handleVerifyOtp}
-            disabled={verifying || otpCode.length !== 6}
-            className="w-full py-3 rounded-xl text-sm font-medium text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-50"
-            style={{ background: "var(--gradient-primary)" }}
-          >
-            {verifying ? (
-              <span className="flex items-center justify-center gap-2">
-                <AiStar size={18} animate />
-                جاري التحقق...
-              </span>
-            ) : "تحقق"}
-          </button>
-
-          {/* Resend */}
-          <div className="text-center">
+          <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+            <span>أُرسل إلى <span dir="ltr" className="font-mono">{fullPhone}</span></span>
+            <span className="text-border/50">|</span>
             {resendTimer > 0 ? (
-              <p className="text-xs text-muted-foreground">
-                إعادة الإرسال بعد <span className="font-mono">{resendTimer}</span> ثانية
-              </p>
+              <span>إعادة بعد <span className="font-mono">{resendTimer}</span>ث</span>
             ) : (
-              <button
-                onClick={handleResend}
-                disabled={sending}
-                className="text-xs text-primary hover:underline"
-              >
-                إعادة إرسال الرمز
-              </button>
+              <button onClick={handleResend} disabled={sending} className="text-primary hover:underline">إعادة الإرسال</button>
             )}
+            <span className="text-border/50">|</span>
+            <button
+              onClick={() => { setStep("phone"); setOtpCode(""); setError(""); setAiMessage("عدّل رقمك وأرسل كود جديد"); }}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              تغيير الرقم
+            </button>
           </div>
-
-          {/* Change number */}
-          <button
-            onClick={() => { setStep("phone"); setOtpCode(""); setError(""); setAiMessage("عدّل رقمك وأرسل كود جديد"); }}
-            className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            تغيير رقم الجوال
-          </button>
-        </>
+        </div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 bg-destructive/5 text-destructive text-xs p-3 rounded-xl">
-          <AlertCircle size={14} />
+        <div className="flex items-center gap-1.5 text-destructive text-[10px] bg-destructive/5 px-2.5 py-1.5 rounded-lg">
+          <AlertCircle size={12} />
           {error}
         </div>
       )}
