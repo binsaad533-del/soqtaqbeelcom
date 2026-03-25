@@ -105,10 +105,10 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
         <div className="bg-primary/5 rounded-xl p-4 border border-primary/10 text-center">
           <p className="text-[11px] text-muted-foreground mb-1">المبلغ المستحق</p>
           <p className="text-xl font-semibold text-primary">
-            {commission.commission_amount.toLocaleString("en-US")} ر.س
+            {commission.commission_amount.toLocaleString("en-US")} <SarSymbol size={16} />
           </p>
           <p className="text-[10px] text-muted-foreground mt-1">
-            ({(commission.commission_rate * 100)}% من {commission.deal_amount.toLocaleString("en-US")} ر.س)
+            ({(commission.commission_rate * 100)}% من {commission.deal_amount.toLocaleString("en-US")} <SarSymbol size={9} />)
           </p>
         </div>
 

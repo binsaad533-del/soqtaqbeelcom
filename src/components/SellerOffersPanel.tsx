@@ -102,7 +102,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[11px] text-muted-foreground">
-            أعلى: {offers.length > 0 ? `${Math.max(...offers.map(o => Number(o.offered_price))).toLocaleString("en-US")} ر.س` : "—"}
+            أعلى: {offers.length > 0 ? <>{Math.max(...offers.map(o => Number(o.offered_price))).toLocaleString("en-US")} <SarSymbol size={9} /></> : "—"}
           </span>
           {expanded ? <ChevronUp size={14} className="text-muted-foreground" /> : <ChevronDown size={14} className="text-muted-foreground" />}
         </div>
@@ -115,7 +115,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
             <div className="p-3 bg-success/5 rounded-xl border border-success/20 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-foreground">
-                  {Number(acceptedOffer.offered_price).toLocaleString("en-US")} ر.س
+                  {Number(acceptedOffer.offered_price).toLocaleString("en-US")} <SarSymbol size={11} />
                 </span>
                 <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-success/15 text-success">
                   مقبول — صفقة جارية
@@ -154,7 +154,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
             )}>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-foreground">
-                  {Number(offer.offered_price).toLocaleString("en-US")} ر.س
+                  {Number(offer.offered_price).toLocaleString("en-US")} <SarSymbol size={11} />
                 </span>
                 <div className="flex items-center gap-2">
                   {hasAccepted && (
@@ -204,7 +204,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
             <div key={offer.id} className="p-2.5 bg-muted/20 rounded-xl border border-border/10 opacity-50">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-foreground">
-                  {Number(offer.offered_price).toLocaleString("en-US")} ر.س
+                  {Number(offer.offered_price).toLocaleString("en-US")} <SarSymbol size={10} />
                 </span>
                 <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
                   مرفوض

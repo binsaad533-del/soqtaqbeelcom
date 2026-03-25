@@ -78,8 +78,8 @@ const CommissionAdminPanel = () => {
     <div className="space-y-5">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard icon={Landmark} value={`${totalUnpaid.toLocaleString("en-US")} ر.س`} label="مستحقة" />
-        <StatCard icon={CheckCircle2} value={`${totalVerified.toLocaleString("en-US")} ر.س`} label="تم التحقق" />
+        <StatCard icon={Landmark} value={<>{totalUnpaid.toLocaleString("en-US")} <SarSymbol size={12} /></>} label="مستحقة" />
+        <StatCard icon={CheckCircle2} value={<>{totalVerified.toLocaleString("en-US")} <SarSymbol size={12} /></>} label="تم التحقق" />
         <StatCard icon={AlertTriangle} value={String(overdueCount)} label="متأخرة" />
         <StatCard icon={Eye} value={String(pendingReview)} label="بانتظار المراجعة" />
       </div>
@@ -118,9 +118,9 @@ const CommissionAdminPanel = () => {
                 className="w-full flex items-center justify-between p-3 text-right hover:bg-muted/20 transition-colors"
               >
                 <div>
-                  <div className="text-sm font-medium">{c.commission_amount.toLocaleString("en-US")} ر.س</div>
+                  <div className="text-sm font-medium">{c.commission_amount.toLocaleString("en-US")} <SarSymbol size={11} /></div>
                   <div className="text-[10px] text-muted-foreground">
-                    صفقة: {c.deal_amount.toLocaleString("en-US")} ر.س • صفقة: {c.deal_amount.toLocaleString("en-US")} ر.س • {new Date(c.created_at).toLocaleDateString("en-US")}
+                    صفقة: {c.deal_amount.toLocaleString("en-US")} <SarSymbol size={8} /> • {new Date(c.created_at).toLocaleDateString("en-US")}
                   </div>
                 </div>
                 <Badge variant="outline" className={`text-[10px] ${COMMISSION_STATUS_COLORS[s]}`}>
@@ -161,7 +161,7 @@ const CommissionAdminPanel = () => {
   );
 };
 
-const StatCard = ({ icon: Icon, value, label }: { icon: any; value: string; label: string }) => (
+const StatCard = ({ icon: Icon, value, label }: { icon: any; value: React.ReactNode; label: string }) => (
   <div className="bg-card rounded-xl p-4 shadow-soft text-center">
     <Icon size={18} className="mx-auto mb-2 text-primary" />
     <div className="text-lg font-medium">{value}</div>
