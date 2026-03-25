@@ -37,12 +37,18 @@ const LoginPage = () => {
   const { signIn, signUp, user } = useAuthContext();
   const navigate = useNavigate();
 
+  // MFA state
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaVerifying, setMfaVerifying] = useState(false);
+
   // Redirect if already logged in
   useEffect(() => {
-    if (user) {
+    if (user && !mfaRequired) {
       navigate("/", { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, mfaRequired]);
   const { reportFailedLogin } = useSecurityIncidents();
 
   // Auto-convert Arabic numerals on phone input
