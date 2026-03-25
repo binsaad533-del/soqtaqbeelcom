@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Send, Loader2, Check, DollarSign, TrendingUp } from "lucide-react";
+import { Send, Loader2, Check, DollarSign, TrendingUp, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useListingOffers, type OffersSummary, type ListingOffer } from "@/hooks/useListingOffers";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { toEnglishNumerals } from "@/lib/arabicNumerals";
 
 interface Props {
   listingId: string;
@@ -21,24 +22,28 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
 
   const [price, setPrice] = useState("");
   const [message, setMessage] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [myOffer, setMyOffer] = useState<ListingOffer | null>(null);
   const [summary, setSummary] = useState<OffersSummary | null>(null);
+  const [showForm, setShowForm] = useState(true);
 
-  // Load summary + my offer on mount
   useEffect(() => {
     getOffersSummary(listingId).then(setSummary);
     if (user && user.id !== ownerId) {
       getMyOffer(listingId).then((offer) => {
         if (offer) {
           setMyOffer(offer);
-          setSubmitted(true);
+          setShowForm(false);
         }
       });
     }
   }, [listingId, user, ownerId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isOwner = user?.id === ownerId;
+
+  const handlePriceChange = (val: string) => {
+    const normalized = toEnglishNumerals(val).replace(/[^0-9.]/g, "");
+    setPrice(normalized);
+  };
 
   const handleSubmit = async () => {
     if (!user) { navigate("/login"); return; }
@@ -53,9 +58,10 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
       toast.error("فشل إرسال العرض");
     } else {
       toast.success("تم إرسال عرضك بنجاح ✅");
-      setSubmitted(true);
+      setShowForm(false);
       setMyOffer({ offered_price: numPrice, message, status: "pending" } as any);
-      // Refresh summary
+      setPrice("");
+      setMessage("");
       getOffersSummary(listingId).then(setSummary);
     }
   };
@@ -64,7 +70,6 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
 
   return (
     <div className={cn("space-y-3", className)}>
-      {/* Public summary */}
       {summary && summary.total_offers > 0 && (
         <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-xl border border-primary/10">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -81,12 +86,13 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
         </div>
       )}
 
-      {/* Already submitted */}
-      {submitted && myOffer ? (
+      {!showForm && myOffer ? (
         <div className="p-4 bg-success/5 rounded-xl border border-success/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Check size={14} className="text-success" />
-            <span className="text-xs font-medium text-success">تم إرسال عرضك</span>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Check size={14} className="text-success" />
+              <span className="text-xs font-medium text-success">تم إرسال عرضك</span>
+            </div>
           </div>
           <p className="text-sm font-medium text-foreground">
             {Number(myOffer.offered_price).toLocaleString("en-US")} ر.س
@@ -105,23 +111,35 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
               {myOffer.seller_response && <span className="block mt-1 font-normal">{myOffer.seller_response}</span>}
             </div>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-3 gap-1.5 text-xs"
+            onClick={() => setShowForm(true)}
+          >
+            <RefreshCw size={12} />
+            تقديم عرض جديد
+          </Button>
         </div>
       ) : (
-        /* Offer form */
         <div className="p-4 bg-muted/20 rounded-xl border border-border/30 space-y-3">
           <div className="flex items-center gap-2">
             <DollarSign size={14} className="text-primary" />
-            <span className="text-xs font-semibold text-foreground">قدّم عرض سعر</span>
+            <span className="text-xs font-semibold text-foreground">
+              {myOffer ? "تقديم عرض جديد" : "قدّم عرض سعر"}
+            </span>
           </div>
 
           <div className="relative">
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              onChange={(e) => handlePriceChange(e.target.value)}
               placeholder={listingPrice ? `السعر المطلوب: ${Number(listingPrice).toLocaleString("en-US")}` : "اكتب سعرك"}
               className="w-full px-3 py-2.5 rounded-xl border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
               dir="ltr"
+              lang="en"
             />
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ر.س</span>
           </div>
@@ -142,6 +160,15 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
             {loading ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
             إرسال العرض
           </Button>
+
+          {myOffer && (
+            <button
+              onClick={() => setShowForm(false)}
+              className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              إلغاء
+            </button>
+          )}
         </div>
       )}
     </div>
