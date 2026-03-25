@@ -17,6 +17,7 @@ import ComparePanel, { type CompareItem } from "@/components/marketplace/Compare
 import { MapPin, Eye, ShieldCheck, GitCompareArrows, Check, Lightbulb, Heart, Share2 } from "lucide-react";
 import MarketplaceTicker from "@/components/marketplace/MarketplaceTicker";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 
 interface EnrichedListing extends Listing {
   sellerProfile?: Profile | null;
@@ -442,7 +443,7 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
           {/* Price + transparency */}
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-primary">
-              {listing.price ? `${Number(listing.price).toLocaleString()} ر.س` : "—"}
+              {listing.price ? <>{Number(listing.price).toLocaleString()} <SarSymbol size={10} /></> : "—"}
             </span>
             {(() => {
               const tr = calculateTransparency(listing);
