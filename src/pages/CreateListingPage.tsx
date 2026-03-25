@@ -1604,9 +1604,6 @@ const CreateListingPage = () => {
                   <ClipboardList size={16} strokeWidth={1.5} className="text-primary" />
                   <h2 className="font-medium text-sm">بيانات الإفصاح</h2>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {isCrOnly ? "راجع البيانات المستخرجة وأكمل ما يلزم — لا حاجة لحقول الأصول أو الإيجار" : "أكمل بيانات الإفصاح لتعزيز ثقة المشترين — الـAI يعبّئ ما يقدر تلقائياً"}
-                </p>
 
                 {/* CR extraction auto-fill notice */}
                 {isCrOnly && crExtractionDone && crExtraction && (
