@@ -1658,7 +1658,7 @@ const CreateListingPage = () => {
                       <div className="bg-primary/5 border border-primary/15 rounded-xl p-3 space-y-2">
                         <div className="flex items-center gap-1.5">
                           <Check size={12} className="text-primary" />
-                          <span className="text-[11px] font-medium text-primary">تم تعبئتها من المراحل السابقة</span>
+                          <span className="text-[11px] font-medium text-primary">بيانات تم إدخالها مسبقاً</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {preFilledFields.map((f) => (
