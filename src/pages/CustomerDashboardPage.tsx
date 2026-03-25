@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
+import SecuritySettingsPanel from "@/components/SecuritySettingsPanel";
 
 /* ── Status helpers ── */
 const statusBadge = (s: string) => {
@@ -49,7 +50,7 @@ const CustomerDashboardPage = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"deals" | "listings">("deals");
+  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "security">("deals");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dealStatusFilter, setDealStatusFilter] = useState<string>("all");
@@ -597,6 +598,7 @@ const CustomerDashboardPage = () => {
                 {[
                   { id: "deals" as const, label: "صفقاتي", icon: Briefcase, count: deals.length },
                   { id: "listings" as const, label: "إعلاناتي", icon: Store, count: listings.length },
+                  { id: "security" as const, label: "الأمان", icon: Shield, count: undefined },
                 ].map(tab => (
                   <button key={tab.id} onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }} className={cn(
                     "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs transition-all",
@@ -604,10 +606,11 @@ const CustomerDashboardPage = () => {
                   )}>
                     <tab.icon size={13} strokeWidth={1.3} />
                     {tab.label}
-                    <span className="text-[10px] bg-muted/60 px-1.5 py-0.5 rounded-md">{tab.count}</span>
+                    {tab.count !== undefined && <span className="text-[10px] bg-muted/60 px-1.5 py-0.5 rounded-md">{tab.count}</span>}
                   </button>
                 ))}
               </div>
+              {activeTab !== "security" && (
               <div className="relative flex-1 max-w-xs">
                 <Search size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -618,6 +621,7 @@ const CustomerDashboardPage = () => {
                   className="w-full bg-muted/40 border-0 rounded-lg py-2 pr-9 pl-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
                 />
               </div>
+              )}
             </div>
 
             {/* Status filter chips */}
@@ -735,6 +739,7 @@ const CustomerDashboardPage = () => {
                 )}
               </div>
             )}
+            {activeTab === "security" && <SecuritySettingsPanel />}
         </div>
       </div>
     </div>

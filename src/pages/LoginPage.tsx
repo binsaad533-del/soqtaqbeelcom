@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
@@ -37,12 +38,18 @@ const LoginPage = () => {
   const { signIn, signUp, user } = useAuthContext();
   const navigate = useNavigate();
 
+  // MFA state
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaVerifying, setMfaVerifying] = useState(false);
+
   // Redirect if already logged in
   useEffect(() => {
-    if (user) {
+    if (user && !mfaRequired) {
       navigate("/", { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, mfaRequired]);
   const { reportFailedLogin } = useSecurityIncidents();
 
   // Auto-convert Arabic numerals on phone input
@@ -89,6 +96,18 @@ const LoginPage = () => {
     if (isLogin) {
       const { error } = await signIn(authEmail, password);
       if (error) {
+        // Check if MFA is required
+        if (error.message?.includes("mfa") || (error as any).status === 400) {
+          // Check for MFA factors
+          const { data: factorsData } = await supabase.auth.mfa.listFactors();
+          const verified = factorsData?.totp?.filter(f => f.status === "verified") || [];
+          if (verified.length > 0) {
+            setMfaRequired(true);
+            setMfaFactorId(verified[0].id);
+            setLoading(false);
+            return;
+          }
+        }
         reportFailedLogin(authEmail);
         setError(
           error.message === "Invalid login credentials"
@@ -96,6 +115,15 @@ const LoginPage = () => {
             : error.message
         );
       } else {
+        // Check if user has MFA factors after login
+        const { data: factorsData } = await supabase.auth.mfa.listFactors();
+        const verified = factorsData?.totp?.filter(f => f.status === "verified") || [];
+        if (verified.length > 0) {
+          setMfaRequired(true);
+          setMfaFactorId(verified[0].id);
+          setLoading(false);
+          return;
+        }
         navigate("/");
       }
     } else {
@@ -160,6 +188,50 @@ const LoginPage = () => {
         </div>
 
         <div className="bg-card rounded-2xl p-6 shadow-soft">
+          {mfaRequired ? (
+            /* MFA Verification Step */
+            <div className="space-y-4" dir="rtl">
+              <div className="text-center space-y-2">
+                <ShieldCheck size={32} className="mx-auto text-primary" />
+                <h2 className="text-base font-medium text-foreground">التحقق بخطوتين</h2>
+                <p className="text-xs text-muted-foreground">أدخل رمز المصادقة من تطبيقك</p>
+              </div>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={mfaCode}
+                onChange={e => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="000000"
+                className="w-full px-4 py-3 rounded-xl border border-border/50 bg-muted/50 text-sm text-center tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-primary/20"
+                dir="ltr"
+                autoFocus
+              />
+              {error && <div className="bg-destructive/5 text-destructive text-xs p-3 rounded-xl">{error}</div>}
+              <button
+                onClick={async () => {
+                  if (!mfaFactorId || mfaCode.length !== 6) return;
+                  setMfaVerifying(true);
+                  setError("");
+                  const { data: challenge, error: chalErr } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
+                  if (chalErr) { setError(chalErr.message); setMfaVerifying(false); return; }
+                  const { error: verErr } = await supabase.auth.mfa.verify({ factorId: mfaFactorId, challengeId: challenge.id, code: mfaCode });
+                  if (verErr) { setError("رمز غير صحيح"); setMfaVerifying(false); return; }
+                  setMfaVerifying(false);
+                  navigate("/");
+                }}
+                disabled={mfaCode.length !== 6 || mfaVerifying}
+                className="w-full py-3 rounded-xl text-sm font-medium text-primary-foreground transition-all disabled:opacity-50"
+                style={{ background: "var(--gradient-primary)" }}
+              >
+                {mfaVerifying ? "جاري التحقق..." : "تأكيد"}
+              </button>
+              <button onClick={() => { setMfaRequired(false); setMfaCode(""); setError(""); }} className="w-full text-xs text-muted-foreground hover:text-foreground">
+                العودة لتسجيل الدخول
+              </button>
+            </div>
+          ) : (
+            <>
           {/* Login / Register toggle */}
           <div className="flex bg-muted rounded-xl p-1 mb-5">
             <button
@@ -378,6 +450,8 @@ const LoginPage = () => {
               </p>
             )}
           </form>
+            </>
+          )}
         </div>
 
         {/* Subtle AI tip */}
