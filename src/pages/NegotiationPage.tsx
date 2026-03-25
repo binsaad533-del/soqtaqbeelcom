@@ -442,9 +442,9 @@ const NegotiationPage = () => {
           <span>{listingTitle}</span>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-5">
-          {/* ═══════════ DEAL SUMMARY (3 cols) ═══════════ */}
-          <div className="lg:col-span-3 order-2 lg:order-2">
+        <div className="grid lg:grid-cols-5 gap-5 items-end">
+          {/* ═══════════ DEAL SUMMARY (2 cols, RIGHT in RTL) ═══════════ */}
+          <div className="lg:col-span-2 order-2 lg:order-1">
             <div className="space-y-4">
               {/* Deal Summary Card - Simple */}
               <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
