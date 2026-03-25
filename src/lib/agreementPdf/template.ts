@@ -87,11 +87,8 @@ const infoGrid = (items: Array<{ label: string; value: string; emphasized?: bool
   </div>`;
 
 const listCard = (items: string[], tone: "neutral" | "success" | "warning" = "neutral") => {
-  const accent = {
-    neutral: "hsl(212 84% 42%)",
-    success: "hsl(142 72% 29%)",
-    warning: "hsl(35 92% 45%)",
-  }[tone];
+  // Unified blue palette regardless of tone
+  const accent = "hsl(212 84% 42%)";
 
   return `
     <div style="display:grid;gap:8px;">
@@ -181,13 +178,11 @@ const buildSections = (data: AgreementPdfData) => {
             <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
               <div>
                 <div style="font-size:11px;color:hsl(215 16% 45%);margin-bottom:4px;">حالة الاتفاقية</div>
-                <div style="font-size:24px;font-weight:800;color:${bothApproved ? "hsl(142 72% 29%)" : "hsl(212 84% 42%)"};">
+                <div style="font-size:24px;font-weight:800;color:hsl(212 84% 42%);">
                   ${bothApproved ? "مكتملة وجاهزة للتحميل" : "بانتظار اعتماد الطرفين"}
                 </div>
               </div>
-              <div style="padding:10px 14px;border-radius:999px;background:${
-                bothApproved ? "hsl(142 76% 95%)" : "hsl(48 96% 89%)"
-              };color:${bothApproved ? "hsl(142 72% 29%)" : "hsl(35 92% 34%)"};font-size:12px;font-weight:700;white-space:nowrap;">
+              <div style="padding:10px 14px;border-radius:999px;background:hsl(212 84% 42% / 0.1);color:hsl(212 84% 42%);font-size:12px;font-weight:700;white-space:nowrap;">
                 ${bothApproved ? "تهانينا للطرفين" : "اعتماد قيد الاستكمال"}
               </div>
             </div>
@@ -226,13 +221,13 @@ const buildSections = (data: AgreementPdfData) => {
           ]
             .map(
               (party) => `
-                <div style="border:1px solid ${party.approved ? "hsl(142 45% 80%)" : "hsl(214 32% 91%)"};background:${
-                  party.approved ? "hsl(138 76% 97%)" : "hsl(210 40% 98%)"
+                <div style="border:1px solid ${party.approved ? "hsl(212 84% 82%)" : "hsl(214 32% 91%)"};background:${
+                  party.approved ? "hsl(210 100% 97%)" : "hsl(210 40% 98%)"
                 };border-radius:18px;padding:16px;display:grid;gap:7px;">
                   <div style="font-size:10px;color:hsl(215 16% 45%);">${party.label}</div>
                   <div style="font-size:18px;font-weight:800;color:hsl(215 28% 17%);">${safeText(party.name)}</div>
                   <div style="font-size:12px;color:hsl(215 16% 45%);direction:ltr;text-align:right;">${safeText(party.contact)}</div>
-                  <div style="font-size:11px;font-weight:700;color:${party.approved ? "hsl(142 72% 29%)" : "hsl(35 92% 34%)"};">
+                  <div style="font-size:11px;font-weight:700;color:${party.approved ? "hsl(212 84% 42%)" : "hsl(212 60% 60%)"};">
                     ${party.approved ? `✓ تم الاعتماد في ${formatDate(party.approvedAt)}` : "بانتظار الاعتماد"}
                   </div>
                 </div>`,
@@ -356,7 +351,7 @@ const buildSections = (data: AgreementPdfData) => {
     sections.push(
       section(
         "سبب التعديل",
-        `<div style="font-size:12px;line-height:2;color:hsl(35 92% 30%);background:hsl(48 96% 93%);border:1px solid hsl(48 96% 80%);border-radius:16px;padding:14px;">${safeText(data.amendmentReason)}</div>`,
+        `<div style="font-size:12px;line-height:2;color:hsl(212 60% 30%);background:hsl(210 100% 97%);border:1px solid hsl(212 84% 82%);border-radius:16px;padding:14px;">${safeText(data.amendmentReason)}</div>`,
         "highlight",
       ),
     );
@@ -421,9 +416,9 @@ const buildSections = (data: AgreementPdfData) => {
               .join("")}
           </div>
         </div>
-        <div style="background:hsl(48 96% 93%);border:1px solid hsl(48 96% 80%);border-radius:16px;padding:14px;text-align:center;display:grid;gap:6px;">
-          <div style="font-size:11px;font-weight:700;color:hsl(35 92% 30%);">تنويه مهم</div>
-          <div style="font-size:11px;line-height:2;color:hsl(35 80% 28%);">
+        <div style="background:hsl(210 100% 97%);border:1px solid hsl(212 84% 82%);border-radius:16px;padding:14px;text-align:center;display:grid;gap:6px;">
+          <div style="font-size:11px;font-weight:700;color:hsl(212 84% 32%);">تنويه مهم</div>
+          <div style="font-size:11px;line-height:2;color:hsl(212 60% 35%);">
             عمولة المنصة مستحقة على البائع فقط بنسبة ${commissionRate * 100}% من قيمة الصفقة، وتُسدد بعد إتمام الصفقة واعتماد الطرفين.<br />
             تحتفظ المنصة بحقها الكامل في المطالبة بمستحقاتها، ونثق بالتزامكم الكريم بالسداد في الوقت المحدد 🤝
           </div>
