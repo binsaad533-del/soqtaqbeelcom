@@ -331,6 +331,7 @@ const AgreementPage = () => {
               العودة للوحة التحكم
             </Link>
           </div>
+          <DealProgressBar currentStage={getDealStage(deal, false)} className="mb-6" />
           <div className="bg-card rounded-2xl shadow-soft p-8 text-center">
             <AiStar size={40} className="mx-auto mb-4" />
             <h2 className="text-lg font-medium mb-2">لم يتم إنشاء الاتفاقية بعد</h2>
