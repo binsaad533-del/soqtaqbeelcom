@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, TrendingUp, Info, FileCheck, CheckCircle2 } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, TrendingUp, Info, FileCheck, CheckCircle2, X } from "lucide-react";
 import ChatAttachmentButton from "@/components/chat/ChatAttachmentButton";
 import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
 import AiStar from "@/components/AiStar";
@@ -59,6 +59,7 @@ const NegotiationPage = () => {
   const { getMessages, sendMessage } = useDeals();
   const { getListing } = useListings();
   const { monitorChat, calculateDealRisk } = useFraudEngine();
+  const navigate = useNavigate();
   const { getProfile } = useProfiles();
   const { getCommission } = useCommissions();
 
@@ -559,16 +560,32 @@ const NegotiationPage = () => {
                 </div>
               </div>
 
-              {/* CTA: Legal confirmation */}
+              {/* CTA: Legal confirmation & Cancel */}
               {!isPostAgreement && deal.status === "negotiating" && (
-                <button
-                  onClick={() => setShowLegalPanel(true)}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-l from-primary/10 to-primary/5 border border-primary/20 text-primary text-xs font-medium hover:from-primary/15 hover:to-primary/10 transition-all active:scale-[0.98]"
-                >
-                  <Scale size={13} strokeWidth={1.5} />
-                  متفقون؟ انتقل للتأكيد القانوني وإتمام الصفقة
-                  <ArrowRight size={13} strokeWidth={1.5} className="rotate-180" />
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowLegalPanel(true)}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-l from-primary/10 to-primary/5 border border-primary/20 text-primary text-xs font-medium hover:from-primary/15 hover:to-primary/10 transition-all active:scale-[0.98]"
+                  >
+                    <Scale size={13} strokeWidth={1.5} />
+                    متفقون؟ إتمام الصفقة
+                    <ArrowRight size={13} strokeWidth={1.5} className="rotate-180" />
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!confirm("هل أنت متأكد من إلغاء الصفقة؟ سيعود الإعلان للعرض ويمكن للعملاء تقديم عروض جديدة.")) return;
+                      await supabase.from("deals").update({ status: "cancelled" }).eq("id", deal.id);
+                      await supabase.from("listing_offers").update({ status: "pending" }).eq("listing_id", deal.listing_id).eq("status", "accepted");
+                      await supabase.from("listings").update({ status: "published" }).eq("id", deal.listing_id);
+                      toast.success("تم إلغاء الصفقة وإعادة الإعلان للعرض");
+                      navigate(`/listing/${deal.listing_id}`);
+                    }}
+                    className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl border border-destructive/20 text-destructive text-xs font-medium hover:bg-destructive/5 transition-all active:scale-[0.98]"
+                  >
+                    <X size={13} strokeWidth={1.5} />
+                    إلغاء الصفقة
+                  </button>
+                </div>
               )}
 
               {/* Other party trust */}
