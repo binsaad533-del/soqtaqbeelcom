@@ -143,7 +143,7 @@ const ListingDetailsPage = () => {
 
         {/* Active deal banner */}
         {myActiveDeal && (
-          <div className="mb-4 p-3 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-3">
+          <div className="sticky top-0 z-40 mb-4 p-3 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-3 backdrop-blur-sm">
             <div className="flex items-center gap-2">
               <MessageCircle size={14} className="text-primary" />
               <span className="text-xs text-foreground font-medium">
