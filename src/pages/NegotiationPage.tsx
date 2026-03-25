@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, TrendingUp, Info, FileCheck, CheckCircle2 } from "lucide-react";
+import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, TrendingUp, Info, FileCheck, CheckCircle2, MapPin, Tag, Building2, Calendar, Banknote, ChevronDown } from "lucide-react";
 import ChatAttachmentButton from "@/components/chat/ChatAttachmentButton";
 import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
 import AiStar from "@/components/AiStar";
@@ -430,48 +430,110 @@ const NegotiationPage = () => {
           {/* ═══════════ DEAL SUMMARY (3 cols) ═══════════ */}
           <div className="lg:col-span-3 order-2 lg:order-2">
             <div className="space-y-4">
-              {/* Deal Readiness Card */}
-              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium text-xs flex items-center gap-1.5">
-                    <CheckCircle2 size={13} className="text-primary" strokeWidth={1.5} />
-                    جاهزية الصفقة
-                  </h3>
-                  <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-md", 
-                    readinessPercent >= 70 ? "bg-success/10 text-success" : 
-                    readinessPercent >= 40 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive"
-                  )}>
-                    {readinessPercent}%
-                  </span>
-                </div>
-                
-                <div className="w-full h-1.5 rounded-full bg-muted/60 mb-3">
-                  <div
-                    className={cn("h-full rounded-full transition-all duration-500",
-                      readinessPercent >= 70 ? "bg-success" : readinessPercent >= 40 ? "bg-warning" : "bg-destructive"
-                    )}
-                    style={{ width: `${readinessPercent}%` }}
-                  />
+              {/* Deal Overview Card */}
+              <div className="bg-card rounded-2xl shadow-soft border border-border/20 overflow-hidden">
+                {/* Header with listing photo */}
+                <div className="relative h-28 bg-gradient-to-b from-primary/8 to-transparent">
+                  {listing?.photos && Array.isArray(listing.photos) && (listing.photos as string[]).length > 0 ? (
+                    <img src={(listing.photos as string[])[0]} alt="" className="w-full h-full object-cover opacity-40" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-bl from-primary/10 to-accent/5" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
+                  <div className="absolute bottom-3 right-4 left-4">
+                    <h3 className="font-semibold text-sm leading-tight line-clamp-1">{listingTitle}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={cn("text-[9px] font-medium px-2 py-0.5 rounded-full",
+                        readinessPercent >= 70 ? "bg-success/15 text-success" :
+                        readinessPercent >= 40 ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive"
+                      )}>
+                        جاهزية {readinessPercent}%
+                      </span>
+                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{statusLabel}</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">الحالة</span>
-                    <span className="text-primary font-medium">{statusLabel}</span>
+                {/* Key metrics grid */}
+                <div className="grid grid-cols-3 gap-px bg-border/10 border-b border-border/10">
+                  <div className="bg-card p-3 text-center">
+                    <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+                      <Banknote size={11} strokeWidth={1.5} />
+                      <span className="text-[9px]">السعر المطلوب</span>
+                    </div>
+                    <p className="text-xs font-bold">{listing?.price ? `${Number(listing.price).toLocaleString("en-US")}` : "—"}</p>
+                    <p className="text-[8px] text-muted-foreground">ر.س</p>
                   </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">الرسائل</span>
-                    <span className="font-medium">{messages.length}</span>
+                  <div className="bg-card p-3 text-center">
+                    <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+                      <TrendingUp size={11} strokeWidth={1.5} />
+                      <span className="text-[9px]">السعر المتفق</span>
+                    </div>
+                    <p className="text-xs font-bold">{deal.agreed_price ? `${Number(deal.agreed_price).toLocaleString("en-US")}` : "—"}</p>
+                    <p className="text-[8px] text-muted-foreground">ر.س</p>
                   </div>
-                  {deal.agreed_price && (
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">السعر المتفق</span>
-                      <span className="font-medium">{Number(deal.agreed_price).toLocaleString("en-US")} ر.س</span>
+                  <div className="bg-card p-3 text-center">
+                    <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
+                      <MessageSquare size={11} strokeWidth={1.5} />
+                      <span className="text-[9px]">الرسائل</span>
+                    </div>
+                    <p className="text-xs font-bold">{messages.length}</p>
+                    <p className="text-[8px] text-muted-foreground">رسالة</p>
+                  </div>
+                </div>
+
+                {/* Deal details */}
+                <div className="p-3 space-y-2 text-[11px]">
+                  {listing?.city && (
+                    <div className="flex items-center gap-2">
+                      <MapPin size={12} className="text-muted-foreground shrink-0" strokeWidth={1.5} />
+                      <span className="text-muted-foreground">الموقع:</span>
+                      <span className="font-medium mr-auto">{listing.city}{listing.district ? ` — ${listing.district}` : ""}</span>
+                    </div>
+                  )}
+                  {listing?.deal_type && (
+                    <div className="flex items-center gap-2">
+                      <Tag size={12} className="text-muted-foreground shrink-0" strokeWidth={1.5} />
+                      <span className="text-muted-foreground">نوع الصفقة:</span>
+                      <span className="font-medium mr-auto">{listing.deal_type}</span>
+                    </div>
+                  )}
+                  {listing?.business_activity && (
+                    <div className="flex items-center gap-2">
+                      <Building2 size={12} className="text-muted-foreground shrink-0" strokeWidth={1.5} />
+                      <span className="text-muted-foreground">النشاط:</span>
+                      <span className="font-medium mr-auto">{listing.business_activity}</span>
+                    </div>
+                  )}
+                  {listing?.category && (
+                    <div className="flex items-center gap-2">
+                      <Info size={12} className="text-muted-foreground shrink-0" strokeWidth={1.5} />
+                      <span className="text-muted-foreground">التصنيف:</span>
+                      <span className="font-medium mr-auto">{listing.category}</span>
+                    </div>
+                  )}
+                  {deal.created_at && (
+                    <div className="flex items-center gap-2">
+                      <Calendar size={12} className="text-muted-foreground shrink-0" strokeWidth={1.5} />
+                      <span className="text-muted-foreground">بدء الصفقة:</span>
+                      <span className="font-medium mr-auto">{new Date(deal.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" })}</span>
                     </div>
                   )}
                 </div>
 
-                {/* Interactive readiness steps */}
+                {/* Readiness progress bar */}
+                <div className="px-3 pb-1">
+                  <div className="w-full h-1 rounded-full bg-muted/60">
+                    <div
+                      className={cn("h-full rounded-full transition-all duration-500",
+                        readinessPercent >= 70 ? "bg-success" : readinessPercent >= 40 ? "bg-warning" : "bg-destructive"
+                      )}
+                      style={{ width: `${readinessPercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Readiness steps (collapsible) */}
                 {(() => {
                   const allSteps = [
                     { key: "buyer_verified", label: "توثيق المشتري", factor: "مشتري غير موثق", action: "verify" as const, path: "/dashboard", done: profile?.is_verified === true || (profile?.verification_level !== "none") },
@@ -483,48 +545,57 @@ const NegotiationPage = () => {
                   const riskFactors = (deal.risk_factors as string[]) || [];
                   const relevantSteps = allSteps.filter(s => riskFactors.includes(s.factor) || s.done);
                   if (relevantSteps.length === 0) return null;
+                  const incomplete = relevantSteps.filter(s => !s.done);
 
                   return (
-                    <div className="mt-3 pt-3 border-t border-border/20">
-                      <p className="text-[10px] text-muted-foreground mb-2">خطوات الجاهزية:</p>
-                      <div className="space-y-1.5">
-                        {relevantSteps.map((step) => (
-                          <div key={step.key} className="flex items-center gap-2 text-[10px] group">
-                            {step.done ? (
-                              <div className="w-4 h-4 rounded-full bg-success/15 flex items-center justify-center shrink-0">
-                                <CheckCircle2 size={10} className="text-success" strokeWidth={2} />
-                              </div>
-                            ) : (
-                              <div className="w-4 h-4 rounded-full bg-warning/15 flex items-center justify-center shrink-0">
-                                <div className="w-1.5 h-1.5 rounded-full bg-warning" />
-                              </div>
-                            )}
-                            <span className={cn("flex-1", step.done ? "text-muted-foreground/50 line-through" : "text-muted-foreground")}>
-                              {step.done ? step.label : step.factor}
-                            </span>
-                            {!step.done && (
-                              step.action === "chat" ? (
-                                <button
-                                  onClick={() => {
-                                    const chatInput = document.querySelector<HTMLInputElement>('input[placeholder="اكتب رسالتك..."]');
-                                    chatInput?.focus();
-                                  }}
-                                  className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover:opacity-100"
-                                >
-                                  {step.label}
-                                </button>
+                    <div className="px-3 pb-3 pt-2">
+                      <details className="group">
+                        <summary className="flex items-center gap-1.5 cursor-pointer text-[10px] text-muted-foreground hover:text-foreground transition-colors list-none">
+                          <ChevronDown size={12} className="transition-transform group-open:rotate-180" strokeWidth={1.5} />
+                          <span>خطوات الجاهزية</span>
+                          {incomplete.length > 0 && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-warning/10 text-warning font-medium">{incomplete.length} متبقية</span>
+                          )}
+                        </summary>
+                        <div className="mt-2 space-y-1.5">
+                          {relevantSteps.map((step) => (
+                            <div key={step.key} className="flex items-center gap-2 text-[10px] group/step">
+                              {step.done ? (
+                                <div className="w-4 h-4 rounded-full bg-success/15 flex items-center justify-center shrink-0">
+                                  <CheckCircle2 size={10} className="text-success" strokeWidth={2} />
+                                </div>
                               ) : (
-                                <Link
-                                  to={step.path}
-                                  className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover:opacity-100"
-                                >
-                                  {step.label}
-                                </Link>
-                              )
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                                <div className="w-4 h-4 rounded-full bg-warning/15 flex items-center justify-center shrink-0">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-warning" />
+                                </div>
+                              )}
+                              <span className={cn("flex-1", step.done ? "text-muted-foreground/50 line-through" : "text-muted-foreground")}>
+                                {step.done ? step.label : step.factor}
+                              </span>
+                              {!step.done && (
+                                step.action === "chat" ? (
+                                  <button
+                                    onClick={() => {
+                                      const chatInput = document.querySelector<HTMLInputElement>('input[placeholder="اكتب رسالتك..."]');
+                                      chatInput?.focus();
+                                    }}
+                                    className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover/step:opacity-100"
+                                  >
+                                    {step.label}
+                                  </button>
+                                ) : (
+                                  <Link
+                                    to={step.path}
+                                    className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-70 group-hover/step:opacity-100"
+                                  >
+                                    {step.label}
+                                  </Link>
+                                )
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </details>
                     </div>
                   );
                 })()}
