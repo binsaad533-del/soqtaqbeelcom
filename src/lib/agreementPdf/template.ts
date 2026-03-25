@@ -33,14 +33,17 @@ const safeText = (value?: string | null, fallback = "—") => {
   return escapeHtml(cleaned && cleaned.length > 0 ? cleaned : fallback);
 };
 
+const toEnDigits = (s: string) => s.replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+
 const formatDate = (value?: string | null) => {
   if (!value) return "—";
   try {
-    return new Intl.DateTimeFormat("ar-SA", {
+    const formatted = new Intl.DateTimeFormat("ar-SA", {
       year: "numeric",
       month: "long",
       day: "numeric",
     }).format(new Date(value));
+    return toEnDigits(formatted);
   } catch {
     return value;
   }
