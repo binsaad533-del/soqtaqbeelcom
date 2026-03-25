@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
+import { generateAgreementPdf } from "@/lib/generateAgreementPdf";
 import { useParams, Link } from "react-router-dom";
 import {
   Check, Download, ArrowRight, FileText, Shield, Clock, AlertTriangle,
@@ -74,47 +75,45 @@ const AgreementPage = () => {
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
-  const agreementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadData();
   }, [id]);
 
   const handleDownloadPdf = async () => {
-    if (!agreementRef.current) return;
+    if (!agreement) return;
     setPdfLoading(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
-      const { jsPDF } = await import("jspdf");
-
-      const canvas = await html2canvas(agreementRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
+      await generateAgreementPdf({
+        agreementNumber: agreement.agreement_number,
+        version: agreement.version,
+        createdAt: agreement.created_at,
+        dealTitle: agreement.deal_title,
+        dealType: t(agreement.deal_type, DEAL_TYPE_LABELS),
+        location: agreement.location,
+        businessActivity: agreement.business_activity,
+        buyerName: agreement.buyer_name,
+        buyerContact: agreement.buyer_contact,
+        sellerName: agreement.seller_name,
+        sellerContact: agreement.seller_contact,
+        financialTerms: agreement.financial_terms,
+        includedAssets: (agreement.included_assets || []) as string[],
+        excludedAssets: (agreement.excluded_assets || []) as string[],
+        leaseDetails: agreement.lease_details,
+        liabilities: agreement.liabilities,
+        licenseStatus: agreement.license_status,
+        documentsReferenced: (agreement.documents_referenced || []) as string[],
+        declarations: agreement.declarations,
+        importantNotes: (agreement.important_notes || []) as string[],
+        amendmentReason: agreement.amendment_reason,
+        buyerApproved: agreement.buyer_approved,
+        buyerApprovedAt: agreement.buyer_approved_at,
+        sellerApproved: agreement.seller_approved,
+        sellerApprovedAt: agreement.seller_approved_at,
+        commissionAmount: commission?.commission_amount ?? null,
+        commissionRate: commission?.commission_rate ?? null,
+        dealAmount: commission?.deal_amount ?? null,
       });
-
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgData = canvas.toDataURL("image/png");
-
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const title = agreement?.deal_title || agreement?.agreement_number || "agreement";
-      pdf.save(`اتفاقية-${title}.pdf`);
       toast.success("تم تحميل الاتفاقية بنجاح");
     } catch {
       toast.error("حدث خطأ أثناء إنشاء ملف PDF");
@@ -402,7 +401,7 @@ const AgreementPage = () => {
           </div>
         )}
 
-        <div ref={agreementRef} className="bg-card rounded-2xl shadow-soft overflow-hidden">
+        <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
           {/* Header */}
           <div className="p-6 border-b border-border/20 bg-gradient-to-l from-primary/5 to-transparent">
             <div className="flex items-center justify-between mb-4">
