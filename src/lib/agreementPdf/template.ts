@@ -429,6 +429,15 @@ const buildSections = (data: AgreementPdfData) => {
     ),
   );
 
+  // ── Recommendation to officially document the agreement ──
+  sections.push(
+    createNode(`
+      <div style="text-align:center;padding:14px 20px;opacity:0.55;font-size:10px;line-height:2;color:hsl(215 16% 45%);font-family:${FONT_FAMILY};">
+        ننصح بتوثيق هذه الاتفاقية لدى الجهات الرسمية المعتمدة لضمان حفظ حقوق جميع الأطراف
+      </div>
+    `),
+  );
+
   return sections;
 };
 
