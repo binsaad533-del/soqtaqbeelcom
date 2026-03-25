@@ -471,24 +471,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
         <div className="space-y-4">
 
 
-          {/* Understanding score gate */}
-          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium flex items-center gap-2">
-                <Eye size={14} className="text-muted-foreground" />
-                درجة الاستيعاب عند التأكيد
-              </span>
-              <span className={cn("text-sm font-bold tabular-nums", scoreColor)}>
-                {understanding.score}%
-              </span>
-            </div>
-            <Progress value={understanding.score} className="h-1.5" />
-            {!understanding.canProceed && (
-              <p className="text-[11px] text-muted-foreground mt-2">
-                يجب أن تصل درجة الاستيعاب إلى {understanding.MIN_SCORE}% على الأقل مع مراجعة جميع الأقسام الحرجة.
-              </p>
-            )}
-          </div>
+
 
           {!submitted ? (
             <div className="bg-card rounded-2xl p-6 shadow-soft border border-primary/10">
