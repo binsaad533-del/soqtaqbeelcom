@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { FileText, Download, Maximize2 } from "lucide-react";
+import { FileText, Download, Maximize2, Loader2 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
 import type { NegotiationMessage } from "@/hooks/useDeals";
+import { toast } from "sonner";
 
 interface ChatMessageBubbleProps {
   msg: NegotiationMessage;
@@ -13,10 +14,39 @@ interface ChatMessageBubbleProps {
 
 export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: ChatMessageBubbleProps) {
   const [imgExpanded, setImgExpanded] = useState(false);
+  const [openingDoc, setOpeningDoc] = useState(false);
   const isAi = msg.sender_type === "ai" || msg.message_type === "ai_request" || msg.message_type === "ai_mediation";
   const isImage = msg.message_type === "image";
   const isDoc = msg.message_type === "document";
   const meta = (msg.metadata || {}) as Record<string, any>;
+
+  const openDocument = async () => {
+    if (!meta.file_url || openingDoc) return;
+
+    try {
+      setOpeningDoc(true);
+      const response = await fetch(meta.file_url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.download = meta.file_name || "document";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    } catch (error) {
+      console.error("[ChatMessageBubble] Failed to open document:", error);
+      toast.error("تعذر فتح الملف أو تحميله");
+    } finally {
+      setOpeningDoc(false);
+    }
+  };
 
   return (
     <>
@@ -60,24 +90,21 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
           ) : isDoc && meta.file_url ? (
             <button
               type="button"
-              onClick={() => {
-                const a = document.createElement('a');
-                a.href = meta.file_url;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-              }}
-              className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/30 hover:bg-background/80 transition-colors w-full text-right"
+              onClick={openDocument}
+              disabled={openingDoc}
+              className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/30 hover:bg-background/80 transition-colors w-full text-right disabled:opacity-70"
             >
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <FileText size={18} className="text-primary" />
+                {openingDoc ? <Loader2 size={18} className="text-primary animate-spin" /> : <FileText size={18} className="text-primary" />}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium truncate">{meta.file_name || "مستند"}</p>
                 <p className="text-[10px] text-muted-foreground">
-                  {meta.file_size ? `${(meta.file_size / 1024).toFixed(0)} KB` : "مستند مرفق"}
+                  {openingDoc
+                    ? "جاري فتح الملف..."
+                    : meta.file_size
+                      ? `${(meta.file_size / 1024).toFixed(0)} KB`
+                      : "مستند مرفق"}
                 </p>
               </div>
               <Download size={14} className="text-muted-foreground shrink-0" />
@@ -94,7 +121,6 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
         </div>
       </div>
 
-      {/* Full-screen image viewer */}
       {imgExpanded && meta.file_url && (
         <div
           className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
