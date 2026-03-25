@@ -909,6 +909,36 @@ export type Database = {
         }
         Relationships: []
       }
+      search_alerts: {
+        Row: {
+          created_at: string
+          filters: Json | null
+          id: string
+          is_active: boolean
+          notified_at: string | null
+          search_query: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json | null
+          id?: string
+          is_active?: boolean
+          notified_at?: string | null
+          search_query: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json | null
+          id?: string
+          is_active?: boolean
+          notified_at?: string | null
+          search_query?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       security_incidents: {
         Row: {
           affected_resource_id: string | null
