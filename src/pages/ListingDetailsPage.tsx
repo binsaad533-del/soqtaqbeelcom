@@ -57,12 +57,16 @@ const ListingDetailsPage = () => {
       console.log("[ListingDetails] Listing loaded:", { id, found: !!data, status: data?.status });
       setListing(data);
       if (data) {
-        const [profile, reviews] = await Promise.all([
+        const [profile, reviews, social] = await Promise.all([
           getProfile(data.owner_id),
           getSellerReviews(data.owner_id),
+          getLikesAndViews([data.id]),
         ]);
         setSellerProfile(profile);
         setSellerReviews(reviews);
+        setViewCount(social.views[data.id] || 0);
+        setLikeCount(social.likes[data.id] || 0);
+        setIsLiked(social.userLikes.has(data.id));
       }
     } catch (err: any) {
       console.error("[ListingDetails] Load failed:", { id, error: err?.message });
