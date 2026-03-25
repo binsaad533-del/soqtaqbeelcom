@@ -129,7 +129,7 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
 
       {/* Deal Type Tabs */}
       <Section label="نوع العملية">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-col gap-1.5">
           {dealTypes.map(dt => (
             <TabChip
               key={dt.id}
@@ -226,7 +226,7 @@ const TabChip = ({ active, onClick, children }: { active: boolean; onClick: () =
   <button
     onClick={onClick}
     className={cn(
-      "text-xs px-3.5 py-1.5 rounded-lg whitespace-nowrap transition-all font-medium",
+      "text-xs px-3.5 py-2 rounded-lg text-right transition-all font-medium w-full",
       active
         ? "bg-primary text-primary-foreground shadow-sm"
         : "bg-muted/50 text-muted-foreground hover:bg-muted"
