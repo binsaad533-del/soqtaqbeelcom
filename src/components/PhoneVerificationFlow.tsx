@@ -42,6 +42,7 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
   const [attempts, setAttempts] = useState(0);
   const [resendTimer, setResendTimer] = useState(0);
   const [deliveryChannel, setDeliveryChannel] = useState<"sms" | "call">("sms");
+  const [aiMessage, setAiMessage] = useState("يالله حيّه، دخل رقمك عشان نتحقق 📱");
 
   // If already verified
   useEffect(() => {
