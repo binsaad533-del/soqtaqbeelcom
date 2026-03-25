@@ -77,7 +77,7 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-medium text-muted-foreground">شارة إعلانك في السوق</p>
+            <p className="text-[10px] font-medium text-muted-foreground">شارة الإعلان في السوق</p>
             <p className={cn("text-[11px] font-semibold", style.text)}>
               {style.tier === "trusted" ? "✓ موثوق" : style.tier === "yellow" ? "⚠ يحتاج تحسين" : style.tier === "orange" ? "⚠ ضعيف" : "✗ غير مكتمل"}
             </p>
