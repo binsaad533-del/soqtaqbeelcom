@@ -189,7 +189,7 @@ const MarketplacePage = () => {
           {/* Desktop filters sidebar */}
           {!isMobile && (
             <aside className="w-64 shrink-0">
-              <div className="sticky top-[108px] flex flex-col gap-4 max-h-[calc(100vh-8rem)]">
+              <div className="sticky top-24 flex flex-col gap-4 max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-border">
                 <SmartSearchBar onApplyFilters={handleSmartSearch} resultCount={filtered.length} />
                 <div className="bg-card rounded-2xl p-4 shadow-soft overflow-y-auto min-h-0">
                   <MarketplaceFilters filters={filters} onChange={setFilters} resultCount={filtered.length} />
