@@ -11,6 +11,7 @@ const footerLinks = [
   { label: "كيف تعمل المنصة", path: "/how-it-works" },
   { label: "تواصل معنا", path: "/contact" },
   { label: "مركز المساعدة", path: "/help" },
+  { label: "المدونة", path: "/blog" },
 ];
 
 const Footer = () => {

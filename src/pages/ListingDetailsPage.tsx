@@ -1,5 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Flag } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
@@ -22,6 +22,7 @@ import SarSymbol from "@/components/SarSymbol";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
+import ReportListingDialog from "@/components/ReportListingDialog";
 
 
 const ListingDetailsPage = () => {
