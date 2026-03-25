@@ -148,14 +148,14 @@ const MarketplacePage = () => {
         </div>
 
         {/* Mobile: Smart search */}
-        {isMobile && <SmartSearchBar onApplyFilters={handleSmartSearch} />}
+        {isMobile && <SmartSearchBar onApplyFilters={handleSmartSearch} resultCount={filtered.length} />}
 
         <div className="flex gap-6">
           {/* Desktop filters sidebar */}
           {!isMobile && (
             <aside className="w-64 shrink-0">
               <div className="sticky top-24 space-y-4">
-                <SmartSearchBar onApplyFilters={handleSmartSearch} />
+                <SmartSearchBar onApplyFilters={handleSmartSearch} resultCount={filtered.length} />
                 <div className="bg-card rounded-2xl p-4 shadow-soft">
                   <MarketplaceFilters filters={filters} onChange={setFilters} resultCount={filtered.length} />
                 </div>
