@@ -78,7 +78,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <>
                 <Link
                   to="/create-listing"
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-foreground text-background text-[12px] font-medium hover:bg-foreground/90 transition-colors"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[12px] font-medium hover:bg-primary/90 transition-colors"
                 >
                   <Plus size={13} strokeWidth={2} />
                   أضف فرصة
