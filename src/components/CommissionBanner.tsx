@@ -11,7 +11,7 @@ const CommissionBanner = ({ dealAmount, showDetails = false, className = "" }: P
   const amount = dealAmount ? calculateCommission(dealAmount) : null;
 
   return (
-    <div className={`bg-muted/30 rounded-xl p-4 border border-border/30 ${className}`}>
+    <div className={`bg-muted/20 rounded-xl p-3 border border-border/20 ${className}`}>
       <div className="flex items-start gap-2.5">
         <Info size={14} className="text-muted-foreground mt-0.5 shrink-0" />
         <div className="flex-1">
