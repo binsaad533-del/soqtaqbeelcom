@@ -207,7 +207,7 @@ const MarketplaceTicker = () => {
           oneSetWidth += (children[i] as HTMLElement).offsetWidth + 24; // gap
         }
         // ~50px per second scroll speed
-        setDuration(Math.max(25, Math.round(oneSetWidth / 50)));
+        setDuration(Math.max(8, Math.round(oneSetWidth / 150)));
       }
     }
   }, [items]);
