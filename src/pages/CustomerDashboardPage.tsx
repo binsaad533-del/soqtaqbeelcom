@@ -375,8 +375,8 @@ const CustomerDashboardPage = () => {
         {/* ═══ MAIN CONTENT ═══ */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-reveal" style={{ animationDelay: '420ms' }}>
 
-          {/* ── Left: Main content area (2 cols) ── */}
-          <div className="lg:col-span-2 space-y-5">
+          {/* ── Main content area (2 cols) ── */}
+          <div className="lg:col-span-2 space-y-5 lg:order-2 order-2">
 
             {/* Tabs + Search */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -516,8 +516,8 @@ const CustomerDashboardPage = () => {
             )}
           </div>
 
-          {/* ── Right: Sidebar (1 col) ── */}
-          <div className="space-y-4">
+          {/* ── Sidebar (1 col) — order-1 so it appears first (right in RTL) ── */}
+          <div className="space-y-4 lg:order-1 order-1">
 
             {/* Profile card */}
             <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
