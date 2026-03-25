@@ -346,8 +346,8 @@ const CustomerDashboardPage = () => {
 
               {/* Phone verification (collapsible) */}
               {!isPhoneVerified && profile?.phone && showPhoneVerify && (
-                <div className="pr-10">
-                  <PhoneVerificationFlow initialPhone={profile.phone} onVerified={() => window.location.reload()} mode="inline" />
+                <div className="pr-10 pt-1">
+                  <PhoneVerificationFlow initialPhone={profile.phone} onVerified={() => window.location.reload()} mode="inline" skipPhoneStep />
                 </div>
               )}
 
