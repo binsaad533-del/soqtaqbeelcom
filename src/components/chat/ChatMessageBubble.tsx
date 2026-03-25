@@ -60,7 +60,15 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
           ) : isDoc && meta.file_url ? (
             <button
               type="button"
-              onClick={() => window.open(meta.file_url, '_blank', 'noopener,noreferrer')}
+              onClick={() => {
+                const a = document.createElement('a');
+                a.href = meta.file_url;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              }}
               className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/30 hover:bg-background/80 transition-colors w-full text-right"
             >
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
