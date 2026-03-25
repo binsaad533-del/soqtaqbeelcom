@@ -3,6 +3,8 @@ import { calculateTransparency } from "@/lib/transparencyScore";
 import { Link } from "react-router-dom";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
+import { useListingSocial } from "@/hooks/useListingSocial";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import AiStar from "@/components/AiStar";
@@ -12,7 +14,7 @@ import MarketplaceFilters, { defaultFilters, type FilterState } from "@/componen
 import MobileFilterSheet from "@/components/marketplace/MobileFilterSheet";
 import SmartSearchBar from "@/components/marketplace/SmartSearchBar";
 import ComparePanel, { type CompareItem } from "@/components/marketplace/ComparePanel";
-import { MapPin, Eye, ShieldCheck, GitCompareArrows, Check, Lightbulb } from "lucide-react";
+import { MapPin, Eye, ShieldCheck, GitCompareArrows, Check, Lightbulb, Heart, Share2 } from "lucide-react";
 import MarketplaceTicker from "@/components/marketplace/MarketplaceTicker";
 import { toast } from "sonner";
 
@@ -24,6 +26,8 @@ interface EnrichedListing extends Listing {
 const MarketplacePage = () => {
   const { getPublishedListings } = useListings();
   const { getAllProfiles } = useProfiles();
+  const { getLikesAndViews, toggleLike } = useListingSocial();
+  const { user } = useAuthContext();
   const isMobile = useIsMobile();
   const [listings, setListings] = useState<Listing[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -31,6 +35,11 @@ const MarketplacePage = () => {
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [compareItems, setCompareItems] = useState<CompareItem[]>([]);
   const [similarActivities, setSimilarActivities] = useState<string[]>([]);
+
+  // Social data
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
+  const [viewCounts, setViewCounts] = useState<Record<string, number>>({});
+  const [userLikedIds, setUserLikedIds] = useState<Set<string>>(new Set());
 
   const handleSmartSearch = (partial: Partial<FilterState>, _message: string, similar?: string[]) => {
     setFilters(prev => ({ ...prev, ...partial }));
@@ -80,9 +89,35 @@ const MarketplacePage = () => {
       setListings(listingsData);
       setProfiles(profilesData);
       setLoading(false);
+
+      // Load social data
+      if (listingsData.length > 0) {
+        const ids = listingsData.map(l => l.id);
+        const { likes, views, userLikes } = await getLikesAndViews(ids);
+        setLikeCounts(likes);
+        setViewCounts(views);
+        setUserLikedIds(userLikes);
+      }
     };
     load();
-  }, [getPublishedListings, getAllProfiles]);
+  }, [getPublishedListings, getAllProfiles, getLikesAndViews]);
+
+  const handleToggleLike = useCallback(async (listingId: string) => {
+    if (!user) {
+      toast.error("سجّل دخولك أولاً للإعجاب");
+      return;
+    }
+    const liked = await toggleLike(listingId);
+    setUserLikedIds(prev => {
+      const next = new Set(prev);
+      if (liked) next.add(listingId); else next.delete(listingId);
+      return next;
+    });
+    setLikeCounts(prev => ({
+      ...prev,
+      [listingId]: (prev[listingId] || 0) + (liked ? 1 : -1),
+    }));
+  }, [user, toggleLike]);
 
   const enrichedListings = useMemo((): EnrichedListing[] => {
     const profileMap = new Map(profiles.map(p => [p.user_id, p]));
@@ -125,19 +160,13 @@ const MarketplacePage = () => {
     return result;
   }, [enrichedListings, filters]);
 
-  // Similar results: listings matching similar activities but NOT the main filter
+  // Similar results
   const similarResults = useMemo(() => {
     if (similarActivities.length === 0 || filters.activity === "الكل") return [];
-
     return enrichedListings.filter(l => {
-      // Exclude listings already in main results
       if (l.category === filters.activity || l.business_activity?.includes(filters.activity)) return false;
-      // Check if matches any similar activity
-      const matchesSimilar = similarActivities.some(sa =>
-        l.category === sa || l.business_activity?.includes(sa)
-      );
+      const matchesSimilar = similarActivities.some(sa => l.category === sa || l.business_activity?.includes(sa));
       if (!matchesSimilar) return false;
-      // Apply other filters (city, price, deal type)
       if (filters.city === "📍 بالقرب مني" && filters.nearbyCities?.length) {
         if (!filters.nearbyCities.includes(l.city || "")) return false;
       } else if (filters.city !== "الكل" && filters.city !== "📍 بالقرب مني" && l.city !== filters.city) return false;
@@ -157,6 +186,13 @@ const MarketplacePage = () => {
 
   const compareIds = useMemo(() => new Set(compareItems.map(i => i.id)), [compareItems]);
 
+  // Check online status based on last_activity (within 15 min = online)
+  const isOnline = useCallback((profile?: Profile | null) => {
+    if (!profile?.last_activity) return false;
+    const diff = Date.now() - new Date(profile.last_activity).getTime();
+    return diff < 15 * 60 * 1000;
+  }, []);
+
   return (
     <div className={cn("py-8", compareItems.length > 0 && "pb-24")}>
       <div className="container max-w-5xl">
@@ -173,14 +209,11 @@ const MarketplacePage = () => {
           </div>
         </div>
 
-        {/* Live Market Ticker */}
         <MarketplaceTicker />
 
-        {/* Mobile: Smart search */}
         {isMobile && <SmartSearchBar onApplyFilters={handleSmartSearch} resultCount={filtered.length} />}
 
         <div className="flex gap-6">
-          {/* Desktop filters sidebar */}
           {!isMobile && (
             <aside className="w-72 shrink-0">
               <div className="sticky top-[68px] flex flex-col gap-4 max-h-[calc(100vh-76px)]">
@@ -192,7 +225,6 @@ const MarketplacePage = () => {
             </aside>
           )}
 
-          {/* Listings grid */}
           <div className="flex-1 min-w-0 space-y-6">
             {loading ? (
               <div className="text-center py-16 text-sm text-muted-foreground">جاري التحميل...</div>
@@ -203,7 +235,6 @@ const MarketplacePage = () => {
               </div>
             ) : (
               <>
-                {/* Exact results */}
                 {filtered.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {filtered.map(listing => (
@@ -212,6 +243,11 @@ const MarketplacePage = () => {
                         listing={listing}
                         isComparing={compareIds.has(listing.id)}
                         onToggleCompare={() => toggleCompare(listing)}
+                        likeCount={likeCounts[listing.id] || 0}
+                        viewCount={viewCounts[listing.id] || 0}
+                        isLiked={userLikedIds.has(listing.id)}
+                        onToggleLike={() => handleToggleLike(listing.id)}
+                        isOnline={isOnline(listing.sellerProfile)}
                       />
                     ))}
                   </div>
@@ -224,7 +260,6 @@ const MarketplacePage = () => {
                   </div>
                 )}
 
-                {/* Similar results section */}
                 {similarResults.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3 px-1">
@@ -241,6 +276,11 @@ const MarketplacePage = () => {
                           listing={listing}
                           isComparing={compareIds.has(listing.id)}
                           onToggleCompare={() => toggleCompare(listing)}
+                          likeCount={likeCounts[listing.id] || 0}
+                          viewCount={viewCounts[listing.id] || 0}
+                          isLiked={userLikedIds.has(listing.id)}
+                          onToggleLike={() => handleToggleLike(listing.id)}
+                          isOnline={isOnline(listing.sellerProfile)}
                         />
                       ))}
                     </div>
@@ -252,19 +292,38 @@ const MarketplacePage = () => {
         </div>
       </div>
 
-      {/* Compare Panel */}
       <ComparePanel items={compareItems} onRemove={removeCompare} onClear={clearCompare} />
     </div>
   );
 };
 
-const ListingCard = ({ listing, isComparing, onToggleCompare }: {
+const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCount, isLiked, onToggleLike, isOnline }: {
   listing: EnrichedListing;
   isComparing: boolean;
   onToggleCompare: () => void;
+  likeCount: number;
+  viewCount: number;
+  isLiked: boolean;
+  onToggleLike: () => void;
+  isOnline: boolean;
 }) => {
   const seller = listing.sellerProfile;
   const badges = seller ? getSellerBadges(seller) : [];
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/listing/${listing.id}`;
+    const title = listing.title || listing.business_activity || "فرصة تقبيل";
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+      } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success("تم نسخ الرابط");
+    }
+  };
 
   return (
     <div className={cn(
@@ -278,19 +337,43 @@ const ListingCard = ({ listing, isComparing, onToggleCompare }: {
         </div>
       )}
 
-      {/* Compare toggle button */}
-      <button
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleCompare(); }}
-        className={cn(
-          "absolute top-2 left-2 z-10 w-8 h-8 rounded-lg flex items-center justify-center transition-all",
-          isComparing
-            ? "bg-primary text-primary-foreground shadow-soft"
-            : "bg-card/80 backdrop-blur text-muted-foreground hover:bg-card hover:text-primary border border-border/50"
-        )}
-        title={isComparing ? "إزالة من المقارنة" : "إضافة للمقارنة"}
-      >
-        {isComparing ? <Check size={14} strokeWidth={2} /> : <GitCompareArrows size={14} strokeWidth={1.5} />}
-      </button>
+      {/* Top-left action buttons */}
+      <div className="absolute top-2 left-2 z-10 flex items-center gap-1">
+        {/* Compare */}
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleCompare(); }}
+          className={cn(
+            "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
+            isComparing
+              ? "bg-primary text-primary-foreground shadow-soft"
+              : "bg-card/80 backdrop-blur text-muted-foreground hover:bg-card hover:text-primary border border-border/50"
+          )}
+          title={isComparing ? "إزالة من المقارنة" : "إضافة للمقارنة"}
+        >
+          {isComparing ? <Check size={12} strokeWidth={2} /> : <GitCompareArrows size={12} strokeWidth={1.5} />}
+        </button>
+        {/* Like */}
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleLike(); }}
+          className={cn(
+            "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
+            isLiked
+              ? "bg-red-500/15 text-red-500"
+              : "bg-card/80 backdrop-blur text-muted-foreground hover:bg-card hover:text-red-500 border border-border/50"
+          )}
+          title="إعجاب"
+        >
+          <Heart size={12} strokeWidth={1.5} fill={isLiked ? "currentColor" : "none"} />
+        </button>
+        {/* Share */}
+        <button
+          onClick={handleShare}
+          className="w-7 h-7 rounded-lg flex items-center justify-center bg-card/80 backdrop-blur text-muted-foreground hover:bg-card hover:text-primary border border-border/50 transition-all"
+          title="مشاركة"
+        >
+          <Share2 size={12} strokeWidth={1.5} />
+        </button>
+      </div>
 
       <Link to={`/listing/${listing.id}`}>
         <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center relative">
@@ -304,6 +387,24 @@ const ListingCard = ({ listing, isComparing, onToggleCompare }: {
           )}
         </div>
         <div className="p-4">
+          {/* Seller info with online status */}
+          {seller && (
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <TrustBadge score={seller.trust_score} verificationLevel={seller.verification_level} size="sm" showScore showBadges badges={badges.slice(0, 2)} />
+              </div>
+              <div className="flex items-center gap-1" title={isOnline ? "متواجد الآن" : "غير متواجد"}>
+                <span className={cn(
+                  "w-1.5 h-1.5 rounded-full",
+                  isOnline ? "bg-emerald-500" : "bg-red-400"
+                )} />
+                <span className="text-[8px] text-muted-foreground/70">
+                  {isOnline ? "متواجد" : "غير متواجد"}
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">
             {listing.title || listing.business_activity || "فرصة تقبيل"}
           </div>
@@ -322,12 +423,9 @@ const ListingCard = ({ listing, isComparing, onToggleCompare }: {
               {listing.district && `${listing.district}, `}{listing.city || "—"}
             </div>
           )}
-          {seller && (
-            <div className="mb-2">
-              <TrustBadge score={seller.trust_score} verificationLevel={seller.verification_level} size="sm" showScore showBadges badges={badges.slice(0, 2)} />
-            </div>
-          )}
-          <div className="flex items-center justify-between">
+
+          {/* Price + transparency */}
+          <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-primary">
               {listing.price ? `${Number(listing.price).toLocaleString()} ر.س` : "—"}
             </span>
@@ -346,6 +444,18 @@ const ListingCard = ({ listing, isComparing, onToggleCompare }: {
                 </div>
               );
             })()}
+          </div>
+
+          {/* Social stats bar */}
+          <div className="flex items-center gap-3 pt-2 border-t border-border/10">
+            <div className="flex items-center gap-1 text-muted-foreground/60">
+              <Eye size={11} strokeWidth={1.3} />
+              <span className="text-[10px] tabular-nums">{viewCount}</span>
+            </div>
+            <div className="flex items-center gap-1 text-muted-foreground/60">
+              <Heart size={11} strokeWidth={1.3} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "text-red-400" : ""} />
+              <span className="text-[10px] tabular-nums">{likeCount}</span>
+            </div>
           </div>
         </div>
       </Link>

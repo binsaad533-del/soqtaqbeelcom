@@ -631,6 +631,27 @@ export type Database = {
           },
         ]
       }
+      listing_likes: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       listing_offers: {
         Row: {
           buyer_id: string
@@ -684,6 +705,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      listing_views: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       listings: {
         Row: {

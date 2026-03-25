@@ -12,6 +12,7 @@ import ListingOfferForm from "@/components/ListingOfferForm";
 import SellerOffersPanel from "@/components/SellerOffersPanel";
 import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
+import { useListingSocial } from "@/hooks/useListingSocial";
 import { useDeals } from "@/hooks/useDeals";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
@@ -26,6 +27,7 @@ const ListingDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const { recordView } = useListingSocial();
   const { getListing } = useListings();
   const { createDeal, getMyDeals } = useDeals();
   const { getProfile } = useProfiles();
@@ -66,6 +68,7 @@ const ListingDetailsPage = () => {
 
   useEffect(() => {
     loadListing();
+    if (id) recordView(id).catch(() => {});
     // Check if the current user has an active deal on this listing
     if (user && id) {
       getMyDeals().then(deals => {
