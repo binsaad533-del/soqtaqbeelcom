@@ -165,10 +165,10 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
           placeholder="وش تدور عليه؟ الـAI يساعدك…"
           disabled={loading}
           className={cn(
-            "w-full pr-10 pl-9 py-2.5 rounded-xl border text-sm transition-all",
-            "bg-background border-border/40",
-            "focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/10",
-            "placeholder:text-muted-foreground/50",
+            "w-full pr-10 pl-9 py-3 rounded-xl border text-sm transition-all",
+            "bg-primary/5 border-primary/20 shadow-sm",
+            "focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15 focus:bg-background",
+            "placeholder:text-muted-foreground/60 placeholder:font-medium",
             loading && "opacity-70"
           )}
         />
