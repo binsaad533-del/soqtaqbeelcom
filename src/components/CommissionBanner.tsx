@@ -1,5 +1,6 @@
 import { COMMISSION_RATE, calculateCommission, BANK_DETAILS } from "@/hooks/useCommissions";
 import { Info } from "lucide-react";
+import SarSymbol from "@/components/SarSymbol";
 
 interface Props {
   dealAmount: number | null | undefined;
@@ -23,11 +24,11 @@ const CommissionBanner = ({ dealAmount, showDetails = false, className = "" }: P
             <div className="mt-2 pt-2 border-t border-border/20 space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">قيمة الصفقة</span>
-                <span className="font-medium">{Number(dealAmount).toLocaleString("en-US")} ر.س</span>
+                <span className="font-medium">{Number(dealAmount).toLocaleString("en-US")} <SarSymbol size={10} /></span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">العمولة ({COMMISSION_RATE * 100}%)</span>
-                <span className="font-medium text-primary">{amount.toLocaleString("en-US")} ر.س</span>
+                <span className="font-medium text-primary">{amount.toLocaleString("en-US")} <SarSymbol size={10} /></span>
               </div>
               <div className="pt-1.5 mt-1.5 border-t border-border/15">
                 <p className="text-[10px] text-muted-foreground">

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { X, GitCompareArrows, MapPin, Eye, ShieldCheck, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
+import SarSymbol from "@/components/SarSymbol";
 
 export interface CompareItem {
   id: string;
@@ -131,7 +132,7 @@ const ComparePanel = ({ items, onRemove, onClear }: Props) => {
                 <tbody>
                   <CompareRow label="السعر" items={items} render={item => (
                     <span className="font-semibold text-primary">
-                      {item.price ? `${Number(item.price).toLocaleString()} ر.س` : "—"}
+                      {item.price ? <>{Number(item.price).toLocaleString()} <SarSymbol size={9} /></> : "—"}
                     </span>
                   )} highlight="lowest-price" />
                   <CompareRow label="المدينة" items={items} render={item => (

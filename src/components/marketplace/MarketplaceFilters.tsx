@@ -4,6 +4,7 @@ import { Search, MapPin, RotateCcw, ChevronDown, ChevronUp, Loader2 } from "luci
 import { Slider } from "@/components/ui/slider";
 import { requestGeolocation, findNearestCity, getNearbyCities } from "@/lib/saudiCities";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 
 const dealTypes = [
   { id: "الكل", label: "الكل" },
@@ -196,8 +197,8 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
             className="my-2"
           />
           <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-1">
-            <span>{filters.priceRange[0].toLocaleString()} ر.س</span>
-            <span>{filters.priceRange[1].toLocaleString()} ر.س</span>
+            <span>{filters.priceRange[0].toLocaleString()} <SarSymbol size={8} /></span>
+            <span>{filters.priceRange[1].toLocaleString()} <SarSymbol size={8} /></span>
           </div>
         </div>
       </Section>

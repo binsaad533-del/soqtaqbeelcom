@@ -379,14 +379,14 @@ const MonitoringDashboardPage = () => {
               icon={TrendingUp}
               label="إجمالي العمولة"
               value={`${stats.totalCommissionValue.toLocaleString("en-US")}`}
-              sub="ر.س"
+              sub="﷼"
               accent="green"
             />
             <StatCard
               icon={TrendingDown}
               label="غير محصلة"
               value={`${stats.unpaidCommissionValue.toLocaleString("en-US")}`}
-              sub="ر.س"
+              sub="﷼"
               accent="red"
             />
             <StatCard icon={AlertTriangle} label="التنبيهات" value={unresolvedAlerts.length} accent={unresolvedAlerts.length > 0 ? "red" : undefined} />

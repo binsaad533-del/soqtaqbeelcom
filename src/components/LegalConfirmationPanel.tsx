@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Shield, CheckCircle2, Clock, User, Phone, Mail, ImageIcon, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
@@ -287,7 +288,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
           )}
           {listing?.lease_duration && <Row label="مدة الإيجار" value={listing.lease_duration} />}
           {listing?.lease_remaining && <Row label="المتبقي من الإيجار" value={listing.lease_remaining} />}
-          {listing?.annual_rent && <Row label="الإيجار السنوي" value={`${listing.annual_rent.toLocaleString("en-US")} ر.س`} />}
+          {listing?.annual_rent && <Row label="الإيجار السنوي" value={<>{listing.annual_rent.toLocaleString("en-US")} <SarSymbol size={10} /></>} />}
           {listing?.municipality_license && <Row label="رخصة البلدية" value={listing.municipality_license} />}
           {listing?.civil_defense_license && <Row label="رخصة الدفاع المدني" value={listing.civil_defense_license} />}
           {listing?.surveillance_cameras && <Row label="كاميرات المراقبة" value={listing.surveillance_cameras} />}
@@ -306,7 +307,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
               <div key={i} className="flex items-center justify-between text-xs bg-muted/20 rounded-xl px-3 py-2">
                 <span className="text-foreground/80">{item.name || item.item || `عنصر ${i + 1}`}</span>
                 <span className="text-muted-foreground">
-                  {item.quantity ? `${item.quantity} ×` : ""} {item.price ? `${Number(item.price).toLocaleString("en-US")} ر.س` : ""}
+                  {item.quantity ? `${item.quantity} ×` : ""} {item.price ? <>{Number(item.price).toLocaleString("en-US")} <SarSymbol size={9} /></> : ""}
                 </span>
               </div>
             ))}
@@ -363,7 +364,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
       <div className="bg-primary/5 rounded-2xl p-5 border border-primary/15 text-center">
         <span className="text-xs text-muted-foreground block mb-1">السعر المتفق عليه</span>
         <span className="text-2xl font-bold text-primary tabular-nums">
-          {agreedPrice ? `${Number(agreedPrice).toLocaleString("en-US")} ر.س` : "غير محدد بعد"}
+          {agreedPrice ? <>{Number(agreedPrice).toLocaleString("en-US")} <SarSymbol size={18} /></> : "غير محدد بعد"}
         </span>
       </div>
 
@@ -430,7 +431,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
       {agreedPrice && (
         <div className="text-center pt-1">
           <p className="text-[10px] text-muted-foreground/50">
-            عمولة المنصة {COMMISSION_RATE * 100}% = {Math.round(Number(agreedPrice) * COMMISSION_RATE).toLocaleString("en-US")} ر.س
+            عمولة المنصة {COMMISSION_RATE * 100}% = {Math.round(Number(agreedPrice) * COMMISSION_RATE).toLocaleString("en-US")} <SarSymbol size={8} />
           </p>
         </div>
       )}
@@ -440,7 +441,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
 
 /* ─── Sub-components ─── */
 
-const Row = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
+const Row = ({ label, value, highlight }: { label: string; value: React.ReactNode; highlight?: boolean }) => (
   <div className="flex items-center justify-between text-xs">
     <span className="text-muted-foreground">{label}</span>
     <span className={cn("font-medium", highlight && "text-primary")}>{value}</span>

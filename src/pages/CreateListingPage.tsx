@@ -35,6 +35,7 @@ import { useListings } from "@/hooks/useListings";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
@@ -1407,7 +1408,7 @@ const CreateListingPage = () => {
                       </div>
                       {inventoryPricingMode === "bulk" && (
                         <div className="mt-3">
-                          <label className="text-[11px] text-muted-foreground mb-1 block">السعر الإجمالي لجميع الأصول (ر.س)</label>
+                          <label className="text-[11px] text-muted-foreground mb-1 block">السعر الإجمالي لجميع الأصول (<SarSymbol size={9} />)</label>
                           <input
                             type="text"
                             inputMode="numeric"
@@ -1420,7 +1421,7 @@ const CreateListingPage = () => {
                           />
                           {bulkInventoryPrice && (
                             <div className="text-[11px] text-primary mt-1 font-medium">
-                              {Number(bulkInventoryPrice).toLocaleString("en-US")} ر.س
+                              {Number(bulkInventoryPrice).toLocaleString("en-US")} <SarSymbol size={9} />
                             </div>
                           )}
                         </div>
@@ -1569,13 +1570,13 @@ const CreateListingPage = () => {
                                 return catTotal > 0 ? (
                                   <div key={cat} className="flex items-center justify-between text-[11px]">
                                     <span className="text-muted-foreground">{cat}</span>
-                                    <span className="text-foreground">{catTotal.toLocaleString("en-US")} ر.س</span>
+                                    <span className="text-foreground">{catTotal.toLocaleString("en-US")} <SarSymbol size={9} /></span>
                                   </div>
                                 ) : null;
                               })}
                               <div className="flex items-center justify-between text-sm font-medium border-t border-primary/10 pt-2">
                                 <span className="text-foreground">إجمالي الأصول المسعّرة ({pricedItems.length} من {includedItems.length}) — {totalQty} قطعة</span>
-                                <span className="text-primary">{totalPrice > 0 ? `${totalPrice.toLocaleString("en-US")} ر.س` : "لم يتم تحديد أسعار"}</span>
+                                <span className="text-primary">{totalPrice > 0 ? <>{totalPrice.toLocaleString("en-US")} <SarSymbol size={10} /></> : "لم يتم تحديد أسعار"}</span>
                               </div>
                               {pricedItems.length < includedItems.length && pricedItems.length > 0 && (
                                 <p className="text-[10px] text-muted-foreground">{includedItems.length - pricedItems.length} عنصر بدون سعر — يمكنك إضافته لاحقاً</p>
@@ -1585,7 +1586,7 @@ const CreateListingPage = () => {
                         })() : (
                           <div className="flex items-center justify-between text-sm font-medium">
                             <span className="text-foreground">السعر الإجمالي للأصول</span>
-                            <span className="text-primary">{bulkInventoryPrice ? `${Number(bulkInventoryPrice).toLocaleString("en-US")} ر.س` : "لم يتم التحديد"}</span>
+                            <span className="text-primary">{bulkInventoryPrice ? <>{Number(bulkInventoryPrice).toLocaleString("en-US")} <SarSymbol size={10} /></> : "لم يتم التحديد"}</span>
                           </div>
                         )}
                       </div>
@@ -1652,7 +1653,7 @@ const CreateListingPage = () => {
                     if (disclosure.business_activity && isFieldVisible(dealTypeForTransparency, "business_activity")) preFilledFields.push({ label: "النشاط", value: disclosure.business_activity, key: "business_activity" });
                     if (disclosure.city && isFieldVisible(dealTypeForTransparency, "city")) preFilledFields.push({ label: "المدينة", value: disclosure.city, key: "city" });
                     if (disclosure.district) preFilledFields.push({ label: "الحي", value: disclosure.district, key: "district" });
-                    if (disclosure.price) preFilledFields.push({ label: "السعر", value: `${Number(disclosure.price).toLocaleString("en-US")} ر.س`, key: "price" });
+                    if (disclosure.price) preFilledFields.push({ label: "السعر", value: `${Number(disclosure.price).toLocaleString("en-US")} ﷼`, key: "price" });
                     
                     return preFilledFields.length > 0 ? (
                       <div className="bg-primary/5 border border-primary/15 rounded-xl p-3">
@@ -1693,7 +1694,7 @@ const CreateListingPage = () => {
                     <FormField
                       label="السعر المطلوب *"
                       placeholder="180000"
-                      suffix="ر.س"
+                      suffix={<SarSymbol size={11} />}
                       value={disclosure.price}
                       onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))}
                       error={publishAttempted && disclosureErrors["price"]}
@@ -1701,7 +1702,7 @@ const CreateListingPage = () => {
                   )}
                   {isFieldVisible(dealTypeForTransparency, "annual_rent") && (
                     <div className="grid grid-cols-2 gap-3">
-                      <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} />
+                      <FormField label="الإيجار السنوي" placeholder="45000" suffix={<SarSymbol size={11} />} value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} />
                       {isFieldVisible(dealTypeForTransparency, "lease_duration") && (
                         <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_duration: v }))} />
                       )}
@@ -2004,7 +2005,7 @@ const CreateListingPage = () => {
                         </div>
                         <div className="flex items-center justify-between pt-1 border-t border-border/30">
                           <span className="text-base font-semibold text-primary transition-all duration-300" key={disclosure.price || "no-price"}>
-                            <span className="inline-block animate-fade-in">{disclosure.price ? `${Number(disclosure.price).toLocaleString()} ر.س` : "—"}</span>
+                            <span className="inline-block animate-fade-in">{disclosure.price ? <>{Number(disclosure.price).toLocaleString()} <SarSymbol size={12} /></> : "—"}</span>
                           </span>
                           <div className="flex items-center gap-2 text-[10px] text-muted-foreground transition-all duration-300">
                             <span>{totalPhotos} صورة</span>
@@ -2112,7 +2113,7 @@ const CreateListingPage = () => {
               <div className="border-t border-border/30" />
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">السعر</span>
-                <span className="font-medium text-foreground">{disclosure.price ? `${Number(disclosure.price).toLocaleString()} ر.س` : "—"}</span>
+                <span className="font-medium text-foreground">{disclosure.price ? <>{Number(disclosure.price).toLocaleString()} <SarSymbol size={10} /></> : "—"}</span>
               </div>
             </div>
 
@@ -2226,7 +2227,7 @@ const ConfirmationCard = ({
   );
 };
 
-const FormField = ({ label, placeholder, suffix, value, onChange, error }: { label: string; placeholder: string; suffix?: string; value: string; onChange: (v: string) => void; error?: string }) => (
+const FormField = ({ label, placeholder, suffix, value, onChange, error }: { label: string; placeholder: string; suffix?: React.ReactNode; value: string; onChange: (v: string) => void; error?: string }) => (
   <div>
     <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
     <div className="relative">

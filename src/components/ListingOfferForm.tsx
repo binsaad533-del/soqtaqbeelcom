@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useListingOffers, type OffersSummary, type ListingOffer } from "@/hooks/useListingOffers";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
@@ -80,7 +81,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
               {summary.total_offers} عرض مقدّم
             </p>
             <p className="text-[11px] text-muted-foreground">
-              أعلى عرض: {summary.highest_offer.toLocaleString("en-US")} ر.س
+              أعلى عرض: {summary.highest_offer.toLocaleString("en-US")} <SarSymbol size={9} />
             </p>
           </div>
         </div>
@@ -95,7 +96,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
             </div>
           </div>
           <p className="text-sm font-medium text-foreground">
-            {Number(myOffer.offered_price).toLocaleString("en-US")} ر.س
+            {Number(myOffer.offered_price).toLocaleString("en-US")} <SarSymbol size={11} />
           </p>
           {myOffer.message && (
             <p className="text-xs text-muted-foreground mt-1">{myOffer.message}</p>
@@ -131,7 +132,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
           </div>
 
           <div className="relative">
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">ر.س</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none"><SarSymbol size={12} /></span>
             <input
               type="text"
               inputMode="decimal"

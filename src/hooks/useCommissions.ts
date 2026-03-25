@@ -121,7 +121,7 @@ export function useCommissions() {
     await supabase.from("notifications").insert({
       user_id: commission.seller_id,
       title: "تذكير ودي بسداد العمولة 🤍",
-      body: `نأمل التكرم بسداد عمولة المنصة (1%) الخاصة بهذه الصفقة. مبلغ العمولة: ${commission.commission_amount.toLocaleString("en-US")} ر.س. ثقتكم وأمانتكم محل تقديرنا 🙏`,
+      body: `نأمل التكرم بسداد عمولة المنصة (1%) الخاصة بهذه الصفقة. مبلغ العمولة: ${commission.commission_amount.toLocaleString("en-US")} ﷼. ثقتكم وأمانتكم محل تقديرنا 🙏`,
       type: "commission_reminder",
       reference_type: "deal",
       reference_id: commission.deal_id,

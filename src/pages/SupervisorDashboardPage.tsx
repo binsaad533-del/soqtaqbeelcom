@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 
 type Tab = "overview" | "listings" | "deals" | "users" | "reports";
 
@@ -216,7 +217,7 @@ const SupervisorDashboardPage = () => {
                             </div>
                             <div>
                               <div className="text-xs font-medium group-hover:text-primary transition-colors">{l.title || "بدون عنوان"}</div>
-                              <div className="text-[10px] text-muted-foreground">{l.city || "—"} {l.price ? `· ${Number(l.price).toLocaleString("en-US")} ر.س` : ""}</div>
+                              <div className="text-[10px] text-muted-foreground">{l.city || "—"} {l.price ? <>· {Number(l.price).toLocaleString("en-US")} <SarSymbol size={8} /></> : ""}</div>
                             </div>
                           </div>
                           <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
@@ -249,7 +250,7 @@ const SupervisorDashboardPage = () => {
                               <div className="text-xs font-medium">صفقة #{d.id.slice(0, 6)}</div>
                               <div className="text-[10px] text-muted-foreground">
                                 {getProfileName(d.seller_id)} ← {getProfileName(d.buyer_id)}
-                                {d.agreed_price ? ` · ${Number(d.agreed_price).toLocaleString("en-US")} ر.س` : ""}
+                                {d.agreed_price ? <> · {Number(d.agreed_price).toLocaleString("en-US")} <SarSymbol size={8} /></> : ""}
                               </div>
                             </div>
                           </div>
@@ -275,7 +276,7 @@ const SupervisorDashboardPage = () => {
                         <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center shrink-0"><FileText size={16} className="text-muted-foreground" strokeWidth={1.3} /></div>
                         <div>
                           <div className="text-sm font-medium group-hover:text-primary transition-colors">{l.title || "بدون عنوان"}</div>
-                          <div className="text-[11px] text-muted-foreground">{l.city || "—"} · {l.business_activity || "—"} {l.price ? `· ${Number(l.price).toLocaleString("en-US")} ر.س` : ""}</div>
+                          <div className="text-[11px] text-muted-foreground">{l.city || "—"} · {l.business_activity || "—"} {l.price ? <>· {Number(l.price).toLocaleString("en-US")} <SarSymbol size={9} /></> : ""}</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -302,7 +303,7 @@ const SupervisorDashboardPage = () => {
                           <div className="text-sm font-medium">صفقة #{d.id.slice(0, 6)}</div>
                           <div className="text-[11px] text-muted-foreground">
                             {getProfileName(d.seller_id)} ← {getProfileName(d.buyer_id)}
-                            {d.agreed_price ? ` · ${Number(d.agreed_price).toLocaleString("en-US")} ر.س` : ""}
+                            {d.agreed_price ? <> · {Number(d.agreed_price).toLocaleString("en-US")} <SarSymbol size={8} /></> : ""}
                             {" · "}{new Date(d.created_at).toLocaleDateString("en-GB")}
                           </div>
                         </div>

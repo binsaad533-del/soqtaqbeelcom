@@ -14,6 +14,7 @@ import {
   Clock, ArrowRight, ChevronDown, X, Archive
 } from "lucide-react";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 
 interface AgreementRow {
   id: string;
@@ -210,7 +211,7 @@ const AgreementsArchivePage = () => {
             { label: "إجمالي الاتفاقيات", value: stats.total, icon: FileText },
             { label: "معتمدة", value: stats.approved, icon: CheckCircle2, cls: "text-success" },
             { label: "بانتظار الاعتماد", value: stats.pending, icon: Clock, cls: "text-warning" },
-            { label: "إجمالي القيمة", value: `${stats.totalValue.toLocaleString("en-US")} ر.س`, icon: Lock },
+            { label: "إجمالي القيمة", value: <>{stats.totalValue.toLocaleString("en-US")} <SarSymbol size={10} /></>, icon: Lock },
           ].map((s, i) => (
             <div key={i} className="bg-card rounded-xl p-3.5 shadow-soft border border-border/10">
               <div className="flex items-center gap-1.5 mb-1">
@@ -306,7 +307,7 @@ const AgreementsArchivePage = () => {
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       <span className="text-sm font-bold text-primary">
-                        {price > 0 ? `${price.toLocaleString("en-US")} ر.س` : "—"}
+                        {price > 0 ? <>{price.toLocaleString("en-US")} <SarSymbol size={11} /></> : "—"}
                       </span>
                       <div className="flex items-center gap-1.5">
                         <Button
