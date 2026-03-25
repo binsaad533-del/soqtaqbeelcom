@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import CommissionBanner from "@/components/CommissionBanner";
 import { toast } from "sonner";
 import VerificationGate from "@/components/VerificationGate";
+import DealProgressBar, { getDealStage } from "@/components/DealProgressBar";
 
 // Parse SSE stream and extract text
 async function parseSSEStream(response: Response): Promise<string> {
@@ -441,6 +442,8 @@ const NegotiationPage = () => {
           <span className="text-border">|</span>
           <span>{listingTitle}</span>
         </div>
+
+        <DealProgressBar currentStage={getDealStage(deal, isPostAgreement)} className="mb-5" />
 
         <div className="grid lg:grid-cols-5 gap-5 items-stretch">
           {/* ═══════════ DEAL SUMMARY (2 cols, RIGHT in RTL) ═══════════ */}

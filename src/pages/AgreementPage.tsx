@@ -17,6 +17,7 @@ import CommissionBanner from "@/components/CommissionBanner";
 import CommissionPaymentPanel from "@/components/CommissionPaymentPanel";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import DealProgressBar, { getDealStage } from "@/components/DealProgressBar";
 
 interface AgreementRecord {
   id: string;
@@ -330,6 +331,7 @@ const AgreementPage = () => {
               العودة للوحة التحكم
             </Link>
           </div>
+          <DealProgressBar currentStage={getDealStage(deal, false)} className="mb-6" />
           <div className="bg-card rounded-2xl shadow-soft p-8 text-center">
             <AiStar size={40} className="mx-auto mb-4" />
             <h2 className="text-lg font-medium mb-2">لم يتم إنشاء الاتفاقية بعد</h2>
@@ -366,6 +368,8 @@ const AgreementPage = () => {
             العودة للوحة التحكم
           </Link>
         </div>
+
+        <DealProgressBar currentStage={getDealStage(deal, true, bothApproved)} className="mb-6" />
 
         {/* Congratulations Banner — only when both approved */}
         {bothApproved && (
