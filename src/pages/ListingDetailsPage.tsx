@@ -1,5 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Flag } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
@@ -402,6 +402,13 @@ const ListingDetailsPage = () => {
               {/* Seller Reviews */}
               {sellerReviews.length > 0 && (
                 <SellerReviewsSummary reviews={sellerReviews} className="mt-4" />
+              )}
+
+              {/* Report */}
+              {!isOwner && !isSimulation && (
+                <div className="mt-4 flex justify-center">
+                  <ReportListingDialog listingId={listing.id} />
+                </div>
               )}
             </div>
           </div>
