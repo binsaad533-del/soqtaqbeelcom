@@ -12,3 +12,12 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /monitoring
+Disallow: /negotiate/
+Disallow: /agreement/
+Disallow: /agreements-archive
+Disallow: /reset-password
+Disallow: /unauthorized
+
+Sitemap: https://soqtaqbeelcom.lovable.app/sitemap.xml
