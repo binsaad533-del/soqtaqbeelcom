@@ -321,7 +321,7 @@ const ListingDetailsPage = () => {
 
               <div className="mb-6">
                 <div className="text-2xl font-medium gradient-text">
-                  {listing.price ? `${Number(listing.price).toLocaleString("en-US")}` : "—"} <span className="text-sm">ر.س</span>
+                  {listing.price ? `${Number(listing.price).toLocaleString("en-US")}` : "—"} <SarSymbol size={14} />
                 </div>
                 {isOwner && (
                   <QuickPriceEdit
@@ -335,7 +335,7 @@ const ListingDetailsPage = () => {
 
               <div className="space-y-3 mb-6">
                 <InfoRow label="نوع الصفقة" value={primaryConfig?.label || t(listing.deal_type, DEAL_TYPE_LABELS)} />
-                {listing.annual_rent && <InfoRow label="الإيجار السنوي" value={`${Number(listing.annual_rent).toLocaleString("en-US")} ر.س`} />}
+                {listing.annual_rent && <InfoRow label="الإيجار السنوي" value={<>{Number(listing.annual_rent).toLocaleString("en-US")} <SarSymbol size={10} /></>} />}
                 {listing.lease_duration && <InfoRow label="مدة العقد" value={listing.lease_duration} />}
                 {listing.lease_remaining && <InfoRow label="المتبقي" value={listing.lease_remaining} />}
                 {listing.municipality_license && <InfoRow label="رخصة البلدية" value={listing.municipality_license} />}

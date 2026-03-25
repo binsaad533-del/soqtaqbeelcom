@@ -442,7 +442,7 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
           {/* Price + transparency */}
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-primary">
-              {listing.price ? `${Number(listing.price).toLocaleString()} ر.س` : "—"}
+              {listing.price ? <>{Number(listing.price).toLocaleString()} <SarSymbol size={10} /></> : "—"}
             </span>
             {(() => {
               const tr = calculateTransparency(listing);
