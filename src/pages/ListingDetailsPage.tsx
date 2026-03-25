@@ -333,7 +333,7 @@ const ListingDetailsPage = () => {
                     className="mb-4"
                   />
                   <p className="text-[11px] text-muted-foreground text-center mb-2">
-                    💡 تقديم العروض العامة يزيد من شفافية الصفقة ويعطيك أفضلية
+                    💡 تقديم العروض على العام يزيد من شفافية الصفقة ويعطيك أفضلية
                   </p>
                   <Button
                     onClick={handleStartNegotiation}
