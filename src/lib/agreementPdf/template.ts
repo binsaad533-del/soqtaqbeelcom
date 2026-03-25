@@ -74,11 +74,11 @@ const infoGrid = (items: Array<{ label: string; value: string; emphasized?: bool
     ${items
       .map(
         ({ label, value, emphasized }) => `
-          <div style="border:1px solid hsl(214 32% 91%);border-radius:16px;padding:12px 14px;background:${
+          <div style="border:0.5px solid hsl(214 32% 91%);border-radius:16px;padding:12px 14px;background:${
             emphasized ? "hsl(210 100% 98%)" : "hsl(210 40% 98%)"
           }">
             <div style="font-size:10px;color:hsl(215 16% 45%);margin-bottom:4px;">${escapeHtml(label)}</div>
-            <div style="font-size:${emphasized ? "18px" : "13px"};font-weight:${emphasized ? 700 : 600};color:${
+            <div style="font-size:${emphasized ? "16px" : "12px"};font-weight:${emphasized ? 600 : 500};color:${
               emphasized ? "hsl(212 84% 42%)" : "hsl(215 25% 18%)"
             };line-height:1.6;">${value}</div>
           </div>`,
@@ -95,8 +95,8 @@ const listCard = (items: string[], tone: "neutral" | "success" | "warning" = "ne
       ${items
         .map(
           (item) => `
-            <div style="display:flex;align-items:flex-start;gap:8px;border:1px solid hsl(214 32% 91%);border-radius:14px;padding:10px 12px;background:hsl(210 40% 98%);font-size:12px;line-height:1.8;color:hsl(215 25% 18%);">
-              <span style="width:8px;height:8px;border-radius:999px;background:${accent};margin-top:7px;flex-shrink:0;"></span>
+            <div style="display:flex;align-items:flex-start;gap:8px;border:0.5px solid hsl(214 32% 91%);border-radius:14px;padding:10px 12px;background:hsl(210 40% 98%);font-size:11px;line-height:1.8;color:hsl(215 25% 18%);">
+              <span style="width:6px;height:6px;border-radius:999px;background:${accent};margin-top:7px;flex-shrink:0;"></span>
               <span>${safeText(item)}</span>
             </div>`,
         )
@@ -107,9 +107,9 @@ const listCard = (items: string[], tone: "neutral" | "success" | "warning" = "ne
 const section = (title: string, body: string, tone: "default" | "highlight" = "default") => {
   const background = tone === "highlight" ? "hsl(210 100% 98%)" : "#ffffff";
   return createNode(`
-    <section style="border:1px solid hsl(214 32% 91%);border-radius:22px;padding:18px 18px 16px;background:${background};display:grid;gap:12px;break-inside:avoid;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid hsl(214 32% 93%);padding-bottom:10px;">
-        <h2 style="margin:0;font-size:18px;font-weight:700;color:hsl(215 28% 17%);">${escapeHtml(title)}</h2>
+    <section style="border:0.5px solid hsl(214 32% 91%);border-radius:22px;padding:18px 18px 16px;background:${background};display:grid;gap:12px;break-inside:avoid;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:0.5px solid hsl(214 32% 93%);padding-bottom:10px;">
+        <h2 style="margin:0;font-size:15px;font-weight:600;color:hsl(215 28% 17%);">${escapeHtml(title)}</h2>
       </div>
       ${body}
     </section>
@@ -121,9 +121,9 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, pageNumber: 
   page.style.cssText = PAGE_SHELL_STYLE;
 
   const header = createNode(`
-    <header style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding-bottom:12px;border-bottom:1px solid hsl(214 32% 91%);">
+    <header style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding-bottom:12px;border-bottom:0.5px solid hsl(214 32% 91%);">
       <div style="display:grid;gap:6px;">
-        <div style="font-size:22px;font-weight:800;color:hsl(215 28% 17%);">اتفاقية الصفقة</div>
+        <div style="font-size:18px;font-weight:600;color:hsl(215 28% 17%);">اتفاقية الصفقة</div>
         <div style="font-size:12px;color:hsl(215 16% 45%);line-height:1.7;">${safeText(data.dealTitle)} — ${safeText(data.location)}</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:hsl(215 16% 45%);">
           <span>رقم الاتفاقية: ${safeText(data.agreementNumber)}</span>
@@ -137,7 +137,7 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, pageNumber: 
             ? `<img src="${logoBase64}" alt="Taqbeel logo" style="height:40px;object-fit:contain;" />`
             : ""
         }
-        <div style="font-size:11px;color:hsl(212 84% 42%);font-weight:700;">TAQ/BEEL Marketplace</div>
+        <div style="font-size:10px;color:hsl(212 84% 42%);font-weight:600;">TAQ/BEEL Marketplace</div>
       </div>
     </header>
   `);
@@ -146,7 +146,7 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, pageNumber: 
   content.style.cssText = "display:flex;flex-direction:column;flex:1;gap:12px;padding-top:2px;overflow:visible;";
 
   const footer = createNode(`
-    <footer style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid hsl(214 32% 91%);font-size:10px;color:hsl(215 16% 45%);line-height:1.8;">
+    <footer style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:12px;border-top:0.5px solid hsl(214 32% 91%);font-size:10px;color:hsl(215 16% 45%);line-height:1.8;">
       <div>
         منصة سوق تقبيل مملوكة ومدارة بواسطة شركة Ain Jasaas — شركة عين جساس<br />
         سجل تجاري: ${escapeHtml(BANK_DETAILS.nationalId)}
@@ -174,15 +174,15 @@ const buildSections = (data: AgreementPdfData) => {
       "الملخص التنفيذي",
       `
         <div style="display:grid;gap:12px;">
-          <div style="border-radius:22px;padding:18px;background:linear-gradient(135deg, hsl(210 100% 98%), hsl(195 80% 96%));border:1px solid hsl(201 87% 86%);display:grid;gap:12px;">
+          <div style="border-radius:22px;padding:18px;background:linear-gradient(135deg, hsl(210 100% 98%), hsl(195 80% 96%));border:0.5px solid hsl(201 87% 86%);display:grid;gap:12px;">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
               <div>
                 <div style="font-size:11px;color:hsl(215 16% 45%);margin-bottom:4px;">حالة الاتفاقية</div>
-                <div style="font-size:24px;font-weight:800;color:hsl(212 84% 42%);">
+                <div style="font-size:20px;font-weight:600;color:hsl(212 84% 42%);">
                   ${bothApproved ? "مكتملة وجاهزة للتحميل" : "بانتظار اعتماد الطرفين"}
                 </div>
               </div>
-              <div style="padding:10px 14px;border-radius:999px;background:hsl(212 84% 42% / 0.1);color:hsl(212 84% 42%);font-size:12px;font-weight:700;white-space:nowrap;">
+              <div style="padding:10px 14px;border-radius:999px;background:hsl(212 84% 42% / 0.1);color:hsl(212 84% 42%);font-size:11px;font-weight:500;white-space:nowrap;">
                 ${bothApproved ? "تهانينا للطرفين" : "اعتماد قيد الاستكمال"}
               </div>
             </div>
@@ -221,13 +221,13 @@ const buildSections = (data: AgreementPdfData) => {
           ]
             .map(
               (party) => `
-                <div style="border:1px solid ${party.approved ? "hsl(212 84% 82%)" : "hsl(214 32% 91%)"};background:${
+                <div style="border:0.5px solid ${party.approved ? "hsl(212 84% 82%)" : "hsl(214 32% 91%)"};background:${
                   party.approved ? "hsl(210 100% 97%)" : "hsl(210 40% 98%)"
                 };border-radius:18px;padding:16px;display:grid;gap:7px;">
                   <div style="font-size:10px;color:hsl(215 16% 45%);">${party.label}</div>
-                  <div style="font-size:18px;font-weight:800;color:hsl(215 28% 17%);">${safeText(party.name)}</div>
+                  <div style="font-size:15px;font-weight:600;color:hsl(215 28% 17%);">${safeText(party.name)}</div>
                   <div style="font-size:12px;color:hsl(215 16% 45%);direction:ltr;text-align:right;">${safeText(party.contact)}</div>
-                  <div style="font-size:11px;font-weight:700;color:${party.approved ? "hsl(212 84% 42%)" : "hsl(212 60% 60%)"};">
+                  <div style="font-size:11px;font-weight:500;color:${party.approved ? "hsl(212 84% 42%)" : "hsl(212 60% 60%)"};">
                     ${party.approved ? `✓ تم الاعتماد في ${formatDate(party.approvedAt)}` : "بانتظار الاعتماد"}
                   </div>
                 </div>`,
@@ -250,9 +250,9 @@ const buildSections = (data: AgreementPdfData) => {
           ]
             .map(
               (item, index) => `
-                <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:hsl(210 40% 98%);border:1px solid hsl(214 32% 91%);">
-                  <div style="width:24px;height:24px;border-radius:999px;background:hsl(212 84% 42% / 0.1);color:hsl(212 84% 42%);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">${index + 1}</div>
-                  <div style="font-size:12px;line-height:1.9;color:hsl(215 25% 18%);">${escapeHtml(item)}</div>
+                <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:hsl(210 40% 98%);border:0.5px solid hsl(214 32% 91%);">
+                  <div style="width:22px;height:22px;border-radius:999px;background:hsl(212 84% 42% / 0.1);color:hsl(212 84% 42%);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">${index + 1}</div>
+                  <div style="font-size:11px;line-height:1.9;color:hsl(215 25% 18%);font-weight:400;">${escapeHtml(item)}</div>
                 </div>`,
             )
             .join("")}
@@ -328,11 +328,11 @@ const buildSections = (data: AgreementPdfData) => {
           ]
             .map(
               (item, index) => `
-                <div style="border:1px solid ${index === 2 ? "hsl(201 87% 86%)" : "hsl(214 32% 91%)"};background:${
+                <div style="border:0.5px solid ${index === 2 ? "hsl(201 87% 86%)" : "hsl(214 32% 91%)"};background:${
                   index === 2 ? "hsl(210 100% 98%)" : "hsl(210 40% 98%)"
                 };border-radius:16px;padding:14px;display:grid;gap:6px;">
-                  <div style="font-size:11px;font-weight:700;color:${index === 2 ? "hsl(212 84% 42%)" : "hsl(215 28% 17%)"};">${item.label}</div>
-                  <div style="font-size:12px;line-height:1.9;color:hsl(215 16% 45%);">${safeText(item.value)}</div>
+                  <div style="font-size:11px;font-weight:600;color:${index === 2 ? "hsl(212 84% 42%)" : "hsl(215 28% 17%)"};">${item.label}</div>
+                  <div style="font-size:11px;line-height:1.9;color:hsl(215 16% 45%);font-weight:400;">${safeText(item.value)}</div>
                 </div>`,
             )
             .join("")}
@@ -351,7 +351,7 @@ const buildSections = (data: AgreementPdfData) => {
     sections.push(
       section(
         "سبب التعديل",
-        `<div style="font-size:12px;line-height:2;color:hsl(212 60% 30%);background:hsl(210 100% 97%);border:1px solid hsl(212 84% 82%);border-radius:16px;padding:14px;">${safeText(data.amendmentReason)}</div>`,
+        `<div style="font-size:11px;line-height:2;color:hsl(212 60% 30%);background:hsl(210 100% 97%);border:0.5px solid hsl(212 84% 82%);border-radius:16px;padding:14px;font-weight:400;">${safeText(data.amendmentReason)}</div>`,
         "highlight",
       ),
     );
@@ -387,12 +387,12 @@ const buildSections = (data: AgreementPdfData) => {
         <div style="display:grid;gap:12px;">
           <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:12px;">
             <div style="border-radius:20px;padding:16px;background:linear-gradient(135deg, hsl(212 84% 42%), hsl(196 85% 45%));color:white;display:grid;gap:8px;">
-              <div style="font-size:11px;opacity:0.86;">المبلغ المستحق للمنصة</div>
-              <div style="font-size:28px;font-weight:800;line-height:1.2;">${formatPrice(commissionAmount)} ر.س</div>
+              <div style="font-size:10px;opacity:0.86;">المبلغ المستحق للمنصة</div>
+              <div style="font-size:22px;font-weight:600;line-height:1.2;">${formatPrice(commissionAmount)} ر.س</div>
               <div style="font-size:11px;opacity:0.92;">${commissionRate * 100}% من قيمة الصفقة ${formatPrice(dealAmount)} ${escapeHtml(currency)}</div>
             </div>
-            <div style="border:1px solid hsl(214 32% 91%);border-radius:20px;padding:16px;background:hsl(210 40% 98%);display:grid;gap:8px;">
-              <div style="font-size:12px;font-weight:700;color:hsl(215 28% 17%);">تعليمات السداد</div>
+            <div style="border:0.5px solid hsl(214 32% 91%);border-radius:20px;padding:16px;background:hsl(210 40% 98%);display:grid;gap:8px;">
+              <div style="font-size:11px;font-weight:600;color:hsl(215 28% 17%);">تعليمات السداد</div>
               <div style="font-size:11px;line-height:1.9;color:hsl(215 16% 45%);">يرجى تحويل العمولة إلى حساب الشركة التالي ثم رفع إثبات السداد عبر المنصة لاستكمال التحقق.</div>
               <div style="font-size:11px;line-height:1.9;color:hsl(215 16% 45%);">الحساب باسم شركة Ain Jasaas / شركة عين جساس.</div>
             </div>
@@ -408,17 +408,17 @@ const buildSections = (data: AgreementPdfData) => {
             ]
               .map(
                 ({ label, value }) => `
-                   <div style="border:1px solid hsl(214 32% 91%);border-radius:16px;padding:12px 14px;background:#ffffff;display:grid;gap:4px;text-align:center;">
-                    <div style="font-size:10px;color:hsl(215 16% 45%);">${escapeHtml(label)}</div>
-                    <div style="font-size:13px;font-weight:700;color:hsl(215 28% 17%);line-height:1.8;direction:ltr;font-family:${FONT_FAMILY}, monospace;">${safeText(value)}</div>
+                   <div style="border:0.5px solid hsl(214 32% 91%);border-radius:16px;padding:12px 14px;background:#ffffff;display:grid;gap:4px;text-align:center;">
+                    <div style="font-size:9px;color:hsl(215 16% 45%);">${escapeHtml(label)}</div>
+                    <div style="font-size:12px;font-weight:600;color:hsl(215 28% 17%);line-height:1.8;direction:ltr;font-family:${FONT_FAMILY}, monospace;">${safeText(value)}</div>
                   </div>`,
               )
               .join("")}
           </div>
         </div>
-        <div style="background:hsl(210 100% 97%);border:1px solid hsl(212 84% 82%);border-radius:16px;padding:14px;text-align:center;display:grid;gap:6px;">
-          <div style="font-size:11px;font-weight:700;color:hsl(212 84% 32%);">تنويه مهم</div>
-          <div style="font-size:11px;line-height:2;color:hsl(212 60% 35%);">
+        <div style="background:hsl(210 100% 97%);border:0.5px solid hsl(212 84% 82%);border-radius:16px;padding:14px;text-align:center;display:grid;gap:6px;">
+          <div style="font-size:11px;font-weight:600;color:hsl(212 84% 32%);">تنويه مهم</div>
+          <div style="font-size:10px;line-height:2;color:hsl(212 60% 35%);font-weight:400;">
             عمولة المنصة مستحقة على البائع فقط بنسبة ${commissionRate * 100}% من قيمة الصفقة، وتُسدد بعد إتمام الصفقة واعتماد الطرفين.<br />
             تحتفظ المنصة بحقها الكامل في المطالبة بمستحقاتها، ونثق بالتزامكم الكريم بالسداد في الوقت المحدد 🤝<br />
             للتواصل: a.almalki@soqtaqbeel.com — جوال: 0500668089
