@@ -1409,9 +1409,11 @@ const CreateListingPage = () => {
                           <input
                             type="text"
                             inputMode="numeric"
+                            lang="en"
+                            dir="ltr"
                             placeholder="مثال: 50,000"
                             value={bulkInventoryPrice}
-                            onChange={(e) => setBulkInventoryPrice(toEnglishNumerals(e.target.value.replace(/[^\d]/g, "")))}
+                            onChange={(e) => setBulkInventoryPrice(toEnglishNumerals(e.target.value).replace(/[^\d]/g, ""))}
                             className="w-full text-sm bg-background border border-border/50 rounded-lg px-3 py-2 outline-none focus:border-primary/50 transition-colors [direction:ltr] text-left"
                           />
                           {bulkInventoryPrice && (
