@@ -515,7 +515,7 @@ const NegotiationPage = () => {
 
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">تاريخ البدء</span>
-                    <span className="font-medium">{new Date(deal.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" })}</span>
+                    <span className="font-medium">{new Date(deal.created_at).toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" })}</span>
                   </div>
 
                   {/* Inventory summary */}
