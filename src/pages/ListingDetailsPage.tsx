@@ -282,14 +282,20 @@ const ListingDetailsPage = () => {
               {/* Owner edit buttons */}
               {isOwner && (
                 <div className="flex gap-2 mb-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditDialogOpen(true)}
-                    className="flex-1 rounded-xl text-xs"
-                  >
-                    <Edit3 size={14} /> تعديل الإعلان
-                  </Button>
+                  {myActiveDeal && (myActiveDeal.status === "finalized" || myActiveDeal.status === "completed") ? (
+                    <div className="flex-1 text-center text-xs text-muted-foreground bg-muted/50 rounded-xl py-2 px-3">
+                      لا يمكن تعديل الإعلان أثناء الاتفاق النهائي
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditDialogOpen(true)}
+                      className="flex-1 rounded-xl text-xs"
+                    >
+                      <Edit3 size={14} /> تعديل الإعلان
+                    </Button>
+                  )}
                 </div>
               )}
 
