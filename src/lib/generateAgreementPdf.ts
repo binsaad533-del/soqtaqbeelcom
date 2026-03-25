@@ -62,7 +62,7 @@ export async function generateAgreementPdf(data: AgreementPdfData) {
     });
   } catch { /* QR is optional */ }
 
-  const [logoBase64] = await Promise.all([loadLogoBase64(), ensureFontLoaded()]);
+  const [logoBase64, logoIconBase64] = await Promise.all([loadImageBase64(logoUrl), loadImageBase64(logoIconGoldUrl), ensureFontLoaded()]);
 
   const mount = document.createElement("div");
   mount.style.cssText = [
@@ -79,7 +79,7 @@ export async function generateAgreementPdf(data: AgreementPdfData) {
   document.body.appendChild(mount);
 
   try {
-    const pages = buildAgreementPdfPages({ data, logoBase64, qrDataUrl, mount });
+    const pages = buildAgreementPdfPages({ data, logoBase64, logoIconBase64, qrDataUrl, mount });
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
     for (const [index, page] of pages.entries()) {
