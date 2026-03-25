@@ -208,13 +208,22 @@
   animation: ai-breathe 2s ease-in-out infinite;
 }
 
-@keyframes ai-glow-slow {
-  0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 2px hsl(var(--primary) / 0.2)); }
-  50% { opacity: 1; filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.5)); }
+@keyframes ai-glow-big {
+  0%, 100% { opacity: 0.5; filter: drop-shadow(0 0 1px hsl(var(--primary) / 0.15)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.5)); }
 }
 
-.ai-glow-slow {
-  animation: ai-glow-slow 3s ease-in-out infinite;
+@keyframes ai-glow-small {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.5)); }
+  50% { opacity: 0.4; filter: drop-shadow(0 0 1px hsl(var(--primary) / 0.1)); }
+}
+
+.ai-glow-slow .ai-sparkle-big {
+  animation: ai-glow-big 2.5s ease-in-out infinite;
+}
+
+.ai-glow-slow .ai-sparkle-small {
+  animation: ai-glow-small 2.5s ease-in-out infinite;
 }
 
 /* Scroll reveal */
