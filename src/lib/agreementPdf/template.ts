@@ -413,12 +413,19 @@ const buildSections = (data: AgreementPdfData) => {
             ]
               .map(
                 ({ label, value }) => `
-                  <div style="border:1px solid hsl(214 32% 91%);border-radius:16px;padding:12px 14px;background:#ffffff;display:grid;gap:4px;">
+                   <div style="border:1px solid hsl(214 32% 91%);border-radius:16px;padding:12px 14px;background:#ffffff;display:grid;gap:4px;text-align:center;">
                     <div style="font-size:10px;color:hsl(215 16% 45%);">${escapeHtml(label)}</div>
-                    <div style="font-size:13px;font-weight:700;color:hsl(215 28% 17%);line-height:1.8;direction:ltr;text-align:right;font-family:${FONT_FAMILY}, monospace;">${safeText(value)}</div>
+                    <div style="font-size:13px;font-weight:700;color:hsl(215 28% 17%);line-height:1.8;direction:ltr;font-family:${FONT_FAMILY}, monospace;">${safeText(value)}</div>
                   </div>`,
               )
               .join("")}
+          </div>
+        </div>
+        <div style="background:hsl(48 96% 93%);border:1px solid hsl(48 96% 80%);border-radius:16px;padding:14px;text-align:center;display:grid;gap:6px;">
+          <div style="font-size:11px;font-weight:700;color:hsl(35 92% 30%);">تنويه مهم</div>
+          <div style="font-size:11px;line-height:2;color:hsl(35 80% 28%);">
+            عمولة المنصة مستحقة على البائع فقط بنسبة ${commissionRate * 100}% من قيمة الصفقة، وتُسدد بعد إتمام الصفقة واعتماد الطرفين.<br />
+            تحتفظ المنصة بحقها الكامل في المطالبة بمستحقاتها، ونثق بالتزامكم الكريم بالسداد في الوقت المحدد 🤝
           </div>
         </div>
       `,
