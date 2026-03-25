@@ -105,6 +105,7 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route path="/install" element={<InstallPage />} />
               <Route path="/unsubscribe" element={<UnsubscribePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
