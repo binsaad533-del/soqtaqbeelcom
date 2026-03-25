@@ -41,6 +41,7 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
   const [error, setError] = useState("");
   const [attempts, setAttempts] = useState(0);
   const [resendTimer, setResendTimer] = useState(0);
+  const [deliveryChannel, setDeliveryChannel] = useState<"sms" | "call">("sms");
   const [aiMessage, setAiMessage] = useState("يالله حيّه، دخل رقمك عشان نتحقق 📱");
 
   // If already verified
@@ -67,13 +68,14 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
       return;
     }
     setError("");
-    setAiMessage("نرسل لك الكود، لحظة... ⏳");
 
     const result = await sendOtp(fullPhone);
     if (result.success) {
+      const channel = result.channel || "sms";
+      setDeliveryChannel(channel);
       setStep("otp");
       setResendTimer(30);
-      setAiMessage("أرسلنا لك كود، شيّك جوالك 📲");
+      setAiMessage(channel === "call" ? "اتصلنا عليك بالكود، انتبه للمكالمة 📞" : "أرسلنا لك كود، شيّك جوالك 📲");
     } else {
       setError(result.error || "فشل الإرسال");
       setAiMessage("صار خطأ، جرّب مرة ثانية 🔄");
@@ -125,9 +127,11 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
     setAiMessage("نعيد إرسال الكود... ⏳");
     const result = await sendOtp(fullPhone);
     if (result.success) {
+      const channel = result.channel || "sms";
+      setDeliveryChannel(channel);
       setResendTimer(30);
       setAttempts(0);
-      setAiMessage("تم إعادة الإرسال، شيّك جوالك 📲");
+      setAiMessage(channel === "call" ? "أعدنا الاتصال بالكود 📞" : "تم إعادة الإرسال، شيّك جوالك 📲");
     } else {
       setError(result.error || "فشل إعادة الإرسال");
     }
@@ -257,7 +261,7 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
           </div>
 
           <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-            <span>أُرسل إلى <span dir="ltr" className="font-mono">{fullPhone}</span></span>
+            <span>{deliveryChannel === "call" ? "تم الإرسال عبر مكالمة" : "تم الإرسال عبر رسالة"} إلى <span dir="ltr" className="font-mono">{fullPhone}</span></span>
             <span className="text-border/50">|</span>
             {resendTimer > 0 ? (
               <span>إعادة بعد <span className="font-mono">{resendTimer}</span>ث</span>

@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface UsePhoneVerificationReturn {
-  sendOtp: (phone: string) => Promise<{ success: boolean; error?: string }>;
+  sendOtp: (phone: string) => Promise<{ success: boolean; error?: string; channel?: "sms" | "call" }>;
   verifyOtp: (phone: string, code: string) => Promise<{ success: boolean; verified?: boolean; error?: string }>;
   sending: boolean;
   verifying: boolean;
@@ -20,7 +20,7 @@ export function usePhoneVerification(): UsePhoneVerificationReturn {
       });
       if (error) return { success: false, error: "فشل إرسال رمز التحقق" };
       if (data?.error) return { success: false, error: data.error };
-      return { success: true };
+      return { success: true, channel: data?.channel };
     } catch {
       return { success: false, error: "حدث خطأ، حاول مرة أخرى" };
     } finally {

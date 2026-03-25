@@ -67,27 +67,38 @@ Deno.serve(async (req) => {
     const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
     if (!TWILIO_AUTH_TOKEN) throw new Error("TWILIO_AUTH_TOKEN is not configured");
 
-    // Call Twilio Verify API directly (not through gateway - Verify uses different base URL)
+    // Call Twilio Verify API directly
     const verifyUrl = `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/Verifications`;
 
-    const response = await fetch(verifyUrl, {
-      method: "POST",
-      headers: {
-        "Authorization": `Basic ${btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`)}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        To: phone,
-        Channel: "sms",
-      }),
-    });
+    const sendVerification = async (channel: "sms" | "call") => {
+      const response = await fetch(verifyUrl, {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`)}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          To: phone,
+          Channel: channel,
+        }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
+      return { response, data, channel };
+    };
 
-    if (!response.ok) {
-      console.error("Twilio Verify error:", JSON.stringify(data));
+    // Try SMS first, then fallback to voice call when SMS is blocked/unavailable
+    let attempt = await sendVerification("sms");
+
+    if (!attempt.response.ok && attempt.data?.code === 60410) {
+      console.warn("SMS verification blocked by provider, falling back to voice call", JSON.stringify(attempt.data));
+      attempt = await sendVerification("call");
+    }
+
+    if (!attempt.response.ok) {
+      console.error("Twilio Verify error:", JSON.stringify(attempt.data));
       return new Response(
-        JSON.stringify({ error: data.message || "فشل إرسال رمز التحقق" }),
+        JSON.stringify({ error: attempt.data.message || "فشل إرسال رمز التحقق" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -97,11 +108,11 @@ Deno.serve(async (req) => {
       user_id: user.id,
       action: "otp_sent",
       resource_type: "phone_verification",
-      details: { phone: phone.slice(-4), channel: "sms" },
+      details: { phone: phone.slice(-4), channel: attempt.channel },
     });
 
     return new Response(
-      JSON.stringify({ success: true, status: data.status }),
+      JSON.stringify({ success: true, status: attempt.data.status, channel: attempt.channel }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
