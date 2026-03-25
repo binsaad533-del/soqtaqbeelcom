@@ -1,9 +1,10 @@
 import { useState, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Loader2, X } from "lucide-react";
+import { Sparkles, Loader2, X, Bell } from "lucide-react";
 import type { FilterState } from "./MarketplaceFilters";
 import AiStar from "@/components/AiStar";
+import { toast } from "sonner";
 
 const suggestions = [
   "كوفي في جدة",
@@ -25,20 +26,25 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [appliedLabel, setAppliedLabel] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
+  const [alertSaving, setAlertSaving] = useState(false);
+  const [alertSaved, setAlertSaved] = useState(false);
+  const [lastFilters, setLastFilters] = useState<Partial<FilterState>>({});
   const inputRef = useRef<HTMLInputElement>(null);
 
   const filteredSuggestions = query
     ? suggestions.filter(s => s.includes(query))
     : suggestions;
 
+  const noResults = hasSearched && resultCount === 0;
+
   // Derive display message: override AI message when no results
   const displayMessage = useMemo(() => {
     if (!hasSearched || !aiMessage) return aiMessage;
-    if (resultCount === 0) {
-      return "ما لقيت نتائج تطابق بحثك الحين.. جرّب تعدّل الفلاتر أو تبحث بكلمات ثانية 🔍";
+    if (noResults) {
+      return "ما لقيت نتائج تطابق بحثك الحين.. بس لا تشيل هم! فعّل التنبيه وأنا أرسل لك إشعار فور ما ينزل عرض يناسبك 🔔";
     }
     return aiMessage;
-  }, [aiMessage, resultCount, hasSearched]);
+  }, [aiMessage, resultCount, hasSearched, noResults]);
 
   const handleSearch = async (text?: string) => {
     const q = text || query;
@@ -49,6 +55,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
     setAppliedLabel("");
     setShowSuggestions(false);
     setHasSearched(false);
+    setAlertSaved(false);
 
     try {
       const { data, error } = await supabase.functions.invoke("smart-search", {
@@ -64,6 +71,8 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
       if (data.priceMin !== undefined || data.priceMax !== undefined) {
         filters.priceRange = [data.priceMin || 0, data.priceMax || 5000000];
       }
+
+      setLastFilters(filters);
 
       // Build applied label
       const parts: string[] = [];
@@ -85,6 +94,33 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
     }
   };
 
+  const handleSetAlert = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("سجّل دخولك أولاً لتفعيل التنبيه");
+      return;
+    }
+
+    setAlertSaving(true);
+    try {
+      const { error } = await supabase.from("search_alerts").insert([{
+        user_id: user.id,
+        search_query: query,
+        filters: JSON.parse(JSON.stringify(lastFilters)),
+      }]);
+
+      if (error) throw error;
+
+      setAlertSaved(true);
+      toast.success("تم تفعيل التنبيه! راح ننبّهك فور ما ينزل عرض يناسب بحثك 🔔");
+    } catch (e) {
+      console.error("Alert save error:", e);
+      toast.error("حصل خطأ، حاول مرة ثانية");
+    } finally {
+      setAlertSaving(false);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSearch();
   };
@@ -94,6 +130,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
     setAiMessage("");
     setAppliedLabel("");
     setHasSearched(false);
+    setAlertSaved(false);
     inputRef.current?.focus();
   };
 
@@ -167,13 +204,43 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
       {/* AI message */}
       {displayMessage && (
         <div className={cn(
-          "flex items-start gap-2 rounded-xl px-3.5 py-2.5 animate-reveal",
-          resultCount === 0 && hasSearched
+          "rounded-xl px-3.5 py-2.5 animate-reveal space-y-2",
+          noResults
             ? "bg-gradient-to-l from-destructive/15 via-destructive/8 to-transparent"
             : "bg-gradient-to-l from-primary/10 via-primary/5 to-transparent"
         )}>
-          <AiStar size={14} className="mt-0.5 shrink-0" />
-          <p className="text-xs text-foreground/80 leading-relaxed">{displayMessage}</p>
+          <div className="flex items-start gap-2">
+            <AiStar size={14} className="mt-0.5 shrink-0" />
+            <p className="text-xs text-foreground/80 leading-relaxed">{displayMessage}</p>
+          </div>
+
+          {/* Notify me button */}
+          {noResults && !alertSaved && (
+            <button
+              onClick={handleSetAlert}
+              disabled={alertSaving}
+              className={cn(
+                "flex items-center gap-1.5 mr-5 text-[11px] font-medium px-3 py-1.5 rounded-lg transition-all",
+                "gradient-primary text-primary-foreground hover:opacity-90 active:scale-[0.97]",
+                alertSaving && "opacity-60 pointer-events-none"
+              )}
+            >
+              {alertSaving ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : (
+                <Bell size={12} />
+              )}
+              نبّهني عند توفر عرض مشابه
+            </button>
+          )}
+
+          {/* Alert saved confirmation */}
+          {noResults && alertSaved && (
+            <div className="flex items-center gap-1.5 mr-5 text-[11px] text-success font-medium">
+              <Bell size={12} />
+              تم تفعيل التنبيه ✓
+            </div>
+          )}
         </div>
       )}
 
