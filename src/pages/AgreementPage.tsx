@@ -349,9 +349,9 @@ const AgreementPage = () => {
     <div className="py-8">
       <div className="container max-w-2xl">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link to={`/negotiate/${id}`} className="hover:text-foreground transition-colors flex items-center gap-1">
+          <Link to="/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
             <ArrowRight size={14} strokeWidth={1.3} />
-            العودة للتفاوض
+            العودة للوحة التحكم
           </Link>
         </div>
 
