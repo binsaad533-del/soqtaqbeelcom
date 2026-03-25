@@ -106,7 +106,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
       const { error } = await supabase.from("search_alerts").insert([{
         user_id: user.id,
         search_query: query,
-        filters: lastFilters as Record<string, unknown>,
+        filters: JSON.parse(JSON.stringify(lastFilters)),
       }]);
 
       if (error) throw error;
