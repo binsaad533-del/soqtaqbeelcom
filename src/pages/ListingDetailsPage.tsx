@@ -425,7 +425,7 @@ const ListingDetailsPage = () => {
 
 // ---- Sub-components ----
 
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
+const InfoRow = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div className="flex items-center justify-between text-sm">
     <span className="text-muted-foreground">{label}</span>
     <span>{value}</span>
