@@ -318,15 +318,30 @@ const ListingDetailsPage = () => {
                 </div>
               )}
 
+              {/* Seller: offers panel */}
+              {isOwner && (
+                <SellerOffersPanel listingId={listing.id} listingOwnerId={listing.owner_id} className="mb-4" />
+              )}
+
+              {/* Buyer: offer form + negotiate button */}
               {!isOwner && !isSimulation && (
-                <Button
-                  onClick={handleStartNegotiation}
-                  disabled={startingDeal}
-                  className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
-                >
-                  {startingDeal ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} strokeWidth={1.5} />}
-                  ابدأ التفاوض
-                </Button>
+                <>
+                  <ListingOfferForm
+                    listingId={listing.id}
+                    listingPrice={listing.price}
+                    ownerId={listing.owner_id}
+                    className="mb-4"
+                  />
+                  <Button
+                    onClick={handleStartNegotiation}
+                    disabled={startingDeal}
+                    variant="outline"
+                    className="w-full rounded-xl active:scale-[0.98]"
+                  >
+                    {startingDeal ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} strokeWidth={1.5} />}
+                    ابدأ التفاوض مباشرة
+                  </Button>
+                </>
               )}
 
               {isSimulation && (
