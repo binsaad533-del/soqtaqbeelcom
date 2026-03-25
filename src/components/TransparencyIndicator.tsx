@@ -1,4 +1,4 @@
-import { Shield, TrendingUp, Eye, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { Shield, Eye, ChevronDown, ChevronUp, Sparkles, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { calculateTransparency, type TransparencyResult } from "@/lib/transparencyScore";
 import { useState } from "react";
@@ -27,8 +27,8 @@ const TIER_BADGE: Record<string, { badge: string; label: string }> = {
 
 const TransparencyIndicator = ({ listing, compact = false, className, onFieldClick }: TransparencyIndicatorProps) => {
   const result = calculateTransparency(listing);
-  const style = LEVEL_STYLES[result.level];
-  const impact = IMPACT_MESSAGES[result.level];
+  const style = getScoreStyle(result.score);
+  const tierInfo = TIER_BADGE[style.tier];
   const [expanded, setExpanded] = useState(false);
 
   if (compact) {
