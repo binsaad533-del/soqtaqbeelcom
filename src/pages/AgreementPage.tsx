@@ -619,6 +619,13 @@ const AgreementPage = () => {
               تنزيل PDF
             </Button>
           </div>
+
+          {/* Commission — compact footer */}
+          {!commission && deal?.agreed_price && (
+            <div className="border-t border-border/15 px-5 py-3">
+              <CommissionBanner dealAmount={deal.agreed_price} showDetails className="!p-2.5 !rounded-lg text-[10px]" />
+            </div>
+          )}
         </div>
 
         <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-muted-foreground/60">
