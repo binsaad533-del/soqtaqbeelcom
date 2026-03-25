@@ -1810,7 +1810,7 @@ const CreateListingPage = () => {
                           dealCheckResult.ratingColor === "blue" ? "text-blue-700" :
                           "text-foreground"
                         )}>{dealCheckResult.rating}</span>
-                        <span className="text-[11px] text-muted-foreground">عدالة السعر: {dealCheckResult.fairnessVerdict}</span>
+                        <span className="text-sm text-muted-foreground">عدالة السعر: {dealCheckResult.fairnessVerdict}</span>
                       </div>
                     </div>
 
