@@ -292,7 +292,7 @@ const CustomerDashboardPage = () => {
                   <div className="text-[10px] text-muted-foreground mb-0.5">البريد الإلكتروني</div>
                   {editingField === "email" ? (
                     <div className="flex items-center gap-1.5">
-                      <input type="email" dir="ltr" className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(e.target.value)} autoFocus />
+                      <input type="email" dir="ltr" lang="en" className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toEnglishNumerals(e.target.value))} autoFocus />
                       <button onClick={() => saveField("email", editValue)} disabled={saving} className="text-success"><Check size={13} /></button>
                       <button onClick={cancelEdit} className="text-muted-foreground"><XIcon size={13} /></button>
                     </div>
