@@ -141,7 +141,27 @@ const ListingDetailsPage = () => {
           <span className="text-foreground">{listing.title || listing.business_activity || "فرصة تقبيل"}</span>
         </div>
 
-        {isSimulation && (
+        {/* Active deal banner */}
+        {myActiveDeal && (
+          <div className="mb-4 p-3 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <MessageCircle size={14} className="text-primary" />
+              <span className="text-xs text-foreground font-medium">
+                لديك صفقة جارية على هذا الإعلان
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                ({myActiveDeal.status === "negotiating" ? "جاري التفاوض" : myActiveDeal.status === "finalized" ? "مُقفل" : myActiveDeal.status})
+              </span>
+            </div>
+            <Button asChild size="sm" className="rounded-xl text-xs gap-1.5">
+              <Link to={`/negotiate/${myActiveDeal.id}`}>
+                <ArrowLeft size={12} />
+                الانتقال للمفاوضات
+              </Link>
+            </Button>
+          </div>
+        )}
+
           <div className="mb-5 rounded-2xl bg-amber-50 border border-amber-200 p-5" dir="rtl">
             <div className="flex items-start gap-3 mb-3">
               <div className="mt-0.5 shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
