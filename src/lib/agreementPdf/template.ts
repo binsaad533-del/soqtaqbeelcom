@@ -351,7 +351,7 @@ const buildSections = (data: AgreementPdfData) => {
     sections.push(
       section(
         "سبب التعديل",
-        `<div style="font-size:12px;line-height:2;color:hsl(35 92% 30%);background:hsl(48 96% 93%);border:1px solid hsl(48 96% 80%);border-radius:16px;padding:14px;">${safeText(data.amendmentReason)}</div>`,
+        `<div style="font-size:12px;line-height:2;color:hsl(212 60% 30%);background:hsl(210 100% 97%);border:1px solid hsl(212 84% 82%);border-radius:16px;padding:14px;">${safeText(data.amendmentReason)}</div>`,
         "highlight",
       ),
     );
