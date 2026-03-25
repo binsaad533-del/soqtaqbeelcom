@@ -484,7 +484,19 @@ const NegotiationPage = () => {
                   {listing?.city && (
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">الموقع</span>
-                      <span className="font-medium">{listing.city}{listing.district ? ` — ${listing.district}` : ""}</span>
+                      {listing.location_lat && listing.location_lng ? (
+                        <a
+                          href={`https://www.google.com/maps?q=${listing.location_lat},${listing.location_lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-primary hover:underline flex items-center gap-1"
+                        >
+                          {listing.city}{listing.district ? ` — ${listing.district}` : ""}
+                          <MapPin size={11} strokeWidth={1.5} />
+                        </a>
+                      ) : (
+                        <span className="font-medium">{listing.city}{listing.district ? ` — ${listing.district}` : ""}</span>
+                      )}
                     </div>
                   )}
 
