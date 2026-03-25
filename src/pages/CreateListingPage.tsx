@@ -618,6 +618,8 @@ const CreateListingPage = () => {
     primary_deal_type: dealStructure.primaryType,
     deal_type: dealStructure.primaryType,
     inventory: inventory.filter((item) => item.included),
+    inventory_pricing_mode: inventoryPricingMode,
+    bulk_inventory_price: inventoryPricingMode === "bulk" && bulkInventoryPrice ? Number(bulkInventoryPrice) : null,
     photos,
     documents: Object.entries(uploadedDocs).map(([type, files]) => ({ type, files })),
     cr_extraction: crExtraction || undefined,
@@ -626,7 +628,7 @@ const CreateListingPage = () => {
       priority: i,
       is_primary: id === dealStructure.primaryType,
     })),
-  }), [disclosure, dealStructure, inventory, photos, uploadedDocs, crExtraction, sellerNote]);
+  }), [disclosure, dealStructure, inventory, photos, uploadedDocs, crExtraction, sellerNote, inventoryPricingMode, bulkInventoryPrice]);
 
   const getCurrentDealCheckInputKey = useCallback(() => JSON.stringify(buildListingPayload()), [buildListingPayload]);
 

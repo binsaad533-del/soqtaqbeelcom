@@ -132,6 +132,9 @@ function normalizeListingForAnalysis(listing: any) {
     ai_summary: normalizeText(listing?.ai_summary),
     cr_extraction: crData,
     inventory,
+    inventory_pricing_mode: inventoryPricingMode,
+    bulk_inventory_price: bulkInventoryPrice,
+    inventory_total_price: inventoryTotalPrice,
     documents,
     deal_options: dealOptions,
   };
