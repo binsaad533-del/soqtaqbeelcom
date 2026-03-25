@@ -773,7 +773,7 @@ const NegotiationPage = () => {
                   <Loader2 size={9} className="animate-spin" /> المساعد يعمل...
                 </div>
               )}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 relative">
                 <ChatAttachmentButton
                   dealId={dealId!}
                   onFileSent={async (message, type, metadata) => {
