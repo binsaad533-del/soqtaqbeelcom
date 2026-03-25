@@ -610,6 +610,7 @@ const CustomerDashboardPage = () => {
                   </button>
                 ))}
               </div>
+              {activeTab !== "security" && (
               <div className="relative flex-1 max-w-xs">
                 <Search size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -620,7 +621,7 @@ const CustomerDashboardPage = () => {
                   className="w-full bg-muted/40 border-0 rounded-lg py-2 pr-9 pl-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
                 />
               </div>
-            </div>
+              )}
 
             {/* Status filter chips */}
             {activeTab === "deals" && (
