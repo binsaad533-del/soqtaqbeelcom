@@ -763,16 +763,8 @@ const NegotiationPage = () => {
                   <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
                 )}
 
-                {/* Empty state for actions tab during negotiation */}
-                {!isPostAgreement && (
-                  <div className="text-center py-6">
-                    <p className="text-[11px] text-muted-foreground/60">
-                      أكمل التفاوض أولاً، ثم ستظهر هنا إجراءات العمولة والاتفاقية
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
+
+
           </div>
         </div>
       </div>
