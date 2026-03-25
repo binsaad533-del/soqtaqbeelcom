@@ -5,6 +5,7 @@ import AiInlineStar from "@/components/AiInlineStar";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 import { useEffect, useRef } from "react";
+import { useSEO } from "@/hooks/useSEO";
 
 const stats = [
   { value: "847", label: "فرصة نشطة" },
