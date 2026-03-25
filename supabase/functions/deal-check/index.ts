@@ -1,5 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+type AnalysisPerspective = "seller" | "buyer";
+type AnalysisMode = "create" | "update";
+
+const ANALYSIS_VERSION = "v2";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -32,6 +37,112 @@ const DEAL_TYPE_SCOPES: Record<string, { label: string; analyzeFields: string[];
     focusAreas: ["المعدات والأجهزة", "حالة الأصول", "الكمية", "واقعية السعر", "النقل والتسليم"],
   },
 };
+
+function normalizeText(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const normalized = value.replace(/\s+/g, " ").trim();
+  return normalized || null;
+}
+
+function normalizeNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const cleaned = value.replace(/,/g, "").trim();
+    if (!cleaned) return null;
+    const parsed = Number(cleaned);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function normalizeListingForAnalysis(listing: any) {
+  const inventory = Array.isArray(listing?.inventory)
+    ? listing.inventory
+        .map((item: any) => ({
+          name: normalizeText(item?.name),
+          qty: normalizeNumber(item?.qty),
+          condition: normalizeText(item?.condition),
+          category: normalizeText(item?.category),
+        }))
+        .filter((item: any) => item.name)
+        .sort((a: any, b: any) => JSON.stringify(a).localeCompare(JSON.stringify(b), "ar"))
+    : [];
+
+  const documents = Array.isArray(listing?.documents)
+    ? listing.documents
+        .map((doc: any) => ({
+          name: normalizeText(doc?.name),
+          type: normalizeText(doc?.type),
+          status: normalizeText(doc?.status),
+          filesCount: Array.isArray(doc?.files) ? doc.files.length : normalizeNumber(doc?.filesCount) ?? 0,
+        }))
+        .sort((a: any, b: any) => JSON.stringify(a).localeCompare(JSON.stringify(b), "ar"))
+    : [];
+
+  const dealOptions = Array.isArray(listing?.deal_options)
+    ? listing.deal_options
+        .map((opt: any) => ({
+          type_id: normalizeText(opt?.type_id),
+          priority: normalizeNumber(opt?.priority) ?? 0,
+          is_primary: Boolean(opt?.is_primary),
+        }))
+        .filter((opt: any) => opt.type_id)
+        .sort((a: any, b: any) => (a.priority - b.priority) || String(a.type_id).localeCompare(String(b.type_id), "ar"))
+    : [];
+
+  const crData = listing?.cr_extraction
+    ? {
+        cr_number: normalizeText(listing.cr_extraction.cr_number),
+        entity_name: normalizeText(listing.cr_extraction.entity_name),
+        business_activity: normalizeText(listing.cr_extraction.business_activity),
+        city: normalizeText(listing.cr_extraction.city),
+        district: normalizeText(listing.cr_extraction.district),
+        issue_date: normalizeText(listing.cr_extraction.issue_date),
+        expiry_date: normalizeText(listing.cr_extraction.expiry_date),
+        legal_status: normalizeText(listing.cr_extraction.legal_status),
+        extraction_confidence: normalizeText(listing.cr_extraction.extraction_confidence),
+      }
+    : null;
+
+  return {
+    title: normalizeText(listing?.title),
+    business_activity: normalizeText(listing?.business_activity),
+    category: normalizeText(listing?.category),
+    primary_deal_type: normalizeText(listing?.primary_deal_type),
+    deal_type: normalizeText(listing?.deal_type),
+    city: normalizeText(listing?.city),
+    district: normalizeText(listing?.district),
+    price: normalizeNumber(listing?.price),
+    annual_rent: normalizeNumber(listing?.annual_rent),
+    lease_duration: normalizeText(listing?.lease_duration),
+    lease_remaining: normalizeText(listing?.lease_remaining),
+    municipality_license: normalizeText(listing?.municipality_license),
+    civil_defense_license: normalizeText(listing?.civil_defense_license),
+    surveillance_cameras: normalizeText(listing?.surveillance_cameras),
+    liabilities: normalizeText(listing?.liabilities),
+    disclosure_score: normalizeNumber(listing?.disclosure_score),
+    ai_summary: normalizeText(listing?.ai_summary),
+    cr_extraction: crData,
+    inventory,
+    documents,
+    deal_options: dealOptions,
+  };
+}
+
+async function createInputSignature(listing: any, perspective: AnalysisPerspective, sellerName?: string): Promise<string> {
+  const payload = JSON.stringify({
+    listing,
+    perspective,
+    sellerName: normalizeText(sellerName),
+    analysisVersion: ANALYSIS_VERSION,
+  });
+  const bytes = new TextEncoder().encode(payload);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 24);
+}
 
 function buildDealTypeContext(listing: any): string {
   const primaryType = listing.primary_deal_type || listing.deal_type || "full_takeover";
@@ -66,7 +177,7 @@ function buildDealTypeContext(listing: any): string {
 }
 
 function buildSellerPerspective(sellerName?: string): string {
-  const nameGreeting = sellerName ? `- خاطب البائع باسمه "${sellerName}" عند التوصيات والإرشادات (مثل: "يا ${sellerName}، ننصحك...")` : '- خاطب البائع بضمير المخاطب ("إعلانك"، "سعرك"، "صفقتك")';
+  const nameGreeting = sellerName ? `- خاطب البائع باسمه "${sellerName}" عند التوصيات والإرشادات (مثل: "يا ${sellerName}، ننصحك...")` : '- خاطب البائع بضمير المخاطب ("إعلانك", "سعرك", "صفقتك")';
   return `
 ## منظور التحليل: البائع (قبل النشر)
 ${nameGreeting}
@@ -81,7 +192,7 @@ ${nameGreeting}
 
 const BUYER_PERSPECTIVE = `
 ## منظور التحليل: المشتري (بعد النشر)
-- خاطب المشتري مباشرةً بضمير المخاطب ("هذه الصفقة أمامك"، "يمكنك"، "انتبه")
+- خاطب المشتري مباشرةً بضمير المخاطب ("هذه الصفقة أمامك", "يمكنك", "انتبه")
 - ساعد المشتري على اتخاذ قرار الشراء
 - قيّم ما إذا كان السعر المعروض عادلاً بالنسبة للمشتري
 - في التوصية: وضّح للمشتري هل يستحق الدخول في هذه الصفقة أم لا
@@ -89,17 +200,42 @@ const BUYER_PERSPECTIVE = `
 - في negotiationGuidance: قدّم نصائح للمشتري حول كيف يتفاوض ويحصل على سعر أفضل
 - مثال: "يمكنك التفاوض لخفض السعر إلى X ريال بناءً على حالة الأصول"`;
 
-function buildSystemPrompt(perspective: "seller" | "buyer", sellerName?: string): string {
+function buildConsistencyRules(mode: AnalysisMode): string {
+  if (mode === "update") {
+    return `
+## قاعدة الثبات عند التحديث:
+- هذا تحديث لتحليل سابق، وليس تحليلاً جديداً من الصفر
+- حافظ على نفس الحكم العام ونفس عدالة السعر ونفس مستوى المخاطر إذا لم تتغير الأدلة المرتبطة بها
+- غيّر فقط البنود المتأثرة فعلياً بالبيانات المعدلة
+- إذا كان التغيير في السعر فقط، حدّث التقييم السعري والتوصية والتفاوض فقط ما لم يظهر سبب آخر واضح
+- إذا كان التغيير في البيانات أو المستندات فقط، حدّث missingInfo والثقة والمخاطر ذات الصلة فقط
+- لا تبدّل بين أوصاف متناقضة مثل "فرصة جيدة" و"مخاطر عالية" دون سبب جديد صريح في البيانات`; 
+  }
+
+  return `
+## قاعدة الثبات الأساسية:
+- إذا تكررت نفس المدخلات أو مدخلات مكافئة، يجب أن يبقى rating وfairnessVerdict وconfidenceLevel والتوصية السعريّة متسقة
+- لا تغيّر الحكم لمجرد اختلاف أسلوب الصياغة
+- عند الشك، قدّم حكماً محافظاً وثابتاً يستند إلى الأدلة`; 
+}
+
+function buildSystemPrompt(perspective: AnalysisPerspective, mode: AnalysisMode, sellerName?: string): string {
   const perspectiveBlock = perspective === "seller" ? buildSellerPerspective(sellerName) : BUYER_PERSPECTIVE;
-  
-  return `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية قصيرة وقوية لكل صفقة.
+
+  return `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية دقيقة وثابتة لكل صفقة.
 
 ${perspectiveBlock}
+${buildConsistencyRules(mode)}
 
 ## قاعدة أساسية — احترام نوع الصفقة:
 - يجب أن يكون تحليلك محصوراً بنطاق نوع الصفقة المحدد
 - إذا كانت الصفقة "أصول فقط": لا تسأل عن السجل التجاري أو الاسم التجاري أو عقد الإيجار أو الالتزامات السابقة
 - الحقول غير المشمولة في نطاق الصفقة ليست "معلومات ناقصة" ولا "مخاطر"
+
+## منهج تقييم ثابت:
+- احسب الحكم بناءً على 5 محاور ثابتة فقط: السعر مقابل السوق، اكتمال البيانات، جودة الأصول/التشغيل، وضوح النشاط، والمخاطر النظامية
+- لا تغيّر rating أو fairnessVerdict إلا إذا تغيّر واحد من هذه المحاور بدليل واضح
+- اذكر الأدلة أولاً ثم الاستنتاج
 
 ## قواعد صارمة:
 - استخدم الأرقام الإنجليزية فقط (0-9)
@@ -136,7 +272,6 @@ ${perspectiveBlock}
 - أمثلة على أوصاف مشبوهة: حروف عشوائية، كلمات بلا سياق، رموز فقط، نص مكرر بلا معنى
 - الوصف التجاري الواضح يجب أن يحدد نوع النشاط بوضوح (مطعم، محل تجاري، مصنع، إلخ)
 
-
 عند تقييم الأصول، استخدم منصات: حراج، مستعمل، OpenSooq، Facebook Marketplace
 - قارن بذكاء حسب النوع والفئة والحالة
 - ميّز بين: سعر الطلب، المؤشر السوقي المقدّر، القيمة المؤكدة
@@ -149,14 +284,149 @@ ${perspectiveBlock}
 - missingInfo يجب أن تحتوي فقط على معلومات ناقصة ضمن نطاق الصفقة المحدد`;
 }
 
+function buildPreviousAnalysisReference(previousAnalysis: any): string | null {
+  if (!previousAnalysis || typeof previousAnalysis !== "object") return null;
+
+  const reference = {
+    rating: previousAnalysis.rating,
+    fairnessVerdict: previousAnalysis.fairnessVerdict,
+    confidenceLevel: previousAnalysis.confidenceLevel,
+    recommendation: previousAnalysis.recommendation,
+    risks: previousAnalysis.risks,
+    strengths: previousAnalysis.strengths,
+    missingInfo: previousAnalysis.missingInfo,
+    marketComparison: previousAnalysis.marketComparison,
+  };
+
+  return JSON.stringify(reference, null, 2);
+}
+
+function buildAnalysisPrompt(listing: any, mode: AnalysisMode, previousAnalysis: any, inputSignature: string): string {
+  const sections: string[] = [];
+
+  sections.push("# بيانات الصفقة المطلوب تحليلها\n");
+  sections.push(`## بصمة المدخلات الحالية: ${inputSignature}`);
+  sections.push(buildDealTypeContext(listing));
+
+  if (listing.title) sections.push(`\n## العنوان: ${listing.title}`);
+  if (listing.business_activity || listing.category) sections.push(`## النشاط: ${listing.business_activity || listing.category}`);
+
+  const primaryType = listing.primary_deal_type || listing.deal_type;
+  const scope = DEAL_TYPE_SCOPES[primaryType] || DEAL_TYPE_SCOPES["full_takeover"];
+
+  sections.push(`## نوع الصفقة: ${scope.label}`);
+  if (listing.city) sections.push(`## المدينة: ${listing.city}`);
+  if (listing.district) sections.push(`## الحي: ${listing.district}`);
+  if (listing.price) sections.push(`## السعر المطلوب: ${listing.price} ريال سعودي`);
+
+  const crData = listing.cr_extraction;
+  if (crData) {
+    sections.push("\n## بيانات مستخرجة من السجل التجاري (تم قراءتها من الوثيقة):");
+    if (crData.cr_number) sections.push(`- رقم السجل التجاري: ${crData.cr_number}`);
+    if (crData.entity_name) sections.push(`- اسم المنشأة: ${crData.entity_name}`);
+    if (crData.business_activity) sections.push(`- النشاط التجاري: ${crData.business_activity}`);
+    if (crData.city) sections.push(`- المدينة: ${crData.city}`);
+    if (crData.district) sections.push(`- الحي: ${crData.district}`);
+    if (crData.issue_date) sections.push(`- تاريخ الإصدار: ${crData.issue_date}`);
+    if (crData.expiry_date) sections.push(`- تاريخ الانتهاء: ${crData.expiry_date}`);
+    if (crData.legal_status) sections.push(`- الحالة القانونية: ${crData.legal_status}`);
+    if (crData.extraction_confidence) sections.push(`- دقة الاستخراج: ${crData.extraction_confidence}`);
+    sections.push("⚠️ هذه البيانات تم استخراجها فعلياً من المستند — لا تعتبرها ناقصة ولا تطلبها كمعلومات مفقودة.");
+  }
+
+  if (scope.analyzeFields.includes("lease")) {
+    if (listing.annual_rent || listing.lease_duration || listing.lease_remaining) {
+      sections.push("\n## بيانات الإيجار:");
+      if (listing.annual_rent) sections.push(`- الإيجار السنوي: ${listing.annual_rent} ريال`);
+      if (listing.lease_duration) sections.push(`- مدة العقد: ${listing.lease_duration}`);
+      if (listing.lease_remaining) sections.push(`- المتبقي من العقد: ${listing.lease_remaining}`);
+    }
+  }
+
+  if (scope.analyzeFields.includes("licenses")) {
+    if (listing.municipality_license || listing.civil_defense_license || listing.surveillance_cameras) {
+      sections.push("\n## التراخيص والامتثال:");
+      if (listing.municipality_license) sections.push(`- رخصة البلدية: ${listing.municipality_license}`);
+      if (listing.civil_defense_license) sections.push(`- الدفاع المدني: ${listing.civil_defense_license}`);
+      if (listing.surveillance_cameras) sections.push(`- كاميرات المراقبة: ${listing.surveillance_cameras}`);
+    }
+  }
+
+  if (scope.analyzeFields.includes("liabilities") && listing.liabilities) {
+    sections.push(`\n## الالتزامات: ${listing.liabilities}`);
+  }
+
+  const dealOptions = listing.deal_options || [];
+  if (dealOptions.length > 0) {
+    sections.push("\n## هيكل الصفقة المختار:");
+    for (const opt of dealOptions) {
+      const optScope = DEAL_TYPE_SCOPES[opt.type_id];
+      if (optScope) {
+        sections.push(`- ${opt.is_primary ? "رئيسي" : "بديل"}: ${optScope.label}`);
+      }
+    }
+  }
+
+  if (scope.analyzeFields.includes("assets") && listing.inventory?.length) {
+    sections.push("\n## جرد الأصول (قارن كل صنف مع منصات السوق المستعمل السعودي):");
+    listing.inventory.forEach((item: any) => {
+      const details = [
+        item.name,
+        item.qty ? `${item.qty} وحدة` : null,
+        item.condition ? `حالة: ${item.condition}` : null,
+        item.category ? `فئة: ${item.category}` : null,
+      ].filter(Boolean).join(" — ");
+      sections.push(`- ${details}`);
+    });
+  }
+
+  if (listing.documents?.length) {
+    sections.push("\n## المستندات:");
+    listing.documents.forEach((doc: any) => {
+      const label = doc.name || doc.type || "مستند";
+      const suffix = doc.filesCount ? ` (${doc.filesCount} ملف)` : "";
+      sections.push(`- ${label}${suffix}: ${doc.status || "مرفق"}`);
+    });
+  }
+
+  if (listing.disclosure_score) sections.push(`\n## نسبة الإفصاح: ${listing.disclosure_score}%`);
+  if (listing.ai_summary) sections.push(`\n## ملخص البائع:\n${listing.ai_summary}`);
+
+  const previousReference = buildPreviousAnalysisReference(previousAnalysis);
+  if (mode === "update" && previousReference) {
+    sections.push("\n## التحليل السابق المرجعي (حدّثه فقط عند وجود سبب واضح):");
+    sections.push(previousReference);
+  }
+
+  sections.push("\n---");
+  sections.push("## تعليمات:");
+  sections.push(`1. حلل هذه الصفقة حصرياً كصفقة "${scope.label}"`);
+  sections.push("2. لا تطلب معلومات خارج نطاق نوع الصفقة المحدد");
+  sections.push("3. إذا تم تقديم بيانات مستخرجة من السجل التجاري أعلاه، استخدمها في التحليل ولا تعتبرها ناقصة");
+  sections.push(mode === "update"
+    ? "4. هذا تحديث لتحليل سابق — أبقِ العناصر غير المتأثرة ثابتة، وغيّر فقط ما أثّرت عليه التعديلات الحالية"
+    : "4. حافظ على ثبات الحكم إذا أُعيد إرسال نفس البيانات مرة أخرى");
+
+  if (scope.analyzeFields.includes("assets")) {
+    sections.push("5. استخدم منصات حراج ومستعمل وأوبن سوق كمراجع مقارنة للأصول");
+  } else {
+    sections.push("5. تخطّ مقارنة الأصول — ليست ضمن نطاق هذه الصفقة");
+  }
+
+  sections.push("6. أنتج تقرير الجدوى باستخدام الأداة deal_check_result");
+
+  return sections.join("\n");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { listing, perspective: rawPerspective, sellerName } = await req.json();
-    const perspective: "seller" | "buyer" = rawPerspective === "seller" ? "seller" : "buyer";
+    const { listing, perspective: rawPerspective, sellerName, mode: rawMode, previousAnalysis } = await req.json();
+    const perspective: AnalysisPerspective = rawPerspective === "seller" ? "seller" : "buyer";
+    const mode: AnalysisMode = rawMode === "update" ? "update" : "create";
 
     if (!listing) {
       return new Response(
@@ -173,7 +443,9 @@ serve(async (req) => {
       );
     }
 
-    const userPrompt = buildAnalysisPrompt(listing);
+    const normalizedListing = normalizeListingForAnalysis(listing);
+    const inputSignature = await createInputSignature(normalizedListing, perspective, sellerName);
+    const userPrompt = buildAnalysisPrompt(normalizedListing, mode, previousAnalysis, inputSignature);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -182,9 +454,11 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
+        temperature: 0.1,
+        top_p: 0.1,
         messages: [
-          { role: "system", content: buildSystemPrompt(perspective, sellerName) },
+          { role: "system", content: buildSystemPrompt(perspective, mode, sellerName) },
           { role: "user", content: userPrompt },
         ],
         tools: [
@@ -288,8 +562,18 @@ serve(async (req) => {
     }
 
     const result = JSON.parse(toolCall.function.arguments);
+    const analysis = {
+      ...result,
+      _meta: {
+        analysisVersion: ANALYSIS_VERSION,
+        inputSignature,
+        mode,
+        perspective,
+        generatedAt: new Date().toISOString(),
+      },
+    };
 
-    return new Response(JSON.stringify({ success: true, analysis: result }), {
+    return new Response(JSON.stringify({ success: true, analysis }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
@@ -300,117 +584,3 @@ serve(async (req) => {
     );
   }
 });
-
-function buildAnalysisPrompt(listing: any): string {
-  const sections: string[] = [];
-
-  sections.push("# بيانات الصفقة المطلوب تحليلها\n");
-
-  // Add deal type context FIRST - this is the most important part
-  sections.push(buildDealTypeContext(listing));
-
-  if (listing.title) sections.push(`\n## العنوان: ${listing.title}`);
-  if (listing.business_activity || listing.category) sections.push(`## النشاط: ${listing.business_activity || listing.category}`);
-  
-  const primaryType = listing.primary_deal_type || listing.deal_type;
-  const scope = DEAL_TYPE_SCOPES[primaryType] || DEAL_TYPE_SCOPES["full_takeover"];
-  
-  sections.push(`## نوع الصفقة: ${scope.label}`);
-  if (listing.city) sections.push(`## المدينة: ${listing.city}`);
-  if (listing.district) sections.push(`## الحي: ${listing.district}`);
-  if (listing.price) sections.push(`## السعر المطلوب: ${listing.price} ريال سعودي`);
-
-  // CR extraction data — include when available (especially for cr_only)
-  const crData = listing.cr_extraction;
-  if (crData) {
-    sections.push("\n## بيانات مستخرجة من السجل التجاري (تم قراءتها من الوثيقة):");
-    if (crData.cr_number) sections.push(`- رقم السجل التجاري: ${crData.cr_number}`);
-    if (crData.entity_name) sections.push(`- اسم المنشأة: ${crData.entity_name}`);
-    if (crData.business_activity) sections.push(`- النشاط التجاري: ${crData.business_activity}`);
-    if (crData.city) sections.push(`- المدينة: ${crData.city}`);
-    if (crData.district) sections.push(`- الحي: ${crData.district}`);
-    if (crData.issue_date) sections.push(`- تاريخ الإصدار: ${crData.issue_date}`);
-    if (crData.expiry_date) sections.push(`- تاريخ الانتهاء: ${crData.expiry_date}`);
-    if (crData.legal_status) sections.push(`- الحالة القانونية: ${crData.legal_status}`);
-    if (crData.extraction_confidence) sections.push(`- دقة الاستخراج: ${crData.extraction_confidence}`);
-    sections.push("⚠️ هذه البيانات تم استخراجها فعلياً من مستند السجل التجاري — لا تعتبرها ناقصة ولا تطلبها كمعلومات مفقودة.");
-  }
-
-  // Lease info - only if relevant to deal type
-  if (scope.analyzeFields.includes("lease")) {
-    if (listing.annual_rent || listing.lease_duration || listing.lease_remaining) {
-      sections.push("\n## بيانات الإيجار:");
-      if (listing.annual_rent) sections.push(`- الإيجار السنوي: ${listing.annual_rent} ريال`);
-      if (listing.lease_duration) sections.push(`- مدة العقد: ${listing.lease_duration}`);
-      if (listing.lease_remaining) sections.push(`- المتبقي من العقد: ${listing.lease_remaining}`);
-    }
-  }
-
-  // Licenses - only if relevant
-  if (scope.analyzeFields.includes("licenses")) {
-    if (listing.municipality_license || listing.civil_defense_license || listing.surveillance_cameras) {
-      sections.push("\n## التراخيص والامتثال:");
-      if (listing.municipality_license) sections.push(`- رخصة البلدية: ${listing.municipality_license}`);
-      if (listing.civil_defense_license) sections.push(`- الدفاع المدني: ${listing.civil_defense_license}`);
-      if (listing.surveillance_cameras) sections.push(`- كاميرات المراقبة: ${listing.surveillance_cameras}`);
-    }
-  }
-
-  // Liabilities - only if relevant
-  if (scope.analyzeFields.includes("liabilities")) {
-    if (listing.liabilities) sections.push(`\n## الالتزامات: ${listing.liabilities}`);
-  }
-
-  // Deal structure includes/excludes
-  const dealOptions = listing.deal_options || [];
-  if (dealOptions.length > 0) {
-    sections.push("\n## هيكل الصفقة المختار:");
-    for (const opt of dealOptions) {
-      const optScope = DEAL_TYPE_SCOPES[opt.type_id];
-      if (optScope) {
-        sections.push(`- ${opt.is_primary ? "رئيسي" : "بديل"}: ${optScope.label}`);
-      }
-    }
-  }
-
-  // Inventory - only if assets are in scope
-  if (scope.analyzeFields.includes("assets") && listing.inventory?.length) {
-    sections.push("\n## جرد الأصول (قارن كل صنف مع منصات السوق المستعمل السعودي):");
-    listing.inventory.forEach((item: any) => {
-      const details = [
-        item.name,
-        item.qty ? `${item.qty} وحدة` : null,
-        item.condition ? `حالة: ${item.condition}` : null,
-        item.category ? `فئة: ${item.category}` : null,
-      ].filter(Boolean).join(" — ");
-      sections.push(`- ${details}`);
-    });
-  }
-
-  // Documents
-  if (listing.documents?.length) {
-    sections.push("\n## المستندات:");
-    listing.documents.forEach((doc: any) => {
-      sections.push(`- ${doc.name || doc.type}: ${doc.status || "مرفق"}`);
-    });
-  }
-
-  if (listing.disclosure_score) sections.push(`\n## نسبة الإفصاح: ${listing.disclosure_score}%`);
-  if (listing.ai_summary) sections.push(`\n## ملخص البائع:\n${listing.ai_summary}`);
-
-  sections.push("\n---");
-  sections.push("## تعليمات:");
-  sections.push(`1. حلل هذه الصفقة حصرياً كصفقة "${scope.label}"`);
-  sections.push("2. لا تطلب معلومات خارج نطاق نوع الصفقة المحدد");
-  sections.push("3. إذا تم تقديم بيانات مستخرجة من السجل التجاري أعلاه، استخدمها في التحليل ولا تعتبرها ناقصة");
-  
-  if (scope.analyzeFields.includes("assets")) {
-    sections.push("4. استخدم منصات حراج ومستعمل وأوبن سوق كمراجع مقارنة للأصول");
-  } else {
-    sections.push("4. تخطّ مقارنة الأصول — ليست ضمن نطاق هذه الصفقة");
-  }
-  
-  sections.push("5. أنتج تقرير الجدوى باستخدام الأداة deal_check_result");
-
-  return sections.join("\n");
-}

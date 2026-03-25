@@ -602,6 +602,7 @@ const CreateListingPage = () => {
   const [dealCheckLoading, setDealCheckLoading] = useState(false);
   const [dealCheckResult, setDealCheckResult] = useState<any>(null);
   const [dealCheckError, setDealCheckError] = useState("");
+  const [dealCheckInputKey, setDealCheckInputKey] = useState<string | null>(null);
 
   const buildListingPayload = useCallback(() => ({
     ...disclosure,
@@ -621,6 +622,8 @@ const CreateListingPage = () => {
     })),
   }), [disclosure, dealStructure, inventory, photos, uploadedDocs, crExtraction, sellerNote]);
 
+  const getCurrentDealCheckInputKey = useCallback(() => JSON.stringify(buildListingPayload()), [buildListingPayload]);
+
   const handleRunInlineDealCheck = async () => {
     setPublishAttempted(true);
     const imgReq = getImageRequirement(dealStructure.primaryType);
@@ -631,17 +634,31 @@ const CreateListingPage = () => {
       return;
     }
 
+    const nextListingPayload = buildListingPayload();
+    const nextInputKey = JSON.stringify(nextListingPayload);
+
+    if (dealCheckResult && dealCheckInputKey === nextInputKey) {
+      toast.info("التحليل الحالي ما زال مطابقاً لآخر بياناتك");
+      return;
+    }
+
     setDealCheckLoading(true);
     setDealCheckError("");
-    setDealCheckResult(null);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: { listing: buildListingPayload(), perspective: "seller", sellerName },
+        body: {
+          listing: nextListingPayload,
+          perspective: "seller",
+          sellerName,
+          mode: dealCheckResult ? "update" : "create",
+          previousAnalysis: dealCheckResult || null,
+        },
       });
       if (fnError) throw new Error(fnError.message);
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
       setDealCheckResult(data.analysis);
+      setDealCheckInputKey(nextInputKey);
     } catch (e: any) {
       console.error("[DealCheck] Inline check failed:", e);
       setDealCheckError(e.message || "تعذّر إجراء الفحص");
@@ -663,24 +680,32 @@ const CreateListingPage = () => {
       return;
     }
 
-    // If deal check already done, go straight to publish confirmation
-    if (dealCheckResult) {
+    const nextListingPayload = buildListingPayload();
+    const nextInputKey = JSON.stringify(nextListingPayload);
+
+    if (dealCheckResult && dealCheckInputKey === nextInputKey) {
       setShowPublishConfirm(true);
       return;
     }
 
-    // Run deal check before showing confirmation
     setShowPublishConfirm(true);
     setDealCheckLoading(true);
     setDealCheckError("");
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: { listing: buildListingPayload(), perspective: "seller", sellerName },
+        body: {
+          listing: nextListingPayload,
+          perspective: "seller",
+          sellerName,
+          mode: dealCheckResult ? "update" : "create",
+          previousAnalysis: dealCheckResult || null,
+        },
       });
       if (fnError) throw new Error(fnError.message);
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
       setDealCheckResult(data.analysis);
+      setDealCheckInputKey(nextInputKey);
     } catch (e: any) {
       console.error("[DealCheck] Pre-publish check failed:", e);
       setDealCheckError(e.message || "تعذّر إجراء الفحص — يمكنك المتابعة بالنشر");
@@ -688,6 +713,8 @@ const CreateListingPage = () => {
       setDealCheckLoading(false);
     }
   };
+
+  
 
   const handlePublish = async () => {
     if (!listingId) return;
