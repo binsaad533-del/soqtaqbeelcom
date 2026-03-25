@@ -145,8 +145,8 @@ const MarketplaceTicker = () => {
 
   if (items.length === 0) return null;
 
-  // 3 copies for seamless wrap
-  const copies = [0, 1, 2];
+  // Enough copies to always overflow the container
+  const copies = [0, 1, 2, 3, 4, 5, 6];
 
   return (
     <div
