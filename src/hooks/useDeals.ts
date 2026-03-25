@@ -55,12 +55,16 @@ export function useDeals() {
     return (data || []) as Deal[];
   }, []);
 
-  const createDeal = useCallback(async (listingId: string, sellerId: string, buyerId?: string) => {
+  const createDeal = useCallback(async (listingId: string, sellerId: string, buyerId?: string, agreedPrice?: number) => {
     if (!user) return { error: new Error("Not authenticated"), data: null };
     setLoading(true);
+    const insertData: any = { listing_id: listingId, buyer_id: buyerId || user.id, seller_id: sellerId };
+    if (agreedPrice != null) {
+      insertData.agreed_price = agreedPrice;
+    }
     const { data, error } = await supabase
       .from("deals")
-      .insert({ listing_id: listingId, buyer_id: buyerId || user.id, seller_id: sellerId })
+      .insert(insertData)
       .select()
       .single();
     setLoading(false);

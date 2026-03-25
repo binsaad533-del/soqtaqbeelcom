@@ -35,7 +35,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
     } else {
       toast.success("تم قبول العرض ✅");
       // Create a deal
-      const { data: dealData } = await createDeal(listingId, listingOwnerId, offer.buyer_id);
+      const { data: dealData } = await createDeal(listingId, listingOwnerId, offer.buyer_id, offer.offered_price);
       if (dealData) {
         setOffers(prev => prev.map(o => o.id === offer.id ? { ...o, status: "accepted", deal_id: dealData.id } : o));
         navigate(`/negotiate/${dealData.id}`);
