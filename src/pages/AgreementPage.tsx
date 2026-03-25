@@ -369,6 +369,8 @@ const AgreementPage = () => {
           </Link>
         </div>
 
+        <DealProgressBar currentStage={getDealStage(deal, true, bothApproved)} className="mb-6" />
+
         {/* Congratulations Banner — only when both approved */}
         {bothApproved && (
           <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 mb-4 text-center">
