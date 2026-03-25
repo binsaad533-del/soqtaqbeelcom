@@ -146,13 +146,6 @@ const AgreementPage = () => {
         setAllVersions(agreements as unknown as AgreementRecord[]);
       }
 
-      // Load history
-      const { data: historyData } = await supabase
-        .from("deal_history")
-        .select("*")
-        .eq("deal_id", id)
-        .order("created_at", { ascending: false });
-      if (historyData) setHistory(historyData as unknown as HistoryEntry[]);
 
       // Load commission
       const commData = await getCommission(id);
