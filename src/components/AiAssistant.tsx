@@ -83,11 +83,11 @@ const AiAssistant = () => {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
-  const [peeking, setPeeking] = useState(false);
+  
   const [hasInteracted, setHasInteracted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const peekTimer = useRef<ReturnType<typeof setTimeout>>();
+  
   const { greeting, role, suggestions, proactiveMessage, dismissProactive, pathname } = useAiContext();
   const { pageData } = usePageData();
 
@@ -95,14 +95,6 @@ const AiAssistant = () => {
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
   useEffect(() => { chatMode && inputRef.current?.focus(); }, [chatMode]);
 
-  useEffect(() => {
-    if (open || hasInteracted) return;
-    peekTimer.current = setTimeout(() => {
-      setPeeking(true);
-      setTimeout(() => setPeeking(false), 5000);
-    }, 6000);
-    return () => { clearTimeout(peekTimer.current); setPeeking(false); };
-  }, [pathname, open, hasInteracted]);
 
   const now = () => new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
@@ -165,43 +157,13 @@ const AiAssistant = () => {
 
   const handleOpen = () => {
     setOpen(true);
-    setPeeking(false);
     setHasInteracted(true);
-    dismissProactive();
   };
 
   return (
     <>
-      {/* Proactive tooltip */}
-      {(proactiveMessage || peeking) && !open && (
-        <div
-          className="fixed bottom-16 left-0 z-50 flex items-end gap-0 cursor-pointer animate-fade-in"
-          onClick={handleOpen}
-        >
-          <div className="relative -ml-2 transition-transform duration-500 ease-out hover:translate-x-2">
-            <div className="w-14 h-14 rounded-full gradient-primary flex items-center justify-center shadow-soft-lg">
-              <Sparkles size={24} className="text-primary-foreground" strokeWidth={1.5} />
-            </div>
-          </div>
-          {proactiveMessage && (
-            <div className="max-w-60 mb-8 mr-2">
-              <div className="bg-card rounded-2xl p-3 shadow-soft-lg border border-border/40 relative">
-                <button
-                  onClick={(e) => { e.stopPropagation(); dismissProactive(); setPeeking(false); }}
-                  className="absolute top-1.5 right-1.5 text-muted-foreground/50 hover:text-foreground"
-                >
-                  <X size={10} />
-                </button>
-                <p className="text-[11px] text-foreground/80 leading-relaxed pr-3">{proactiveMessage}</p>
-              </div>
-              <div className="w-2.5 h-2.5 bg-card border-b border-l border-border/40 rotate-[-45deg] absolute bottom-6 left-16" />
-            </div>
-          )}
-        </div>
-      )}
-
       {/* AI button */}
-      {!open && !peeking && !proactiveMessage && (
+      {!open && (
         <button
           onClick={handleOpen}
           className="fixed bottom-6 left-4 z-50 flex items-center gap-1.5 group transition-all duration-300"
