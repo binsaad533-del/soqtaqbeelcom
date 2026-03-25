@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Loader2, X, Bell } from "lucide-react";
+import { Sparkles, Loader2, X, Bell, Mail, Phone } from "lucide-react";
 import type { FilterState } from "./MarketplaceFilters";
 import AiStar from "@/components/AiStar";
 import { toast } from "sonner";
@@ -41,7 +41,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
   const displayMessage = useMemo(() => {
     if (!hasSearched || !aiMessage) return aiMessage;
     if (noResults) {
-      return "ما لقيت نتائج تطابق بحثك الحين.. بس لا تشيل هم! فعّل التنبيه وأنا أرسل لك إشعار فور ما ينزل عرض يناسبك 🔔";
+      return "ما لقيت نتائج تطابق بحثك الحين.. بس لا تشيل هم! فعّل التنبيه وأنا أرسل لك إشعار على الإيميل والجوال فور ما ينزل عرض يناسبك 📧📱";
     }
     return aiMessage;
   }, [aiMessage, resultCount, hasSearched, noResults]);
@@ -103,16 +103,23 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
 
     setAlertSaving(true);
     try {
+      // Fetch user profile for phone, and email from auth
+      const [{ data: profile }] = await Promise.all([
+        supabase.from("profiles").select("phone").eq("user_id", user.id).single(),
+      ]);
+
       const { error } = await supabase.from("search_alerts").insert([{
         user_id: user.id,
         search_query: query,
         filters: JSON.parse(JSON.stringify(lastFilters)),
+        notify_email: user.email || null,
+        notify_phone: profile?.phone || null,
       }]);
 
       if (error) throw error;
 
       setAlertSaved(true);
-      toast.success("تم تفعيل التنبيه! راح ننبّهك فور ما ينزل عرض يناسب بحثك 🔔");
+      toast.success("تم تفعيل التنبيه! راح ننبّهك على الإيميل والجوال 📧📱");
     } catch (e) {
       console.error("Alert save error:", e);
       toast.error("حصل خطأ، حاول مرة ثانية");
@@ -230,7 +237,9 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
               ) : (
                 <Bell size={12} />
               )}
-              نبّهني عند توفر عرض مشابه
+              <Mail size={12} />
+              <Phone size={12} />
+              نبّهني على الإيميل والجوال
             </button>
           )}
 
@@ -238,7 +247,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
           {noResults && alertSaved && (
             <div className="flex items-center gap-1.5 mr-5 text-[11px] text-success font-medium">
               <Bell size={12} />
-              تم تفعيل التنبيه ✓
+              تم تفعيل التنبيه على الإيميل والجوال ✓
             </div>
           )}
         </div>
