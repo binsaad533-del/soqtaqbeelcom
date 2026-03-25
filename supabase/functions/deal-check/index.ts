@@ -56,6 +56,9 @@ function normalizeNumber(value: unknown): number | null {
 }
 
 function normalizeListingForAnalysis(listing: any) {
+  const inventoryPricingMode = listing?.inventory_pricing_mode || "per_item";
+  const bulkInventoryPrice = normalizeNumber(listing?.bulk_inventory_price);
+
   const inventory = Array.isArray(listing?.inventory)
     ? listing.inventory
         .map((item: any) => ({
@@ -63,10 +66,15 @@ function normalizeListingForAnalysis(listing: any) {
           qty: normalizeNumber(item?.qty),
           condition: normalizeText(item?.condition),
           category: normalizeText(item?.category),
+          unitPrice: normalizeNumber(item?.unitPrice),
         }))
         .filter((item: any) => item.name)
         .sort((a: any, b: any) => JSON.stringify(a).localeCompare(JSON.stringify(b), "ar"))
     : [];
+
+  const inventoryTotalPrice = inventoryPricingMode === "bulk"
+    ? bulkInventoryPrice
+    : inventory.reduce((sum: number, item: any) => sum + ((item.unitPrice || 0) * (item.qty || 1)), 0) || null;
 
   const documents = Array.isArray(listing?.documents)
     ? listing.documents
@@ -124,6 +132,9 @@ function normalizeListingForAnalysis(listing: any) {
     ai_summary: normalizeText(listing?.ai_summary),
     cr_extraction: crData,
     inventory,
+    inventory_pricing_mode: inventoryPricingMode,
+    bulk_inventory_price: bulkInventoryPrice,
+    inventory_total_price: inventoryTotalPrice,
     documents,
     deal_options: dealOptions,
   };
@@ -271,6 +282,16 @@ ${buildConsistencyRules(mode)}
   - أضف في risks: "عنوان أو وصف الصفقة غير مفهوم — قد يشير إلى صفقة غير جدية أو محاولة احتيال"
 - أمثلة على أوصاف مشبوهة: حروف عشوائية، كلمات بلا سياق، رموز فقط، نص مكرر بلا معنى
 - الوصف التجاري الواضح يجب أن يحدد نوع النشاط بوضوح (مطعم، محل تجاري، مصنع، إلخ)
+
+## تسعير الأصول:
+- إذا كانت البيانات تحتوي على inventory_pricing_mode = "per_item" وكل قطعة لها unitPrice:
+  - حلل سعر كل قطعة مقارنة بالسوق
+  - استخدم inventory_total_price كمؤشر لقيمة الأصول الإجمالية
+  - إذا كان إجمالي أسعار الأصول أعلى من السعر الكلي للصفقة، نبّه
+- إذا كانت inventory_pricing_mode = "bulk":
+  - استخدم bulk_inventory_price كسعر إجمالي للأصول
+  - قارنه بعدد القطع وحالتها لتقييم عدالته
+- إذا لم يتم تحديد أسعار للأصول، اذكر ذلك كمعلومة ناقصة (إن كانت الأصول ضمن نطاق الصفقة)
 
 عند تقييم الأصول، استخدم منصات: حراج، مستعمل، OpenSooq، Facebook Marketplace
 - قارن بذكاء حسب النوع والفئة والحالة
