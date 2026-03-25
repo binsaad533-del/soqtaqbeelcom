@@ -136,11 +136,6 @@ const ListingDetailsPage = () => {
     <>
       <div className="py-8">
       <div className="container">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link to="/marketplace" className="hover:text-foreground transition-colors">السوق</Link>
-          <span>/</span>
-          <span className="text-foreground">{listing.title || listing.business_activity || "فرصة تقبيل"}</span>
-        </div>
 
         {myActiveDeal && (
           <div className="mb-5 p-3 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-3" dir="rtl">
