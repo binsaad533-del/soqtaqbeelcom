@@ -307,10 +307,23 @@ const ListingCard = ({ listing, isComparing, onToggleCompare }: {
           <div className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">
             {listing.title || listing.business_activity || "فرصة تقبيل"}
           </div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-            <MapPin size={12} strokeWidth={1.3} />
-            {listing.district && `${listing.district}, `}{listing.city || "—"}
-          </div>
+          {listing.location_lat && listing.location_lng ? (
+            <a
+              href={`https://www.google.com/maps?q=${listing.location_lat},${listing.location_lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-1 text-xs text-primary hover:underline mb-2"
+            >
+              <MapPin size={12} strokeWidth={1.3} />
+              {listing.district && `${listing.district}, `}{listing.city || "—"}
+            </a>
+          ) : (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+              <MapPin size={12} strokeWidth={1.3} />
+              {listing.district && `${listing.district}, `}{listing.city || "—"}
+            </div>
+          )}
           {seller && (
             <div className="mb-2">
               <TrustBadge score={seller.trust_score} verificationLevel={seller.verification_level} size="sm" showScore showBadges badges={badges.slice(0, 2)} />
