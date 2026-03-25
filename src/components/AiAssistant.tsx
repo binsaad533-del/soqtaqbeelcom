@@ -166,7 +166,7 @@ const AiAssistant = () => {
       {!open && (
         <button
           onClick={handleOpen}
-          className="fixed bottom-6 left-4 z-50 flex items-center gap-1.5 group transition-all duration-300"
+          className="fixed bottom-6 left-[-8px] z-50 flex items-center gap-1.5 group transition-all duration-300 hover:left-2"
         >
           <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center shadow-soft-lg group-hover:scale-110 transition-transform duration-300">
             <AiStar size={26} className="ai-glow-slow [&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" animate={false} />
