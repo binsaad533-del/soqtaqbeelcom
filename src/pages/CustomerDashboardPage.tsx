@@ -701,14 +701,18 @@ const CustomerDashboardPage = () => {
                 ) : (
                   filteredListings.map(listing => {
                     const st = statusBadge(listing.status);
+                    const isDraft = listing.status === "draft";
                     return (
-                      <Link key={listing.id} to={`/listing/${listing.id}`} className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/30 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-200 group">
+                      <Link key={listing.id} to={isDraft ? "/create-listing" : `/listing/${listing.id}`} className={cn(
+                        "flex items-center justify-between p-4 rounded-xl border hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-200 group",
+                        isDraft ? "bg-primary/[0.03] border-primary/20" : "bg-card border-border/30"
+                      )}>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center shrink-0">
-                            <Store size={16} className="text-muted-foreground" strokeWidth={1.3} />
+                          <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", isDraft ? "bg-primary/10" : "bg-muted/50")}>
+                            <Store size={16} className={isDraft ? "text-primary" : "text-muted-foreground"} strokeWidth={1.3} />
                           </div>
                           <div>
-                            <div className="text-sm font-medium group-hover:text-primary transition-colors">{listing.title || "بدون عنوان"}</div>
+                            <div className="text-sm font-medium group-hover:text-primary transition-colors">{listing.title || listing.business_activity || "بدون عنوان"}</div>
                             <div className="text-[11px] text-muted-foreground mt-0.5">
                               {listing.city || "—"}
                               {listing.price ? ` · ${Number(listing.price).toLocaleString("en-US")} ر.س` : ""}
@@ -716,7 +720,11 @@ const CustomerDashboardPage = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
+                          {isDraft ? (
+                            <span className="text-[10px] px-2.5 py-1 rounded-lg font-medium bg-primary/10 text-primary">أكمل الإعلان</span>
+                          ) : (
+                            <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
+                          )}
                           <ChevronLeft size={14} className="text-muted-foreground/40" />
                         </div>
                       </Link>
