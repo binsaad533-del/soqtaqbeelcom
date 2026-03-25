@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
@@ -34,8 +34,15 @@ const LoginPage = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
-  const { signIn, signUp } = useAuthContext();
+  const { signIn, signUp, user } = useAuthContext();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/", { replace: true });
+    }
+  }, [user, navigate]);
   const { reportFailedLogin } = useSecurityIncidents();
 
   // Auto-convert Arabic numerals on phone input
