@@ -674,6 +674,8 @@ const CreateListingPage = () => {
         deal_disclosures: dealStructure.requiredDisclosures,
         required_documents: dealStructure.requiredDocuments,
         ai_structure_validation: dealCheckResult || null,
+        location_lat: locationLat,
+        location_lng: locationLng,
         status: "published",
         published_at: new Date().toISOString(),
         title: isCrOnly
