@@ -538,6 +538,21 @@ const NegotiationPage = () => {
                   <Loader2 size={10} className="animate-spin" /> المساعد الذكي يعمل...
                 </div>
               )}
+
+              {/* Proceed to legal confirmation - prominent CTA */}
+              {!isPostAgreement && deal.status === "negotiating" && messages.length > 0 && (
+                <div className="px-4 pb-2">
+                  <button
+                    onClick={() => setShowLegalPanel(true)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-l from-primary/10 to-primary/5 border border-primary/20 text-primary text-xs font-medium hover:from-primary/15 hover:to-primary/10 transition-all active:scale-[0.98]"
+                  >
+                    <Scale size={13} strokeWidth={1.5} />
+                    متفقون؟ انتقل للتأكيد القانوني وإتمام الصفقة
+                    <ArrowLeft size={13} strokeWidth={1.5} />
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowAiToolbar(!showAiToolbar)}
