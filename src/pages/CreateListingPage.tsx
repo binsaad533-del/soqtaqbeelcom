@@ -1510,7 +1510,7 @@ const CreateListingPage = () => {
                             <div className="flex items-center gap-2 shrink-0 mr-3">
                               <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-1">
                                 <button onClick={() => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: Math.max(1, entry.qty - 1) } : entry))} className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Minus size={12} /></button>
-                                <input type="number" min="1" value={item.qty} onChange={(e) => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: Math.max(1, parseInt(e.target.value) || 1) } : entry))} className="w-8 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                <input type="text" inputMode="numeric" lang="en" dir="ltr" min="1" value={item.qty} onChange={(e) => { const val = toEnglishNumerals(e.target.value); const num = parseInt(val.replace(/[^\d]/g, "")) || 1; setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: Math.max(1, num) } : entry)); }} className="w-8 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                 <button onClick={() => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: entry.qty + 1 } : entry))} className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Plus size={12} /></button>
                               </div>
                               {/* Price per piece + total after qty */}
@@ -1519,10 +1519,12 @@ const CreateListingPage = () => {
                                   <input
                                     type="text"
                                     inputMode="numeric"
+                                    lang="en"
+                                    dir="ltr"
                                     placeholder="سعر القطعة"
                                     value={item.unitPrice ? String(item.unitPrice) : ""}
                                     onChange={(e) => {
-                                      const val = toEnglishNumerals(e.target.value.replace(/[^\d]/g, ""));
+                                      const val = toEnglishNumerals(e.target.value).replace(/[^\d]/g, "");
                                       setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, unitPrice: val ? Number(val) : null } : entry));
                                     }}
                                     className="w-20 text-[11px] bg-muted/50 border border-border/30 rounded px-1.5 py-1 outline-none focus:border-primary/50 transition-colors [direction:ltr] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
