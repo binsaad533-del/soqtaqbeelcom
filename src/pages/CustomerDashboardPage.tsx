@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
+import SecuritySettingsPanel from "@/components/SecuritySettingsPanel";
 
 /* ── Status helpers ── */
 const statusBadge = (s: string) => {
