@@ -634,7 +634,7 @@ const CreateListingPage = () => {
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: { listing: buildListingPayload(), perspective: "seller" },
+        body: { listing: buildListingPayload(), perspective: "seller", sellerName },
       });
       if (fnError) throw new Error(fnError.message);
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
@@ -673,7 +673,7 @@ const CreateListingPage = () => {
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: { listing: buildListingPayload(), perspective: "seller" },
+        body: { listing: buildListingPayload(), perspective: "seller", sellerName },
       });
       if (fnError) throw new Error(fnError.message);
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
