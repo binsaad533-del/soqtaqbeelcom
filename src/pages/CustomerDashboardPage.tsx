@@ -14,7 +14,7 @@ import {
   DollarSign, Eye, Camera, Pencil,
   Check, X as XIcon, Phone, UserCheck, Shield, Bell,
   Store, Briefcase, ChevronLeft, Wallet, TrendingUp,
-  ArrowUpRight, RefreshCw, Mail
+  ArrowUpRight, RefreshCw, Mail, Search
 } from "lucide-react";
 import { toast } from "sonner";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
@@ -50,6 +50,9 @@ const CustomerDashboardPage = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"deals" | "listings">("deals");
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dealStatusFilter, setDealStatusFilter] = useState<string>("all");
+  const [listingStatusFilter, setListingStatusFilter] = useState<string>("all");
   /* ── Profile editing ── */
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
