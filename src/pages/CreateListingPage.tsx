@@ -1557,6 +1557,7 @@ const CreateListingPage = () => {
                       <div className="bg-primary/5 border border-primary/15 rounded-xl p-3">
                         {inventoryPricingMode === "per_item" ? (() => {
                           const includedItems = inventory.filter(i => i.included);
+                          const totalQty = includedItems.reduce((sum, i) => sum + i.qty, 0);
                           const pricedItems = includedItems.filter(i => i.unitPrice && i.unitPrice > 0);
                           const totalPrice = pricedItems.reduce((sum, i) => sum + (i.unitPrice || 0) * i.qty, 0);
                           const categories = [...new Set(pricedItems.map(i => i.category))];
@@ -1572,7 +1573,7 @@ const CreateListingPage = () => {
                                 ) : null;
                               })}
                               <div className="flex items-center justify-between text-sm font-medium border-t border-primary/10 pt-2">
-                                <span className="text-foreground">إجمالي الأصول المسعّرة ({pricedItems.length} من {includedItems.length})</span>
+                                <span className="text-foreground">إجمالي الأصول المسعّرة ({pricedItems.length} من {includedItems.length}) — {totalQty} قطعة</span>
                                 <span className="text-primary">{totalPrice > 0 ? `${totalPrice.toLocaleString("en-US")} ر.س` : "لم يتم تحديد أسعار"}</span>
                               </div>
                               {pricedItems.length < includedItems.length && pricedItems.length > 0 && (
