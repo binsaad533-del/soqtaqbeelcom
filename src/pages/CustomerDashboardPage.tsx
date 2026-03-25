@@ -376,7 +376,7 @@ const CustomerDashboardPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-reveal" style={{ animationDelay: '420ms' }}>
 
           {/* ── Main content area (2 cols) ── */}
-          <div className="lg:col-span-2 space-y-5 lg:order-2 order-2">
+          <div className="lg:col-span-2 space-y-5 order-2">
 
             {/* Tabs + Search */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
