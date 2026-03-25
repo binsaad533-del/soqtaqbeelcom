@@ -647,7 +647,6 @@ const CustomerDashboardPage = () => {
                 )}
               </div>
             )}
-          </div>
         </div>
       </div>
     </div>
