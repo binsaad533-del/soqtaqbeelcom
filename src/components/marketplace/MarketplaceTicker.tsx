@@ -28,7 +28,7 @@ interface TickerItem {
 }
 
 const ITEM_GAP = 24;
-const SPEED_PX_PER_SEC = 216;
+const SPEED_PX_PER_SEC = 60;
 
 const MarketplaceTicker = () => {
   const [items, setItems] = useState<TickerItem[]>([]);
