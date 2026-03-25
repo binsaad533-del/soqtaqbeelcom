@@ -140,7 +140,7 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, pageNumber: 
             ? `<img src="${logoBase64}" alt="Taqbeel logo" style="height:40px;object-fit:contain;" />`
             : ""
         }
-        <div style="font-size:10px;color:hsl(212 84% 42%);font-weight:600;">TAQ/BEEL Marketplace</div>
+        <div style="font-size:10px;color:hsl(212 84% 42%);font-weight:600;">SOQ TAQBEEL</div>
       </div>
     </header>
   `);
