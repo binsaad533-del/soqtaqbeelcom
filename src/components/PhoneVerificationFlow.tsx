@@ -229,22 +229,18 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
       {step === "otp" && (
         <div className="space-y-2.5">
           <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-            <div className="flex-1" dir="ltr">
-              <InputOTP
-                maxLength={6}
-                value={otpCode}
-                onChange={(val) => setOtpCode(toDigitsOnly(val))}
-              >
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} className="h-8 w-8 text-xs" />
-                  <InputOTPSlot index={1} className="h-8 w-8 text-xs" />
-                  <InputOTPSlot index={2} className="h-8 w-8 text-xs" />
-                  <InputOTPSlot index={3} className="h-8 w-8 text-xs" />
-                  <InputOTPSlot index={4} className="h-8 w-8 text-xs" />
-                  <InputOTPSlot index={5} className="h-8 w-8 text-xs" />
-                </InputOTPGroup>
-              </InputOTP>
-            </div>
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              placeholder="000000"
+              value={otpCode}
+              onChange={(e) => setOtpCode(toDigitsOnly(e.target.value).slice(0, 6))}
+              className="w-28 h-8 bg-muted/50 rounded-lg px-3 text-xs text-center tracking-[0.3em] border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all font-mono"
+              dir="ltr"
+              lang="en"
+              autoFocus
+            />
 
             <button
               onClick={handleVerifyOtp}
