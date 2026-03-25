@@ -182,8 +182,8 @@ const MarketplacePage = () => {
         <div className="flex gap-6">
           {/* Desktop filters sidebar */}
           {!isMobile && (
-            <aside className="w-72 shrink-0 self-start">
-              <div className="fixed top-24 w-72 flex flex-col gap-4 max-h-[calc(100vh-7rem)]">
+            <aside className="w-72 shrink-0">
+              <div className="sticky top-[68px] flex flex-col gap-4 max-h-[calc(100vh-76px)]">
                 <SmartSearchBar onApplyFilters={handleSmartSearch} resultCount={filtered.length} />
                 <div className="bg-card rounded-2xl p-4 shadow-soft overflow-y-auto min-h-0 flex-1 scrollbar-thin scrollbar-thumb-border">
                   <MarketplaceFilters filters={filters} onChange={setFilters} resultCount={filtered.length} />
