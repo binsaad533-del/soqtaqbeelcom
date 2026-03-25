@@ -714,7 +714,7 @@ const CreateListingPage = () => {
     }
   };
 
-  const dealCheckIsStale = !!dealCheckResult && dealCheckInputKey !== getCurrentDealCheckInputKey();
+  
 
   const handlePublish = async () => {
     if (!listingId) return;
