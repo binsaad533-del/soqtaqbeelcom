@@ -1879,7 +1879,7 @@ const CreateListingPage = () => {
 
                     {/* Action hint */}
                     <div className="bg-accent/30 rounded-xl p-3 flex items-start gap-2">
-                      <Sparkles size={14} className="text-primary shrink-0 mt-0.5" />
+                      <AiStar size={16} animate className="shrink-0 mt-0.5" />
                       <p className="text-xs text-muted-foreground leading-relaxed">
                         يمكنك تعديل البيانات أعلاه بناءً على هذا التحليل (مثل السعر أو بيانات الإفصاح) ثم إعادة الفحص — أو المتابعة للنشر مباشرة.
                       </p>
