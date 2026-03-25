@@ -274,6 +274,38 @@ const ListingDetailsPage = () => {
                 </button>
               </div>
             </div>
+const CollapsibleList = <T,>({ title, icon, items, threshold, renderItem }: {
+  title: string;
+  icon?: React.ReactNode;
+  items: T[];
+  threshold: number;
+  renderItem: (item: T, index: number) => React.ReactNode;
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const needsExpand = items.length > threshold;
+  const visibleItems = needsExpand && !expanded ? items.slice(0, threshold) : items;
+
+  return (
+    <div className="border-b border-border/20 pb-5 last:border-0 last:pb-0">
+      <h3 className="font-medium mb-3 flex items-center gap-2">
+        {icon}
+        {title}
+        <span className="text-xs text-muted-foreground font-normal">({items.length})</span>
+      </h3>
+      <div className="space-y-2">
+        {visibleItems.map((item, i) => renderItem(item, i))}
+      </div>
+      {needsExpand && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-3 text-xs text-primary hover:text-primary/80 transition-colors"
+        >
+          {expanded ? "عرض أقل" : `عرض المزيد (${items.length - threshold}+)`}
+        </button>
+      )}
+    </div>
+  );
+};
 
 
             {primaryConfig && (
