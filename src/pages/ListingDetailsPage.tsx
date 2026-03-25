@@ -162,6 +162,7 @@ const ListingDetailsPage = () => {
           </div>
         )}
 
+        {isSimulation && (
           <div className="mb-5 rounded-2xl bg-amber-50 border border-amber-200 p-5" dir="rtl">
             <div className="flex items-start gap-3 mb-3">
               <div className="mt-0.5 shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
