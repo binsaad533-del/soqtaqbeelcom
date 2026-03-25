@@ -67,7 +67,9 @@ Deno.serve(async (req) => {
     const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
     if (!TWILIO_AUTH_TOKEN) throw new Error("TWILIO_AUTH_TOKEN is not configured");
 
-    const sendVerification = async (channel: "sms" | "call") => {
+    // Call Twilio Verify API directly
+    const verifyUrl = `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/Verifications`;
+
       const response = await fetch(verifyUrl, {
         method: "POST",
         headers: {
