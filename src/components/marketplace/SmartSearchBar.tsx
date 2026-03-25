@@ -15,7 +15,7 @@ const suggestions = [
 ];
 
 interface Props {
-  onApplyFilters: (filters: Partial<FilterState>, message: string) => void;
+  onApplyFilters: (filters: Partial<FilterState>, message: string, similarActivities?: string[]) => void;
   resultCount?: number;
 }
 
@@ -84,7 +84,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
 
       setAiMessage(data.message || "");
       setHasSearched(true);
-      onApplyFilters(filters, data.message);
+      onApplyFilters(filters, data.message, data.similarActivities || []);
     } catch (e) {
       console.error("Smart search error:", e);
       setAiMessage("عذرًا، حاول مرة ثانية");
