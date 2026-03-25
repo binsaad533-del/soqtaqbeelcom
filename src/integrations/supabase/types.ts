@@ -631,6 +631,60 @@ export type Database = {
           },
         ]
       }
+      listing_offers: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          deal_id: string | null
+          id: string
+          listing_id: string
+          message: string | null
+          offered_price: number
+          seller_response: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          listing_id: string
+          message?: string | null
+          offered_price: number
+          seller_response?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          listing_id?: string
+          message?: string | null
+          offered_price?: number
+          seller_response?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_offers_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listing_offers_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
           ai_rating: string | null
@@ -1116,6 +1170,10 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      get_listing_offers_summary: {
+        Args: { _listing_id: string }
+        Returns: Json
       }
       get_seller_visibility_tier: {
         Args: { _seller_id: string }

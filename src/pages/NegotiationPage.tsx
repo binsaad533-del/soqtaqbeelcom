@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, ChevronDown, Info, FileCheck, CheckCircle2 } from "lucide-react";
+import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, TrendingUp, Info, FileCheck, CheckCircle2 } from "lucide-react";
 import ChatAttachmentButton from "@/components/chat/ChatAttachmentButton";
 import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
 import AiStar from "@/components/AiStar";
@@ -514,6 +514,10 @@ const NegotiationPage = () => {
                 <button onClick={() => { handleStallIntervention(); setShowAiToolbar(false); }} disabled={aiLoading}
                   className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
                   <RefreshCw size={10} /> تحريك
+                </button>
+                <button onClick={() => { handleMarketAnalysis(); setShowAiToolbar(false); }} disabled={aiLoading}
+                  className="flex items-center gap-1 text-[10px] px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                  <TrendingUp size={10} /> تحليل السوق
                 </button>
               </div>
             )}
