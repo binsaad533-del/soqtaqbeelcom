@@ -20,6 +20,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import CommissionBanner from "@/components/CommissionBanner";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 import VerificationGate from "@/components/VerificationGate";
 import DealProgressBar, { getDealStage } from "@/components/DealProgressBar";
 
@@ -475,12 +476,12 @@ const NegotiationPage = () => {
                   {deal.agreed_price ? (
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">السعر المتفق عليه</span>
-                      <span className="font-bold text-success">{Number(deal.agreed_price).toLocaleString("en-US")} ر.س</span>
+                      <span className="font-bold text-success">{Number(deal.agreed_price).toLocaleString("en-US")} <SarSymbol size={12} /></span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">السعر المطلوب</span>
-                      <span className="font-bold">{listing?.price ? `${Number(listing.price).toLocaleString("en-US")} ر.س` : "—"}</span>
+                      <span className="font-bold">{listing?.price ? <>{Number(listing.price).toLocaleString("en-US")} <SarSymbol size={12} /></> : "—"}</span>
                     </div>
                   )}
 
@@ -563,7 +564,7 @@ const NegotiationPage = () => {
                           {totalValue > 0 && (
                             <div className="flex items-center justify-between">
                               <span className="text-muted-foreground">قيمة المخزون</span>
-                              <span className="font-semibold text-primary">{totalValue.toLocaleString("en-US")} ر.س</span>
+                              <span className="font-semibold text-primary">{totalValue.toLocaleString("en-US")} <SarSymbol size={11} /></span>
                             </div>
                           )}
                           {Object.keys(conditions).length > 0 && (
@@ -675,7 +676,7 @@ const NegotiationPage = () => {
                 <div>
                   <h2 className="font-medium text-xs leading-tight">{listingTitle}</h2>
                   <p className="text-[9px] text-muted-foreground">
-                    {listing?.price ? `${Number(listing.price).toLocaleString("en-US")} ر.س` : ""} — {statusLabel}
+                    {listing?.price ? <>{Number(listing.price).toLocaleString("en-US")} <SarSymbol size={8} /></> : ""} — {statusLabel}
                   </p>
                 </div>
               </div>

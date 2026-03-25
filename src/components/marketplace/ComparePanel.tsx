@@ -131,7 +131,7 @@ const ComparePanel = ({ items, onRemove, onClear }: Props) => {
                 <tbody>
                   <CompareRow label="السعر" items={items} render={item => (
                     <span className="font-semibold text-primary">
-                      {item.price ? `${Number(item.price).toLocaleString()} ر.س` : "—"}
+                      {item.price ? <>{Number(item.price).toLocaleString()} <SarSymbol size={9} /></> : "—"}
                     </span>
                   )} highlight="lowest-price" />
                   <CompareRow label="المدينة" items={items} render={item => (

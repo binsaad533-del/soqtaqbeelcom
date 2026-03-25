@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useListingOffers, type ListingOffer } from "@/hooks/useListingOffers";
 import { useDeals } from "@/hooks/useDeals";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 import { cn } from "@/lib/utils";
 import { useNavigate, Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";

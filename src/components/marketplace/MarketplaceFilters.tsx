@@ -4,6 +4,7 @@ import { Search, MapPin, RotateCcw, ChevronDown, ChevronUp, Loader2 } from "luci
 import { Slider } from "@/components/ui/slider";
 import { requestGeolocation, findNearestCity, getNearbyCities } from "@/lib/saudiCities";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 
 const dealTypes = [
   { id: "الكل", label: "الكل" },

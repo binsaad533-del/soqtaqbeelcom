@@ -1,5 +1,6 @@
 import { COMMISSION_RATE, calculateCommission, BANK_DETAILS } from "@/hooks/useCommissions";
 import { Info } from "lucide-react";
+import SarSymbol from "@/components/SarSymbol";
 
 interface Props {
   dealAmount: number | null | undefined;

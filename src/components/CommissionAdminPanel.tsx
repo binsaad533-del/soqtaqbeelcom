@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 
 const CommissionAdminPanel = () => {
   const { getAllCommissions, verifyCommission, sendReminder } = useCommissions();
