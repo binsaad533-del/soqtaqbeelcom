@@ -453,15 +453,15 @@ const NegotiationPage = () => {
                     )}>{statusLabel}</span>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">السعر المطلوب</span>
-                    <span className="font-bold">{listing?.price ? `${Number(listing.price).toLocaleString("en-US")} ر.س` : "—"}</span>
-                  </div>
-
-                  {deal.agreed_price && (
+                  {deal.agreed_price ? (
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">السعر المتفق</span>
+                      <span className="text-muted-foreground">السعر المتفق عليه</span>
                       <span className="font-bold text-success">{Number(deal.agreed_price).toLocaleString("en-US")} ر.س</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">السعر المطلوب</span>
+                      <span className="font-bold">{listing?.price ? `${Number(listing.price).toLocaleString("en-US")} ر.س` : "—"}</span>
                     </div>
                   )}
 
