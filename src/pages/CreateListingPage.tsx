@@ -1412,7 +1412,7 @@ const CreateListingPage = () => {
                             inputMode="numeric"
                             lang="en"
                             dir="ltr"
-                            placeholder="ضع القيمة التقديرية لجميع الأصول مجتمعة"
+                            placeholder="ضع القيمة التقديرية لجميع الأصول مجتمعة — إذا ما ودك تسعّر كل قطعة"
                             value={bulkInventoryPrice}
                             onChange={(e) => setBulkInventoryPrice(toEnglishNumerals(e.target.value).replace(/[^\d]/g, ""))}
                             className="w-full text-sm bg-background border border-border/50 rounded-lg px-3 py-2 outline-none focus:border-primary/50 transition-colors [direction:ltr] text-left"
