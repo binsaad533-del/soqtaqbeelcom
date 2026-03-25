@@ -59,6 +59,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
   const [submitted, setSubmitted] = useState(false);
   const [step, setStep] = useState<"summary" | "risks" | "confirm">("summary");
   const [showScoreWarning, setShowScoreWarning] = useState(false);
+  const [showRiskSummary, setShowRiskSummary] = useState(false);
 
   const isBuyer = user?.id === deal.buyer_id;
   const isSeller = user?.id === deal.seller_id;
@@ -93,7 +94,6 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
     }
     if (step === "risks") {
       understanding.markViewed("liabilities");
-      understanding.markViewed("ai_analysis");
     }
   }, [step, understanding.markViewed]);
 
@@ -150,6 +150,19 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
   if (deal.risk_score && deal.risk_score >= 50) warnings.push(`هذه الصفقة مصنفة كمخاطرة ${deal.risk_score >= 70 ? "عالية" : "متوسطة"}`);
   if (deal.fraud_flags && Array.isArray(deal.fraud_flags) && deal.fraud_flags.length > 0) warnings.push("تم رصد مؤشرات احتيال محتملة");
   if (primaryType?.cautionNotes) warnings.push(...primaryType.cautionNotes);
+
+  const riskSummaryPoints = [
+    deal.risk_score !== null && deal.risk_score !== undefined
+      ? `درجة المخاطر الحالية ${deal.risk_score}%، ${deal.risk_score >= 70 ? "وهذا يعني أن الصفقة تحتاج مراجعة دقيقة جداً قبل الإتمام." : deal.risk_score >= 50 ? "لذلك يُنصح بمراجعة البنود والمستندات بعناية." : "ولا توجد مؤشرات مرتفعة حالياً، مع بقاء التحقق اليدوي ضرورياً."}`
+      : null,
+    warnings.length > 0 ? `أبرز التنبيهات: ${warnings.slice(0, 3).join("، ")}.` : null,
+    primaryType?.mandatoryDisclosures?.length
+      ? `تأكد من مراجعة الإفصاحات الإلزامية لهذا النوع وعددها ${primaryType.mandatoryDisclosures.length}.`
+      : null,
+    "الخلاصة: لا تعتمد على هذا الملخص وحده، وراجع الأصول والالتزامات والمستندات قبل الموافقة النهائية.",
+  ].filter(Boolean) as string[];
+
+  const riskSummaryText = riskSummaryPoints.join(" ");
 
   if (deal.locked || deal.status === "finalized") {
     return (
@@ -395,16 +408,34 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
           )}
 
           {/* AI Summary Prompt */}
-          <div className="bg-muted/20 rounded-2xl p-5 border border-border/20">
+          <div className="bg-muted/20 rounded-2xl p-5 border border-border/20 space-y-3">
             <div className="flex items-start gap-2.5">
               <AiStar size={16} animate={false} />
               <div>
                 <p className="text-xs font-medium mb-1">هل تريد ملخصاً للمخاطر الرئيسية؟</p>
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  يمكن للذكاء الاصطناعي تلخيص النقاط المهمة وتوضيح المخاطر المحتملة بلغة مبسطة.
+                  اضغط الزر بالأسفل لعرض ملخص سريع وواضح لأهم التنبيهات قبل الانتقال للتأكيد النهائي.
                 </p>
               </div>
             </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full rounded-xl"
+              onClick={() => {
+                understanding.markViewed("ai_analysis");
+                setShowRiskSummary(prev => !prev);
+              }}
+            >
+              {showRiskSummary ? "إخفاء ملخص المخاطر" : "عرض ملخص المخاطر"}
+            </Button>
+
+            {showRiskSummary && (
+              <div className="rounded-xl border border-border/20 bg-card px-4 py-3">
+                <p className="text-xs leading-relaxed text-foreground/80">{riskSummaryText}</p>
+              </div>
+            )}
           </div>
 
           <div className="bg-muted/30 rounded-2xl p-5 border border-border/20">
