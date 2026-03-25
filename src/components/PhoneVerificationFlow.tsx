@@ -3,7 +3,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { usePhoneVerification } from "@/hooks/usePhoneVerification";
 import { toDigitsOnly } from "@/lib/arabicNumerals";
 import AiStar from "@/components/AiStar";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { Phone, ChevronDown, CheckCircle, AlertCircle } from "lucide-react";
 import { Phone, ChevronDown, CheckCircle, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
