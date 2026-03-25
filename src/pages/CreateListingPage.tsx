@@ -1655,6 +1655,7 @@ const CreateListingPage = () => {
                     if (disclosure.business_activity && isFieldVisible(dealTypeForTransparency, "business_activity")) preFilledFields.push({ label: "النشاط", value: disclosure.business_activity, key: "business_activity" });
                     if (disclosure.city && isFieldVisible(dealTypeForTransparency, "city")) preFilledFields.push({ label: "المدينة", value: disclosure.city, key: "city" });
                     if (disclosure.district) preFilledFields.push({ label: "الحي", value: disclosure.district, key: "district" });
+                    if (disclosure.price) preFilledFields.push({ label: "السعر", value: `${Number(disclosure.price).toLocaleString("en-US")} ر.س`, key: "price" });
                     
                     return preFilledFields.length > 0 ? (
                       <div className="bg-primary/5 border border-primary/15 rounded-xl p-3 space-y-2">
@@ -1694,14 +1695,16 @@ const CreateListingPage = () => {
                       error={publishAttempted && disclosureErrors["city"]}
                     />
                   )}
-                  <FormField
-                    label="السعر المطلوب *"
-                    placeholder="180000"
-                    suffix="ر.س"
-                    value={disclosure.price}
-                    onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))}
-                    error={publishAttempted && disclosureErrors["price"]}
-                  />
+                  {!disclosure.price && (
+                    <FormField
+                      label="السعر المطلوب *"
+                      placeholder="180000"
+                      suffix="ر.س"
+                      value={disclosure.price}
+                      onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))}
+                      error={publishAttempted && disclosureErrors["price"]}
+                    />
+                  )}
                   {isFieldVisible(dealTypeForTransparency, "annual_rent") && (
                     <div className="grid grid-cols-2 gap-3">
                       <FormField label="الإيجار السنوي" placeholder="45000" suffix="ر.س" value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} />
