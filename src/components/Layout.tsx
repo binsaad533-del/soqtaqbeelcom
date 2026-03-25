@@ -37,8 +37,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     <div className="min-h-screen flex flex-col bg-background">
       <header
         className={cn(
-          "sticky top-0 z-50 bg-background/95 backdrop-blur-md transition-all duration-200",
-          scrolled ? "h-[52px] shadow-[0_1px_3px_0_hsl(var(--foreground)/0.04)]" : "h-[60px]"
+          "sticky top-0 z-50 backdrop-blur-md transition-all duration-200 border-b border-primary/5",
+          scrolled
+            ? "h-[52px] shadow-[0_1px_3px_0_hsl(var(--primary)/0.08)] bg-background/95"
+            : "h-[60px] bg-gradient-to-l from-primary/[0.03] via-background/95 to-accent/[0.04]"
         )}
       >
         <div className="container h-full flex items-center justify-between">
