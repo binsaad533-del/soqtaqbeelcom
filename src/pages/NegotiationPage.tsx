@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import CommissionBanner from "@/components/CommissionBanner";
 import { toast } from "sonner";
 import VerificationGate from "@/components/VerificationGate";
+import DealProgressBar, { getDealStage } from "@/components/DealProgressBar";
 
 // Parse SSE stream and extract text
 async function parseSSEStream(response: Response): Promise<string> {

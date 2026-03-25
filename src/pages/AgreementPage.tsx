@@ -17,6 +17,7 @@ import CommissionBanner from "@/components/CommissionBanner";
 import CommissionPaymentPanel from "@/components/CommissionPaymentPanel";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import DealProgressBar, { getDealStage } from "@/components/DealProgressBar";
 
 interface AgreementRecord {
   id: string;
