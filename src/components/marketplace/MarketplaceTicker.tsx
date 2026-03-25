@@ -244,7 +244,7 @@ const MarketplaceTicker = () => {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
         </span>
-        <span className="text-[8px] text-muted-foreground/60 font-medium">LIVE</span>
+        <span className="text-[8px] font-semibold text-emerald-100 bg-emerald-600/80 px-1.5 py-0.5 rounded">LIVE</span>
       </div>
 
       <div className="py-2.5 px-8 overflow-hidden" dir="ltr">
