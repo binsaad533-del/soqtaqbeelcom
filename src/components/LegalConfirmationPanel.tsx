@@ -504,11 +504,10 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
                       "flex items-start gap-3 cursor-pointer group",
                       key === "commission_acknowledged" && "bg-primary/5 rounded-xl p-3 border border-primary/10"
                     )}
-                    onClick={() => toggleCheck(key)}
                   >
                     <Checkbox
                       checked={!!checked[key]}
-                      onCheckedChange={() => toggleCheck(key)}
+                      onCheckedChange={(value) => setChecked(prev => ({ ...prev, [key]: Boolean(value) }))}
                       className="mt-0.5"
                     />
                     <span className={cn(
