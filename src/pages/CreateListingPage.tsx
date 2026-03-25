@@ -1153,13 +1153,20 @@ const CreateListingPage = () => {
                 <GoogleMapPicker
                   lat={locationLat}
                   lng={locationLng}
-                  onLocationChange={(lat, lng) => {
+                  onLocationChange={(lat, lng, _address, placeDetails) => {
                     if (lat === 0 && lng === 0) {
                       setLocationLat(null);
                       setLocationLng(null);
                     } else {
                       setLocationLat(lat);
                       setLocationLng(lng);
+                    }
+                    if (placeDetails) {
+                      setDisclosure((prev) => ({
+                        ...prev,
+                        ...(placeDetails.city ? { city: placeDetails.city } : {}),
+                        ...(placeDetails.district ? { district: placeDetails.district } : {}),
+                      }));
                     }
                   }}
                 />

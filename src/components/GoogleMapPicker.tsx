@@ -5,10 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { findNearestCity } from "@/lib/saudiCities";
 
+export interface PlaceDetails {
+  city?: string;
+  district?: string;
+  address?: string;
+}
+
 interface GoogleMapPickerProps {
   lat?: number | null;
   lng?: number | null;
-  onLocationChange: (lat: number, lng: number, address?: string) => void;
+  onLocationChange: (lat: number, lng: number, address?: string, placeDetails?: PlaceDetails) => void;
   className?: string;
 }
 
@@ -52,17 +58,31 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   const [error, setError] = useState<string | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
 
+  const extractPlaceDetails = useCallback((components: google.maps.GeocoderAddressComponent[]): PlaceDetails => {
+    let city = "";
+    let district = "";
+    components.forEach((c) => {
+      if (c.types.includes("locality")) city = c.long_name;
+      if (c.types.includes("sublocality") || c.types.includes("neighborhood")) district = c.long_name;
+    });
+    return { city, district };
+  }, []);
+
   const reverseGeocode = useCallback((position: google.maps.LatLng) => {
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ location: position }, (results, status) => {
       if (status === "OK" && results?.[0]) {
         setSelectedAddress(results[0].formatted_address);
+        const details = extractPlaceDetails(results[0].address_components || []);
+        details.address = results[0].formatted_address;
+        onLocationChange(position.lat(), position.lng(), results[0].formatted_address, details);
       } else {
         const nearest = findNearestCity(position.lat(), position.lng());
         setSelectedAddress(`بالقرب من ${nearest.name}`);
+        onLocationChange(position.lat(), position.lng(), undefined, { city: nearest.name });
       }
     });
-  }, []);
+  }, [extractPlaceDetails, onLocationChange]);
 
   const initMap = useCallback(async () => {
     try {
@@ -116,7 +136,6 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         if (!e.latLng) return;
         marker.setPosition(e.latLng);
         marker.setVisible(true);
-        onLocationChange(e.latLng.lat(), e.latLng.lng());
         reverseGeocode(e.latLng);
       });
 
@@ -124,7 +143,6 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
       marker.addListener("dragend", () => {
         const pos = marker.getPosition();
         if (!pos) return;
-        onLocationChange(pos.lat(), pos.lng());
         reverseGeocode(pos);
       });
 
@@ -149,7 +167,9 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         map.setZoom(15);
         marker.setPosition(place.geometry.location);
         marker.setVisible(true);
-        onLocationChange(place.geometry.location.lat(), place.geometry.location.lng(), place.formatted_address);
+        const details = extractPlaceDetails(place.address_components || []);
+        details.address = place.formatted_address;
+        onLocationChange(place.geometry.location.lat(), place.geometry.location.lng(), place.formatted_address, details);
         setSelectedAddress(place.formatted_address || null);
       });
 
