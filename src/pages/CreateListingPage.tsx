@@ -128,7 +128,8 @@ const CreateListingPage = () => {
   const [saving, setSaving] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [locationLat, setLocationLat] = useState<number | null>(null);
-  const [locationLng, setLocationLng] = useState<number | null>(null);
+  const [sellerNote, setSellerNote] = useState("");
+  const SELLER_NOTE_MAX = 300;
 
   const [disclosure, setDisclosure] = useState({
     business_activity: "",
@@ -603,6 +604,7 @@ const CreateListingPage = () => {
 
   const buildListingPayload = useCallback(() => ({
     ...disclosure,
+    description: sellerNote || null,
     price: disclosure.price ? Number(disclosure.price) : null,
     annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
     primary_deal_type: dealStructure.primaryType,
