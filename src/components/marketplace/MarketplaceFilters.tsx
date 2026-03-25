@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { Search, MapPin, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, MapPin, RotateCcw, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { requestGeolocation, findNearestCity, getNearbyCities } from "@/lib/saudiCities";
+import { toast } from "sonner";
 
 const dealTypes = [
   { id: "الكل", label: "الكل" },
@@ -22,6 +24,7 @@ export interface FilterState {
   activity: string;
   priceRange: [number, number];
   search: string;
+  nearbyCities?: string[];
 }
 
 const defaultFilters: FilterState = {
@@ -43,9 +46,39 @@ export { defaultFilters };
 const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
   const [citySearch, setCitySearch] = useState("");
   const [showAllActivities, setShowAllActivities] = useState(false);
+  const [geoLoading, setGeoLoading] = useState(false);
 
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) =>
     onChange({ ...filters, [key]: val });
+
+  const handleNearMe = useCallback(async () => {
+    setGeoLoading(true);
+    try {
+      const pos = await requestGeolocation();
+      const { latitude, longitude } = pos.coords;
+      const nearest = findNearestCity(latitude, longitude);
+      const nearby = getNearbyCities(latitude, longitude, 150);
+      onChange({ ...filters, city: "📍 بالقرب مني", nearbyCities: nearby.length > 0 ? nearby : [nearest.name] });
+      toast.success(`📍 تم تحديد موقعك بالقرب من ${nearest.name}`);
+    } catch (err: unknown) {
+      const geoErr = err as GeolocationPositionError;
+      if (geoErr?.code === 1) {
+        toast.error("يرجى السماح بالوصول إلى الموقع من إعدادات المتصفح");
+      } else {
+        toast.error("تعذر تحديد موقعك، حاول مرة أخرى");
+      }
+    } finally {
+      setGeoLoading(false);
+    }
+  }, [filters, onChange]);
+
+  const handleCityClick = useCallback((city: string) => {
+    if (city === "📍 بالقرب مني") {
+      handleNearMe();
+    } else {
+      onChange({ ...filters, city, nearbyCities: undefined });
+    }
+  }, [handleNearMe, filters, onChange]);
 
   const reset = () => onChange({ ...defaultFilters });
 
@@ -122,8 +155,17 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
         </div>
         <div className="flex flex-wrap gap-1.5">
           {filteredCities.map(c => (
-            <Chip key={c} active={filters.city === c} onClick={() => set("city", c)}>
-              {c}
+            <Chip key={c} active={filters.city === c} onClick={() => handleCityClick(c)}>
+              {c === "📍 بالقرب مني" && geoLoading ? (
+                <span className="flex items-center gap-1">
+                  <Loader2 size={11} className="animate-spin" />
+                  جاري التحديد...
+                </span>
+              ) : c === "📍 بالقرب مني" && filters.city === c && filters.nearbyCities?.length ? (
+                <span>📍 {filters.nearbyCities[0]}</span>
+              ) : (
+                c
+              )}
             </Chip>
           ))}
         </div>
