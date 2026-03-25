@@ -660,6 +660,8 @@ export type Database = {
           lease_paid_period: string | null
           lease_remaining: string | null
           liabilities: string | null
+          location_lat: number | null
+          location_lng: number | null
           municipality_license: string | null
           overdue_rent: string | null
           overdue_salaries: string | null
@@ -702,6 +704,8 @@ export type Database = {
           lease_paid_period?: string | null
           lease_remaining?: string | null
           liabilities?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
           municipality_license?: string | null
           overdue_rent?: string | null
           overdue_salaries?: string | null
@@ -744,6 +748,8 @@ export type Database = {
           lease_paid_period?: string | null
           lease_remaining?: string | null
           liabilities?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
           municipality_license?: string | null
           overdue_rent?: string | null
           overdue_salaries?: string | null
