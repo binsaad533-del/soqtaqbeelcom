@@ -1533,7 +1533,7 @@ const CreateListingPage = () => {
                                   )}
                                 </div>
                               )}
-                              <button onClick={() => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, included: !entry.included } : entry))} className={cn("text-xs px-2.5 py-1 rounded-md transition-all active:scale-[0.97]", item.included ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{item.included ? "مشمول" : "مستثنى"}</button>
+                              
                               <button onClick={() => setInventory((prev) => prev.filter((entry) => entry.id !== item.id))} className="text-muted-foreground hover:text-destructive transition-colors p-1"><Trash2 size={13} /></button>
                             </div>
                           </div>
