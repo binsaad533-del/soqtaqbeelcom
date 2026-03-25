@@ -426,9 +426,11 @@ const NegotiationPage = () => {
           <span>{listingTitle}</span>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-5">
-          {/* ═══════════ CHAT AREA ═══════════ */}
-          <div className="lg:col-span-2 bg-card rounded-2xl shadow-soft flex flex-col" style={{ height: "78vh" }}>
+        <div className="grid lg:grid-cols-5 gap-5">
+          {/* ═══════════ SIDEBAR (wider) ═══════════ */}
+          <div className="lg:col-span-2 order-2 lg:order-1 space-y-4">
+            {/* ═══ Sidebar Content ═══ */}
+              <div className="space-y-4 animate-in fade-in-0 duration-200">
             {/* Chat Header — compact */}
             <div className="px-4 py-3 border-b border-border/20 flex items-center justify-between">
               <div className="flex items-center gap-3">
