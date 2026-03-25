@@ -3,7 +3,7 @@ import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
 import { generateAgreementPdf } from "@/lib/generateAgreementPdf";
 import { useParams, Link } from "react-router-dom";
 import {
-  Check, Download, ArrowRight, FileText, Shield, Clock, AlertTriangle,
+  Check, Download, ArrowRight, FileText, Shield, AlertTriangle,
   Lock, History, ChevronDown, ChevronUp, Loader2, Copy, CheckCircle2
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
