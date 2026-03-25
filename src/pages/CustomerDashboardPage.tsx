@@ -268,7 +268,7 @@ const CustomerDashboardPage = () => {
                   deals.map(deal => {
                     const st = statusBadge(deal.status);
                     return (
-                      <Link key={deal.id} to={dealLink(deal)} className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/30 hover:shadow-soft transition-all group">
+                      <Link key={deal.id} to={dealLink(deal)} className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/30 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-200 group">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center shrink-0">
                             <Briefcase size={16} className="text-muted-foreground" strokeWidth={1.3} />
@@ -306,7 +306,7 @@ const CustomerDashboardPage = () => {
                   listings.map(listing => {
                     const st = statusBadge(listing.status);
                     return (
-                      <Link key={listing.id} to={`/listing/${listing.id}`} className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/30 hover:shadow-soft transition-all group">
+                      <Link key={listing.id} to={`/listing/${listing.id}`} className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/30 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-200 group">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center shrink-0">
                             <Store size={16} className="text-muted-foreground" strokeWidth={1.3} />
