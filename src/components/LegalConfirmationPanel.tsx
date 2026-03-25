@@ -526,7 +526,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
                 </Button>
                 <Button
                   onClick={handleSubmit}
-                  disabled={!allChecked || loading || !understanding.canProceed}
+                  disabled={!allChecked || loading}
                   className="flex-1 rounded-xl gradient-primary text-primary-foreground"
                 >
                   {loading ? "جاري التأكيد..." : "تأكيد الموافقة النهائية"}
