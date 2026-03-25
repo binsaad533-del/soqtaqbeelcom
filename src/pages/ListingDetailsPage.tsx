@@ -68,6 +68,7 @@ const ListingDetailsPage = () => {
 
   useEffect(() => {
     loadListing();
+    if (id) recordView(id).catch(() => {});
     // Check if the current user has an active deal on this listing
     if (user && id) {
       getMyDeals().then(deals => {
