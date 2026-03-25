@@ -519,60 +519,6 @@ const NegotiationPage = () => {
                   </div>
                 </div>
 
-                {/* Readiness bar */}
-                <div className="mt-3 pt-3 border-t border-border/20">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] text-muted-foreground">جاهزية الصفقة</span>
-                    <span className={cn("text-[10px] font-semibold",
-                      readinessPercent >= 70 ? "text-success" : readinessPercent >= 40 ? "text-warning" : "text-destructive"
-                    )}>{readinessPercent}%</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-muted/60">
-                    <div
-                      className={cn("h-full rounded-full transition-all duration-500",
-                        readinessPercent >= 70 ? "bg-success" : readinessPercent >= 40 ? "bg-warning" : "bg-destructive"
-                      )}
-                      style={{ width: `${readinessPercent}%` }}
-                    />
-                  </div>
-
-                  {/* Incomplete steps only */}
-                  {(() => {
-                    const allSteps = [
-                      { key: "buyer_verified", label: "توثيق المشتري", factor: "مشتري غير موثق", action: "verify" as const, path: "/dashboard", done: profile?.is_verified === true || (profile?.verification_level !== "none") },
-                      { key: "seller_verified", label: "توثيق البائع", factor: "بائع غير موثق", action: "verify" as const, path: "/dashboard", done: otherProfile?.is_verified === true || (otherProfile?.verification_level && otherProfile.verification_level !== "none") },
-                      { key: "deal_type", label: "تحديد نوع الصفقة", factor: "نوع الصفقة غير محدد", action: "deal_type" as const, path: `/listing/${deal.listing_id}`, done: !!deal.deal_type },
-                      { key: "has_messages", label: "بدء المحادثة", factor: "صفقة جديدة بدون رسائل", action: "chat" as const, path: "", done: messages.length > 0 },
-                      { key: "agreed_price", label: "الاتفاق على السعر", factor: "لا يوجد سعر متفق عليه", action: "chat" as const, path: "", done: !!deal.agreed_price },
-                    ];
-                    const riskFactors = (deal.risk_factors as string[]) || [];
-                    const incomplete = allSteps.filter(s => riskFactors.includes(s.factor) && !s.done);
-                    if (incomplete.length === 0) return null;
-
-                    return (
-                      <div className="mt-2 space-y-1">
-                        {incomplete.map((step) => (
-                          <div key={step.key} className="flex items-center gap-2 text-[10px]">
-                            <div className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" />
-                            <span className="flex-1 text-muted-foreground">{step.factor}</span>
-                            {step.action === "chat" ? (
-                              <button
-                                onClick={() => document.querySelector<HTMLInputElement>('input[placeholder="اكتب رسالتك..."]')?.focus()}
-                                className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                              >
-                                {step.label}
-                              </button>
-                            ) : (
-                              <Link to={step.path} className="text-[9px] px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                                {step.label}
-                              </Link>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </div>
               </div>
 
               {/* CTA: Legal confirmation & Cancel */}
