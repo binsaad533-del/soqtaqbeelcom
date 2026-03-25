@@ -378,7 +378,7 @@ const AgreementPage = () => {
                 <AiStar size={28} />
                 <div>
                   <h1 className="text-lg font-medium">اتفاقية الصفقة</h1>
-                  <p className="text-xs text-muted-foreground">{agreement.deal_title} — {agreement.location}</p>
+                  <p className="text-xs text-muted-foreground">{agreement.deal_title}{agreement.location && !agreement.deal_title?.includes(agreement.location) ? ` — ${agreement.location}` : ""}</p>
                 </div>
               </div>
               {bothApproved && (
