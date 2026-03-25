@@ -27,6 +27,7 @@ import AboutPage from "./pages/AboutPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import NotFound from "./pages/NotFound";
+import AgreementsArchivePage from "./pages/AgreementsArchivePage";
 
 const queryClient = new QueryClient();
 
