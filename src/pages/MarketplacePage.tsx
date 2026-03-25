@@ -308,16 +308,14 @@ const ListingCard = ({ listing, isComparing, onToggleCompare }: {
             {listing.title || listing.business_activity || "فرصة تقبيل"}
           </div>
           {listing.location_lat && listing.location_lng ? (
-            <a
-              href={`https://www.google.com/maps?q=${listing.location_lat},${listing.location_lng}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 text-xs text-primary hover:underline mb-2"
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); window.open(`https://www.google.com/maps?q=${listing.location_lat},${listing.location_lng}`, '_blank', 'noopener,noreferrer'); }}
+              className="flex items-center gap-1 text-xs text-primary hover:underline mb-2 cursor-pointer bg-transparent border-none p-0"
             >
               <MapPin size={12} strokeWidth={1.3} />
               {listing.district && `${listing.district}, `}{listing.city || "—"}
-            </a>
+            </button>
           ) : (
             <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
               <MapPin size={12} strokeWidth={1.3} />

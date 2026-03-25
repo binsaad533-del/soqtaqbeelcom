@@ -301,15 +301,14 @@ const ListingDetailsPage = () => {
 
               <h2 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || "فرصة تقبيل"}</h2>
               {listing.location_lat && listing.location_lng ? (
-                <a
-                  href={`https://www.google.com/maps?q=${listing.location_lat},${listing.location_lng}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-sm text-primary hover:underline mb-4"
+                <button
+                  type="button"
+                  onClick={() => window.open(`https://www.google.com/maps?q=${listing.location_lat},${listing.location_lng}`, '_blank', 'noopener,noreferrer')}
+                  className="flex items-center gap-1.5 text-sm text-primary hover:underline mb-4 cursor-pointer bg-transparent border-none p-0"
                 >
                   <MapPin size={14} strokeWidth={1.3} />
                   {listing.district && `${listing.district}, `}{listing.city || "—"}
-                </a>
+                </button>
               ) : (
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
                   <MapPin size={14} strokeWidth={1.3} />
