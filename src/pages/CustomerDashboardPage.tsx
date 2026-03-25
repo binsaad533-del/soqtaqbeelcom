@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
@@ -168,6 +168,25 @@ const CustomerDashboardPage = () => {
     return data;
   }, [deals]);
 
+  /* ── Pie chart data ── */
+  const statusPie = useMemo(() => {
+    const groups: Record<string, { label: string; color: string }> = {
+      active: { label: "نشطة", color: "hsl(var(--primary))" },
+      waiting: { label: "بانتظار", color: "hsl(var(--warning))" },
+      completed: { label: "مكتملة", color: "hsl(var(--success))" },
+      cancelled: { label: "ملغية", color: "hsl(var(--destructive))" },
+    };
+    const counts = {
+      active: deals.filter(d => ["negotiating", "new"].includes(d.status)).length,
+      waiting: deals.filter(d => ["under_review", "review", "agreement"].includes(d.status)).length,
+      completed: deals.filter(d => ["completed", "finalized"].includes(d.status)).length,
+      cancelled: deals.filter(d => d.status === "cancelled").length,
+    };
+    return Object.entries(counts)
+      .filter(([, v]) => v > 0)
+      .map(([k, v]) => ({ name: groups[k].label, value: v, color: groups[k].color }));
+  }, [deals]);
+
   /* ── Smart suggestions ── */
   const suggestions = useMemo(() => {
     const s: { text: string; link: string; icon: any; priority: "high" | "medium" }[] = [];
@@ -234,7 +253,7 @@ const CustomerDashboardPage = () => {
         </div>
 
         {/* ═══ MONTHLY CHART ═══ */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
           <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 animate-reveal" style={{ animationDelay: '320ms' }}>
             <h3 className="text-xs font-medium text-muted-foreground mb-4">الصفقات الشهرية</h3>
             <div className="h-[160px]">
@@ -278,7 +297,35 @@ const CustomerDashboardPage = () => {
               </ResponsiveContainer>
             </div>
           </div>
-        </div>
+          </div>
+          {/* Pie Chart */}
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 animate-reveal" style={{ animationDelay: '440ms' }}>
+            <h3 className="text-xs font-medium text-muted-foreground mb-4">توزيع حالات الصفقات</h3>
+            <div className="h-[160px] flex items-center justify-center">
+              {statusPie.length === 0 ? (
+                <p className="text-xs text-muted-foreground">لا توجد صفقات</p>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={statusPie} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value" paddingAngle={3} strokeWidth={0}>
+                      {statusPie.map((entry, idx) => (
+                        <Cell key={idx} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-3 justify-center mt-2">
+              {statusPie.map((s, i) => (
+                <div key={i} className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full" style={{ background: s.color }} />
+                  <span className="text-[10px] text-muted-foreground">{s.name} ({s.value})</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
         {/* ═══ SMART SUGGESTIONS ═══ */}
         {suggestions.length > 0 && (
