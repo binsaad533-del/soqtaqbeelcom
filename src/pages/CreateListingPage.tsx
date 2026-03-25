@@ -1348,7 +1348,7 @@ const CreateListingPage = () => {
                         <div className="text-[10px] font-medium text-warning">ثقة متوسطة</div>
                         <div className="text-[9px] text-muted-foreground mt-1 leading-tight">الـ AI يقينه أقل، مغطاة جزئياً</div>
                       </div>
-                      <div className="text-center px-2 py-2 rounded-lg bg-muted/30 border border-border/20">
+                      <div className="text-center px-2 py-2 rounded-lg bg-muted/30 border border-border">
                         <div className="text-sm font-medium text-muted-foreground">{inventory.filter((i) => i.confidence === "low").length}</div>
                         <div className="text-[10px] font-medium text-muted-foreground">يحتاج تأكيد</div>
                         <div className="text-[9px] text-muted-foreground/70 mt-1 leading-tight">الـ AI يحتاج تأكيدك اليدوي</div>
