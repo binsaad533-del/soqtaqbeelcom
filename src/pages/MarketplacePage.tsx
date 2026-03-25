@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useSEO } from "@/hooks/useSEO";
 import { calculateTransparency } from "@/lib/transparencyScore";
 import { Link } from "react-router-dom";
 import { useListings, type Listing } from "@/hooks/useListings";
@@ -25,6 +26,7 @@ interface EnrichedListing extends Listing {
 }
 
 const MarketplacePage = () => {
+  useSEO({ title: "سوق الفرص", description: "استعرض فرص تقبيل المشاريع التجارية المتاحة", canonical: "/marketplace" });
   const { getPublishedListings } = useListings();
   const { getAllProfiles } = useProfiles();
   const { getLikesAndViews, toggleLike } = useListingSocial();
