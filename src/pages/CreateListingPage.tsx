@@ -1479,39 +1479,60 @@ const CreateListingPage = () => {
                               ) : (
                                 <div className="text-sm cursor-pointer hover:text-primary transition-colors" onClick={() => setEditingItemId(item.id)}>{item.name}</div>
                               )}
-                              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
                                 <span className="text-xs text-muted-foreground">{item.category}</span>
-                                <span className="text-xs text-muted-foreground">— {item.condition}</span>
+                                {/* Condition selector */}
+                                <select
+                                  value={item.condition}
+                                  onChange={(e) => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, condition: e.target.value } : entry))}
+                                  className={cn(
+                                    "text-[10px] px-2 py-0.5 rounded-md border outline-none cursor-pointer transition-colors",
+                                    item.condition === "جديد" && "bg-success/10 border-success/30 text-success",
+                                    item.condition === "شبه جديد" && "bg-primary/10 border-primary/30 text-primary",
+                                    item.condition === "نظيف" && "bg-accent border-accent-foreground/20 text-accent-foreground",
+                                    item.condition === "تالف" && "bg-destructive/10 border-destructive/30 text-destructive",
+                                    !["جديد", "شبه جديد", "نظيف", "تالف"].includes(item.condition) && "bg-muted/50 border-border/30 text-muted-foreground"
+                                  )}
+                                >
+                                  <option value="جديد">جديد</option>
+                                  <option value="شبه جديد">شبه جديد</option>
+                                  <option value="نظيف">نظيف</option>
+                                  <option value="تالف">تالف</option>
+                                  {!["جديد", "شبه جديد", "نظيف", "تالف"].includes(item.condition) && (
+                                    <option value={item.condition}>{item.condition}</option>
+                                  )}
+                                </select>
                                 {getConfidenceBadge(item.confidence)}
                                 {item.isSameAssetMultipleAngles && <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">زوايا متعددة</span>}
                               </div>
                               {item.detectionNote && <div className="text-[10px] text-muted-foreground mt-0.5 italic">{item.detectionNote}</div>}
                             </div>
                             <div className="flex items-center gap-2 shrink-0 mr-3">
-                              {inventoryPricingMode === "per_item" && item.included && (
-                                <div className="flex items-center gap-1">
-                                  <input
-                                    type="text"
-                                    inputMode="numeric"
-                                    placeholder="السعر"
-                                    value={item.unitPrice ? String(item.unitPrice) : ""}
-                                    onChange={(e) => {
-                                      const val = toEnglishNumerals(e.target.value.replace(/[^\d]/g, ""));
-                                      setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, unitPrice: val ? Number(val) : null } : entry));
-                                    }}
-                                    className="w-16 text-[11px] bg-muted/50 border border-border/30 rounded px-1.5 py-1 outline-none focus:border-primary/50 transition-colors [direction:ltr] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                  />
-                                  <span className="text-[10px] text-muted-foreground">ر.س</span>
-                                  {item.unitPrice && item.qty > 1 && (
-                                    <span className="text-[10px] text-primary font-medium">= {itemTotal.toLocaleString("en-US")}</span>
-                                  )}
-                                </div>
-                              )}
                               <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-1">
                                 <button onClick={() => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: Math.max(1, entry.qty - 1) } : entry))} className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Minus size={12} /></button>
                                 <input type="number" min="1" value={item.qty} onChange={(e) => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: Math.max(1, parseInt(e.target.value) || 1) } : entry))} className="w-8 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                 <button onClick={() => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: entry.qty + 1 } : entry))} className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Plus size={12} /></button>
                               </div>
+                              {/* Price per piece + total after qty */}
+                              {inventoryPricingMode === "per_item" && item.included && (
+                                <div className="flex items-center gap-1">
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    placeholder="سعر القطعة"
+                                    value={item.unitPrice ? String(item.unitPrice) : ""}
+                                    onChange={(e) => {
+                                      const val = toEnglishNumerals(e.target.value.replace(/[^\d]/g, ""));
+                                      setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, unitPrice: val ? Number(val) : null } : entry));
+                                    }}
+                                    className="w-20 text-[11px] bg-muted/50 border border-border/30 rounded px-1.5 py-1 outline-none focus:border-primary/50 transition-colors [direction:ltr] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  />
+                                  <span className="text-[10px] text-muted-foreground">ر.س/قطعة</span>
+                                  {item.unitPrice && item.unitPrice > 0 && (
+                                    <span className="text-[10px] text-primary font-medium whitespace-nowrap">= {itemTotal.toLocaleString("en-US")} ر.س</span>
+                                  )}
+                                </div>
+                              )}
                               <button onClick={() => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, included: !entry.included } : entry))} className={cn("text-xs px-2.5 py-1 rounded-md transition-all active:scale-[0.97]", item.included ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{item.included ? "مشمول" : "مستثنى"}</button>
                               <button onClick={() => setInventory((prev) => prev.filter((entry) => entry.id !== item.id))} className="text-muted-foreground hover:text-destructive transition-colors p-1"><Trash2 size={13} /></button>
                             </div>
