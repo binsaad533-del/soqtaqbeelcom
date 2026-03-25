@@ -24,6 +24,7 @@ import {
   Wrench,
   Sparkles,
   Save,
+  X,
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import AiInlineStar from "@/components/AiInlineStar";
