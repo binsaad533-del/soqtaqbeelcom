@@ -524,16 +524,6 @@ const AgreementPage = () => {
               </div>
             )}
 
-            {/* Footer branding */}
-            <div className="pt-4 border-t border-border/20 text-center">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <AiStar size={16} animate={false} />
-                <span className="text-sm font-medium gradient-text">سوق تقبيل</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground">
-                منصة ذكية لتقبيل المشاريع والأعمال التجارية في المملكة العربية السعودية
-              </p>
-            </div>
           </div>
 
           {/* Version History */}
