@@ -14,7 +14,7 @@ import {
   DollarSign, Eye, Camera, Pencil,
   Check, X as XIcon, Phone, UserCheck, Shield, Bell,
   Store, Briefcase, ChevronLeft, Wallet, TrendingUp,
-  ArrowUpRight, RefreshCw, Mail
+  ArrowUpRight, RefreshCw, Mail, Search
 } from "lucide-react";
 import { toast } from "sonner";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
@@ -50,6 +50,9 @@ const CustomerDashboardPage = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"deals" | "listings">("deals");
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dealStatusFilter, setDealStatusFilter] = useState<string>("all");
+  const [listingStatusFilter, setListingStatusFilter] = useState<string>("all");
   /* ── Profile editing ── */
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -152,7 +155,33 @@ const CustomerDashboardPage = () => {
 
   const dealLink = (d: Deal) => ["completed", "finalized"].includes(d.status) ? `/agreement/${d.id}` : `/negotiate/${d.id}`;
 
-  /* ── Monthly chart data ── */
+  /* ── Filtered data ── */
+  const filteredDeals = useMemo(() => {
+    let result = deals;
+    if (dealStatusFilter !== "all") {
+      if (dealStatusFilter === "active") result = result.filter(d => ["negotiating", "new"].includes(d.status));
+      else if (dealStatusFilter === "waiting") result = result.filter(d => ["under_review", "review", "agreement"].includes(d.status));
+      else if (dealStatusFilter === "completed") result = result.filter(d => ["completed", "finalized"].includes(d.status));
+      else if (dealStatusFilter === "cancelled") result = result.filter(d => d.status === "cancelled");
+      else result = result.filter(d => d.status === dealStatusFilter);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(d => d.id.toLowerCase().includes(q) || String(d.agreed_price || "").includes(q) || (d.deal_type || "").toLowerCase().includes(q));
+    }
+    return result;
+  }, [deals, dealStatusFilter, searchQuery]);
+
+  const filteredListings = useMemo(() => {
+    let result = listings;
+    if (listingStatusFilter !== "all") result = result.filter(l => l.status === listingStatusFilter);
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(l => (l.title || "").toLowerCase().includes(q) || (l.city || "").toLowerCase().includes(q) || (l.business_activity || "").toLowerCase().includes(q));
+    }
+    return result;
+  }, [listings, listingStatusFilter, searchQuery]);
+
   const monthlyChart = useMemo(() => {
     const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
     const now = new Date();
@@ -349,34 +378,79 @@ const CustomerDashboardPage = () => {
           {/* ── Left: Main content area (2 cols) ── */}
           <div className="lg:col-span-2 space-y-5">
 
-            {/* Tabs */}
-            <div className="flex gap-1 bg-muted/40 rounded-xl p-1 w-fit">
-              {[
-                { id: "deals" as const, label: "صفقاتي", icon: Briefcase, count: deals.length },
-                { id: "listings" as const, label: "إعلاناتي", icon: Store, count: listings.length },
-              ].map(tab => (
-                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={cn(
-                  "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs transition-all",
-                  activeTab === tab.id ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
-                )}>
-                  <tab.icon size={13} strokeWidth={1.3} />
-                  {tab.label}
-                  <span className="text-[10px] bg-muted/60 px-1.5 py-0.5 rounded-md">{tab.count}</span>
-                </button>
-              ))}
+            {/* Tabs + Search */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex gap-1 bg-muted/40 rounded-xl p-1 w-fit">
+                {[
+                  { id: "deals" as const, label: "صفقاتي", icon: Briefcase, count: deals.length },
+                  { id: "listings" as const, label: "إعلاناتي", icon: Store, count: listings.length },
+                ].map(tab => (
+                  <button key={tab.id} onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }} className={cn(
+                    "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs transition-all",
+                    activeTab === tab.id ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                  )}>
+                    <tab.icon size={13} strokeWidth={1.3} />
+                    {tab.label}
+                    <span className="text-[10px] bg-muted/60 px-1.5 py-0.5 rounded-md">{tab.count}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="relative flex-1 max-w-xs">
+                <Search size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder={activeTab === "deals" ? "ابحث في الصفقات..." : "ابحث في الإعلانات..."}
+                  className="w-full bg-muted/40 border-0 rounded-lg py-2 pr-9 pl-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+                />
+              </div>
             </div>
+
+            {/* Status filter chips */}
+            {activeTab === "deals" && (
+              <div className="flex gap-1.5 overflow-x-auto pb-1">
+                {[
+                  { id: "all", label: "الكل" },
+                  { id: "active", label: "نشطة" },
+                  { id: "waiting", label: "بانتظار" },
+                  { id: "completed", label: "مكتملة" },
+                  { id: "cancelled", label: "ملغية" },
+                ].map(f => (
+                  <button key={f.id} onClick={() => setDealStatusFilter(f.id)} className={cn(
+                    "px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all",
+                    dealStatusFilter === f.id ? "bg-primary/10 text-primary font-medium" : "bg-muted/40 text-muted-foreground hover:bg-muted"
+                  )}>{f.label}</button>
+                ))}
+              </div>
+            )}
+            {activeTab === "listings" && (
+              <div className="flex gap-1.5 overflow-x-auto pb-1">
+                {[
+                  { id: "all", label: "الكل" },
+                  { id: "draft", label: "مسودة" },
+                  { id: "published", label: "منشور" },
+                  { id: "under_review", label: "مراجعة" },
+                ].map(f => (
+                  <button key={f.id} onClick={() => setListingStatusFilter(f.id)} className={cn(
+                    "px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all",
+                    listingStatusFilter === f.id ? "bg-primary/10 text-primary font-medium" : "bg-muted/40 text-muted-foreground hover:bg-muted"
+                  )}>{f.label}</button>
+                ))}
+              </div>
+            )}
 
             {/* Deals list */}
             {activeTab === "deals" && (
               <div className="space-y-2">
-                {deals.length === 0 ? (
+                {filteredDeals.length === 0 ? (
                   <div className="bg-card rounded-2xl p-12 shadow-soft border border-border/30 text-center">
                     <MessageSquare size={32} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
-                    <p className="text-sm text-muted-foreground mb-2">لا توجد صفقات بعد</p>
-                    <Link to="/marketplace" className="text-xs text-primary hover:underline">تصفح السوق وابدأ أول صفقة</Link>
+                    <p className="text-sm text-muted-foreground mb-2">{deals.length === 0 ? "لا توجد صفقات بعد" : "لا توجد نتائج"}</p>
+                    {deals.length === 0 && <Link to="/marketplace" className="text-xs text-primary hover:underline">تصفح السوق وابدأ أول صفقة</Link>}
                   </div>
                 ) : (
-                  deals.map(deal => {
+                  filteredDeals.map(deal => {
                     const st = statusBadge(deal.status);
                     return (
                       <Link key={deal.id} to={dealLink(deal)} className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/30 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-200 group">
@@ -407,14 +481,14 @@ const CustomerDashboardPage = () => {
             {/* Listings list */}
             {activeTab === "listings" && (
               <div className="space-y-2">
-                {listings.length === 0 ? (
+                {filteredListings.length === 0 ? (
                   <div className="bg-card rounded-2xl p-12 shadow-soft border border-border/30 text-center">
                     <Store size={32} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
-                    <p className="text-sm text-muted-foreground mb-2">لا توجد إعلانات</p>
-                    <Link to="/create-listing" className="text-xs text-primary hover:underline">أنشئ أول إعلان</Link>
+                    <p className="text-sm text-muted-foreground mb-2">{listings.length === 0 ? "لا توجد إعلانات" : "لا توجد نتائج"}</p>
+                    {listings.length === 0 && <Link to="/create-listing" className="text-xs text-primary hover:underline">أنشئ أول إعلان</Link>}
                   </div>
                 ) : (
-                  listings.map(listing => {
+                  filteredListings.map(listing => {
                     const st = statusBadge(listing.status);
                     return (
                       <Link key={listing.id} to={`/listing/${listing.id}`} className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/30 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-200 group">
