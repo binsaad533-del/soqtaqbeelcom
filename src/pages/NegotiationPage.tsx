@@ -714,22 +714,6 @@ const NegotiationPage = () => {
                 )}
 
 
-                {/* Legal Confirmation */}
-                {!isPostAgreement && (
-                  <div className="bg-card rounded-2xl p-4 shadow-soft border border-primary/15">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Scale size={13} strokeWidth={1.5} className="text-primary" />
-                      <h3 className="font-medium text-xs">التأكيد القانوني</h3>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
-                      عند الاتفاق على السعر والشروط، يمكنكم البدء في التأكيد الرسمي.
-                    </p>
-                    <Button onClick={() => setShowLegalPanel(true)} variant="outline" className="w-full rounded-xl active:scale-[0.98] text-xs">
-                      بدء التأكيد القانوني
-                    </Button>
-                  </div>
-                )}
-
                 {/* Finalized state */}
                 {deal.status === "finalized" && (
                   <div className="bg-gradient-to-b from-primary/5 to-card rounded-2xl p-4 shadow-soft border border-primary/15">
@@ -762,9 +746,7 @@ const NegotiationPage = () => {
                 {isBuyer && isPostAgreement && deal.seller_id && (
                   <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
                 )}
-
-
-
+              </div>
           </div>
         </div>
       </div>
