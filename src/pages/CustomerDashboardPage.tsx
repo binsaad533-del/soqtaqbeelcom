@@ -234,18 +234,6 @@ const CustomerDashboardPage = () => {
     <div className="min-h-[80vh] bg-background py-6">
       <div className="container max-w-6xl">
 
-        {/* ═══ HEADER ═══ */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-semibold">مرحباً {profile?.full_name || "بك"}</h1>
-            <p className="text-sm text-muted-foreground">لوحة التحكم الشخصية</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={loadData} className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors">
-              <RefreshCw size={13} className="text-muted-foreground" />
-            </button>
-          </div>
-        </div>
 
         {loadError && (
           <div className="p-3 rounded-xl bg-destructive/10 flex items-center justify-between mb-4">
