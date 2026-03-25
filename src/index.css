@@ -208,6 +208,15 @@
   animation: ai-breathe 2s ease-in-out infinite;
 }
 
+@keyframes ai-glow-slow {
+  0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 2px hsl(var(--primary) / 0.2)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.5)); }
+}
+
+.ai-glow-slow {
+  animation: ai-glow-slow 3s ease-in-out infinite;
+}
+
 /* Scroll reveal */
 @keyframes reveal-up {
   from { opacity: 0; transform: translateY(20px); filter: blur(4px); }
