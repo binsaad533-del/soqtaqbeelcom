@@ -454,15 +454,16 @@ const buildSections = (data: AgreementPdfData, qrDataUrl = "") => {
 export function buildAgreementPdfPages(options: {
   data: AgreementPdfData;
   logoBase64: string;
+  logoIconBase64?: string;
   qrDataUrl?: string;
   mount: HTMLElement;
 }) {
-  const { data, logoBase64, qrDataUrl = "", mount } = options;
+  const { data, logoBase64, logoIconBase64 = "", qrDataUrl = "", mount } = options;
   const sections = buildSections(data, qrDataUrl);
   const pages: HTMLElement[] = [];
 
   let pageNumber = 1;
-  let current = buildPageShell(data, logoBase64, pageNumber);
+  let current = buildPageShell(data, logoBase64, logoIconBase64, pageNumber);
   mount.appendChild(current.page);
   pages.push(current.page);
 
@@ -485,7 +486,7 @@ export function buildAgreementPdfPages(options: {
     if (hasOverflow && current.content.childElementCount > 1) {
       current.content.removeChild(nextBlock);
       pageNumber += 1;
-      current = buildPageShell(data, logoBase64, pageNumber);
+      current = buildPageShell(data, logoBase64, logoIconBase64, pageNumber);
       mount.appendChild(current.page);
       pages.push(current.page);
       current.content.appendChild(nextBlock);
