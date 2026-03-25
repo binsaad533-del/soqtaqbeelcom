@@ -155,7 +155,33 @@ const CustomerDashboardPage = () => {
 
   const dealLink = (d: Deal) => ["completed", "finalized"].includes(d.status) ? `/agreement/${d.id}` : `/negotiate/${d.id}`;
 
-  /* ── Monthly chart data ── */
+  /* ── Filtered data ── */
+  const filteredDeals = useMemo(() => {
+    let result = deals;
+    if (dealStatusFilter !== "all") {
+      if (dealStatusFilter === "active") result = result.filter(d => ["negotiating", "new"].includes(d.status));
+      else if (dealStatusFilter === "waiting") result = result.filter(d => ["under_review", "review", "agreement"].includes(d.status));
+      else if (dealStatusFilter === "completed") result = result.filter(d => ["completed", "finalized"].includes(d.status));
+      else if (dealStatusFilter === "cancelled") result = result.filter(d => d.status === "cancelled");
+      else result = result.filter(d => d.status === dealStatusFilter);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(d => d.id.toLowerCase().includes(q) || String(d.agreed_price || "").includes(q) || (d.deal_type || "").toLowerCase().includes(q));
+    }
+    return result;
+  }, [deals, dealStatusFilter, searchQuery]);
+
+  const filteredListings = useMemo(() => {
+    let result = listings;
+    if (listingStatusFilter !== "all") result = result.filter(l => l.status === listingStatusFilter);
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(l => (l.title || "").toLowerCase().includes(q) || (l.city || "").toLowerCase().includes(q) || (l.business_activity || "").toLowerCase().includes(q));
+    }
+    return result;
+  }, [listings, listingStatusFilter, searchQuery]);
+
   const monthlyChart = useMemo(() => {
     const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
     const now = new Date();
