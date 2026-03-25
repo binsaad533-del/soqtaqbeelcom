@@ -1163,6 +1163,16 @@ const CreateListingPage = () => {
                     }
                   }}
                 />
+                {isFieldVisible(dealTypeForTransparency, "district") && (
+                  <div className="mt-3">
+                    <FormField
+                      label="اسم الحي"
+                      placeholder="مثال: حي النسيم"
+                      value={disclosure.district}
+                      onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1445,9 +1455,6 @@ const CreateListingPage = () => {
                         onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))}
                         error={publishAttempted && disclosureErrors["city"]}
                       />
-                    )}
-                    {isFieldVisible(dealTypeForTransparency, "district") && (
-                      <FormField label="الحي" placeholder="حي النسيم" value={disclosure.district} onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))} />
                     )}
                   </div>
                   <FormField
