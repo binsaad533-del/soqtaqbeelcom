@@ -269,8 +269,6 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
                   : "غير محدد"
               } />
               <Row label="الموقع" value={`${listing?.district || ""} ${listing?.city || ""}`.trim() || "—"} />
-              {/* Commission disclosure */}
-              <CommissionBanner dealAmount={deal.agreed_price || listing?.price} showDetails className="mt-3" />
               {listing?.lease_duration && <Row label="مدة الإيجار" value={listing.lease_duration} />}
               {listing?.annual_rent && <Row label="الإيجار السنوي" value={`${listing.annual_rent.toLocaleString("en-US")} ر.س`} />}
             </div>
@@ -335,6 +333,14 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
               </div>
             </div>
           )}
+
+          <div className="pt-1">
+            <CommissionBanner
+              dealAmount={deal.agreed_price || listing?.price}
+              showDetails
+              className="!p-2.5 !rounded-xl text-[10px]"
+            />
+          </div>
 
           <Button onClick={() => handleStepChange("risks")} className="w-full rounded-xl">
             التالي — المخاطر والتحذيرات
