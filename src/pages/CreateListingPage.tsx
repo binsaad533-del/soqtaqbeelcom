@@ -1656,12 +1656,14 @@ const CreateListingPage = () => {
                     
                     return preFilledFields.length > 0 ? (
                       <div className="bg-primary/5 border border-primary/15 rounded-xl p-3">
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           {preFilledFields.map((f) => (
-                            <div key={f.key} className="flex items-center gap-1.5 bg-background/60 rounded-lg px-2.5 py-1.5 border border-border/30">
-                              <span className="text-[10px] text-muted-foreground">{f.label}:</span>
-                              <span className="text-xs font-medium">{f.value}</span>
-                              <button onClick={() => setDisclosure((prev) => ({ ...prev, [f.key]: "" }))} className="text-muted-foreground/50 hover:text-destructive transition-colors mr-1"><X size={10} /></button>
+                            <div key={f.key} className="flex items-center justify-between gap-1.5 bg-background/60 rounded-lg px-2.5 py-2 border border-border/30">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">{f.label}:</span>
+                                <span className="text-xs font-medium truncate">{f.value}</span>
+                              </div>
+                              <button onClick={() => setDisclosure((prev) => ({ ...prev, [f.key]: "" }))} className="text-muted-foreground/50 hover:text-destructive transition-colors shrink-0"><X size={10} /></button>
                             </div>
                           ))}
                         </div>
