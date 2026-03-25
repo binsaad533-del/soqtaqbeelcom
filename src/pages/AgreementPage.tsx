@@ -3,7 +3,7 @@ import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
 import { generateAgreementPdf } from "@/lib/generateAgreementPdf";
 import { useParams, Link } from "react-router-dom";
 import {
-  Check, Download, ArrowRight, FileText, Shield, Clock, AlertTriangle,
+  Check, Download, ArrowRight, FileText, Shield, AlertTriangle,
   Lock, History, ChevronDown, ChevronUp, Loader2, Copy, CheckCircle2
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
@@ -50,13 +50,6 @@ interface AgreementRecord {
   created_at: string;
 }
 
-interface HistoryEntry {
-  id: string;
-  action: string;
-  actor_id: string | null;
-  details: Record<string, any>;
-  created_at: string;
-}
 
 const AgreementPage = () => {
   const { id } = useParams(); // deal ID
@@ -65,13 +58,13 @@ const AgreementPage = () => {
   const { getCommission } = useCommissions();
   const [agreement, setAgreement] = useState<AgreementRecord | null>(null);
   const [allVersions, setAllVersions] = useState<AgreementRecord[]>([]);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  
   const [deal, setDeal] = useState<any>(null);
   const [commission, setCommission] = useState<Commission | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [approving, setApproving] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
+  
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -146,13 +139,6 @@ const AgreementPage = () => {
         setAllVersions(agreements as unknown as AgreementRecord[]);
       }
 
-      // Load history
-      const { data: historyData } = await supabase
-        .from("deal_history")
-        .select("*")
-        .eq("deal_id", id)
-        .order("created_at", { ascending: false });
-      if (historyData) setHistory(historyData as unknown as HistoryEntry[]);
 
       // Load commission
       const commData = await getCommission(id);
@@ -608,30 +594,6 @@ const AgreementPage = () => {
             </div>
           )}
 
-          {/* Deal History */}
-          {history.length > 0 && (
-            <div className="border-t border-border/20">
-              <button onClick={() => setHistoryOpen(!historyOpen)} className="w-full flex items-center justify-between p-4 hover:bg-accent/20 transition-colors">
-                <span className="text-sm font-medium flex items-center gap-2">
-                  <Clock size={15} strokeWidth={1.3} className="text-primary/60" />
-                  سجل الصفقة ({history.length})
-                </span>
-                {historyOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-              </button>
-              {historyOpen && (
-                <div className="px-4 pb-4 space-y-2">
-                  {history.map(h => (
-                    <div key={h.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-muted/30 text-sm">
-                      <span className="text-muted-foreground">{ACTION_LABELS[h.action] || h.action}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(h.created_at).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Commission Section */}
           {commission && (
@@ -681,14 +643,6 @@ const AgreementPage = () => {
   );
 };
 
-const ACTION_LABELS: Record<string, string> = {
-  agreement_created: "تم إنشاء الاتفاقية",
-  agreement_amended: "تم تعديل الاتفاقية",
-  buyer_approved: "اعتماد المشتري",
-  seller_approved: "اعتماد البائع",
-  negotiation_started: "بدء التفاوض",
-  deal_completed: "اكتمال الصفقة",
-};
 
 const ApprovalCard = ({
   label, name, approved, approvedAt, onApprove, loading, disabled,
