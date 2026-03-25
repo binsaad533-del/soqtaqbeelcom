@@ -315,13 +315,28 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
     e.stopPropagation();
     const url = `${window.location.origin}/listing/${listing.id}`;
     const title = listing.title || listing.business_activity || "فرصة تقبيل";
-    if (navigator.share) {
-      try {
+    try {
+      if (navigator.share) {
         await navigator.share({ title, url });
-      } catch { /* cancelled */ }
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast.success("تم نسخ الرابط");
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("تم نسخ الرابط");
+      }
+    } catch {
+      // Fallback: copy using execCommand for environments where clipboard API is blocked
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = url;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        toast.success("تم نسخ الرابط");
+      } catch {
+        toast.error("لم يتم نسخ الرابط، انسخه يدوياً");
+      }
     }
   };
 
