@@ -140,7 +140,9 @@ const MarketplacePage = () => {
       );
       if (!matchesSimilar) return false;
       // Apply other filters (city, price, deal type)
-      if (filters.city !== "الكل" && filters.city !== "📍 بالقرب مني" && l.city !== filters.city) return false;
+      if (filters.city === "📍 بالقرب مني" && filters.nearbyCities?.length) {
+        if (!filters.nearbyCities.includes(l.city || "")) return false;
+      } else if (filters.city !== "الكل" && filters.city !== "📍 بالقرب مني" && l.city !== filters.city) return false;
       if (filters.dealType !== "الكل") {
         const dt = l.primary_deal_type || l.deal_type || "";
         if (filters.dealType === "تقبيل_كامل" && !dt.includes("تقبيل") && !dt.includes("full")) return false;
