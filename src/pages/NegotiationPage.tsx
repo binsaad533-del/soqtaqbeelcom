@@ -461,6 +461,15 @@ const NegotiationPage = () => {
                   <p className="text-[11px] mt-1.5 text-muted-foreground/60 max-w-xs mx-auto">
                     المساعد الذكي متاح لمساعدتك في أي وقت — اضغط ✨ أسفل الدردشة
                   </p>
+                  {!isPostAgreement && deal.status === "negotiating" && (
+                    <Button
+                      onClick={() => setShowLegalPanel(true)}
+                      className="mt-4 rounded-xl text-xs gradient-primary text-primary-foreground gap-1.5"
+                    >
+                      <Scale size={14} strokeWidth={1.5} />
+                      متفقون؟ انتقل للتأكيد القانوني
+                    </Button>
+                  )}
                 </div>
               )}
               {messages.map((msg) => (
@@ -529,6 +538,21 @@ const NegotiationPage = () => {
                   <Loader2 size={10} className="animate-spin" /> المساعد الذكي يعمل...
                 </div>
               )}
+
+              {/* Proceed to legal confirmation - prominent CTA */}
+              {!isPostAgreement && deal.status === "negotiating" && messages.length > 0 && (
+                <div className="px-4 pb-2">
+                  <button
+                    onClick={() => setShowLegalPanel(true)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-l from-primary/10 to-primary/5 border border-primary/20 text-primary text-xs font-medium hover:from-primary/15 hover:to-primary/10 transition-all active:scale-[0.98]"
+                  >
+                    <Scale size={13} strokeWidth={1.5} />
+                    متفقون؟ انتقل للتأكيد القانوني وإتمام الصفقة
+                    <ArrowRight size={13} strokeWidth={1.5} className="rotate-180" />
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowAiToolbar(!showAiToolbar)}
