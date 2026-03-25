@@ -25,6 +25,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
+import AiInlineStar from "@/components/AiInlineStar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -40,9 +41,9 @@ import { getRules, isFieldVisible, validateDisclosure, validateImages, FIELD_LAB
 import VerificationGate from "@/components/VerificationGate";
 
 const steps = [
-  { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على الـAI" },
-  { label: "الصور والمستندات", icon: Camera, hint: "ارفع الصور والمستندات فقط — الـAI يتكفّل بالباقي" },
-  { label: "التحليل الذكي", icon: Eye, hint: "الـAI يحلل ويجرد تلقائياً — فقط راجع وأكّد" },
+  { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على الـAI ✦" },
+  { label: "الصور والمستندات", icon: Camera, hint: "ارفع الصور والمستندات فقط — الـAI ✦ يتكفّل بالباقي" },
+  { label: "التحليل الذكي", icon: Eye, hint: "الـAI ✦ يحلل ويجرد تلقائياً — فقط راجع وأكّد" },
   { label: "الإفصاح والنشر", icon: Check, hint: "أكمل البيانات وانشر بضغطة واحدة" },
 ];
 
@@ -811,7 +812,7 @@ const CreateListingPage = () => {
     <div className="py-8">
       <div className="container max-w-3xl">
         <h1 className="text-2xl font-medium mb-2">إضافة فرصة تقبيل</h1>
-        <p className="text-sm text-muted-foreground">أنشئ إعلان تقبيل احترافي بمساعدة الذكاء الاصطناعي</p>
+        <p className="text-sm text-muted-foreground">أنشئ إعلان تقبيل احترافي بمساعدة الذكاء الاصطناعي <AiInlineStar size={12} /></p>
         <p className="text-sm font-bold text-primary animate-fade-in [animation-delay:0.5s] [animation-fill-mode:backwards] mb-2">
           <Sparkles size={14} className="inline-block ml-1" />
           بدون ما تكتب سطر واحد
