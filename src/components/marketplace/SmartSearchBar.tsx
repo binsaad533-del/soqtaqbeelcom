@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Loader2, X } from "lucide-react";
@@ -15,28 +15,40 @@ const suggestions = [
 
 interface Props {
   onApplyFilters: (filters: Partial<FilterState>, message: string) => void;
+  resultCount?: number;
 }
 
-const SmartSearchBar = ({ onApplyFilters }: Props) => {
+const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [aiMessage, setAiMessage] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [appliedLabel, setAppliedLabel] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const filteredSuggestions = query
     ? suggestions.filter(s => s.includes(query))
     : suggestions;
 
+  // Derive display message: override AI message when no results
+  const displayMessage = useMemo(() => {
+    if (!hasSearched || !aiMessage) return aiMessage;
+    if (resultCount === 0) {
+      return "ما لقيت نتائج تطابق بحثك الحين.. جرّب تعدّل الفلاتر أو تبحث بكلمات ثانية 🔍";
+    }
+    return aiMessage;
+  }, [aiMessage, resultCount, hasSearched]);
+
   const handleSearch = async (text?: string) => {
     const q = text || query;
     if (!q.trim()) return;
 
     setLoading(true);
-    setMessage("");
+    setAiMessage("");
     setAppliedLabel("");
     setShowSuggestions(false);
+    setHasSearched(false);
 
     try {
       const { data, error } = await supabase.functions.invoke("smart-search", {
@@ -61,11 +73,13 @@ const SmartSearchBar = ({ onApplyFilters }: Props) => {
       if (data.priceMax < 5000000 || data.priceMin > 0) parts.push("نطاق سعري محدد");
       if (parts.length > 0) setAppliedLabel(`تم تطبيق: ${parts.join(" + ")}`);
 
-      setMessage(data.message || "");
+      setAiMessage(data.message || "");
+      setHasSearched(true);
       onApplyFilters(filters, data.message);
     } catch (e) {
       console.error("Smart search error:", e);
-      setMessage("عذرًا، حاول مرة ثانية");
+      setAiMessage("عذرًا، حاول مرة ثانية");
+      setHasSearched(true);
     } finally {
       setLoading(false);
     }
@@ -77,8 +91,9 @@ const SmartSearchBar = ({ onApplyFilters }: Props) => {
 
   const clear = () => {
     setQuery("");
-    setMessage("");
+    setAiMessage("");
     setAppliedLabel("");
+    setHasSearched(false);
     inputRef.current?.focus();
   };
 
@@ -150,15 +165,18 @@ const SmartSearchBar = ({ onApplyFilters }: Props) => {
       )}
 
       {/* AI message */}
-      {message && (
-        <div className="flex items-start gap-2 bg-primary/5 rounded-xl px-3.5 py-2.5 animate-reveal">
+      {displayMessage && (
+        <div className={cn(
+          "flex items-start gap-2 rounded-xl px-3.5 py-2.5 animate-reveal",
+          resultCount === 0 && hasSearched ? "bg-warning/10" : "bg-primary/5"
+        )}>
           <AiStar size={14} className="mt-0.5 shrink-0" />
-          <p className="text-xs text-foreground/80 leading-relaxed">{message}</p>
+          <p className="text-xs text-foreground/80 leading-relaxed">{displayMessage}</p>
         </div>
       )}
 
       {/* Applied filters label */}
-      {appliedLabel && !message && (
+      {appliedLabel && !displayMessage && (
         <p className="text-[11px] text-muted-foreground px-1">{appliedLabel}</p>
       )}
     </div>
