@@ -1,5 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3 } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
@@ -37,6 +37,7 @@ const ListingDetailsPage = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [startingDeal, setStartingDeal] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [myActiveDeal, setMyActiveDeal] = useState<any>(null);
 
   const loadListing = async () => {
     if (!id) return;
@@ -65,7 +66,14 @@ const ListingDetailsPage = () => {
 
   useEffect(() => {
     loadListing();
-  }, [id, getListing]);
+    // Check if the current user has an active deal on this listing
+    if (user && id) {
+      getMyDeals().then(deals => {
+        const active = deals.find(d => d.listing_id === id && !["cancelled", "completed"].includes(d.status));
+        setMyActiveDeal(active || null);
+      });
+    }
+  }, [id, getListing, user]);
 
   const handleStartNegotiation = async () => {
     if (!user) { navigate("/login"); return; }
@@ -132,6 +140,27 @@ const ListingDetailsPage = () => {
           <span>/</span>
           <span className="text-foreground">{listing.title || listing.business_activity || "فرصة تقبيل"}</span>
         </div>
+
+        {/* Active deal banner */}
+        {myActiveDeal && (
+          <div className="mb-4 p-3 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <MessageCircle size={14} className="text-primary" />
+              <span className="text-xs text-foreground font-medium">
+                لديك صفقة جارية على هذا الإعلان
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                ({myActiveDeal.status === "negotiating" ? "جاري التفاوض" : myActiveDeal.status === "finalized" ? "مُقفل" : myActiveDeal.status})
+              </span>
+            </div>
+            <Button asChild size="sm" className="rounded-xl text-xs gap-1.5">
+              <Link to={`/negotiate/${myActiveDeal.id}`}>
+                <ArrowLeft size={12} />
+                الانتقال للمفاوضات
+              </Link>
+            </Button>
+          </div>
+        )}
 
         {isSimulation && (
           <div className="mb-5 rounded-2xl bg-amber-50 border border-amber-200 p-5" dir="rtl">
