@@ -162,7 +162,7 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, pageNumber: 
   return { page, content };
 };
 
-const buildSections = (data: AgreementPdfData) => {
+const buildSections = (data: AgreementPdfData, qrDataUrl = "") => {
   const agreedPrice = data.financialTerms?.agreedPrice || 0;
   const currency = data.financialTerms?.currency || "ر.س";
   const dealAmount = data.dealAmount || agreedPrice;
@@ -432,11 +432,15 @@ const buildSections = (data: AgreementPdfData) => {
     ),
   );
 
-  // ── Recommendation to officially document the agreement ──
+  // ── Recommendation + QR code ──
   sections.push(
     createNode(`
-      <div style="text-align:center;padding:14px 20px;opacity:0.55;font-size:10px;line-height:2;color:hsl(215 16% 45%);font-family:${FONT_FAMILY};">
-        ننصح بتوثيق هذه الاتفاقية لدى الجهات الرسمية المعتمدة لضمان حفظ حقوق جميع الأطراف
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:14px 20px;opacity:0.5;font-family:${FONT_FAMILY};">
+        ${qrDataUrl ? `<img src="${qrDataUrl}" alt="QR" style="width:56px;height:56px;border-radius:6px;" />` : ""}
+        <div style="font-size:9px;line-height:2;color:hsl(215 16% 45%);text-align:center;">
+          ننصح بتوثيق هذه الاتفاقية لدى الجهات الرسمية المعتمدة لضمان حفظ حقوق جميع الأطراف<br />
+          يمكنكم مسح الرمز للتحقق من الاتفاقية إلكترونياً
+        </div>
       </div>
     `),
   );
@@ -447,10 +451,11 @@ const buildSections = (data: AgreementPdfData) => {
 export function buildAgreementPdfPages(options: {
   data: AgreementPdfData;
   logoBase64: string;
+  qrDataUrl?: string;
   mount: HTMLElement;
 }) {
-  const { data, logoBase64, mount } = options;
-  const sections = buildSections(data);
+  const { data, logoBase64, qrDataUrl = "", mount } = options;
+  const sections = buildSections(data, qrDataUrl);
   const pages: HTMLElement[] = [];
 
   let pageNumber = 1;
