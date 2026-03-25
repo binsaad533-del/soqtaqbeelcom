@@ -140,11 +140,6 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline" }: Ph
 
   return (
     <div className={cn("space-y-3", mode === "modal" && "p-1")} dir="rtl">
-      {/* AI Assistant Message */}
-      <div className="flex items-center gap-2 bg-primary/5 rounded-lg px-3 py-2">
-        <AiStar size={16} animate={sending || verifying} />
-        <p className="text-xs text-foreground/80 leading-relaxed">{aiMessage}</p>
-      </div>
 
       {step === "phone" && (
         <div className="flex items-end gap-2 flex-wrap sm:flex-nowrap">
