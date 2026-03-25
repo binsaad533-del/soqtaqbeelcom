@@ -148,6 +148,8 @@ const CreateListingPage = () => {
   });
 
   const { createListing, updateListing, uploadFile, getMyDraft, loading } = useListings();
+  const { profile } = useAuthContext();
+  const sellerName = profile?.full_name || "";
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
