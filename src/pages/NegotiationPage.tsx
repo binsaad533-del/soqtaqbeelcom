@@ -774,16 +774,6 @@ const NegotiationPage = () => {
                 </div>
               )}
               <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setShowAiToolbar(!showAiToolbar)}
-                  className={cn(
-                    "h-8 w-8 rounded-xl flex items-center justify-center transition-all shrink-0",
-                    showAiToolbar ? "bg-primary/15 text-primary" : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  title="أدوات المساعد الذكي"
-                >
-                  <Sparkles size={13} strokeWidth={1.5} />
-                </button>
                 <ChatAttachmentButton
                   dealId={dealId!}
                   onFileSent={async (message, type, metadata) => {
