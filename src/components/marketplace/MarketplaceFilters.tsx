@@ -46,9 +46,39 @@ export { defaultFilters };
 const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
   const [citySearch, setCitySearch] = useState("");
   const [showAllActivities, setShowAllActivities] = useState(false);
+  const [geoLoading, setGeoLoading] = useState(false);
 
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) =>
     onChange({ ...filters, [key]: val });
+
+  const handleNearMe = useCallback(async () => {
+    setGeoLoading(true);
+    try {
+      const pos = await requestGeolocation();
+      const { latitude, longitude } = pos.coords;
+      const nearest = findNearestCity(latitude, longitude);
+      const nearby = getNearbyCities(latitude, longitude, 150);
+      onChange({ ...filters, city: "📍 بالقرب مني", nearbyCities: nearby.length > 0 ? nearby : [nearest.name] });
+      toast.success(`📍 تم تحديد موقعك بالقرب من ${nearest.name}`);
+    } catch (err: unknown) {
+      const geoErr = err as GeolocationPositionError;
+      if (geoErr?.code === 1) {
+        toast.error("يرجى السماح بالوصول إلى الموقع من إعدادات المتصفح");
+      } else {
+        toast.error("تعذر تحديد موقعك، حاول مرة أخرى");
+      }
+    } finally {
+      setGeoLoading(false);
+    }
+  }, [filters, onChange]);
+
+  const handleCityClick = useCallback((city: string) => {
+    if (city === "📍 بالقرب مني") {
+      handleNearMe();
+    } else {
+      onChange({ ...filters, city, nearbyCities: undefined });
+    }
+  }, [handleNearMe, filters, onChange]);
 
   const reset = () => onChange({ ...defaultFilters });
 
