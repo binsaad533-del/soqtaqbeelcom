@@ -44,7 +44,7 @@ const HomePage = () => {
       {/* Hero */}
       <section className="gradient-hero py-20 md:py-32 relative overflow-hidden">
         <div className="container relative z-10">
-          <div className="animate-reveal">
+          <div className="max-w-2xl mx-auto text-center animate-reveal">
             <div className="flex flex-col items-center mb-6">
               <img src={logoIcon} alt="سوق تقبيل" className="h-16 md:h-20 w-auto" />
               <span className="text-[11px] md:text-xs font-semibold tracking-[0.2em] text-primary/80 mt-2 uppercase">SOQ TAQBEEL</span>
