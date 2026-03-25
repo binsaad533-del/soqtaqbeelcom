@@ -284,65 +284,55 @@ const ListingDetailsPage = () => {
               />
             )}
 
-            {/* Summary */}
-            {(listing.description || listing.ai_summary) && (
-              <div className="bg-card rounded-2xl p-6 shadow-soft">
-                <div className="flex items-center gap-2 mb-4">
-                  <AiStar size={20} animate={false} />
-                  <h2 className="font-medium">ملخص الفرصة</h2>
+            {/* Details Card */}
+            <div className="bg-card rounded-2xl p-6 shadow-soft space-y-5">
+              {/* Summary */}
+              {(listing.description || listing.ai_summary) && (
+                <div className="border-b border-border/20 pb-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <AiStar size={20} animate={false} />
+                    <h2 className="font-medium">ملخص الفرصة</h2>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {listing.ai_summary || listing.description}
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {listing.ai_summary || listing.description}
-                </p>
-              </div>
-            )}
+              )}
 
-            {/* Inventory */}
-            {inventory.length > 0 && (
-              <div className="bg-card rounded-2xl p-6 shadow-soft">
-                <h3 className="font-medium mb-4">جرد الأصول المؤكّد</h3>
-                <div className="space-y-2">
-                  {inventory.map((item, i) => (
-                    <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
-                      <span className="text-sm">{item.name}</span>
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm text-muted-foreground">{item.qty} وحدة</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-md ${item.condition === "جديد" || item.condition === "شبه جديد" ? "bg-success/10 text-success" : item.condition === "تالف" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}>
-                          {item.condition}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Documents */}
-            {documents.length > 0 && (
-              <div className="bg-card rounded-2xl p-6 shadow-soft">
-                <h3 className="font-medium mb-4 flex items-center gap-2">
-                  <FileText size={16} strokeWidth={1.3} />
-                  المستندات الداعمة
-                </h3>
-                <div className="space-y-2">
-                  {documents.map((doc, i) => (
-                    <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
-                      <span className="text-sm">{doc.name}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-md ${doc.status === "مرفق" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                        {doc.status}
+              {/* Inventory */}
+              {inventory.length > 0 && (
+                <CollapsibleList title="جرد الأصول المؤكّد" items={inventory} threshold={5} renderItem={(item, i) => (
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                    <span className="text-sm">{item.name}</span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-muted-foreground">{item.qty} وحدة</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-md ${item.condition === "جديد" || item.condition === "شبه جديد" ? "bg-success/10 text-success" : item.condition === "تالف" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}>
+                        {item.condition}
                       </span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                  </div>
+                )} />
+              )}
+
+              {/* Documents */}
+              {documents.length > 0 && (
+                <CollapsibleList title="المستندات الداعمة" icon={<FileText size={16} strokeWidth={1.3} />} items={documents} threshold={5} renderItem={(doc, i) => (
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                    <span className="text-sm">{doc.name}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-md ${doc.status === "مرفق" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                      {doc.status}
+                    </span>
+                  </div>
+                )} />
+              )}
+            </div>
 
             <DealCheckPanel listing={listing} savedAnalysis={listing.ai_structure_validation} />
           </div>
 
           {/* Sidebar */}
           <div className="space-y-5">
-            <div className="bg-card rounded-2xl p-6 shadow-soft sticky top-20">
+            <div className="bg-card rounded-2xl p-6 shadow-soft">
               {/* Owner edit buttons */}
               {isOwner && (
                 <div className="flex gap-2 mb-4">
@@ -498,6 +488,39 @@ const InfoRow = ({ label, value }: { label: string; value: React.ReactNode }) =>
     <span>{value}</span>
   </div>
 );
+
+const CollapsibleList = <T,>({ title, icon, items, threshold, renderItem }: {
+  title: string;
+  icon?: React.ReactNode;
+  items: T[];
+  threshold: number;
+  renderItem: (item: T, index: number) => React.ReactNode;
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const needsExpand = items.length > threshold;
+  const visibleItems = needsExpand && !expanded ? items.slice(0, threshold) : items;
+
+  return (
+    <div className="border-b border-border/20 pb-5 last:border-0 last:pb-0">
+      <h3 className="font-medium mb-3 flex items-center gap-2">
+        {icon}
+        {title}
+        <span className="text-xs text-muted-foreground font-normal">({items.length})</span>
+      </h3>
+      <div className="space-y-2">
+        {visibleItems.map((item, i) => renderItem(item, i))}
+      </div>
+      {needsExpand && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-3 text-xs text-primary hover:text-primary/80 transition-colors"
+        >
+          {expanded ? "عرض أقل" : `عرض المزيد (${items.length - threshold}+)`}
+        </button>
+      )}
+    </div>
+  );
+};
 
 interface DealStructureDisplayProps {
   primaryConfig: typeof DEAL_TYPE_MAP[string];
