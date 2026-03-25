@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { toast } from "sonner";
+import SarSymbol from "@/components/SarSymbol";
 import { isFieldRelevant } from "@/lib/transparencyScore";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -220,7 +221,7 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated }: ListingEd
               <label className="text-xs text-muted-foreground mb-1 block">السعر المطلوب *</label>
               <div className="relative">
                 <input type="number" value={fields.price} onChange={(e) => set("price", e.target.value)} placeholder="180000" className={inputCls} />
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ر.س</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground"><SarSymbol size={12} /></span>
               </div>
             </div>
 
@@ -229,7 +230,7 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated }: ListingEd
                 <label className="text-xs text-muted-foreground mb-1 block">الإيجار السنوي</label>
                 <div className="relative">
                   <input type="number" value={fields.annual_rent} onChange={(e) => set("annual_rent", e.target.value)} placeholder="45000" className={inputCls} />
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ر.س</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground"><SarSymbol size={12} /></span>
                 </div>
               </div>
             )}

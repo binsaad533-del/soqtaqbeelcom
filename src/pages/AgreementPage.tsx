@@ -182,7 +182,7 @@ const AgreementPage = () => {
           excludedAssets: [],
           financialTerms: {
             agreedPrice: deal.agreed_price || listing?.price || 0,
-            currency: "ر.س",
+            currency: "﷼",
             paymentNote: "حسب الاتفاق بين الطرفين",
           },
           declarations: {
@@ -203,7 +203,7 @@ const AgreementPage = () => {
             cameras: listing?.surveillance_cameras || "—",
           },
           leaseDetails: {
-            annualRent: listing?.annual_rent ? `${Number(listing.annual_rent).toLocaleString("en-US")} ر.س` : "—",
+            annualRent: listing?.annual_rent ? `${Number(listing.annual_rent).toLocaleString("en-US")} ﷼` : "—",
             remaining: listing?.lease_remaining || "—",
           },
         },
@@ -358,7 +358,7 @@ const AgreementPage = () => {
 
   const bothApproved = agreement.buyer_approved && agreement.seller_approved;
   const agreedPrice = agreement.financial_terms?.agreedPrice || 0;
-  const currency = agreement.financial_terms?.currency || "ر.س";
+  const currency = agreement.financial_terms?.currency || "﷼";
 
   return (
     <div className="py-8">
