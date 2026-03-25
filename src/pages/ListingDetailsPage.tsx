@@ -403,7 +403,7 @@ const ListingDetailsPage = () => {
           }}
         />
       )}
-      </div>
+        </div>
       </div>
     </>
   );
