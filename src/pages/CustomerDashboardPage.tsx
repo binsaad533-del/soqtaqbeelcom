@@ -244,9 +244,6 @@ const CustomerDashboardPage = () => {
             <button onClick={loadData} className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors">
               <RefreshCw size={13} className="text-muted-foreground" />
             </button>
-            <Link to="/create-listing" className="flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-xs font-medium hover:bg-primary/90 transition-colors">
-              <Plus size={13} /> إعلان جديد
-            </Link>
           </div>
         </div>
 
