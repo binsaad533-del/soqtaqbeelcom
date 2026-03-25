@@ -260,3 +260,17 @@
 .animate-step-slide-in-prev {
   animation: step-slide-in-prev 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Marketplace ticker infinite scroll */
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-25%); }
+}
+
+.ticker-track {
+  animation: ticker-scroll var(--ticker-duration, 40s) linear infinite;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
