@@ -665,6 +665,13 @@ const NegotiationPage = () => {
               {isBuyer && isPostAgreement && deal.seller_id && (
                 <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
               )}
+
+              {/* Commission — compact footer */}
+              {isPostAgreement && listing?.price && (
+                <div className="pt-2 mt-auto">
+                  <CommissionBanner dealAmount={deal.agreed_price || listing.price} showDetails className="!p-2.5 !rounded-lg text-[10px]" />
+                </div>
+              )}
             </div>
           </div>
 
