@@ -207,7 +207,7 @@ const AiAssistant = () => {
           className="fixed bottom-6 left-4 z-50 flex items-center gap-1.5 group transition-all duration-300"
         >
           <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center shadow-soft-lg group-hover:scale-110 transition-transform duration-300">
-            <Sparkles size={20} className="text-primary-foreground" strokeWidth={1.5} />
+            <AiStar size={26} className="ai-glow-slow [&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" animate={false} />
           </div>
           <span className="text-[11px] font-medium text-foreground/70 bg-card/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full shadow-soft border border-border/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
             المساعد الذكي
@@ -228,7 +228,7 @@ const AiAssistant = () => {
                   </button>
                 )}
                 <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
-                  <Sparkles size={18} className="text-primary-foreground" strokeWidth={1.5} />
+                  <AiStar size={22} className="ai-glow-slow [&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" animate={false} />
                 </div>
                 <div>
                   <h3 className="text-sm font-medium">المساعد الذكي</h3>
