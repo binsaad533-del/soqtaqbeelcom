@@ -169,7 +169,6 @@ const MarketplacePage = () => {
             {isMobile && (
               <MobileFilterSheet filters={filters} onChange={setFilters} resultCount={filtered.length} />
             )}
-            <AiStar size={24} />
           </div>
         </div>
 
