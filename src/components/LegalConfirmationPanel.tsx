@@ -469,13 +469,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
       {/* Step 3: Confirmation */}
       {step === "confirm" && (
         <div className="space-y-4">
-          <div className="bg-card rounded-2xl p-6 shadow-soft border border-border/30">
-            <h3 className="font-medium text-sm mb-4">حالة الموافقة</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <ApprovalCard label="المشتري" confirmed={buyerConfirmed} isYou={isBuyer} />
-              <ApprovalCard label="البائع" confirmed={sellerConfirmed} isYou={isSeller} />
-            </div>
-          </div>
+
 
           {/* Understanding score gate */}
           <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
