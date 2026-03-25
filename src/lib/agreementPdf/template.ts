@@ -7,7 +7,7 @@ export const PAGE_HEIGHT_PX = 1123;
 const FONT_FAMILY = `'IBM Plex Sans Arabic', system-ui, sans-serif`;
 const PAGE_SHELL_STYLE = [
   `width:${PAGE_WIDTH_PX}px`,
-  `min-height:${PAGE_HEIGHT_PX}px`,
+  `height:${PAGE_HEIGHT_PX}px`,
   "background:#ffffff",
   `font-family:${FONT_FAMILY}`,
   "direction:rtl",
@@ -17,7 +17,7 @@ const PAGE_SHELL_STYLE = [
   "box-sizing:border-box",
   "padding:34px 34px 28px",
   "gap:16px",
-  "border:1px solid hsl(214 32% 91%)",
+  "overflow:hidden",
 ].join(";");
 
 const escapeHtml = (value: string) =>
@@ -146,7 +146,7 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, pageNumber: 
   `);
 
   const content = document.createElement("div");
-  content.style.cssText = "display:flex;flex-direction:column;flex:1;gap:12px;overflow:hidden;padding-top:2px;";
+  content.style.cssText = "display:flex;flex-direction:column;flex:1;gap:12px;padding-top:2px;overflow:visible;";
 
   const footer = createNode(`
     <footer style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid hsl(214 32% 91%);font-size:10px;color:hsl(215 16% 45%);line-height:1.8;">
@@ -420,11 +420,22 @@ export function buildAgreementPdfPages(options: {
   mount.appendChild(current.page);
   pages.push(current.page);
 
+  // Measure available content height (page height minus header, footer, padding, gaps)
+  const getAvailableHeight = () => {
+    const pageRect = current.page.getBoundingClientRect();
+    const contentRect = current.content.getBoundingClientRect();
+    // The available space is from content top to footer top (page bottom - footer height - padding)
+    return pageRect.bottom - contentRect.top - 60; // 60px reserved for footer + gap
+  };
+
   sections.forEach((block) => {
     const nextBlock = block.cloneNode(true) as HTMLElement;
     current.content.appendChild(nextBlock);
 
-    const hasOverflow = current.content.scrollHeight > current.content.clientHeight;
+    const contentBottom = current.content.scrollHeight;
+    const available = getAvailableHeight();
+    const hasOverflow = contentBottom > available;
+
     if (hasOverflow && current.content.childElementCount > 1) {
       current.content.removeChild(nextBlock);
       pageNumber += 1;
