@@ -155,7 +155,7 @@ const ListingDetailsPage = () => {
           </div>
         </div>
       )}
-    <div className={myActiveDeal ? "pt-20" : "py-8"}>
+      <div className={myActiveDeal ? "pt-20" : "py-8"}>
       <div className="container">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/marketplace" className="hover:text-foreground transition-colors">السوق</Link>
