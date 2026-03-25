@@ -1517,25 +1517,29 @@ const CreateListingPage = () => {
                                 <input type="text" inputMode="numeric" lang="en" dir="ltr" value={item.qty} onChange={(e) => { const val = toEnglishNumerals(e.target.value); const num = parseInt(val.replace(/[^\d]/g, "")) || 1; setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: Math.max(1, num) } : entry)); }} className="w-6 text-center text-[11px] bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                                 <button onClick={() => setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, qty: entry.qty + 1 } : entry))} className="px-1 h-full text-muted-foreground hover:text-foreground transition-colors"><Plus size={10} /></button>
                               </div>
-                              {/* Price input */}
-                              {inventoryPricingMode === "per_item" && item.included && (
-                                <div className="flex items-center gap-1">
-                                  <input
-                                    type="text"
-                                    inputMode="numeric"
-                                    lang="en"
-                                    dir="ltr"
-                                    placeholder="السعر"
-                                    value={item.unitPrice ? String(item.unitPrice) : ""}
-                                    onChange={(e) => {
-                                      const val = toEnglishNumerals(e.target.value).replace(/[^\d]/g, "");
-                                      setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, unitPrice: val ? Number(val) : null } : entry));
-                                    }}
-                                    className="w-16 h-7 text-[11px] bg-muted/50 border border-border/30 rounded-md px-1.5 outline-none focus:border-primary/50 transition-colors text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                  />
-                                  {item.unitPrice && item.unitPrice > 0 && (
-                                    <span className="text-[10px] text-primary font-medium whitespace-nowrap">= {itemTotal.toLocaleString("en-US")}</span>
-                                  )}
+                              {/* Price input — fixed width to keep alignment */}
+                              {inventoryPricingMode === "per_item" && (
+                                <div className="flex items-center gap-1 w-32">
+                                  {item.included ? (
+                                    <>
+                                      <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        lang="en"
+                                        dir="ltr"
+                                        placeholder="السعر"
+                                        value={item.unitPrice ? String(item.unitPrice) : ""}
+                                        onChange={(e) => {
+                                          const val = toEnglishNumerals(e.target.value).replace(/[^\d]/g, "");
+                                          setInventory((prev) => prev.map((entry) => entry.id === item.id ? { ...entry, unitPrice: val ? Number(val) : null } : entry));
+                                        }}
+                                        className="w-16 h-7 text-[11px] bg-muted/50 border border-border/30 rounded-md px-1.5 outline-none focus:border-primary/50 transition-colors text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                      />
+                                      <span className="text-[10px] text-primary font-medium whitespace-nowrap w-14 text-start">
+                                        {item.unitPrice && item.unitPrice > 0 ? `= ${itemTotal.toLocaleString("en-US")}` : ""}
+                                      </span>
+                                    </>
+                                  ) : <div className="w-full" />}
                                 </div>
                               )}
                               {/* Delete */}
