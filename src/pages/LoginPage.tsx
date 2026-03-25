@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
-import logo from "@/assets/logo.png";
+import logoIconGold from "@/assets/logo-icon-gold.png";
 import SocialIcons from "@/components/SocialIcons";
 import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown, Sparkles, ShieldCheck, Zap } from "lucide-react";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
@@ -160,10 +160,10 @@ const LoginPage = () => {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <img src={logo} alt="سوق تقبيل" className="h-14 md:h-16 w-auto mx-auto" />
+          <div className="flex flex-col items-center mb-4">
+            <img src={logoIconGold} alt="سوق تقبيل" className="h-16 md:h-20 w-auto" />
+            <span className="text-sm md:text-base font-semibold tracking-[0.25em] text-foreground/70 mt-2 uppercase">SOQ TAQBEEL</span>
           </div>
-          <h1 className="text-2xl font-medium gradient-text">سوق تقبيل</h1>
           <p className="text-sm text-muted-foreground mt-2">
             {isLogin ? "تسجيل الدخول إلى حسابك" : "إنشاء حساب جديد"}
           </p>

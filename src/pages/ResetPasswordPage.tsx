@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo.png";
+import logoIconGold from "@/assets/logo-icon-gold.png";
 import { Lock, Eye, EyeOff, CheckCircle, Sparkles } from "lucide-react";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";

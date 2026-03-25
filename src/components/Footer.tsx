@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import SocialIcons from "./SocialIcons";
-import logoIcon from "@/assets/logo-icon.png";
+import logoIcon from "@/assets/logo-icon-gold.png";
 
 const footerLinks = [
   { label: "الرئيسية", path: "/" },
