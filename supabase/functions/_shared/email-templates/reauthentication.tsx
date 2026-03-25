@@ -22,7 +22,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
     <Preview>رمز التحقق — سوق تقبيل</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Text style={logo}>TAQ/BEEL</Text>
+        <Text style={logo}>SOQ TAQBEEL</Text>
         <Heading style={h1}>رمز التحقق</Heading>
         <Text style={text}>استخدم الرمز أدناه لتأكيد هويتك:</Text>
         <Text style={codeStyle}>{token}</Text>
