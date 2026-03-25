@@ -129,6 +129,8 @@ const CreateListingPage = () => {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
+  const [sellerNote, setSellerNote] = useState("");
+  const SELLER_NOTE_MAX = 300;
 
   const [disclosure, setDisclosure] = useState({
     business_activity: "",
@@ -603,6 +605,7 @@ const CreateListingPage = () => {
 
   const buildListingPayload = useCallback(() => ({
     ...disclosure,
+    description: sellerNote || null,
     price: disclosure.price ? Number(disclosure.price) : null,
     annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
     primary_deal_type: dealStructure.primaryType,
@@ -616,7 +619,7 @@ const CreateListingPage = () => {
       priority: i,
       is_primary: id === dealStructure.primaryType,
     })),
-  }), [disclosure, dealStructure, inventory, photos, uploadedDocs, crExtraction]);
+  }), [disclosure, dealStructure, inventory, photos, uploadedDocs, crExtraction, sellerNote]);
 
   const handleRunInlineDealCheck = async () => {
     setPublishAttempted(true);
@@ -1540,6 +1543,30 @@ const CreateListingPage = () => {
                   )}
                 </div>
               </div>
+
+
+                {/* ── Seller Note ── */}
+                <div className="border-t border-border/50 pt-5">
+                  <label className="block text-sm font-medium mb-2">رسالة للمشترين (اختياري)</label>
+                  <div className="relative">
+                    <textarea
+                      value={sellerNote}
+                      onChange={(e) => {
+                        if (e.target.value.length <= SELLER_NOTE_MAX) setSellerNote(e.target.value);
+                      }}
+                      placeholder={`إذا في خاطرك شي ودّك تقوله عن المشروع يا ${sellerName || "صاحب الإعلان"}... ✍️`}
+                      rows={3}
+                      maxLength={SELLER_NOTE_MAX}
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 placeholder:text-muted-foreground/50"
+                    />
+                    <span className={cn(
+                      "absolute bottom-2 left-3 text-[10px]",
+                      sellerNote.length > SELLER_NOTE_MAX * 0.9 ? "text-destructive" : "text-muted-foreground/40"
+                    )}>
+                      {sellerNote.length}/{SELLER_NOTE_MAX}
+                    </span>
+                  </div>
+                </div>
 
               {/* ── Inline Deal Check / Market Analysis ── */}
               <div className="border-t border-border/50 pt-6 space-y-5">
