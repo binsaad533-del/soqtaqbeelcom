@@ -85,7 +85,7 @@ class ErrorBoundary extends Component<Props, State> {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={this.handleRetry}
-                  className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-l from-primary to-primary/70 text-primary-foreground text-sm font-medium hover:opacity-90 transition-all"
                 >
                   إعادة المحاولة
                 </button>

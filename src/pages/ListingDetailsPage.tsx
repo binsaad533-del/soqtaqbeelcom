@@ -160,7 +160,7 @@ const ListingDetailsPage = () => {
               <div className="mt-3">
                 <Link 
                   to="/create-listing" 
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-l from-primary to-primary/70 text-primary-foreground text-sm font-medium hover:opacity-90 transition-all"
                 >
                   أضف فرصتك الآن
                 </Link>
