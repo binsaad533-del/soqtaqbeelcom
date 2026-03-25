@@ -201,7 +201,7 @@ const CustomerDashboardPage = () => {
             { label: "إجمالي القيمة", value: fmtCurrency(stats.totalVal), icon: Wallet, accent: "text-primary", sub: "ر.س" },
             { label: "العمولة (1%)", value: fmtCurrency(stats.commission), icon: DollarSign, accent: "text-muted-foreground", sub: "ر.س" },
           ].map((kpi, i) => (
-            <div key={i} className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 hover:shadow-soft-lg transition-all">
+            <div key={i} className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 hover:shadow-soft-lg transition-all animate-reveal" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[11px] text-muted-foreground">{kpi.label}</span>
                 <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", `${kpi.accent}/10`)}>
@@ -218,7 +218,7 @@ const CustomerDashboardPage = () => {
 
         {/* ═══ SMART SUGGESTIONS ═══ */}
         {suggestions.length > 0 && (
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+          <div className="flex gap-2 mb-6 overflow-x-auto pb-1 animate-reveal" style={{ animationDelay: '350ms' }}>
             {suggestions.map((s, i) => (
               <Link key={i} to={s.link} className={cn(
                 "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all shrink-0",
@@ -233,7 +233,7 @@ const CustomerDashboardPage = () => {
         )}
 
         {/* ═══ MAIN CONTENT ═══ */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-reveal" style={{ animationDelay: '420ms' }}>
 
           {/* ── Left: Main content area (2 cols) ── */}
           <div className="lg:col-span-2 space-y-5">
