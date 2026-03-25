@@ -10,16 +10,19 @@ interface TransparencyIndicatorProps {
   onFieldClick?: (fieldKey: string) => void;
 }
 
-const LEVEL_STYLES = {
-  high: { bg: "bg-success/10", border: "border-success/30", text: "text-success", barClass: "bg-success", badgeBg: "bg-success/15" },
-  medium: { bg: "bg-warning/10", border: "border-warning/30", text: "text-warning", barClass: "bg-warning", badgeBg: "bg-warning/15" },
-  low: { bg: "bg-destructive/10", border: "border-destructive/30", text: "text-destructive", barClass: "bg-destructive", badgeBg: "bg-destructive/15" },
+/* ── 4-tier color system based on score ── */
+const getScoreStyle = (score: number) => {
+  if (score >= 80) return { bg: "bg-success/10", border: "border-success/30", text: "text-success", barClass: "bg-success", badgeBg: "bg-success/15", tier: "trusted" as const };
+  if (score >= 60) return { bg: "bg-yellow-500/10", border: "border-yellow-500/30", text: "text-yellow-600 dark:text-yellow-400", barClass: "bg-yellow-500", badgeBg: "bg-yellow-500/15", tier: "yellow" as const };
+  if (score >= 40) return { bg: "bg-orange-500/10", border: "border-orange-500/30", text: "text-orange-600 dark:text-orange-400", barClass: "bg-orange-500", badgeBg: "bg-orange-500/15", tier: "orange" as const };
+  return { bg: "bg-destructive/10", border: "border-destructive/30", text: "text-destructive", barClass: "bg-destructive", badgeBg: "bg-destructive/15", tier: "red" as const };
 };
 
-const IMPACT_MESSAGES: Record<string, { message: string; icon: typeof TrendingUp }> = {
-  high: { message: "إعلانك سيظهر بشارة \"موثوق\" — الإعلانات الموثوقة تحصل على تواصل أكثر بـ 3 أضعاف", icon: TrendingUp },
-  medium: { message: "أكمل بعض الحقول لتحصل على شارة \"موثوق\" وترتيب أعلى في نتائج البحث", icon: TrendingUp },
-  low: { message: "الإعلانات منخفضة الشفافية قد تُرفض أو تحصل على مشاهدات أقل بكثير", icon: TrendingUp },
+const TIER_BADGE: Record<string, { badge: string; label: string }> = {
+  trusted: { badge: "✓ موثوق", label: "إعلانك سيظهر بشارة \"موثوق\" — الإعلانات الموثوقة تحصل على تواصل أكثر بـ 3 أضعاف" },
+  yellow: { badge: "⚠ يحتاج تحسين", label: "أكمل بعض الحقول لتحصل على شارة \"موثوق\" وترتيب أعلى في نتائج البحث" },
+  orange: { badge: "⚠ ضعيف", label: "أضف المزيد من البيانات والصور لتحسين ظهور إعلانك وبناء ثقة المشتري" },
+  red: { badge: "✗ غير مكتمل", label: "الإعلانات منخفضة الشفافية قد تُرفض أو تحصل على مشاهدات أقل بكثير" },
 };
 
 const TransparencyIndicator = ({ listing, compact = false, className, onFieldClick }: TransparencyIndicatorProps) => {
