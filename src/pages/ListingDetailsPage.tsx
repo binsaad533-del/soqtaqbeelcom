@@ -332,7 +332,7 @@ const ListingDetailsPage = () => {
 
           {/* Sidebar */}
           <div className="space-y-5">
-            <div className="bg-card rounded-2xl p-6 shadow-soft sticky top-20">
+            <div className="bg-card rounded-2xl p-6 shadow-soft">
               {/* Owner edit buttons */}
               {isOwner && (
                 <div className="flex gap-2 mb-4">
