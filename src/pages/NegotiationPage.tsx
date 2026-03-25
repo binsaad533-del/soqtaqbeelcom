@@ -728,7 +728,9 @@ const NegotiationPage = () => {
             </div>
           </div>
         </div>
+      </div>
     </div>
+    </VerificationGate>
     </VerificationGate>
   );
 };
