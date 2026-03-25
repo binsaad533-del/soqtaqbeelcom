@@ -1506,9 +1506,178 @@ const CreateListingPage = () => {
                 </div>
               </div>
 
+              {/* ── Inline Deal Check / Market Analysis ── */}
               <div className="border-t border-border/50 pt-6 space-y-5">
                 <div className="flex items-center gap-3">
                   <AiStar size={24} />
+                  <div>
+                    <h2 className="font-medium text-sm">تحليل السوق وفحص الصفقة</h2>
+                    <p className="text-[10px] text-muted-foreground">الـAI يحلل صفقتك ويعطيك توصية — راجع النتائج وعدّل قبل النشر</p>
+                  </div>
+                </div>
+
+                {!dealCheckResult && !dealCheckLoading && !dealCheckError && (
+                  <div className="bg-primary/5 border border-primary/15 rounded-xl p-5 text-center space-y-3">
+                    <AiStar size={32} className="mx-auto" />
+                    <p className="text-sm font-medium">ابدأ فحص الصفقة لمعرفة تقييم السوق والتوصيات</p>
+                    <p className="text-xs text-muted-foreground max-w-sm mx-auto">سيتم تحليل بياناتك ومقارنتها بالسوق — يمكنك تعديل البيانات بناءً على النتائج قبل النشر</p>
+                    <Button
+                      onClick={handleRunInlineDealCheck}
+                      disabled={!canPublish}
+                      className="gradient-primary text-primary-foreground rounded-xl"
+                    >
+                      <Eye size={16} strokeWidth={1.5} />
+                      ابدأ فحص الصفقة
+                    </Button>
+                    {!canPublish && publishAttempted && (
+                      <p className="text-[11px] text-destructive">أكمل الحقول المطلوبة أعلاه أولاً</p>
+                    )}
+                  </div>
+                )}
+
+                {dealCheckLoading && (
+                  <div className="py-10 flex flex-col items-center gap-3 animate-fade-in">
+                    <div className="relative">
+                      <AiStar size={32} />
+                      <Loader2 size={48} strokeWidth={1} className="absolute -top-2 -left-2 text-primary/30 animate-spin" />
+                    </div>
+                    <p className="text-sm font-medium">جاري تحليل الصفقة ومقارنتها بالسوق...</p>
+                    <p className="text-xs text-muted-foreground">يتم فحص البيانات والأصول والموقع والسوق</p>
+                  </div>
+                )}
+
+                {dealCheckError && !dealCheckLoading && (
+                  <div className="bg-warning/10 border border-warning/30 rounded-xl p-4 space-y-3">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle size={16} className="text-warning shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-medium text-warning">تعذّر إجراء الفحص التلقائي</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{dealCheckError}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={handleRunInlineDealCheck} className="rounded-xl text-xs">
+                        <Loader2 size={12} strokeWidth={1.5} className="ml-1" />
+                        إعادة المحاولة
+                      </Button>
+                      <p className="text-[10px] text-muted-foreground self-center">يمكنك المتابعة بالنشر بدون الفحص</p>
+                    </div>
+                  </div>
+                )}
+
+                {dealCheckResult && !dealCheckLoading && (
+                  <div className="space-y-4 animate-fade-in">
+                    {/* Rating Banner */}
+                    <div className={cn("rounded-xl p-4 border",
+                      dealCheckResult.ratingColor === "green" ? "bg-emerald-50 border-emerald-200" :
+                      dealCheckResult.ratingColor === "yellow" ? "bg-amber-50 border-amber-200" :
+                      dealCheckResult.ratingColor === "red" ? "bg-red-50 border-red-200" :
+                      dealCheckResult.ratingColor === "blue" ? "bg-blue-50 border-blue-200" :
+                      "bg-muted border-border"
+                    )}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={cn("text-sm font-medium",
+                          dealCheckResult.ratingColor === "green" ? "text-emerald-700" :
+                          dealCheckResult.ratingColor === "yellow" ? "text-amber-700" :
+                          dealCheckResult.ratingColor === "red" ? "text-red-700" :
+                          dealCheckResult.ratingColor === "blue" ? "text-blue-700" :
+                          "text-foreground"
+                        )}>{dealCheckResult.rating}</span>
+                        <span className="text-[11px] text-muted-foreground">عدالة السعر: {dealCheckResult.fairnessVerdict}</span>
+                      </div>
+                    </div>
+
+                    {/* Recommendation */}
+                    <div className="bg-primary/5 rounded-xl p-3 border border-primary/10">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <AiStar size={12} animate={false} />
+                        <span className="text-[11px] font-medium text-primary">التوصية</span>
+                      </div>
+                      <p className="text-xs leading-relaxed">{dealCheckResult.recommendation}</p>
+                    </div>
+
+                    {/* Risks */}
+                    {dealCheckResult.risks?.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium flex items-center gap-1.5 mb-2">
+                          <AlertTriangle size={12} strokeWidth={1.3} className="text-red-500/70" />
+                          المخاطر الرئيسية
+                        </h4>
+                        <ul className="space-y-1">
+                          {dealCheckResult.risks.slice(0, 4).map((risk: string, i: number) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500/50 shrink-0" />
+                              {risk}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Strengths */}
+                    {dealCheckResult.strengths?.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium flex items-center gap-1.5 mb-2">
+                          <Check size={12} strokeWidth={1.3} className="text-emerald-600" />
+                          نقاط القوة
+                        </h4>
+                        <ul className="space-y-1">
+                          {dealCheckResult.strengths.slice(0, 4).map((s: string, i: number) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500/60 shrink-0" />
+                              {s}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Missing Info */}
+                    {dealCheckResult.missingInfo?.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium flex items-center gap-1.5 mb-2">
+                          <AlertTriangle size={12} strokeWidth={1.3} className="text-amber-500" />
+                          معلومات ناقصة
+                        </h4>
+                        <ul className="space-y-1">
+                          {dealCheckResult.missingInfo.map((info: string, i: number) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500/50 shrink-0" />
+                              {info}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Action hint */}
+                    <div className="bg-accent/30 rounded-xl p-3 flex items-start gap-2">
+                      <Sparkles size={14} className="text-primary shrink-0 mt-0.5" />
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        يمكنك تعديل البيانات أعلاه بناءً على هذا التحليل (مثل السعر أو بيانات الإفصاح) ثم إعادة الفحص — أو المتابعة للنشر مباشرة.
+                      </p>
+                    </div>
+
+                    {/* Re-run button */}
+                    <div className="flex justify-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRunInlineDealCheck}
+                        className="text-xs text-muted-foreground hover:text-foreground rounded-xl"
+                      >
+                        <Loader2 size={12} strokeWidth={1.5} className="ml-1" />
+                        إعادة التحليل بعد التعديل
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Listing Summary & Publish ── */}
+              <div className="border-t border-border/50 pt-6 space-y-5">
+                <div className="flex items-center gap-3">
+                  <Eye size={20} strokeWidth={1.5} className="text-primary" />
                   <div>
                     <h2 className="font-medium text-sm">ملخص الإعلان</h2>
                     <p className="text-[10px] text-muted-foreground">راجع البيانات قبل النشر</p>
