@@ -1368,7 +1368,7 @@ const CreateListingPage = () => {
                           id: String(Date.now()),
                           name: "عنصر جديد",
                           qty: 1,
-                          condition: "جيدة",
+                          condition: "جديد",
                           category: "أخرى",
                           included: true,
                           confidence: "high",
@@ -1489,16 +1489,16 @@ const CreateListingPage = () => {
                                     "text-[10px] px-2 py-0.5 rounded-md border outline-none cursor-pointer transition-colors",
                                     item.condition === "جديد" && "bg-success/10 border-success/30 text-success",
                                     item.condition === "شبه جديد" && "bg-primary/10 border-primary/30 text-primary",
-                                    item.condition === "نظيف" && "bg-accent border-accent-foreground/20 text-accent-foreground",
+                                    item.condition === "جيد" && "bg-accent border-accent-foreground/20 text-accent-foreground",
                                     item.condition === "تالف" && "bg-destructive/10 border-destructive/30 text-destructive",
-                                    !["جديد", "شبه جديد", "نظيف", "تالف"].includes(item.condition) && "bg-muted/50 border-border/30 text-muted-foreground"
+                                    !["جديد", "شبه جديد", "جيد", "تالف"].includes(item.condition) && "bg-muted/50 border-border/30 text-muted-foreground"
                                   )}
                                 >
                                   <option value="جديد">جديد</option>
                                   <option value="شبه جديد">شبه جديد</option>
-                                  <option value="نظيف">نظيف</option>
+                                  <option value="جيد">جيد</option>
                                   <option value="تالف">تالف</option>
-                                  {!["جديد", "شبه جديد", "نظيف", "تالف"].includes(item.condition) && (
+                                  {!["جديد", "شبه جديد", "جيد", "تالف"].includes(item.condition) && (
                                     <option value={item.condition}>{item.condition}</option>
                                   )}
                                 </select>
