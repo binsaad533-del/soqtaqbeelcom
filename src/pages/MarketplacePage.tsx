@@ -197,25 +197,60 @@ const MarketplacePage = () => {
           )}
 
           {/* Listings grid */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 space-y-6">
             {loading ? (
               <div className="text-center py-16 text-sm text-muted-foreground">جاري التحميل...</div>
-            ) : filtered.length === 0 ? (
+            ) : filtered.length === 0 && similarResults.length === 0 ? (
               <div className="text-center py-16">
                 <AiStar size={32} className="mx-auto mb-4" />
                 <p className="text-sm text-muted-foreground">لا توجد نتائج مطابقة</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filtered.map(listing => (
-                  <ListingCard
-                    key={listing.id}
-                    listing={listing}
-                    isComparing={compareIds.has(listing.id)}
-                    onToggleCompare={() => toggleCompare(listing)}
-                  />
-                ))}
-              </div>
+              <>
+                {/* Exact results */}
+                {filtered.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filtered.map(listing => (
+                      <ListingCard
+                        key={listing.id}
+                        listing={listing}
+                        isComparing={compareIds.has(listing.id)}
+                        onToggleCompare={() => toggleCompare(listing)}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {filtered.length === 0 && similarResults.length > 0 && (
+                  <div className="text-center py-8">
+                    <AiStar size={28} className="mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">لا توجد نتائج مطابقة تماماً لبحثك</p>
+                  </div>
+                )}
+
+                {/* Similar results section */}
+                {similarResults.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3 px-1">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Lightbulb size={14} className="text-amber-500" />
+                        <span className="text-xs font-medium">فرص مشابهة قد تهمّك</span>
+                      </div>
+                      <div className="flex-1 h-px bg-border/50" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-90">
+                      {similarResults.map(listing => (
+                        <ListingCard
+                          key={listing.id}
+                          listing={listing}
+                          isComparing={compareIds.has(listing.id)}
+                          onToggleCompare={() => toggleCompare(listing)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
