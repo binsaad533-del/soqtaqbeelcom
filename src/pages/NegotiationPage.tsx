@@ -517,6 +517,72 @@ const NegotiationPage = () => {
                     <span className="text-muted-foreground">تاريخ البدء</span>
                     <span className="font-medium">{new Date(deal.created_at).toLocaleDateString("ar-SA", { year: "numeric", month: "short", day: "numeric" })}</span>
                   </div>
+
+                  {/* Inventory summary */}
+                  {(() => {
+                    const inventory = (listing?.inventory || []) as Array<{ name: string; quantity?: number; condition?: string; unit_price?: number; total_price?: number }>;
+                    if (inventory.length === 0) return null;
+                    const totalItems = inventory.reduce((sum, item) => sum + (item.quantity || 1), 0);
+                    const totalValue = inventory.reduce((sum, item) => {
+                      if (item.total_price) return sum + item.total_price;
+                      if (item.unit_price && item.quantity) return sum + (item.unit_price * item.quantity);
+                      return sum;
+                    }, 0);
+                    const conditions = inventory.reduce((acc, item) => {
+                      const c = item.condition || "غير محدد";
+                      acc[c] = (acc[c] || 0) + (item.quantity || 1);
+                      return acc;
+                    }, {} as Record<string, number>);
+
+                    return (
+                      <div className="mt-3 pt-3 border-t border-border/20">
+                        <h4 className="text-[10px] font-semibold text-muted-foreground mb-2">ملخص الأصول</h4>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">عدد الأصناف</span>
+                            <span className="font-medium">{inventory.length}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">إجمالي القطع</span>
+                            <span className="font-medium">{totalItems}</span>
+                          </div>
+                          {totalValue > 0 && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">قيمة المخزون</span>
+                              <span className="font-semibold text-primary">{totalValue.toLocaleString("en-US")} ر.س</span>
+                            </div>
+                          )}
+                          {Object.keys(conditions).length > 0 && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">حالة الأصول</span>
+                              <div className="flex gap-1 flex-wrap justify-end">
+                                {Object.entries(conditions).map(([cond, count]) => (
+                                  <span key={cond} className="text-[9px] px-1.5 py-0.5 rounded-md bg-muted/60">
+                                    {cond} ({count})
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Documents summary */}
+                  {(() => {
+                    const docs = (listing?.documents || []) as Array<{ name: string; status: string }>;
+                    if (docs.length === 0) return null;
+                    const verified = docs.filter(d => d.status === "verified").length;
+                    return (
+                      <div className="mt-3 pt-3 border-t border-border/20">
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">المستندات</span>
+                          <span className="font-medium">{verified}/{docs.length} موثقة</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
 
               </div>
