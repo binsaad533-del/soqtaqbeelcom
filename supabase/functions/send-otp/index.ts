@@ -70,6 +70,7 @@ Deno.serve(async (req) => {
     // Call Twilio Verify API directly
     const verifyUrl = `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/Verifications`;
 
+    const sendVerification = async (channel: "sms" | "call") => {
       const response = await fetch(verifyUrl, {
         method: "POST",
         headers: {
