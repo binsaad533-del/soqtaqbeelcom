@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  TrendingUp, TrendingDown, Activity, BarChart3,
+  Activity, BarChart3,
   Handshake, Store, ArrowUpRight, ArrowDownRight,
-  Zap, Users, DollarSign, Flame
+  DollarSign, Flame
 } from "lucide-react";
 
 interface TickerItem {
