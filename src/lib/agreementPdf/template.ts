@@ -119,12 +119,12 @@ const section = (title: string, body: string, tone: "default" | "highlight" = "d
   `);
 };
 
-const buildPageShell = (data: AgreementPdfData, logoBase64: string, pageNumber: number) => {
+const buildPageShell = (data: AgreementPdfData, logoBase64: string, logoIconBase64: string, pageNumber: number) => {
   const page = document.createElement("div");
   page.style.cssText = PAGE_SHELL_STYLE;
 
   const header = createNode(`
-    <header style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding-bottom:12px;border-bottom:0.5px solid hsl(214 32% 91%);">
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:12px;border-bottom:0.5px solid hsl(214 32% 91%);">
       <div style="display:grid;gap:6px;">
         <div style="font-size:18px;font-weight:600;color:hsl(215 28% 17%);">اتفاقية الصفقة</div>
         <div style="font-size:12px;color:hsl(215 16% 45%);line-height:1.7;">${safeText(data.dealTitle)} — ${safeText(data.location)}</div>
@@ -134,13 +134,16 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, pageNumber: 
           <span>التاريخ: ${formatDate(data.createdAt)}</span>
         </div>
       </div>
-      <div style="display:grid;justify-items:end;gap:8px;text-align:left;">
+      <div style="display:flex;align-items:center;gap:10px;">
         ${
-          logoBase64
-            ? `<img src="${logoBase64}" alt="Taqbeel logo" style="height:40px;object-fit:contain;" />`
+          logoIconBase64
+            ? `<img src="${logoIconBase64}" alt="Taqbeel icon" style="height:44px;width:44px;object-fit:contain;" />`
             : ""
         }
-        <div style="font-size:10px;color:hsl(212 84% 42%);font-weight:600;">SOQ TAQBEEL</div>
+        <div style="display:grid;gap:2px;text-align:left;">
+          <div style="font-size:14px;font-weight:700;color:hsl(212 84% 42%);letter-spacing:0.12em;">SOQ TAQBEEL</div>
+          <div style="font-size:9px;color:hsl(215 16% 55%);font-weight:400;">سوق تقبيل</div>
+        </div>
       </div>
     </header>
   `);
@@ -451,15 +454,16 @@ const buildSections = (data: AgreementPdfData, qrDataUrl = "") => {
 export function buildAgreementPdfPages(options: {
   data: AgreementPdfData;
   logoBase64: string;
+  logoIconBase64?: string;
   qrDataUrl?: string;
   mount: HTMLElement;
 }) {
-  const { data, logoBase64, qrDataUrl = "", mount } = options;
+  const { data, logoBase64, logoIconBase64 = "", qrDataUrl = "", mount } = options;
   const sections = buildSections(data, qrDataUrl);
   const pages: HTMLElement[] = [];
 
   let pageNumber = 1;
-  let current = buildPageShell(data, logoBase64, pageNumber);
+  let current = buildPageShell(data, logoBase64, logoIconBase64, pageNumber);
   mount.appendChild(current.page);
   pages.push(current.page);
 
@@ -482,7 +486,7 @@ export function buildAgreementPdfPages(options: {
     if (hasOverflow && current.content.childElementCount > 1) {
       current.content.removeChild(nextBlock);
       pageNumber += 1;
-      current = buildPageShell(data, logoBase64, pageNumber);
+      current = buildPageShell(data, logoBase64, logoIconBase64, pageNumber);
       mount.appendChild(current.page);
       pages.push(current.page);
       current.content.appendChild(nextBlock);

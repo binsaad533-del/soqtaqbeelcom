@@ -1,6 +1,7 @@
 import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
 import logoUrl from "@/assets/logo.png";
+import logoIconGoldUrl from "@/assets/logo-icon-gold.png";
 import { PAGE_HEIGHT_PX, PAGE_WIDTH_PX, buildAgreementPdfPages } from "@/lib/agreementPdf/template";
 import type { AgreementPdfData } from "@/lib/agreementPdf/types";
 
@@ -8,9 +9,9 @@ const PAGE_W = 210;
 const PAGE_H = 297;
 const FONT_URL = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700;800&display=swap";
 
-async function loadLogoBase64(): Promise<string> {
+async function loadImageBase64(url: string): Promise<string> {
   try {
-    const response = await fetch(logoUrl);
+    const response = await fetch(url);
     const blob = await response.blob();
     return await new Promise((resolve) => {
       const reader = new FileReader();
@@ -61,7 +62,7 @@ export async function generateAgreementPdf(data: AgreementPdfData) {
     });
   } catch { /* QR is optional */ }
 
-  const [logoBase64] = await Promise.all([loadLogoBase64(), ensureFontLoaded()]);
+  const [logoBase64, logoIconBase64] = await Promise.all([loadImageBase64(logoUrl), loadImageBase64(logoIconGoldUrl), ensureFontLoaded()]);
 
   const mount = document.createElement("div");
   mount.style.cssText = [
@@ -78,7 +79,7 @@ export async function generateAgreementPdf(data: AgreementPdfData) {
   document.body.appendChild(mount);
 
   try {
-    const pages = buildAgreementPdfPages({ data, logoBase64, qrDataUrl, mount });
+    const pages = buildAgreementPdfPages({ data, logoBase64, logoIconBase64, qrDataUrl, mount });
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
     for (const [index, page] of pages.entries()) {
