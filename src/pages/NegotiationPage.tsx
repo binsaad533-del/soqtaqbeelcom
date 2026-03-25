@@ -442,7 +442,7 @@ const NegotiationPage = () => {
           <span>{listingTitle}</span>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-5 items-end">
+        <div className="grid lg:grid-cols-5 gap-5 items-start">
           {/* ═══════════ DEAL SUMMARY (2 cols, RIGHT in RTL) ═══════════ */}
           <div className="lg:col-span-2 order-2 lg:order-1">
             <div className="space-y-4">
