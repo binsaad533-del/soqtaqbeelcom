@@ -83,11 +83,11 @@ const AiAssistant = () => {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
-  const [peeking, setPeeking] = useState(false);
+  
   const [hasInteracted, setHasInteracted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const peekTimer = useRef<ReturnType<typeof setTimeout>>();
+  
   const { greeting, role, suggestions, proactiveMessage, dismissProactive, pathname } = useAiContext();
   const { pageData } = usePageData();
 
@@ -95,14 +95,6 @@ const AiAssistant = () => {
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
   useEffect(() => { chatMode && inputRef.current?.focus(); }, [chatMode]);
 
-  useEffect(() => {
-    if (open || hasInteracted) return;
-    peekTimer.current = setTimeout(() => {
-      setPeeking(true);
-      setTimeout(() => setPeeking(false), 5000);
-    }, 6000);
-    return () => { clearTimeout(peekTimer.current); setPeeking(false); };
-  }, [pathname, open, hasInteracted]);
 
   const now = () => new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
@@ -165,9 +157,7 @@ const AiAssistant = () => {
 
   const handleOpen = () => {
     setOpen(true);
-    setPeeking(false);
     setHasInteracted(true);
-    dismissProactive();
   };
 
   return (
