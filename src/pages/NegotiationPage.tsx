@@ -657,12 +657,6 @@ const NegotiationPage = () => {
                 </div>
               )}
 
-              {/* Commission */}
-              {isPostAgreement && listing?.price && (
-                <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
-                  <CommissionBanner dealAmount={deal.agreed_price || listing.price} showDetails />
-                </div>
-              )}
 
               {commission && isPostAgreement && (
                 <CommissionPaymentPanel commission={commission} isSeller={user?.id === deal.seller_id} onUpdate={loadData} />
