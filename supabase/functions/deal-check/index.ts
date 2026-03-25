@@ -151,7 +151,8 @@ serve(async (req) => {
   }
 
   try {
-    const { listing } = await req.json();
+    const { listing, perspective: rawPerspective } = await req.json();
+    const perspective: "seller" | "buyer" = rawPerspective === "seller" ? "seller" : "buyer";
 
     if (!listing) {
       return new Response(
