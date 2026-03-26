@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import VerificationGate from "@/components/VerificationGate";
 import DealProgressBar, { getDealStage } from "@/components/DealProgressBar";
+import AdminDealActions from "@/components/AdminDealActions";
 
 // Parse SSE stream and extract text
 async function parseSSEStream(response: Response): Promise<string> {
@@ -57,7 +58,7 @@ async function parseSSEStream(response: Response): Promise<string> {
 
 const NegotiationPage = () => {
   const { id: dealId } = useParams();
-  const { user, profile } = useAuthContext();
+  const { user, profile, role } = useAuthContext();
   const { getMessages, sendMessage } = useDeals();
   const { getListing } = useListings();
   const { monitorChat, calculateDealRisk } = useFraudEngine();
@@ -445,7 +446,7 @@ const NegotiationPage = () => {
 
   const isPostAgreement = deal.status === "completed" || deal.status === "finalized";
 
-  const statusLabel = deal.status === "negotiating" ? "جاري التفاوض" : deal.status === "completed" ? "مكتمل" : deal.status === "finalized" ? "مُقفل" : deal.status;
+  const statusLabel = deal.status === "negotiating" ? "جاري التفاوض" : deal.status === "completed" ? "مكتمل" : deal.status === "finalized" ? "مُقفل" : deal.status === "suspended" ? "معلّقة" : deal.status === "cancelled" ? "ملغاة" : deal.status;
   const riskLabel = !deal.risk_score || deal.risk_score <= 25 ? "مرتفعة" : deal.risk_score <= 50 ? "متوسطة" : "منخفضة";
   const riskColor = !deal.risk_score || deal.risk_score <= 25 ? "text-success" : deal.risk_score <= 50 ? "text-warning" : "text-destructive";
   const readinessPercent = Math.max(0, 100 - (deal.risk_score || 0));
@@ -489,7 +490,9 @@ const NegotiationPage = () => {
                     <span className="text-muted-foreground">الحالة</span>
                     <span className={cn("font-medium px-2 py-0.5 rounded-full text-[10px]",
                       deal.status === "negotiating" ? "bg-primary/10 text-primary" :
-                      deal.status === "finalized" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+                      deal.status === "finalized" ? "bg-success/10 text-success" :
+                      deal.status === "suspended" ? "bg-warning/10 text-warning" :
+                      deal.status === "cancelled" ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"
                     )}>{statusLabel}</span>
                   </div>
 
@@ -674,6 +677,11 @@ const NegotiationPage = () => {
 
               {isBuyer && isPostAgreement && deal.seller_id && (
                 <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
+              )}
+
+              {/* Admin Deal Actions */}
+              {(role === "platform_owner" || role === "supervisor") && (
+                <AdminDealActions deal={deal} onUpdate={loadData} />
               )}
 
               {/* Commission — compact footer */}
