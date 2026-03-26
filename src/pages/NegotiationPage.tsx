@@ -677,6 +677,11 @@ const NegotiationPage = () => {
                 <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
               )}
 
+              {/* Admin Deal Actions */}
+              {(role === "platform_owner" || role === "supervisor") && (
+                <AdminDealActions deal={deal} onUpdate={loadData} />
+              )}
+
               {/* Commission — compact footer */}
               {listing?.price && (
                 <div className="pt-2 mt-auto">
