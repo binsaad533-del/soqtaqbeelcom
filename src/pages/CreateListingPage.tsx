@@ -69,44 +69,9 @@ function getImageRequirement(dealType: string): "required" | "optional" | "none"
   return "optional";
 }
 
-interface InventoryItem {
-  id: string;
-  name: string;
-  qty: number;
-  condition: string;
-  category: string;
-  included: boolean;
-  confidence: "high" | "medium" | "low";
-  detectionNote: string;
-  photoIndices: number[];
-  isSameAssetMultipleAngles: boolean;
-  userConfirmed: boolean;
-  unitPrice?: number | null;
-}
-
-type InventoryPricingMode = "per_item" | "bulk";
-
-interface DedupAction {
-  description: string;
-  merged_count: number;
-}
-
-interface CrExtractionResult {
-  cr_number?: string;
-  entity_name?: string;
-  business_activity?: string;
-  secondary_activities?: string[];
-  city?: string;
-  district?: string;
-  issue_date?: string;
-  expiry_date?: string;
-  status?: string;
-  entity_type?: string;
-  owner_name?: string;
-  extraction_confidence?: "high" | "medium" | "low";
-  extraction_notes?: string;
-  fields_confidence?: Record<string, string>;
-}
+import type { InventoryItem, InventoryPricingMode, DedupAction, CrExtractionResult } from "./create-listing/types";
+import { ConfirmationCard } from "./create-listing/ConfirmationCard";
+import { FormField, SelectField } from "./create-listing/FormFields";
 
 const CreateListingPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -2180,81 +2145,5 @@ const CreateListingPage = () => {
     </VerificationGate>
   );
 };
-
-const ConfirmationCard = ({
-  item,
-  allPhotoUrls,
-  onConfirmSame,
-  onConfirmMultiple,
-}: {
-  item: InventoryItem;
-  allPhotoUrls: string[];
-  onConfirmSame: () => void;
-  onConfirmMultiple: (qty: number) => void;
-}) => {
-  const [showQtyInput, setShowQtyInput] = useState(false);
-  const [tempQty, setTempQty] = useState(item.qty);
-
-  return (
-    <div className="bg-card rounded-lg p-3 border border-border/50">
-      <div className="text-sm font-medium mb-1">{item.name}</div>
-      <div className="text-[11px] text-muted-foreground mb-2">{item.detectionNote}</div>
-      {item.photoIndices.length > 0 && (
-        <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
-          {item.photoIndices.filter((idx) => idx < allPhotoUrls.length).slice(0, 6).map((idx) => (
-            <img key={idx} src={allPhotoUrls[idx]} alt="" className="w-14 h-14 rounded-md object-cover shrink-0 border border-border/30" />
-          ))}
-        </div>
-      )}
-      <p className="text-xs text-muted-foreground mb-2">هل هذه الصور لنفس الأصل أم لأصول متعددة؟</p>
-      {!showQtyInput ? (
-        <div className="flex gap-2">
-          <button onClick={onConfirmSame} className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors active:scale-[0.97]">هذا نفس الأصل</button>
-          <button onClick={() => setShowQtyInput(true)} className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/80 transition-colors active:scale-[0.97]">هذه أصول متعددة</button>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">عدد القطع:</span>
-          <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-1">
-            <button onClick={() => setTempQty((q) => Math.max(2, q - 1))} className="p-1"><Minus size={12} /></button>
-            <input type="number" min="2" value={tempQty} onChange={(e) => setTempQty(Math.max(2, parseInt(e.target.value) || 2))} className="w-10 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
-            <button onClick={() => setTempQty((q) => q + 1)} className="p-1"><Plus size={12} /></button>
-          </div>
-          <button onClick={() => onConfirmMultiple(tempQty)} className="text-xs px-3 py-1.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors active:scale-[0.97]">تأكيد</button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const FormField = ({ label, placeholder, suffix, value, onChange, error }: { label: string; placeholder: string; suffix?: React.ReactNode; value: string; onChange: (v: string) => void; error?: string }) => (
-  <div>
-    <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
-    <div className="relative">
-      <input
-        type="text"
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(toEnglishNumerals(e.target.value))}
-        className={cn(
-          "w-full px-3 py-2 rounded-lg border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 transition-all",
-          error ? "border-destructive/60 focus:border-destructive/60 focus:ring-destructive/30" : "border-border/50 focus:border-primary/30 focus:ring-primary/20"
-        )}
-      />
-      {suffix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{suffix}</span>}
-    </div>
-    {error && <p className="text-[11px] text-destructive mt-1 flex items-center gap-1"><AlertTriangle size={11} /> {error}</p>}
-  </div>
-);
-
-const SelectField = ({ label, options, value, onChange }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) => (
-  <div>
-    <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
-    <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20 transition-all">
-      <option value="">اختر...</option>
-      {options.map((option) => <option key={option} value={option}>{option}</option>)}
-    </select>
-  </div>
-);
 
 export default CreateListingPage;

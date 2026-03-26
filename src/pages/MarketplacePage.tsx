@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { calculateTransparency } from "@/lib/transparencyScore";
 import { Link } from "react-router-dom";
-import { useListings, type Listing } from "@/hooks/useListings";
-import { useProfiles, type Profile } from "@/hooks/useProfiles";
+import { type Listing } from "@/hooks/useListings";
+import { type Profile } from "@/hooks/useProfiles";
 import { useListingSocial } from "@/hooks/useListingSocial";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,18 @@ import { MapPin, Eye, ShieldCheck, GitCompareArrows, Check, Lightbulb, Heart, Sh
 import MarketplaceTicker from "@/components/marketplace/MarketplaceTicker";
 import { toast } from "sonner";
 import PriceDisplay from "@/components/PriceDisplay";
+import { usePublishedListingsQuery } from "@/hooks/useListingsQuery";
+import { useAllProfilesQuery } from "@/hooks/useProfilesQuery";
+import { usePagination } from "@/hooks/usePagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 
 interface EnrichedListing extends Listing {
   sellerProfile?: Profile | null;
@@ -27,14 +39,12 @@ interface EnrichedListing extends Listing {
 
 const MarketplacePage = () => {
   useSEO({ title: "سوق الفرص", description: "استعرض فرص تقبيل المشاريع التجارية المتاحة", canonical: "/marketplace" });
-  const { getPublishedListings } = useListings();
-  const { getAllProfiles } = useProfiles();
+  const { data: listings = [], isLoading: listingsLoading } = usePublishedListingsQuery();
+  const { data: profiles = [], isLoading: profilesLoading } = useAllProfilesQuery();
   const { getLikesAndViews, toggleLike } = useListingSocial();
   const { user } = useAuthContext();
   const isMobile = useIsMobile();
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [loading, setLoading] = useState(true);
+  const loading = listingsLoading || profilesLoading;
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [compareItems, setCompareItems] = useState<CompareItem[]>([]);
   const [similarActivities, setSimilarActivities] = useState<string[]>([]);
@@ -43,6 +53,18 @@ const MarketplacePage = () => {
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
   const [viewCounts, setViewCounts] = useState<Record<string, number>>({});
   const [userLikedIds, setUserLikedIds] = useState<Set<string>>(new Set());
+
+  // Load social data when listings change
+  useEffect(() => {
+    if (listings.length > 0) {
+      const ids = listings.map(l => l.id);
+      getLikesAndViews(ids).then(({ likes, views, userLikes }) => {
+        setLikeCounts(likes);
+        setViewCounts(views);
+        setUserLikedIds(userLikes);
+      });
+    }
+  }, [listings, getLikesAndViews]);
 
   const handleSmartSearch = (partial: Partial<FilterState>, _message: string, similar?: string[]) => {
     setFilters(prev => ({ ...prev, ...partial }));
@@ -81,29 +103,6 @@ const MarketplacePage = () => {
   }, []);
 
   const clearCompare = useCallback(() => setCompareItems([]), []);
-
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      const [listingsData, profilesData] = await Promise.all([
-        getPublishedListings(),
-        getAllProfiles(),
-      ]);
-      setListings(listingsData);
-      setProfiles(profilesData);
-      setLoading(false);
-
-      // Load social data
-      if (listingsData.length > 0) {
-        const ids = listingsData.map(l => l.id);
-        const { likes, views, userLikes } = await getLikesAndViews(ids);
-        setLikeCounts(likes);
-        setViewCounts(views);
-        setUserLikedIds(userLikes);
-      }
-    };
-    load();
-  }, [getPublishedListings, getAllProfiles, getLikesAndViews]);
 
   const handleToggleLike = useCallback(async (listingId: string) => {
     if (!user) {
@@ -163,6 +162,15 @@ const MarketplacePage = () => {
     return result;
   }, [enrichedListings, filters]);
 
+  // Pagination
+  const pagination = usePagination(filtered, 12);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    pagination.resetPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
+
   // Similar results
   const similarResults = useMemo(() => {
     if (similarActivities.length === 0 || filters.activity === "الكل") return [];
@@ -189,12 +197,31 @@ const MarketplacePage = () => {
 
   const compareIds = useMemo(() => new Set(compareItems.map(i => i.id)), [compareItems]);
 
-  // Check online status based on last_activity (within 15 min = online)
   const isOnline = useCallback((profile?: Profile | null) => {
     if (!profile?.last_activity) return false;
     const diff = Date.now() - new Date(profile.last_activity).getTime();
     return diff < 15 * 60 * 1000;
   }, []);
+
+  // Generate pagination page numbers
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+    const total = pagination.totalPages;
+    const current = pagination.currentPage;
+    
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (current > 3) pages.push("ellipsis");
+      for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+        pages.push(i);
+      }
+      if (current < total - 2) pages.push("ellipsis");
+      pages.push(total);
+    }
+    return pages;
+  };
 
   return (
     <div className={cn("py-8", compareItems.length > 0 && "pb-24")}>
@@ -238,9 +265,16 @@ const MarketplacePage = () => {
               </div>
             ) : (
               <>
+                {/* Results count */}
+                {filtered.length > 0 && (
+                  <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+                    <span>عرض {pagination.startIndex}–{pagination.endIndex} من {pagination.totalItems} نتيجة</span>
+                  </div>
+                )}
+
                 {filtered.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {filtered.map(listing => (
+                    {pagination.paginatedItems.map(listing => (
                       <ListingCard
                         key={listing.id}
                         listing={listing}
@@ -254,6 +288,41 @@ const MarketplacePage = () => {
                       />
                     ))}
                   </div>
+                )}
+
+                {/* Pagination Controls */}
+                {pagination.totalPages > 1 && (
+                  <Pagination className="mt-6">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => pagination.prevPage()}
+                          className={cn(!pagination.hasPrevPage && "pointer-events-none opacity-50", "cursor-pointer")}
+                        />
+                      </PaginationItem>
+                      {getPageNumbers().map((page, idx) => (
+                        <PaginationItem key={idx}>
+                          {page === "ellipsis" ? (
+                            <PaginationEllipsis />
+                          ) : (
+                            <PaginationLink
+                              isActive={page === pagination.currentPage}
+                              onClick={() => pagination.goToPage(page)}
+                              className="cursor-pointer"
+                            >
+                              {page}
+                            </PaginationLink>
+                          )}
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => pagination.nextPage()}
+                          className={cn(!pagination.hasNextPage && "pointer-events-none opacity-50", "cursor-pointer")}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 )}
 
                 {filtered.length === 0 && similarResults.length > 0 && (
@@ -326,7 +395,6 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
         toast.success("تم نسخ الرابط");
       }
     } catch {
-      // Fallback: copy using execCommand for environments where clipboard API is blocked
       try {
         const textarea = document.createElement("textarea");
         textarea.value = url;
@@ -355,8 +423,6 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
         </div>
       )}
 
-
-
       <Link to={`/listing/${listing.id}`}>
         <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center relative">
           {listing.photos && Object.values(listing.photos).flat().length > 0 ? (
@@ -369,7 +435,6 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
           )}
         </div>
         <div className="p-4">
-          {/* Seller info with online status */}
           {seller && (
             <Link to={`/seller/${seller.user_id}`} onClick={e => e.stopPropagation()} className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
@@ -410,7 +475,6 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
             </div>
           )}
 
-          {/* Price + transparency */}
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-primary">
               {listing.price ? <PriceDisplay amount={Number(listing.price)} size={10} /> : "—"}
@@ -432,7 +496,6 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
             })()}
           </div>
 
-          {/* Social stats + actions bar */}
           <div className="flex items-center justify-between pt-2 border-t border-border/10">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 text-muted-foreground/60">
