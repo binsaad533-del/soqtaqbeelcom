@@ -1373,6 +1373,48 @@ export type Database = {
         }
         Relationships: []
       }
+      supervisor_permissions: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          id: string
+          manage_crm: boolean
+          manage_deals: boolean
+          manage_listings: boolean
+          manage_reports: boolean
+          manage_security: boolean
+          manage_users: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          manage_crm?: boolean
+          manage_deals?: boolean
+          manage_listings?: boolean
+          manage_reports?: boolean
+          manage_security?: boolean
+          manage_users?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          manage_crm?: boolean
+          manage_deals?: boolean
+          manage_listings?: boolean
+          manage_reports?: boolean
+          manage_security?: boolean
+          manage_users?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
