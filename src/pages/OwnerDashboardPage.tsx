@@ -393,7 +393,10 @@ const OwnerDashboardPage = () => {
                   {listingsNoPhotos.length > 0 && (
                     <div onClick={() => { setActiveTab("listings"); setSearchQuery(""); }} className="flex items-start gap-3 p-3 rounded-xl bg-muted/50 cursor-pointer hover:bg-muted/80 transition-colors group">
                       <ImageOff size={14} className="text-muted-foreground mt-0.5 shrink-0" />
-                      <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">{listingsNoPhotos.length} إعلان بدون صور</span>
+                      <div className="flex-1">
+                        <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">{listingsNoPhotos.length} إعلان بدون صور مرفقة</span>
+                        <span className="block text-[10px] text-muted-foreground/70 group-hover:underline mt-0.5">مراجعة الإعلانات ←</span>
+                      </div>
                       <ChevronLeft size={14} className="text-muted-foreground/50 mt-0.5 shrink-0 mr-auto" />
                     </div>
                   )}
