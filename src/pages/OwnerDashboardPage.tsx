@@ -291,19 +291,20 @@ const OwnerDashboardPage = () => {
             {/* KPI Row 2: Financial */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "إجمالي قيمة الصفقات", value: <>{totalDealValue.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: BarChart3, accent: "text-primary" },
-                { label: "العمولة المستحقة (1%)", value: <>{totalCommissionDue.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: Landmark, accent: "text-primary" },
-                { label: "العمولة المحصلة", value: <>{totalCollected.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: ShieldCheck, accent: "text-success" },
-                { label: "العمولة غير المحصلة", value: <>{totalUncollected.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: AlertTriangle, accent: totalUncollected > 0 ? "text-warning" : "text-muted-foreground" },
+                { label: "إجمالي قيمة الصفقات", value: <>{totalDealValue.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: BarChart3, accent: "text-primary", action: () => { setActiveTab("deals"); setDealFilter("all"); setSearchQuery(""); } },
+                { label: "العمولة المستحقة (1%)", value: <>{totalCommissionDue.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: Landmark, accent: "text-primary", action: () => { setActiveTab("deals"); setDealFilter("all"); setSearchQuery(""); } },
+                { label: "العمولة المحصلة", value: <>{totalCollected.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: ShieldCheck, accent: "text-success", action: () => { setActiveTab("deals"); setDealFilter("paid"); setSearchQuery(""); } },
+                { label: "العمولة غير المحصلة", value: <>{totalUncollected.toLocaleString("en-US")} <SarSymbol size={12} /></>, icon: AlertTriangle, accent: totalUncollected > 0 ? "text-warning" : "text-muted-foreground", action: () => { setActiveTab("deals"); setDealFilter("unpaid"); setSearchQuery(""); } },
               ].map((s, i) => (
-                <div key={i} className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 hover:shadow-soft-lg transition-all">
+                <div key={i} onClick={s.action} className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 hover:shadow-soft-lg transition-all cursor-pointer group">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] text-muted-foreground font-medium">{s.label}</span>
+                    <span className="text-[11px] text-muted-foreground font-medium group-hover:text-foreground transition-colors">{s.label}</span>
                     <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center">
                       <s.icon size={15} className={cn("shrink-0", s.accent)} strokeWidth={1.5} />
                     </div>
                   </div>
                   <div className="text-lg font-bold tracking-tight">{s.value}</div>
+                  <span className="block text-[10px] text-muted-foreground/60 group-hover:text-primary group-hover:underline mt-1 transition-colors">عرض التفاصيل ←</span>
                 </div>
               ))}
             </div>
