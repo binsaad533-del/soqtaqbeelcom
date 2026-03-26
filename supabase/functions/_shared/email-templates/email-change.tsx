@@ -7,7 +7,6 @@ import {
   Button,
   Container,
   Head,
-  Heading,
   Hr,
   Html,
   Img,
@@ -19,13 +18,14 @@ import { EmailFooter } from '../email-footer.tsx'
 
 const FONT_URL = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
 
-const ICON_MAIL = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%230a8af8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='20' height='16' x='2' y='4' rx='2'/%3E%3Cpath d='m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7'/%3E%3C/svg%3E`
+const ICON_MAIL = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 24 24' fill='none' stroke='%230a8af8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='20' height='16' x='2' y='4' rx='2'/%3E%3Cpath d='m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7'/%3E%3C/svg%3E`
 
 interface EmailChangeEmailProps {
   siteName: string
   email: string
   newEmail: string
   confirmationUrl: string
+  recipientName?: string
 }
 
 export const EmailChangeEmail = ({
@@ -33,10 +33,14 @@ export const EmailChangeEmail = ({
   email,
   newEmail,
   confirmationUrl,
+  recipientName,
 }: EmailChangeEmailProps) => (
   <Html lang="ar" dir="rtl">
-    <Head><link rel="stylesheet" href={FONT_URL} /></Head>
-    <Preview>تأكيد تغيير البريد الإلكتروني — سوق تقبيل</Preview>
+    <Head>
+      <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
+      <link rel="stylesheet" href={FONT_URL} />
+    </Head>
+    <Preview>تأكيد تغيير البريد الالكتروني</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>
@@ -47,12 +51,14 @@ export const EmailChangeEmail = ({
         <Hr style={divider} />
 
         <Section style={iconSection}>
-          <Img src={ICON_MAIL} width="48" height="48" alt="" style={{ margin: '0 auto' }} />
+          <Img src={ICON_MAIL} width="44" height="44" alt="" style={{ margin: '0 auto' }} />
         </Section>
 
-        <Heading style={h1}>تأكيد تغيير البريد الإلكتروني</Heading>
+        <Text style={greeting}>
+          {recipientName ? `مرحبا ${recipientName}،` : 'مرحبا،'}
+        </Text>
         <Text style={text}>
-          طلبت تغيير بريدك الإلكتروني المسجّل في سوق تقبيل.
+          طلبت تغيير بريدك الالكتروني المسجل في سوق تقبيل.
         </Text>
 
         <Section style={detailsBox}>
@@ -61,7 +67,7 @@ export const EmailChangeEmail = ({
         </Section>
 
         <Text style={text}>
-          اضغط الزر أدناه لتأكيد التغيير.
+          اضغط الزر ادناه لتأكيد التغيير.
         </Text>
 
         <Section style={buttonSection}>
@@ -71,7 +77,7 @@ export const EmailChangeEmail = ({
         </Section>
 
         <Text style={hint}>
-          إذا لم تطلب هذا التغيير، تجاهل هذه الرسالة.
+          اذا لم تطلب هذا التغيير، تجاهل هذه الرسالة.
         </Text>
 
         <EmailFooter />
@@ -89,8 +95,8 @@ const headerSection = { textAlign: 'center' as const, marginBottom: '8px' }
 const brandName = { fontSize: '22px', fontWeight: '600' as const, color: '#1e3a5f', margin: '0', fontFamily: FONT }
 const brandNameEn = { fontSize: '11px', fontWeight: '500' as const, color: '#9ca3af', margin: '2px 0 0', letterSpacing: '2px', textTransform: 'uppercase' as const, fontFamily: FONT }
 const divider = { borderColor: '#e8ecf0', margin: '20px 0 24px' }
-const iconSection = { textAlign: 'center' as const, marginBottom: '12px' }
-const h1 = { fontSize: '22px', fontWeight: '600' as const, color: '#1e3a5f', textAlign: 'center' as const, margin: '0 0 20px', fontFamily: FONT }
+const iconSection = { textAlign: 'center' as const, marginBottom: '16px' }
+const greeting = { fontSize: '16px', fontWeight: '600' as const, color: '#1e3a5f', margin: '0 0 16px', fontFamily: FONT }
 const text = { fontSize: '15px', color: '#55575d', lineHeight: '1.7', margin: '0 0 16px', fontFamily: FONT }
 const detailsBox = { backgroundColor: '#f0f7ff', borderRadius: '12px', padding: '16px 20px', margin: '0 0 20px', border: '1px solid #d6e8fa' }
 const detailRow = { fontSize: '14px', color: '#1e3a5f', margin: '0 0 6px', lineHeight: '1.6', fontFamily: FONT, direction: 'ltr' as const, textAlign: 'right' as const }
