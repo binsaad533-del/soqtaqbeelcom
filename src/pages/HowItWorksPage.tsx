@@ -50,7 +50,7 @@ const sellerSteps: Step[] = [
   {
     icon: Eye,
     title: "انشر وراقب",
-    description: "إعلانك جاهز ويظهر في السوق",
+    description: "إعلانك جاهز ويظهر في سوق الفرص",
     detail: "بعد النشر، يظهر إعلانك للمشترين مع تقييم AI وشارة الشفافية. تابع الإحصائيات والاستفسارات من لوحة التحكم الخاصة بك.",
     color: "from-primary/10 to-accent/10",
   },
@@ -59,7 +59,7 @@ const sellerSteps: Step[] = [
 const buyerSteps: Step[] = [
   {
     icon: Search,
-    title: "تصفّح السوق",
+    title: "تصفّح سوق الفرص",
     description: "ابحث عن المشاريع المناسبة لك",
     detail: "استخدم الفلاتر الذكية للبحث حسب المدينة، نوع التقبيل، نطاق السعر، والنشاط التجاري. البحث الذكي يفهم ما تبحث عنه بلغتك.",
     color: "from-primary/15 to-primary/5",
