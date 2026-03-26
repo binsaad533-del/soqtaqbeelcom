@@ -396,6 +396,85 @@ const ViewCustomerPage = () => {
             })}
           </div>
         )}
+
+        {/* Chats Tab */}
+        {activeTab === "chats" && (
+          <div className="space-y-3">
+            {deals.filter(d => messages.some(m => m.deal_id === d.id)).length === 0 && (
+              <p className="text-center text-xs text-muted-foreground py-12">لا توجد محادثات لهذا العميل</p>
+            )}
+            {deals
+              .filter(d => messages.some(m => m.deal_id === d.id))
+              .map((d: Deal) => {
+                const dealMsgs = messages.filter(m => m.deal_id === d.id);
+                const isExpanded = expandedDeal === d.id;
+                const st = statusBadge(d.status);
+                const isBuyer = d.buyer_id === userId;
+                return (
+                  <div key={d.id} className="rounded-xl bg-card border border-border/40 overflow-hidden">
+                    <button
+                      onClick={() => setExpandedDeal(isExpanded ? null : d.id)}
+                      className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <MessageSquare size={14} className="text-primary" strokeWidth={1.3} />
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs font-medium flex items-center gap-2">
+                            <Badge variant="outline" className="text-[9px]">{isBuyer ? "مشتري" : "بائع"}</Badge>
+                            <span>{dealMsgs.length} رسالة</span>
+                          </div>
+                          <div className="text-[10px] text-muted-foreground mt-0.5">
+                            {new Date(d.created_at).toLocaleDateString("en-GB")}
+                            {d.deal_type && <> · {d.deal_type}</>}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
+                        <span className={cn("text-muted-foreground transition-transform text-xs", isExpanded && "rotate-180")}>▼</span>
+                      </div>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="border-t border-border/30 max-h-[400px] overflow-y-auto p-3 space-y-2 bg-muted/10">
+                        {dealMsgs.map((msg) => {
+                          const isCustomer = msg.sender_id === userId;
+                          const isSystem = msg.sender_type === "system" || msg.sender_type === "ai";
+                          return (
+                            <div
+                              key={msg.id}
+                              className={cn(
+                                "max-w-[80%] rounded-xl px-3 py-2 text-xs",
+                                isSystem
+                                  ? "mx-auto bg-muted/50 text-muted-foreground text-center max-w-full text-[10px]"
+                                  : isCustomer
+                                    ? "mr-auto bg-primary/10 text-foreground"
+                                    : "ml-auto bg-muted text-foreground"
+                              )}
+                            >
+                              {!isSystem && (
+                                <div className="text-[9px] text-muted-foreground mb-0.5 font-medium">
+                                  {isCustomer ? "العميل" : "الطرف الآخر"}
+                                </div>
+                              )}
+                              <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+                              <div className="text-[9px] text-muted-foreground mt-1 text-left" dir="ltr">
+                                {new Date(msg.created_at).toLocaleString("en-GB", {
+                                  day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+        )}
       </div>
     </div>
   );
