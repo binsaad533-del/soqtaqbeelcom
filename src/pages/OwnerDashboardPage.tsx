@@ -118,9 +118,23 @@ const OwnerDashboardPage = () => {
     if (!userId) return "—";
     return profiles.find(p => p.user_id === userId)?.full_name || "—";
   };
+  /** Normalize phone to 05xxxxxxxx format */
+  const formatPhone = (phone: string | null | undefined): string => {
+    if (!phone) return "—";
+    let cleaned = phone.replace(/[^\d+]/g, "");
+    // +966 or 00966 → 0
+    if (cleaned.startsWith("+966")) cleaned = "0" + cleaned.slice(4);
+    else if (cleaned.startsWith("00966")) cleaned = "0" + cleaned.slice(5);
+    else if (cleaned.startsWith("966") && cleaned.length > 9) cleaned = "0" + cleaned.slice(3);
+    // Ensure starts with 0
+    if (!cleaned.startsWith("0") && cleaned.length === 9) cleaned = "0" + cleaned;
+    return cleaned || "—";
+  };
+
   const getProfilePhone = (userId: string | null) => {
     if (!userId) return "—";
-    return profiles.find(p => p.user_id === userId)?.phone || "—";
+    const phone = profiles.find(p => p.user_id === userId)?.phone;
+    return formatPhone(phone);
   };
   const getProfileEmail = (userId: string | null) => {
     if (!userId) return "—";
@@ -530,6 +544,8 @@ const OwnerDashboardPage = () => {
                     <TableHead className="text-right text-[11px]">المشتري</TableHead>
                     <TableHead className="text-right text-[11px]">جوال البائع</TableHead>
                     <TableHead className="text-right text-[11px]">جوال المشتري</TableHead>
+                    <TableHead className="text-right text-[11px]">إيميل البائع</TableHead>
+                    <TableHead className="text-right text-[11px]">إيميل المشتري</TableHead>
                     <TableHead className="text-right text-[11px]">قيمة الصفقة</TableHead>
                     <TableHead className="text-right text-[11px]">العمولة (1%)</TableHead>
                     <TableHead className="text-right text-[11px]">حالة العمولة</TableHead>
@@ -547,6 +563,8 @@ const OwnerDashboardPage = () => {
                         <TableCell className="text-xs">{row.buyerName}</TableCell>
                         <TableCell className="text-xs text-muted-foreground" dir="ltr">{getProfilePhone(row.seller_id)}</TableCell>
                         <TableCell className="text-xs text-muted-foreground" dir="ltr">{getProfilePhone(row.buyer_id)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground" dir="ltr">{getProfileEmail(row.seller_id)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground" dir="ltr">{getProfileEmail(row.buyer_id)}</TableCell>
                         <TableCell className="text-xs">{Number(row.agreed_price || 0).toLocaleString("en-US")} <SarSymbol size={9} /></TableCell>
                         <TableCell className="text-xs">{row.commissionAmount.toLocaleString("en-US")} <SarSymbol size={9} /></TableCell>
                         <TableCell>
@@ -604,7 +622,7 @@ const OwnerDashboardPage = () => {
                         {isOwner && <span className="text-[9px] bg-success/10 text-success px-1.5 py-0.5 rounded font-medium">مالك</span>}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {p.phone || "—"} · {p.email || "—"} · {p.city || "—"}
+                        {formatPhone(p.phone)} · {p.email || "—"} · {p.city || "—"}
                       </div>
                     </div>
                   </div>
