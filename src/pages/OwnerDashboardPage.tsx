@@ -41,6 +41,7 @@ const TABS: { id: Tab; label: string; icon: any }[] = [
 ];
 
 const OwnerDashboardPage = () => {
+  const navigate = useNavigate();
   const { profile, signOut } = useAuthContext();
   const { getAllListings } = useListings();
   const { getAllDeals } = useDeals();
