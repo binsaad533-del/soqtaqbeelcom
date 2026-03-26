@@ -43,6 +43,7 @@ const whyUsItems = [
 ];
 
 const AboutPage = () => {
+  useSEO({ title: "عن سوق تقبيل", description: "أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع التجارية", canonical: "/about" });
   const [liveStats, setLiveStats] = useState({ listings: 0, deals: 0, completionRate: 0 });
 
   const fetchStats = async () => {

@@ -7,6 +7,7 @@ import {
   CheckCircle, ArrowLeft, ArrowRight, FileText, Eye, Handshake, Award,
   ChevronLeft, ChevronRight, Users, Zap, Lock, BarChart3
 } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 
 type Perspective = "seller" | "buyer";
 
@@ -102,6 +103,7 @@ const features = [
 ];
 
 const HowItWorksPage = () => {
+  useSEO({ title: "كيف تعمل المنصة", description: "تعرف على خطوات عرض مشروعك أو شراء فرصة عبر سوق تقبيل", canonical: "/how-it-works" });
   const [perspective, setPerspective] = useState<Perspective>("seller");
   const [activeStep, setActiveStep] = useState(0);
 

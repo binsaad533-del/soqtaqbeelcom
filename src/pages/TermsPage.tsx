@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-gold.png";
+import { useSEO } from "@/hooks/useSEO";
 
 const sections = [
   { id: "intro", title: "1. مقدمة" },
@@ -17,6 +18,7 @@ const sections = [
 ];
 
 const TermsPage = () => {
+  useSEO({ title: "الشروط والأحكام", description: "شروط وأحكام استخدام منصة سوق تقبيل", canonical: "/terms" });
   return (
     <div className="min-h-screen py-12 px-4" dir="rtl">
       <div className="max-w-3xl mx-auto">

@@ -7,8 +7,10 @@ import SocialIcons from "@/components/SocialIcons";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { Send, Mail, Phone, MapPin, CheckCircle, Briefcase, AlertTriangle, Handshake } from "lucide-react";
 import { toast } from "sonner";
+import { useSEO } from "@/hooks/useSEO";
 
 const ContactPage = () => {
+  useSEO({ title: "تواصل معنا", description: "تواصل مع فريق سوق تقبيل للاستفسارات والدعم", canonical: "/contact" });
   const { user, profile } = useAuthContext();
   const [name, setName] = useState(profile?.full_name || "");
   const [phone, setPhone] = useState(profile?.phone || "");
