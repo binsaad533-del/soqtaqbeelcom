@@ -155,16 +155,64 @@ const ViewCustomerPage = () => {
       setListings(l || []);
       setDeals(d || []);
 
+      const listingIds = (l || []).map((li: Listing) => li.id);
       const dealIds = (d || []).map((deal: Deal) => deal.id);
-      if (dealIds.length > 0) {
-        const [{ data: msgs }, { data: comms }, { data: hist }] = await Promise.all([
-          supabase.from("negotiation_messages").select("*").in("deal_id", dealIds).order("created_at", { ascending: true }),
-          supabase.from("deal_commissions").select("*").eq("seller_id", userId).order("created_at", { ascending: false }),
-          supabase.from("deal_history").select("*").in("deal_id", dealIds).order("created_at", { ascending: false }),
-        ]);
-        setMessages((msgs || []) as NegMessage[]);
-        setCommissions((comms || []) as unknown as Commission[]);
-        setDealHistory((hist || []) as DealHistoryEntry[]);
+
+      // Fetch reports: against this user's listings + reported by this user + message reports in their deals
+      const reportsPromises: Promise<any>[] = [
+        // Listing reports: reported BY this user
+        supabase.from("listing_reports").select("*").eq("reporter_id", userId).order("created_at", { ascending: false }),
+        // Listing reports: against this user's listings
+        listingIds.length > 0
+          ? supabase.from("listing_reports").select("*").in("listing_id", listingIds).order("created_at", { ascending: false })
+          : Promise.resolve({ data: [] }),
+        // Message reports: reported BY this user
+        supabase.from("message_reports").select("*").eq("reporter_id", userId).order("created_at", { ascending: false }),
+        // Message reports: in this user's deals
+        dealIds.length > 0
+          ? supabase.from("message_reports").select("*").in("deal_id", dealIds).order("created_at", { ascending: false })
+          : Promise.resolve({ data: [] }),
+      ];
+
+      const mainPromises: Promise<any>[] = dealIds.length > 0 ? [
+        supabase.from("negotiation_messages").select("*").in("deal_id", dealIds).order("created_at", { ascending: true }),
+        supabase.from("deal_commissions").select("*").eq("seller_id", userId).order("created_at", { ascending: false }),
+        supabase.from("deal_history").select("*").in("deal_id", dealIds).order("created_at", { ascending: false }),
+      ] : [];
+
+      const [rByUser, rAgainst, mrByUser, mrInDeals, ...rest] = await Promise.all([
+        ...reportsPromises,
+        ...mainPromises,
+      ]);
+
+      // Deduplicate listing reports
+      const allListingReports = [...(rByUser.data || []), ...(rAgainst.data || [])];
+      const uniqueLR = Array.from(new Map(allListingReports.map((r: any) => [r.id, r])).values()) as ListingReport[];
+      setListingReports(uniqueLR);
+
+      // Deduplicate message reports
+      const allMsgReports = [...(mrByUser.data || []), ...(mrInDeals.data || [])];
+      const uniqueMR = Array.from(new Map(allMsgReports.map((r: any) => [r.id, r])).values()) as MessageReport[];
+      setMessageReports(uniqueMR);
+
+      if (rest.length >= 3) {
+        setMessages((rest[0]?.data || []) as NegMessage[]);
+        setCommissions((rest[1]?.data || []) as unknown as Commission[]);
+        setDealHistory((rest[2]?.data || []) as DealHistoryEntry[]);
+      }
+
+      // Fetch reporter names
+      const reporterIds = new Set<string>();
+      uniqueLR.forEach(r => { if (r.reporter_id !== userId) reporterIds.add(r.reporter_id); });
+      uniqueMR.forEach(r => { if (r.reporter_id !== userId) reporterIds.add(r.reporter_id); });
+      if (reporterIds.size > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", Array.from(reporterIds));
+        const map: Record<string, string> = {};
+        (profiles || []).forEach((p: any) => { map[p.user_id] = p.full_name || "مجهول"; });
+        setReporterProfiles(map);
       }
     } catch (err) {
       console.error("Failed to load customer data:", err);
