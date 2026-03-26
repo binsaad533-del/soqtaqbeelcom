@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SessionGuard from "./components/SessionGuard";
@@ -46,6 +47,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <LanguageProvider>
+        <CurrencyProvider>
         <AuthProvider>
           <ErrorBoundary>
           <SessionGuard />
@@ -131,6 +133,7 @@ const App = () => (
           </Layout>
           </ErrorBoundary>
         </AuthProvider>
+        </CurrencyProvider>
         </LanguageProvider>
       </BrowserRouter>
     </TooltipProvider>
