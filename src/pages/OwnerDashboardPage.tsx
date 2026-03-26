@@ -211,26 +211,35 @@ const OwnerDashboardPage = () => {
 
   /* ── Monthly chart data ── */
   const monthlyData = useMemo(() => {
-    const months: Record<string, { month: string; deals: number; completed: number; value: number; commission: number }> = {};
+    const months: Record<string, { month: string; deals: number; completed: number; value: number; commission: number; collected: number; uncollected: number }> = {};
     const now = new Date();
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-      months[key] = { month: monthNames[d.getMonth()], deals: 0, completed: 0, value: 0, commission: 0 };
+      months[key] = { month: monthNames[d.getMonth()], deals: 0, completed: 0, value: 0, commission: 0, collected: 0, uncollected: 0 };
     }
+    const commMap = new Map(commissions.map(c => [c.deal_id, c]));
     deals.forEach(d => {
       const date = new Date(d.created_at);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       if (months[key]) {
         months[key].deals++;
         if (['completed', 'finalized'].includes(d.status)) months[key].completed++;
-        months[key].value += Number(d.agreed_price) || 0;
-        months[key].commission += (Number(d.agreed_price) || 0) * 0.01;
+        const price = Number(d.agreed_price) || 0;
+        months[key].value += price;
+        const comm = commMap.get(d.id);
+        const commAmount = comm ? Number(comm.commission_amount) : price * 0.01;
+        months[key].commission += commAmount;
+        if (comm && comm.payment_status === 'verified') {
+          months[key].collected += commAmount;
+        } else {
+          months[key].uncollected += commAmount;
+        }
       }
     });
     return Object.values(months);
-  }, [deals]);
+  }, [deals, commissions]);
 
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={24} className="animate-spin text-primary" /></div>;
 
@@ -352,7 +361,7 @@ const OwnerDashboardPage = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center"><Landmark size={14} className="text-success" strokeWidth={1.5} /></div>
-                    العمولات الشهرية
+                    العمولات: محصلة مقابل غير محصلة
                   </h3>
                   <span className="text-[10px] text-muted-foreground">آخر 6 أشهر</span>
                 </div>
@@ -364,10 +373,15 @@ const OwnerDashboardPage = () => {
                       <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={40}
                         tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} />
                       <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }}
-                        formatter={(value: number) => [`${value.toLocaleString('en-US')} ﷼`, 'العمولة']} />
-                      <Bar dataKey="commission" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={28} opacity={0.8} />
+                        formatter={(value: number, name: string) => [`${value.toLocaleString('en-US')} ﷼`, name === 'collected' ? 'محصلة' : 'غير محصلة']} />
+                      <Bar dataKey="collected" stackId="comm" fill="hsl(var(--success))" radius={[0, 0, 0, 0]} barSize={28} name="collected" />
+                      <Bar dataKey="uncollected" stackId="comm" fill="hsl(var(--warning))" radius={[6, 6, 0, 0]} barSize={28} name="uncollected" />
                     </BarChart>
                   </ResponsiveContainer>
+                </div>
+                <div className="flex items-center justify-center gap-5 mt-3">
+                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-success" /><span className="text-[10px] text-muted-foreground">محصلة</span></div>
+                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-warning" /><span className="text-[10px] text-muted-foreground">غير محصلة</span></div>
                 </div>
               </div>
             </div>
