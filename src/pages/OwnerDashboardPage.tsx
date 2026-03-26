@@ -25,6 +25,8 @@ import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import CrmDashboard from "@/components/crm/CrmDashboard";
+import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
+import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 
 type Tab = "overview" | "crm" | "deals" | "users" | "listings" | "security" | "settings";
 
@@ -44,6 +46,7 @@ const OwnerDashboardPage = () => {
   const { getAllDeals } = useDeals();
   const { getAllProfiles, getAllRoles, updateProfile } = useProfiles();
   const { getAllCommissions, verifyCommission } = useCommissions();
+  const { getAllPermissions, promoteToSupervisor, demoteToCustomer, upsertPermissions } = useSupervisorPermissions();
 
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [listings, setListings] = useState<Listing[]>([]);
@@ -55,6 +58,8 @@ const OwnerDashboardPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [dealFilter, setDealFilter] = useState<"all" | "paid" | "unpaid">("all");
   const [dealSort, setDealSort] = useState<"date" | "value">("date");
+  const [supervisorPerms, setSupervisorPerms] = useState<SupervisorPermissions[]>([]);
+  const [permDialogUser, setPermDialogUser] = useState<Profile | null>(null);
 
   /* ── Realtime feed ── */
   const [feed, setFeed] = useState<{ id: string; text: string; time: string; type: string }[]>([]);
@@ -62,20 +67,21 @@ const OwnerDashboardPage = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [l, d, p, r, c] = await Promise.all([
+      const [l, d, p, r, c, sp] = await Promise.all([
         getAllListings().catch(() => []),
         getAllDeals().catch(() => []),
         getAllProfiles().catch(() => []),
         getAllRoles().catch(() => []),
         getAllCommissions().catch(() => []),
+        getAllPermissions().catch(() => []),
       ]);
-      setListings(l || []); setDeals(d || []); setProfiles(p || []); setRoles(r || []); setCommissions(c || []);
+      setListings(l || []); setDeals(d || []); setProfiles(p || []); setRoles(r || []); setCommissions(c || []); setSupervisorPerms(sp || []);
     } catch (err) {
       console.error("Owner dashboard load failed:", err);
     } finally {
       setLoading(false);
     }
-  }, [getAllListings, getAllDeals, getAllProfiles, getAllRoles, getAllCommissions]);
+  }, [getAllListings, getAllDeals, getAllProfiles, getAllRoles, getAllCommissions, getAllPermissions]);
 
   useEffect(() => { load(); }, [load]);
 
