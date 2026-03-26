@@ -35,7 +35,7 @@ export const SignupEmail = ({
     <Preview>تأكيد حسابك في سوق تقبيل</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Img src={LOGO_URL} width="48" height="48" alt="سوق تقبيل" style={logoImg} />
+        <Text style={siteName}>SOQ TAQBEEL</Text>
         <Heading style={h1}>أهلاً بك في سوق تقبيل!</Heading>
         <Text style={text}>
           شكراً لتسجيلك في سوق تقبيل. يرجى تأكيد بريدك الإلكتروني بالضغط على الزر أدناه.

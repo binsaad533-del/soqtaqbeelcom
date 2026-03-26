@@ -33,7 +33,7 @@ export const InviteEmail = ({
     <Preview>دعوة للانضمام إلى سوق تقبيل</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Img src={LOGO_URL} width="48" height="48" alt="سوق تقبيل" style={logoImg} />
+        <Text style={siteName}>SOQ TAQBEEL</Text>
         <Heading style={h1}>دعوة للانضمام</Heading>
         <Text style={text}>
           تمت دعوتك للانضمام إلى سوق تقبيل. اضغط الزر أدناه لقبول الدعوة وإنشاء حسابك.

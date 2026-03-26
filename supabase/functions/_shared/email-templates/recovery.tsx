@@ -31,7 +31,7 @@ export const RecoveryEmail = ({
     <Preview>إعادة تعيين كلمة المرور — سوق تقبيل</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Img src={LOGO_URL} width="48" height="48" alt="سوق تقبيل" style={logoImg} />
+        <Text style={siteName}>SOQ TAQBEEL</Text>
         <Heading style={h1}>إعادة تعيين كلمة المرور</Heading>
         <Text style={text}>
           وصلنا طلب لإعادة تعيين كلمة المرور الخاصة بحسابك في سوق تقبيل. اضغط الزر أدناه لاختيار كلمة مرور جديدة.

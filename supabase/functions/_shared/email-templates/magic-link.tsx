@@ -31,7 +31,7 @@ export const MagicLinkEmail = ({
     <Preview>رابط تسجيل الدخول — سوق تقبيل</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Img src={LOGO_URL} width="48" height="48" alt="سوق تقبيل" style={logoImg} />
+        <Text style={siteName}>SOQ TAQBEEL</Text>
         <Heading style={h1}>رابط تسجيل الدخول</Heading>
         <Text style={text}>
           اضغط الزر أدناه لتسجيل الدخول إلى سوق تقبيل. هذا الرابط سينتهي خلال فترة قصيرة.

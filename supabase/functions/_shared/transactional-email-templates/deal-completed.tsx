@@ -34,7 +34,7 @@ const DealCompletedEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>
-          <Img src={LOGO_URL} width="48" height="48" alt="سوق تقبيل" style={logoImg} />
+          <Text style={siteName}>{SITE_NAME}</Text>
         </Section>
 
         <Section style={iconSection}>

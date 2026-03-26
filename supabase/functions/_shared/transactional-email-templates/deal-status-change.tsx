@@ -66,7 +66,7 @@ const DealStatusChangeEmail = ({
       <Preview>تحديث على صفقتك: {status.label} — {SITE_NAME}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Section style={headerSection}><Img src={LOGO_URL} width="48" height="48" alt="سوق تقبيل" style={logoImg} /></Section>
+          <Section style={headerSection}><Text style={siteName}>{SITE_NAME}</Text></Section>
           <Section style={iconSection}>
             <Img src={icon.src} width="48" height="48" alt="" style={{ margin: '0 auto' }} />
           </Section>

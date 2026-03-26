@@ -26,7 +26,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
     <Preview>رمز التحقق — سوق تقبيل</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Img src={LOGO_URL} width="48" height="48" alt="سوق تقبيل" style={logoImg} />
+        <Text style={siteName}>SOQ TAQBEEL</Text>
         <Heading style={h1}>رمز التحقق</Heading>
         <Text style={text}>استخدم الرمز أدناه لتأكيد هويتك:</Text>
         <Text style={codeStyle}>{token}</Text>
