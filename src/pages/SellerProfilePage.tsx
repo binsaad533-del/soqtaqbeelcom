@@ -1,27 +1,33 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
 import { useListingSocial } from "@/hooks/useListingSocial";
+import { useAuthContext } from "@/contexts/AuthContext";
 import TrustBadge, { getSellerBadges, getVerificationLabel } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
+import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
+import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 import { useSEO } from "@/hooks/useSEO";
-import { cn } from "@/lib/utils";
 import SarSymbol from "@/components/SarSymbol";
 import {
-  MapPin, Calendar, Store, Eye, Heart, Star, Loader2,
-  ShieldCheck, Award, UserCheck, ArrowLeft
+  MapPin, Calendar, Store, Eye, Heart, Loader2,
+  Award, UserCheck, ArrowLeft, Shield
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const SellerProfilePage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { getProfile } = useProfiles();
   const { getPublishedListings } = useListings();
   const { getSellerReviews } = useSellerReviews();
   const { getLikesAndViews } = useListingSocial();
+  const { user, role } = useAuthContext();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
@@ -29,6 +35,14 @@ const SellerProfilePage = () => {
   const [social, setSocial] = useState<{ likes: Record<string, number>; views: Record<string, number> }>({ likes: {}, views: {} });
   const [loading, setLoading] = useState(true);
   const [commissionStats, setCommissionStats] = useState<{ paid: number; total: number }>({ paid: 0, total: 0 });
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [supervisorDialogOpen, setSupervisorDialogOpen] = useState(false);
+  const [supervisorPerms, setSupervisorPerms] = useState<SupervisorPermissions | null>(null);
+  const { promoteToSupervisor, demoteToCustomer, upsertPermissions, getAllPermissions } = useSupervisorPermissions();
+
+  const isOwner = role === "platform_owner";
+  const isSupervisor = userRole === "supervisor";
+  const isCurrentUser = user?.id === id;
 
   useEffect(() => {
     if (!id) return;
@@ -63,6 +77,18 @@ const SellerProfilePage = () => {
             total: commissions.length,
           });
         }
+
+        // Get user role for admin actions
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", id)
+          .maybeSingle();
+        setUserRole(roleData?.role || "customer");
+
+        // Get supervisor permissions if applicable
+        const allPerms = await getAllPermissions();
+        setSupervisorPerms(allPerms.find(p => p.user_id === id) || null);
       } catch (e) {
         console.error(e);
       } finally {
@@ -174,7 +200,65 @@ const SellerProfilePage = () => {
             ))}
           </div>
         </div>
+
+        {/* Admin Actions */}
+        {isOwner && !isCurrentUser && (
+          <div className="flex items-center gap-2 pt-4 border-t border-border/30">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl text-xs gap-1.5"
+              onClick={() => navigate(`/dashboard/view-customer/${id}`)}
+            >
+              <Eye size={13} />
+              معاينة الحساب
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl text-xs gap-1.5"
+              onClick={() => setSupervisorDialogOpen(true)}
+            >
+              <Shield size={13} />
+              {isSupervisor ? "صلاحيات المشرف" : "تعيين كمشرف"}
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* Supervisor Dialog */}
+      {isOwner && id && (
+        <SupervisorPermissionsDialog
+          open={supervisorDialogOpen}
+          onOpenChange={setSupervisorDialogOpen}
+          userId={id}
+          userName={profile.full_name || "مستخدم"}
+          currentRole={userRole || "customer"}
+          existingPermissions={supervisorPerms}
+          onPromote={async (userId, perms) => {
+            const { error } = await promoteToSupervisor(userId, perms);
+            if (error) toast.error("فشل في ترقية المستخدم");
+            else { toast.success("تم ترقية المستخدم إلى مشرف"); setUserRole("supervisor"); }
+          }}
+          onDemote={async (userId) => {
+            const { error } = await demoteToCustomer(userId);
+            if (error) toast.error("فشل في إزالة الصلاحيات");
+            else { toast.success("تم إزالة صلاحيات المشرف"); setUserRole("customer"); }
+          }}
+          onUpdatePermissions={async (userId, perms) => {
+            const { error } = await upsertPermissions(userId, {
+              manage_listings: perms.manage_listings,
+              manage_deals: perms.manage_deals,
+              manage_users: perms.manage_users,
+              manage_crm: perms.manage_crm,
+              manage_reports: perms.manage_reports,
+              manage_security: perms.manage_security,
+            });
+            if (error) toast.error("فشل في تحديث الصلاحيات");
+            else toast.success("تم تحديث الصلاحيات");
+          }}
+        />
+      )}
 
       {/* Reviews */}
       <SellerReviewsSummary reviews={reviews} />
