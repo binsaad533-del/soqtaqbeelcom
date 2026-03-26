@@ -200,12 +200,14 @@ const HomePage = () => {
               {featured.map((listing, i) => {
                 const photos = listing.photos ? Object.values(listing.photos).flat() as string[] : [];
                 return (
-                  <Link
+                  <div
                     key={listing.id}
-                    to={`/listing/${listing.id}`}
                     ref={addRevealRef}
                     style={{ opacity: 0, animationDelay: `${i * 100}ms` }}
-                    className="group bg-card rounded-2xl shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                  >
+                  <Link
+                    to={`/listing/${listing.id}`}
+                    className="group bg-card rounded-2xl shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden block"
                   >
                     <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/20 flex items-center justify-center relative">
                       {photos.length > 0 ? (
