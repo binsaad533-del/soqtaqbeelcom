@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section, Img,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { EmailFooter } from '../email-footer.tsx'
 
 const SITE_NAME = "سوق تقبيل"
 const FONT_URL = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
@@ -38,9 +39,7 @@ const NewNegotiationMessageEmail = ({
         <Section style={buttonSection}>
           <Button style={button} href="https://soqtaqbeel.com/dashboard">الرد على الرسالة</Button>
         </Section>
-        <Hr style={hr} />
-        <Text style={footer}>شكراً لاستخدامك {SITE_NAME}</Text>
-        <Text style={footerSmall}>هذا البريد تم إرساله تلقائياً. لا حاجة للرد عليه.</Text>
+        <EmailFooter />
       </Container>
     </Body>
   </Html>
