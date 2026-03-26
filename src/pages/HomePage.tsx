@@ -4,7 +4,7 @@ import AiStar from "@/components/AiStar";
 import AiInlineStar from "@/components/AiInlineStar";
 import { Button } from "@/components/ui/button";
 import logoIconGold from "@/assets/logo-icon-gold.png";
-import SarSymbol from "@/components/SarSymbol";
+import PriceDisplay from "@/components/PriceDisplay";
 import { useEffect, useRef, useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
@@ -282,7 +282,7 @@ const HomePage = () => {
                         </div>
                         <div className="flex items-center justify-between pt-2.5 border-t border-border/10">
                           <span className="text-sm font-medium text-primary">
-                            {listing.price ? <>{Number(listing.price).toLocaleString("en-GB")} <SarSymbol size={10} /></> : tx("السعر عند التواصل", "Price on request")}
+                            {listing.price ? <PriceDisplay amount={Number(listing.price)} size={10} /> : tx("السعر عند التواصل", "Price on request")}
                           </span>
                         </div>
                       </div>
