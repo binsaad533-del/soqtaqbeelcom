@@ -544,6 +544,8 @@ const OwnerDashboardPage = () => {
                     <TableHead className="text-right text-[11px]">المشتري</TableHead>
                     <TableHead className="text-right text-[11px]">جوال البائع</TableHead>
                     <TableHead className="text-right text-[11px]">جوال المشتري</TableHead>
+                    <TableHead className="text-right text-[11px]">إيميل البائع</TableHead>
+                    <TableHead className="text-right text-[11px]">إيميل المشتري</TableHead>
                     <TableHead className="text-right text-[11px]">قيمة الصفقة</TableHead>
                     <TableHead className="text-right text-[11px]">العمولة (1%)</TableHead>
                     <TableHead className="text-right text-[11px]">حالة العمولة</TableHead>
