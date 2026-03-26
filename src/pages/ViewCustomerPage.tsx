@@ -63,8 +63,10 @@ const ViewCustomerPage = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
+  const [messages, setMessages] = useState<NegMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"deals" | "listings">("deals");
+  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "chats">("deals");
+  const [expandedDeal, setExpandedDeal] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     if (!userId) return;
