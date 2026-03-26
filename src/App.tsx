@@ -35,6 +35,7 @@ import SellerProfilePage from "./pages/SellerProfilePage";
 import HelpCenterPage from "./pages/HelpCenterPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
+import ViewCustomerPage from "./pages/ViewCustomerPage";
 
 const queryClient = new QueryClient();
 
@@ -96,6 +97,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <AgreementsArchivePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/view-customer/:userId"
+                element={
+                  <ProtectedRoute allowedRoles={["platform_owner"]}>
+                    <ViewCustomerPage />
                   </ProtectedRoute>
                 }
               />
