@@ -75,6 +75,14 @@ const SellerProfilePage = () => {
             total: commissions.length,
           });
         }
+
+        // Get user role for admin actions
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", id)
+          .maybeSingle();
+        setUserRole(roleData?.role || "customer");
       } catch (e) {
         console.error(e);
       } finally {
