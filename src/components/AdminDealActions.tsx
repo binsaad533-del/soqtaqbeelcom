@@ -45,11 +45,14 @@ const AdminDealActions = ({ deal, onUpdate }: AdminDealActionsProps) => {
 
   const handleSuspend = async () => {
     setLoading(true);
-    const { error } = await supabase.from("deals").update({ status: "suspended" }).eq("id", deal.id);
+    const { error } = await supabase.from("deals").update({
+      status: "suspended",
+      deal_details: { ...(deal as any).deal_details, admin_action: { type: "suspended", reason, at: new Date().toISOString() } },
+    }).eq("id", deal.id);
     if (error) { toast.error("فشل تعليق الصفقة"); setLoading(false); return; }
-    // Hide the associated listing from marketplace
+    // Hide the associated listing from marketplace but allow owner to edit
     await supabase.from("listings").update({ status: "suspended" }).eq("id", deal.listing_id);
-    await notify("⚠️ تم تعليق صفقتك", reason || "تم تعليق الصفقة من قبل إدارة المنصة.");
+    await notify("⚠️ تم تعليق صفقتك", reason || "تم تعليق الصفقة من قبل إدارة المنصة. يمكنك تعديل بيانات الإعلان وإعادة نشره.");
     await supabase.from("audit_logs").insert({
       action: "deal_suspended",
       resource_type: "deal",
@@ -87,8 +90,10 @@ const AdminDealActions = ({ deal, onUpdate }: AdminDealActionsProps) => {
 
   const handleDelete = async () => {
     setLoading(true);
-    // Cancel the deal and restore the listing
-    const { error } = await supabase.from("deals").update({ status: "cancelled" }).eq("id", deal.id);
+    const { error } = await supabase.from("deals").update({
+      status: "cancelled",
+      deal_details: { ...(deal as any).deal_details, admin_action: { type: "cancelled", reason, at: new Date().toISOString() } },
+    }).eq("id", deal.id);
     if (error) { toast.error("فشل حذف الصفقة"); setLoading(false); return; }
     await supabase.from("listings").update({ status: "published" }).eq("id", deal.listing_id);
     await supabase.from("listing_offers").update({ status: "pending" }).eq("listing_id", deal.listing_id).eq("status", "accepted");

@@ -34,6 +34,7 @@ const statusLabel = (s: string) => {
     completed: { label: "مكتملة", cls: "bg-success/10 text-success" },
     finalized: { label: "نهائية", cls: "bg-primary/10 text-primary" },
     cancelled: { label: "ملغاة", cls: "bg-destructive/10 text-destructive" },
+    suspended: { label: "معلّقة", cls: "bg-warning/10 text-warning" },
   };
   return m[s] || { label: s, cls: "bg-muted text-muted-foreground" };
 };
