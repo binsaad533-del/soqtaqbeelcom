@@ -561,7 +561,7 @@ const OwnerDashboardPage = () => {
                   {dealTableData.map(row => {
                     const s = row.commissionStatus as CommissionStatus;
                     return (
-                      <TableRow key={row.id} className="cursor-pointer hover:bg-muted/40 transition-colors" onClick={() => window.location.href = `/negotiate/${row.id}`}>
+                      <TableRow key={row.id} className="cursor-pointer hover:bg-muted/40 transition-colors" onClick={() => navigate(`/negotiate/${row.id}`)}>
                         <TableCell className="text-xs font-medium text-primary hover:underline">{row.listingTitle}</TableCell>
                         <TableCell className="text-xs">{row.sellerName}</TableCell>
                         <TableCell className="text-xs">{row.buyerName}</TableCell>
@@ -615,7 +615,7 @@ const OwnerDashboardPage = () => {
                 const isOwner = role === "platform_owner";
                 const isSupervisor = role === "supervisor";
                 return (
-                <div key={p.id} className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all cursor-pointer" onClick={() => !isOwner && window.location.assign(`/dashboard/view-customer/${p.user_id}`)}>
+                <div key={p.id} className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all cursor-pointer" onClick={() => !isOwner && navigate(`/dashboard/view-customer/${p.user_id}`)}>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">{p.full_name?.charAt(0) || "?"}</div>
                     <div>
