@@ -211,26 +211,35 @@ const OwnerDashboardPage = () => {
 
   /* ── Monthly chart data ── */
   const monthlyData = useMemo(() => {
-    const months: Record<string, { month: string; deals: number; completed: number; value: number; commission: number }> = {};
+    const months: Record<string, { month: string; deals: number; completed: number; value: number; commission: number; collected: number; uncollected: number }> = {};
     const now = new Date();
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-      months[key] = { month: monthNames[d.getMonth()], deals: 0, completed: 0, value: 0, commission: 0 };
+      months[key] = { month: monthNames[d.getMonth()], deals: 0, completed: 0, value: 0, commission: 0, collected: 0, uncollected: 0 };
     }
+    const commMap = new Map(commissions.map(c => [c.deal_id, c]));
     deals.forEach(d => {
       const date = new Date(d.created_at);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       if (months[key]) {
         months[key].deals++;
         if (['completed', 'finalized'].includes(d.status)) months[key].completed++;
-        months[key].value += Number(d.agreed_price) || 0;
-        months[key].commission += (Number(d.agreed_price) || 0) * 0.01;
+        const price = Number(d.agreed_price) || 0;
+        months[key].value += price;
+        const comm = commMap.get(d.id);
+        const commAmount = comm ? Number(comm.commission_amount) : price * 0.01;
+        months[key].commission += commAmount;
+        if (comm && comm.payment_status === 'verified') {
+          months[key].collected += commAmount;
+        } else {
+          months[key].uncollected += commAmount;
+        }
       }
     });
     return Object.values(months);
-  }, [deals]);
+  }, [deals, commissions]);
 
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={24} className="animate-spin text-primary" /></div>;
 
