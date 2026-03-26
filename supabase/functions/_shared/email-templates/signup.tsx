@@ -12,6 +12,7 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { EmailFooter } from '../email-footer.tsx'
 
 interface SignupEmailProps {
   siteName: string
@@ -39,10 +40,7 @@ export const SignupEmail = ({
         <Button style={button} href={confirmationUrl}>
           تأكيد البريد الإلكتروني
         </Button>
-        <Text style={footer}>
-          إذا لم تنشئ حساباً، تجاهل هذه الرسالة.
-        </Text>
-        <Text style={brand}>سوق تقبيل — منصة بالذكاء الاصطناعي لإتمام الصفقات</Text>
+        <EmailFooter />
       </Container>
     </Body>
   </Html>

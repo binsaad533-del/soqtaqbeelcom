@@ -12,6 +12,7 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { EmailFooter } from '../email-footer.tsx'
 
 interface MagicLinkEmailProps {
   siteName: string
@@ -35,10 +36,7 @@ export const MagicLinkEmail = ({
         <Button style={button} href={confirmationUrl}>
           تسجيل الدخول
         </Button>
-        <Text style={footer}>
-          إذا لم تطلب هذا الرابط، تجاهل هذه الرسالة.
-        </Text>
-        <Text style={brand}>سوق تقبيل — منصة بالذكاء الاصطناعي لإتمام الصفقات</Text>
+        <EmailFooter />
       </Container>
     </Body>
   </Html>

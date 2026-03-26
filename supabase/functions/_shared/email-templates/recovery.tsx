@@ -12,6 +12,7 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { EmailFooter } from '../email-footer.tsx'
 
 interface RecoveryEmailProps {
   siteName: string
@@ -35,10 +36,7 @@ export const RecoveryEmail = ({
         <Button style={button} href={confirmationUrl}>
           إعادة تعيين كلمة المرور
         </Button>
-        <Text style={footer}>
-          إذا لم تطلب إعادة تعيين كلمة المرور، تجاهل هذه الرسالة. لن يتم تغيير كلمة المرور.
-        </Text>
-        <Text style={brand}>سوق تقبيل — منصة بالذكاء الاصطناعي لإتمام الصفقات</Text>
+        <EmailFooter />
       </Container>
     </Body>
   </Html>

@@ -12,6 +12,7 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { EmailFooter } from '../email-footer.tsx'
 
 interface InviteEmailProps {
   siteName: string
@@ -37,10 +38,7 @@ export const InviteEmail = ({
         <Button style={button} href={confirmationUrl}>
           قبول الدعوة
         </Button>
-        <Text style={footer}>
-          إذا لم تكن تتوقع هذه الدعوة، تجاهل هذه الرسالة.
-        </Text>
-        <Text style={brand}>سوق تقبيل — منصة بالذكاء الاصطناعي لإتمام الصفقات</Text>
+        <EmailFooter />
       </Container>
     </Body>
   </Html>
