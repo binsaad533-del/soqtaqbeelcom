@@ -153,7 +153,11 @@ const OwnerDashboardPage = () => {
   const listingsNoPhotos = useMemo(() => listings.filter(l => {
     const photos = l.photos as any;
     if (!photos) return true;
-    if (typeof photos === "object" && !Array.isArray(photos)) return Object.values(photos).flat().length === 0;
+    if (Array.isArray(photos)) return photos.length === 0;
+    if (typeof photos === "object") {
+      const allFiles = Object.values(photos).flat();
+      return allFiles.length === 0;
+    }
     return true;
   }), [listings]);
 
