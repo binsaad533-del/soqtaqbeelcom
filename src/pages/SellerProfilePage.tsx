@@ -44,6 +44,8 @@ const SellerProfilePage = () => {
   const isSupervisor = userRole === "supervisor";
   const isCurrentUser = user?.id === id;
 
+  console.log("[SellerProfile] Debug:", { role, userId: user?.id, profileId: id, isOwner, isCurrentUser });
+
   useEffect(() => {
     if (!id) return;
     (async () => {
