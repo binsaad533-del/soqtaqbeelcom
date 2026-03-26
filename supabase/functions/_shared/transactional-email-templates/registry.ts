@@ -10,7 +10,13 @@ export interface TemplateEntry {
 }
 
 import { template as dealCompleted } from './deal-completed.tsx'
+import { template as offerStatusUpdate } from './offer-status-update.tsx'
+import { template as newNegotiationMessage } from './new-negotiation-message.tsx'
+import { template as dealStatusChange } from './deal-status-change.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'deal-completed': dealCompleted,
+  'offer-status-update': offerStatusUpdate,
+  'new-negotiation-message': newNegotiationMessage,
+  'deal-status-change': dealStatusChange,
 }
