@@ -628,6 +628,14 @@ const OwnerDashboardPage = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {!isOwner && (
+                      <Link
+                        to={`/dashboard/view-customer/${p.user_id}`}
+                        className="text-[10px] px-2.5 py-1 rounded-lg transition-colors gap-1 flex items-center text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        <Eye size={11} />
+                        معاينة
+                      </Link>
+                    )}
                       <button
                         onClick={() => setPermDialogUser(p)}
                         className={cn(
