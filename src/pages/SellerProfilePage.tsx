@@ -37,6 +37,8 @@ const SellerProfilePage = () => {
   const [commissionStats, setCommissionStats] = useState<{ paid: number; total: number }>({ paid: 0, total: 0 });
   const [userRole, setUserRole] = useState<string | null>(null);
   const [supervisorDialogOpen, setSupervisorDialogOpen] = useState(false);
+  const [existingPerms, setExistingPerms] = useState<SupervisorPermissions | null>(null);
+  const { promoteToSupervisor, demoteToCustomer, upsertPermissions, getPermissions } = useSupervisorPermissions();
 
   const isOwner = role === "platform_owner";
   const isSupervisor = userRole === "supervisor";
