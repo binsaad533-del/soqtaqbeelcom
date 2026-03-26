@@ -28,7 +28,7 @@ const NotFound = () => {
         </div>
 
         {/* Error Code */}
-        <div className="text-6xl font-bold gradient-text mb-3">٤٠٤</div>
+        <div className="text-6xl font-bold gradient-text mb-3">404</div>
 
         {/* Message */}
         <h1 className="text-xl font-semibold text-foreground mb-2">
