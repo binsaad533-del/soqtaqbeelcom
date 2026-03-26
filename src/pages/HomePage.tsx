@@ -65,9 +65,41 @@ function useHomeStats() {
   return stats;
 }
 
+type FeaturedListing = {
+  id: string;
+  title: string | null;
+  business_activity: string | null;
+  city: string | null;
+  district: string | null;
+  price: number | null;
+  photos: Record<string, unknown> | null;
+  featured: boolean;
+};
+
+function useFeaturedListings() {
+  const [listings, setListings] = useState<FeaturedListing[]>([]);
+
+  useEffect(() => {
+    async function fetch() {
+      const { data } = await supabase
+        .from("listings")
+        .select("id, title, business_activity, city, district, price, photos, featured")
+        .eq("status", "published")
+        .eq("featured", true)
+        .order("published_at", { ascending: false })
+        .limit(6);
+      if (data) setListings(data as FeaturedListing[]);
+    }
+    fetch();
+  }, []);
+
+  return listings;
+}
+
 const HomePage = () => {
   useSEO({ canonical: "/" });
   const stats = useHomeStats();
+  const featured = useFeaturedListings();
   const revealRefs = useRef<HTMLDivElement[]>([]);
 
   useEffect(() => {
