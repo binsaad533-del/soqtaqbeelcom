@@ -29,7 +29,7 @@ import ReportListingDialog from "@/components/ReportListingDialog";
 const ListingDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuthContext();
+  const { user, role } = useAuthContext();
   const { recordView, toggleLike, getLikesAndViews } = useListingSocial();
   const { getListing } = useListings();
   const { createDeal, getMyDeals } = useDeals();
@@ -407,7 +407,13 @@ const ListingDetailsPage = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium truncate">{sellerProfile.full_name || "بائع"}</span>
+                        {role === "platform_owner" ? (
+                          <Link to={`/dashboard/view-customer/${sellerProfile.user_id}`} className="text-sm font-medium truncate text-primary hover:underline">
+                            {sellerProfile.full_name || "بائع"}
+                          </Link>
+                        ) : (
+                          <span className="text-sm font-medium truncate">{sellerProfile.full_name || "بائع"}</span>
+                        )}
                       </div>
                       <p className="text-[11px] text-muted-foreground">صاحب الفرصة</p>
                     </div>
