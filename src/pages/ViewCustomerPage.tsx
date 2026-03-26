@@ -452,6 +452,7 @@ const ViewCustomerPage = () => {
             { id: "overview" as const, label: "نظرة عامة", icon: TrendingUp },
             { id: "deals" as const, label: "الصفقات", icon: Handshake, count: deals.length },
             { id: "commissions" as const, label: "العمولات", icon: Landmark, count: commissions.length },
+            { id: "reports" as const, label: "البلاغات", icon: Flag, count: listingReports.length + messageReports.length },
             { id: "listings" as const, label: "الإعلانات", icon: FileText, count: listings.length },
             { id: "history" as const, label: "السجل", icon: CalendarDays, count: dealHistory.length },
             { id: "chats" as const, label: "المحادثات", icon: MessageSquare, count: deals.filter(d => messages.some(m => m.deal_id === d.id)).length },
@@ -882,6 +883,133 @@ const ViewCustomerPage = () => {
                   </div>
                 );
               })}
+          </div>
+        )}
+
+        {/* === Reports Tab === */}
+        {activeTab === "reports" && (
+          <div className="space-y-4">
+            {/* Summary */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 text-center">
+                <Flag size={16} className="mx-auto mb-2 text-warning" />
+                <div className="text-xl font-bold">{listingReports.length + messageReports.length}</div>
+                <div className="text-[10px] text-muted-foreground">إجمالي البلاغات</div>
+              </div>
+              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 text-center">
+                <FileText size={16} className="mx-auto mb-2 text-primary" />
+                <div className="text-xl font-bold">{listingReports.length}</div>
+                <div className="text-[10px] text-muted-foreground">بلاغات إعلانات</div>
+              </div>
+              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 text-center">
+                <MessageSquare size={16} className="mx-auto mb-2 text-primary" />
+                <div className="text-xl font-bold">{messageReports.length}</div>
+                <div className="text-[10px] text-muted-foreground">بلاغات رسائل</div>
+              </div>
+              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 text-center">
+                <ShieldAlert size={16} className="mx-auto mb-2 text-destructive" />
+                <div className="text-xl font-bold">
+                  {[...listingReports, ...messageReports].filter(r => r.status === "pending").length}
+                </div>
+                <div className="text-[10px] text-muted-foreground">بانتظار المراجعة</div>
+              </div>
+            </div>
+
+            {/* Listing Reports */}
+            {listingReports.length > 0 && (
+              <div>
+                <h3 className="text-xs font-semibold flex items-center gap-1.5 mb-3">
+                  <FileText size={13} className="text-warning" /> بلاغات الإعلانات
+                </h3>
+                <div className="space-y-2">
+                  {listingReports.map(r => {
+                    const isReporter = r.reporter_id === userId;
+                    const rst = reportStatusLabels[r.status] || reportStatusLabels.pending;
+                    return (
+                      <div key={r.id} className="rounded-xl bg-card border border-border/40 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className="text-[9px]">
+                                {isReporter ? "أبلغ عن إعلان" : "بلاغ ضد إعلانه"}
+                              </Badge>
+                              <span className={cn("text-[10px] px-2 py-0.5 rounded-lg font-medium", rst.cls)}>
+                                {rst.label}
+                              </span>
+                            </div>
+                            <div className="text-xs font-medium mb-1">
+                              السبب: {reportReasonLabels[r.reason] || r.reason}
+                            </div>
+                            {r.details && (
+                              <p className="text-[11px] text-muted-foreground">{r.details}</p>
+                            )}
+                            <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+                              <span dir="ltr">{new Date(r.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
+                              {!isReporter && (
+                                <span>المُبلّغ: {reporterProfiles[r.reporter_id] || "مجهول"}</span>
+                              )}
+                              <Link to={`/listing/${r.listing_id}`} className="text-primary hover:underline flex items-center gap-0.5">
+                                <ExternalLink size={10} /> عرض الإعلان
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Message Reports */}
+            {messageReports.length > 0 && (
+              <div>
+                <h3 className="text-xs font-semibold flex items-center gap-1.5 mb-3">
+                  <MessageSquare size={13} className="text-warning" /> بلاغات الرسائل
+                </h3>
+                <div className="space-y-2">
+                  {messageReports.map(r => {
+                    const isReporter = r.reporter_id === userId;
+                    const rst = reportStatusLabels[r.status] || reportStatusLabels.pending;
+                    return (
+                      <div key={r.id} className="rounded-xl bg-card border border-border/40 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className="text-[9px]">
+                                {isReporter ? "أبلغ عن رسالة" : "بلاغ ضد رسالته"}
+                              </Badge>
+                              <span className={cn("text-[10px] px-2 py-0.5 rounded-lg font-medium", rst.cls)}>
+                                {rst.label}
+                              </span>
+                            </div>
+                            <div className="text-xs font-medium mb-1">
+                              السبب: {reportReasonLabels[r.reason] || r.reason}
+                            </div>
+                            {r.details && (
+                              <p className="text-[11px] text-muted-foreground">{r.details}</p>
+                            )}
+                            <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+                              <span dir="ltr">{new Date(r.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
+                              {!isReporter && (
+                                <span>المُبلّغ: {reporterProfiles[r.reporter_id] || "مجهول"}</span>
+                              )}
+                              <Link to={`/negotiation/${r.deal_id}`} className="text-primary hover:underline flex items-center gap-0.5">
+                                <ExternalLink size={10} /> عرض الصفقة
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {listingReports.length === 0 && messageReports.length === 0 && (
+              <p className="text-center text-xs text-muted-foreground py-12">لا توجد بلاغات متعلقة بهذا العميل</p>
+            )}
           </div>
         )}
       </div>
