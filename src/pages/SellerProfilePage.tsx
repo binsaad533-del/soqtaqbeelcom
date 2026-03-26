@@ -85,6 +85,10 @@ const SellerProfilePage = () => {
           .eq("user_id", id)
           .maybeSingle();
         setUserRole(roleData?.role || "customer");
+
+        // Get supervisor permissions if applicable
+        const allPerms = await getAllPermissions();
+        setSupervisorPerms(allPerms.find(p => p.user_id === id) || null);
       } catch (e) {
         console.error(e);
       } finally {
