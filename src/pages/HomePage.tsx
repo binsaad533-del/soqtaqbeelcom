@@ -4,15 +4,65 @@ import AiStar from "@/components/AiStar";
 import AiInlineStar from "@/components/AiInlineStar";
 import { Button } from "@/components/ui/button";
 import logoIconGold from "@/assets/logo-icon-gold.png";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
+import { supabase } from "@/integrations/supabase/client";
 
-const stats = [
-  { value: "847", label: "فرصة نشطة" },
-  { value: "12", label: "مدينة" },
-  { value: "94%", label: "إفصاح مكتمل" },
-  { value: "326", label: "صفقة مكتملة" },
-];
+function useHomeStats() {
+  const [stats, setStats] = useState([
+    { value: "—", label: "فرصة نشطة" },
+    { value: "—", label: "مدينة" },
+    { value: "—", label: "إفصاح مكتمل" },
+    { value: "—", label: "صفقة مكتملة" },
+  ]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetch() {
+      const [listingsRes, citiesRes, dealsRes, disclosureRes] = await Promise.all([
+        supabase.from("listings").select("id", { count: "exact", head: true }).eq("status", "published"),
+        supabase.from("listings").select("city").eq("status", "published").not("city", "is", null),
+        supabase.from("deals").select("id", { count: "exact", head: true }).eq("status", "completed"),
+        supabase.from("listings").select("disclosure_score").eq("status", "published").not("disclosure_score", "is", null),
+      ]);
+
+      if (cancelled) return;
+
+      const activeListings = listingsRes.count ?? 0;
+      const uniqueCities = new Set((citiesRes.data ?? []).map((r: any) => r.city)).size;
+      const completedDeals = dealsRes.count ?? 0;
+
+      const scores = (disclosureRes.data ?? []).map((r: any) => r.disclosure_score as number);
+      const avgDisclosure = scores.length > 0
+        ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length)
+        : 0;
+
+      setStats([
+        { value: activeListings.toLocaleString("en-GB"), label: "فرصة نشطة" },
+        { value: uniqueCities.toLocaleString("en-GB"), label: "مدينة" },
+        { value: `${avgDisclosure}%`, label: "إفصاح مكتمل" },
+        { value: completedDeals.toLocaleString("en-GB"), label: "صفقة مكتملة" },
+      ]);
+    }
+
+    fetch();
+
+    // Realtime subscription for live updates
+    const channel = supabase
+      .channel("home-stats")
+      .on("postgres_changes", { event: "*", schema: "public", table: "listings" }, () => fetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "deals" }, () => fetch())
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  return stats;
+}
 
 const HomePage = () => {
   useSEO({ canonical: "/" });
