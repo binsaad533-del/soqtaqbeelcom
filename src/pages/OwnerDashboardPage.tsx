@@ -25,6 +25,8 @@ import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import CrmDashboard from "@/components/crm/CrmDashboard";
+import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
+import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 
 type Tab = "overview" | "crm" | "deals" | "users" | "listings" | "security" | "settings";
 
@@ -44,6 +46,7 @@ const OwnerDashboardPage = () => {
   const { getAllDeals } = useDeals();
   const { getAllProfiles, getAllRoles, updateProfile } = useProfiles();
   const { getAllCommissions, verifyCommission } = useCommissions();
+  const { getAllPermissions, promoteToSupervisor, demoteToCustomer, upsertPermissions } = useSupervisorPermissions();
 
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [listings, setListings] = useState<Listing[]>([]);
@@ -55,6 +58,8 @@ const OwnerDashboardPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [dealFilter, setDealFilter] = useState<"all" | "paid" | "unpaid">("all");
   const [dealSort, setDealSort] = useState<"date" | "value">("date");
+  const [supervisorPerms, setSupervisorPerms] = useState<SupervisorPermissions[]>([]);
+  const [permDialogUser, setPermDialogUser] = useState<Profile | null>(null);
 
   /* ── Realtime feed ── */
   const [feed, setFeed] = useState<{ id: string; text: string; time: string; type: string }[]>([]);
@@ -62,20 +67,21 @@ const OwnerDashboardPage = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [l, d, p, r, c] = await Promise.all([
+      const [l, d, p, r, c, sp] = await Promise.all([
         getAllListings().catch(() => []),
         getAllDeals().catch(() => []),
         getAllProfiles().catch(() => []),
         getAllRoles().catch(() => []),
         getAllCommissions().catch(() => []),
+        getAllPermissions().catch(() => []),
       ]);
-      setListings(l || []); setDeals(d || []); setProfiles(p || []); setRoles(r || []); setCommissions(c || []);
+      setListings(l || []); setDeals(d || []); setProfiles(p || []); setRoles(r || []); setCommissions(c || []); setSupervisorPerms(sp || []);
     } catch (err) {
       console.error("Owner dashboard load failed:", err);
     } finally {
       setLoading(false);
     }
-  }, [getAllListings, getAllDeals, getAllProfiles, getAllRoles, getAllCommissions]);
+  }, [getAllListings, getAllDeals, getAllProfiles, getAllRoles, getAllCommissions, getAllPermissions]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -582,7 +588,11 @@ const OwnerDashboardPage = () => {
               </div>
             </div>
             <div className="space-y-2">
-              {filteredProfiles.map(p => (
+              {filteredProfiles.map(p => {
+                const role = getUserRole(p.user_id);
+                const isOwner = role === "platform_owner";
+                const isSupervisor = role === "supervisor";
+                return (
                 <div key={p.id} className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">{p.full_name?.charAt(0) || "?"}</div>
@@ -590,21 +600,71 @@ const OwnerDashboardPage = () => {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{p.full_name || "—"}</span>
                         <TrustBadge score={p.trust_score} verificationLevel={p.verification_level} size="sm" />
+                        {isSupervisor && <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">مشرف</span>}
+                        {isOwner && <span className="text-[9px] bg-success/10 text-success px-1.5 py-0.5 rounded font-medium">مالك</span>}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {p.phone || "—"} · {p.email || "—"} · {getUserRole(p.user_id) === "platform_owner" ? "مالك" : getUserRole(p.user_id) === "supervisor" ? "مشرف" : "عميل"} · {p.city || "—"}
+                        {p.phone || "—"} · {p.email || "—"} · {p.city || "—"}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => toggleSuspend(p)} className={cn("text-[10px] px-2.5 py-1 rounded-lg transition-colors", p.is_suspended ? "bg-destructive/10 text-destructive" : "text-muted-foreground hover:bg-destructive/10 hover:text-destructive")}>
-                      {p.is_suspended ? "معلّق" : "تعليق"}
-                    </button>
+                    {!isOwner && (
+                      <button
+                        onClick={() => setPermDialogUser(p)}
+                        className={cn(
+                          "text-[10px] px-2.5 py-1 rounded-lg transition-colors gap-1 flex items-center",
+                          isSupervisor ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                        )}
+                      >
+                        <Shield size={11} />
+                        {isSupervisor ? "صلاحيات" : "ترقية لمشرف"}
+                      </button>
+                    )}
+                    {!isOwner && (
+                      <button onClick={() => toggleSuspend(p)} className={cn("text-[10px] px-2.5 py-1 rounded-lg transition-colors", p.is_suspended ? "bg-destructive/10 text-destructive" : "text-muted-foreground hover:bg-destructive/10 hover:text-destructive")}>
+                        {p.is_suspended ? "معلّق" : "تعليق"}
+                      </button>
+                    )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
               {filteredProfiles.length === 0 && <p className="text-center text-sm text-muted-foreground py-8">لا يوجد مستخدمون</p>}
             </div>
+
+            {permDialogUser && (
+              <SupervisorPermissionsDialog
+                open={!!permDialogUser}
+                onOpenChange={(open) => { if (!open) setPermDialogUser(null); }}
+                userName={permDialogUser.full_name || "—"}
+                userId={permDialogUser.user_id}
+                currentRole={getUserRole(permDialogUser.user_id)}
+                existingPermissions={supervisorPerms.find(sp => sp.user_id === permDialogUser.user_id) || null}
+                onPromote={async (userId, perms) => {
+                  const { error } = await promoteToSupervisor(userId, perms);
+                  if (error) toast.error("فشل في ترقية المستخدم");
+                  else { toast.success("تم ترقية المستخدم إلى مشرف"); load(); }
+                }}
+                onDemote={async (userId) => {
+                  const { error } = await demoteToCustomer(userId);
+                  if (error) toast.error("فشل في إزالة الصلاحيات");
+                  else { toast.success("تم إزالة صلاحيات المشرف"); load(); }
+                }}
+                onUpdatePermissions={async (userId, perms) => {
+                  const { error } = await upsertPermissions(userId, {
+                    manage_listings: perms.manage_listings,
+                    manage_deals: perms.manage_deals,
+                    manage_users: perms.manage_users,
+                    manage_crm: perms.manage_crm,
+                    manage_reports: perms.manage_reports,
+                    manage_security: perms.manage_security,
+                  });
+                  if (error) toast.error("فشل في تحديث الصلاحيات");
+                  else { toast.success("تم تحديث الصلاحيات"); load(); }
+                }}
+              />
+            )}
           </div>
         )}
 

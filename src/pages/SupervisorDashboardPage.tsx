@@ -4,6 +4,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
+import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import {
@@ -17,12 +18,12 @@ import SarSymbol from "@/components/SarSymbol";
 
 type Tab = "overview" | "listings" | "deals" | "users" | "reports";
 
-const TABS: { id: Tab; label: string; icon: any }[] = [
+const ALL_TABS: { id: Tab; label: string; icon: any; perm?: string }[] = [
   { id: "overview", label: "نظرة عامة", icon: Eye },
-  { id: "listings", label: "الإعلانات", icon: FileText },
-  { id: "deals", label: "الصفقات", icon: Handshake },
-  { id: "users", label: "المستخدمون", icon: Users },
-  { id: "reports", label: "البلاغات", icon: AlertTriangle },
+  { id: "listings", label: "الإعلانات", icon: FileText, perm: "manage_listings" },
+  { id: "deals", label: "الصفقات", icon: Handshake, perm: "manage_deals" },
+  { id: "users", label: "المستخدمون", icon: Users, perm: "manage_users" },
+  { id: "reports", label: "البلاغات", icon: AlertTriangle, perm: "manage_reports" },
 ];
 
 const statusLabel = (s: string) => {
@@ -42,6 +43,7 @@ const SupervisorDashboardPage = () => {
   const { getAllListings } = useListings();
   const { getAllDeals } = useDeals();
   const { getAllProfiles } = useProfiles();
+  const { getMyPermissions } = useSupervisorPermissions();
 
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [listings, setListings] = useState<Listing[]>([]);
@@ -49,6 +51,12 @@ const SupervisorDashboardPage = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [myPerms, setMyPerms] = useState<SupervisorPermissions | null>(null);
+
+  const TABS = useMemo(() => {
+    if (!myPerms) return ALL_TABS; // show all while loading
+    return ALL_TABS.filter(t => !t.perm || (myPerms as any)[t.perm]);
+  }, [myPerms]);
 
   /* ── Realtime feed ── */
   const [feed, setFeed] = useState<{ id: string; text: string; time: string; type: string }[]>([]);
@@ -56,18 +64,20 @@ const SupervisorDashboardPage = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [l, d, p] = await Promise.all([
+      const [l, d, p, perms] = await Promise.all([
         getAllListings().catch(() => [] as Listing[]),
         getAllDeals().catch(() => [] as Deal[]),
         getAllProfiles().catch(() => [] as Profile[]),
+        getMyPermissions().catch(() => null),
       ]);
       setListings(l || []); setDeals(d || []); setProfiles(p || []);
+      setMyPerms(perms);
     } catch (err) {
       console.error("Supervisor dashboard load failed:", err);
     } finally {
       setLoading(false);
     }
-  }, [getAllListings, getAllDeals, getAllProfiles]);
+  }, [getAllListings, getAllDeals, getAllProfiles, getMyPermissions]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
