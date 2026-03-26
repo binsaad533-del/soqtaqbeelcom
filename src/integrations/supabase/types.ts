@@ -89,6 +89,75 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          category_ar: string | null
+          category_en: string | null
+          content_ar: string
+          content_en: string | null
+          created_at: string
+          excerpt_ar: string | null
+          excerpt_en: string | null
+          featured: boolean | null
+          generated_by_ai: boolean | null
+          id: string
+          meta_description_ar: string | null
+          meta_description_en: string | null
+          published_at: string | null
+          read_time_minutes: number | null
+          slug: string
+          status: string
+          tags: string[] | null
+          title_ar: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          category_ar?: string | null
+          category_en?: string | null
+          content_ar: string
+          content_en?: string | null
+          created_at?: string
+          excerpt_ar?: string | null
+          excerpt_en?: string | null
+          featured?: boolean | null
+          generated_by_ai?: boolean | null
+          id?: string
+          meta_description_ar?: string | null
+          meta_description_en?: string | null
+          published_at?: string | null
+          read_time_minutes?: number | null
+          slug: string
+          status?: string
+          tags?: string[] | null
+          title_ar: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category_ar?: string | null
+          category_en?: string | null
+          content_ar?: string
+          content_en?: string | null
+          created_at?: string
+          excerpt_ar?: string | null
+          excerpt_en?: string | null
+          featured?: boolean | null
+          generated_by_ai?: boolean | null
+          id?: string
+          meta_description_ar?: string | null
+          meta_description_en?: string | null
+          published_at?: string | null
+          read_time_minutes?: number | null
+          slug?: string
+          status?: string
+          tags?: string[] | null
+          title_ar?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_lead_activities: {
         Row: {
           action_type: string
