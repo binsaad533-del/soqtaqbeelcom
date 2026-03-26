@@ -1447,6 +1447,7 @@ export type Database = {
         Args: { _listing_id: string }
         Returns: Json
       }
+      get_profile_name_by_email: { Args: { _email: string }; Returns: string }
       get_seller_visibility_tier: {
         Args: { _seller_id: string }
         Returns: number
