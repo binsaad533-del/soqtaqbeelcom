@@ -234,6 +234,7 @@ const HomePage = () => {
                       </div>
                     </div>
                   </Link>
+                  </div>
                 );
               })}
             </div>
