@@ -18,6 +18,15 @@ import { Button } from "@/components/ui/button";
 
 type Listing = any;
 type Deal = any;
+type NegMessage = {
+  id: string;
+  deal_id: string;
+  sender_id: string;
+  message: string;
+  message_type: string;
+  created_at: string;
+  sender_type: string;
+};
 
 const statusBadge = (s: string) => {
   const m: Record<string, { label: string; cls: string }> = {
