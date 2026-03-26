@@ -8,7 +8,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import TrustBadge, { getSellerBadges, getVerificationLabel } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
-import { useSupervisorPermissions } from "@/hooks/useSupervisorPermissions";
+import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 import { useSEO } from "@/hooks/useSEO";
 import SarSymbol from "@/components/SarSymbol";
 import {
