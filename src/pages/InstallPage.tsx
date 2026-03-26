@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import logoIcon from "@/assets/logo-icon-gold.png";
 import { Download, Smartphone, Share, MoreVertical, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSEO } from "@/hooks/useSEO";
@@ -54,8 +55,8 @@ const InstallPage = () => {
   return (
     <div className="py-12">
       <div className="container max-w-lg text-center">
-        <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto mb-6 shadow-lg">
-          <img src="/pwa-icon-512.png" alt="سوق تقبيل" width={80} height={80} />
+        <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto mb-6 shadow-lg bg-gradient-to-br from-[#0a8af8] to-[#06b6d4] flex items-center justify-center">
+          <img src={logoIcon} alt="سوق تقبيل" className="w-12 h-12 object-contain" />
         </div>
 
         <h1 className="text-2xl font-bold mb-2">ثبّت سوق تقبيل</h1>
