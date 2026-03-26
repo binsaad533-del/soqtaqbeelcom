@@ -26,7 +26,7 @@ const PrivacyPage = () => {
         </Link>
 
         <div className="w-24 h-24 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-5 shadow-soft animate-fade-in">
-          <img src={logoIcon} alt="سوق تقبيل" className="w-14 h-14 object-contain" />
+          <img src={logoIcon} alt="سوق تقبيل" className="w-[4.5rem] h-[4.5rem] object-contain" />
         </div>
 
         <h1 className="text-2xl font-bold text-foreground mb-2">سياسة الخصوصية</h1>
