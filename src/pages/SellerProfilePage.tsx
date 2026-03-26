@@ -238,12 +238,21 @@ const SellerProfilePage = () => {
           onPromote={async (userId, perms) => {
             const { error } = await promoteToSupervisor(userId, perms);
             if (error) toast.error("فشل في ترقية المستخدم");
-            else { toast.success("تم ترقية المستخدم إلى مشرف"); setUserRole("supervisor"); }
+            else {
+              toast.success("تم ترقية المستخدم إلى مشرف");
+              setUserRole("supervisor");
+              const allPerms = await getAllPermissions();
+              setSupervisorPerms(allPerms.find(p => p.user_id === userId) || null);
+            }
           }}
           onDemote={async (userId) => {
             const { error } = await demoteToCustomer(userId);
             if (error) toast.error("فشل في إزالة الصلاحيات");
-            else { toast.success("تم إزالة صلاحيات المشرف"); setUserRole("customer"); }
+            else {
+              toast.success("تم إزالة صلاحيات المشرف");
+              setUserRole("customer");
+              setSupervisorPerms(null);
+            }
           }}
           onUpdatePermissions={async (userId, perms) => {
             const { error } = await upsertPermissions(userId, {
@@ -255,7 +264,11 @@ const SellerProfilePage = () => {
               manage_security: perms.manage_security,
             });
             if (error) toast.error("فشل في تحديث الصلاحيات");
-            else toast.success("تم تحديث الصلاحيات");
+            else {
+              toast.success("تم تحديث الصلاحيات");
+              const allPerms = await getAllPermissions();
+              setSupervisorPerms(allPerms.find(p => p.user_id === userId) || null);
+            }
           }}
         />
       )}
