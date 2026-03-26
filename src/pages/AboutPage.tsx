@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Shield, Zap, Brain, Sparkles } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-gold.png";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const values = [
   { icon: Sparkles, title: "البساطة", desc: "نجعل عملية عرض المشاريع والتفاوض عليها سهلة وواضحة بدون خطوات معقدة." },
@@ -10,11 +12,6 @@ const values = [
   { icon: Brain, title: "الذكاء", desc: "نستخدم تقنيات ذكية لتحليل المشاريع، دعم التفاوض، وتحسين قرارات البيع والشراء." },
 ];
 
-const stats = [
-  { value: "+1,000", label: "فرصة معروضة" },
-  { value: "+500", label: "صفقة محتملة" },
-  { value: "94%", label: "معدل إتمام الصفقات" },
-];
 
 const whyUsItems = [
   {
@@ -45,6 +42,39 @@ const whyUsItems = [
 ];
 
 const AboutPage = () => {
+  const [liveStats, setLiveStats] = useState({ listings: 0, deals: 0, completionRate: 0 });
+
+  const fetchStats = async () => {
+    const [listingsRes, dealsRes, completedRes] = await Promise.all([
+      supabase.from("listings").select("id", { count: "exact", head: true }).eq("status", "published").is("deleted_at", null),
+      supabase.from("deals").select("id", { count: "exact", head: true }),
+      supabase.from("deals").select("id", { count: "exact", head: true }).in("status", ["completed", "finalized"]),
+    ]);
+    const total = dealsRes.count ?? 0;
+    const completed = completedRes.count ?? 0;
+    setLiveStats({
+      listings: listingsRes.count ?? 0,
+      deals: total,
+      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
+    });
+  };
+
+  useEffect(() => {
+    fetchStats();
+    const channel = supabase
+      .channel("about-stats")
+      .on("postgres_changes", { event: "*", schema: "public", table: "listings" }, fetchStats)
+      .on("postgres_changes", { event: "*", schema: "public", table: "deals" }, fetchStats)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  const stats = [
+    { value: liveStats.listings.toLocaleString(), label: "فرصة معروضة" },
+    { value: liveStats.deals.toLocaleString(), label: "صفقة نشطة" },
+    { value: `${liveStats.completionRate}%`, label: "معدل إتمام الصفقات" },
+  ];
+
   return (
     <div className="min-h-screen" dir="rtl">
       {/* Hero / Intro */}
