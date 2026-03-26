@@ -696,12 +696,12 @@ const OwnerDashboardPage = () => {
                 onPromote={async (userId, perms) => {
                   const { error } = await promoteToSupervisor(userId, perms);
                   if (error) toast.error("فشل في ترقية المستخدم");
-                  else { toast.success("تم ترقية المستخدم إلى مشرف"); load(); }
+                  else { toast.success("تم ترقية المستخدم إلى مشرف"); await load(); }
                 }}
                 onDemote={async (userId) => {
                   const { error } = await demoteToCustomer(userId);
                   if (error) toast.error("فشل في إزالة الصلاحيات");
-                  else { toast.success("تم إزالة صلاحيات المشرف"); load(); }
+                  else { toast.success("تم إزالة صلاحيات المشرف"); await load(); }
                 }}
                 onUpdatePermissions={async (userId, perms) => {
                   const { error } = await upsertPermissions(userId, {
@@ -713,7 +713,7 @@ const OwnerDashboardPage = () => {
                     manage_security: perms.manage_security,
                   });
                   if (error) toast.error("فشل في تحديث الصلاحيات");
-                  else { toast.success("تم تحديث الصلاحيات"); load(); }
+                  else { toast.success("تم تحديث الصلاحيات"); await load(); }
                 }}
               />
             )}
