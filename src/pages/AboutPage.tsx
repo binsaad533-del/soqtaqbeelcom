@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Shield, Zap, Brain, Sparkles } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-gold.png";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const values = [
   { icon: Sparkles, title: "البساطة", desc: "نجعل عملية عرض المشاريع والتفاوض عليها سهلة وواضحة بدون خطوات معقدة." },
