@@ -8,9 +8,12 @@ import {
   Head,
   Heading,
   Html,
+  Img,
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+
+const LOGO_URL = 'https://sxvfjtmntdmrlzdetnyg.supabase.co/storage/v1/object/public/email-assets/logo-icon-gold.png'
 import { EmailFooter } from '../email-footer.tsx'
 
 interface ReauthenticationEmailProps {
@@ -23,7 +26,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
     <Preview>رمز التحقق — سوق تقبيل</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Text style={logo}>SOQ TAQBEEL</Text>
+        <Img src={LOGO_URL} width="48" height="48" alt="سوق تقبيل" style={logoImg} />
         <Heading style={h1}>رمز التحقق</Heading>
         <Text style={text}>استخدم الرمز أدناه لتأكيد هويتك:</Text>
         <Text style={codeStyle}>{token}</Text>
@@ -40,7 +43,7 @@ export default ReauthenticationEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'IBM Plex Sans Arabic', Arial, sans-serif" }
 const container = { padding: '30px 25px', textAlign: 'center' as const }
-const logo = { fontSize: '24px', fontWeight: 'bold' as const, color: '#0a8af8', margin: '0 0 25px', letterSpacing: '1px' }
+const logoImg = { margin: '0 auto 20px', display: 'block' as const }
 const h1 = { fontSize: '22px', fontWeight: '600' as const, color: '#3a4a5c', margin: '0 0 20px' }
 const text = { fontSize: '14px', color: '#7a8a9c', lineHeight: '1.7', margin: '0 0 25px', textAlign: 'right' as const }
 const codeStyle = { fontFamily: 'Courier, monospace', fontSize: '28px', fontWeight: 'bold' as const, color: '#0a8af8', margin: '0 0 30px', letterSpacing: '4px' }

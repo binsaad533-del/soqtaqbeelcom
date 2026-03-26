@@ -7,6 +7,7 @@ import { EmailFooter } from '../email-footer.tsx'
 
 const SITE_NAME = "سوق تقبيل"
 const FONT_URL = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
+const LOGO_URL = 'https://sxvfjtmntdmrlzdetnyg.supabase.co/storage/v1/object/public/email-assets/logo-icon-gold.png'
 
 const ICONS = {
   accepted: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%2316a34a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 11.08V12a10 10 0 1 1-5.93-9.14'/%3E%3Cpath d='m9 11 3 3L22 4'/%3E%3C/svg%3E`,
@@ -38,7 +39,7 @@ const OfferStatusEmail = ({
       <Preview>{info.title} — {SITE_NAME}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Section style={headerSection}><Text style={logo}>{SITE_NAME}</Text></Section>
+          <Section style={headerSection}><Img src={LOGO_URL} width="48" height="48" alt="سوق تقبيل" style={logoImg} /></Section>
           <Section style={iconSection}>
             <Img src={info.icon} width="48" height="48" alt="" style={{ margin: '0 auto' }} />
           </Section>
@@ -74,7 +75,7 @@ const FONT = "'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif"
 const main = { backgroundColor: '#ffffff', fontFamily: FONT }
 const container = { padding: '40px 25px', maxWidth: '560px', margin: '0 auto' }
 const headerSection = { textAlign: 'center' as const, marginBottom: '10px' }
-const logo = { fontSize: '20px', fontWeight: '600' as const, color: '#0a8af8', margin: '0', fontFamily: FONT }
+const logoImg = { margin: '0 auto', display: 'block' as const }
 const iconSection = { textAlign: 'center' as const, marginBottom: '12px' }
 const h1 = { fontSize: '22px', fontWeight: '600' as const, color: '#1e3a5f', textAlign: 'center' as const, margin: '0 0 24px', fontFamily: FONT }
 const text = { fontSize: '15px', color: '#55575d', lineHeight: '1.7', margin: '0 0 16px', fontFamily: FONT }

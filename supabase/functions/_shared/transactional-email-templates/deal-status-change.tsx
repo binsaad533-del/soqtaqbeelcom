@@ -7,6 +7,7 @@ import { EmailFooter } from '../email-footer.tsx'
 
 const SITE_NAME = "سوق تقبيل"
 const FONT_URL = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
+const LOGO_URL = 'https://sxvfjtmntdmrlzdetnyg.supabase.co/storage/v1/object/public/email-assets/logo-icon-gold.png'
 
 // Lucide-style inline SVG icons as data URIs
 const ICONS: Record<string, { src: string; color: string }> = {
@@ -65,7 +66,7 @@ const DealStatusChangeEmail = ({
       <Preview>تحديث على صفقتك: {status.label} — {SITE_NAME}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Section style={headerSection}><Text style={logo}>{SITE_NAME}</Text></Section>
+          <Section style={headerSection}><Img src={LOGO_URL} width="48" height="48" alt="سوق تقبيل" style={logoImg} /></Section>
           <Section style={iconSection}>
             <Img src={icon.src} width="48" height="48" alt="" style={{ margin: '0 auto' }} />
           </Section>
@@ -107,7 +108,7 @@ const FONT = "'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif"
 const main = { backgroundColor: '#ffffff', fontFamily: FONT }
 const container = { padding: '40px 25px', maxWidth: '560px', margin: '0 auto' }
 const headerSection = { textAlign: 'center' as const, marginBottom: '10px' }
-const logo = { fontSize: '20px', fontWeight: '600' as const, color: '#0a8af8', margin: '0', fontFamily: FONT }
+const logoImg = { margin: '0 auto', display: 'block' as const }
 const iconSection = { textAlign: 'center' as const, marginBottom: '12px' }
 const h1 = { fontSize: '22px', fontWeight: '600' as const, color: '#1e3a5f', textAlign: 'center' as const, margin: '0 0 24px', fontFamily: FONT }
 const text = { fontSize: '15px', color: '#55575d', lineHeight: '1.7', margin: '0 0 16px', fontFamily: FONT }
