@@ -10,7 +10,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 import { sendNotificationEmail } from "@/lib/sendNotificationEmail";
-import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   listingId: string;

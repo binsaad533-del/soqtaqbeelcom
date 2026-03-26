@@ -374,6 +374,26 @@ const NegotiationPage = () => {
     const msg = await sendMessage(dealId, trimmed);
     if (msg) setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
     if (user) monitorChat(dealId, trimmed, user.id).catch(() => {});
+
+    // Send email notification to the other party
+    if (deal && user) {
+      const otherUserId = user.id === deal.buyer_id ? deal.seller_id : deal.buyer_id;
+      if (otherUserId) {
+        const { sendNotificationEmail } = await import("@/lib/sendNotificationEmail");
+        sendNotificationEmail({
+          userId: otherUserId,
+          category: "messages",
+          templateName: "new-negotiation-message",
+          idempotencyKey: `neg-msg-${msg?.id || Date.now()}`,
+          templateData: {
+            senderName: profile?.full_name || "",
+            dealTitle: listing?.title || "",
+            messagePreview: trimmed.slice(0, 100),
+          },
+        }).catch(() => {});
+      }
+    }
+
     setInput("");
     setSending(false);
   };
