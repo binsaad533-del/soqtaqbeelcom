@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import {
   FileText, Loader2, CheckCircle, Clock,
-  DollarSign, Eye, Phone, UserCheck, Shield, Bell,
+  Eye, Phone, UserCheck, Shield,
   Wallet, TrendingUp, ArrowLeft, Mail, Activity,
   MessageSquare, AlertTriangle, Handshake, Store,
   Receipt, BadgeCheck, ChevronDown, ExternalLink,
