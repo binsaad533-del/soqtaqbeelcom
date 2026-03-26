@@ -1014,6 +1014,51 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          deals_email: boolean
+          deals_sms: boolean
+          id: string
+          marketing_email: boolean
+          marketing_sms: boolean
+          messages_email: boolean
+          messages_sms: boolean
+          offers_email: boolean
+          offers_sms: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deals_email?: boolean
+          deals_sms?: boolean
+          id?: string
+          marketing_email?: boolean
+          marketing_sms?: boolean
+          messages_email?: boolean
+          messages_sms?: boolean
+          offers_email?: boolean
+          offers_sms?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deals_email?: boolean
+          deals_sms?: boolean
+          id?: string
+          marketing_email?: boolean
+          marketing_sms?: boolean
+          messages_email?: boolean
+          messages_sms?: boolean
+          offers_email?: boolean
+          offers_sms?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null

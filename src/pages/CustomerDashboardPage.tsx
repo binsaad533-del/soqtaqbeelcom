@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 import SecuritySettingsPanel from "@/components/SecuritySettingsPanel";
+import NotificationPreferencesPanel from "@/components/NotificationPreferencesPanel";
 
 /* ── Status helpers ── */
 const statusBadge = (s: string) => {
@@ -50,7 +51,7 @@ const CustomerDashboardPage = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "security">("deals");
+  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "notifications" | "security">("deals");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dealStatusFilter, setDealStatusFilter] = useState<string>("all");
@@ -598,6 +599,7 @@ const CustomerDashboardPage = () => {
                 {[
                   { id: "deals" as const, label: "صفقاتي", icon: Briefcase, count: deals.length },
                   { id: "listings" as const, label: "إعلاناتي", icon: Store, count: listings.length },
+                  { id: "notifications" as const, label: "الإشعارات", icon: Bell, count: undefined },
                   { id: "security" as const, label: "الأمان", icon: Shield, count: undefined },
                 ].map(tab => (
                   <button key={tab.id} onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }} className={cn(
@@ -610,7 +612,7 @@ const CustomerDashboardPage = () => {
                   </button>
                 ))}
               </div>
-              {activeTab !== "security" && (
+              {(activeTab === "deals" || activeTab === "listings") && (
               <div className="relative flex-1 max-w-xs">
                 <Search size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -739,6 +741,7 @@ const CustomerDashboardPage = () => {
                 )}
               </div>
             )}
+            {activeTab === "notifications" && <NotificationPreferencesPanel />}
             {activeTab === "security" && <SecuritySettingsPanel />}
         </div>
       </div>
