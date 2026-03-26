@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { Home, Search, ShoppingBag, ArrowRight } from "lucide-react";
+import logoIcon from "@/assets/logo-icon-gold.png";
 import AiStar from "@/components/AiStar";
 import { logAudit } from "@/lib/security";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -21,10 +22,9 @@ const NotFound = () => {
       <div className="max-w-md w-full text-center">
         {/* Animated Star */}
         <div className="relative mb-6">
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center">
-            <AiStar size={36} />
+          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-[#0a8af8] to-[#06b6d4] shadow-lg flex items-center justify-center">
+            <img src={logoIcon} alt="سوق تقبيل" className="w-14 h-14 object-contain" />
           </div>
-          <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-warning/20 animate-pulse" />
         </div>
 
         {/* Error Code */}
