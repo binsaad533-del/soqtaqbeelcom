@@ -112,6 +112,14 @@ const OwnerDashboardPage = () => {
     if (!userId) return "—";
     return profiles.find(p => p.user_id === userId)?.full_name || "—";
   };
+  const getProfilePhone = (userId: string | null) => {
+    if (!userId) return "—";
+    return profiles.find(p => p.user_id === userId)?.phone || "—";
+  };
+  const getProfileEmail = (userId: string | null) => {
+    if (!userId) return "—";
+    return profiles.find(p => p.user_id === userId)?.email || "—";
+  };
 
   const completedDeals = useMemo(() => deals.filter(d => ["completed", "finalized"].includes(d.status)), [deals]);
   const activeDeals = useMemo(() => deals.filter(d => d.status === "negotiating"), [deals]);
