@@ -361,7 +361,7 @@ const OwnerDashboardPage = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center"><Landmark size={14} className="text-success" strokeWidth={1.5} /></div>
-                    العمولات الشهرية
+                    العمولات: محصلة مقابل غير محصلة
                   </h3>
                   <span className="text-[10px] text-muted-foreground">آخر 6 أشهر</span>
                 </div>
@@ -373,10 +373,15 @@ const OwnerDashboardPage = () => {
                       <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={40}
                         tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} />
                       <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 11, direction: 'rtl' }}
-                        formatter={(value: number) => [`${value.toLocaleString('en-US')} ﷼`, 'العمولة']} />
-                      <Bar dataKey="commission" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={28} opacity={0.8} />
+                        formatter={(value: number, name: string) => [`${value.toLocaleString('en-US')} ﷼`, name === 'collected' ? 'محصلة' : 'غير محصلة']} />
+                      <Bar dataKey="collected" stackId="comm" fill="hsl(var(--success))" radius={[0, 0, 0, 0]} barSize={28} name="collected" />
+                      <Bar dataKey="uncollected" stackId="comm" fill="hsl(var(--warning))" radius={[6, 6, 0, 0]} barSize={28} name="uncollected" />
                     </BarChart>
                   </ResponsiveContainer>
+                </div>
+                <div className="flex items-center justify-center gap-5 mt-3">
+                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-success" /><span className="text-[10px] text-muted-foreground">محصلة</span></div>
+                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-warning" /><span className="text-[10px] text-muted-foreground">غير محصلة</span></div>
                 </div>
               </div>
             </div>
