@@ -133,21 +133,6 @@ const AboutPage = () => {
             ))}
           </div>
 
-          {/* Trust */}
-          <div className="mt-12 text-center">
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-lg mx-auto">
-              منصة سعودية بالكامل، مملوكة لشركة{" "}
-              <a
-                href="https://www.jsaas-group.com/en"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline font-medium"
-              >
-                عين جساس
-              </a>{" "}
-              بخبرة تشغيلية واستثمارية حقيقية.
-            </p>
-          </div>
         </div>
       </section>
 
