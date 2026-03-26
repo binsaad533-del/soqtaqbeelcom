@@ -636,6 +636,7 @@ const OwnerDashboardPage = () => {
                         معاينة
                       </Link>
                     )}
+                    {!isOwner && (
                       <button
                         onClick={() => setPermDialogUser(p)}
                         className={cn(
