@@ -194,7 +194,43 @@ const SellerProfilePage = () => {
             ))}
           </div>
         </div>
+
+        {/* Admin Actions */}
+        {isOwner && !isCurrentUser && (
+          <div className="flex items-center gap-2 pt-4 border-t border-border/30">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl text-xs gap-1.5"
+              onClick={() => navigate(`/dashboard/view-customer/${id}`)}
+            >
+              <Eye size={13} />
+              معاينة الحساب
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl text-xs gap-1.5"
+              onClick={() => setSupervisorDialogOpen(true)}
+            >
+              <Shield size={13} />
+              {isSupervisor ? "صلاحيات المشرف" : "تعيين كمشرف"}
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* Supervisor Dialog */}
+      {isOwner && id && (
+        <SupervisorPermissionsDialog
+          open={supervisorDialogOpen}
+          onOpenChange={setSupervisorDialogOpen}
+          userId={id}
+          userName={profile.full_name || "مستخدم"}
+          isSupervisor={isSupervisor}
+          onRoleChanged={(newRole) => setUserRole(newRole)}
+        />
+      )}
 
       {/* Reviews */}
       <SellerReviewsSummary reviews={reviews} />
