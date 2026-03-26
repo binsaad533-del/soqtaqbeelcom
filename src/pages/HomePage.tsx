@@ -66,6 +66,7 @@ function useHomeStats() {
 
 const HomePage = () => {
   useSEO({ canonical: "/" });
+  const stats = useHomeStats();
   const revealRefs = useRef<HTMLDivElement[]>([]);
 
   useEffect(() => {
