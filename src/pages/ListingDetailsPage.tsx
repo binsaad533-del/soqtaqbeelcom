@@ -20,6 +20,7 @@ import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
+import PriceDisplay from "@/components/PriceDisplay";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
@@ -380,7 +381,7 @@ const ListingDetailsPage = () => {
 
               <div className="mb-6">
                 <div className="text-2xl font-medium gradient-text">
-                  {listing.price ? `${Number(listing.price).toLocaleString("en-US")}` : "—"} <SarSymbol size={14} />
+                  {listing.price ? <PriceDisplay amount={Number(listing.price)} size={14} /> : "—"}
                 </div>
                 {isOwner && (
                   <QuickPriceEdit
@@ -394,7 +395,7 @@ const ListingDetailsPage = () => {
 
               <div className="space-y-3 mb-6">
                 <InfoRow label="نوع الصفقة" value={primaryConfig?.label || t(listing.deal_type, DEAL_TYPE_LABELS)} />
-                {listing.annual_rent && <InfoRow label="الإيجار السنوي" value={<>{Number(listing.annual_rent).toLocaleString("en-US")} <SarSymbol size={10} /></>} />}
+                {listing.annual_rent && <InfoRow label="الإيجار السنوي" value={<PriceDisplay amount={Number(listing.annual_rent)} size={10} />} />}
                 {listing.lease_duration && <InfoRow label="مدة العقد" value={listing.lease_duration} />}
                 {listing.lease_remaining && <InfoRow label="المتبقي" value={listing.lease_remaining} />}
                 {listing.municipality_license && <InfoRow label="رخصة البلدية" value={listing.municipality_license} />}

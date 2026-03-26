@@ -7,6 +7,7 @@ import Footer from "./Footer";
 import NotificationBell from "./NotificationBell";
 import ThemeToggle from "./ThemeToggle";
 import LanguageToggle from "./LanguageToggle";
+import CurrencyToggle from "./CurrencyToggle";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -77,6 +78,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </nav>
 
           <div className="flex items-center gap-0.5">
+            <CurrencyToggle />
             <LanguageToggle />
             <ThemeToggle />
             {user ? (
