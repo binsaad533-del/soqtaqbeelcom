@@ -11,7 +11,7 @@ import {
   Wallet, TrendingUp, ArrowLeft, Mail, Activity,
   MessageSquare, AlertTriangle, Handshake, Store,
   Receipt, BadgeCheck, ChevronDown, ExternalLink,
-  Landmark, CalendarDays, Hash, ArrowUpDown
+  Landmark, CalendarDays, Hash, ArrowUpDown, Flag, ShieldAlert
 } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
@@ -42,6 +42,44 @@ type NegMessage = {
   message_type: string;
   created_at: string;
   sender_type: string;
+};
+type ListingReport = {
+  id: string;
+  listing_id: string;
+  reporter_id: string;
+  reason: string;
+  details: string | null;
+  status: string;
+  created_at: string;
+  reviewed_at: string | null;
+};
+type MessageReport = {
+  id: string;
+  deal_id: string;
+  message_id: string;
+  reporter_id: string;
+  reason: string;
+  details: string | null;
+  status: string;
+  created_at: string;
+  reviewed_at: string | null;
+};
+
+const reportReasonLabels: Record<string, string> = {
+  fraud: "احتيال",
+  threats: "تهديد",
+  inappropriate: "محتوى غير لائق",
+  off_platform: "محاولة تواصل خارج المنصة",
+  spam: "رسائل مزعجة",
+  misleading: "معلومات مضللة",
+  other: "أخرى",
+};
+
+const reportStatusLabels: Record<string, { label: string; cls: string }> = {
+  pending: { label: "بانتظار المراجعة", cls: "bg-warning/15 text-warning" },
+  reviewed: { label: "تمت المراجعة", cls: "bg-success/15 text-success" },
+  dismissed: { label: "مرفوض", cls: "bg-muted text-muted-foreground" },
+  resolved: { label: "تم الحل", cls: "bg-success/15 text-success" },
 };
 
 const statusBadge = (s: string) => {
