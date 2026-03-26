@@ -69,44 +69,9 @@ function getImageRequirement(dealType: string): "required" | "optional" | "none"
   return "optional";
 }
 
-interface InventoryItem {
-  id: string;
-  name: string;
-  qty: number;
-  condition: string;
-  category: string;
-  included: boolean;
-  confidence: "high" | "medium" | "low";
-  detectionNote: string;
-  photoIndices: number[];
-  isSameAssetMultipleAngles: boolean;
-  userConfirmed: boolean;
-  unitPrice?: number | null;
-}
-
-type InventoryPricingMode = "per_item" | "bulk";
-
-interface DedupAction {
-  description: string;
-  merged_count: number;
-}
-
-interface CrExtractionResult {
-  cr_number?: string;
-  entity_name?: string;
-  business_activity?: string;
-  secondary_activities?: string[];
-  city?: string;
-  district?: string;
-  issue_date?: string;
-  expiry_date?: string;
-  status?: string;
-  entity_type?: string;
-  owner_name?: string;
-  extraction_confidence?: "high" | "medium" | "low";
-  extraction_notes?: string;
-  fields_confidence?: Record<string, string>;
-}
+import type { InventoryItem, InventoryPricingMode, DedupAction, CrExtractionResult } from "./create-listing/types";
+import { ConfirmationCard } from "./create-listing/ConfirmationCard";
+import { FormField, SelectField } from "./create-listing/FormFields";
 
 const CreateListingPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
