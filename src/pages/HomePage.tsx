@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MapPin, Eye, Star } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import AiInlineStar from "@/components/AiInlineStar";
 import { Button } from "@/components/ui/button";
 import logoIconGold from "@/assets/logo-icon-gold.png";
+import SarSymbol from "@/components/SarSymbol";
 import { useEffect, useRef, useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
