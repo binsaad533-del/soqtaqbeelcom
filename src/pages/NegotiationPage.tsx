@@ -759,6 +759,13 @@ const NegotiationPage = () => {
 
             {/* Input area */}
             <div className="p-2.5 border-t border-border/20">
+              {/* Platform safety disclaimer */}
+              <div className="flex items-center gap-1.5 mb-2 px-2 py-1.5 rounded-lg bg-primary/5 border border-primary/10">
+                <Shield size={11} className="text-primary shrink-0" />
+                <p className="text-[9px] text-muted-foreground leading-relaxed">
+                  لحماية حقوقك وضمان سلامة الصفقة، يُرجى إتمام جميع المحادثات والاتفاقيات داخل المنصة. التواصل الخارجي قد يُفقدك حق المتابعة والحماية.
+                </p>
+              </div>
               {aiLoading && (
                 <div className="flex items-center gap-1.5 mb-1.5 px-1 text-[9px] text-primary">
                   <Loader2 size={9} className="animate-spin" /> المساعد يعمل...
