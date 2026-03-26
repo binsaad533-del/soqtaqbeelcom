@@ -13,6 +13,7 @@ const footerLinks = [
   { label: "تواصل معنا", path: "/contact" },
   { label: "مركز المساعدة", path: "/help" },
   { label: "المدونة", path: "/blog" },
+  { label: "تثبيت التطبيق", path: "/install" },
 ];
 
 const Footer = () => {
