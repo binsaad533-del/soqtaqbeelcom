@@ -43,6 +43,7 @@ const SupervisorDashboardPage = () => {
   const { getAllListings } = useListings();
   const { getAllDeals } = useDeals();
   const { getAllProfiles } = useProfiles();
+  const { getMyPermissions } = useSupervisorPermissions();
 
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [listings, setListings] = useState<Listing[]>([]);
@@ -50,6 +51,12 @@ const SupervisorDashboardPage = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [myPerms, setMyPerms] = useState<SupervisorPermissions | null>(null);
+
+  const TABS = useMemo(() => {
+    if (!myPerms) return ALL_TABS; // show all while loading
+    return ALL_TABS.filter(t => !t.perm || (myPerms as any)[t.perm]);
+  }, [myPerms]);
 
   /* ── Realtime feed ── */
   const [feed, setFeed] = useState<{ id: string; text: string; time: string; type: string }[]>([]);
