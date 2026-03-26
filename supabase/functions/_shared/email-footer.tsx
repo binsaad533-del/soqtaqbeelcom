@@ -21,8 +21,7 @@ const NAV_LINKS = [
   { label: 'مركز المساعدة', href: `${SITE_URL}/help` },
 ]
 
-// Golden logo icon as data URI (simplified geometric star)
-const LOGO_ICON = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40' fill='none'%3E%3Ccircle cx='20' cy='20' r='18' stroke='%23d4a843' stroke-width='1.5' fill='none'/%3E%3Cpath d='M20 6L23.5 15.5L33 15.5L25.5 21.5L28.5 31L20 25L11.5 31L14.5 21.5L7 15.5L16.5 15.5Z' stroke='%23d4a843' stroke-width='1.2' fill='none' stroke-linejoin='round'/%3E%3C/svg%3E`
+const LOGO_URL = 'https://sxvfjtmntdmrlzdetnyg.supabase.co/storage/v1/object/public/email-assets/logo-icon-gold.png'
 
 const FONT = "'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif"
 
@@ -44,7 +43,7 @@ export const EmailFooter = () => (
 
     {/* Logo icon */}
     <Section style={logoSection}>
-      <Img src={LOGO_ICON} width="40" height="40" alt="سوق تقبيل" style={{ margin: '0 auto' }} />
+      <Img src={LOGO_URL} width="36" height="36" alt="سوق تقبيل" style={{ margin: '0 auto' }} />
     </Section>
 
     {/* Social icons */}
