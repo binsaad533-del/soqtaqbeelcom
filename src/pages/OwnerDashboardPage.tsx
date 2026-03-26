@@ -267,15 +267,15 @@ const OwnerDashboardPage = () => {
             {/* KPI Row 1: Counts */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "إجمالي المستخدمين", value: profiles.length, icon: Users, accent: "text-primary" },
-                { label: "الإعلانات", value: listings.length, icon: FileText, accent: "text-primary" },
-                { label: "صفقات مكتملة", value: completedDeals.length, icon: Handshake, accent: "text-success" },
-                { label: "صفقات جارية", value: activeDeals.length, icon: TrendingUp, accent: "text-primary" },
+                { label: "إجمالي المستخدمين", value: profiles.length, icon: Users, accent: "text-primary", tab: "users" as Tab },
+                { label: "الإعلانات", value: listings.length, icon: FileText, accent: "text-primary", tab: "listings" as Tab },
+                { label: "صفقات مكتملة", value: completedDeals.length, icon: Handshake, accent: "text-success", tab: "deals" as Tab },
+                { label: "صفقات جارية", value: activeDeals.length, icon: TrendingUp, accent: "text-primary", tab: "deals" as Tab },
               ].map((s, i) => (
-                <div key={i} className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 hover:shadow-soft-lg transition-all">
+                <div key={i} onClick={() => { setActiveTab(s.tab); setSearchQuery(""); }} className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 hover:shadow-soft-lg transition-all cursor-pointer group">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] text-muted-foreground font-medium">{s.label}</span>
-                    <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center">
+                    <span className="text-[11px] text-muted-foreground font-medium group-hover:text-primary transition-colors">{s.label}</span>
+                    <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
                       <s.icon size={15} className={cn("shrink-0", s.accent)} strokeWidth={1.5} />
                     </div>
                   </div>
