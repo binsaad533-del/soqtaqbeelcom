@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, TrendingUp, Info, FileCheck, CheckCircle2, X, MapPin } from "lucide-react";
+import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, TrendingUp, Info, FileCheck, CheckCircle2, X, MapPin, ShieldAlert } from "lucide-react";
 import ChatAttachmentButton from "@/components/chat/ChatAttachmentButton";
 import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
 import AiStar from "@/components/AiStar";
@@ -464,6 +464,35 @@ const NegotiationPage = () => {
           <span className="text-border">|</span>
           <span>{listingTitle}</span>
         </div>
+
+        {/* Suspension Banner */}
+        {deal.status === "suspended" && (
+          <div className="mb-4 rounded-2xl border border-warning/30 bg-warning/5 p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <ShieldAlert size={16} className="text-warning" strokeWidth={1.5} />
+              <h3 className="font-semibold text-sm text-warning">هذه الصفقة معلّقة</h3>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              تم تعليق هذه الصفقة من قبل إدارة المنصة. الإعلان المرتبط مخفي من سوق الفرص.
+              {user?.id === deal.seller_id && (
+                <span className="block mt-1 text-foreground font-medium">
+                  يمكنك تعديل بيانات الإعلان ثم إعادة نشره من <Link to={`/listing/${deal.listing_id}`} className="text-primary hover:underline">صفحة الإعلان</Link>.
+                </span>
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Cancelled Banner */}
+        {deal.status === "cancelled" && (
+          <div className="mb-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <X size={16} className="text-destructive" strokeWidth={1.5} />
+              <h3 className="font-semibold text-sm text-destructive">هذه الصفقة ملغاة</h3>
+            </div>
+            <p className="text-xs text-muted-foreground">تم إلغاء هذه الصفقة. الإعلان المرتبط أعيد للعرض في سوق الفرص.</p>
+          </div>
+        )}
 
         <DealProgressBar currentStage={getDealStage(deal, isPostAgreement)} className="mb-5" />
 
