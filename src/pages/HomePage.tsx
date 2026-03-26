@@ -8,13 +8,14 @@ import SarSymbol from "@/components/SarSymbol";
 import { useEffect, useRef, useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-function useHomeStats() {
+function useHomeStats(tx: (ar: string, en: string) => string) {
   const [stats, setStats] = useState([
-    { value: "—", label: "فرصة نشطة" },
-    { value: "—", label: "مدينة" },
-    { value: "—", label: "إفصاح مكتمل" },
-    { value: "—", label: "صفقة مكتملة" },
+    { value: "—", label: tx("فرصة نشطة", "Active opportunities") },
+    { value: "—", label: tx("مدينة", "Cities") },
+    { value: "—", label: tx("إفصاح مكتمل", "Disclosure complete") },
+    { value: "—", label: tx("صفقة مكتملة", "Completed deals") },
   ]);
 
   useEffect(() => {
@@ -40,16 +41,15 @@ function useHomeStats() {
         : 0;
 
       setStats([
-        { value: activeListings.toLocaleString("en-GB"), label: "فرصة نشطة" },
-        { value: uniqueCities.toLocaleString("en-GB"), label: "مدينة" },
-        { value: `${avgDisclosure}%`, label: "إفصاح مكتمل" },
-        { value: completedDeals.toLocaleString("en-GB"), label: "صفقة مكتملة" },
+        { value: activeListings.toLocaleString("en-GB"), label: tx("فرصة نشطة", "Active opportunities") },
+        { value: uniqueCities.toLocaleString("en-GB"), label: tx("مدينة", "Cities") },
+        { value: `${avgDisclosure}%`, label: tx("إفصاح مكتمل", "Disclosure complete") },
+        { value: completedDeals.toLocaleString("en-GB"), label: tx("صفقة مكتملة", "Completed deals") },
       ]);
     }
 
     fetch();
 
-    // Realtime subscription for live updates
     const channel = supabase
       .channel("home-stats")
       .on("postgres_changes", { event: "*", schema: "public", table: "listings" }, () => fetch())
@@ -60,7 +60,7 @@ function useHomeStats() {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [tx]);
 
   return stats;
 }
@@ -98,7 +98,8 @@ function useFeaturedListings() {
 
 const HomePage = () => {
   useSEO({ canonical: "/" });
-  const stats = useHomeStats();
+  const { tx } = useLanguage();
+  const stats = useHomeStats(tx);
   const featured = useFeaturedListings();
   const revealRefs = useRef<HTMLDivElement[]>([]);
 
@@ -122,39 +123,93 @@ const HomePage = () => {
     if (el && !revealRefs.current.includes(el)) revealRefs.current.push(el);
   };
 
+  const smartFeatures = [
+    {
+      num: "1",
+      title: tx("ارفع صور… والذكاء يجرد لك", "Upload photos and let AI inventory everything"),
+      desc: tx(
+        "بمجرد رفع صور المحل أو المشروع، الذكاء الاصطناعي يسوّي جرد كامل للأصول والمعدات تلقائيًا.",
+        "Once you upload shop or business photos, AI automatically creates a full inventory of assets and equipment."
+      ),
+    },
+    {
+      num: "2",
+      title: tx("تقييم ذكي بدون خبير", "Smart valuation without an expert"),
+      desc: tx(
+        "المنصة تحلل بيانات المشروع وتعطيك تقييم واقعي للقيمة السوقية بناءً على البيانات الفعلية.",
+        "The platform analyzes business data and gives you a realistic market valuation based on real inputs."
+      ),
+    },
+    {
+      num: "3",
+      title: tx("بدون تعبئة بيانات… الذكاء يكفي", "No manual forms, AI handles it"),
+      desc: tx(
+        "ارفع الصور والمستندات والذكاء الاصطناعي يستخرج كل البيانات المطلوبة بدون ما تكتب شيء.",
+        "Upload photos and documents, and AI extracts the required data without manual entry."
+      ),
+    },
+    {
+      num: "4",
+      title: tx("تفاوض ذكي داخل المنصة", "Smart negotiation inside the platform"),
+      desc: tx(
+        "مساعد ذكي يتفاوض معك ويقترح حلول عادلة ويساعدك توصل لأفضل صفقة.",
+        "An intelligent assistant helps negotiate, suggests fair solutions, and guides both sides to a better deal."
+      ),
+    },
+    {
+      num: "5",
+      title: tx("صفقات حقيقية… مو مجرد إعلانات", "Real transactions, not just listings"),
+      desc: tx(
+        "نركّز على إتمام الصفقة فعليًا، مو مجرد عرض إعلان بين آلاف الإعلانات.",
+        "We focus on completing real deals, not just posting another listing in a crowded marketplace."
+      ),
+    },
+    {
+      num: "6",
+      title: tx("تجربة منظمة من البداية للنهاية", "A guided journey from start to finish"),
+      desc: tx(
+        "من رفع الصور حتى توقيع الاتفاق، كل شيء واضح ومرتب في مكان واحد.",
+        "From uploading images to signing the agreement, everything stays clear and organized in one place."
+      ),
+    },
+  ];
+
   return (
     <div className="relative">
-
-      {/* Hero */}
       <section className="bg-background py-20 md:py-32 relative overflow-hidden">
         <div className="container relative z-10">
           <div className="max-w-2xl mx-auto text-center animate-reveal">
             <div className="flex flex-col items-center mb-8 -mt-4">
-              <img src={logoIconGold} alt="سوق تقبيل" className="h-28 md:h-36 w-auto" />
+              <img src={logoIconGold} alt={tx("سوق تقبيل", "Soq Taqbeel")} className="h-28 md:h-36 w-auto" />
               <span className="text-lg md:text-xl font-semibold tracking-[0.3em] text-foreground/70 mt-3 uppercase">SOQ TAQBEEL</span>
             </div>
-            <p className="text-sm font-medium text-primary mb-3 tracking-wide">أول منصة سعودية بالذكاء الاصطناعي <AiInlineStar size={13} /> لتقبيل المشاريع</p>
+            <p className="text-sm font-medium text-primary mb-3 tracking-wide">
+              {tx("أول منصة سعودية بالذكاء الاصطناعي", "The first Saudi AI-powered platform")} <AiInlineStar size={13} /> {tx("لتقبيل المشاريع", "for business transfers")}
+            </p>
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
-              ارفع صور مشروعك…
+              {tx("ارفع صور مشروعك…", "Upload your business photos…")}
               <br />
-              <span className="gradient-text">والذكاء الاصطناعي يكمل الباقي <AiInlineStar size={20} /></span>
+              <span className="gradient-text">{tx("والذكاء الاصطناعي يكمل الباقي", "and AI handles the rest")} <AiInlineStar size={20} /></span>
             </h1>
 
             <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
-              جرد، تقييم، بيانات، وتفاوض — كلها تلقائيًا بدون ما تكتب سطر واحد.
+              {tx(
+                "جرد، تقييم، بيانات، وتفاوض — كلها تلقائيًا بدون ما تكتب سطر واحد.",
+                "Inventory, valuation, data extraction, and negotiation — all automated without writing a single line."
+              )}
             </p>
             <p className="text-xs md:text-sm text-muted-foreground/70 mb-8">
-              فقط ارفع الصور والمستندات وخلّ الـAI <AiInlineStar size={11} /> يشتغل عنك.
+              {tx("فقط ارفع الصور والمستندات وخلّ الـAI", "Just upload photos and documents and let AI")} <AiInlineStar size={11} /> {tx("يشتغل عنك.", "do the heavy lifting.")}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft hover:shadow-soft-lg transition-shadow active:scale-[0.98]">
                 <Link to="/create-listing">
-                  اعرض مشروعك
+                  {tx("اعرض مشروعك", "List your business")}
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="rounded-xl border-border/60 hover:bg-accent/50 active:scale-[0.98]">
                 <Link to="/marketplace">
-                  تصفح الفرص
+                  {tx("تصفح الفرص", "Browse opportunities")}
                   <ArrowLeft size={16} strokeWidth={1.5} />
                 </Link>
               </Button>
@@ -163,7 +218,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Stats */}
       <section className="py-12 border-b border-border/50">
         <div className="container" ref={addRevealRef} style={{ opacity: 0 }}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -177,7 +231,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Featured Listings */}
       {featured.length > 0 && (
         <section className="py-16 md:py-20">
           <div className="container">
@@ -185,13 +238,13 @@ const HomePage = () => {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Star size={18} className="text-primary" strokeWidth={1.5} fill="currentColor" />
-                  <h2 className="text-xl md:text-2xl font-medium">فرص مميزة</h2>
+                  <h2 className="text-xl md:text-2xl font-medium">{tx("فرص مميزة", "Featured opportunities")}</h2>
                 </div>
-                <p className="text-sm text-muted-foreground">فرص مختارة بعناية لك</p>
+                <p className="text-sm text-muted-foreground">{tx("فرص مختارة بعناية لك", "Curated opportunities for you")}</p>
               </div>
               <Button asChild variant="ghost" size="sm" className="text-primary hover:text-primary/80">
                 <Link to="/marketplace" className="flex items-center gap-1">
-                  عرض الكل
+                  {tx("عرض الكل", "View all")}
                   <ArrowLeft size={14} strokeWidth={1.5} />
                 </Link>
               </Button>
@@ -205,35 +258,35 @@ const HomePage = () => {
                     ref={addRevealRef}
                     style={{ opacity: 0, animationDelay: `${i * 100}ms` }}
                   >
-                  <Link
-                    to={`/listing/${listing.id}`}
-                    className="group bg-card rounded-2xl shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden block"
-                  >
-                    <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/20 flex items-center justify-center relative">
-                      {photos.length > 0 ? (
-                        <img src={photos[0]} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <Eye size={24} className="text-muted-foreground/20" strokeWidth={1} />
-                      )}
-                      <span className="absolute top-2.5 right-2.5 bg-primary/90 text-primary-foreground text-[10px] px-2.5 py-0.5 rounded-md flex items-center gap-1">
-                        <Star size={9} fill="currentColor" /> مميز
-                      </span>
-                    </div>
-                    <div className="p-4">
-                      <div className="text-sm font-medium mb-1.5 group-hover:text-primary transition-colors">
-                        {listing.title || listing.business_activity || "فرصة تقبيل"}
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
-                        <MapPin size={12} strokeWidth={1.3} />
-                        {listing.district && `${listing.district}، `}{listing.city || "—"}
-                      </div>
-                      <div className="flex items-center justify-between pt-2.5 border-t border-border/10">
-                        <span className="text-sm font-medium text-primary">
-                          {listing.price ? <>{Number(listing.price).toLocaleString("en-GB")} <SarSymbol size={10} /></> : "السعر عند التواصل"}
+                    <Link
+                      to={`/listing/${listing.id}`}
+                      className="group bg-card rounded-2xl shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden block"
+                    >
+                      <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/20 flex items-center justify-center relative">
+                        {photos.length > 0 ? (
+                          <img src={photos[0]} alt={listing.title || listing.business_activity || tx("فرصة مميزة", "Featured opportunity")} className="w-full h-full object-cover" />
+                        ) : (
+                          <Eye size={24} className="text-muted-foreground/20" strokeWidth={1} />
+                        )}
+                        <span className="absolute top-2.5 right-2.5 bg-primary/90 text-primary-foreground text-[10px] px-2.5 py-0.5 rounded-md flex items-center gap-1">
+                          <Star size={9} fill="currentColor" /> {tx("مميز", "Featured")}
                         </span>
                       </div>
-                    </div>
-                  </Link>
+                      <div className="p-4">
+                        <div className="text-sm font-medium mb-1.5 group-hover:text-primary transition-colors">
+                          {listing.title || listing.business_activity || tx("فرصة تقبيل", "Business opportunity")}
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
+                          <MapPin size={12} strokeWidth={1.3} />
+                          {listing.district && `${listing.district}، `}{listing.city || "—"}
+                        </div>
+                        <div className="flex items-center justify-between pt-2.5 border-t border-border/10">
+                          <span className="text-sm font-medium text-primary">
+                            {listing.price ? <>{Number(listing.price).toLocaleString("en-GB")} <SarSymbol size={10} /></> : tx("السعر عند التواصل", "Price on request")}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
                   </div>
                 );
               })}
@@ -242,25 +295,20 @@ const HomePage = () => {
         </section>
       )}
 
-      {/* Smart Platform */}
       <section className="py-16 md:py-24 border-t border-border/50">
         <div className="container">
           <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
-            <h2 className="text-2xl md:text-3xl font-medium mb-4">منصة بالذكاء الاصطناعي <AiInlineStar size={18} /> لإتمام الصفقات… مو مجرد عرض</h2>
+            <h2 className="text-2xl md:text-3xl font-medium mb-4">{tx("منصة بالذكاء الاصطناعي", "An AI-powered platform")} <AiInlineStar size={18} /> {tx("لإتمام الصفقات… مو مجرد عرض", "built to close deals, not just display listings")}</h2>
             <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              كل الأدوات اللي تحتاجها لتقييم، عرض، وتوثيق الصفقات في مكان واحد — بطريقة ذكية وسريعة وواضحة.
+              {tx(
+                "كل الأدوات اللي تحتاجها لتقييم، عرض، وتوثيق الصفقات في مكان واحد — بطريقة ذكية وسريعة وواضحة.",
+                "Everything you need to value, showcase, negotiate, and document deals in one smart, fast, and clear workflow."
+              )}
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
-            {[
-              { num: "1", title: "ارفع صور… والذكاء يجرد لك", desc: "بمجرد رفع صور المحل أو المشروع، الذكاء الاصطناعي يسوّي جرد كامل للأصول والمعدات تلقائيًا." },
-              { num: "2", title: "تقييم ذكي بدون خبير", desc: "المنصة تحلل بيانات المشروع وتعطيك تقييم واقعي للقيمة السوقية بناءً على البيانات الفعلية." },
-              { num: "3", title: "بدون تعبئة بيانات… الذكاء يكفي", desc: "ارفع الصور والمستندات والذكاء الاصطناعي يستخرج كل البيانات المطلوبة بدون ما تكتب شيء." },
-              { num: "4", title: "تفاوض ذكي داخل المنصة", desc: "مساعد ذكي يتفاوض معك ويقترح حلول عادلة ويساعدك توصل لأفضل صفقة." },
-              { num: "5", title: "صفقات حقيقية… مو مجرد إعلانات", desc: "نركّز على إتمام الصفقة فعليًا، مو مجرد عرض إعلان بين آلاف الإعلانات." },
-              { num: "6", title: "تجربة منظمة من البداية للنهاية", desc: "من رفع الصور حتى توقيع الاتفاق، كل شيء واضح ومرتب في مكان واحد." },
-            ].map((item, i) => (
+            {smartFeatures.map((item, i) => (
               <div
                 key={item.num}
                 ref={addRevealRef}
@@ -278,18 +326,17 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-16 gradient-hero" ref={addRevealRef} style={{ opacity: 0 }}>
         <div className="container text-center">
           <AiStar size={36} className="justify-center mb-4" />
-          <h2 className="text-2xl md:text-3xl font-medium mb-2">ابدأ الآن خلال 30 ثانية</h2>
-          <p className="text-muted-foreground mb-6">سواء تبي تعرض مشروعك أو تدور فرصة… المنصة جاهزة لك</p>
+          <h2 className="text-2xl md:text-3xl font-medium mb-2">{tx("ابدأ الآن خلال 30 ثانية", "Get started in 30 seconds")}</h2>
+          <p className="text-muted-foreground mb-6">{tx("سواء تبي تعرض مشروعك أو تدور فرصة… المنصة جاهزة لك", "Whether you want to list your business or discover an opportunity, the platform is ready for you")}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft active:scale-[0.98]">
-              <Link to="/create-listing">اعرض مشروعك</Link>
+              <Link to="/create-listing">{tx("اعرض مشروعك", "List your business")}</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="rounded-xl border-border/60 hover:bg-accent/50 active:scale-[0.98]">
-              <Link to="/marketplace">تصفح الفرص</Link>
+              <Link to="/marketplace">{tx("تصفح الفرص", "Browse opportunities")}</Link>
             </Button>
           </div>
         </div>
