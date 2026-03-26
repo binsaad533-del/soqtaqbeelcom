@@ -2,17 +2,17 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 const sections = [
-  { id: "intro", title: "١. مقدمة" },
-  { id: "definition", title: "٢. تعريف المنصة" },
-  { id: "registration", title: "٣. التسجيل والحساب" },
-  { id: "content", title: "٤. الإعلانات والمحتوى" },
-  { id: "deals", title: "٥. الصفقات والتفاوض" },
-  { id: "ai", title: "٦. الذكاء الاصطناعي" },
-  { id: "liability", title: "٧. المسؤولية والإخلاء" },
-  { id: "ip", title: "٨. الملكية الفكرية" },
-  { id: "changes", title: "٩. التعديلات" },
-  { id: "law", title: "١٠. القانون المُطبّق" },
-  { id: "contact", title: "١١. التواصل" },
+  { id: "intro", title: "1. مقدمة" },
+  { id: "definition", title: "2. تعريف المنصة" },
+  { id: "registration", title: "3. التسجيل والحساب" },
+  { id: "content", title: "4. الإعلانات والمحتوى" },
+  { id: "deals", title: "5. الصفقات والتفاوض" },
+  { id: "ai", title: "6. الذكاء الاصطناعي" },
+  { id: "liability", title: "7. المسؤولية والإخلاء" },
+  { id: "ip", title: "8. الملكية الفكرية" },
+  { id: "changes", title: "9. التعديلات" },
+  { id: "law", title: "10. القانون المُطبّق" },
+  { id: "contact", title: "11. التواصل" },
 ];
 
 const TermsPage = () => {
@@ -25,7 +25,7 @@ const TermsPage = () => {
         </Link>
 
         <h1 className="text-2xl font-bold text-foreground mb-2">الشروط والأحكام</h1>
-        <p className="text-xs text-muted-foreground mb-8">آخر تحديث: مارس ٢٠٢٦</p>
+        <p className="text-xs text-muted-foreground mb-8">آخر تحديث: مارس 2026</p>
 
         {/* Table of Contents */}
         <nav className="mb-10 p-4 rounded-xl bg-card border border-border/30">
@@ -42,15 +42,15 @@ const TermsPage = () => {
         </nav>
 
         <div className="space-y-6 text-sm text-foreground/85 leading-relaxed">
-          <Section id="intro" title="١. مقدمة">
+          <Section id="intro" title="1. مقدمة">
             مرحبًا بك في منصة <strong>سوق تقبيل</strong>. باستخدامك للمنصة أو التسجيل فيها، فإنك توافق على الالتزام بهذه الشروط والأحكام. يُرجى قراءتها بعناية قبل استخدام أي من خدمات المنصة.
           </Section>
 
-          <Section id="definition" title="٢. تعريف المنصة">
+          <Section id="definition" title="2. تعريف المنصة">
             سوق تقبيل هي منصة إلكترونية وسيطة تتيح للمستخدمين عرض المشاريع التجارية والأصول للبيع أو التقبيل، والتفاوض بين الأطراف، وإتمام الصفقات. المنصة لا تُعد طرفًا في أي صفقة تتم بين المستخدمين.
           </Section>
 
-          <Section id="registration" title="٣. التسجيل والحساب">
+          <Section id="registration" title="3. التسجيل والحساب">
             <ul className="list-disc pr-5 space-y-1 mt-1">
               <li>يجب أن تكون المعلومات المقدمة عند التسجيل صحيحة ودقيقة.</li>
               <li>يتحمل المستخدم مسؤولية الحفاظ على سرية بيانات حسابه.</li>
@@ -59,7 +59,7 @@ const TermsPage = () => {
             </ul>
           </Section>
 
-          <Section id="content" title="٤. الإعلانات والمحتوى">
+          <Section id="content" title="4. الإعلانات والمحتوى">
             <ul className="list-disc pr-5 space-y-1 mt-1">
               <li>يتحمل المُعلن المسؤولية الكاملة عن صحة ودقة المعلومات المنشورة.</li>
               <li>يحق للمنصة مراجعة أو تعديل أو حذف أي إعلان يُخالف السياسات.</li>
@@ -68,7 +68,7 @@ const TermsPage = () => {
             </ul>
           </Section>
 
-          <Section id="deals" title="٥. الصفقات والتفاوض">
+          <Section id="deals" title="5. الصفقات والتفاوض">
             <ul className="list-disc pr-5 space-y-1 mt-1">
               <li>المنصة وسيط تقني فقط ولا تتحمل مسؤولية نتائج أي صفقة.</li>
               <li>الاتفاقيات النهائية تكون بين الأطراف مباشرة.</li>
@@ -77,11 +77,11 @@ const TermsPage = () => {
             </ul>
           </Section>
 
-          <Section id="ai" title="٦. الذكاء الاصطناعي">
+          <Section id="ai" title="6. الذكاء الاصطناعي">
             تستخدم المنصة تقنيات الذكاء الاصطناعي لتحليل البيانات وتقديم التوصيات. جميع مخرجات الذكاء الاصطناعي استرشادية وغير ملزمة، ولا تُغني عن الفحص المستقل والاستشارة المتخصصة.
           </Section>
 
-          <Section id="liability" title="٧. المسؤولية والإخلاء">
+          <Section id="liability" title="7. المسؤولية والإخلاء">
             <ul className="list-disc pr-5 space-y-1 mt-1">
               <li>المنصة غير مسؤولة عن أي خسائر ناتجة عن صفقات بين المستخدمين.</li>
               <li>المنصة غير مسؤولة عن دقة المعلومات المقدمة من المستخدمين.</li>
@@ -89,19 +89,19 @@ const TermsPage = () => {
             </ul>
           </Section>
 
-          <Section id="ip" title="٨. الملكية الفكرية">
+          <Section id="ip" title="8. الملكية الفكرية">
             جميع حقوق الملكية الفكرية للمنصة وتصميمها ومحتواها محفوظة لسوق تقبيل. لا يجوز نسخ أو إعادة إنتاج أي جزء من المنصة دون إذن كتابي مسبق.
           </Section>
 
-          <Section id="changes" title="٩. التعديلات">
+          <Section id="changes" title="9. التعديلات">
             يحق للمنصة تعديل هذه الشروط في أي وقت. سيتم إشعار المستخدمين بالتعديلات الجوهرية، ويُعد استمرار استخدام المنصة موافقة على الشروط المُحدّثة.
           </Section>
 
-          <Section id="law" title="١٠. القانون المُطبّق">
+          <Section id="law" title="10. القانون المُطبّق">
             تخضع هذه الشروط لأنظمة المملكة العربية السعودية، ويختص القضاء السعودي بالنظر في أي نزاع ينشأ عن استخدام المنصة.
           </Section>
 
-          <Section id="contact" title="١١. التواصل">
+          <Section id="contact" title="11. التواصل">
             لأي استفسارات حول هذه الشروط، يمكنك التواصل معنا عبر قسم الدعم في المنصة.
           </Section>
         </div>
