@@ -35,7 +35,7 @@ export const EmailChangeEmail = ({
     <Preview>تأكيد تغيير البريد الإلكتروني — سوق تقبيل</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Img src={LOGO_URL} width="48" height="48" alt="سوق تقبيل" style={logoImg} />
+        <Text style={siteName}>SOQ TAQBEEL</Text>
         <Heading style={h1}>تأكيد تغيير البريد الإلكتروني</Heading>
         <Text style={text}>
           طلبت تغيير بريدك الإلكتروني من {email} إلى {newEmail}. اضغط الزر أدناه لتأكيد التغيير.
@@ -53,7 +53,7 @@ export default EmailChangeEmail
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'IBM Plex Sans Arabic', Arial, sans-serif" }
 const container = { padding: '30px 25px', textAlign: 'center' as const }
-const logoImg = { margin: '0 auto 20px', display: 'block' as const }
+const siteName = { fontSize: '20px', fontWeight: '600' as const, color: '#0a8af8', margin: '0 0 20px', letterSpacing: '1px', textAlign: 'center' as const }
 const h1 = { fontSize: '22px', fontWeight: '600' as const, color: '#3a4a5c', margin: '0 0 20px' }
 const text = { fontSize: '14px', color: '#7a8a9c', lineHeight: '1.7', margin: '0 0 25px', textAlign: 'right' as const }
 const button = { backgroundColor: '#0a8af8', color: '#ffffff', fontSize: '14px', borderRadius: '12px', padding: '14px 28px', textDecoration: 'none', fontWeight: '500' as const }
