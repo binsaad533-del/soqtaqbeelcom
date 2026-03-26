@@ -123,7 +123,7 @@ const ContactPage = () => {
                 <MapPin size={14} className="text-primary mt-0.5 shrink-0" strokeWidth={1.3} />
                 <div>
                   <div className="text-[11px] font-medium">الموقع</div>
-                  <div className="text-[11px] text-muted-foreground">المملكة العربية السعودية</div>
+                  <div className="text-[11px] text-muted-foreground">الطائف - المملكة العربية السعودية</div>
                 </div>
               </div>
             </div>
