@@ -112,6 +112,14 @@ const OwnerDashboardPage = () => {
     if (!userId) return "—";
     return profiles.find(p => p.user_id === userId)?.full_name || "—";
   };
+  const getProfilePhone = (userId: string | null) => {
+    if (!userId) return "—";
+    return profiles.find(p => p.user_id === userId)?.phone || "—";
+  };
+  const getProfileEmail = (userId: string | null) => {
+    if (!userId) return "—";
+    return profiles.find(p => p.user_id === userId)?.email || "—";
+  };
 
   const completedDeals = useMemo(() => deals.filter(d => ["completed", "finalized"].includes(d.status)), [deals]);
   const activeDeals = useMemo(() => deals.filter(d => d.status === "negotiating"), [deals]);
@@ -514,6 +522,8 @@ const OwnerDashboardPage = () => {
                     <TableHead className="text-right text-[11px]">المشروع</TableHead>
                     <TableHead className="text-right text-[11px]">البائع</TableHead>
                     <TableHead className="text-right text-[11px]">المشتري</TableHead>
+                    <TableHead className="text-right text-[11px]">جوال البائع</TableHead>
+                    <TableHead className="text-right text-[11px]">جوال المشتري</TableHead>
                     <TableHead className="text-right text-[11px]">قيمة الصفقة</TableHead>
                     <TableHead className="text-right text-[11px]">العمولة (1%)</TableHead>
                     <TableHead className="text-right text-[11px]">حالة العمولة</TableHead>
@@ -529,6 +539,8 @@ const OwnerDashboardPage = () => {
                         <TableCell className="text-xs font-medium">{row.listingTitle}</TableCell>
                         <TableCell className="text-xs">{row.sellerName}</TableCell>
                         <TableCell className="text-xs">{row.buyerName}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground" dir="ltr">{getProfilePhone(row.seller_id)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground" dir="ltr">{getProfilePhone(row.buyer_id)}</TableCell>
                         <TableCell className="text-xs">{Number(row.agreed_price || 0).toLocaleString("en-US")} <SarSymbol size={9} /></TableCell>
                         <TableCell className="text-xs">{row.commissionAmount.toLocaleString("en-US")} <SarSymbol size={9} /></TableCell>
                         <TableCell>
@@ -550,7 +562,7 @@ const OwnerDashboardPage = () => {
                     );
                   })}
                   {dealTableData.length === 0 && (
-                    <TableRow><TableCell colSpan={8} className="text-center text-sm text-muted-foreground py-12">لا توجد صفقات</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={10} className="text-center text-sm text-muted-foreground py-12">لا توجد صفقات</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
@@ -580,7 +592,7 @@ const OwnerDashboardPage = () => {
                         <TrustBadge score={p.trust_score} verificationLevel={p.verification_level} size="sm" />
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {p.phone || "—"} · {getUserRole(p.user_id) === "platform_owner" ? "مالك" : getUserRole(p.user_id) === "supervisor" ? "مشرف" : "عميل"} · {p.city || "—"}
+                        {p.phone || "—"} · {p.email || "—"} · {getUserRole(p.user_id) === "platform_owner" ? "مالك" : getUserRole(p.user_id) === "supervisor" ? "مشرف" : "عميل"} · {p.city || "—"}
                       </div>
                     </div>
                   </div>

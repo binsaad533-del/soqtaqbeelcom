@@ -6,6 +6,7 @@ export interface Profile {
   user_id: string;
   full_name: string | null;
   phone: string | null;
+  email: string | null;
   city: string | null;
   avatar_url: string | null;
   is_verified: boolean;
