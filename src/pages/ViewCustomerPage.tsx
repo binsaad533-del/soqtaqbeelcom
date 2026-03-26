@@ -326,6 +326,7 @@ const ViewCustomerPage = () => {
           {([
             { id: "deals" as const, label: "الصفقات", icon: Handshake, count: deals.length },
             { id: "listings" as const, label: "الإعلانات", icon: FileText, count: listings.length },
+            { id: "chats" as const, label: "المحادثات", icon: MessageSquare, count: deals.filter(d => messages.some(m => m.deal_id === d.id)).length },
           ]).map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
               className={cn("flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs whitespace-nowrap transition-all flex-1 justify-center",
