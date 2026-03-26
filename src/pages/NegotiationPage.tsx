@@ -58,7 +58,7 @@ async function parseSSEStream(response: Response): Promise<string> {
 
 const NegotiationPage = () => {
   const { id: dealId } = useParams();
-  const { user, profile } = useAuthContext();
+  const { user, profile, role } = useAuthContext();
   const { getMessages, sendMessage } = useDeals();
   const { getListing } = useListings();
   const { monitorChat, calculateDealRisk } = useFraudEngine();
