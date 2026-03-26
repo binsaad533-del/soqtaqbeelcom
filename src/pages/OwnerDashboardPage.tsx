@@ -665,7 +665,6 @@ const OwnerDashboardPage = () => {
                 }}
               />
             )}
-            </div>
           </div>
         )}
 
