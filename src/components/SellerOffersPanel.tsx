@@ -85,24 +85,16 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
       setOffers(prev => prev.map(o => o.id === offer.id ? { ...o, status: "rejected" } : o));
 
       // Send email notification to buyer about rejection
-      const { data: buyerProfile } = await supabase
-        .from("profiles").select("full_name").eq("user_id", offer.buyer_id).maybeSingle();
-      const { data: buyerAuth } = await supabase.auth.admin?.getUserById?.(offer.buyer_id) || { data: null };
-      const buyerEmail = (buyerAuth as any)?.user?.email;
-      if (buyerEmail) {
-        sendNotificationEmail({
-          userId: offer.buyer_id,
-          category: "offers",
-          templateName: "offer-status-update",
-          recipientEmail: buyerEmail,
-          idempotencyKey: `offer-rejected-${offer.id}`,
-          templateData: {
-            recipientName: buyerProfile?.full_name || "",
-            offeredPrice: offer.offered_price?.toLocaleString("ar-SA"),
-            status: "rejected",
-          },
-        }).catch(() => {});
-      }
+      sendNotificationEmail({
+        userId: offer.buyer_id,
+        category: "offers",
+        templateName: "offer-status-update",
+        idempotencyKey: `offer-rejected-${offer.id}`,
+        templateData: {
+          offeredPrice: offer.offered_price?.toLocaleString("ar-SA"),
+          status: "rejected",
+        },
+      }).catch(() => {});
     }
     setRespondingId(null);
   };
