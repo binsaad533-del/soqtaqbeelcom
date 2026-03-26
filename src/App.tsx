@@ -34,6 +34,7 @@ import AgreementsArchivePage from "./pages/AgreementsArchivePage";
 import SellerProfilePage from "./pages/SellerProfilePage";
 import HelpCenterPage from "./pages/HelpCenterPage";
 import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const App = () => (
               <Route path="/seller/:id" element={<SellerProfilePage />} />
               <Route path="/help" element={<HelpCenterPage />} />
               <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/listing/:id" element={<ListingDetailsPage />} />
               <Route
                 path="/create-listing"

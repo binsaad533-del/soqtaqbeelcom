@@ -9,8 +9,10 @@ import { BarChart3, Users, FileText, Handshake, ChevronLeft, Loader2, Shield, Da
 import BackupPanel from "@/components/BackupPanel";
 import CommissionAdminPanel from "@/components/CommissionAdminPanel";
 import CrmDashboard from "@/components/crm/CrmDashboard";
+import BlogAdminPanel from "@/components/BlogAdminPanel";
+import { Newspaper } from "lucide-react";
 
-type Tab = "overview" | "crm" | "commissions" | "backup";
+type Tab = "overview" | "crm" | "commissions" | "blog" | "backup";
 
 const AdminDashboardPage = () => {
   const { getAllListings } = useListings();
@@ -53,6 +55,7 @@ const AdminDashboardPage = () => {
             { id: "overview" as Tab, label: "نظرة عامة", icon: BarChart3 },
             { id: "crm" as Tab, label: "العملاء المحتملين", icon: UserPlus },
             { id: "commissions" as Tab, label: "العمولات", icon: Database },
+            { id: "blog" as Tab, label: "المدونة", icon: Newspaper },
             { id: "backup" as Tab, label: "النسخ الاحتياطي", icon: Shield },
           ].map(tab => (
             <button
@@ -105,6 +108,8 @@ const AdminDashboardPage = () => {
         {activeTab === "crm" && <CrmDashboard />}
 
         {activeTab === "commissions" && <CommissionAdminPanel />}
+
+        {activeTab === "blog" && <BlogAdminPanel />}
 
         {activeTab === "backup" && <BackupPanel />}
       </div>
