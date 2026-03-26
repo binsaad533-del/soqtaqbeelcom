@@ -22,10 +22,12 @@ import { toast } from "sonner";
 
 const SellerProfilePage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { getProfile } = useProfiles();
   const { getPublishedListings } = useListings();
   const { getSellerReviews } = useSellerReviews();
   const { getLikesAndViews } = useListingSocial();
+  const { user, role } = useAuthContext();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
@@ -33,6 +35,12 @@ const SellerProfilePage = () => {
   const [social, setSocial] = useState<{ likes: Record<string, number>; views: Record<string, number> }>({ likes: {}, views: {} });
   const [loading, setLoading] = useState(true);
   const [commissionStats, setCommissionStats] = useState<{ paid: number; total: number }>({ paid: 0, total: 0 });
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [supervisorDialogOpen, setSupervisorDialogOpen] = useState(false);
+
+  const isOwner = role === "platform_owner";
+  const isSupervisor = userRole === "supervisor";
+  const isCurrentUser = user?.id === id;
 
   useEffect(() => {
     if (!id) return;
