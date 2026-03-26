@@ -469,7 +469,7 @@ const NegotiationPage = () => {
 
         <div className="grid lg:grid-cols-5 gap-5 items-stretch">
           {/* ═══════════ DEAL SUMMARY (2 cols, RIGHT in RTL) ═══════════ */}
-          <div className="lg:col-span-2 order-2 lg:order-1 h-[65vh]">
+          <div className="lg:col-span-2 order-2 lg:order-1 h-[65vh] overflow-y-auto">
             <div className="h-full flex flex-col justify-between gap-4">
               {/* Deal Summary Card - Simple */}
               <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20 flex-1">
