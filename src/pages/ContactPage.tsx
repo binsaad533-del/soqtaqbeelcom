@@ -132,7 +132,7 @@ const ContactPage = () => {
               <h3 className="text-sm font-medium mb-2">ساعات العمل</h3>
               <div className="text-[11px] text-muted-foreground space-y-1">
                 <div>الأحد - الخميس: 9:00 ص - 5:00 م</div>
-                <div>السبت: 10:00 ص - 2:00 م</div>
+                <div>السبت: 9:00 ص - 5:00 م</div>
                 <div>الجمعة: مغلق</div>
               </div>
             </div>
