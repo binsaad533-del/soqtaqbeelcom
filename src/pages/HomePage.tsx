@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MapPin, Eye, Star } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import AiInlineStar from "@/components/AiInlineStar";
 import { Button } from "@/components/ui/button";
 import logoIconGold from "@/assets/logo-icon-gold.png";
+import SarSymbol from "@/components/SarSymbol";
 import { useEffect, useRef, useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,9 +65,41 @@ function useHomeStats() {
   return stats;
 }
 
+type FeaturedListing = {
+  id: string;
+  title: string | null;
+  business_activity: string | null;
+  city: string | null;
+  district: string | null;
+  price: number | null;
+  photos: Record<string, unknown> | null;
+  featured: boolean;
+};
+
+function useFeaturedListings() {
+  const [listings, setListings] = useState<FeaturedListing[]>([]);
+
+  useEffect(() => {
+    async function fetch() {
+      const { data } = await supabase
+        .from("listings")
+        .select("id, title, business_activity, city, district, price, photos, featured")
+        .eq("status", "published")
+        .eq("featured", true)
+        .order("published_at", { ascending: false })
+        .limit(6);
+      if (data) setListings(data as FeaturedListing[]);
+    }
+    fetch();
+  }, []);
+
+  return listings;
+}
+
 const HomePage = () => {
   useSEO({ canonical: "/" });
   const stats = useHomeStats();
+  const featured = useFeaturedListings();
   const revealRefs = useRef<HTMLDivElement[]>([]);
 
   useEffect(() => {
@@ -143,6 +176,71 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Featured Listings */}
+      {featured.length > 0 && (
+        <section className="py-16 md:py-20">
+          <div className="container">
+            <div className="flex items-center justify-between mb-8" ref={addRevealRef} style={{ opacity: 0 }}>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Star size={18} className="text-primary" strokeWidth={1.5} fill="currentColor" />
+                  <h2 className="text-xl md:text-2xl font-medium">فرص مميزة</h2>
+                </div>
+                <p className="text-sm text-muted-foreground">فرص مختارة بعناية لك</p>
+              </div>
+              <Button asChild variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+                <Link to="/marketplace" className="flex items-center gap-1">
+                  عرض الكل
+                  <ArrowLeft size={14} strokeWidth={1.5} />
+                </Link>
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {featured.map((listing, i) => {
+                const photos = listing.photos ? Object.values(listing.photos).flat() as string[] : [];
+                return (
+                  <div
+                    key={listing.id}
+                    ref={addRevealRef}
+                    style={{ opacity: 0, animationDelay: `${i * 100}ms` }}
+                  >
+                  <Link
+                    to={`/listing/${listing.id}`}
+                    className="group bg-card rounded-2xl shadow-soft hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden block"
+                  >
+                    <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/20 flex items-center justify-center relative">
+                      {photos.length > 0 ? (
+                        <img src={photos[0]} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <Eye size={24} className="text-muted-foreground/20" strokeWidth={1} />
+                      )}
+                      <span className="absolute top-2.5 right-2.5 bg-primary/90 text-primary-foreground text-[10px] px-2.5 py-0.5 rounded-md flex items-center gap-1">
+                        <Star size={9} fill="currentColor" /> مميز
+                      </span>
+                    </div>
+                    <div className="p-4">
+                      <div className="text-sm font-medium mb-1.5 group-hover:text-primary transition-colors">
+                        {listing.title || listing.business_activity || "فرصة تقبيل"}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
+                        <MapPin size={12} strokeWidth={1.3} />
+                        {listing.district && `${listing.district}، `}{listing.city || "—"}
+                      </div>
+                      <div className="flex items-center justify-between pt-2.5 border-t border-border/10">
+                        <span className="text-sm font-medium text-primary">
+                          {listing.price ? <>{Number(listing.price).toLocaleString("en-GB")} <SarSymbol size={10} /></> : "السعر عند التواصل"}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Smart Platform */}
       <section className="py-16 md:py-24 border-t border-border/50">
