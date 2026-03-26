@@ -144,7 +144,7 @@ const ContactPage = () => {
 
           {/* Contact Form */}
           <div className="md:col-span-2">
-            <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-soft space-y-4">
+            <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-soft space-y-4 flex flex-col h-full">
               <h3 className="text-sm font-medium">نموذج التواصل السريع</h3>
               
               <div className="grid grid-cols-2 gap-4">
@@ -185,13 +185,12 @@ const ContactPage = () => {
                 />
               </div>
 
-              <div>
+              <div className="flex-1 flex flex-col">
                 <label className="text-xs font-medium mb-1.5 block">الموضوع *</label>
-                <input
-                  type="text"
+                <textarea
                   value={subject}
                   onChange={e => setSubject(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none"
+                  className="w-full flex-1 min-h-[120px] px-3 py-2.5 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none resize-none"
                   placeholder="موضوع رسالتك"
                   required
                 />
