@@ -333,7 +333,7 @@ const SupervisorDashboardPage = () => {
                           {p.is_suspended && <span className="text-[9px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded">معلّق</span>}
                         </div>
                         <div className="text-[11px] text-muted-foreground">
-                          {p.phone || "—"} · {p.city || "—"} · {p.completed_deals} صفقة مكتملة
+                          {p.phone || "—"} · {p.email || "—"} · {p.city || "—"} · {p.completed_deals} صفقة مكتملة
                         </div>
                       </div>
                     </div>
