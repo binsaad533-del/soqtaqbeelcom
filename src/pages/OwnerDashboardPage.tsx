@@ -622,7 +622,7 @@ const OwnerDashboardPage = () => {
                         {isOwner && <span className="text-[9px] bg-success/10 text-success px-1.5 py-0.5 rounded font-medium">مالك</span>}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {p.phone || "—"} · {p.email || "—"} · {p.city || "—"}
+                        {formatPhone(p.phone)} · {p.email || "—"} · {p.city || "—"}
                       </div>
                     </div>
                   </div>
