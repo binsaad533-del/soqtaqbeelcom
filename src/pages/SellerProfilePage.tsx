@@ -1,20 +1,24 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
 import { useListingSocial } from "@/hooks/useListingSocial";
+import { useAuthContext } from "@/contexts/AuthContext";
 import TrustBadge, { getSellerBadges, getVerificationLabel } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
+import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
 import { useSEO } from "@/hooks/useSEO";
 import { cn } from "@/lib/utils";
 import SarSymbol from "@/components/SarSymbol";
 import {
   MapPin, Calendar, Store, Eye, Heart, Star, Loader2,
-  ShieldCheck, Award, UserCheck, ArrowLeft
+  ShieldCheck, Award, UserCheck, ArrowLeft, Shield, UserCog
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const SellerProfilePage = () => {
   const { id } = useParams<{ id: string }>();
