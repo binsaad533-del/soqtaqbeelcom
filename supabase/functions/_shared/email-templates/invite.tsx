@@ -10,6 +10,7 @@ import {
   Heading,
   Hr,
   Html,
+  Img,
   Preview,
   Section,
   Text,
@@ -17,6 +18,8 @@ import {
 import { EmailFooter } from '../email-footer.tsx'
 
 const FONT_URL = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
+
+const ICON_INVITE = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%230a8af8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cline x1='19' x2='19' y1='8' y2='14'/%3E%3Cline x1='22' x2='16' y1='11' y2='11'/%3E%3C/svg%3E`
 
 interface InviteEmailProps {
   siteName: string
@@ -41,7 +44,11 @@ export const InviteEmail = ({
 
         <Hr style={divider} />
 
-        <Heading style={h1}>دعوة للانضمام 🤝</Heading>
+        <Section style={iconSection}>
+          <Img src={ICON_INVITE} width="48" height="48" alt="" style={{ margin: '0 auto' }} />
+        </Section>
+
+        <Heading style={h1}>دعوة للانضمام</Heading>
         <Text style={text}>
           تمت دعوتك للانضمام إلى سوق تقبيل — المنصة الأولى لتقبيل الأعمال التجارية في السعودية.
         </Text>
@@ -74,6 +81,7 @@ const headerSection = { textAlign: 'center' as const, marginBottom: '8px' }
 const brandName = { fontSize: '22px', fontWeight: '600' as const, color: '#1e3a5f', margin: '0', fontFamily: FONT }
 const brandNameEn = { fontSize: '11px', fontWeight: '500' as const, color: '#9ca3af', margin: '2px 0 0', letterSpacing: '2px', textTransform: 'uppercase' as const, fontFamily: FONT }
 const divider = { borderColor: '#e8ecf0', margin: '20px 0 24px' }
+const iconSection = { textAlign: 'center' as const, marginBottom: '12px' }
 const h1 = { fontSize: '22px', fontWeight: '600' as const, color: '#1e3a5f', textAlign: 'center' as const, margin: '0 0 20px', fontFamily: FONT }
 const text = { fontSize: '15px', color: '#55575d', lineHeight: '1.7', margin: '0 0 16px', fontFamily: FONT }
 const buttonSection = { textAlign: 'center' as const, margin: '8px 0 28px' }
