@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
+import logoIcon from "@/assets/logo-icon-gold.png";
 
 const BlogPage = () => {
   const { tx, lang } = useLanguage();

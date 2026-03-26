@@ -4,6 +4,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import AiStar from "@/components/AiStar";
 import SocialIcons from "@/components/SocialIcons";
+import logoIcon from "@/assets/logo-icon-gold.png";
 import { Send, Mail, Phone, MapPin, CheckCircle, Briefcase, AlertTriangle, Handshake } from "lucide-react";
 import { toast } from "sonner";
 

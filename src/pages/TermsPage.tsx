@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import logoIcon from "@/assets/logo-icon-gold.png";
 
 const sections = [
   { id: "intro", title: "1. مقدمة" },

@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useSEO } from "@/hooks/useSEO";
+import logoIcon from "@/assets/logo-icon-gold.png";
 import { Search, HelpCircle, Store, Shield, FileText, MessageCircle, Settings } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";

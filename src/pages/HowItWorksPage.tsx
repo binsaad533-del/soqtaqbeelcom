@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import logoIcon from "@/assets/logo-icon-gold.png";
 import {
   Store, Camera, Sparkles, ClipboardList, Search, MessageSquare, Shield,
   CheckCircle, ArrowLeft, ArrowRight, FileText, Eye, Handshake, Award,
