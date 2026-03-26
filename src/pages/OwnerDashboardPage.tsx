@@ -563,6 +563,8 @@ const OwnerDashboardPage = () => {
                         <TableCell className="text-xs">{row.buyerName}</TableCell>
                         <TableCell className="text-xs text-muted-foreground" dir="ltr">{getProfilePhone(row.seller_id)}</TableCell>
                         <TableCell className="text-xs text-muted-foreground" dir="ltr">{getProfilePhone(row.buyer_id)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground" dir="ltr">{getProfileEmail(row.seller_id)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground" dir="ltr">{getProfileEmail(row.buyer_id)}</TableCell>
                         <TableCell className="text-xs">{Number(row.agreed_price || 0).toLocaleString("en-US")} <SarSymbol size={9} /></TableCell>
                         <TableCell className="text-xs">{row.commissionAmount.toLocaleString("en-US")} <SarSymbol size={9} /></TableCell>
                         <TableCell>
