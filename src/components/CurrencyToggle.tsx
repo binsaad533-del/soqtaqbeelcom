@@ -12,11 +12,11 @@ const CurrencyToggle = () => {
       title={currency === "SAR" ? "Switch to USD" : "التبديل للريال"}
     >
       {currency === "SAR" ? (
-        <DollarSign size={15} strokeWidth={1.5} />
-      ) : (
         <SarSymbol size={15} />
+      ) : (
+        <DollarSign size={15} strokeWidth={1.5} />
       )}
-      <span className="hidden sm:inline">{currency === "SAR" ? "$" : "﷼"}</span>
+      <span className="hidden sm:inline">{currency === "SAR" ? "﷼" : "$"}</span>
     </button>
   );
 };
