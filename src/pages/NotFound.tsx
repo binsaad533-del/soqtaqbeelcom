@@ -22,7 +22,7 @@ const NotFound = () => {
       <div className="max-w-md w-full text-center">
         {/* Animated Star */}
         <div className="relative mb-6">
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-[#0a8af8] to-[#06b6d4] shadow-lg flex items-center justify-center">
+          <div className="w-20 h-20 mx-auto rounded-2xl gradient-primary shadow-lg flex items-center justify-center">
             <img src={logoIcon} alt="سوق تقبيل" className="w-14 h-14 object-contain" />
           </div>
         </div>
