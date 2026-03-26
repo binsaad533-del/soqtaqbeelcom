@@ -354,6 +354,14 @@ const ListingDetailsPage = () => {
               )}
 
               <h2 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || "فرصة تقبيل"}</h2>
+              {sellerProfile && (
+                <Link to={`/seller/${sellerProfile.user_id}`} className="flex items-center gap-1.5 mb-1 group/seller">
+                  <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary">
+                    {sellerProfile.full_name?.charAt(0) || "?"}
+                  </div>
+                  <span className="text-xs text-muted-foreground group-hover/seller:text-primary transition-colors">{sellerProfile.full_name || "بائع"}</span>
+                </Link>
+              )}
               {listing.location_lat && listing.location_lng ? (
                 <button
                   type="button"
