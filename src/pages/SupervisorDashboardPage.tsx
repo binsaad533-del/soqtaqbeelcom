@@ -4,6 +4,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
+import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import {
@@ -17,12 +18,12 @@ import SarSymbol from "@/components/SarSymbol";
 
 type Tab = "overview" | "listings" | "deals" | "users" | "reports";
 
-const TABS: { id: Tab; label: string; icon: any }[] = [
+const ALL_TABS: { id: Tab; label: string; icon: any; perm?: string }[] = [
   { id: "overview", label: "نظرة عامة", icon: Eye },
-  { id: "listings", label: "الإعلانات", icon: FileText },
-  { id: "deals", label: "الصفقات", icon: Handshake },
-  { id: "users", label: "المستخدمون", icon: Users },
-  { id: "reports", label: "البلاغات", icon: AlertTriangle },
+  { id: "listings", label: "الإعلانات", icon: FileText, perm: "manage_listings" },
+  { id: "deals", label: "الصفقات", icon: Handshake, perm: "manage_deals" },
+  { id: "users", label: "المستخدمون", icon: Users, perm: "manage_users" },
+  { id: "reports", label: "البلاغات", icon: AlertTriangle, perm: "manage_reports" },
 ];
 
 const statusLabel = (s: string) => {
