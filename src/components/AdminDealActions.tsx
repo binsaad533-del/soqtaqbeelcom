@@ -3,6 +3,7 @@ import { ShieldAlert, Play, Trash2, Bell, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ interface AdminDealActionsProps {
 type ActionType = "suspend" | "activate" | "delete" | null;
 
 const AdminDealActions = ({ deal, onUpdate }: AdminDealActionsProps) => {
+  const { user } = useAuthContext();
   const [action, setAction] = useState<ActionType>(null);
   const [reason, setReason] = useState("");
   const [sendNotif, setSendNotif] = useState(true);
@@ -27,6 +29,7 @@ const AdminDealActions = ({ deal, onUpdate }: AdminDealActionsProps) => {
 
   const isSuspended = deal.status === "suspended";
   const isCancelled = deal.status === "cancelled";
+  const currentUserId = user?.id;
 
   const notify = async (title: string, body: string) => {
     if (!sendNotif) return;
@@ -43,6 +46,16 @@ const AdminDealActions = ({ deal, onUpdate }: AdminDealActionsProps) => {
     }
   };
 
+  const logAction = async (actionName: string) => {
+    await supabase.from("audit_logs").insert({
+      action: actionName,
+      resource_type: "deal",
+      resource_id: deal.id,
+      user_id: currentUserId,
+      details: { reason },
+    });
+  };
+
   const handleSuspend = async () => {
     setLoading(true);
     const { error } = await supabase.from("deals").update({
@@ -50,16 +63,9 @@ const AdminDealActions = ({ deal, onUpdate }: AdminDealActionsProps) => {
       deal_details: { ...(deal as any).deal_details, admin_action: { type: "suspended", reason, at: new Date().toISOString() } },
     }).eq("id", deal.id);
     if (error) { toast.error("فشل تعليق الصفقة"); setLoading(false); return; }
-    // Hide the associated listing from marketplace but allow owner to edit
     await supabase.from("listings").update({ status: "suspended" }).eq("id", deal.listing_id);
     await notify("⚠️ تم تعليق صفقتك", reason || "تم تعليق الصفقة من قبل إدارة المنصة. يمكنك تعديل بيانات الإعلان وإعادة نشره.");
-    await supabase.from("audit_logs").insert({
-      action: "deal_suspended",
-      resource_type: "deal",
-      resource_id: deal.id,
-      user_id: (await supabase.auth.getUser()).data.user?.id,
-      details: { reason },
-    });
+    await logAction("deal_suspended");
     toast.success("تم تعليق الصفقة");
     setAction(null);
     setReason("");
@@ -71,16 +77,9 @@ const AdminDealActions = ({ deal, onUpdate }: AdminDealActionsProps) => {
     setLoading(true);
     const { error } = await supabase.from("deals").update({ status: "negotiating" }).eq("id", deal.id);
     if (error) { toast.error("فشل تنشيط الصفقة"); setLoading(false); return; }
-    // Restore the listing to published
     await supabase.from("listings").update({ status: "published" }).eq("id", deal.listing_id);
     await notify("✅ تم تنشيط صفقتك", reason || "تم إعادة تنشيط الصفقة من قبل إدارة المنصة.");
-    await supabase.from("audit_logs").insert({
-      action: "deal_activated",
-      resource_type: "deal",
-      resource_id: deal.id,
-      user_id: (await supabase.auth.getUser()).data.user?.id,
-      details: { reason },
-    });
+    await logAction("deal_activated");
     toast.success("تم تنشيط الصفقة");
     setAction(null);
     setReason("");
@@ -98,13 +97,7 @@ const AdminDealActions = ({ deal, onUpdate }: AdminDealActionsProps) => {
     await supabase.from("listings").update({ status: "published" }).eq("id", deal.listing_id);
     await supabase.from("listing_offers").update({ status: "pending" }).eq("listing_id", deal.listing_id).eq("status", "accepted");
     await notify("🚫 تم إلغاء صفقتك", reason || "تم إلغاء الصفقة من قبل إدارة المنصة.");
-    await supabase.from("audit_logs").insert({
-      action: "deal_deleted_by_admin",
-      resource_type: "deal",
-      resource_id: deal.id,
-      user_id: (await supabase.auth.getUser()).data.user?.id,
-      details: { reason },
-    });
+    await logAction("deal_deleted_by_admin");
     toast.success("تم إلغاء الصفقة وإعادة الإعلان للعرض");
     setAction(null);
     setReason("");

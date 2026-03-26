@@ -52,8 +52,10 @@ function useHomeStats(tx: (ar: string, en: string) => string) {
 
     const channel = supabase
       .channel("home-stats")
-      .on("postgres_changes", { event: "*", schema: "public", table: "listings" }, () => fetch())
-      .on("postgres_changes", { event: "*", schema: "public", table: "deals" }, () => fetch())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "listings", filter: "status=eq.published" }, () => fetch())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "listings" }, () => fetch())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "deals", filter: "status=eq.completed" }, () => fetch())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "deals" }, () => fetch())
       .subscribe();
 
     return () => {

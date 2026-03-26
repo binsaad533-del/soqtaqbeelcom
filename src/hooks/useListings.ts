@@ -105,19 +105,27 @@ export function useListings() {
   }, [user]);
 
   const getPublishedListings = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("listings")
       .select("*")
       .eq("status", "published")
       .order("created_at", { ascending: false });
+    if (error) {
+      console.error("[useListings] getPublishedListings failed:", { error: error.message, code: error.code });
+      throw new Error(`فشل تحميل الإعلانات: ${error.message}`);
+    }
     return (data || []) as unknown as Listing[];
   }, []);
 
   const getAllListings = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("listings")
       .select("*")
       .order("created_at", { ascending: false });
+    if (error) {
+      console.error("[useListings] getAllListings failed:", { error: error.message, code: error.code });
+      throw new Error(`فشل تحميل الإعلانات: ${error.message}`);
+    }
     return (data || []) as unknown as Listing[];
   }, []);
 
