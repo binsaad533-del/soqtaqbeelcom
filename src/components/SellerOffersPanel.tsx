@@ -48,6 +48,28 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
 
     toast.success("تم قبول العرض ✅");
 
+    // Send email notification to buyer
+    const { data: buyerProfile } = await supabase
+      .from("profiles").select("full_name").eq("user_id", offer.buyer_id).maybeSingle();
+    const { data: buyerAuth } = await supabase.auth.admin?.getUserById?.(offer.buyer_id) || { data: null };
+    // Fallback: get email from auth user metadata if admin API not available
+    const buyerEmail = (buyerAuth as any)?.user?.email;
+    if (buyerEmail) {
+      sendNotificationEmail({
+        userId: offer.buyer_id,
+        category: "offers",
+        templateName: "offer-status-update",
+        recipientEmail: buyerEmail,
+        idempotencyKey: `offer-accepted-${offer.id}`,
+        templateData: {
+          recipientName: buyerProfile?.full_name || "",
+          listingTitle: "",
+          offeredPrice: offer.offered_price?.toLocaleString("ar-SA"),
+          status: "accepted",
+        },
+      }).catch(() => {});
+    }
+
     // Create a deal with agreed price — other offers stay pending (on hold)
     const { data: dealData } = await createDeal(listingId, listingOwnerId, offer.buyer_id, offer.offered_price);
     if (dealData) {
@@ -71,6 +93,26 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
     } else {
       toast.success("تم رفض العرض");
       setOffers(prev => prev.map(o => o.id === offer.id ? { ...o, status: "rejected" } : o));
+
+      // Send email notification to buyer about rejection
+      const { data: buyerProfile } = await supabase
+        .from("profiles").select("full_name").eq("user_id", offer.buyer_id).maybeSingle();
+      const { data: buyerAuth } = await supabase.auth.admin?.getUserById?.(offer.buyer_id) || { data: null };
+      const buyerEmail = (buyerAuth as any)?.user?.email;
+      if (buyerEmail) {
+        sendNotificationEmail({
+          userId: offer.buyer_id,
+          category: "offers",
+          templateName: "offer-status-update",
+          recipientEmail: buyerEmail,
+          idempotencyKey: `offer-rejected-${offer.id}`,
+          templateData: {
+            recipientName: buyerProfile?.full_name || "",
+            offeredPrice: offer.offered_price?.toLocaleString("ar-SA"),
+            status: "rejected",
+          },
+        }).catch(() => {});
+      }
     }
     setRespondingId(null);
   };
