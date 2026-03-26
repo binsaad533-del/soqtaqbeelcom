@@ -398,10 +398,23 @@ const ListingDetailsPage = () => {
               {/* Deal-type-aware Transparency Indicator */}
               <TransparencyIndicator listing={listing} className="mb-4" />
 
-              {/* Seller Trust Badge */}
+              {/* Seller Info Card */}
               {sellerProfile && (
-                <div className="mb-4 p-3 bg-muted/20 rounded-xl">
-                  <p className="text-[11px] text-muted-foreground mb-2">مستوى ثقة البائع</p>
+                <div className="mb-4 p-4 bg-muted/20 rounded-xl space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
+                      {sellerProfile.full_name?.charAt(0) || "?"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium truncate">{sellerProfile.full_name || "بائع"}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">صاحب الفرصة</p>
+                    </div>
+                    <Link to={`/seller/${sellerProfile.user_id}`} className="text-[10px] text-primary hover:underline shrink-0">
+                      الملف الشخصي
+                    </Link>
+                  </div>
                   <TrustBadge
                     score={sellerProfile.trust_score}
                     verificationLevel={sellerProfile.verification_level}
