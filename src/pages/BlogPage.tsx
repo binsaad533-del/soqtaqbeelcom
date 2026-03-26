@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
+import logoIcon from "@/assets/logo-icon-gold.png";
 
 const BlogPage = () => {
   const { tx, lang } = useLanguage();
@@ -76,6 +77,9 @@ const BlogPage = () => {
 
         {/* Header */}
         <div className="text-center mb-8">
+          <div className="w-24 h-24 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-5 shadow-soft animate-fade-in">
+            <img src={logoIcon} alt="سوق تقبيل" className="w-14 h-14 object-contain" />
+          </div>
           <h1 className="text-2xl md:text-3xl font-medium mb-3">
             {tx("المدونة والأخبار", "Blog & News")}
           </h1>
