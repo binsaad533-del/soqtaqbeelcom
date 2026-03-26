@@ -233,8 +233,30 @@ const SellerProfilePage = () => {
           onOpenChange={setSupervisorDialogOpen}
           userId={id}
           userName={profile.full_name || "مستخدم"}
-          isSupervisor={isSupervisor}
-          onRoleChanged={(newRole) => setUserRole(newRole)}
+          currentRole={userRole || "customer"}
+          existingPermissions={supervisorPerms}
+          onPromote={async (userId, perms) => {
+            const { error } = await promoteToSupervisor(userId, perms);
+            if (error) toast.error("فشل في ترقية المستخدم");
+            else { toast.success("تم ترقية المستخدم إلى مشرف"); setUserRole("supervisor"); }
+          }}
+          onDemote={async (userId) => {
+            const { error } = await demoteToCustomer(userId);
+            if (error) toast.error("فشل في إزالة الصلاحيات");
+            else { toast.success("تم إزالة صلاحيات المشرف"); setUserRole("customer"); }
+          }}
+          onUpdatePermissions={async (userId, perms) => {
+            const { error } = await upsertPermissions(userId, {
+              manage_listings: perms.manage_listings,
+              manage_deals: perms.manage_deals,
+              manage_users: perms.manage_users,
+              manage_crm: perms.manage_crm,
+              manage_reports: perms.manage_reports,
+              manage_security: perms.manage_security,
+            });
+            if (error) toast.error("فشل في تحديث الصلاحيات");
+            else toast.success("تم تحديث الصلاحيات");
+          }}
         />
       )}
 
