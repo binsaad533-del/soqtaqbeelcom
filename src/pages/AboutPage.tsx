@@ -18,13 +18,13 @@ const AboutPage = () => {
   return (
     <div className="min-h-screen" dir="rtl">
       {/* Hero / Intro */}
-      <section className="py-16 md:py-24">
+      <section className="py-12 md:py-16">
         <div className="container max-w-2xl mx-auto text-center">
-          <h1 className="text-3xl md:text-4xl font-semibold mb-6">من نحن</h1>
-          <p className="text-base md:text-lg text-muted-foreground leading-relaxed mb-4">
+          <h1 className="text-2xl md:text-3xl font-semibold mb-4">من نحن</h1>
+          <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-3">
             نحن منصة "تقبيل"، نربط بين البائعين والمشترين بطريقة ذكية وسريعة وآمنة، لنحوّل فرص البيع والشراء إلى صفقات ناجحة بدون تعقيد.
           </p>
-          <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+          <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
             نؤمن أن كل مشروع أو أصل له قيمة حقيقية، ومهمتنا هي إظهار هذه القيمة وربطها بالشخص المناسب في الوقت المناسب.
           </p>
         </div>
