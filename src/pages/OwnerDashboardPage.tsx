@@ -46,7 +46,7 @@ const OwnerDashboardPage = () => {
   const { getAllDeals } = useDeals();
   const { getAllProfiles, getAllRoles, updateProfile } = useProfiles();
   const { getAllCommissions, verifyCommission } = useCommissions();
-  const { getAllPermissions, promoteToSupervisor, demoteToCustomer, upsertPermissions } = useSupervisorPermissions();
+  const { getAllPermissions, promoteToSupervisor, demoteToCustomer, upsertPermissions, suspendSupervisor, enableSupervisor } = useSupervisorPermissions();
 
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [listings, setListings] = useState<Listing[]>([]);
@@ -619,6 +619,31 @@ const OwnerDashboardPage = () => {
                       >
                         <Shield size={11} />
                         {isSupervisor ? "صلاحيات" : "ترقية لمشرف"}
+                      </button>
+                    )}
+                    {/* Suspend/Enable supervisor role without affecting customer account */}
+                    {!isOwner && supervisorPerms.find(sp => sp.user_id === p.user_id) && (
+                      <button
+                        onClick={async () => {
+                          if (isSupervisor) {
+                            const { error } = await suspendSupervisor(p.user_id);
+                            if (error) toast.error("فشل في تعليق صلاحيات المشرف");
+                            else { toast.success("تم تعليق صلاحيات المشرف — الحساب كعميل لا يزال نشطاً"); load(); }
+                          } else {
+                            const { error } = await enableSupervisor(p.user_id);
+                            if (error) toast.error("فشل في تمكين صلاحيات المشرف");
+                            else { toast.success("تم تمكين صلاحيات المشرف مجدداً"); load(); }
+                          }
+                        }}
+                        className={cn(
+                          "text-[10px] px-2.5 py-1 rounded-lg transition-colors gap-1 flex items-center",
+                          isSupervisor
+                            ? "text-amber-600 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/30 dark:text-amber-400"
+                            : "text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 dark:text-emerald-400"
+                        )}
+                      >
+                        <UserCheck size={11} />
+                        {isSupervisor ? "تعليق المشرف" : "تمكين المشرف"}
                       </button>
                     )}
                     {!isOwner && (

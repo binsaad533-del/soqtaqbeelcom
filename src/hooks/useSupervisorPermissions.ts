@@ -113,5 +113,23 @@ export function useSupervisorPermissions() {
     return { error: null };
   }, []);
 
-  return { getAllPermissions, getMyPermissions, upsertPermissions, deletePermissions, promoteToSupervisor, demoteToCustomer };
+  /** Suspend supervisor access (role → customer) but keep permissions record */
+  const suspendSupervisor = useCallback(async (userId: string) => {
+    const { error } = await supabase
+      .from("user_roles")
+      .update({ role: "customer" })
+      .eq("user_id", userId);
+    return { error };
+  }, []);
+
+  /** Re-enable supervisor access (role → supervisor), permissions record must still exist */
+  const enableSupervisor = useCallback(async (userId: string) => {
+    const { error } = await supabase
+      .from("user_roles")
+      .update({ role: "supervisor" })
+      .eq("user_id", userId);
+    return { error };
+  }, []);
+
+  return { getAllPermissions, getMyPermissions, upsertPermissions, deletePermissions, promoteToSupervisor, demoteToCustomer, suspendSupervisor, enableSupervisor };
 }
