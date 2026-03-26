@@ -64,18 +64,20 @@ const SupervisorDashboardPage = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [l, d, p] = await Promise.all([
+      const [l, d, p, perms] = await Promise.all([
         getAllListings().catch(() => [] as Listing[]),
         getAllDeals().catch(() => [] as Deal[]),
         getAllProfiles().catch(() => [] as Profile[]),
+        getMyPermissions().catch(() => null),
       ]);
       setListings(l || []); setDeals(d || []); setProfiles(p || []);
+      setMyPerms(perms);
     } catch (err) {
       console.error("Supervisor dashboard load failed:", err);
     } finally {
       setLoading(false);
     }
-  }, [getAllListings, getAllDeals, getAllProfiles]);
+  }, [getAllListings, getAllDeals, getAllProfiles, getMyPermissions]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
