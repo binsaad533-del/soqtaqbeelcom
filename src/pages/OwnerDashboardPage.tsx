@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
@@ -41,6 +41,7 @@ const TABS: { id: Tab; label: string; icon: any }[] = [
 ];
 
 const OwnerDashboardPage = () => {
+  const navigate = useNavigate();
   const { profile, signOut } = useAuthContext();
   const { getAllListings } = useListings();
   const { getAllDeals } = useDeals();
@@ -497,16 +498,19 @@ const OwnerDashboardPage = () => {
                     };
                     const st = stMap[d.status] || { label: d.status, cls: "bg-muted text-muted-foreground" };
                     return (
-                      <div key={d.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                      <Link key={d.id} to={`/negotiate/${d.id}`} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/60 transition-all group">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0"><Handshake size={14} className="text-muted-foreground" strokeWidth={1.3} /></div>
                           <div>
-                            <div className="text-xs font-medium">{getProfileName(d.seller_id)} ← {getProfileName(d.buyer_id)}</div>
+                            <div className="text-xs font-medium group-hover:text-primary transition-colors">{getProfileName(d.seller_id)} ← {getProfileName(d.buyer_id)}</div>
                             <div className="text-[10px] text-muted-foreground">{d.agreed_price ? <>{Number(d.agreed_price).toLocaleString("en-US")} <SarSymbol size={8} /></> : "—"} · {new Date(d.created_at).toLocaleDateString("en-GB")}</div>
                           </div>
                         </div>
-                        <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
-                      </div>
+                        <div className="flex items-center gap-2">
+                          <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
+                          <ChevronLeft size={14} className="text-muted-foreground" strokeWidth={1.3} />
+                        </div>
+                      </Link>
                     );
                   })}
                   {deals.length === 0 && <p className="text-center text-xs text-muted-foreground py-8">لا توجد صفقات</p>}
@@ -557,8 +561,8 @@ const OwnerDashboardPage = () => {
                   {dealTableData.map(row => {
                     const s = row.commissionStatus as CommissionStatus;
                     return (
-                      <TableRow key={row.id}>
-                        <TableCell className="text-xs font-medium">{row.listingTitle}</TableCell>
+                      <TableRow key={row.id} className="cursor-pointer hover:bg-muted/40 transition-colors" onClick={() => navigate(`/negotiate/${row.id}`)}>
+                        <TableCell className="text-xs font-medium text-primary hover:underline">{row.listingTitle}</TableCell>
                         <TableCell className="text-xs">{row.sellerName}</TableCell>
                         <TableCell className="text-xs">{row.buyerName}</TableCell>
                         <TableCell className="text-xs text-muted-foreground" dir="ltr">{getProfilePhone(row.seller_id)}</TableCell>
@@ -611,7 +615,7 @@ const OwnerDashboardPage = () => {
                 const isOwner = role === "platform_owner";
                 const isSupervisor = role === "supervisor";
                 return (
-                <div key={p.id} className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all">
+                <div key={p.id} className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all cursor-pointer" onClick={() => !isOwner && navigate(`/dashboard/view-customer/${p.user_id}`)}>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">{p.full_name?.charAt(0) || "?"}</div>
                     <div>
