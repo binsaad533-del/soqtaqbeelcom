@@ -446,7 +446,7 @@ const NegotiationPage = () => {
 
   const isPostAgreement = deal.status === "completed" || deal.status === "finalized";
 
-  const statusLabel = deal.status === "negotiating" ? "جاري التفاوض" : deal.status === "completed" ? "مكتمل" : deal.status === "finalized" ? "مُقفل" : deal.status;
+  const statusLabel = deal.status === "negotiating" ? "جاري التفاوض" : deal.status === "completed" ? "مكتمل" : deal.status === "finalized" ? "مُقفل" : deal.status === "suspended" ? "معلّقة" : deal.status === "cancelled" ? "ملغاة" : deal.status;
   const riskLabel = !deal.risk_score || deal.risk_score <= 25 ? "مرتفعة" : deal.risk_score <= 50 ? "متوسطة" : "منخفضة";
   const riskColor = !deal.risk_score || deal.risk_score <= 25 ? "text-success" : deal.risk_score <= 50 ? "text-warning" : "text-destructive";
   const readinessPercent = Math.max(0, 100 - (deal.risk_score || 0));
