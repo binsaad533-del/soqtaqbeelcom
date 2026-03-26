@@ -1,26 +1,28 @@
 import { Link } from "react-router-dom";
 import SocialIcons from "./SocialIcons";
 import logoIcon from "@/assets/logo-icon-gold.png";
-
-const footerLinks = [
-  { label: "الرئيسية", path: "/" },
-  { label: "السوق", path: "/marketplace" },
-  { label: "أضف فرصة", path: "/create-listing" },
-  { label: "الشروط", path: "/terms" },
-  { label: "الخصوصية", path: "/privacy" },
-  { label: "من نحن", path: "/about" },
-  { label: "كيف تعمل المنصة", path: "/how-it-works" },
-  { label: "تواصل معنا", path: "/contact" },
-  { label: "مركز المساعدة", path: "/help" },
-  { label: "المدونة", path: "/blog" },
-  { label: "تثبيت التطبيق", path: "/install" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
+  const { tx } = useLanguage();
+
+  const footerLinks = [
+    { label: tx("الرئيسية", "Home"), path: "/" },
+    { label: tx("السوق", "Marketplace"), path: "/marketplace" },
+    { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing" },
+    { label: tx("الشروط", "Terms"), path: "/terms" },
+    { label: tx("الخصوصية", "Privacy"), path: "/privacy" },
+    { label: tx("من نحن", "About"), path: "/about" },
+    { label: tx("كيف تعمل المنصة", "How it works"), path: "/how-it-works" },
+    { label: tx("تواصل معنا", "Contact"), path: "/contact" },
+    { label: tx("مركز المساعدة", "Help Center"), path: "/help" },
+    { label: tx("المدونة", "Blog"), path: "/blog" },
+    { label: tx("تثبيت التطبيق", "Install App"), path: "/install" },
+  ];
+
   return (
     <footer className="py-8 px-4">
       <div className="container max-w-3xl mx-auto text-center space-y-3">
-        {/* Line 1: Links */}
         <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1">
           {footerLinks.map((link, i) => (
             <span key={link.path} className="flex items-center gap-1.5">
@@ -37,22 +39,18 @@ const Footer = () => {
           ))}
         </div>
 
-        {/* Logo icon */}
         <div className="flex justify-center">
-          <img src={logoIcon} alt="سوق تقبيل" className="h-8 w-auto opacity-60" />
+          <img src={logoIcon} alt={tx("سوق تقبيل", "Soq Taqbeel")} className="h-8 w-auto opacity-60" />
         </div>
 
-        {/* Social Icons */}
         <SocialIcons className="justify-center" />
 
-        {/* Line 2: Brand statement */}
         <p className="text-[12px] text-muted-foreground/70">
-          في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦
+          {tx("في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦", "Built in Saudi Arabia — for its market 🇸🇦")}
         </p>
 
-        {/* Line 3: Ownership */}
         <p className="text-[11px] text-muted-foreground/50">
-          © {new Date().getFullYear()} المنصة مملوكة ومدارة بواسطة شركة{" "}
+          © {new Date().getFullYear()} {tx("المنصة مملوكة ومدارة بواسطة شركة", "This platform is owned and operated by")}{" "}
           <a
             href="https://www.jsaas-group.com/en"
             target="_blank"
