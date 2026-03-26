@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-gold.png";
+import { useSEO } from "@/hooks/useSEO";
 
 const sections = [
   { id: "intro", title: "1. مقدمة" },
@@ -17,6 +18,7 @@ const sections = [
 ];
 
 const PrivacyPage = () => {
+  useSEO({ title: "سياسة الخصوصية", description: "سياسة الخصوصية وحماية البيانات في منصة سوق تقبيل", canonical: "/privacy" });
   return (
     <div className="min-h-screen py-12 px-4" dir="rtl">
       <div className="max-w-3xl mx-auto">

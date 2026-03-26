@@ -4,6 +4,7 @@ import { Shield, Zap, Brain, Sparkles } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSEO } from "@/hooks/useSEO";
 
 const values = [
   { icon: Sparkles, title: "البساطة", desc: "نجعل عملية عرض المشاريع والتفاوض عليها سهلة وواضحة بدون خطوات معقدة." },
@@ -42,6 +43,7 @@ const whyUsItems = [
 ];
 
 const AboutPage = () => {
+  useSEO({ title: "عن سوق تقبيل", description: "أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع التجارية", canonical: "/about" });
   const [liveStats, setLiveStats] = useState({ listings: 0, deals: 0, completionRate: 0 });
 
   const fetchStats = async () => {
