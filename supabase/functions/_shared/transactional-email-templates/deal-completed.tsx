@@ -1,10 +1,16 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
+  Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section, Img,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = "سوق تقبيل"
+const FONT_URL = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
+
+// Inline SVG icons as data URIs for email compatibility
+const ICONS = {
+  check: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%2316a34a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 11.08V12a10 10 0 1 1-5.93-9.14'/%3E%3Cpath d='m9 11 3 3L22 4'/%3E%3C/svg%3E`,
+}
 
 interface DealCompletedProps {
   recipientName?: string
@@ -16,15 +22,12 @@ interface DealCompletedProps {
 }
 
 const DealCompletedEmail = ({
-  recipientName,
-  dealTitle,
-  agreementNumber,
-  agreedPrice,
-  otherPartyName,
-  role,
+  recipientName, dealTitle, agreementNumber, agreedPrice, otherPartyName, role,
 }: DealCompletedProps) => (
   <Html lang="ar" dir="rtl">
-    <Head />
+    <Head>
+      <link rel="stylesheet" href={FONT_URL} />
+    </Head>
     <Preview>تم إتمام صفقتك بنجاح على {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
@@ -33,7 +36,7 @@ const DealCompletedEmail = ({
         </Section>
 
         <Section style={iconSection}>
-          <Text style={checkIcon}>✅</Text>
+          <Img src={ICONS.check} width="48" height="48" alt="تم" style={{ margin: '0 auto' }} />
         </Section>
 
         <Heading style={h1}>تهانينا! تمت الصفقة بنجاح</Heading>
@@ -94,7 +97,7 @@ const DealCompletedEmail = ({
 
 export const template = {
   component: DealCompletedEmail,
-  subject: 'تم إتمام صفقتك بنجاح ✅',
+  subject: 'تم إتمام صفقتك بنجاح',
   displayName: 'تأكيد إتمام الصفقة',
   previewData: {
     recipientName: 'أحمد',
@@ -106,104 +109,19 @@ export const template = {
   },
 } satisfies TemplateEntry
 
-const main = {
-  backgroundColor: '#ffffff',
-  fontFamily: "'IBM Plex Sans Arabic', Arial, sans-serif",
-}
-
-const container = {
-  padding: '40px 25px',
-  maxWidth: '560px',
-  margin: '0 auto',
-}
-
-const headerSection = {
-  textAlign: 'center' as const,
-  marginBottom: '10px',
-}
-
-const logo = {
-  fontSize: '20px',
-  fontWeight: '600' as const,
-  color: '#0a8af8',
-  margin: '0',
-}
-
-const iconSection = {
-  textAlign: 'center' as const,
-  marginBottom: '5px',
-}
-
-const checkIcon = {
-  fontSize: '48px',
-  margin: '0',
-}
-
-const h1 = {
-  fontSize: '22px',
-  fontWeight: '600' as const,
-  color: '#1e3a5f',
-  textAlign: 'center' as const,
-  margin: '0 0 24px',
-}
-
-const text = {
-  fontSize: '15px',
-  color: '#55575d',
-  lineHeight: '1.7',
-  margin: '0 0 16px',
-}
-
-const detailsBox = {
-  backgroundColor: '#f0f7ff',
-  borderRadius: '12px',
-  padding: '20px 24px',
-  margin: '0 0 24px',
-  border: '1px solid #d6e8fa',
-}
-
-const detailRow = {
-  fontSize: '14px',
-  color: '#1e3a5f',
-  margin: '0 0 8px',
-  lineHeight: '1.6',
-}
-
-const detailLabel = {
-  fontWeight: '600' as const,
-}
-
-const buttonSection = {
-  textAlign: 'center' as const,
-  margin: '8px 0 32px',
-}
-
-const button = {
-  backgroundColor: '#0a8af8',
-  color: '#ffffff',
-  fontSize: '15px',
-  fontWeight: '500' as const,
-  padding: '12px 32px',
-  borderRadius: '12px',
-  textDecoration: 'none',
-  display: 'inline-block',
-}
-
-const hr = {
-  borderColor: '#e8ecf0',
-  margin: '24px 0',
-}
-
-const footer = {
-  fontSize: '13px',
-  color: '#888',
-  textAlign: 'center' as const,
-  margin: '0 0 8px',
-}
-
-const footerSmall = {
-  fontSize: '11px',
-  color: '#aaa',
-  textAlign: 'center' as const,
-  margin: '0',
-}
+const FONT = "'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Arial, sans-serif"
+const main = { backgroundColor: '#ffffff', fontFamily: FONT }
+const container = { padding: '40px 25px', maxWidth: '560px', margin: '0 auto' }
+const headerSection = { textAlign: 'center' as const, marginBottom: '10px' }
+const logo = { fontSize: '20px', fontWeight: '600' as const, color: '#0a8af8', margin: '0', fontFamily: "'IBM Plex Sans Arabic', Arial, sans-serif" }
+const iconSection = { textAlign: 'center' as const, marginBottom: '12px' }
+const h1 = { fontSize: '22px', fontWeight: '600' as const, color: '#1e3a5f', textAlign: 'center' as const, margin: '0 0 24px', fontFamily: FONT }
+const text = { fontSize: '15px', color: '#55575d', lineHeight: '1.7', margin: '0 0 16px', fontFamily: FONT }
+const detailsBox = { backgroundColor: '#f0f7ff', borderRadius: '12px', padding: '20px 24px', margin: '0 0 24px', border: '1px solid #d6e8fa' }
+const detailRow = { fontSize: '14px', color: '#1e3a5f', margin: '0 0 8px', lineHeight: '1.6', fontFamily: FONT }
+const detailLabel = { fontWeight: '600' as const }
+const buttonSection = { textAlign: 'center' as const, margin: '8px 0 32px' }
+const button = { backgroundColor: '#0a8af8', color: '#ffffff', fontSize: '15px', fontWeight: '500' as const, padding: '12px 32px', borderRadius: '12px', textDecoration: 'none', display: 'inline-block', fontFamily: FONT }
+const hr = { borderColor: '#e8ecf0', margin: '24px 0' }
+const footer = { fontSize: '13px', color: '#888', textAlign: 'center' as const, margin: '0 0 8px', fontFamily: FONT }
+const footerSmall = { fontSize: '11px', color: '#aaa', textAlign: 'center' as const, margin: '0', fontFamily: FONT }
