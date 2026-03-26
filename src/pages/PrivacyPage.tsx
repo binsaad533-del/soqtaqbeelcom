@@ -2,17 +2,17 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 const sections = [
-  { id: "intro", title: "١. مقدمة" },
-  { id: "data-collected", title: "٢. البيانات التي نجمعها" },
-  { id: "data-usage", title: "٣. كيف نستخدم بياناتك" },
-  { id: "ai-data", title: "٤. الذكاء الاصطناعي والبيانات" },
-  { id: "data-protection", title: "٥. حماية البيانات" },
-  { id: "data-sharing", title: "٦. مشاركة البيانات" },
-  { id: "rights", title: "٧. حقوقك" },
-  { id: "cookies", title: "٨. ملفات الارتباط" },
-  { id: "retention", title: "٩. الاحتفاظ بالبيانات" },
-  { id: "changes", title: "١٠. التعديلات" },
-  { id: "contact", title: "١١. التواصل" },
+  { id: "intro", title: "1. مقدمة" },
+  { id: "data-collected", title: "2. البيانات التي نجمعها" },
+  { id: "data-usage", title: "3. كيف نستخدم بياناتك" },
+  { id: "ai-data", title: "4. الذكاء الاصطناعي والبيانات" },
+  { id: "data-protection", title: "5. حماية البيانات" },
+  { id: "data-sharing", title: "6. مشاركة البيانات" },
+  { id: "rights", title: "7. حقوقك" },
+  { id: "cookies", title: "8. ملفات الارتباط" },
+  { id: "retention", title: "9. الاحتفاظ بالبيانات" },
+  { id: "changes", title: "10. التعديلات" },
+  { id: "contact", title: "11. التواصل" },
 ];
 
 const PrivacyPage = () => {
@@ -25,7 +25,7 @@ const PrivacyPage = () => {
         </Link>
 
         <h1 className="text-2xl font-bold text-foreground mb-2">سياسة الخصوصية</h1>
-        <p className="text-xs text-muted-foreground mb-8">آخر تحديث: مارس ٢٠٢٦</p>
+        <p className="text-xs text-muted-foreground mb-8">آخر تحديث: مارس 2026</p>
 
         {/* Table of Contents */}
         <nav className="mb-10 p-4 rounded-xl bg-card border border-border/30">
@@ -42,11 +42,11 @@ const PrivacyPage = () => {
         </nav>
 
         <div className="space-y-6 text-sm text-foreground/85 leading-relaxed">
-          <Section id="intro" title="١. مقدمة">
+          <Section id="intro" title="1. مقدمة">
             نحن في <strong>سوق تقبيل</strong> نلتزم بحماية خصوصيتك وبياناتك الشخصية وفقًا لنظام حماية البيانات الشخصية في المملكة العربية السعودية. توضح هذه السياسة كيفية جمع واستخدام وحماية بياناتك.
           </Section>
 
-          <Section id="data-collected" title="٢. البيانات التي نجمعها">
+          <Section id="data-collected" title="2. البيانات التي نجمعها">
             <ul className="list-disc pr-5 space-y-1 mt-1">
               <li><strong>بيانات التسجيل:</strong> الاسم، رقم الجوال، البريد الإلكتروني (اختياري).</li>
               <li><strong>بيانات الملف الشخصي:</strong> المدينة، الصورة الشخصية، معلومات التحقق.</li>
@@ -56,7 +56,7 @@ const PrivacyPage = () => {
             </ul>
           </Section>
 
-          <Section id="data-usage" title="٣. كيف نستخدم بياناتك">
+          <Section id="data-usage" title="3. كيف نستخدم بياناتك">
             <ul className="list-disc pr-5 space-y-1 mt-1">
               <li>تقديم خدمات المنصة وتحسينها.</li>
               <li>التحقق من الهوية والحسابات.</li>
@@ -68,11 +68,11 @@ const PrivacyPage = () => {
             </ul>
           </Section>
 
-          <Section id="ai-data" title="٤. الذكاء الاصطناعي والبيانات">
+          <Section id="ai-data" title="4. الذكاء الاصطناعي والبيانات">
             تستخدم المنصة تقنيات الذكاء الاصطناعي لتحليل البيانات المُدخلة والمستندات والصور. يتم معالجة هذه البيانات لتقديم خدمات ذكية مثل تحليل الصفقات والتقييم والتوصيات. لا يتم مشاركة بياناتك الشخصية مع أطراف خارجية لأغراض تسويقية.
           </Section>
 
-          <Section id="data-protection" title="٥. حماية البيانات">
+          <Section id="data-protection" title="5. حماية البيانات">
             <ul className="list-disc pr-5 space-y-1 mt-1">
               <li>نستخدم تشفير البيانات أثناء النقل والتخزين.</li>
               <li>الوصول إلى البيانات مقيّد بصلاحيات محددة.</li>
@@ -81,7 +81,7 @@ const PrivacyPage = () => {
             </ul>
           </Section>
 
-          <Section id="data-sharing" title="٦. مشاركة البيانات">
+          <Section id="data-sharing" title="6. مشاركة البيانات">
             <ul className="list-disc pr-5 space-y-1 mt-1">
               <li>لا نبيع بياناتك الشخصية لأي طرف ثالث.</li>
               <li>قد نشارك بيانات محدودة مع الطرف الآخر في الصفقة لإتمامها.</li>
@@ -89,7 +89,7 @@ const PrivacyPage = () => {
             </ul>
           </Section>
 
-          <Section id="rights" title="٧. حقوقك">
+          <Section id="rights" title="7. حقوقك">
             بموجب نظام حماية البيانات الشخصية السعودي، لديك الحق في:
             <ul className="list-disc pr-5 space-y-1 mt-1">
               <li>الاطلاع على بياناتك الشخصية المُخزّنة.</li>
@@ -99,19 +99,19 @@ const PrivacyPage = () => {
             </ul>
           </Section>
 
-          <Section id="cookies" title="٨. ملفات الارتباط (Cookies)">
+          <Section id="cookies" title="8. ملفات الارتباط (Cookies)">
             قد نستخدم ملفات الارتباط لتحسين تجربة الاستخدام وتحليل أداء المنصة. يمكنك التحكم في إعدادات ملفات الارتباط من خلال متصفحك.
           </Section>
 
-          <Section id="retention" title="٩. الاحتفاظ بالبيانات">
+          <Section id="retention" title="9. الاحتفاظ بالبيانات">
             نحتفظ ببياناتك طوال فترة نشاط حسابك وللمدة اللازمة قانونيًا بعد إغلاقه. بيانات الصفقات والاتفاقيات تُحفظ بشكل دائم كسجلات قانونية.
           </Section>
 
-          <Section id="changes" title="١٠. التعديلات">
+          <Section id="changes" title="10. التعديلات">
             قد نُحدّث هذه السياسة من وقت لآخر. سنُخطرك بأي تغييرات جوهرية عبر إشعارات المنصة.
           </Section>
 
-          <Section id="contact" title="١١. التواصل">
+          <Section id="contact" title="11. التواصل">
             لأي استفسارات حول خصوصية بياناتك، يمكنك التواصل معنا عبر قسم الدعم في المنصة.
           </Section>
         </div>
