@@ -54,7 +54,7 @@ const NotFound = () => {
             className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-soft transition-all group"
           >
             <ShoppingBag size={20} className="text-primary group-hover:scale-110 transition-transform" strokeWidth={1.5} />
-            <span className="text-xs font-medium text-foreground">السوق</span>
+            <span className="text-xs font-medium text-foreground">سوق الفرص</span>
           </Link>
           <Link
             to="/contact"
