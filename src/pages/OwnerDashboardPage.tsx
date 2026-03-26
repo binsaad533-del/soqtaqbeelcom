@@ -118,9 +118,23 @@ const OwnerDashboardPage = () => {
     if (!userId) return "—";
     return profiles.find(p => p.user_id === userId)?.full_name || "—";
   };
+  /** Normalize phone to 05xxxxxxxx format */
+  const formatPhone = (phone: string | null | undefined): string => {
+    if (!phone) return "—";
+    let cleaned = phone.replace(/[^\d+]/g, "");
+    // +966 or 00966 → 0
+    if (cleaned.startsWith("+966")) cleaned = "0" + cleaned.slice(4);
+    else if (cleaned.startsWith("00966")) cleaned = "0" + cleaned.slice(5);
+    else if (cleaned.startsWith("966") && cleaned.length > 9) cleaned = "0" + cleaned.slice(3);
+    // Ensure starts with 0
+    if (!cleaned.startsWith("0") && cleaned.length === 9) cleaned = "0" + cleaned;
+    return cleaned || "—";
+  };
+
   const getProfilePhone = (userId: string | null) => {
     if (!userId) return "—";
-    return profiles.find(p => p.user_id === userId)?.phone || "—";
+    const phone = profiles.find(p => p.user_id === userId)?.phone;
+    return formatPhone(phone);
   };
   const getProfileEmail = (userId: string | null) => {
     if (!userId) return "—";
