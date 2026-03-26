@@ -1142,6 +1142,7 @@ export type Database = {
           completed_deals: number
           created_at: string
           disputes_count: number
+          email: string | null
           full_name: string | null
           id: string
           is_active: boolean
@@ -1164,6 +1165,7 @@ export type Database = {
           completed_deals?: number
           created_at?: string
           disputes_count?: number
+          email?: string | null
           full_name?: string | null
           id?: string
           is_active?: boolean
@@ -1186,6 +1188,7 @@ export type Database = {
           completed_deals?: number
           created_at?: string
           disputes_count?: number
+          email?: string | null
           full_name?: string | null
           id?: string
           is_active?: boolean
