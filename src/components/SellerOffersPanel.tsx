@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useNavigate, Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
+import { sendNotificationEmail } from "@/lib/sendNotificationEmail";
 
 interface Props {
   listingId: string;
@@ -46,6 +47,18 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
 
     toast.success("تم قبول العرض ✅");
 
+    // Send email notification to buyer (server looks up email)
+    sendNotificationEmail({
+      userId: offer.buyer_id,
+      category: "offers",
+      templateName: "offer-status-update",
+      idempotencyKey: `offer-accepted-${offer.id}`,
+      templateData: {
+        offeredPrice: offer.offered_price?.toLocaleString("ar-SA"),
+        status: "accepted",
+      },
+    }).catch(() => {});
+
     // Create a deal with agreed price — other offers stay pending (on hold)
     const { data: dealData } = await createDeal(listingId, listingOwnerId, offer.buyer_id, offer.offered_price);
     if (dealData) {
@@ -69,6 +82,18 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
     } else {
       toast.success("تم رفض العرض");
       setOffers(prev => prev.map(o => o.id === offer.id ? { ...o, status: "rejected" } : o));
+
+      // Send email notification to buyer about rejection
+      sendNotificationEmail({
+        userId: offer.buyer_id,
+        category: "offers",
+        templateName: "offer-status-update",
+        idempotencyKey: `offer-rejected-${offer.id}`,
+        templateData: {
+          offeredPrice: offer.offered_price?.toLocaleString("ar-SA"),
+          status: "rejected",
+        },
+      }).catch(() => {});
     }
     setRespondingId(null);
   };
