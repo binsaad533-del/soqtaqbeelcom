@@ -81,7 +81,7 @@ const AboutPage = () => {
       <section className="py-10 md:py-14">
         <div className="container max-w-2xl mx-auto text-center animate-fade-in">
           <div className="w-24 h-24 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-5 shadow-soft">
-            <img src={logoIcon} alt="سوق تقبيل" className="w-14 h-14 object-contain" />
+            <img src={logoIcon} alt="سوق تقبيل" className="w-[4.5rem] h-[4.5rem] object-contain" />
           </div>
           <h1 className="text-xl md:text-2xl font-semibold mb-3">من نحن</h1>
           <p className="text-sm text-muted-foreground leading-relaxed mb-2">

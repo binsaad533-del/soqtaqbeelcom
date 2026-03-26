@@ -87,7 +87,7 @@ const ContactPage = () => {
       <div className="container max-w-4xl">
         <div className="text-center mb-10">
           <div className="w-24 h-24 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-5 shadow-soft animate-fade-in">
-            <img src={logoIcon} alt="سوق تقبيل" className="w-14 h-14 object-contain" />
+            <img src={logoIcon} alt="سوق تقبيل" className="w-[4.5rem] h-[4.5rem] object-contain" />
           </div>
           <h1 className="text-2xl font-medium mb-2">تواصل معنا</h1>
           <p className="text-sm text-muted-foreground">نحن هنا لمساعدتك. اختر طريقة التواصل المناسبة لك.</p>
