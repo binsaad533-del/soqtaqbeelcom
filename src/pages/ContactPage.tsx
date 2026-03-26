@@ -62,6 +62,18 @@ const ContactPage = () => {
       }
     }
 
+    // Send confirmation email to customer if they provided an email
+    if (email.trim()) {
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "contact-confirmation",
+          recipientEmail: email.trim(),
+          idempotencyKey: `contact-confirm-${Date.now()}`,
+          templateData: { recipientName: name.trim(), subject: subject.trim() },
+        },
+      });
+    }
+
     setLoading(false);
     setSent(true);
     toast.success("تم إرسال رسالتك بنجاح");
