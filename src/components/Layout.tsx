@@ -21,7 +21,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const navLinks = [
     { label: tx("الرئيسية", "Home"), path: "/" },
-    { label: tx("السوق", "Marketplace"), path: "/marketplace" },
+    { label: tx("سوق الفرص", "Marketplace"), path: "/marketplace" },
     { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing" },
     { label: tx("لوحة التحكم", "Dashboard"), path: "/dashboard" },
   ];
