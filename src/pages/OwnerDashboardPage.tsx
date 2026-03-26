@@ -377,18 +377,20 @@ const OwnerDashboardPage = () => {
                 </h3>
                 <div className="space-y-2.5">
                   {unpaidCompleted.length > 0 && (
-                    <div className="flex items-start gap-3 p-3 rounded-xl bg-destructive/5 border border-destructive/10">
+                    <div onClick={() => { setActiveTab("deals"); setDealFilter("unpaid"); setSearchQuery(""); }} className="flex items-start gap-3 p-3 rounded-xl bg-destructive/5 border border-destructive/10 cursor-pointer hover:bg-destructive/10 transition-colors group">
                       <AlertTriangle size={14} className="text-destructive mt-0.5 shrink-0" />
-                      <div>
+                      <div className="flex-1">
                         <span className="text-xs font-medium text-destructive">{unpaidCompleted.length} عمولة غير محصلة</span>
-                        <button onClick={() => setActiveTab("deals")} className="block text-[10px] text-destructive/70 hover:underline mt-0.5">عرض التفاصيل</button>
+                        <span className="block text-[10px] text-destructive/70 group-hover:underline mt-0.5">عرض التفاصيل ←</span>
                       </div>
+                      <ChevronLeft size={14} className="text-destructive/50 mt-0.5 shrink-0" />
                     </div>
                   )}
                   {listingsNoPhotos.length > 0 && (
-                    <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
+                    <div onClick={() => { setActiveTab("listings"); setSearchQuery(""); }} className="flex items-start gap-3 p-3 rounded-xl bg-muted/50 cursor-pointer hover:bg-muted/80 transition-colors group">
                       <ImageOff size={14} className="text-muted-foreground mt-0.5 shrink-0" />
-                      <span className="text-xs text-muted-foreground">{listingsNoPhotos.length} إعلان بدون صور</span>
+                      <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">{listingsNoPhotos.length} إعلان بدون صور</span>
+                      <ChevronLeft size={14} className="text-muted-foreground/50 mt-0.5 shrink-0 mr-auto" />
                     </div>
                   )}
                   {unpaidCompleted.length === 0 && listingsNoPhotos.length === 0 && (
