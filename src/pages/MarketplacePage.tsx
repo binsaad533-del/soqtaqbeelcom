@@ -373,6 +373,10 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
           {seller && (
             <Link to={`/seller/${seller.user_id}`} onClick={e => e.stopPropagation()} className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
+                <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary shrink-0">
+                  {seller.full_name?.charAt(0) || "?"}
+                </div>
+                <span className="text-[11px] text-foreground font-medium truncate max-w-[120px]">{seller.full_name || "بائع"}</span>
                 <TrustBadge score={seller.trust_score} verificationLevel={seller.verification_level} size="sm" showScore showBadges badges={badges.slice(0, 2)} />
               </div>
               <div className="flex items-center gap-1" title={isOnline ? "متواجد الآن" : "غير متواجد"}>
