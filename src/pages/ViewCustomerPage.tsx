@@ -80,6 +80,17 @@ const ViewCustomerPage = () => {
       setProfile(p);
       setListings(l || []);
       setDeals(d || []);
+
+      // Load negotiation messages for all deals
+      const dealIds = (d || []).map((deal: Deal) => deal.id);
+      if (dealIds.length > 0) {
+        const { data: msgs } = await supabase
+          .from("negotiation_messages")
+          .select("*")
+          .in("deal_id", dealIds)
+          .order("created_at", { ascending: true });
+        setMessages((msgs || []) as NegMessage[]);
+      }
     } catch (err) {
       console.error("Failed to load customer data:", err);
     } finally {
