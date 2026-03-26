@@ -68,6 +68,8 @@ const AdminDealActions = ({ deal, onUpdate }: AdminDealActionsProps) => {
     setLoading(true);
     const { error } = await supabase.from("deals").update({ status: "negotiating" }).eq("id", deal.id);
     if (error) { toast.error("فشل تنشيط الصفقة"); setLoading(false); return; }
+    // Restore the listing to published
+    await supabase.from("listings").update({ status: "published" }).eq("id", deal.listing_id);
     await notify("✅ تم تنشيط صفقتك", reason || "تم إعادة تنشيط الصفقة من قبل إدارة المنصة.");
     await supabase.from("audit_logs").insert({
       action: "deal_activated",
