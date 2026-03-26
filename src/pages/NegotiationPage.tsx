@@ -490,7 +490,9 @@ const NegotiationPage = () => {
                     <span className="text-muted-foreground">الحالة</span>
                     <span className={cn("font-medium px-2 py-0.5 rounded-full text-[10px]",
                       deal.status === "negotiating" ? "bg-primary/10 text-primary" :
-                      deal.status === "finalized" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+                      deal.status === "finalized" ? "bg-success/10 text-success" :
+                      deal.status === "suspended" ? "bg-warning/10 text-warning" :
+                      deal.status === "cancelled" ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"
                     )}>{statusLabel}</span>
                   </div>
 
