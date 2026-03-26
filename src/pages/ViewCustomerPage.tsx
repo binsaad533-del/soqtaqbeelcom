@@ -134,8 +134,11 @@ const ViewCustomerPage = () => {
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [dealHistory, setDealHistory] = useState<DealHistoryEntry[]>([]);
   const [messages, setMessages] = useState<NegMessage[]>([]);
+  const [listingReports, setListingReports] = useState<ListingReport[]>([]);
+  const [messageReports, setMessageReports] = useState<MessageReport[]>([]);
+  const [reporterProfiles, setReporterProfiles] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "deals" | "commissions" | "listings" | "history" | "chats">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "deals" | "commissions" | "listings" | "history" | "chats" | "reports">("overview");
   const [expandedDeal, setExpandedDeal] = useState<string | null>(null);
   const [expandedCommission, setExpandedCommission] = useState<string | null>(null);
 
