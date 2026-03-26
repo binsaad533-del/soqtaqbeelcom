@@ -12,6 +12,7 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { EmailFooter } from '../email-footer.tsx'
 
 interface EmailChangeEmailProps {
   siteName: string
@@ -39,10 +40,7 @@ export const EmailChangeEmail = ({
         <Button style={button} href={confirmationUrl}>
           تأكيد التغيير
         </Button>
-        <Text style={footer}>
-          إذا لم تطلب هذا التغيير، يرجى تأمين حسابك فوراً.
-        </Text>
-        <Text style={brand}>سوق تقبيل — منصة بالذكاء الاصطناعي لإتمام الصفقات</Text>
+        <EmailFooter />
       </Container>
     </Body>
   </Html>

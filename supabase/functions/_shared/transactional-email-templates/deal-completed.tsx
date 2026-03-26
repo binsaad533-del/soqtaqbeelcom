@@ -3,6 +3,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section, Img,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { EmailFooter } from '../email-footer.tsx'
 
 const SITE_NAME = "سوق تقبيل"
 const FONT_URL = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
@@ -82,14 +83,7 @@ const DealCompletedEmail = ({
           </Button>
         </Section>
 
-        <Hr style={hr} />
-
-        <Text style={footer}>
-          شكراً لاستخدامك {SITE_NAME} — منصتك الموثوقة لتقبيل الأنشطة التجارية
-        </Text>
-        <Text style={footerSmall}>
-          هذا البريد تم إرساله تلقائياً بناءً على إتمام صفقتك. لا حاجة للرد عليه.
-        </Text>
+        <EmailFooter />
       </Container>
     </Body>
   </Html>
