@@ -121,6 +121,9 @@ const HowItWorksPage = () => {
       <div className="container max-w-4xl">
         {/* Hero */}
         <div className="text-center mb-10 md:mb-14">
+          <div className="w-24 h-24 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-5 shadow-soft animate-fade-in">
+            <img src={logoIcon} alt="سوق تقبيل" className="w-14 h-14 object-contain" />
+          </div>
           <h1 className="text-2xl md:text-3xl font-semibold mb-3">كيف تعمل المنصة؟</h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
             سواء كنت بائعاً أو مشترياً، نوفر لك رحلة سلسة ومحمية من البداية حتى إتمام الصفقة

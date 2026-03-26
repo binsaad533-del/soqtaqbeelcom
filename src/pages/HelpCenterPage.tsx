@@ -121,6 +121,9 @@ const HelpCenterPage = () => {
     <div className="container max-w-4xl py-10 space-y-8" dir="rtl">
       {/* Header */}
       <div className="text-center space-y-3">
+        <div className="w-24 h-24 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-5 shadow-soft animate-fade-in">
+          <img src={logoIcon} alt="سوق تقبيل" className="w-14 h-14 object-contain" />
+        </div>
         <h1 className="text-2xl font-semibold text-foreground">مركز المساعدة</h1>
         <p className="text-sm text-muted-foreground">ابحث عن إجابات لأسئلتك أو تصفح الأقسام</p>
       </div>
