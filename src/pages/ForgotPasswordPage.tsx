@@ -78,7 +78,7 @@ const ForgotPasswordPage = () => {
             </div>
             <h2 className="text-lg font-medium text-foreground mb-2">تم إرسال رابط إعادة التعيين</h2>
             <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-              تم إرسال رابط إعادة تعيين كلمة المرور إلى البريد المرتبط برقم جوالك. تحقق من بريدك الإلكتروني.
+              تم إرسال رابط إعادة تعيين كلمة المرور عبر رسالة نصية إلى رقم جوالك. تحقق من رسائلك.
             </p>
             <Link
               to="/login"
