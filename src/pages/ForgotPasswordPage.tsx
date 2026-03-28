@@ -17,11 +17,9 @@ const COUNTRY_CODES = [
 ];
 
 const ForgotPasswordPage = () => {
-  const [method, setMethod] = useState<"phone" | "email">("phone");
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+966");
   const [showCountryCodes, setShowCountryCodes] = useState(false);
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
