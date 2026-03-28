@@ -5,7 +5,7 @@ import AiInlineStar from "@/components/AiInlineStar";
 import { Button } from "@/components/ui/button";
 import logoIconGold from "@/assets/logo-icon-gold.png";
 import PriceDisplay from "@/components/PriceDisplay";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -189,7 +189,11 @@ const HomePage = () => {
               {tx("أول منصة سعودية بالذكاء الاصطناعي", "The first Saudi AI-powered platform")} <AiInlineStar size={13} /> {tx("لتقبيل المشاريع", "for business transfers")}
             </p>
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
-              {tx("ارفع صور مشروعك…", "Upload your business photos…")}
+              {tx("ارفع صور", "Upload photos of your")}{" "}
+              <RotatingWord words={tx(
+                "مطعمك,حلاقك,مركز تجميلك,ورشتك,مكتبك,أثاثك,محطتك",
+                "restaurant,barbershop,beauty center,workshop,office,furniture,station"
+              ).split(",")} />
               <br />
               <span className="gradient-text">{tx("والذكاء الاصطناعي يكمل الباقي", "and AI handles the rest")} <AiInlineStar size={20} /></span>
             </h1>
