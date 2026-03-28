@@ -102,7 +102,7 @@ const MonitoringDashboardPage = () => {
   const [alerts, setAlerts] = useState<SystemAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeSection, setActiveSection] = useState<"live" | "paths" | "ai" | "alerts">("live");
+  const [activeSection, setActiveSection] = useState<"live" | "paths" | "ai" | "alerts" | "perf">("live");
   const [searchQuery, setSearchQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [autoRefresh, setAutoRefresh] = useState(true);
@@ -385,6 +385,7 @@ const MonitoringDashboardPage = () => {
             { id: "paths" as const, label: "مسارات المستخدم", icon: ArrowRight },
             { id: "ai" as const, label: "الذكاء الاصطناعي", icon: Bot },
             { id: "alerts" as const, label: `التنبيهات (${unresolvedAlerts.length})`, icon: Bell },
+            { id: "perf" as const, label: "الأداء والموارد", icon: Zap },
           ].map(tab => (
             <button
               key={tab.id}
