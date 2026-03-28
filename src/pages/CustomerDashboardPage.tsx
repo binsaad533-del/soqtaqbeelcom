@@ -11,10 +11,10 @@ import { cn } from "@/lib/utils";
 import {
   Plus, FileText, MessageSquare, AlertCircle,
   CheckCircle, Loader2, Activity, Clock,
-  DollarSign, Eye, Camera, Pencil,
+  DollarSign, Camera, Pencil,
   Check, X as XIcon, Phone, UserCheck, Shield, Bell,
   Store, Briefcase, ChevronLeft, Wallet, TrendingUp,
-  ArrowUpRight, RefreshCw, Mail, Search
+  ArrowUpRight, Mail, Search, ShoppingCart, Heart
 } from "lucide-react";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
