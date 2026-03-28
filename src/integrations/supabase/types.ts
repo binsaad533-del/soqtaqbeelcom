@@ -1472,6 +1472,7 @@ export type Database = {
         Args: { _seller_id: string }
         Returns: number
       }
+      cleanup_old_logs: { Args: never; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
