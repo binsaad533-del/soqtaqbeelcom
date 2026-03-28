@@ -21,6 +21,8 @@ import SarSymbol from "@/components/SarSymbol";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 import SecuritySettingsPanel from "@/components/SecuritySettingsPanel";
 import NotificationPreferencesPanel from "@/components/NotificationPreferencesPanel";
+import BuyerOffersTab from "@/components/dashboard/BuyerOffersTab";
+import SavedListingsTab from "@/components/dashboard/SavedListingsTab";
 
 /* ── Status helpers ── */
 const statusBadge = (s: string) => {
@@ -51,7 +53,7 @@ const CustomerDashboardPage = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "notifications" | "security">("deals");
+  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "offers" | "saved" | "notifications" | "security">("deals");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dealStatusFilter, setDealStatusFilter] = useState<string>("all");
@@ -576,6 +578,8 @@ const CustomerDashboardPage = () => {
                 {[
                   { id: "deals" as const, label: "صفقاتي", icon: Briefcase, count: deals.length },
                   { id: "listings" as const, label: "إعلاناتي", icon: Store, count: listings.length },
+                  { id: "offers" as const, label: "عروضي", icon: ShoppingCart, count: undefined },
+                  { id: "saved" as const, label: "المحفوظة", icon: Heart, count: undefined },
                   { id: "notifications" as const, label: "الإشعارات", icon: Bell, count: undefined },
                   { id: "security" as const, label: "الأمان", icon: Shield, count: undefined },
                 ].map(tab => (
