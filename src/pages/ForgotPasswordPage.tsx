@@ -52,7 +52,11 @@ const ForgotPasswordPage = () => {
     });
 
     if (resetError) {
-      setError("حدث خطأ أثناء إرسال رابط إعادة التعيين. حاول مرة أخرى.");
+      if (resetError.message?.includes("rate_limit") || resetError.status === 429) {
+        setError("لقد تجاوزت الحد المسموح. انتظر قليلاً ثم حاول مرة أخرى.");
+      } else {
+        setError("حدث خطأ أثناء إرسال رابط إعادة التعيين. حاول مرة أخرى.");
+      }
     } else {
       setSent(true);
     }
