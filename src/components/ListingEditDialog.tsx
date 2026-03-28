@@ -16,6 +16,7 @@ interface ListingEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdated?: (updated: Partial<Listing>) => void;
+  onDeleted?: () => void;
 }
 
 const shouldShow = (dealType: string, field: string) =>
