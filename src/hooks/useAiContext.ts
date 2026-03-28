@@ -118,22 +118,22 @@ export function useAiContext() {
     return pageContextMap[pathname] || pageContextMap["/"];
   }, [pathname]);
 
-  // Track idle
+  // Track idle — use a longer interval (5s instead of 1s) to reduce CPU churn
   useEffect(() => {
     setBehavior(b => ({ ...b, idleSeconds: 0, hesitationDetected: false }));
     setProactiveMessage(null);
 
     idleTimer.current = setInterval(() => {
       setBehavior(prev => {
-        const newIdle = prev.idleSeconds + 1;
-        if (newIdle === 8 && !prev.hesitationDetected) {
+        const newIdle = prev.idleSeconds + 5;
+        if (newIdle >= 10 && !prev.hesitationDetected) {
           const ctx = getContext();
           setProactiveMessage(`💡 ${ctx.suggestions[0]?.description || "تبغاني أساعدك بشي؟ 👌"}`);
           return { ...prev, idleSeconds: newIdle, hesitationDetected: true };
         }
         return { ...prev, idleSeconds: newIdle };
       });
-    }, 1000);
+    }, 5000); // was 1000ms, now 5000ms
 
     return () => clearInterval(idleTimer.current);
   }, [pathname, getContext]);

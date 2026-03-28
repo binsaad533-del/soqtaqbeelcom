@@ -124,18 +124,26 @@ function getSafeErrorMessage(error: any, fallback: string): string {
   return fallback;
 }
 
-// ─── Auto-save utility ────────────────────────────────────
+// ─── Auto-save utility (debounced) ────────────────────────
 const AUTOSAVE_PREFIX = "souq_autosave_";
+const _pendingSaves = new Map<string, ReturnType<typeof setTimeout>>();
 
 export function autoSave(key: string, data: any) {
-  try {
-    localStorage.setItem(`${AUTOSAVE_PREFIX}${key}`, JSON.stringify({
-      data,
-      savedAt: new Date().toISOString(),
-    }));
-  } catch {
-    // Storage full or unavailable
-  }
+  // Debounce: only write after 3s of inactivity
+  const existing = _pendingSaves.get(key);
+  if (existing) clearTimeout(existing);
+  
+  _pendingSaves.set(key, setTimeout(() => {
+    try {
+      localStorage.setItem(`${AUTOSAVE_PREFIX}${key}`, JSON.stringify({
+        data,
+        savedAt: new Date().toISOString(),
+      }));
+    } catch {
+      // Storage full or unavailable
+    }
+    _pendingSaves.delete(key);
+  }, 3000));
 }
 
 export function loadAutoSave<T>(key: string): { data: T; savedAt: string } | null {
