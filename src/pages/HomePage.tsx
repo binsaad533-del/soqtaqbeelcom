@@ -113,13 +113,15 @@ function RotatingWord({ words }: { words: string[] }) {
     return () => clearInterval(interval);
   }, [words.length]);
 
+  const longestWord = words.reduce((a, b) => (a.length > b.length ? a : b), "");
+
   return (
-    <span className="inline-block relative overflow-hidden align-bottom" style={{ minWidth: "6ch" }}>
+    <span className="inline-block relative overflow-hidden align-bottom">
+      {/* invisible longest word to reserve width */}
+      <span className="invisible whitespace-nowrap">{longestWord}</span>
       <span
-        className={`inline-block gradient-text font-semibold transition-all duration-400 ${
-          animating
-            ? "translate-y-full opacity-0"
-            : "translate-y-0 opacity-100"
+        className={`absolute inset-0 inline-flex items-center justify-start gradient-text font-semibold whitespace-nowrap ${
+          animating ? "translate-y-full opacity-0" : "translate-y-0 opacity-100"
         }`}
         style={{ transition: "transform 0.4s ease, opacity 0.4s ease" }}
       >
