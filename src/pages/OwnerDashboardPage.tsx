@@ -135,6 +135,40 @@ const OwnerDashboardPage = () => {
   const totalUncollected = totalCommissionDue - totalCollected;
 
   const unpaidCompleted = useMemo(() => commissions.filter(c => !["verified", "paid_proof_uploaded"].includes(c.payment_status)), [commissions]);
+
+  /* ── Performance KPIs ── */
+  const avgClosureTimeDays = useMemo(() => {
+    const closed = deals.filter(d => d.completed_at && ["completed", "finalized"].includes(d.status));
+    if (closed.length === 0) return 0;
+    const totalMs = closed.reduce((sum, d) => {
+      return sum + (new Date(d.completed_at!).getTime() - new Date(d.created_at).getTime());
+    }, 0);
+    return Math.round(totalMs / closed.length / (1000 * 60 * 60 * 24));
+  }, [deals]);
+
+  const completionRate = useMemo(() => {
+    if (deals.length === 0) return 0;
+    const completed = deals.filter(d => ["completed", "finalized"].includes(d.status)).length;
+    return Math.round((completed / deals.length) * 100);
+  }, [deals]);
+
+  const avgResponseTimeHours = useMemo(() => {
+    // Estimate response rate from deal creation to first status change (completion)
+    const responded = deals.filter(d => d.updated_at && d.updated_at !== d.created_at);
+    if (responded.length === 0) return 0;
+    const totalMs = responded.reduce((sum, d) => {
+      return sum + (new Date(d.updated_at).getTime() - new Date(d.created_at).getTime());
+    }, 0);
+    const hours = totalMs / responded.length / (1000 * 60 * 60);
+    return hours < 1 ? Math.round(hours * 60) : Math.round(hours); // minutes if < 1h
+  }, [deals]);
+
+  const avgResponseIsMinutes = useMemo(() => {
+    const responded = deals.filter(d => d.updated_at && d.updated_at !== d.created_at);
+    if (responded.length === 0) return false;
+    const totalMs = responded.reduce((sum, d) => sum + (new Date(d.updated_at).getTime() - new Date(d.created_at).getTime()), 0);
+    return (totalMs / responded.length / (1000 * 60 * 60)) < 1;
+  }, [deals]);
   const listingsNoPhotos = useMemo(() => listings.filter(l => {
     const photos = l.photos as any;
     if (!photos) return true;
@@ -301,6 +335,57 @@ const OwnerDashboardPage = () => {
                   <span className="block text-[10px] text-muted-foreground/60 group-hover:text-primary group-hover:underline mt-1 transition-colors">عرض التفاصيل ←</span>
                 </div>
               ))}
+            </div>
+
+            {/* KPI Row 3: Performance */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[11px] text-muted-foreground font-medium">متوسط وقت الإغلاق</span>
+                  <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center">
+                    <Activity size={15} className="text-primary shrink-0" strokeWidth={1.5} />
+                  </div>
+                </div>
+                <div className="text-2xl font-bold tracking-tight">{avgClosureTimeDays}</div>
+                <span className="text-[10px] text-muted-foreground/60 mt-1">يوم</span>
+              </div>
+
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[11px] text-muted-foreground font-medium">معدل الإتمام</span>
+                  <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center">
+                    <UserCheck size={15} className={cn("shrink-0", completionRate >= 50 ? "text-success" : "text-warning")} strokeWidth={1.5} />
+                  </div>
+                </div>
+                <div className="text-2xl font-bold tracking-tight">{completionRate}%</div>
+                <div className="w-full bg-muted/50 rounded-full h-1.5 mt-2">
+                  <div className={cn("h-1.5 rounded-full transition-all", completionRate >= 50 ? "bg-success" : "bg-warning")} style={{ width: `${completionRate}%` }} />
+                </div>
+              </div>
+
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[11px] text-muted-foreground font-medium">متوسط وقت الاستجابة</span>
+                  <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center">
+                    <RefreshCw size={15} className="text-primary shrink-0" strokeWidth={1.5} />
+                  </div>
+                </div>
+                <div className="text-2xl font-bold tracking-tight">{avgResponseTimeHours}</div>
+                <span className="text-[10px] text-muted-foreground/60 mt-1">{avgResponseIsMinutes ? "دقيقة" : "ساعة"}</span>
+              </div>
+
+              <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[11px] text-muted-foreground font-medium">معدل تحصيل العمولات</span>
+                  <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center">
+                    <ShieldCheck size={15} className={cn("shrink-0", totalCommissionDue > 0 && totalCollected / totalCommissionDue >= 0.5 ? "text-success" : "text-warning")} strokeWidth={1.5} />
+                  </div>
+                </div>
+                <div className="text-2xl font-bold tracking-tight">{totalCommissionDue > 0 ? Math.round((totalCollected / totalCommissionDue) * 100) : 0}%</div>
+                <div className="w-full bg-muted/50 rounded-full h-1.5 mt-2">
+                  <div className={cn("h-1.5 rounded-full transition-all", totalCommissionDue > 0 && totalCollected / totalCommissionDue >= 0.5 ? "bg-success" : "bg-warning")} style={{ width: `${totalCommissionDue > 0 ? Math.round((totalCollected / totalCommissionDue) * 100) : 0}%` }} />
+                </div>
+              </div>
             </div>
 
             {/* Charts */}
