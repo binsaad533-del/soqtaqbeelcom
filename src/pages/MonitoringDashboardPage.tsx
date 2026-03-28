@@ -534,6 +534,11 @@ const MonitoringDashboardPage = () => {
             </div>
           </div>
         )}
+
+        {/* ─── Performance & Resources ─── */}
+        {activeSection === "perf" && (
+          <PerfMonitorSection />
+        )}
       </div>
     </div>
   );
