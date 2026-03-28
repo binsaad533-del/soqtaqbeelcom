@@ -136,10 +136,10 @@ const HomePage = () => {
     },
     {
       num: "2",
-      title: tx("تقييم ذكي بدون خبير", "Smart valuation without an expert"),
+      title: tx("تقييم استرشادي بالذكاء الاصطناعي", "AI-guided valuation via market comparisons"),
       desc: tx(
-        "المنصة تحلل بيانات المشروع وتعطيك تقييم واقعي للقيمة السوقية بناءً على البيانات الفعلية.",
-        "The platform analyzes business data and gives you a realistic market valuation based on real inputs."
+        "المنصة تحلل بيانات المشروع وتعطيك تقييماً استرشادياً بالذكاء الاصطناعي عبر مقارنات السوق.",
+        "The platform analyzes business data and gives you an AI-guided indicative valuation through market comparisons."
       ),
     },
     {
