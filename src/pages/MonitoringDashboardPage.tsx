@@ -214,33 +214,18 @@ const MonitoringDashboardPage = () => {
     loadAll();
   }, [loadAll]);
 
-  // Auto-refresh every 15s
+  // Auto-refresh every 30s (was 15s) — reduced DB I/O
   useEffect(() => {
     if (autoRefresh) {
-      intervalRef.current = setInterval(loadAll, 15000);
+      intervalRef.current = setInterval(loadAll, 30_000);
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [autoRefresh, loadAll]);
 
-  // Realtime subscription for audit_logs
+  // Realtime: only security incidents (critical alerts). Audit logs use polling.
   useEffect(() => {
     const channel = supabase
-      .channel("monitoring-audit")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "audit_logs" }, (payload) => {
-        const a = payload.new as any;
-        const newEvent: ActivityEvent = {
-          id: a.id,
-          time: a.created_at,
-          type: mapResourceType(a.resource_type),
-          action: mapAction(a.action, a.resource_type),
-          userId: a.user_id,
-          resourceId: a.resource_id,
-          page: a.resource_type,
-          severity: "info",
-          status: "success",
-        };
-        setEvents(prev => [newEvent, ...prev].slice(0, 150));
-      })
+      .channel("monitoring-critical")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "security_incidents" }, (payload) => {
         const i = payload.new as any;
         const newEvent: ActivityEvent = {

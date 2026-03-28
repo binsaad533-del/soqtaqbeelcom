@@ -48,23 +48,23 @@ export function useAuth() {
         if (session?.user) {
           // defer to avoid deadlock
           setTimeout(() => fetchUserData(session.user), 0);
-          // Update last_activity on sign-in
+          // Update last_activity + log session ONLY on sign-in (not every state change)
           if (event === "SIGNED_IN") {
-            supabase
-              .from("profiles")
-              .update({ last_activity: new Date().toISOString() })
-              .eq("user_id", session.user.id)
-              .then();
-            // Log session
-            supabase
-              .from("session_logs" as any)
-              .insert({
-                user_id: session.user.id,
-                event_type: "sign_in",
-                user_agent: navigator.userAgent,
-                device_info: /Mobile/i.test(navigator.userAgent) ? "mobile" : "desktop",
-              })
-              .then();
+            // Batch both writes into one promise to reduce round-trips
+            Promise.all([
+              supabase
+                .from("profiles")
+                .update({ last_activity: new Date().toISOString() })
+                .eq("user_id", session.user.id),
+              supabase
+                .from("session_logs" as any)
+                .insert({
+                  user_id: session.user.id,
+                  event_type: "sign_in",
+                  user_agent: navigator.userAgent,
+                  device_info: /Mobile/i.test(navigator.userAgent) ? "mobile" : "desktop",
+                }),
+            ]).catch(() => {});
           }
         } else {
           setState({ user: null, session: null, role: null, profile: null, loading: false });

@@ -117,31 +117,8 @@ const CustomerDashboardPage = () => {
   useEffect(() => { loadData(); }, [loadData]);
 
   /* ── Realtime sync ── */
-  const [feed, setFeed] = useState<{ id: string; text: string; time: string }[]>([]);
-  useEffect(() => {
-    if (!user) return;
-    const ch = supabase.channel("customer-dash-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "deals" }, (p) => {
-        const d = p.new as any;
-        if (d?.buyer_id === user.id || d?.seller_id === user.id) {
-          setFeed(prev => [{ id: crypto.randomUUID(), text: p.eventType === "INSERT" ? "صفقة جديدة" : "تحديث صفقة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }) }, ...prev].slice(0, 6));
-          loadData();
-        }
-      })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "negotiation_messages" }, (p) => {
-        const msg = p.new as any;
-        setFeed(prev => [{ id: crypto.randomUUID(), text: "رسالة تفاوض جديدة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }) }, ...prev].slice(0, 6));
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "listings" }, (p) => {
-        const l = p.new as any;
-        if (l?.owner_id === user.id) {
-          setFeed(prev => [{ id: crypto.randomUUID(), text: p.eventType === "INSERT" ? "إعلان جديد" : "تحديث إعلان", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }) }, ...prev].slice(0, 6));
-          loadData();
-        }
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [user, loadData]);
+  /* ── Removed aggressive realtime for customer dashboard. Use manual refresh ── */
+  const [feed] = useState<{ id: string; text: string; time: string }[]>([]);
 
   /* ── Derived stats ── */
   const stats = useMemo(() => {
