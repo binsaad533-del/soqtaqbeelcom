@@ -5,7 +5,7 @@ import AiInlineStar from "@/components/AiInlineStar";
 import { Button } from "@/components/ui/button";
 import logoIconGold from "@/assets/logo-icon-gold.png";
 import PriceDisplay from "@/components/PriceDisplay";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -96,6 +96,37 @@ function useFeaturedListings() {
   }, []);
 
   return listings;
+}
+
+function RotatingWord({ words }: { words: string[] }) {
+  const [index, setIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAnimating(true);
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % words.length);
+        setAnimating(false);
+      }, 400);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [words.length]);
+
+  return (
+    <span className="inline-block relative overflow-hidden align-bottom" style={{ minWidth: "6ch" }}>
+      <span
+        className={`inline-block gradient-text font-semibold transition-all duration-400 ${
+          animating
+            ? "translate-y-full opacity-0"
+            : "translate-y-0 opacity-100"
+        }`}
+        style={{ transition: "transform 0.4s ease, opacity 0.4s ease" }}
+      >
+        {words[index]}
+      </span>
+    </span>
+  );
 }
 
 const HomePage = () => {
