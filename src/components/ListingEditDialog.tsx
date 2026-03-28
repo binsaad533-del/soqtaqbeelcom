@@ -410,10 +410,29 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
         </Tabs>
 
         <div className="flex gap-3 mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 rounded-xl">
+          <Button
+            variant="destructive"
+            onClick={async () => {
+              if (!confirm("هل أنت متأكد من حذف هذا الإعلان؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+              setDeleting(true);
+              const { error } = await softDeleteListing(listing.id);
+              setDeleting(false);
+              if (error) { toast.error("فشل حذف الإعلان"); return; }
+              toast.success("تم حذف الإعلان بنجاح");
+              onOpenChange(false);
+              onDeleted?.();
+            }}
+            disabled={deleting || saving}
+            className="rounded-xl gap-1"
+          >
+            {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+            حذف
+          </Button>
+          <div className="flex-1" />
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl px-6">
             إلغاء
           </Button>
-          <Button onClick={handleSave} disabled={saving || uploading} className="flex-1 gradient-primary text-primary-foreground rounded-xl">
+          <Button onClick={handleSave} disabled={saving || uploading} className="gradient-primary text-primary-foreground rounded-xl px-6">
             {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
             حفظ التعديلات
           </Button>
