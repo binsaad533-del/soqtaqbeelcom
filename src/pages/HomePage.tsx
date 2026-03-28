@@ -220,10 +220,10 @@ const HomePage = () => {
               {tx("أول منصة سعودية بالذكاء الاصطناعي", "The first Saudi AI-powered platform")} <AiInlineStar size={13} /> {tx("لتقبيل المشاريع", "for business transfers")}
             </p>
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
-              {tx("ارفع صور", "Upload photos of your")}{" "}
+              {tx("ارفع صور مشروعك…", "Upload your business photos…")}{" "}
               <RotatingWord words={tx(
-                "مطعمك,حلاقك,مركز تجميلك,ورشتك,مكتبك,أثاثك,محطتك",
-                "restaurant,barbershop,beauty center,workshop,office,furniture,station"
+                "مطعم,حلاق,مركز تجميل,ورشة,مكتب,اثاث,محطة",
+                "Restaurant,Barbershop,Beauty Center,Workshop,Office,Furniture,Station"
               ).split(",")} />
               <br />
               <span className="gradient-text">{tx("والذكاء الاصطناعي يكمل الباقي", "and AI handles the rest")} <AiInlineStar size={20} /></span>
