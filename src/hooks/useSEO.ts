@@ -9,7 +9,7 @@ interface SEOOptions {
 }
 
 const BASE_TITLE = "سوق تقبيل";
-const BASE_URL = "https://soqtaqbeelcom.lovable.app";
+const BASE_URL = "https://soqtaqbeel.com";
 
 export const useSEO = ({ title, description, ogImage, canonical, type = "website" }: SEOOptions) => {
   useEffect(() => {

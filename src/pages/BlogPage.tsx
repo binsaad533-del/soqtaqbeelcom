@@ -56,13 +56,13 @@ const BlogPage = () => {
       "مقالات متخصصة في سوق التقبيل التجاري السعودي",
       "Expert articles about Saudi business transfer market"
     ),
-    url: "https://soqtaqbeelcom.lovable.app/blog",
+    url: "https://soqtaqbeel.com/blog",
     publisher: { "@type": "Organization", name: "سوق تقبيل" },
     blogPost: filtered.slice(0, 10).map((p) => ({
       "@type": "BlogPosting",
       headline: lang === "ar" ? p.title_ar : (p.title_en || p.title_ar),
       datePublished: p.published_at,
-      url: `https://soqtaqbeelcom.lovable.app/blog/${p.slug}`,
+      url: `https://soqtaqbeel.com/blog/${p.slug}`,
     })),
   };
 

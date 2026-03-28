@@ -20,4 +20,4 @@ Disallow: /agreements-archive
 Disallow: /reset-password
 Disallow: /unauthorized
 
-Sitemap: https://soqtaqbeelcom.lovable.app/sitemap.xml
+Sitemap: https://soqtaqbeel.com/sitemap.xml
