@@ -22,9 +22,10 @@ interface ListingEditDialogProps {
 const shouldShow = (dealType: string, field: string) =>
   isFieldRelevant(dealType, field) || ["business_activity", "city", "district", "price"].includes(field);
 
-const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated }: ListingEditDialogProps) => {
+const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }: ListingEditDialogProps) => {
   const dealType = listing.primary_deal_type || listing.deal_type || "full_takeover";
-  const { updateListing, uploadFile } = useListings();
+  const { updateListing, uploadFile, softDeleteListing } = useListings();
+  const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
