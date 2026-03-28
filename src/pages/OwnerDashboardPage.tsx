@@ -7,6 +7,7 @@ import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import { useCommissions, type Commission, COMMISSION_STATUS_LABELS, COMMISSION_STATUS_COLORS, type CommissionStatus } from "@/hooks/useCommissions";
 import { supabase } from "@/integrations/supabase/client";
+import { registerChannel, unregisterChannel } from "@/lib/performanceConfig";
 import TrustBadge from "@/components/TrustBadge";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
