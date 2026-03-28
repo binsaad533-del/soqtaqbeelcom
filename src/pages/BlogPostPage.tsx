@@ -72,8 +72,8 @@ const BlogPostPage = () => {
     datePublished: post.published_at,
     dateModified: post.updated_at,
     author: { "@type": "Organization", name: "سوق تقبيل" },
-    publisher: { "@type": "Organization", name: "سوق تقبيل", url: "https://soqtaqbeelcom.lovable.app" },
-    mainEntityOfPage: { "@type": "WebPage", "@id": `https://soqtaqbeelcom.lovable.app/blog/${post.slug}` },
+    publisher: { "@type": "Organization", name: "سوق تقبيل", url: "https://soqtaqbeel.com" },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `https://soqtaqbeel.com/blog/${post.slug}` },
     keywords: post.tags?.join(", "),
   };
 

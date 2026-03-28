@@ -41,7 +41,7 @@ const SENDER_DOMAIN = "notify.soqtaqbeel.com"
 const ROOT_DOMAIN = "soqtaqbeel.com"
 const FROM_DOMAIN = "notify.soqtaqbeel.com"
 
-const SAMPLE_PROJECT_URL = "https://soqtaqbeelcom.lovable.app"
+const SAMPLE_PROJECT_URL = "https://soqtaqbeel.com"
 const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
