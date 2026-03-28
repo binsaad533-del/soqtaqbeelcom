@@ -82,28 +82,16 @@ const SupervisorDashboardPage = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  /* ── Realtime subscriptions ── */
+  /* ── Realtime: only security incidents (critical). Manual refresh for others ── */
   useEffect(() => {
-    const ch = supabase.channel("supervisor-dash-live")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "deals" }, (p) => {
-        setFeed(prev => [{ id: crypto.randomUUID(), text: "صفقة جديدة تم إنشاؤها", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "deal" }, ...prev].slice(0, 8));
-        loadData();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "listings" }, (p) => {
-        const text = p.eventType === "INSERT" ? "إعلان جديد تم إضافته" : "تحديث على إعلان";
-        setFeed(prev => [{ id: crypto.randomUUID(), text, time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "listing" }, ...prev].slice(0, 8));
-        loadData();
-      })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "negotiation_messages" }, () => {
-        setFeed(prev => [{ id: crypto.randomUUID(), text: "رسالة تفاوض جديدة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "message" }, ...prev].slice(0, 8));
-      })
+    const ch = supabase.channel("supervisor-dash-critical")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "security_incidents" }, () => {
         setFeed(prev => [{ id: crypto.randomUUID(), text: "⚠️ حادثة أمنية جديدة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "incident" }, ...prev].slice(0, 8));
         toast.warning("تنبيه: حادثة أمنية جديدة");
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [loadData]);
+  }, []);
 
   /* ── Derived data ── */
   const completedDeals = useMemo(() => deals.filter(d => ["completed", "finalized"].includes(d.status)), [deals]);

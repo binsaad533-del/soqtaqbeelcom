@@ -81,20 +81,28 @@ export function validateDocFile(file: File): FileValidationResult {
   return { valid: true };
 }
 
-// ─── Audit Logging ─────────────────────────────────────────
+// ─── Audit Logging (optimized) ─────────────────────────────
+import { shouldLog, isDuplicateLog, trackPerf } from "@/lib/performanceConfig";
+
 export async function logAudit(
   action: string,
   resourceType: string,
   resourceId?: string,
   details?: Record<string, unknown>
 ) {
+  // Skip non-critical or duplicate logs to reduce DB I/O
+  if (!shouldLog(action)) return;
+  if (isDuplicateLog(action, resourceId)) return;
+
   try {
+    const start = performance.now();
     await supabase.from("audit_logs" as any).insert({
       action,
       resource_type: resourceType,
       resource_id: resourceId || null,
       details: details || {},
     } as any);
+    trackPerf("audit_log_write", performance.now() - start);
   } catch {
     // Silent fail — audit should never break user flow
   }

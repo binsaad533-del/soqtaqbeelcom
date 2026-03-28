@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { getPerfMetrics, getRealtimeChannelCount, isResourceSafeMode } from "@/lib/performanceConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,7 +103,7 @@ const MonitoringDashboardPage = () => {
   const [alerts, setAlerts] = useState<SystemAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeSection, setActiveSection] = useState<"live" | "paths" | "ai" | "alerts">("live");
+  const [activeSection, setActiveSection] = useState<"live" | "paths" | "ai" | "alerts" | "perf">("live");
   const [searchQuery, setSearchQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [autoRefresh, setAutoRefresh] = useState(true);
@@ -160,8 +161,8 @@ const MonitoringDashboardPage = () => {
 
   const loadEvents = useCallback(async () => {
     const [auditRes, incidentsRes] = await Promise.all([
-      supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(100),
-      supabase.from("security_incidents").select("*").order("created_at", { ascending: false }).limit(20),
+      supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(50),
+      supabase.from("security_incidents").select("*").order("created_at", { ascending: false }).limit(15),
     ]);
 
     const auditEvents: ActivityEvent[] = (auditRes.data || []).map(a => ({
@@ -214,33 +215,18 @@ const MonitoringDashboardPage = () => {
     loadAll();
   }, [loadAll]);
 
-  // Auto-refresh every 15s
+  // Auto-refresh every 30s (was 15s) — reduced DB I/O
   useEffect(() => {
     if (autoRefresh) {
-      intervalRef.current = setInterval(loadAll, 15000);
+      intervalRef.current = setInterval(loadAll, 30_000);
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [autoRefresh, loadAll]);
 
-  // Realtime subscription for audit_logs
+  // Realtime: only security incidents (critical alerts). Audit logs use polling.
   useEffect(() => {
     const channel = supabase
-      .channel("monitoring-audit")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "audit_logs" }, (payload) => {
-        const a = payload.new as any;
-        const newEvent: ActivityEvent = {
-          id: a.id,
-          time: a.created_at,
-          type: mapResourceType(a.resource_type),
-          action: mapAction(a.action, a.resource_type),
-          userId: a.user_id,
-          resourceId: a.resource_id,
-          page: a.resource_type,
-          severity: "info",
-          status: "success",
-        };
-        setEvents(prev => [newEvent, ...prev].slice(0, 150));
-      })
+      .channel("monitoring-critical")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "security_incidents" }, (payload) => {
         const i = payload.new as any;
         const newEvent: ActivityEvent = {
@@ -400,6 +386,7 @@ const MonitoringDashboardPage = () => {
             { id: "paths" as const, label: "مسارات المستخدم", icon: ArrowRight },
             { id: "ai" as const, label: "الذكاء الاصطناعي", icon: Bot },
             { id: "alerts" as const, label: `التنبيهات (${unresolvedAlerts.length})`, icon: Bell },
+            { id: "perf" as const, label: "الأداء والموارد", icon: Zap },
           ].map(tab => (
             <button
               key={tab.id}
@@ -548,6 +535,11 @@ const MonitoringDashboardPage = () => {
             </div>
           </div>
         )}
+
+        {/* ─── Performance & Resources ─── */}
+        {activeSection === "perf" && (
+          <PerfMonitorSection />
+        )}
       </div>
     </div>
   );
@@ -689,6 +681,123 @@ function mapAction(action: string, resource: string): string {
     export_data: "تصدير بيانات",
   };
   return map[action] || `${action} — ${resource}`;
+}
+
+function PerfMonitorSection() {
+  const [dbStats, setDbStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const now = new Date();
+      const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      const [
+        auditTodayRes, auditWeekRes,
+        sessionTodayRes, sessionWeekRes,
+        msgsTodayRes,
+      ] = await Promise.all([
+        supabase.from("audit_logs").select("id", { count: "exact", head: true }).gte("created_at", dayAgo),
+        supabase.from("audit_logs").select("id", { count: "exact", head: true }).gte("created_at", weekAgo),
+        supabase.from("session_logs").select("id", { count: "exact", head: true }).gte("created_at", dayAgo),
+        supabase.from("session_logs").select("id", { count: "exact", head: true }).gte("created_at", weekAgo),
+        supabase.from("negotiation_messages").select("id", { count: "exact", head: true }).gte("created_at", dayAgo),
+      ]);
+
+      const perfMetrics = getPerfMetrics();
+
+      setDbStats({
+        auditToday: auditTodayRes.count || 0,
+        auditWeek: auditWeekRes.count || 0,
+        sessionToday: sessionTodayRes.count || 0,
+        sessionWeek: sessionWeekRes.count || 0,
+        msgsToday: msgsTodayRes.count || 0,
+        realtimeChannels: getRealtimeChannelCount(),
+        resourceSafe: isResourceSafeMode(),
+        topActions: perfMetrics.slice(0, 5),
+      });
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  if (loading) return <Skeleton className="h-40" />;
+  if (!dbStats) return null;
+
+  return (
+    <div className="space-y-4">
+      {/* Resource-safe mode indicator */}
+      <div className={cn(
+        "rounded-2xl p-4 border",
+        dbStats.resourceSafe
+          ? "bg-warning/10 border-warning/30"
+          : "bg-success/10 border-success/30"
+      )}>
+        <div className="flex items-center gap-2">
+          <Shield size={16} className={dbStats.resourceSafe ? "text-warning" : "text-success"} />
+          <span className="text-sm font-medium">
+            {dbStats.resourceSafe ? "وضع حماية الموارد مُفعّل — تم تقليل النشاط غير الضروري" : "الموارد مستقرة — الأداء طبيعي"}
+          </span>
+        </div>
+      </div>
+
+      {/* DB I/O Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-card rounded-xl border border-border/20 p-4">
+          <div className="text-[10px] text-muted-foreground mb-1">سجلات التدقيق (اليوم)</div>
+          <div className="text-lg font-semibold">{dbStats.auditToday}</div>
+          <div className="text-[10px] text-muted-foreground">أسبوعياً: {dbStats.auditWeek}</div>
+        </div>
+        <div className="bg-card rounded-xl border border-border/20 p-4">
+          <div className="text-[10px] text-muted-foreground mb-1">سجلات الجلسات (اليوم)</div>
+          <div className="text-lg font-semibold">{dbStats.sessionToday}</div>
+          <div className="text-[10px] text-muted-foreground">أسبوعياً: {dbStats.sessionWeek}</div>
+        </div>
+        <div className="bg-card rounded-xl border border-border/20 p-4">
+          <div className="text-[10px] text-muted-foreground mb-1">رسائل التفاوض (اليوم)</div>
+          <div className="text-lg font-semibold">{dbStats.msgsToday}</div>
+        </div>
+        <div className="bg-card rounded-xl border border-border/20 p-4">
+          <div className="text-[10px] text-muted-foreground mb-1">قنوات البث المباشر</div>
+          <div className="text-lg font-semibold">{dbStats.realtimeChannels}</div>
+        </div>
+      </div>
+
+      {/* Top actions by frequency */}
+      {dbStats.topActions.length > 0 && (
+        <div className="bg-card rounded-2xl border border-border/20 p-5">
+          <h3 className="text-sm font-medium mb-3">أكثر العمليات استهلاكاً</h3>
+          <div className="space-y-2">
+            {dbStats.topActions.map((m: any, i: number) => (
+              <div key={i} className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">{m.action}</span>
+                <div className="flex items-center gap-3">
+                  <span className="font-medium">{m.count} مرة</span>
+                  <span className="text-muted-foreground/60">{Math.round(m.totalMs / m.count)}ms avg</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Optimization summary */}
+      <div className="bg-card rounded-2xl border border-border/20 p-5">
+        <h3 className="text-sm font-medium mb-3">التحسينات المُطبّقة</h3>
+        <div className="space-y-1.5 text-xs text-muted-foreground">
+          <div>✅ تقليل اشتراكات البث المباشر (Realtime) — فقط الحوادث الأمنية الحرجة</div>
+          <div>✅ منع تكرار سجلات التدقيق خلال 10 ثوانٍ</div>
+          <div>✅ تنظيف تلقائي: سجلات الجلسات (7 أيام) · التدقيق (30 يوم)</div>
+          <div>✅ فهارس قاعدة بيانات محسّنة للجداول الثقيلة</div>
+          <div>✅ تقليل تكرار التحديث التلقائي (30 ثانية بدلاً من 15)</div>
+          <div>✅ تخزين نتائج الذكاء الاصطناعي مؤقتاً (5 دقائق)</div>
+          <div>✅ حفظ تلقائي مؤجل (3 ثوانٍ بدلاً من فوري)</div>
+          <div>✅ تقليل فترة مراقبة الخمول في الذكاء الاصطناعي (5 ثوانٍ بدلاً من 1)</div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default MonitoringDashboardPage;

@@ -7,6 +7,7 @@ import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import { useCommissions, type Commission, COMMISSION_STATUS_LABELS, COMMISSION_STATUS_COLORS, type CommissionStatus } from "@/hooks/useCommissions";
 import { supabase } from "@/integrations/supabase/client";
+import { registerChannel, unregisterChannel } from "@/lib/performanceConfig";
 import TrustBadge from "@/components/TrustBadge";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -86,33 +87,17 @@ const OwnerDashboardPage = () => {
 
   useEffect(() => { load(); }, [load]);
 
-  /* ── Realtime subscriptions ── */
+  /* ── Realtime: only security incidents (critical). Others use debounced polling ── */
   useEffect(() => {
-    const ch = supabase.channel("owner-dash-live")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "deals" }, () => {
-        setFeed(prev => [{ id: crypto.randomUUID(), text: "صفقة جديدة تم إنشاؤها", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "deal" }, ...prev].slice(0, 10));
-        load();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "listings" }, (p) => {
-        const text = p.eventType === "INSERT" ? "إعلان جديد" : "تحديث إعلان";
-        setFeed(prev => [{ id: crypto.randomUUID(), text, time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "listing" }, ...prev].slice(0, 10));
-        load();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "deal_commissions" }, () => {
-        setFeed(prev => [{ id: crypto.randomUUID(), text: "تحديث عمولة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "commission" }, ...prev].slice(0, 10));
-        load();
-      })
+    const ch = supabase.channel("owner-dash-critical")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "security_incidents" }, () => {
         setFeed(prev => [{ id: crypto.randomUUID(), text: "⚠️ حادثة أمنية جديدة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "incident" }, ...prev].slice(0, 10));
         toast.warning("تنبيه: حادثة أمنية جديدة");
       })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "crm_leads" }, () => {
-        setFeed(prev => [{ id: crypto.randomUUID(), text: "عميل محتمل جديد", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "crm" }, ...prev].slice(0, 10));
-        toast.info("عميل محتمل جديد");
-      })
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [load]);
+    registerChannel();
+    return () => { supabase.removeChannel(ch); unregisterChannel(); };
+  }, []);
 
   const getUserRole = (userId: string) => roles.find((r: any) => r.user_id === userId)?.role || "customer";
   const getProfileName = (userId: string | null) => {
