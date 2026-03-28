@@ -98,6 +98,37 @@ function useFeaturedListings() {
   return listings;
 }
 
+function RotatingWord({ words }: { words: string[] }) {
+  const [index, setIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAnimating(true);
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % words.length);
+        setAnimating(false);
+      }, 400);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [words.length]);
+
+  return (
+    <span className="inline-block relative overflow-hidden align-bottom" style={{ minWidth: "6ch" }}>
+      <span
+        className={`inline-block gradient-text font-semibold transition-all duration-400 ${
+          animating
+            ? "translate-y-full opacity-0"
+            : "translate-y-0 opacity-100"
+        }`}
+        style={{ transition: "transform 0.4s ease, opacity 0.4s ease" }}
+      >
+        {words[index]}
+      </span>
+    </span>
+  );
+}
+
 const HomePage = () => {
   useSEO({ canonical: "/" });
   const { tx } = useLanguage();
@@ -189,7 +220,11 @@ const HomePage = () => {
               {tx("أول منصة سعودية بالذكاء الاصطناعي", "The first Saudi AI-powered platform")} <AiInlineStar size={13} /> {tx("لتقبيل المشاريع", "for business transfers")}
             </p>
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
-              {tx("ارفع صور مشروعك…", "Upload your business photos…")}
+              {tx("ارفع صور", "Upload photos of your")}{" "}
+              <RotatingWord words={tx(
+                "مطعمك,حلاقك,مركز تجميلك,ورشتك,مكتبك,أثاثك,محطتك",
+                "restaurant,barbershop,beauty center,workshop,office,furniture,station"
+              ).split(",")} />
               <br />
               <span className="gradient-text">{tx("والذكاء الاصطناعي يكمل الباقي", "and AI handles the rest")} <AiInlineStar size={20} /></span>
             </h1>
