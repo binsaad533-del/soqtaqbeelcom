@@ -160,8 +160,8 @@ const MonitoringDashboardPage = () => {
 
   const loadEvents = useCallback(async () => {
     const [auditRes, incidentsRes] = await Promise.all([
-      supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(100),
-      supabase.from("security_incidents").select("*").order("created_at", { ascending: false }).limit(20),
+      supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(50),
+      supabase.from("security_incidents").select("*").order("created_at", { ascending: false }).limit(15),
     ]);
 
     const auditEvents: ActivityEvent[] = (auditRes.data || []).map(a => ({
