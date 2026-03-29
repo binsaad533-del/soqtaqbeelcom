@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import logoIconGold from "@/assets/logo-icon-gold.png";
-import { Phone, ChevronDown, ArrowRight, Sparkles, Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Phone, ChevronDown, Sparkles, Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { toDigitsOnly, toEnglishNumerals } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";
 import PasswordStrengthBar from "@/components/PasswordStrengthBar";
