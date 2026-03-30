@@ -102,6 +102,9 @@ export function useNotifications() {
         setNotifications(prev => [newNotif, ...prev]);
         setUnreadCount(prev => prev + 1);
 
+        // Play notification sound
+        playNotificationSound();
+
         // Show browser push notification
         showBrowserNotification(newNotif);
       })
