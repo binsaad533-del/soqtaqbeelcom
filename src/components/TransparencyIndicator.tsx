@@ -101,14 +101,18 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
         {missingItems.map((item) => (
           <div
             key={item.label}
-            className={cn(
-              "flex items-center gap-2",
-              onFieldClick && "cursor-pointer hover:text-primary transition-colors"
-            )}
-            onClick={() => onFieldClick?.(item.label)}
+            className="flex items-center justify-between"
           >
-            <Square size={14} className="text-muted-foreground/30 shrink-0" />
-            <span className="text-[11px] text-muted-foreground">{item.label}</span>
+            <div className="flex items-center gap-2">
+              <Square size={14} className="text-muted-foreground/30 shrink-0" />
+              <span className="text-[11px] text-muted-foreground">{item.label}</span>
+            </div>
+            <button
+              onClick={() => onFieldClick?.(item.label)}
+              className="text-[10px] font-medium text-primary hover:text-primary/80 transition-colors px-2 py-0.5 rounded-md bg-primary/5 hover:bg-primary/10"
+            >
+              أضف الآن ←
+            </button>
           </div>
         ))}
       </div>
