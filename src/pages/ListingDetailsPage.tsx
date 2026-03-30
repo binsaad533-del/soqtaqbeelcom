@@ -533,6 +533,29 @@ const ListingDetailsPage = () => {
           }}
         />
       )}
+
+      {/* Auth required dialog */}
+      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+        <DialogContent className="max-w-sm text-center" dir="rtl">
+          <DialogHeader className="items-center">
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+              <MessageCircle className="h-7 w-7 text-primary" />
+            </div>
+            <DialogTitle className="text-lg">سجّل حسابك</DialogTitle>
+            <DialogDescription className="text-sm">
+              سجّل حسابك لتتواصل مع البائع مباشرة
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col gap-2 sm:flex-col mt-2">
+            <Button className="w-full rounded-xl h-11" onClick={() => navigate("/login")}>
+              تسجيل الدخول
+            </Button>
+            <Button variant="outline" className="w-full rounded-xl h-11" onClick={() => navigate("/login?tab=register")}>
+              إنشاء حساب جديد
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
     </>
   );
