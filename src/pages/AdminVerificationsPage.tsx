@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const ID_TYPE_MAP: Record<string, string> = {
 };
 
 const AdminVerificationsPage = () => {
+  useSEO({ title: "طلبات التوثيق", description: "مراجعة طلبات توثيق البائعين على سوق تقبيل" });
   const { user } = useAuthContext();
   const [items, setItems] = useState<Verification[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});

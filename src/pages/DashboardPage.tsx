@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { FileText, Image, MessageCircle, AlertCircle, Check, Clock, ChevronLeft } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
+import { useSEO } from "@/hooks/useSEO";
 
 const tabs = ["إعلاناتي", "المسودات", "التفاوضات", "الاتفاقيات"];
 
@@ -23,6 +24,7 @@ const notifications = [
 import { useState } from "react";
 
 const DashboardPage = () => {
+  useSEO({ title: "لوحة التحكم", description: "أدِر إعلاناتك وصفقاتك من لوحة تحكم سوق تقبيل", canonical: "/dashboard" });
   const [activeTab, setActiveTab] = useState(0);
 
   return (

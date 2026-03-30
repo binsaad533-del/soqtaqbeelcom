@@ -3,6 +3,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { getPerfMetrics, getRealtimeChannelCount, isResourceSafeMode } from "@/lib/performanceConfig";
+import { useSEO } from "@/hooks/useSEO";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,6 +98,7 @@ const formatTimeAgo = (iso: string) => {
 
 // ─── Main Component ──────────────────────────────────────
 const MonitoringDashboardPage = () => {
+  useSEO({ title: "لوحة المراقبة", description: "مراقبة أداء المنصة والأحداث الأمنية — سوق تقبيل" });
   const { role } = useAuthContext();
   const [stats, setStats] = useState<LiveStats | null>(null);
   const [events, setEvents] = useState<ActivityEvent[]>([]);

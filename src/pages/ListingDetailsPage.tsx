@@ -23,6 +23,7 @@ import { useDeals } from "@/hooks/useDeals";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useSEO } from "@/hooks/useSEO";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import PriceDisplay from "@/components/PriceDisplay";
@@ -34,6 +35,7 @@ import ReportListingDialog from "@/components/ReportListingDialog";
 
 const ListingDetailsPage = () => {
   const { id } = useParams();
+  useSEO({ title: "تفاصيل الإعلان", description: "عرض تفاصيل فرصة تقبيل على سوق تقبيل", canonical: `/listing/${id}` });
   const navigate = useNavigate();
   const { user, role } = useAuthContext();
   const { recordView, toggleLike, getLikesAndViews } = useListingSocial();

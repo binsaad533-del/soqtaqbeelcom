@@ -5,6 +5,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useSEO } from "@/hooks/useSEO";
 import {
   FileText, Loader2, CheckCircle, Clock,
   Eye, Phone, UserCheck, Shield,
@@ -123,6 +124,7 @@ const dealActionLabels: Record<string, string> = {
 };
 
 const ViewCustomerPage = () => {
+  useSEO({ title: "ملف العميل", description: "عرض تفاصيل حساب العميل على سوق تقبيل" });
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { role } = useAuthContext();

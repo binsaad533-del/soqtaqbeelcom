@@ -12,6 +12,7 @@ import CrmDashboard from "@/components/crm/CrmDashboard";
 import BlogAdminPanel from "@/components/BlogAdminPanel";
 import SarSymbol from "@/components/SarSymbol";
 import { supabase } from "@/integrations/supabase/client";
+import { useSEO } from "@/hooks/useSEO";
 
 type Tab = "overview" | "crm" | "commissions" | "blog" | "backup" | "actions";
 
@@ -25,6 +26,7 @@ interface AuditLog {
 }
 
 const AdminDashboardPage = () => {
+  useSEO({ title: "لوحة الإدارة", description: "لوحة إدارة المنصة — سوق تقبيل" });
   const { getAllListings } = useListings();
   const { getAllDeals } = useDeals();
   const { getAllProfiles } = useProfiles();

@@ -5,8 +5,10 @@ import logoIcon from "@/assets/logo-icon-gold.png";
 import AiStar from "@/components/AiStar";
 import { logAudit } from "@/lib/security";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useSEO } from "@/hooks/useSEO";
 
 const NotFound = () => {
+  useSEO({ title: "الصفحة غير موجودة", description: "الصفحة التي تبحث عنها غير موجودة في سوق تقبيل" });
   const location = useLocation();
   const { user } = useAuthContext();
 

@@ -6,8 +6,10 @@ import { Lock, Eye, EyeOff, CheckCircle, Sparkles } from "lucide-react";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";
 import PasswordStrengthBar from "@/components/PasswordStrengthBar";
+import { useSEO } from "@/hooks/useSEO";
 
 const ResetPasswordPage = () => {
+  useSEO({ title: "إعادة تعيين كلمة المرور", description: "أعد تعيين كلمة مرورك في سوق تقبيل", canonical: "/reset-password" });
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

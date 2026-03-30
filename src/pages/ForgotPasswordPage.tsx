@@ -6,6 +6,7 @@ import { Phone, ChevronDown, Sparkles, Lock, Eye, EyeOff, CheckCircle } from "lu
 import { toDigitsOnly, toEnglishNumerals } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";
 import PasswordStrengthBar from "@/components/PasswordStrengthBar";
+import { useSEO } from "@/hooks/useSEO";
 
 const COUNTRY_CODES = [
   { code: "+966", flag: "🇸🇦", name: "السعودية" },
@@ -21,6 +22,7 @@ const COUNTRY_CODES = [
 type Step = "phone" | "otp" | "password" | "success";
 
 const ForgotPasswordPage = () => {
+  useSEO({ title: "استعادة كلمة المرور", description: "استعد كلمة مرورك في سوق تقبيل عبر رقم الجوال", canonical: "/forgot-password" });
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+966");
   const [showCountryCodes, setShowCountryCodes] = useState(false);

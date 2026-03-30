@@ -18,6 +18,7 @@ import { useProfiles } from "@/hooks/useProfiles";
 import { useCommissions, type Commission } from "@/hooks/useCommissions";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useSEO } from "@/hooks/useSEO";
 import CommissionBanner from "@/components/CommissionBanner";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
@@ -57,6 +58,7 @@ async function parseSSEStream(response: Response): Promise<string> {
 }
 
 const NegotiationPage = () => {
+  useSEO({ title: "التفاوض", description: "صفحة التفاوض وإتمام الصفقات على سوق تقبيل" });
   const { id: dealId } = useParams();
   const { user, profile, role } = useAuthContext();
   const { getMessages, sendMessage } = useDeals();

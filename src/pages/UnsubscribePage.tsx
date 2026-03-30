@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MailX, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 
 type Status = "loading" | "valid" | "already" | "invalid" | "success" | "error";
 
 const UnsubscribePage = () => {
+  useSEO({ title: "إلغاء الاشتراك", description: "إلغاء الاشتراك في رسائل البريد الإلكتروني من سوق تقبيل" });
   const [params] = useSearchParams();
   const token = params.get("token");
   const [status, setStatus] = useState<Status>("loading");
