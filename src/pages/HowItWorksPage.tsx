@@ -197,7 +197,34 @@ const HowItWorksPage = () => {
           ))}
         </div>
 
-        {/* CTA */}
+        {/* Commission Section */}
+        <div className="rounded-2xl border border-border/30 bg-card overflow-hidden mb-12">
+          <div className="bg-gradient-to-br from-orange-500/10 to-amber-500/5 p-6 md:p-8 text-center">
+            <Wallet size={32} strokeWidth={1.3} className="mx-auto mb-3 text-orange-600" />
+            <h2 className="text-lg font-semibold mb-2">عمولة المنصة 1% فقط من قيمة الصفقة</h2>
+            <p className="text-sm text-muted-foreground max-w-lg mx-auto mb-5">
+              لا توجد أي رسوم على التصفح أو التفاوض أو الإعلان — تدفع فقط عند إتمام الصفقة بنجاح
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto">
+              <div className="rounded-xl bg-card border border-border/20 p-4">
+                <p className="text-2xl font-bold text-foreground">0 <span className="text-xs font-normal text-muted-foreground">ر.س</span></p>
+                <p className="text-[10px] text-muted-foreground mt-1">رسوم الإعلان</p>
+              </div>
+              <div className="rounded-xl bg-card border border-border/20 p-4">
+                <p className="text-2xl font-bold text-foreground">0 <span className="text-xs font-normal text-muted-foreground">ر.س</span></p>
+                <p className="text-[10px] text-muted-foreground mt-1">رسوم التفاوض</p>
+              </div>
+              <div className="rounded-xl bg-card border border-orange-500/20 p-4">
+                <p className="text-2xl font-bold text-orange-600">1<span className="text-sm">%</span></p>
+                <p className="text-[10px] text-muted-foreground mt-1">عند إتمام الصفقة فقط</p>
+              </div>
+            </div>
+            <Link to="/commission" className="inline-flex items-center gap-1.5 text-xs text-orange-600 hover:underline mt-4">
+              تعرف على تفاصيل العمولة ←
+            </Link>
+          </div>
+        </div>
+
         <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 border border-primary/10 p-8 text-center">
           <Zap size={28} className="mx-auto mb-3 text-primary" strokeWidth={1.5} />
           <h2 className="text-lg font-semibold mb-2">جاهز للبدء؟</h2>
