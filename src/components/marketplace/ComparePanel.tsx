@@ -65,7 +65,7 @@ const ComparePanel = ({ items, onRemove, onClear }: Props) => {
                   <div key={item.id} className="relative group">
                     <div className="w-10 h-10 rounded-lg overflow-hidden border border-border/50 bg-muted">
                       {getPhoto(item) ? (
-                        <img src={getPhoto(item)!} alt="" className="w-full h-full object-cover" />
+                        <img src={getPhoto(item)!} alt="" loading="lazy" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <Eye size={12} className="text-muted-foreground/40" />
@@ -114,7 +114,7 @@ const ComparePanel = ({ items, onRemove, onClear }: Props) => {
                         <div className="flex flex-col items-center gap-2">
                           <div className="w-16 h-16 rounded-xl overflow-hidden border border-border/50 bg-muted">
                             {getPhoto(item) ? (
-                              <img src={getPhoto(item)!} alt="" className="w-full h-full object-cover" />
+                              <img src={getPhoto(item)!} alt="" loading="lazy" className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-muted/50">
                                 <Eye size={16} className="text-muted-foreground/30" />

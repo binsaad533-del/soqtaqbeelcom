@@ -332,7 +332,7 @@ const ViewCustomerPage = () => {
             <div className="flex items-center gap-3 mb-5">
               <div className="relative w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl ring-2 ring-background shadow-sm shrink-0 overflow-hidden">
                 {profile.avatar_url
-                  ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
+                  ? <img src={profile.avatar_url} alt="" loading="lazy" className="w-full h-full object-cover rounded-full" />
                   : (profile.full_name?.charAt(0) || "؟")}
               </div>
               <div className="flex-1 min-w-0">

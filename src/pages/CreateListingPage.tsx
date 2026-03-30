@@ -1135,7 +1135,7 @@ const CreateListingPage = () => {
                           <div className="flex gap-1.5 mt-2.5 overflow-x-auto pb-1">
                             {displayUrls.map((url, i) => (
                               <div key={`${group.id}-${i}`} className="relative shrink-0 w-12 h-12 rounded-lg border border-border/30 overflow-hidden bg-muted/40">
-                                <img src={url} alt={`معاينة ${group.label}`} className="w-full h-full object-cover" onError={(e) => { const target = e.currentTarget; target.style.display = "none"; const fallback = target.nextElementSibling as HTMLDivElement | null; if (fallback) fallback.style.display = "flex"; }} />
+                                <img src={url} alt={`معاينة ${group.label}`} loading="lazy" className="w-full h-full object-cover" onError={(e) => { const target = e.currentTarget; target.style.display = "none"; const fallback = target.nextElementSibling as HTMLDivElement | null; if (fallback) fallback.style.display = "flex"; }} />
                                 <div className="hidden absolute inset-0 items-center justify-center text-primary bg-primary/5"><ImageIcon size={16} /></div>
                                 {uploadingGroup === group.id && i === displayUrls.length - 1 && (
                                   <div className="absolute inset-0 bg-background/55 flex items-center justify-center"><Loader2 size={14} className="animate-spin text-primary" /></div>
@@ -1950,7 +1950,7 @@ const CreateListingPage = () => {
                       {/* Image */}
                       <div className="h-36 overflow-hidden bg-muted/30 transition-all duration-500">
                         {allPhotoUrls.length > 0 ? (
-                          <img src={allPhotoUrls[0]} alt="صورة الإعلان" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                          <img src={allPhotoUrls[0]} alt="صورة الإعلان" loading="lazy" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <ImageIcon size={32} strokeWidth={1} className="text-muted-foreground/30" />

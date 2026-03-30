@@ -23,7 +23,7 @@ export const ConfirmationCard = ({
       {item.photoIndices.length > 0 && (
         <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
           {item.photoIndices.filter((idx) => idx < allPhotoUrls.length).slice(0, 6).map((idx) => (
-            <img key={idx} src={allPhotoUrls[idx]} alt="" className="w-14 h-14 rounded-md object-cover shrink-0 border border-border/30" />
+            <img key={idx} src={allPhotoUrls[idx]} alt="" loading="lazy" className="w-14 h-14 rounded-md object-cover shrink-0 border border-border/30" />
           ))}
         </div>
       )}

@@ -335,7 +335,7 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
                     <div className="grid grid-cols-4 gap-2">
                       {groupPhotos.map((url, i) => (
                         <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-border/30">
-                          <img src={url} alt="" className="w-full h-full object-cover" />
+                          <img src={url} alt="" loading="lazy" className="w-full h-full object-cover" />
                           <button
                             onClick={() => removePhoto(group.id, i)}
                             className="absolute top-1 left-1 bg-destructive/80 text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
