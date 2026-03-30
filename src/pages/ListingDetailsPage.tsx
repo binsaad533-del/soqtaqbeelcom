@@ -457,7 +457,7 @@ const ListingDetailsPage = () => {
               </div>
 
               <div className="space-y-3 mb-6">
-                <InfoRow label="نوع الصفقة" value={primaryConfig?.label || t(listing.deal_type, DEAL_TYPE_LABELS)} />
+                <InfoRow label="نوع الصفقة" value={primaryConfig?.label || getArabicDealType(listing.deal_type)} />
                 {listing.annual_rent && <InfoRow label="الإيجار السنوي" value={<PriceDisplay amount={Number(listing.annual_rent)} size={10} />} />}
                 {listing.lease_duration && <InfoRow label="مدة العقد" value={listing.lease_duration} />}
                 {listing.lease_remaining && <InfoRow label="المتبقي" value={listing.lease_remaining} />}
