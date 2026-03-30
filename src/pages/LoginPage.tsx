@@ -426,9 +426,18 @@ const LoginPage = () => {
 
             {/* Redirect message — specific pages */}
             {isFromProtectedPage && !error && !success && (
-              <div className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs p-3 rounded-xl flex items-center gap-2 border border-blue-200 dark:border-blue-800">
-                <Zap className="h-4 w-4 shrink-0" />
-                <span>لإضافة فرصتك أو الوصول للوحة التحكم، يرجى تسجيل الدخول أولاً</span>
+              <div className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs p-3 rounded-xl flex items-center justify-between gap-2 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-2">
+                  <Info className="h-4 w-4 shrink-0" />
+                  <span>لإضافة فرصتك أو الوصول للوحة التحكم، يرجى تسجيل الدخول أولاً</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(false)}
+                  className="shrink-0 text-[10px] font-semibold bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  إنشاء حساب جديد
+                </button>
               </div>
             )}
 
