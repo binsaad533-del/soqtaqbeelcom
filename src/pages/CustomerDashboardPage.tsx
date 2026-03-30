@@ -426,6 +426,18 @@ const CustomerDashboardPage = () => {
             )}
           </div>
 
+          {/* Messages shortcut */}
+          <Link to="/messages" className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 flex items-center gap-3 hover:bg-muted/20 transition-colors group">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <MessageSquare size={16} className="text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xs font-semibold">رسائلي</h3>
+              <p className="text-[10px] text-muted-foreground">عرض جميع المحادثات</p>
+            </div>
+            <ChevronLeft size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+          </Link>
+
           {/* Activity feed */}
           <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
             <div className="flex items-center justify-between mb-3">
