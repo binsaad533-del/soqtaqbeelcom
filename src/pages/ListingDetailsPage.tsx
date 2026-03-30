@@ -101,11 +101,42 @@ const ListingDetailsPage = () => {
     const myDeals = await getMyDeals();
     const existing = myDeals.find(d => d.listing_id === listing.id);
     if (existing) { navigate(`/negotiate/${existing.id}`); return; }
-    setStartingDeal(true);
+    // Show interest form instead of creating deal directly
+    setShowInterestForm(true);
+  };
+
+  const handleSubmitInterest = async () => {
+    if (!listing || !user) return;
+    setSubmittingInterest(true);
     const { data, error } = await createDeal(listing.id, listing.owner_id);
-    if (error) { toast.error("حدث خطأ أثناء بدء التفاوض"); }
-    else if (data) { navigate(`/negotiate/${data.id}`); }
-    setStartingDeal(false);
+    if (error) {
+      toast.error("حدث خطأ أثناء بدء التفاوض");
+      setSubmittingInterest(false);
+      return;
+    }
+    if (data) {
+      // Send first message + meeting preference
+      const { sendMessage } = await import("@/hooks/useDeals").then(() => ({ sendMessage: null }));
+      const msgParts: string[] = [];
+      if (interestMessage.trim()) msgParts.push(interestMessage.trim());
+      if (wantsMeeting === true) msgParts.push("🤝 أرغب بترتيب مقابلة للاطلاع على الفرصة");
+      if (wantsMeeting === false) msgParts.push("💬 أفضل إتمام التفاوض إلكترونياً");
+      const fullMsg = msgParts.length > 0 ? msgParts.join("\n\n") : "مرحباً، أنا مهتم بهذه الفرصة وأود معرفة المزيد من التفاصيل.";
+
+      await supabase.from("negotiation_messages").insert({
+        deal_id: data.id,
+        sender_id: user.id,
+        message: fullMsg,
+        message_type: "text",
+      });
+
+      setShowInterestForm(false);
+      setInterestMessage("");
+      setWantsMeeting(null);
+      toast.success("تم إرسال اهتمامك بنجاح!");
+      navigate(`/negotiate/${data.id}`);
+    }
+    setSubmittingInterest(false);
   };
 
   if (loading) {
