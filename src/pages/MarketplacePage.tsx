@@ -19,6 +19,7 @@ import { MapPin, Eye, ShieldCheck, GitCompareArrows, Check, Lightbulb, Heart, Sh
 import MarketplaceTicker from "@/components/marketplace/MarketplaceTicker";
 import { toast } from "sonner";
 import PriceDisplay from "@/components/PriceDisplay";
+import { getArabicDealType } from "@/lib/translations";
 import { usePublishedListingsQuery } from "@/hooks/useListingsQuery";
 import { useAllProfilesQuery } from "@/hooks/useProfilesQuery";
 import { usePagination } from "@/hooks/usePagination";
