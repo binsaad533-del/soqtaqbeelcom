@@ -682,15 +682,25 @@ const NegotiationPage = () => {
                   <button
                     onClick={async () => {
                       if (!confirm("هل أنت متأكد من إلغاء الصفقة؟ سيعود الإعلان للعرض ويمكن للعملاء تقديم عروض جديدة.")) return;
-                      await supabase.from("deals").update({ status: "cancelled" }).eq("id", deal.id);
-                      await supabase.from("listing_offers").update({ status: "pending" }).eq("listing_id", deal.listing_id).eq("status", "accepted");
-                      await supabase.from("listings").update({ status: "published" }).eq("id", deal.listing_id);
-                      toast.success("تم إلغاء الصفقة وإعادة الإعلان للعرض");
-                      navigate(`/listing/${deal.listing_id}`);
+                      setActionLoading("cancel");
+                      try {
+                        const { error: cancelErr } = await supabase.from("deals").update({ status: "cancelled" }).eq("id", deal.id);
+                        if (cancelErr) throw cancelErr;
+                        await supabase.from("listing_offers").update({ status: "pending" }).eq("listing_id", deal.listing_id).eq("status", "accepted");
+                        await supabase.from("listings").update({ status: "published" }).eq("id", deal.listing_id);
+                        toast.success("تم إلغاء الصفقة وإعادة الإعلان للعرض");
+                        navigate(`/listing/${deal.listing_id}`);
+                      } catch (err: any) {
+                        console.error("[Negotiation] cancel failed:", err?.message);
+                        toast.error("فشل إلغاء الصفقة. يرجى إعادة المحاولة");
+                      } finally {
+                        setActionLoading(null);
+                      }
                     }}
-                    className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl border border-destructive/20 text-destructive text-xs font-medium hover:bg-destructive/5 transition-all active:scale-[0.98]"
+                    disabled={actionLoading === "cancel"}
+                    className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl border border-destructive/20 text-destructive text-xs font-medium hover:bg-destructive/5 transition-all active:scale-[0.98] disabled:opacity-50"
                   >
-                    <X size={13} strokeWidth={1.5} />
+                    {actionLoading === "cancel" ? <Loader2 size={13} className="animate-spin" /> : <X size={13} strokeWidth={1.5} />}
                     إلغاء الصفقة
                   </button>
                 </div>
@@ -714,22 +724,32 @@ const NegotiationPage = () => {
                     {!isBuyer && (
                       <Button
                         variant="outline"
+                        disabled={actionLoading === "transfer"}
                         onClick={async () => {
-                          await supabase.from("deals").update({ escrow_status: "transferring", updated_at: new Date().toISOString() }).eq("id", deal.id);
-                          await supabase.from("notifications").insert({
-                            user_id: deal.buyer_id,
-                            title: "🔄 بدأ البائع نقل الملكية",
-                            body: `بدأ البائع إجراءات نقل ملكية "${listingTitle}". يرجى المتابعة وتأكيد الاستلام بعد اكتمال النقل.`,
-                            type: "deal",
-                            reference_type: "deal",
-                            reference_id: deal.id,
-                          } as any);
-                          toast.success("تم بدء إجراءات نقل الملكية ✅");
-                          loadData();
+                          setActionLoading("transfer");
+                          try {
+                            const { error: transferErr } = await supabase.from("deals").update({ escrow_status: "transferring", updated_at: new Date().toISOString() }).eq("id", deal.id);
+                            if (transferErr) throw transferErr;
+                            await supabase.from("notifications").insert({
+                              user_id: deal.buyer_id,
+                              title: "🔄 بدأ البائع نقل الملكية",
+                              body: `بدأ البائع إجراءات نقل ملكية "${listingTitle}". يرجى المتابعة وتأكيد الاستلام بعد اكتمال النقل.`,
+                              type: "deal",
+                              reference_type: "deal",
+                              reference_id: deal.id,
+                            } as any);
+                            toast.success("تم بدء إجراءات نقل الملكية ✅");
+                            loadData();
+                          } catch (err: any) {
+                            console.error("[Negotiation] transfer start failed:", err?.message);
+                            toast.error("فشل بدء نقل الملكية. يرجى إعادة المحاولة");
+                          } finally {
+                            setActionLoading(null);
+                          }
                         }}
                         className="flex-1 rounded-xl text-xs"
                       >
-                        <ArrowRightLeft size={14} className="ml-1.5" />
+                        {actionLoading === "transfer" ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <ArrowRightLeft size={14} className="ml-1.5" />}
                         بدء نقل الملكية
                       </Button>
                     )}
