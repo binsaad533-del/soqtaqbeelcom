@@ -418,6 +418,13 @@ const ListingDetailsPage = () => {
                 </div>
               )}
 
+              {listing.status === "sold" && (
+                <div className="inline-flex items-center gap-1.5 bg-destructive/10 text-destructive border border-destructive/20 rounded-md px-3 py-1.5 text-sm font-bold mb-2">
+                  <Check size={16} />
+                  تم البيع
+                </div>
+              )}
+
               <h2 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || "فرصة تقبيل"}</h2>
               {sellerProfile && (
                 <Link to={`/seller/${sellerProfile.user_id}`} className="flex items-center gap-1.5 mb-1 group/seller">
