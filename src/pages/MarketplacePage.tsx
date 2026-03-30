@@ -138,6 +138,8 @@ const MarketplacePage = () => {
 
   const filtered = useMemo(() => {
     const result = enrichedListings.filter(l => {
+      // Hide simulation listings if filter is on
+      if (filters.hideSimulation && hasSimulationPhotos(l.photos as Record<string, unknown>)) return false;
       if (filters.city === "📍 بالقرب مني" && filters.nearbyCities?.length) {
         if (!filters.nearbyCities.includes(l.city || "")) return false;
       } else if (filters.city !== "الكل" && filters.city !== "📍 بالقرب مني" && l.city !== filters.city) return false;
