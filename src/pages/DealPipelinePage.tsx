@@ -429,15 +429,41 @@ const DealPipelinePage = () => {
                                         className="w-full h-7 text-[10px] mt-1"
                                         onClick={async (e) => {
                                           e.stopPropagation();
+                                          const now = new Date().toISOString();
                                           const { error } = await supabase
                                             .from("deals")
-                                            .update({ status: "completed", completed_at: new Date().toISOString() })
+                                            .update({ status: "completed", completed_at: now })
                                             .eq("id", deal.id);
                                           if (error) {
                                             console.error("[DealPipeline] confirm receipt error", error);
-                                          } else {
-                                            load();
+                                            return;
                                           }
+                                          await supabase
+                                            .from("listings")
+                                            .update({ status: "sold" } as any)
+                                            .eq("id", deal.listing_id);
+                                          const notifs = [
+                                            deal.buyer_id && {
+                                              user_id: deal.buyer_id,
+                                              title: "تمت الصفقة بنجاح 🎉",
+                                              body: `تم إتمام صفقة "${deal.listing_title}" بنجاح. تم إصدار الفاتورة تلقائياً.`,
+                                              type: "deal",
+                                              reference_id: deal.id,
+                                              reference_type: "deal",
+                                            },
+                                            deal.seller_id && {
+                                              user_id: deal.seller_id,
+                                              title: "تمت الصفقة بنجاح 🎉",
+                                              body: `تم إتمام صفقة "${deal.listing_title}" بنجاح. المشتري أكّد استلام النشاط.`,
+                                              type: "deal",
+                                              reference_id: deal.id,
+                                              reference_type: "deal",
+                                            },
+                                          ].filter(Boolean);
+                                          if (notifs.length) {
+                                            await supabase.from("notifications").insert(notifs);
+                                          }
+                                          load();
                                         }}
                                       >
                                         <CheckCircle2 className="h-3 w-3 ml-1" />
