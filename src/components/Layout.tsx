@@ -11,6 +11,7 @@ import CurrencyToggle from "./CurrencyToggle";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -19,6 +20,26 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { tx } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  // Fetch unread message count
+  useEffect(() => {
+    if (!user) { setUnreadMessages(0); return; }
+    const fetchUnread = async () => {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("receiver_id", user.id)
+        .eq("is_read", false);
+      setUnreadMessages(count || 0);
+    };
+    fetchUnread();
+    const channel = supabase
+      .channel("unread-msgs-nav")
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, fetchUnread)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
 
   const navLinks = [
     { label: tx("الرئيسية", "Home"), path: "/" },
@@ -93,10 +114,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </Link>
                 <Link
                   to="/messages"
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                  className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
                   title={tx("المحادثات", "Messages")}
                 >
                   <MessageSquare size={17} strokeWidth={1.5} />
+                  {unreadMessages > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[16px] h-[16px] rounded-full bg-primary text-primary-foreground text-[9px] font-bold px-0.5">
+                      {unreadMessages > 9 ? "9+" : unreadMessages}
+                    </span>
+                  )}
                 </Link>
                 <NotificationBell />
                 <Link
