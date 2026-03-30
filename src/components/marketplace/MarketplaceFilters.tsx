@@ -26,6 +26,7 @@ export interface FilterState {
   priceRange: [number, number];
   search: string;
   nearbyCities?: string[];
+  hideSimulation?: boolean;
 }
 
 const defaultFilters: FilterState = {
@@ -34,6 +35,7 @@ const defaultFilters: FilterState = {
   activity: "الكل",
   priceRange: [0, 3000000],
   search: "",
+  hideSimulation: true,
 };
 
 interface Props {
