@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, Menu, X, LogIn, LogOut, Plus } from "lucide-react";
+import { User, Menu, X, LogIn, LogOut, Plus, MessageSquare } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { useState, useEffect } from "react";
 import AiAssistant from "./AiAssistant";
@@ -90,6 +90,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 >
                   <Plus size={13} strokeWidth={2} />
                   {tx("أضف فرصة", "Add Listing")}
+                </Link>
+                <Link
+                  to="/messages"
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                  title={tx("المحادثات", "Messages")}
+                >
+                  <MessageSquare size={17} strokeWidth={1.5} />
                 </Link>
                 <NotificationBell />
                 <Link

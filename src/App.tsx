@@ -41,6 +41,7 @@ const BlogPage = lazy(() => import("./pages/BlogPage"));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
 const ViewCustomerPage = lazy(() => import("./pages/ViewCustomerPage"));
 const DealPipelinePage = lazy(() => import("./pages/DealPipelinePage"));
+const MessagesPage = lazy(() => import("./pages/MessagesPage"));
 
 const queryClient = new QueryClient();
 
@@ -145,6 +146,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={["platform_owner", "supervisor"]}>
                       <DealPipelinePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/messages"
+                  element={
+                    <ProtectedRoute>
+                      <MessagesPage />
                     </ProtectedRoute>
                   }
                 />
