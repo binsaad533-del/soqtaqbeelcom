@@ -37,6 +37,8 @@ const LoginPage = () => {
   const [success, setSuccess] = useState("");
   const { signIn, signUp, user } = useAuthContext();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectReason = searchParams.get("redirect");
 
   // MFA state
   const [mfaRequired, setMfaRequired] = useState(false);
