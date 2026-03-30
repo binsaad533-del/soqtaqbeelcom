@@ -177,6 +177,14 @@ const App = () => (
                   }
                 />
                 <Route
+                  path="/admin/verifications"
+                  element={
+                    <ProtectedRoute allowedRoles={["platform_owner", "supervisor"]}>
+                      <AdminVerificationsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/messages"
                   element={
                     <ProtectedRoute>
