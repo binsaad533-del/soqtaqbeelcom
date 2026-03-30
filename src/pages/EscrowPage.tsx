@@ -109,7 +109,13 @@ export default function EscrowPage() {
         ))}
       </section>
 
-      {/* Guarantees */}
+      {/* Escrow Status Tracker */}
+      <section className="max-w-3xl mx-auto px-4 pb-12">
+        <h2 className="text-xl font-bold text-foreground text-center mb-2">مراحل حالة الضمان</h2>
+        <p className="text-sm text-muted-foreground text-center mb-8">تتبّع حالة ضمان صفقتك في كل مرحلة</p>
+        <EscrowStatusTracker />
+      </section>
+
       <section className="max-w-3xl mx-auto px-4 pb-12">
         <h2 className="text-xl font-bold text-foreground text-center mb-6">ماذا يضمن لك النظام؟</h2>
         <div className="grid sm:grid-cols-3 gap-4">
