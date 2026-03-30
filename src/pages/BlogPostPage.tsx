@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { safeJsonLd } from "@/lib/security";
 import { ArrowRight, Calendar, Clock, Tag } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -83,7 +84,7 @@ const BlogPostPage = () => {
         {/* JSON-LD */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
         />
 
         {/* Back link */}

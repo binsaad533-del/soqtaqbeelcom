@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { safeJsonLd } from "@/lib/security";
 import { Link, useSearchParams } from "react-router-dom";
 import { Calendar, Clock, Tag, Search, Loader2 } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
@@ -72,7 +73,7 @@ const BlogPage = () => {
         {/* JSON-LD */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
         />
 
         {/* Header */}
