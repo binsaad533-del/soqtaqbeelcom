@@ -61,6 +61,7 @@ export default function CommissionPage() {
     title: "كيف تعمل عمولة سوق تقبيل | نموذج التسعير",
     description:
       "تعرّف على نموذج عمولة منصة سوق تقبيل: نسبة 1% فقط من قيمة الصفقة بعد إتمامها بنجاح. بدون رسوم مسبقة أو اشتراكات.",
+    canonical: "/commission",
   });
 
   const [calcAmount, setCalcAmount] = useState(500_000);

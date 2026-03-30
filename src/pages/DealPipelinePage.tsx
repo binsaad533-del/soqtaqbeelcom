@@ -133,6 +133,7 @@ const DealPipelinePage = () => {
   useSEO({
     title: "مسار الصفقات | سوق تقبيل",
     description: "تتبع مسار الصفقات من الإعلان حتى الإغلاق عبر 8 مراحل",
+    canonical: "/deal-pipeline",
   });
 
   const load = useCallback(async () => {

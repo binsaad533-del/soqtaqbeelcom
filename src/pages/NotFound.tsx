@@ -8,7 +8,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useSEO } from "@/hooks/useSEO";
 
 const NotFound = () => {
-  useSEO({ title: "الصفحة غير موجودة", description: "الصفحة التي تبحث عنها غير موجودة في سوق تقبيل" });
+  useSEO({ title: "الصفحة غير موجودة", description: "الصفحة التي تبحث عنها غير موجودة في سوق تقبيل", canonical: "/404" });
   const location = useLocation();
   const { user } = useAuthContext();
 

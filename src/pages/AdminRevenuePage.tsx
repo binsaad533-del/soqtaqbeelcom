@@ -31,7 +31,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 };
 
 const AdminRevenuePage = () => {
-  useSEO({ title: "الإيرادات والعمولات", description: "تقارير الإيرادات والعمولات على سوق تقبيل" });
+  useSEO({ title: "الإيرادات والعمولات", description: "تقارير الإيرادات والعمولات على سوق تقبيل", canonical: "/admin-revenue" });
   const [deals, setDeals] = useState<DealRow[]>([]);
   const [loading, setLoading] = useState(true);
 

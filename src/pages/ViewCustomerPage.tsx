@@ -124,8 +124,8 @@ const dealActionLabels: Record<string, string> = {
 };
 
 const ViewCustomerPage = () => {
-  useSEO({ title: "ملف العميل", description: "عرض تفاصيل حساب العميل على سوق تقبيل" });
   const { userId } = useParams<{ userId: string }>();
+  useSEO({ title: "ملف العميل", description: "عرض تفاصيل حساب العميل على سوق تقبيل", canonical: `/view-customer/${userId}` });
   const navigate = useNavigate();
   const { role } = useAuthContext();
   const { getProfile } = useProfiles();

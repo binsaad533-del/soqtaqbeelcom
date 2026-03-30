@@ -58,8 +58,8 @@ async function parseSSEStream(response: Response): Promise<string> {
 }
 
 const NegotiationPage = () => {
-  useSEO({ title: "التفاوض", description: "صفحة التفاوض وإتمام الصفقات على سوق تقبيل" });
   const { id: dealId } = useParams();
+  useSEO({ title: "التفاوض", description: "صفحة التفاوض وإتمام الصفقات على سوق تقبيل", canonical: `/negotiate/${dealId}` });
   const { user, profile, role } = useAuthContext();
   const { getMessages, sendMessage } = useDeals();
   const { getListing } = useListings();

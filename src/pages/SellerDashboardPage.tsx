@@ -72,7 +72,7 @@ const SellerDashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState<ListingRow[]>([]);
 
-  useSEO({ title: "لوحة تحكم البائع | سوق تقبيل", description: "إحصائيات نشاطك كبائع في سوق تقبيل" });
+  useSEO({ title: "لوحة تحكم البائع | سوق تقبيل", description: "إحصائيات نشاطك كبائع في سوق تقبيل", canonical: "/seller-dashboard" });
 
   const load = useCallback(async () => {
     if (!user) return;

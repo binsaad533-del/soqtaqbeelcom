@@ -67,7 +67,7 @@ const ESCROW_LABELS: Record<string, string> = {
 };
 
 const AdminDealsPage = () => {
-  useSEO({ title: "إدارة الصفقات", description: "إدارة ومتابعة جميع الصفقات على سوق تقبيل" });
+  useSEO({ title: "إدارة الصفقات", description: "إدارة ومتابعة جميع الصفقات على سوق تقبيل", canonical: "/admin-deals" });
   const { user } = useAuthContext();
   const [deals, setDeals] = useState<DealRow[]>([]);
   const [profiles, setProfiles] = useState<ProfileMap>({});

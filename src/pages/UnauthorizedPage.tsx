@@ -3,7 +3,7 @@ import { ShieldX } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
 
 const UnauthorizedPage = () => {
-  useSEO({ title: "غير مصرّح", description: "ليس لديك صلاحية للوصول لهذه الصفحة" });
+  useSEO({ title: "غير مصرّح", description: "ليس لديك صلاحية للوصول لهذه الصفحة", canonical: "/unauthorized" });
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="text-center">

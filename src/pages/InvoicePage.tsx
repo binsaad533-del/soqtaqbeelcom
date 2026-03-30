@@ -39,8 +39,8 @@ const STATUS_MAP: Record<string, { label: string; cls: string }> = {
 };
 
 const InvoicePage = () => {
-  useSEO({ title: "الفاتورة", description: "عرض فاتورة الصفقة على سوق تقبيل" });
   const { id } = useParams<{ id: string }>();
+  useSEO({ title: "الفاتورة", description: "عرض فاتورة الصفقة على سوق تقبيل", canonical: `/invoice/${id}` });
   const { user } = useAuthContext();
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [seller, setSeller] = useState<ProfileInfo | null>(null);
