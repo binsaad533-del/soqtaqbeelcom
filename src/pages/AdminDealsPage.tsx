@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Loader2, Handshake, ChevronLeft, Search } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 import AiStar from "@/components/AiStar";
 import SarSymbol from "@/components/SarSymbol";
 import { cn } from "@/lib/utils";
@@ -66,6 +67,7 @@ const ESCROW_LABELS: Record<string, string> = {
 };
 
 const AdminDealsPage = () => {
+  useSEO({ title: "إدارة الصفقات", description: "إدارة ومتابعة جميع الصفقات على سوق تقبيل" });
   const { user } = useAuthContext();
   const [deals, setDeals] = useState<DealRow[]>([]);
   const [profiles, setProfiles] = useState<ProfileMap>({});

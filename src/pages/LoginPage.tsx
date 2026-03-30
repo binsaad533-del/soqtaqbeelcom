@@ -9,6 +9,7 @@ import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";
 import PasswordStrengthBar from "@/components/PasswordStrengthBar";
 import { useSecurityIncidents } from "@/hooks/useSecurityIncidents";
+import { useSEO } from "@/hooks/useSEO";
 
 const COUNTRY_CODES = [
   { code: "+966", flag: "🇸🇦", name: "السعودية" },
@@ -22,6 +23,7 @@ const COUNTRY_CODES = [
 ];
 
 const LoginPage = () => {
+  useSEO({ title: "تسجيل الدخول", description: "سجّل دخولك إلى سوق تقبيل لإدارة إعلاناتك وصفقاتك التجارية", canonical: "/login" });
   const [isLogin, setIsLogin] = useState(true);
   const [loginMethod, setLoginMethod] = useState<"phone" | "email">("phone");
   const [phone, setPhone] = useState("");

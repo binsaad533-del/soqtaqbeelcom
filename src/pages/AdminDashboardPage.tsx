@@ -25,6 +25,7 @@ interface AuditLog {
 }
 
 const AdminDashboardPage = () => {
+  useSEO({ title: "لوحة الإدارة", description: "لوحة إدارة المنصة — سوق تقبيل" });
   const { getAllListings } = useListings();
   const { getAllDeals } = useDeals();
   const { getAllProfiles } = useProfiles();

@@ -23,6 +23,7 @@ const notifications = [
 import { useState } from "react";
 
 const DashboardPage = () => {
+  useSEO({ title: "لوحة التحكم", description: "أدِر إعلاناتك وصفقاتك من لوحة تحكم سوق تقبيل", canonical: "/dashboard" });
   const [activeTab, setActiveTab] = useState(0);
 
   return (

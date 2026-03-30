@@ -2,8 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Store, Search } from "lucide-react";
 import { useEffect } from "react";
+import { useSEO } from "@/hooks/useSEO";
 
 const OnboardingPage = () => {
+  useSEO({ title: "البدء", description: "ابدأ رحلتك في سوق تقبيل — بيع أو شراء مشروع تجاري", canonical: "/onboarding" });
   const navigate = useNavigate();
   const { user, profile, loading } = useAuthContext();
 

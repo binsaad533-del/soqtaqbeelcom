@@ -23,6 +23,7 @@ import { useDeals } from "@/hooks/useDeals";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useSEO } from "@/hooks/useSEO";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import PriceDisplay from "@/components/PriceDisplay";

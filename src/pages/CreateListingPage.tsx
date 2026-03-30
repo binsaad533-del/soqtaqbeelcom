@@ -45,6 +45,7 @@ import { getRules, isFieldVisible, validateDisclosure, validateImages, FIELD_LAB
 import VerificationGate from "@/components/VerificationGate";
 import GoogleMapPicker from "@/components/GoogleMapPicker";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
+import { useSEO } from "@/hooks/useSEO";
 
 const steps = [
   { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على الـAI ✦" },
@@ -74,6 +75,7 @@ import { ConfirmationCard } from "./create-listing/ConfirmationCard";
 import { FormField, SelectField } from "./create-listing/FormFields";
 
 const CreateListingPage = () => {
+  useSEO({ title: "أضف فرصة جديدة", description: "أنشئ إعلان تقبيل جديد على سوق تقبيل — أضف تفاصيل مشروعك واجذب المشترين", canonical: "/create-listing" });
   const [currentStep, setCurrentStep] = useState(0);
   const [dealStructure, setDealStructure] = useState<DealStructureSelection>({
     selectedTypes: [],

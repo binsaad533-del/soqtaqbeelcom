@@ -6,6 +6,7 @@ import { useListings, type Listing } from "@/hooks/useListings";
 import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
+import { useSEO } from "@/hooks/useSEO";
 import PhoneVerificationFlow from "@/components/PhoneVerificationFlow";
 import { cn } from "@/lib/utils";
 import {
@@ -44,6 +45,7 @@ const fmtCurrency = (n: number) =>
   n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n.toLocaleString("en-US");
 
 const CustomerDashboardPage = () => {
+  useSEO({ title: "لوحة العميل", description: "لوحة تحكم العميل — تابع إعلاناتك وصفقاتك على سوق تقبيل", canonical: "/dashboard" });
   const { profile, user } = useAuthContext();
   const { getMyListings } = useListings();
   const { getMyDeals } = useDeals();

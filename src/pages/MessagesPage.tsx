@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { useSEO } from "@/hooks/useSEO";
 import { ar } from "date-fns/locale";
 
 interface Conversation {
@@ -24,6 +25,7 @@ interface Conversation {
 }
 
 const MessagesPage = () => {
+  useSEO({ title: "المحادثات", description: "تابع محادثاتك ومفاوضاتك على سوق تقبيل", canonical: "/messages" });
   const { user } = useAuthContext();
   const { tx } = useLanguage();
   const navigate = useNavigate();

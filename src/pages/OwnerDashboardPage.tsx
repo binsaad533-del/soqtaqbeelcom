@@ -7,6 +7,7 @@ import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import { useCommissions, type Commission, COMMISSION_STATUS_LABELS, COMMISSION_STATUS_COLORS, type CommissionStatus } from "@/hooks/useCommissions";
 import { supabase } from "@/integrations/supabase/client";
+import { useSEO } from "@/hooks/useSEO";
 import { registerChannel, unregisterChannel } from "@/lib/performanceConfig";
 import TrustBadge from "@/components/TrustBadge";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,7 @@ const TABS: { id: Tab; label: string; icon: any }[] = [
 ];
 
 const OwnerDashboardPage = () => {
+  useSEO({ title: "لوحة مالك المنصة", description: "لوحة تحكم مالك المنصة — إدارة شاملة لسوق تقبيل" });
   const navigate = useNavigate();
   const { profile, signOut } = useAuthContext();
   const { getAllListings } = useListings();

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, TrendingUp, Handshake, CheckCircle2, Clock, ChevronLeft, DollarSign } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useSEO } from "@/hooks/useSEO";
 import SarSymbol from "@/components/SarSymbol";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 };
 
 const AdminRevenuePage = () => {
+  useSEO({ title: "الإيرادات والعمولات", description: "تقارير الإيرادات والعمولات على سوق تقبيل" });
   const [deals, setDeals] = useState<DealRow[]>([]);
   const [loading, setLoading] = useState(true);
 

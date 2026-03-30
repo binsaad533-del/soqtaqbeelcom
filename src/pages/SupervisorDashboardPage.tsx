@@ -6,6 +6,7 @@ import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 import { supabase } from "@/integrations/supabase/client";
+import { useSEO } from "@/hooks/useSEO";
 import { cn } from "@/lib/utils";
 import {
   FileText, MessageSquare, AlertTriangle, CheckCircle, Clock,
@@ -40,6 +41,7 @@ const statusLabel = (s: string) => {
 };
 
 const SupervisorDashboardPage = () => {
+  useSEO({ title: "لوحة المشرف", description: "لوحة تحكم المشرف — متابعة الإعلانات والصفقات على سوق تقبيل" });
   const { profile, signOut } = useAuthContext();
   const { getAllListings } = useListings();
   const { getAllDeals } = useDeals();
