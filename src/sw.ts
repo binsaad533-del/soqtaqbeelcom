@@ -108,7 +108,7 @@ registerRoute(
   })
 );
 
-// Pre-cache the offline page on install
+// Pre-cache offline fallback on install
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open("offline-fallback").then((cache) => cache.add("/offline.html"))
@@ -120,13 +120,17 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// ── Offline fallback: only show offline.html when truly offline ──
-// Workbox NavigationRoute (NetworkFirst) handles navigation normally.
-// This handler is a safety net that ONLY fires when the network fetch
-// inside NavigationRoute throws (i.e. no connectivity at all).
-// We override the handlerDidError lifecycle to serve offline.html.
+// ── SPA fallback: return cached /index.html first, then offline.html ──
 navigationHandler.plugins.push({
   handlerDidError: async () => {
+    // Try the precached SPA shell first (index.html)
+    const precached = await caches.match(
+      new Request("/index.html"),
+      { ignoreSearch: true }
+    );
+    if (precached) return precached;
+
+    // Last resort: offline page
     const offlineCache = await caches.open("offline-fallback");
     return (await offlineCache.match("/offline.html")) ||
       new Response("أنت غير متصل بالإنترنت", {
