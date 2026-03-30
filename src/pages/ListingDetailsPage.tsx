@@ -8,6 +8,7 @@ import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
+import { calculateTransparency } from "@/lib/transparencyScore";
 import QuickPriceEdit from "@/components/QuickPriceEdit";
 import ListingEditDialog from "@/components/ListingEditDialog";
 import ListingOfferForm from "@/components/ListingOfferForm";
@@ -450,7 +451,6 @@ const ListingDetailsPage = () => {
 
               {/* Listing Completion Progress Bar */}
               {(() => {
-                const { calculateTransparency } = require("@/lib/transparencyScore");
                 const result = calculateTransparency(listing);
                 const score = result.score;
                 const barColor = score >= 80 ? "bg-emerald-500" : score >= 50 ? "bg-amber-500" : "bg-destructive";
