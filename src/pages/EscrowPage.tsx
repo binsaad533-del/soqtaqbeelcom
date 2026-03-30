@@ -1,4 +1,5 @@
-import { Shield, Lock, CheckCircle, ArrowDown, FileText, Banknote, AlertTriangle, HelpCircle } from "lucide-react";
+import { useState } from "react";
+import { Shield, Lock, CheckCircle, ArrowDown, FileText, Banknote, AlertTriangle, HelpCircle, Clock, Truck, CircleCheck, PartyPopper } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
