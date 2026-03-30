@@ -453,8 +453,8 @@ const NegotiationPage = () => {
     );
   }
 
-  const isPostAgreement = deal.status === "completed" || deal.status === "finalized";
-  const isConfirmedStage = deal.status === "confirmed";
+  const isPostAgreement = deal.status === "completed";
+  const isConfirmedStage = deal.status === "confirmed" || deal.status === "finalized";
   const isTransferStage = deal.escrow_status === "transferring";
 
   const statusLabel = deal.status === "negotiating" ? "جاري التفاوض" : deal.status === "confirmed" ? "اتفاق" : deal.status === "completed" ? "مكتمل" : deal.status === "finalized" ? "مُقفل" : deal.status === "suspended" ? "معلّقة" : deal.status === "cancelled" ? "ملغاة" : deal.status;
@@ -667,7 +667,7 @@ const NegotiationPage = () => {
               </div>
 
               {/* CTA: Legal confirmation & Cancel */}
-              {!isPostAgreement && deal.status === "negotiating" && (
+              {!isPostAgreement && (deal.status === "negotiating" || deal.status === "confirmed") && !deal.locked && (
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowLegalPanel(true)}
@@ -695,54 +695,47 @@ const NegotiationPage = () => {
               )}
 
 
-              {/* Finalized state */}
-              {deal.status === "finalized" && (
+              {/* Finalized state — show agreement link + transfer option */}
+              {deal.locked && !isTransferStage && !isPostAgreement && (
                 <div className="bg-gradient-to-b from-primary/5 to-card rounded-2xl p-4 shadow-soft border border-primary/15">
                   <div className="flex items-center gap-2 mb-2">
                     <Shield size={13} strokeWidth={1.5} className="text-primary" />
                     <h3 className="font-medium text-xs">الصفقة مُقفلة ✓</h3>
                   </div>
                   <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
-                    تمت الموافقة من الطرفين. يمكنك الانتقال للاتفاقية.
+                    تمت الموافقة من الطرفين. يمكنك عرض الاتفاقية أو بدء نقل الملكية.
                   </p>
-                  <Button asChild className="w-full rounded-xl text-xs gradient-primary text-primary-foreground">
-                    <Link to={`/agreement/${dealId}`}>عرض الاتفاقية</Link>
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button asChild className="flex-1 rounded-xl text-xs gradient-primary text-primary-foreground">
+                      <Link to={`/agreement/${dealId}`}>عرض الاتفاقية</Link>
+                    </Button>
+                    {!isBuyer && (
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          await supabase.from("deals").update({ escrow_status: "transferring", updated_at: new Date().toISOString() }).eq("id", deal.id);
+                          await supabase.from("notifications").insert({
+                            user_id: deal.buyer_id,
+                            title: "🔄 بدأ البائع نقل الملكية",
+                            body: `بدأ البائع إجراءات نقل ملكية "${listingTitle}". يرجى المتابعة وتأكيد الاستلام بعد اكتمال النقل.`,
+                            type: "deal",
+                            reference_type: "deal",
+                            reference_id: deal.id,
+                          } as any);
+                          toast.success("تم بدء إجراءات نقل الملكية ✅");
+                          loadData();
+                        }}
+                        className="flex-1 rounded-xl text-xs"
+                      >
+                        <ArrowRightLeft size={14} className="ml-1.5" />
+                        بدء نقل الملكية
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
 
-              {/* Seller: Start Transfer button at agreement stage */}
-              {!isBuyer && isConfirmedStage && !isTransferStage && (
-                <div className="bg-gradient-to-b from-accent/10 to-card rounded-2xl p-4 shadow-soft border border-accent/20">
-                  <div className="flex items-center gap-2 mb-2">
-                    <ArrowRightLeft size={13} strokeWidth={1.5} className="text-primary" />
-                    <h3 className="font-medium text-xs">بدء نقل الملكية</h3>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
-                    تم الاتفاق على الشروط. ابدأ إجراءات نقل ملكية النشاط التجاري للمشتري.
-                  </p>
-                  <Button
-                    onClick={async () => {
-                      await supabase.from("deals").update({ escrow_status: "transferring", updated_at: new Date().toISOString() }).eq("id", deal.id);
-                      // Notify buyer
-                      await supabase.from("notifications").insert({
-                        user_id: deal.buyer_id,
-                        title: "🔄 بدأ البائع نقل الملكية",
-                        body: `بدأ البائع إجراءات نقل ملكية "${listingTitle}". يرجى المتابعة وتأكيد الاستلام بعد اكتمال النقل.`,
-                        type: "deal",
-                        reference_type: "deal",
-                        reference_id: deal.id,
-                      } as any);
-                      toast.success("تم بدء إجراءات نقل الملكية ✅");
-                      loadData();
-                    }}
-                    className="w-full rounded-xl text-xs"
-                  >
-                    <ArrowRightLeft size={14} className="ml-1.5" />
-                    بدء نقل الملكية
-                  </Button>
-                </div>
-              )}
+              {/* Note: Transfer button is now integrated into the finalized state above */}
 
               {/* Transfer in progress — show for both parties */}
               {isTransferStage && (
