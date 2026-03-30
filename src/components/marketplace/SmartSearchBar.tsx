@@ -48,7 +48,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
   }, [aiMessage, resultCount, hasSearched, noResults]);
 
   const handleSearch = async (text?: string) => {
-    const q = text || query;
+    const q = sanitizeForSearch(text || query);
     if (!q.trim()) return;
 
     setLoading(true);
