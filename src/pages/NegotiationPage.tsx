@@ -22,7 +22,7 @@ import CommissionBanner from "@/components/CommissionBanner";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import VerificationGate from "@/components/VerificationGate";
-import DealProgressBar, { getDealStage } from "@/components/DealProgressBar";
+import DealProgressBar, { getDealStage, getStageTimestamps } from "@/components/DealProgressBar";
 import AdminDealActions from "@/components/AdminDealActions";
 
 // Parse SSE stream and extract text
