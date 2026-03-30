@@ -259,7 +259,25 @@ const MarketplacePage = () => {
 
           <div className="flex-1 min-w-0 space-y-6">
             {loading ? (
-              <div className="text-center py-16 text-sm text-muted-foreground">جاري التحميل...</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="bg-card rounded-2xl shadow-soft overflow-hidden animate-pulse">
+                    <div className="h-40 bg-muted" />
+                    <div className="p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-full bg-muted" />
+                        <div className="h-3 w-24 bg-muted rounded" />
+                      </div>
+                      <div className="h-4 w-3/4 bg-muted rounded" />
+                      <div className="h-3 w-1/2 bg-muted rounded" />
+                      <div className="flex justify-between pt-2 border-t border-border/10">
+                        <div className="h-3 w-16 bg-muted rounded" />
+                        <div className="h-3 w-12 bg-muted rounded" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : filtered.length === 0 && similarResults.length === 0 ? (
               <div className="text-center py-16">
                 <AiStar size={32} className="mx-auto mb-4" />
@@ -371,7 +389,9 @@ const MarketplacePage = () => {
   );
 };
 
-const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCount, isLiked, onToggleLike, isOnline }: {
+import { memo } from "react";
+
+const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, viewCount, isLiked, onToggleLike, isOnline }: {
   listing: EnrichedListing;
   isComparing: boolean;
   onToggleCompare: () => void;
@@ -429,7 +449,7 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
         <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center relative">
           {listing.photos && Object.values(listing.photos).flat().length > 0 ? (
             <>
-              <img src={(Object.values(listing.photos).flat() as string[])[0]} alt="" className="w-full h-full object-cover" />
+              <img src={(Object.values(listing.photos).flat() as string[])[0]} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
               {hasSimulationPhotos(listing.photos as Record<string, unknown>) && <SimulationOverlay size="sm" />}
             </>
           ) : (
@@ -547,6 +567,6 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
       </Link>
     </div>
   );
-};
+});
 
 export default MarketplacePage;
