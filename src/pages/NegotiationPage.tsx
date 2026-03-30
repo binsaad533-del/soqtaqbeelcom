@@ -774,27 +774,36 @@ const NegotiationPage = () => {
                   </p>
                   {isBuyer && (
                     <Button
+                      disabled={actionLoading === "confirm"}
                       onClick={async () => {
                         if (!confirm("هل تأكد من استلام النشاط التجاري؟ سيتم إتمام الصفقة نهائياً.")) return;
-                        await supabase.from("deals").update({
-                          status: "completed",
-                          escrow_status: "completed",
-                          completed_at: new Date().toISOString(),
-                          updated_at: new Date().toISOString(),
-                        }).eq("id", deal.id);
-                        await supabase.from("listings").update({ status: "sold" }).eq("id", deal.listing_id);
-                        // Notify both parties
-                        const notifications = [
-                          { user_id: deal.seller_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `أكد المشتري استلام "${listingTitle}". تمت الصفقة بنجاح!`, type: "deal", reference_type: "deal", reference_id: deal.id },
-                          { user_id: deal.buyer_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `تم تأكيد استلامك لـ "${listingTitle}". مبارك!`, type: "deal", reference_type: "deal", reference_id: deal.id },
-                        ];
-                        await supabase.from("notifications").insert(notifications as any);
-                        toast.success("🎉 تم إتمام الصفقة بنجاح!");
-                        loadData();
+                        setActionLoading("confirm");
+                        try {
+                          const { error: completeErr } = await supabase.from("deals").update({
+                            status: "completed",
+                            escrow_status: "completed",
+                            completed_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString(),
+                          }).eq("id", deal.id);
+                          if (completeErr) throw completeErr;
+                          await supabase.from("listings").update({ status: "sold" }).eq("id", deal.listing_id);
+                          const notifications = [
+                            { user_id: deal.seller_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `أكد المشتري استلام "${listingTitle}". تمت الصفقة بنجاح!`, type: "deal", reference_type: "deal", reference_id: deal.id },
+                            { user_id: deal.buyer_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `تم تأكيد استلامك لـ "${listingTitle}". مبارك!`, type: "deal", reference_type: "deal", reference_id: deal.id },
+                          ];
+                          await supabase.from("notifications").insert(notifications as any);
+                          toast.success("🎉 تم إتمام الصفقة بنجاح!");
+                          loadData();
+                        } catch (err: any) {
+                          console.error("[Negotiation] confirm receipt failed:", err?.message);
+                          toast.error("فشل تأكيد الاستلام. يرجى إعادة المحاولة");
+                        } finally {
+                          setActionLoading(null);
+                        }
                       }}
                       className="w-full rounded-xl text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
                     >
-                      <CheckCircle2 size={14} className="ml-1.5" />
+                      {actionLoading === "confirm" ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <CheckCircle2 size={14} className="ml-1.5" />}
                       تأكيد استلام النشاط
                     </Button>
                   )}
