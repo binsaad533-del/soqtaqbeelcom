@@ -71,10 +71,8 @@ const ListingDetailsPage = () => {
           getProfile(data.owner_id),
           getSellerReviews(data.owner_id),
           getLikesAndViews([data.id]),
-          supabase.from("deals").select("id", { count: "exact", head: true }).eq("listing_id", data.id),
         ]);
         setInterestCount(dealsCount.count || 0);
-        ]);
         setSellerProfile(profile);
         setSellerReviews(reviews);
         setViewCount(social.views[data.id] || 0);
