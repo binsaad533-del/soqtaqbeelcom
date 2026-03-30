@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { ChevronDown, ChevronUp, Check, X, MessageSquare, Loader2, TrendingUp, Clock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useListingOffers, type ListingOffer } from "@/hooks/useListingOffers";
