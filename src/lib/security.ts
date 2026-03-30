@@ -44,13 +44,32 @@ export function sanitizeText(input: string): string {
     .replace(/\//g, "&#x2F;");
 }
 
+/** Sanitize a form field value — strips HTML tags, trims, enforces max length */
+export function sanitizeInput(input: string, maxLength = 500): string {
+  return input
+    .replace(/<[^>]*>/g, "")           // strip HTML tags
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "") // strip control chars
+    .trim()
+    .slice(0, maxLength);
+}
+
+/** Sanitize all string fields in an object */
+export function sanitizeFormData<T extends Record<string, unknown>>(data: T, maxLength = 500): T {
+  const result = { ...data };
+  for (const key in result) {
+    if (typeof result[key] === "string") {
+      (result as any)[key] = sanitizeInput(result[key] as string, maxLength);
+    }
+  }
+  return result;
+}
+
 export function sanitizeForSearch(input: string): string {
-  // Remove SQL injection patterns and dangerous characters
   return input
     .replace(/['";\\%_\-\-]/g, "")
     .replace(/\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|EXEC|EXECUTE|CREATE)\b/gi, "")
     .trim()
-    .slice(0, 200); // Enforce max length
+    .slice(0, 200);
 }
 
 // ─── URL Validation ────────────────────────────────────────

@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { sanitizeInput, isRateLimited } from "@/lib/security";
 
 const REPORT_REASONS = [
   { value: "misleading", label: "معلومات مضللة" },
@@ -37,13 +38,21 @@ const ReportListingDialog = ({ listingId, className }: ReportListingDialogProps)
       toast.error("يرجى اختيار سبب البلاغ");
       return;
     }
+
+    // Rate limit: max 3 reports per 30 minutes
+    if (isRateLimited(`report_${user.id}`, 3, 30 * 60 * 1000)) {
+      toast.error("تم تجاوز الحد المسموح من البلاغات. يرجى الانتظار");
+      return;
+    }
+
     setSubmitting(true);
     try {
+      const safeDetails = sanitizeInput(details, 1000);
       const { error } = await supabase.from("listing_reports" as any).insert({
         listing_id: listingId,
         reporter_id: user.id,
         reason,
-        details: details.trim() || null,
+        details: safeDetails || null,
       } as any);
       if (error) throw error;
       toast.success("تم إرسال البلاغ بنجاح، شكراً لمساهمتك");

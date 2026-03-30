@@ -8,6 +8,7 @@ import SarSymbol from "@/components/SarSymbol";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
+import { sanitizeInput, isRateLimited } from "@/lib/security";
 
 interface Props {
   listingId: string;
@@ -54,7 +55,15 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
       return;
     }
 
-    const { error } = await submitOffer(listingId, numPrice, message);
+    // Rate limit: max 5 offers per 10 minutes
+    if (isRateLimited(`offer_${user.id}`, 5, 10 * 60 * 1000)) {
+      toast.error("تم تجاوز الحد المسموح. يرجى الانتظار قبل إرسال عرض جديد");
+      return;
+    }
+
+    const safeMessage = sanitizeInput(message, 500);
+
+    const { error } = await submitOffer(listingId, numPrice, safeMessage);
     if (error) {
       toast.error("فشل إرسال العرض");
     } else {

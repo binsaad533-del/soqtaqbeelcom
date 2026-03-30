@@ -8,6 +8,7 @@ import logoIcon from "@/assets/logo-icon-gold.png";
 import { Send, Mail, Phone, MapPin, CheckCircle, Briefcase, AlertTriangle, Handshake } from "lucide-react";
 import { toast } from "sonner";
 import { useSEO } from "@/hooks/useSEO";
+import { sanitizeInput, isRateLimited } from "@/lib/security";
 
 const ContactPage = () => {
   useSEO({ title: "تواصل معنا", description: "تواصل مع فريق سوق تقبيل للاستفسارات والدعم", canonical: "/contact" });
@@ -25,14 +26,27 @@ const ContactPage = () => {
       toast.error("الرجاء تعبئة جميع الحقول المطلوبة");
       return;
     }
+
+    // Rate limit: max 3 contact submissions per 10 minutes
+    if (isRateLimited("contact_form", 3, 10 * 60 * 1000)) {
+      toast.error("تم تجاوز الحد المسموح. يرجى الانتظار قبل الإرسال مرة أخرى");
+      return;
+    }
+
     setLoading(true);
+
+    // Sanitize inputs
+    const safeName = sanitizeInput(name, 100);
+    const safePhone = sanitizeInput(phone, 20);
+    const safeEmail = sanitizeInput(email, 255);
+    const safeSubject = sanitizeInput(subject, 300);
 
     // Create CRM lead
     const { error } = await supabase.from("crm_leads").insert({
-      full_name: name.trim(),
-      phone: phone.trim(),
-      email: email.trim() || null,
-      subject: subject.trim(),
+      full_name: safeName,
+      phone: safePhone,
+      email: safeEmail || null,
+      subject: safeSubject,
       source: "contact_form",
       status: "new",
     } as any);
