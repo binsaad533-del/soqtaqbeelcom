@@ -7,24 +7,32 @@ import { useSEO } from "@/hooks/useSEO";
 
 const steps = [
   {
-    icon: FileText,
-    title: "١. إنشاء الصفقة",
-    desc: "يتفق البائع والمشتري على تفاصيل الصفقة عبر المنصة ويتم توثيق جميع الشروط.",
+    icon: Banknote,
+    title: "١. المشتري يودع المبلغ",
+    desc: "يقوم المشتري بإيداع مبلغ الصفقة المتفق عليه في حساب ضمان المنصة — يبقى المبلغ مجمّداً وآمناً.",
+    party: "مشتري",
+    partyColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
   },
   {
-    icon: Lock,
-    title: "٢. تأمين المبلغ",
-    desc: "يتم تجميد مبلغ الصفقة في حساب ضمان المنصة حتى اكتمال جميع الشروط.",
+    icon: FileText,
+    title: "٢. البائع ينقل الملكية",
+    desc: "يبدأ البائع بإجراءات نقل الملكية أو تسليم النشاط التجاري بالكامل حسب شروط الصفقة.",
+    party: "بائع",
+    partyColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   },
   {
     icon: CheckCircle,
-    title: "٣. التحقق والتنفيذ",
-    desc: "يتم التحقق من استيفاء جميع شروط الصفقة ونقل الملكية أو تسليم النشاط.",
+    title: "٣. المشتري يؤكد الاستلام",
+    desc: "بعد التسليم، يقوم المشتري بالتحقق وتأكيد استلام النشاط بالحالة المتفق عليها.",
+    party: "مشتري",
+    partyColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
   },
   {
-    icon: Banknote,
-    title: "٤. تحرير المبلغ",
-    desc: "بعد تأكيد الطرفين على إتمام الصفقة بنجاح، يُحرَّر المبلغ للبائع.",
+    icon: Lock,
+    title: "٤. المبلغ يُحوَّل للبائع",
+    desc: "فور تأكيد الاستلام، يُحرَّر المبلغ ويُحوَّل مباشرة لحساب البائع خلال ١-٣ أيام عمل.",
+    party: "منصة",
+    partyColor: "bg-primary/10 text-primary",
   },
 ];
 
@@ -72,20 +80,28 @@ export default function EscrowPage() {
         <h2 className="text-xl font-bold text-foreground text-center mb-6">كيف يعمل نظام الضمان؟</h2>
         {steps.map((step, i) => (
           <div key={i}>
-            <Card className="border-border/60">
+            <Card className="border-border/60 relative overflow-hidden">
               <CardContent className="flex items-start gap-4 p-5">
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center">
                   <step.icon className="w-5 h-5 text-primary" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground mb-1">{step.title}</h3>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-foreground">{step.title}</h3>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${step.partyColor}`}>
+                      {step.party}
+                    </span>
+                  </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
                 </div>
               </CardContent>
             </Card>
             {i < steps.length - 1 && (
-              <div className="flex justify-center py-1">
-                <ArrowDown className="w-4 h-4 text-muted-foreground/40" />
+              <div className="flex justify-center py-1.5">
+                <div className="flex flex-col items-center gap-0.5">
+                  <div className="w-0.5 h-3 bg-primary/20 rounded-full" />
+                  <ArrowDown className="w-4 h-4 text-primary/40" />
+                </div>
               </div>
             )}
           </div>
