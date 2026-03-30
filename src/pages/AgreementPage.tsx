@@ -55,8 +55,8 @@ interface AgreementRecord {
 }
 
 const AgreementPage = () => {
-  useSEO({ title: "اتفاقية الصفقة", description: "عرض وتوقيع اتفاقية تقبيل المشروع على سوق تقبيل", canonical: `/agreement/${id}` });
   const { id } = useParams();
+  useSEO({ title: "اتفاقية الصفقة", description: "عرض وتوقيع اتفاقية تقبيل المشروع على سوق تقبيل", canonical: `/agreement/${id}` });
   const { user } = useAuthContext();
   const { getListing } = useListings();
   const { getCommission } = useCommissions();

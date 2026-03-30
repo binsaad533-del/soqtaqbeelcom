@@ -21,7 +21,6 @@ const BlogPage = () => {
       "Articles and tips about business transfers and smart valuation"
     ),
     canonical: "/blog",
-    canonical: "/blog",
   });
 
   const { data: posts = [], isLoading } = useQuery({
