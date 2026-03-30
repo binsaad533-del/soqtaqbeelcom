@@ -424,8 +424,16 @@ const LoginPage = () => {
               </label>
             )}
 
-            {/* Redirect message */}
-            {redirectReason === "auth_required" && !error && !success && (
+            {/* Redirect message — specific pages */}
+            {isFromProtectedPage && !error && !success && (
+              <div className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs p-3 rounded-xl flex items-center gap-2 border border-blue-200 dark:border-blue-800">
+                <Zap className="h-4 w-4 shrink-0" />
+                <span>لإضافة فرصتك أو الوصول للوحة التحكم، يرجى تسجيل الدخول أولاً</span>
+              </div>
+            )}
+
+            {/* Redirect message — generic */}
+            {redirectReason === "auth_required" && !isFromProtectedPage && !error && !success && (
               <div className="bg-primary/5 text-primary text-xs p-3 rounded-xl flex items-center gap-2 border border-primary/10">
                 <ShieldCheck className="h-4 w-4 shrink-0" />
                 <span>يجب تسجيل الدخول للوصول إلى هذه الصفحة</span>
