@@ -108,34 +108,6 @@ registerRoute(
   })
 );
 
-// ── Offline fallback for failed navigation ──
-self.addEventListener("fetch", (event) => {
-  if (event.request.mode === "navigate") {
-    event.respondWith(
-      (async () => {
-        try {
-          // Try network first (already handled by NavigationRoute above)
-          // This is a safety net for any edge cases
-          return await fetch(event.request);
-        } catch {
-          // If completely offline, try to serve cached index.html
-          const cache = await caches.open("navigation");
-          const cached = await cache.match("/index.html");
-          if (cached) return cached;
-
-          // Last resort: serve offline page
-          const offlineCache = await caches.open("offline-fallback");
-          const offlinePage = await offlineCache.match("/offline.html");
-          return offlinePage || new Response("أنت غير متصل بالإنترنت", {
-            status: 503,
-            headers: { "Content-Type": "text/html; charset=utf-8" },
-          });
-        }
-      })()
-    );
-  }
-});
-
 // Pre-cache the offline page on install
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -146,4 +118,20 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
+});
+
+// ── Offline fallback: only show offline.html when truly offline ──
+// Workbox NavigationRoute (NetworkFirst) handles navigation normally.
+// This handler is a safety net that ONLY fires when the network fetch
+// inside NavigationRoute throws (i.e. no connectivity at all).
+// We override the handlerDidError lifecycle to serve offline.html.
+navigationHandler.plugins.push({
+  handlerDidError: async () => {
+    const offlineCache = await caches.open("offline-fallback");
+    return (await offlineCache.match("/offline.html")) ||
+      new Response("أنت غير متصل بالإنترنت", {
+        status: 503,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+  },
 });
