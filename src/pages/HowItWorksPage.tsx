@@ -4,7 +4,7 @@ import logoIcon from "@/assets/logo-icon-gold.png";
 import {
   Store, Search, Heart, Gavel, FileText, ArrowRightLeft,
   CheckCircle, Plus, Zap, Lock, BarChart3, Award, Wallet,
-  BadgeCheck, Sparkles,
+  BadgeCheck, Sparkles, ShieldCheck, Eye,
 } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
 
@@ -22,17 +22,33 @@ const stages: Stage[] = [
     icon: Store,
     title: "إضافة الإعلان",
     seller: "يضيف نشاطه التجاري مع التفاصيل والصور والوثائق. الذكاء الاصطناعي يحلل الأصول ويحسب درجة الشفافية تلقائياً.",
-    buyer: "يتصفح سوق الفرص ويستخدم الفلاتر الذكية للبحث حسب المدينة والنشاط والسعر.",
+    buyer: "—",
     color: "border-primary/20",
     iconBg: "bg-primary/10 text-primary",
+  },
+  {
+    icon: ShieldCheck,
+    title: "التحقق والتوثيق",
+    seller: "يوثّق حسابه عبر صفحة التحقق برفع اسم النشاط، رقم السجل التجاري، ونوع ورقم الهوية. بعد الموافقة يحصل على شارة «بائع موثق».",
+    buyer: "—",
+    color: "border-cyan-500/20",
+    iconBg: "bg-cyan-500/10 text-cyan-600",
+  },
+  {
+    icon: Eye,
+    title: "اكتشاف الفرص",
+    seller: "إعلانه يظهر في سوق الفرص مع تقييم AI وشارة الشفافية. يتابع المشاهدات والاهتمام من لوحة التحكم.",
+    buyer: "يتصفح سوق الفرص ويستخدم الفلاتر الذكية للبحث حسب المدينة والنشاط والسعر. يراجع التفاصيل ودرجة الشفافية وتقييم البائع.",
+    color: "border-blue-500/20",
+    iconBg: "bg-blue-500/10 text-blue-600",
   },
   {
     icon: Heart,
     title: "إبداء الاهتمام",
     seller: "يستقبل إشعاراً فورياً عندما يبدي مشترٍ اهتمامه. تُفتح محادثة مباشرة ويبدأ التواصل.",
     buyer: "يضغط «أبدِ اهتمامك» فتُنشأ صفقة تلقائياً بحالة تفاوض وتُفتح محادثة مع البائع.",
-    color: "border-blue-500/20",
-    iconBg: "bg-blue-500/10 text-blue-600",
+    color: "border-pink-500/20",
+    iconBg: "bg-pink-500/10 text-pink-600",
   },
   {
     icon: Gavel,
@@ -94,7 +110,7 @@ const HowItWorksPage = () => {
           </div>
           <h1 className="text-2xl md:text-3xl font-semibold mb-3">كيف تتم الصفقة؟</h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            ٦ مراحل واضحة من الإعلان حتى إتمام نقل الملكية — بشفافية وحماية كاملة
+            ٨ مراحل واضحة من الإعلان حتى إتمام نقل الملكية — بشفافية وحماية كاملة
           </p>
         </div>
 
@@ -135,15 +151,17 @@ const HowItWorksPage = () => {
                       stage.color
                     )}>
                       <h3 className="text-base font-semibold text-foreground mb-3">{stage.title}</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className={cn("grid gap-3", stage.buyer === "—" ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2")}>
                         <div className="rounded-xl bg-primary/[0.03] p-3">
                           <span className="text-[9px] font-bold text-primary uppercase tracking-wider">البائع</span>
                           <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">{stage.seller}</p>
                         </div>
-                        <div className="rounded-xl bg-accent/30 p-3">
-                          <span className="text-[9px] font-bold text-accent-foreground uppercase tracking-wider">المشتري</span>
-                          <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">{stage.buyer}</p>
-                        </div>
+                        {stage.buyer !== "—" && (
+                          <div className="rounded-xl bg-accent/30 p-3">
+                            <span className="text-[9px] font-bold text-accent-foreground uppercase tracking-wider">المشتري</span>
+                            <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">{stage.buyer}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
