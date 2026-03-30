@@ -1,6 +1,6 @@
-import { Shield, ChevronDown, ChevronUp, TrendingUp, CheckCircle2, AlertCircle } from "lucide-react";
+import { Shield, ChevronDown, ChevronUp, TrendingUp, CheckCircle2, AlertCircle, Circle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { calculateTransparency } from "@/lib/transparencyScore";
+import { calculateTransparency, type ChecklistItem } from "@/lib/transparencyScore";
 import { useState } from "react";
 
 interface TransparencyIndicatorProps {
@@ -18,11 +18,11 @@ const getScoreStyle = (score: number) => {
   return { bg: "bg-destructive/8", border: "border-destructive/20", text: "text-destructive", bar: "bg-destructive", ring: "ring-destructive/20", tier: "red" as const };
 };
 
-const TIER_INFO: Record<string, { badge: string; icon: "shield" | "eye"; hint: string }> = {
-  trusted: { badge: "موثوق", icon: "shield", hint: "الإعلانات الموثوقة تحصل على تواصل أكثر بـ 3 أضعاف" },
-  yellow: { badge: "يحتاج تحسين", icon: "eye", hint: "أكمل بعض الحقول للحصول على شارة \"موثوق\" وترتيب أعلى" },
-  orange: { badge: "ضعيف", icon: "eye", hint: "أضف المزيد من البيانات والصور لتحسين ظهور الإعلان" },
-  red: { badge: "غير مكتمل", icon: "eye", hint: "الإعلانات منخفضة الشفافية قد تُرفض أو تحصل على مشاهدات أقل" },
+const TIER_INFO: Record<string, { badge: string; hint: string }> = {
+  trusted: { badge: "موثوق", hint: "الإعلانات الموثوقة تحصل على تواصل أكثر بـ 3 أضعاف" },
+  yellow: { badge: "يحتاج تحسين", hint: "أكمل بعض الحقول للحصول على شارة \"موثوق\" وترتيب أعلى" },
+  orange: { badge: "ضعيف", hint: "أضف المزيد من البيانات والصور لتحسين ظهور الإعلان" },
+  red: { badge: "غير مكتمل", hint: "الإعلانات منخفضة الشفافية قد تُرفض أو تحصل على مشاهدات أقل" },
 };
 
 const TransparencyIndicator = ({ listing, compact = false, className, onFieldClick }: TransparencyIndicatorProps) => {
@@ -30,7 +30,6 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
   const style = getScoreStyle(result.score);
   const tier = TIER_INFO[style.tier];
   const [expanded, setExpanded] = useState(false);
-  const hasMissing = result.missingFields.length > 0;
 
   if (compact) {
     return (
@@ -42,6 +41,10 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
       </div>
     );
   }
+
+  // Split checklist: filled first, then missing
+  const filledItems = result.checklist.filter(i => i.filled);
+  const missingItems = result.checklist.filter(i => !i.filled);
 
   return (
     <div className={cn("rounded-xl border overflow-hidden transition-colors", style.bg, style.border, className)}>
@@ -87,51 +90,64 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
         </div>
       </div>
 
+      {/* Checklist */}
+      <div className="border-t border-border/15">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full px-3.5 py-2.5 flex items-center justify-between hover:bg-background/20 transition-colors"
+        >
+          <span className="text-[11px] font-medium text-foreground flex items-center gap-1.5">
+            <CheckCircle size={12} className="text-primary" />
+            قائمة الاكتمال
+            <span className="text-muted-foreground font-normal">
+              ({filledItems.length}/{result.checklist.length})
+            </span>
+          </span>
+          {expanded ? <ChevronUp size={13} className="text-muted-foreground" /> : <ChevronDown size={13} className="text-muted-foreground" />}
+        </button>
+
+        {expanded && (
+          <div className="px-3.5 pb-3 space-y-1">
+            {/* Filled items */}
+            {filledItems.map((item) => (
+              <div
+                key={item.label}
+                className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 bg-success/5"
+              >
+                <CheckCircle2 size={13} className="text-success shrink-0" />
+                <span className="text-[11px] text-muted-foreground line-through decoration-success/30">{item.label}</span>
+              </div>
+            ))}
+            {/* Missing items */}
+            {missingItems.map((item) => (
+              <div
+                key={item.label}
+                className={cn(
+                  "flex items-center justify-between rounded-lg px-2.5 py-1.5 bg-background/50 border border-border/15",
+                  onFieldClick && "cursor-pointer hover:bg-background/70 transition-colors"
+                )}
+                onClick={() => onFieldClick?.(item.label)}
+              >
+                <div className="flex items-center gap-2">
+                  <Circle size={13} className="text-muted-foreground/40 shrink-0" />
+                  <span className="text-[11px] text-foreground">{item.label}</span>
+                </div>
+                {onFieldClick && (
+                  <span className="text-[10px] text-primary font-medium">أكمل ←</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Impact hint */}
-      <div className="px-3.5 pb-2.5">
+      <div className="px-3.5 pb-3 pt-0.5">
         <div className="flex items-start gap-2 bg-background/40 rounded-lg p-2.5">
           <TrendingUp size={12} className={cn("shrink-0 mt-0.5", style.text)} />
           <p className="text-[10px] leading-relaxed text-muted-foreground">{tier.hint}</p>
         </div>
       </div>
-
-      {/* Missing fields accordion */}
-      {hasMissing && (
-        <div className="border-t border-border/15">
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="w-full px-3.5 py-2 flex items-center justify-between hover:bg-background/20 transition-colors"
-          >
-            <span className="text-[11px] font-medium text-muted-foreground">
-              {result.missingFields.length} حقل ناقص
-            </span>
-            {expanded ? <ChevronUp size={12} className="text-muted-foreground" /> : <ChevronDown size={12} className="text-muted-foreground" />}
-          </button>
-
-          {expanded && (
-            <div className="px-3.5 pb-3 space-y-1">
-              {result.missingFields.map((field) => (
-                <div
-                  key={field}
-                  className={cn(
-                    "flex items-center justify-between rounded-lg px-2.5 py-1.5 bg-background/50 border border-border/15",
-                    onFieldClick && "cursor-pointer hover:bg-background/70 transition-colors"
-                  )}
-                  onClick={() => onFieldClick?.(field)}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <div className={cn("w-1 h-1 rounded-full", style.bar)} />
-                    <span className="text-[11px] text-foreground">{field}</span>
-                  </div>
-                  {onFieldClick && (
-                    <span className="text-[10px] text-primary font-medium">أكمل ←</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };
