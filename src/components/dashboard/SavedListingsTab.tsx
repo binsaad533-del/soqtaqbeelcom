@@ -125,7 +125,7 @@ export default function SavedListingsTab() {
                 <Link to={`/listing/${item.listing_id}`}>
                   <div className="h-32 bg-gradient-to-br from-primary/5 to-accent/20 flex items-center justify-center">
                     {photos.length > 0 ? (
-                      <img src={photos[0]} alt={item.title || item.business_activity || ""} className="w-full h-full object-cover" />
+                      <img src={photos[0]} alt={item.title || item.business_activity || ""} loading="lazy" className="w-full h-full object-cover" />
                     ) : (
                       <Eye size={20} className="text-muted-foreground/20" strokeWidth={1} />
                     )}

@@ -272,7 +272,7 @@ const CustomerDashboardPage = () => {
             <div className="flex items-center gap-3 mb-5">
               <label className="relative w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl cursor-pointer group overflow-hidden ring-2 ring-background shadow-sm shrink-0">
                 {profile?.avatar_url
-                  ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
+                  ? <img src={profile.avatar_url} alt="" loading="lazy" className="w-full h-full object-cover rounded-full" />
                   : (profile?.full_name?.charAt(0) || "؟")}
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
                   <Camera size={16} className="text-white" />

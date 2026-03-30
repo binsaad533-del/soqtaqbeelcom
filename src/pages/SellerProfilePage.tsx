@@ -152,7 +152,7 @@ const SellerProfilePage = () => {
           {/* Avatar */}
           <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-2xl font-semibold shrink-0">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={profile.full_name || ""} className="w-full h-full object-cover rounded-2xl" />
+              <img src={profile.avatar_url} alt={profile.full_name || ""} loading="lazy" className="w-full h-full object-cover rounded-2xl" />
             ) : (
               (profile.full_name || "؟")[0]
             )}
@@ -295,7 +295,7 @@ const SellerProfilePage = () => {
                 >
                   <div className="aspect-[16/10] bg-muted/30 overflow-hidden">
                     {photos[0] ? (
-                      <img src={photos[0]} alt={listing.title || ""} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <img src={photos[0]} alt={listing.title || ""} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
                         <Store size={32} />
