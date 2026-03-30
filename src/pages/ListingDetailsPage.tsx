@@ -212,8 +212,38 @@ const ListingDetailsPage = () => {
   const primaryConfig = DEAL_TYPE_MAP[primaryDealType];
   const alternativeOptions = dealOptions.filter(o => !o.is_primary);
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: listing.title || "فرصة تقبيل",
+    description: listing.description || "",
+    url: `https://soqtaqbeel.com/listing/${listing.id}`,
+    image: photos.length > 0 ? photos[0] : undefined,
+    brand: {
+      "@type": "Organization",
+      name: "سوق تقبيل",
+    },
+    offers: listing.price
+      ? {
+          "@type": "Offer",
+          price: listing.price,
+          priceCurrency: "SAR",
+          availability: listing.status === "published"
+            ? "https://schema.org/InStock"
+            : "https://schema.org/SoldOut",
+          url: `https://soqtaqbeel.com/listing/${listing.id}`,
+        }
+      : undefined,
+    category: listing.category || listing.business_activity || undefined,
+    additionalProperty: [
+      listing.city ? { "@type": "PropertyValue", name: "المدينة", value: listing.city } : null,
+      listing.district ? { "@type": "PropertyValue", name: "الحي", value: listing.district } : null,
+    ].filter(Boolean),
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <div className="py-8">
       <div className="container">
 

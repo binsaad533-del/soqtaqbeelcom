@@ -209,8 +209,43 @@ const HomePage = () => {
     },
   ];
 
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "سوق تقبيل",
+    alternateName: "Soq Taqbeel",
+    url: "https://soqtaqbeel.com",
+    logo: "https://soqtaqbeel.com/logo-icon-gold.png",
+    description: tx(
+      "أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع التجارية",
+      "The first Saudi AI-powered platform for business transfers"
+    ),
+    foundingDate: "2024",
+    areaServed: { "@type": "Country", name: "Saudi Arabia" },
+    sameAs: [],
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      url: "https://soqtaqbeel.com/contact",
+    },
+  };
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "سوق تقبيل",
+    url: "https://soqtaqbeel.com",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://soqtaqbeel.com/marketplace?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <div className="relative">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       <section className="bg-background py-20 md:py-32 relative overflow-hidden">
         <div className="container relative z-10">
           <div className="max-w-2xl mx-auto text-center animate-reveal">
