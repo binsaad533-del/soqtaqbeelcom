@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -12,6 +12,7 @@ interface Props {
 
 const ProtectedRoute = ({ children, allowedRoles, requireAuth = true }: Props) => {
   const { user, role, loading } = useAuthContext();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -25,7 +26,8 @@ const ProtectedRoute = ({ children, allowedRoles, requireAuth = true }: Props) =
   }
 
   if (requireAuth && !user) {
-    return <Navigate to="/login?redirect=auth_required" replace />;
+    const from = encodeURIComponent(location.pathname);
+    return <Navigate to={`/login?redirect=auth_required&from=${from}`} replace />;
   }
 
   if (allowedRoles && role && !allowedRoles.includes(role)) {
