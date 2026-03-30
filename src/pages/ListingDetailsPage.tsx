@@ -1,4 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
@@ -47,6 +48,7 @@ const ListingDetailsPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [viewCount, setViewCount] = useState(0);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const loadListing = async () => {
     if (!id) return;
@@ -90,7 +92,7 @@ const ListingDetailsPage = () => {
   }, [id, getListing, user]);
 
   const handleStartNegotiation = async () => {
-    if (!user) { navigate("/login"); return; }
+    if (!user) { setShowAuthDialog(true); return; }
     if (!listing) return;
     const myDeals = await getMyDeals();
     const existing = myDeals.find(d => d.listing_id === listing.id);
@@ -531,6 +533,29 @@ const ListingDetailsPage = () => {
           }}
         />
       )}
+
+      {/* Auth required dialog */}
+      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+        <DialogContent className="max-w-sm text-center" dir="rtl">
+          <DialogHeader className="items-center">
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+              <MessageCircle className="h-7 w-7 text-primary" />
+            </div>
+            <DialogTitle className="text-lg">سجّل حسابك</DialogTitle>
+            <DialogDescription className="text-sm">
+              سجّل حسابك لتتواصل مع البائع مباشرة
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col gap-2 sm:flex-col mt-2">
+            <Button className="w-full rounded-xl h-11" onClick={() => navigate("/login")}>
+              تسجيل الدخول
+            </Button>
+            <Button variant="outline" className="w-full rounded-xl h-11" onClick={() => navigate("/login?tab=register")}>
+              إنشاء حساب جديد
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
     </>
   );
