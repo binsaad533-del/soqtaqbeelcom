@@ -30,6 +30,12 @@ interface ListingData {
 export type TransparencyLevel = "high" | "medium" | "low";
 export type PriceLevel = "reasonable" | "high" | "low" | "unknown";
 
+export interface ChecklistItem {
+  label: string;
+  filled: boolean;
+  category: "required" | "media" | "docs" | "optional";
+}
+
 export interface TransparencyResult {
   score: number; // 0-100
   level: TransparencyLevel;
@@ -37,6 +43,7 @@ export interface TransparencyResult {
   missingFields: string[];
   totalRequired: number;
   filledRequired: number;
+  checklist: ChecklistItem[];
 }
 
 export function calculateTransparency(listing: ListingData): TransparencyResult {
