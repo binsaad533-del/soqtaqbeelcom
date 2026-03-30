@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSEO } from "@/hooks/useSEO";
 import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
 import { generateAgreementPdf } from "@/lib/generateAgreementPdf";
 import { useParams, Link } from "react-router-dom";
@@ -54,6 +55,7 @@ interface AgreementRecord {
 }
 
 const AgreementPage = () => {
+  useSEO({ title: "اتفاقية الصفقة", description: "عرض وتوقيع اتفاقية تقبيل المشروع على سوق تقبيل" });
   const { id } = useParams();
   const { user } = useAuthContext();
   const { getListing } = useListings();

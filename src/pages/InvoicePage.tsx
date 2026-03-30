@@ -8,6 +8,7 @@ import SarSymbol from "@/components/SarSymbol";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { useSEO } from "@/hooks/useSEO";
 
 interface InvoiceData {
   id: string;
@@ -38,6 +39,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string }> = {
 };
 
 const InvoicePage = () => {
+  useSEO({ title: "الفاتورة", description: "عرض فاتورة الصفقة على سوق تقبيل" });
   const { id } = useParams<{ id: string }>();
   const { user } = useAuthContext();
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);

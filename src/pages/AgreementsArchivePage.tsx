@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useSEO } from "@/hooks/useSEO";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -55,6 +56,7 @@ const statusOptions = [
 ];
 
 const AgreementsArchivePage = () => {
+  useSEO({ title: "أرشيف الاتفاقيات", description: "عرض جميع اتفاقيات الصفقات السابقة على سوق تقبيل", canonical: "/agreements" });
   const { user } = useAuthContext();
   const { getListing } = useListings();
   const { getCommission } = useCommissions();

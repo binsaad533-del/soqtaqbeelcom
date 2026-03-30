@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useSEO } from "@/hooks/useSEO";
 
 const schema = z.object({
   business_name: z.string().trim().min(2, "اسم النشاط مطلوب (حرفان على الأقل)").max(200),
@@ -25,6 +26,7 @@ const ID_TYPE_OPTIONS = [
 ];
 
 const VerifySellerPage = () => {
+  useSEO({ title: "توثيق البائع", description: "وثّق حسابك كبائع على سوق تقبيل للحصول على شارة التوثيق", canonical: "/verify-seller" });
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const [form, setForm] = useState({ business_name: "", commercial_register_number: "", id_type: "national_id", id_number: "" });

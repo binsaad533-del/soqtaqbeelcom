@@ -12,6 +12,7 @@ import CrmDashboard from "@/components/crm/CrmDashboard";
 import BlogAdminPanel from "@/components/BlogAdminPanel";
 import SarSymbol from "@/components/SarSymbol";
 import { supabase } from "@/integrations/supabase/client";
+import { useSEO } from "@/hooks/useSEO";
 
 type Tab = "overview" | "crm" | "commissions" | "blog" | "backup" | "actions";
 

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { FileText, Image, MessageCircle, AlertCircle, Check, Clock, ChevronLeft } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
+import { useSEO } from "@/hooks/useSEO";
 
 const tabs = ["إعلاناتي", "المسودات", "التفاوضات", "الاتفاقيات"];
 
