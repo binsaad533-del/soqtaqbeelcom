@@ -80,20 +80,28 @@ export default function EscrowPage() {
         <h2 className="text-xl font-bold text-foreground text-center mb-6">كيف يعمل نظام الضمان؟</h2>
         {steps.map((step, i) => (
           <div key={i}>
-            <Card className="border-border/60">
+            <Card className="border-border/60 relative overflow-hidden">
               <CardContent className="flex items-start gap-4 p-5">
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center">
                   <step.icon className="w-5 h-5 text-primary" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground mb-1">{step.title}</h3>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-foreground">{step.title}</h3>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${step.partyColor}`}>
+                      {step.party}
+                    </span>
+                  </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
                 </div>
               </CardContent>
             </Card>
             {i < steps.length - 1 && (
-              <div className="flex justify-center py-1">
-                <ArrowDown className="w-4 h-4 text-muted-foreground/40" />
+              <div className="flex justify-center py-1.5">
+                <div className="flex flex-col items-center gap-0.5">
+                  <div className="w-0.5 h-3 bg-primary/20 rounded-full" />
+                  <ArrowDown className="w-4 h-4 text-primary/40" />
+                </div>
               </div>
             )}
           </div>
