@@ -87,6 +87,13 @@ const LoginPage = () => {
     const authEmail =
       loginMethod === "phone" ? phoneToEmail(phone, countryCode) : email;
 
+    // Client-side rate limiting: max 5 login attempts per 5 minutes
+    if (isLogin && isRateLimited(`login_${authEmail}`, 5, 5 * 60 * 1000)) {
+      setError("تم تجاوز عدد المحاولات المسموح بها. يرجى الانتظار 5 دقائق");
+      setLoading(false);
+      return;
+    }
+
     if (loginMethod === "phone" && phone.length < 9) {
       setError("الرجاء إدخال رقم جوال صحيح");
       setLoading(false);
