@@ -78,6 +78,7 @@ const NegotiationPage = () => {
   const [otherProfile, setOtherProfile] = useState<any>(null);
   const [showLegalPanel, setShowLegalPanel] = useState(false);
   const [commission, setCommission] = useState<Commission | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   
   // AI Mediator state
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
@@ -453,6 +454,8 @@ const NegotiationPage = () => {
     );
   }
 
+
+
   const isPostAgreement = deal.status === "completed";
   const isConfirmedStage = deal.status === "confirmed" || deal.status === "finalized";
   const isTransferStage = deal.escrow_status === "transferring";
@@ -680,15 +683,25 @@ const NegotiationPage = () => {
                   <button
                     onClick={async () => {
                       if (!confirm("هل أنت متأكد من إلغاء الصفقة؟ سيعود الإعلان للعرض ويمكن للعملاء تقديم عروض جديدة.")) return;
-                      await supabase.from("deals").update({ status: "cancelled" }).eq("id", deal.id);
-                      await supabase.from("listing_offers").update({ status: "pending" }).eq("listing_id", deal.listing_id).eq("status", "accepted");
-                      await supabase.from("listings").update({ status: "published" }).eq("id", deal.listing_id);
-                      toast.success("تم إلغاء الصفقة وإعادة الإعلان للعرض");
-                      navigate(`/listing/${deal.listing_id}`);
+                      setActionLoading("cancel");
+                      try {
+                        const { error: cancelErr } = await supabase.from("deals").update({ status: "cancelled" }).eq("id", deal.id);
+                        if (cancelErr) throw cancelErr;
+                        await supabase.from("listing_offers").update({ status: "pending" }).eq("listing_id", deal.listing_id).eq("status", "accepted");
+                        await supabase.from("listings").update({ status: "published" }).eq("id", deal.listing_id);
+                        toast.success("تم إلغاء الصفقة وإعادة الإعلان للعرض");
+                        navigate(`/listing/${deal.listing_id}`);
+                      } catch (err: any) {
+                        console.error("[Negotiation] cancel failed:", err?.message);
+                        toast.error("فشل إلغاء الصفقة. يرجى إعادة المحاولة");
+                      } finally {
+                        setActionLoading(null);
+                      }
                     }}
-                    className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl border border-destructive/20 text-destructive text-xs font-medium hover:bg-destructive/5 transition-all active:scale-[0.98]"
+                    disabled={actionLoading === "cancel"}
+                    className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl border border-destructive/20 text-destructive text-xs font-medium hover:bg-destructive/5 transition-all active:scale-[0.98] disabled:opacity-50"
                   >
-                    <X size={13} strokeWidth={1.5} />
+                    {actionLoading === "cancel" ? <Loader2 size={13} className="animate-spin" /> : <X size={13} strokeWidth={1.5} />}
                     إلغاء الصفقة
                   </button>
                 </div>
@@ -712,22 +725,32 @@ const NegotiationPage = () => {
                     {!isBuyer && (
                       <Button
                         variant="outline"
+                        disabled={actionLoading === "transfer"}
                         onClick={async () => {
-                          await supabase.from("deals").update({ escrow_status: "transferring", updated_at: new Date().toISOString() }).eq("id", deal.id);
-                          await supabase.from("notifications").insert({
-                            user_id: deal.buyer_id,
-                            title: "🔄 بدأ البائع نقل الملكية",
-                            body: `بدأ البائع إجراءات نقل ملكية "${listingTitle}". يرجى المتابعة وتأكيد الاستلام بعد اكتمال النقل.`,
-                            type: "deal",
-                            reference_type: "deal",
-                            reference_id: deal.id,
-                          } as any);
-                          toast.success("تم بدء إجراءات نقل الملكية ✅");
-                          loadData();
+                          setActionLoading("transfer");
+                          try {
+                            const { error: transferErr } = await supabase.from("deals").update({ escrow_status: "transferring", updated_at: new Date().toISOString() }).eq("id", deal.id);
+                            if (transferErr) throw transferErr;
+                            await supabase.from("notifications").insert({
+                              user_id: deal.buyer_id,
+                              title: "🔄 بدأ البائع نقل الملكية",
+                              body: `بدأ البائع إجراءات نقل ملكية "${listingTitle}". يرجى المتابعة وتأكيد الاستلام بعد اكتمال النقل.`,
+                              type: "deal",
+                              reference_type: "deal",
+                              reference_id: deal.id,
+                            } as any);
+                            toast.success("تم بدء إجراءات نقل الملكية ✅");
+                            loadData();
+                          } catch (err: any) {
+                            console.error("[Negotiation] transfer start failed:", err?.message);
+                            toast.error("فشل بدء نقل الملكية. يرجى إعادة المحاولة");
+                          } finally {
+                            setActionLoading(null);
+                          }
                         }}
                         className="flex-1 rounded-xl text-xs"
                       >
-                        <ArrowRightLeft size={14} className="ml-1.5" />
+                        {actionLoading === "transfer" ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <ArrowRightLeft size={14} className="ml-1.5" />}
                         بدء نقل الملكية
                       </Button>
                     )}
@@ -751,27 +774,36 @@ const NegotiationPage = () => {
                   </p>
                   {isBuyer && (
                     <Button
+                      disabled={actionLoading === "confirm"}
                       onClick={async () => {
                         if (!confirm("هل تأكد من استلام النشاط التجاري؟ سيتم إتمام الصفقة نهائياً.")) return;
-                        await supabase.from("deals").update({
-                          status: "completed",
-                          escrow_status: "completed",
-                          completed_at: new Date().toISOString(),
-                          updated_at: new Date().toISOString(),
-                        }).eq("id", deal.id);
-                        await supabase.from("listings").update({ status: "sold" }).eq("id", deal.listing_id);
-                        // Notify both parties
-                        const notifications = [
-                          { user_id: deal.seller_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `أكد المشتري استلام "${listingTitle}". تمت الصفقة بنجاح!`, type: "deal", reference_type: "deal", reference_id: deal.id },
-                          { user_id: deal.buyer_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `تم تأكيد استلامك لـ "${listingTitle}". مبارك!`, type: "deal", reference_type: "deal", reference_id: deal.id },
-                        ];
-                        await supabase.from("notifications").insert(notifications as any);
-                        toast.success("🎉 تم إتمام الصفقة بنجاح!");
-                        loadData();
+                        setActionLoading("confirm");
+                        try {
+                          const { error: completeErr } = await supabase.from("deals").update({
+                            status: "completed",
+                            escrow_status: "completed",
+                            completed_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString(),
+                          }).eq("id", deal.id);
+                          if (completeErr) throw completeErr;
+                          await supabase.from("listings").update({ status: "sold" }).eq("id", deal.listing_id);
+                          const notifications = [
+                            { user_id: deal.seller_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `أكد المشتري استلام "${listingTitle}". تمت الصفقة بنجاح!`, type: "deal", reference_type: "deal", reference_id: deal.id },
+                            { user_id: deal.buyer_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `تم تأكيد استلامك لـ "${listingTitle}". مبارك!`, type: "deal", reference_type: "deal", reference_id: deal.id },
+                          ];
+                          await supabase.from("notifications").insert(notifications as any);
+                          toast.success("🎉 تم إتمام الصفقة بنجاح!");
+                          loadData();
+                        } catch (err: any) {
+                          console.error("[Negotiation] confirm receipt failed:", err?.message);
+                          toast.error("فشل تأكيد الاستلام. يرجى إعادة المحاولة");
+                        } finally {
+                          setActionLoading(null);
+                        }
                       }}
                       className="w-full rounded-xl text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
                     >
-                      <CheckCircle2 size={14} className="ml-1.5" />
+                      {actionLoading === "confirm" ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <CheckCircle2 size={14} className="ml-1.5" />}
                       تأكيد استلام النشاط
                     </Button>
                   )}
