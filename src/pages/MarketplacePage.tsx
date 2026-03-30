@@ -389,7 +389,7 @@ const MarketplacePage = () => {
   );
 };
 
-import { memo } from "react";
+
 
 const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, viewCount, isLiked, onToggleLike, isOnline }: {
   listing: EnrichedListing;
