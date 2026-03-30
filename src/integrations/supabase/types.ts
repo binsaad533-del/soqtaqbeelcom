@@ -691,6 +691,59 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          buyer_id: string
+          commission_amount: number | null
+          commission_rate: number
+          created_at: string
+          deal_amount: number
+          deal_id: string
+          id: string
+          invoice_number: number
+          listing_title: string | null
+          seller_id: string
+          status: string
+          total_amount: number
+        }
+        Insert: {
+          buyer_id: string
+          commission_amount?: number | null
+          commission_rate?: number
+          created_at?: string
+          deal_amount?: number
+          deal_id: string
+          id?: string
+          invoice_number?: number
+          listing_title?: string | null
+          seller_id: string
+          status?: string
+          total_amount?: number
+        }
+        Update: {
+          buyer_id?: string
+          commission_amount?: number | null
+          commission_rate?: number
+          created_at?: string
+          deal_amount?: number
+          deal_id?: string
+          id?: string
+          invoice_number?: number
+          listing_title?: string | null
+          seller_id?: string
+          status?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_confirmations: {
         Row: {
           confirmations: Json
