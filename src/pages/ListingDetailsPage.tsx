@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useListingSocial } from "@/hooks/useListingSocial";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import { useDeals } from "@/hooks/useDeals";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
@@ -116,7 +117,6 @@ const ListingDetailsPage = () => {
     }
     if (data) {
       // Send first message + meeting preference
-      const { sendMessage } = await import("@/hooks/useDeals").then(() => ({ sendMessage: null }));
       const msgParts: string[] = [];
       if (interestMessage.trim()) msgParts.push(interestMessage.trim());
       if (wantsMeeting === true) msgParts.push("🤝 أرغب بترتيب مقابلة للاطلاع على الفرصة");
