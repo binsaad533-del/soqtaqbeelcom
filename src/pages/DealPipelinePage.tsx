@@ -31,6 +31,7 @@ import {
   CreditCard,
   ArrowRightLeft,
   Lock,
+  Shield,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
