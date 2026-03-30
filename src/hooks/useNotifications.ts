@@ -14,6 +14,42 @@ export interface Notification {
   created_at: string;
 }
 
+/** Request browser push permission and show native notification */
+function showBrowserNotification(n: Notification) {
+  if (typeof window === "undefined" || !("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  try {
+    const notif = new window.Notification(n.title, {
+      body: n.body || undefined,
+      icon: "/pwa-icon-192.png",
+      badge: "/pwa-icon-192.png",
+      tag: n.id,
+      dir: "rtl",
+      lang: "ar",
+    });
+    notif.onclick = () => {
+      window.focus();
+      if (n.reference_type === "deal" && n.reference_id) {
+        window.location.href = `/negotiate/${n.reference_id}`;
+      } else if (n.reference_type === "listing" && n.reference_id) {
+        window.location.href = `/listing/${n.reference_id}`;
+      }
+      notif.close();
+    };
+  } catch {
+    // Safari doesn't support Notification constructor in some contexts
+  }
+}
+
+export async function requestPushPermission(): Promise<boolean> {
+  if (typeof window === "undefined" || !("Notification" in window)) return false;
+  if (Notification.permission === "granted") return true;
+  if (Notification.permission === "denied") return false;
+  const result = await Notification.requestPermission();
+  return result === "granted";
+}
+
 export function useNotifications() {
   const { user } = useAuthContext();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -50,6 +86,9 @@ export function useNotifications() {
 
     if (!user) return;
 
+    // Auto-request push permission after login
+    requestPushPermission();
+
     const channel = supabase
       .channel(`notifications-${user.id}`)
       .on("postgres_changes", {
@@ -61,6 +100,9 @@ export function useNotifications() {
         const newNotif = payload.new as unknown as Notification;
         setNotifications(prev => [newNotif, ...prev]);
         setUnreadCount(prev => prev + 1);
+
+        // Show browser push notification
+        showBrowserNotification(newNotif);
       })
       .subscribe();
 
