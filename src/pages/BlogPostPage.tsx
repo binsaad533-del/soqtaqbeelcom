@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { safeJsonLd } from "@/lib/security";
 import { ArrowRight, Calendar, Clock, Tag } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
 import { useLanguage } from "@/contexts/LanguageContext";

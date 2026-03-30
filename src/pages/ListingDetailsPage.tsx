@@ -1,4 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { safeJsonLd } from "@/lib/security";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";

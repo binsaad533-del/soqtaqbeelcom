@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { safeJsonLd } from "@/lib/security";
 import { Link, useSearchParams } from "react-router-dom";
 import { Calendar, Clock, Tag, Search, Loader2 } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
