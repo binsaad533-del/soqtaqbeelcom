@@ -422,6 +422,14 @@ const LoginPage = () => {
               </label>
             )}
 
+            {/* Redirect message */}
+            {redirectReason === "auth_required" && !error && !success && (
+              <div className="bg-primary/5 text-primary text-xs p-3 rounded-xl flex items-center gap-2 border border-primary/10">
+                <ShieldCheck className="h-4 w-4 shrink-0" />
+                <span>يجب تسجيل الدخول للوصول إلى هذه الصفحة</span>
+              </div>
+            )}
+
             {/* Messages */}
             {error && (
               <div className="bg-destructive/5 text-destructive text-xs p-3 rounded-xl">{error}</div>
