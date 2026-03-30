@@ -52,7 +52,16 @@ const VerifySellerPage = lazy(() => import("./pages/VerifySellerPage"));
 const AdminVerificationsPage = lazy(() => import("./pages/AdminVerificationsPage"));
 const SellerDashboardPage = lazy(() => import("./pages/SellerDashboardPage"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 2 * 60 * 1000,      // 2 min — avoid refetches on tab focus
+      gcTime: 10 * 60 * 1000,         // 10 min garbage collection
+      refetchOnWindowFocus: false,     // prevent unnecessary refetches
+      retry: 1,                        // single retry on failure
+    },
+  },
+});
 
 const PageLoader = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
