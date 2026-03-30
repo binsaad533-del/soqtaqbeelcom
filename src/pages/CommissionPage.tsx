@@ -90,7 +90,11 @@ export default function CommissionPage() {
       <section className="container max-w-3xl mx-auto px-4 -mt-8 relative z-10">
         <Card className="border-primary/20 shadow-lg">
           <CardContent className="p-6 md:p-8">
-            <h2 className="text-lg font-semibold text-foreground mb-4">جدول نسب العمولة</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-2">جدول نسب العمولة</h2>
+            <p className="text-sm text-muted-foreground mb-4 flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+              العمولة تُخصم فقط عند إتمام الصفقة بنجاح — لا رسوم على التصفح أو التفاوض أو الإعلان.
+            </p>
             <Table>
               <TableHeader>
                 <TableRow>
