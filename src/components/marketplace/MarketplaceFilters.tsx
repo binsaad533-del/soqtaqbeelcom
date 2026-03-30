@@ -204,6 +204,23 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
           </div>
         </div>
       </Section>
+
+      {/* Hide simulation toggle */}
+      <div className="flex items-center justify-between pt-1">
+        <span className="text-xs text-muted-foreground">إخفاء الإعلانات التجريبية</span>
+        <button
+          onClick={() => onChange({ ...filters, hideSimulation: !filters.hideSimulation })}
+          className={cn(
+            "w-9 h-5 rounded-full transition-colors relative",
+            filters.hideSimulation ? "bg-primary" : "bg-muted"
+          )}
+        >
+          <span className={cn(
+            "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform",
+            filters.hideSimulation ? "right-0.5" : "left-0.5"
+          )} />
+        </button>
+      </div>
     </div>
   );
 };
