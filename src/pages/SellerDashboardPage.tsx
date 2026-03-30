@@ -7,9 +7,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
   Store, ShoppingBag, Pause, Users, Handshake, CheckCircle2,
-  TrendingUp, ArrowLeft, FileText, Plus, MessageSquare,
-  Bell, Percent, ExternalLink,
+  TrendingUp, ArrowLeft, Plus, MessageSquare, Percent, ExternalLink, Eye,
 } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
 
@@ -24,31 +26,51 @@ interface SellerStats {
   totalCommission: number;
 }
 
-const StatCard = ({ icon: Icon, label, value, color, linkTo }: {
-  icon: React.ElementType; label: string; value: number | string; color: string; linkTo?: string;
-}) => {
-  const content = (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer">
-      <CardContent className="p-4 flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-          <Icon size={18} strokeWidth={1.5} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[11px] text-muted-foreground">{label}</p>
-          <p className="text-lg font-bold text-foreground">{value}</p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-  return linkTo ? <Link to={linkTo}>{content}</Link> : content;
+interface ListingRow {
+  id: string;
+  title: string | null;
+  status: string;
+  price: number | null;
+  city: string | null;
+  created_at: string;
+  deal_type: string;
+}
+
+const StatCard = ({ icon: Icon, label, value, color }: {
+  icon: React.ElementType; label: string; value: number | string; color: string;
+}) => (
+  <Card>
+    <CardContent className="p-4 flex items-center gap-3">
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
+        <Icon size={18} strokeWidth={1.5} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[11px] text-muted-foreground">{label}</p>
+        <p className="text-lg font-bold text-foreground">{value}</p>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const statusLabel = (s: string) => {
+  const map: Record<string, string> = {
+    published: "نشط", sold: "مُباع", suspended: "معلّق", draft: "مسودة",
+  };
+  return map[s] || s;
+};
+
+const statusColor = (s: string) => {
+  if (s === "published") return "bg-success/10 text-success border-success/20";
+  if (s === "sold") return "bg-primary/10 text-primary border-primary/20";
+  if (s === "suspended") return "bg-destructive/10 text-destructive border-destructive/20";
+  return "bg-muted text-muted-foreground border-border";
 };
 
 const SellerDashboardPage = () => {
   const { user } = useAuthContext();
   const [stats, setStats] = useState<SellerStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [recentDeals, setRecentDeals] = useState<any[]>([]);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [listings, setListings] = useState<ListingRow[]>([]);
 
   useSEO({ title: "لوحة تحكم البائع | سوق تقبيل", description: "إحصائيات نشاطك كبائع في سوق تقبيل" });
 
@@ -56,16 +78,15 @@ const SellerDashboardPage = () => {
     if (!user) return;
     setLoading(true);
     try {
-      const myListingIds = (await supabase.from("listings").select("id").eq("owner_id", user.id).is("deleted_at", null)).data?.map(l => l.id) || [];
-
-      const [listingsRes, dealsRes, offersRes, notifRes] = await Promise.all([
-        supabase.from("listings").select("id, status, price").eq("owner_id", user.id).is("deleted_at", null),
-        supabase.from("deals").select("id, status, agreed_price, listing_id, buyer_id, created_at, completed_at").eq("seller_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("listing_offers").select("id, listing_id, buyer_id").in("listing_id", myListingIds.length ? myListingIds : ["__none__"]),
-        supabase.from("notifications").select("id, title, body, type, created_at, is_read, reference_type").eq("user_id", user.id).order("created_at", { ascending: false }).limit(8),
+      const [listingsRes, dealsRes, offersRes] = await Promise.all([
+        supabase.from("listings").select("id, title, status, price, city, created_at, deal_type").eq("owner_id", user.id).is("deleted_at", null).order("created_at", { ascending: false }),
+        supabase.from("deals").select("id, status, agreed_price, buyer_id, created_at").eq("seller_id", user.id),
+        supabase.from("listing_offers").select("id, buyer_id, listing_id").in("listing_id",
+          (await supabase.from("listings").select("id").eq("owner_id", user.id).is("deleted_at", null)).data?.map(l => l.id) || ["__none__"]
+        ),
       ]);
 
-      const listings = listingsRes.data || [];
+      const allListings = listingsRes.data || [];
       const deals = dealsRes.data || [];
       const offers = offersRes.data || [];
 
@@ -78,17 +99,16 @@ const SellerDashboardPage = () => {
         .reduce((sum, d) => sum + (Number(d.agreed_price) || 0), 0);
 
       setStats({
-        activeListings: listings.filter(l => l.status === "published").length,
-        soldListings: listings.filter(l => l.status === "sold").length,
-        suspendedListings: listings.filter(l => l.status === "suspended" || l.status === "draft").length,
+        activeListings: allListings.filter(l => l.status === "published").length,
+        soldListings: allListings.filter(l => l.status === "sold").length,
+        suspendedListings: allListings.filter(l => l.status === "suspended" || l.status === "draft").length,
         interestedBuyers: buyerIds.size,
         ongoingDeals: deals.filter(d => !["completed", "finalized", "cancelled", "rejected"].includes(d.status)).length,
         completedDeals: deals.filter(d => d.status === "completed" || d.status === "finalized").length,
         totalRevenue: completedRevenue,
         totalCommission: completedRevenue * 0.01,
       });
-      setRecentDeals(deals.slice(0, 5));
-      setNotifications(notifRes.data || []);
+      setListings(allListings);
     } catch (err) {
       console.error("[SellerDashboard] load error", err);
     } finally {
@@ -100,32 +120,19 @@ const SellerDashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="py-8 container max-w-4xl space-y-4">
+      <div className="py-8 container max-w-5xl space-y-4">
         <Skeleton className="h-8 w-48" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
         </div>
+        <Skeleton className="h-64 rounded-xl" />
       </div>
     );
   }
 
-  const dealStatusLabel = (s: string) => {
-    if (s === "negotiating") return "تفاوض";
-    if (s === "confirmed") return "اتفاق";
-    if (s === "completed" || s === "finalized") return "مكتمل";
-    if (s === "cancelled") return "ملغاة";
-    return s;
-  };
-  const dealStatusColor = (s: string) => {
-    if (s === "negotiating" || s === "confirmed") return "bg-primary/10 text-primary";
-    if (s === "completed" || s === "finalized") return "bg-success/10 text-success";
-    if (s === "cancelled") return "bg-destructive/10 text-destructive";
-    return "bg-muted text-muted-foreground";
-  };
-
   return (
     <div className="py-8">
-      <div className="container max-w-4xl">
+      <div className="container max-w-5xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -133,7 +140,7 @@ const SellerDashboardPage = () => {
             <p className="text-xs text-muted-foreground mt-1">إحصائيات نشاطك وإعلاناتك</p>
           </div>
           <Link to="/dashboard" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
-            <ArrowLeft size={12} /> لوحة التحكم الرئيسية
+            <ArrowLeft size={12} /> الرئيسية
           </Link>
         </div>
 
@@ -154,99 +161,74 @@ const SellerDashboardPage = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-          <StatCard icon={Store} label="إعلانات نشطة" value={stats?.activeListings ?? 0} color="bg-primary/10 text-primary" linkTo="/dashboard" />
+          <StatCard icon={Store} label="إعلانات نشطة" value={stats?.activeListings ?? 0} color="bg-primary/10 text-primary" />
           <StatCard icon={ShoppingBag} label="إعلانات مُباعة" value={stats?.soldListings ?? 0} color="bg-success/10 text-success" />
           <StatCard icon={Pause} label="معلقة / مسودة" value={stats?.suspendedListings ?? 0} color="bg-warning/10 text-warning" />
           <StatCard icon={Users} label="مشترون مهتمون" value={stats?.interestedBuyers ?? 0} color="bg-accent text-accent-foreground" />
           <StatCard icon={Handshake} label="صفقات جارية" value={stats?.ongoingDeals ?? 0} color="bg-primary/10 text-primary" />
           <StatCard icon={CheckCircle2} label="صفقات مكتملة" value={stats?.completedDeals ?? 0} color="bg-success/10 text-success" />
-          <StatCard
-            icon={TrendingUp}
-            label="إجمالي المبيعات"
-            value={stats?.totalRevenue ? `${stats.totalRevenue.toLocaleString("en-US")}` : "0"}
-            color="bg-emerald-500/10 text-emerald-600"
-          />
-          <StatCard
-            icon={Percent}
-            label="العمولات المستحقة (1%)"
-            value={stats?.totalCommission ? `${stats.totalCommission.toLocaleString("en-US")}` : "0"}
-            color="bg-orange-500/10 text-orange-600"
-          />
+          <StatCard icon={TrendingUp} label="إجمالي المبيعات" value={stats?.totalRevenue ? `${stats.totalRevenue.toLocaleString("en-US")}` : "0"} color="bg-emerald-500/10 text-emerald-600" />
+          <StatCard icon={Percent} label="العمولات المستحقة (1%)" value={stats?.totalCommission ? `${stats.totalCommission.toLocaleString("en-US")}` : "0"} color="bg-orange-500/10 text-orange-600" />
         </div>
 
-        {/* Two-column layout: Recent Deals + Notifications */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Recent Deals */}
-          <div>
-            <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-              <FileText size={14} className="text-primary" /> آخر الصفقات
-            </h2>
-            {recentDeals.length === 0 ? (
-              <Card><CardContent className="p-6 text-center text-sm text-muted-foreground">لا توجد صفقات بعد</CardContent></Card>
-            ) : (
-              <div className="space-y-2">
-                {recentDeals.map(deal => (
-                  <Link key={deal.id} to={`/negotiate/${deal.id}`}>
-                    <Card className="hover:shadow-md transition-shadow">
-                      <CardContent className="p-3 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center">
-                            <Handshake size={14} className="text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-foreground">صفقة #{deal.id.slice(0, 8)}</p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {new Date(deal.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          {deal.agreed_price && (
-                            <span className="text-xs font-semibold text-foreground">
-                              {Number(deal.agreed_price).toLocaleString("en-US")} <SarSymbol size={10} />
-                            </span>
-                          )}
-                          <Badge variant="secondary" className={`text-[9px] ${dealStatusColor(deal.status)}`}>
-                            {dealStatusLabel(deal.status)}
+        {/* Listings Table */}
+        <div>
+          <h2 className="text-sm font-semibold text-foreground mb-3">إعلاناتي ({listings.length})</h2>
+          {listings.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center text-sm text-muted-foreground">
+                لا توجد إعلانات بعد —{" "}
+                <Link to="/create-listing" className="text-primary underline">أضف إعلانك الأول</Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-right">العنوان</TableHead>
+                      <TableHead className="text-right">المدينة</TableHead>
+                      <TableHead className="text-right">السعر</TableHead>
+                      <TableHead className="text-right">النوع</TableHead>
+                      <TableHead className="text-right">الحالة</TableHead>
+                      <TableHead className="text-right">التاريخ</TableHead>
+                      <TableHead className="text-center w-10"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {listings.map(listing => (
+                      <TableRow key={listing.id}>
+                        <TableCell className="font-medium text-foreground max-w-[200px] truncate">
+                          {listing.title || "بدون عنوان"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs">{listing.city || "—"}</TableCell>
+                        <TableCell className="text-xs whitespace-nowrap">
+                          {listing.price ? (
+                            <span className="font-semibold">{Number(listing.price).toLocaleString("en-US")} <SarSymbol size={9} /></span>
+                          ) : "—"}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{listing.deal_type === "full" ? "بيع كامل" : listing.deal_type}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={`text-[9px] ${statusColor(listing.status)}`}>
+                            {statusLabel(listing.status)}
                           </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
+                        </TableCell>
+                        <TableCell className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          {new Date(listing.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Link to={`/listing/${listing.id}`} className="text-muted-foreground hover:text-foreground transition-colors">
+                            <Eye size={14} />
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-            )}
-          </div>
-
-          {/* Recent Notifications */}
-          <div>
-            <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-              <Bell size={14} className="text-primary" /> آخر الإشعارات
-            </h2>
-            {notifications.length === 0 ? (
-              <Card><CardContent className="p-6 text-center text-sm text-muted-foreground">لا توجد إشعارات</CardContent></Card>
-            ) : (
-              <div className="space-y-2">
-                {notifications.map(n => (
-                  <Card key={n.id} className={`transition-shadow ${!n.is_read ? "border-primary/20" : ""}`}>
-                    <CardContent className="p-3">
-                      <div className="flex items-start gap-2">
-                        <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${n.is_read ? "bg-muted" : "bg-primary"}`} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-foreground truncate">{n.title}</p>
-                          {n.body && <p className="text-[10px] text-muted-foreground line-clamp-2 mt-0.5">{n.body}</p>}
-                          <p className="text-[9px] text-muted-foreground/60 mt-1">
-                            {new Date(n.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}{" "}
-                            {new Date(n.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false })}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
+            </Card>
+          )}
         </div>
       </div>
     </div>
