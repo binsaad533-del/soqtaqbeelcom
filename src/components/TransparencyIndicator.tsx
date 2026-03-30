@@ -1,7 +1,7 @@
 import { Shield, TrendingUp, CheckCircle2, AlertCircle, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { calculateTransparency, type ChecklistItem } from "@/lib/transparencyScore";
-import { useState } from "react";
+
 
 interface TransparencyIndicatorProps {
   listing: any;
@@ -29,7 +29,7 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
   const result = calculateTransparency(listing);
   const style = getScoreStyle(result.score);
   const tier = TIER_INFO[style.tier];
-  const [_expanded] = useState(false);
+  
 
   if (compact) {
     return (
