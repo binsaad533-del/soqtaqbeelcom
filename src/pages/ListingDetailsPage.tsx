@@ -449,6 +449,29 @@ const ListingDetailsPage = () => {
               {/* Buyer: offer form + negotiate button */}
               {!isOwner && !isSimulation && (
                 <>
+                  {/* Express Interest CTA */}
+                  {!myActiveDeal && (
+                    <Button
+                      onClick={handleStartNegotiation}
+                      disabled={startingDeal}
+                      className="w-full rounded-xl text-base h-12 active:scale-[0.98] mb-3"
+                    >
+                      {startingDeal ? <Loader2 size={18} className="animate-spin" /> : <Heart size={18} strokeWidth={1.5} />}
+                      أبدِ اهتمامك
+                    </Button>
+                  )}
+
+                  {myActiveDeal && (
+                    <Button
+                      onClick={() => navigate(`/negotiate/${myActiveDeal.id}`)}
+                      className="w-full rounded-xl text-base h-12 active:scale-[0.98] mb-3"
+                      variant="secondary"
+                    >
+                      <MessageCircle size={18} strokeWidth={1.5} />
+                      متابعة التفاوض
+                    </Button>
+                  )}
+
                   <ListingOfferForm
                     listingId={listing.id}
                     listingPrice={listing.price}
