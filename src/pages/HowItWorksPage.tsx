@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import {
-  Store, Search, Heart, Gavel, FileText, ArrowRightLeft,
+  Store, Search, Heart, Gavel, FileText, ArrowRightLeft, Shield,
   CheckCircle, Plus, Zap, Lock, BarChart3, Award, Wallet,
-  BadgeCheck, Sparkles, ShieldCheck, Eye,
+  BadgeCheck, Sparkles, ShieldCheck, Eye, Landmark,
 } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
 
@@ -67,10 +67,18 @@ const stages: Stage[] = [
     iconBg: "bg-purple-500/10 text-purple-600",
   },
   {
+    icon: Landmark,
+    title: "ضمان الصفقة",
+    seller: "يتم إيداع المبلغ المتفق عليه في حساب وسيط آمن (Escrow) تابع للمنصة. لا يُحوَّل المبلغ للبائع إلا بعد تأكيد المشتري استلام النشاط.",
+    buyer: "يودع المبلغ في حساب المنصة الوسيط لضمان حقوقه. الأموال محمية ولا تُحوَّل حتى يتم تأكيد نقل الملكية بالكامل.",
+    color: "border-sky-500/20",
+    iconBg: "bg-sky-500/10 text-sky-600",
+  },
+  {
     icon: ArrowRightLeft,
     title: "نقل الملكية",
-    seller: "يضغط «بدء نقل الملكية» لتنتقل الصفقة لمرحلة النقل ويُخطر المشتري فوراً.",
-    buyer: "يتأكد من استلام كل شيء ثم يضغط «تأكيد الاستلام» لإتمام الصفقة رسمياً.",
+    seller: "ينقل النشاط التجاري رسمياً للمشتري ويضغط «بدء نقل الملكية». يتم إخطار المشتري فوراً للتحقق والاستلام.",
+    buyer: "يتأكد من استلام النشاط بالكامل حسب الاتفاقية ثم يضغط «تأكيد الاستلام» لإتمام الصفقة رسمياً.",
     color: "border-emerald-500/20",
     iconBg: "bg-emerald-500/10 text-emerald-600",
   },
