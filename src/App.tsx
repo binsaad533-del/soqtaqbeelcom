@@ -209,6 +209,14 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/seller-dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <SellerDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/install" element={<InstallPage />} />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
                 <Route path="*" element={<NotFound />} />
