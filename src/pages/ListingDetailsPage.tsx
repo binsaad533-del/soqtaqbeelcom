@@ -1,4 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
@@ -47,6 +48,7 @@ const ListingDetailsPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [viewCount, setViewCount] = useState(0);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const loadListing = async () => {
     if (!id) return;
@@ -90,7 +92,7 @@ const ListingDetailsPage = () => {
   }, [id, getListing, user]);
 
   const handleStartNegotiation = async () => {
-    if (!user) { navigate("/login"); return; }
+    if (!user) { setShowAuthDialog(true); return; }
     if (!listing) return;
     const myDeals = await getMyDeals();
     const existing = myDeals.find(d => d.listing_id === listing.id);
