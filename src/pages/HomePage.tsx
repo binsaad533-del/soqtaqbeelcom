@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { safeJsonLd } from "@/lib/security";
 import { ArrowLeft, MapPin, Eye, Star } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import AiInlineStar from "@/components/AiInlineStar";
@@ -244,8 +245,8 @@ const HomePage = () => {
 
   return (
     <div className="relative">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }} />
       <section className="bg-background py-20 md:py-32 relative overflow-hidden">
         <div className="container relative z-10">
           <div className="max-w-2xl mx-auto text-center animate-reveal">
