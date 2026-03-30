@@ -16,6 +16,8 @@ import MobileFilterSheet from "@/components/marketplace/MobileFilterSheet";
 import SmartSearchBar from "@/components/marketplace/SmartSearchBar";
 import ComparePanel, { type CompareItem } from "@/components/marketplace/ComparePanel";
 import { MapPin, Eye, ShieldCheck, GitCompareArrows, Check, Lightbulb, Heart, Share2 } from "lucide-react";
+import { useVerifiedSellers } from "@/components/VerifiedSellerBadge";
+import VerifiedSellerBadge from "@/components/VerifiedSellerBadge";
 import MarketplaceTicker from "@/components/marketplace/MarketplaceTicker";
 import { toast } from "sonner";
 import PriceDisplay from "@/components/PriceDisplay";
@@ -443,6 +445,7 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
                   {seller.full_name?.charAt(0) || "?"}
                 </div>
                 <span className="text-[11px] text-foreground font-medium truncate max-w-[120px]">{seller.full_name || "بائع"}</span>
+                <VerifiedSellerBadge userId={seller.user_id} size="sm" />
                 <TrustBadge score={seller.trust_score} verificationLevel={seller.verification_level} size="sm" showScore showBadges badges={badges.slice(0, 2)} />
               </div>
               <div className="flex items-center gap-1" title={isOnline ? "متواجد الآن" : "غير متواجد"}>

@@ -4,6 +4,7 @@ import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriang
 import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
+import VerifiedSellerBadge from "@/components/VerifiedSellerBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
