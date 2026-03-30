@@ -16,7 +16,7 @@ import MobileFilterSheet from "@/components/marketplace/MobileFilterSheet";
 import SmartSearchBar from "@/components/marketplace/SmartSearchBar";
 import ComparePanel, { type CompareItem } from "@/components/marketplace/ComparePanel";
 import { MapPin, Eye, ShieldCheck, GitCompareArrows, Check, Lightbulb, Heart, Share2 } from "lucide-react";
-import { useVerifiedSellers } from "@/components/VerifiedSellerBadge";
+import VerifiedSellerBadge from "@/components/VerifiedSellerBadge";
 import VerifiedSellerBadge from "@/components/VerifiedSellerBadge";
 import MarketplaceTicker from "@/components/marketplace/MarketplaceTicker";
 import { toast } from "sonner";
