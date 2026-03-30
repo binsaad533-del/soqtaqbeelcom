@@ -121,18 +121,39 @@ const ListingDetailsPage = () => {
       return;
     }
     if (data) {
-      // Send first message + meeting preference
+      // Build first message
       const msgParts: string[] = [];
       if (interestMessage.trim()) msgParts.push(interestMessage.trim());
       if (wantsMeeting === true) msgParts.push("🤝 أرغب بترتيب مقابلة للاطلاع على الفرصة");
       if (wantsMeeting === false) msgParts.push("💬 أفضل إتمام التفاوض إلكترونياً");
       const fullMsg = msgParts.length > 0 ? msgParts.join("\n\n") : "مرحباً، أنا مهتم بهذه الفرصة وأود معرفة المزيد من التفاصيل.";
 
+      // Send negotiation message (existing flow)
       await supabase.from("negotiation_messages").insert({
         deal_id: data.id,
         sender_id: user.id,
         message: fullMsg,
         message_type: "text",
+      });
+
+      // Create conversation + first message in messages table
+      const conversationId = crypto.randomUUID();
+      const defaultFirstMsg = "مرحباً، أنا مهتم بهذه الفرصة";
+      await supabase.from("conversations").insert({
+        id: conversationId,
+        listing_id: listing.id,
+        buyer_id: user.id,
+        seller_id: listing.owner_id,
+        last_message: defaultFirstMsg,
+        last_message_at: new Date().toISOString(),
+        status: "active",
+      });
+      await supabase.from("messages").insert({
+        conversation_id: conversationId,
+        sender_id: user.id,
+        receiver_id: listing.owner_id,
+        listing_id: listing.id,
+        content: defaultFirstMsg,
       });
 
       setShowInterestForm(false);
