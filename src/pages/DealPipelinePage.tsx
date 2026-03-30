@@ -63,6 +63,7 @@ interface PipelineDeal {
   updated_at: string;
   completed_at: string | null;
   risk_score: number | null;
+  escrow_status?: string;
   listing_title?: string;
   buyer_name?: string;
   seller_name?: string;
@@ -81,18 +82,21 @@ function mapToStage(deal: PipelineDeal): ColumnId {
   if (s === "completed" || s === "finalized") return "closed";
   if (s === "cancelled" || s === "rejected") return "closed";
 
+  // Transfer stage: escrow_status indicates transfer started
+  if (deal.escrow_status === "transferring" || deal.escrow_status === "confirmed") return "transfer";
+
   // Has agreement → payment or transfer stage
   if (deal.has_agreement && deal.locked) return "transfer";
   if (deal.has_agreement) return "agreement";
 
+  // Confirmed (offer accepted) → agreement stage
+  if (s === "confirmed") return "agreement";
+
   // Confirmed / locked without agreement → payment
-  if (deal.locked || s === "confirmed") return "payment";
+  if (deal.locked) return "payment";
 
   // Negotiating with agreed price → negotiation
   if (s === "negotiating" && deal.agreed_price && deal.agreed_price > 0) return "negotiation";
-
-  // Confirmed (offer accepted with agreed price) → agreement stage
-  if (s === "confirmed" && !deal.has_agreement) return "agreement";
 
   // Has messages → communication
   if (deal.has_messages) return "communication";

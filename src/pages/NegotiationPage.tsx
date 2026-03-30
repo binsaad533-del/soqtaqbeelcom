@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Send, ArrowRight, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, TrendingUp, Info, FileCheck, CheckCircle2, X, MapPin, ShieldAlert } from "lucide-react";
+import { Send, ArrowRight, ArrowRightLeft, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, TrendingUp, Info, FileCheck, CheckCircle2, X, MapPin, ShieldAlert } from "lucide-react";
 import ChatAttachmentButton from "@/components/chat/ChatAttachmentButton";
 import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
 import AiStar from "@/components/AiStar";
@@ -445,8 +445,10 @@ const NegotiationPage = () => {
   }
 
   const isPostAgreement = deal.status === "completed" || deal.status === "finalized";
+  const isConfirmedStage = deal.status === "confirmed";
+  const isTransferStage = deal.escrow_status === "transferring";
 
-  const statusLabel = deal.status === "negotiating" ? "جاري التفاوض" : deal.status === "completed" ? "مكتمل" : deal.status === "finalized" ? "مُقفل" : deal.status === "suspended" ? "معلّقة" : deal.status === "cancelled" ? "ملغاة" : deal.status;
+  const statusLabel = deal.status === "negotiating" ? "جاري التفاوض" : deal.status === "confirmed" ? "اتفاق" : deal.status === "completed" ? "مكتمل" : deal.status === "finalized" ? "مُقفل" : deal.status === "suspended" ? "معلّقة" : deal.status === "cancelled" ? "ملغاة" : deal.status;
   const riskLabel = !deal.risk_score || deal.risk_score <= 25 ? "مرتفعة" : deal.risk_score <= 50 ? "متوسطة" : "منخفضة";
   const riskColor = !deal.risk_score || deal.risk_score <= 25 ? "text-success" : deal.risk_score <= 50 ? "text-warning" : "text-destructive";
   const readinessPercent = Math.max(0, 100 - (deal.risk_score || 0));
@@ -696,6 +698,80 @@ const NegotiationPage = () => {
                   <Button asChild className="w-full rounded-xl text-xs gradient-primary text-primary-foreground">
                     <Link to={`/agreement/${dealId}`}>عرض الاتفاقية</Link>
                   </Button>
+                </div>
+              )}
+
+              {/* Seller: Start Transfer button at agreement stage */}
+              {!isBuyer && isConfirmedStage && !isTransferStage && (
+                <div className="bg-gradient-to-b from-accent/10 to-card rounded-2xl p-4 shadow-soft border border-accent/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ArrowRightLeft size={13} strokeWidth={1.5} className="text-primary" />
+                    <h3 className="font-medium text-xs">بدء نقل الملكية</h3>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+                    تم الاتفاق على الشروط. ابدأ إجراءات نقل ملكية النشاط التجاري للمشتري.
+                  </p>
+                  <Button
+                    onClick={async () => {
+                      await supabase.from("deals").update({ escrow_status: "transferring", updated_at: new Date().toISOString() }).eq("id", deal.id);
+                      // Notify buyer
+                      await supabase.from("notifications").insert({
+                        user_id: deal.buyer_id,
+                        title: "🔄 بدأ البائع نقل الملكية",
+                        body: `بدأ البائع إجراءات نقل ملكية "${listingTitle}". يرجى المتابعة وتأكيد الاستلام بعد اكتمال النقل.`,
+                        type: "deal",
+                        reference_type: "deal",
+                        reference_id: deal.id,
+                      } as any);
+                      toast.success("تم بدء إجراءات نقل الملكية ✅");
+                      loadData();
+                    }}
+                    className="w-full rounded-xl text-xs"
+                  >
+                    <ArrowRightLeft size={14} className="ml-1.5" />
+                    بدء نقل الملكية
+                  </Button>
+                </div>
+              )}
+
+              {/* Transfer in progress — show for both parties */}
+              {isTransferStage && (
+                <div className="bg-gradient-to-b from-emerald-500/5 to-card rounded-2xl p-4 shadow-soft border border-emerald-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ArrowRightLeft size={13} strokeWidth={1.5} className="text-emerald-500" />
+                    <h3 className="font-medium text-xs text-emerald-600">جاري نقل الملكية</h3>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+                    {isBuyer
+                      ? "البائع بدأ إجراءات النقل. بعد استلام النشاط، اضغط تأكيد الاستلام لإتمام الصفقة."
+                      : "تم بدء إجراءات النقل. انتظر تأكيد المشتري لاستلام النشاط."}
+                  </p>
+                  {isBuyer && (
+                    <Button
+                      onClick={async () => {
+                        if (!confirm("هل تأكد من استلام النشاط التجاري؟ سيتم إتمام الصفقة نهائياً.")) return;
+                        await supabase.from("deals").update({
+                          status: "completed",
+                          escrow_status: "completed",
+                          completed_at: new Date().toISOString(),
+                          updated_at: new Date().toISOString(),
+                        }).eq("id", deal.id);
+                        await supabase.from("listings").update({ status: "sold" }).eq("id", deal.listing_id);
+                        // Notify both parties
+                        const notifications = [
+                          { user_id: deal.seller_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `أكد المشتري استلام "${listingTitle}". تمت الصفقة بنجاح!`, type: "deal", reference_type: "deal", reference_id: deal.id },
+                          { user_id: deal.buyer_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `تم تأكيد استلامك لـ "${listingTitle}". مبارك!`, type: "deal", reference_type: "deal", reference_id: deal.id },
+                        ];
+                        await supabase.from("notifications").insert(notifications as any);
+                        toast.success("🎉 تم إتمام الصفقة بنجاح!");
+                        loadData();
+                      }}
+                      className="w-full rounded-xl text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                    >
+                      <CheckCircle2 size={14} className="ml-1.5" />
+                      تأكيد استلام النشاط
+                    </Button>
+                  )}
                 </div>
               )}
 
