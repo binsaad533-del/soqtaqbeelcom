@@ -41,7 +41,7 @@ const statusLabel = (s: string) => {
 };
 
 const SupervisorDashboardPage = () => {
-  useSEO({ title: "لوحة المشرف", description: "لوحة تحكم المشرف — متابعة الإعلانات والصفقات على سوق تقبيل" });
+  useSEO({ title: "لوحة المشرف", description: "لوحة تحكم المشرف — متابعة الإعلانات والصفقات على سوق تقبيل", canonical: "/supervisor-dashboard" });
   const { profile, signOut } = useAuthContext();
   const { getAllListings } = useListings();
   const { getAllDeals } = useDeals();

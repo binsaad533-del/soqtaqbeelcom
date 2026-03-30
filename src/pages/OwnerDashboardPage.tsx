@@ -43,7 +43,7 @@ const TABS: { id: Tab; label: string; icon: any }[] = [
 ];
 
 const OwnerDashboardPage = () => {
-  useSEO({ title: "لوحة مالك المنصة", description: "لوحة تحكم مالك المنصة — إدارة شاملة لسوق تقبيل" });
+  useSEO({ title: "لوحة مالك المنصة", description: "لوحة تحكم مالك المنصة — إدارة شاملة لسوق تقبيل", canonical: "/owner-dashboard" });
   const navigate = useNavigate();
   const { profile, signOut } = useAuthContext();
   const { getAllListings } = useListings();

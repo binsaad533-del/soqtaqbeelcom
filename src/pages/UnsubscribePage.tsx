@@ -9,7 +9,7 @@ import { useSEO } from "@/hooks/useSEO";
 type Status = "loading" | "valid" | "already" | "invalid" | "success" | "error";
 
 const UnsubscribePage = () => {
-  useSEO({ title: "إلغاء الاشتراك", description: "إلغاء الاشتراك في رسائل البريد الإلكتروني من سوق تقبيل" });
+  useSEO({ title: "إلغاء الاشتراك", description: "إلغاء الاشتراك في رسائل البريد الإلكتروني من سوق تقبيل", canonical: "/unsubscribe" });
   const [params] = useSearchParams();
   const token = params.get("token");
   const [status, setStatus] = useState<Status>("loading");

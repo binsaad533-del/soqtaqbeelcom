@@ -98,7 +98,7 @@ const formatTimeAgo = (iso: string) => {
 
 // ─── Main Component ──────────────────────────────────────
 const MonitoringDashboardPage = () => {
-  useSEO({ title: "لوحة المراقبة", description: "مراقبة أداء المنصة والأحداث الأمنية — سوق تقبيل" });
+  useSEO({ title: "لوحة المراقبة", description: "مراقبة أداء المنصة والأحداث الأمنية — سوق تقبيل", canonical: "/monitoring" });
   const { role } = useAuthContext();
   const [stats, setStats] = useState<LiveStats | null>(null);
   const [events, setEvents] = useState<ActivityEvent[]>([]);
