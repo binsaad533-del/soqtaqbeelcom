@@ -545,6 +545,13 @@ const ListingDetailsPage = () => {
                 </Button>
               )}
 
+              {interestCount > 0 && (
+                <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground mt-2">
+                  <Users size={15} />
+                  <span>{interestCount} مستخدمين أبدوا اهتمامهم</span>
+                </div>
+              )}
+
               {/* Seller Reviews */}
               {sellerReviews.length > 0 && (
                 <SellerReviewsSummary reviews={sellerReviews} className="mt-4" />
