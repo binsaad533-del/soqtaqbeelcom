@@ -51,23 +51,21 @@ const faqs = [
 ];
 
 const escrowStatuses = [
-  { id: "awaiting_deposit", label: "بانتظار الإيداع", icon: Clock, color: "text-amber-500", bg: "bg-amber-500" },
-  { id: "deposited", label: "تم الإيداع", icon: Banknote, color: "text-blue-500", bg: "bg-blue-500" },
-  { id: "transferring", label: "جاري النقل", icon: Truck, color: "text-orange-500", bg: "bg-orange-500" },
-  { id: "confirmed", label: "تم التأكيد", icon: CircleCheckBig, color: "text-emerald-500", bg: "bg-emerald-500" },
-  { id: "completed", label: "مكتمل", icon: PartyPopper, color: "text-primary", bg: "bg-primary" },
+  { id: "awaiting_deposit", label: "بانتظار الإيداع", icon: Clock, color: "text-amber-500", bg: "bg-amber-500", desc: "الصفقة بدأت — بانتظار إيداع المبلغ من المشتري في حساب ضمان المنصة." },
+  { id: "deposited", label: "تم الإيداع", icon: Banknote, color: "text-blue-500", bg: "bg-blue-500", desc: "تم إيداع المبلغ بنجاح — المبلغ مجمّد بأمان في حساب الضمان حتى إتمام النقل." },
+  { id: "transferring", label: "جاري النقل", icon: Truck, color: "text-orange-500", bg: "bg-orange-500", desc: "البائع يقوم حالياً بإجراءات نقل الملكية وتسليم النشاط التجاري." },
+  { id: "confirmed", label: "تم التأكيد", icon: CircleCheckBig, color: "text-emerald-500", bg: "bg-emerald-500", desc: "المشتري أكّد استلام النشاط — جاري تجهيز تحويل المبلغ للبائع." },
+  { id: "completed", label: "مكتمل", icon: PartyPopper, color: "text-primary", bg: "bg-primary", desc: "تم إتمام الصفقة بنجاح — المبلغ حُوِّل للبائع. مبروك! 🎉" },
 ];
 
 function EscrowStatusTracker() {
-  const [active, setActive] = useState(2); // demo default at "جاري النقل"
+  const [active, setActive] = useState(2);
 
   return (
     <div className="space-y-6">
       {/* Interactive status bar */}
       <div className="relative flex items-center justify-between px-2">
-        {/* Background line */}
         <div className="absolute top-5 right-5 left-5 h-0.5 bg-border" />
-        {/* Active line */}
         <div
           className="absolute top-5 right-5 h-0.5 bg-primary transition-all duration-500"
           style={{ width: `${(active / (escrowStatuses.length - 1)) * 100}%`, maxWidth: "calc(100% - 2.5rem)" }}
@@ -104,7 +102,6 @@ function EscrowStatusTracker() {
         })}
       </div>
 
-      {/* Status description card */}
       <Card className="border-border/60">
         <CardContent className="p-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-1">
@@ -114,13 +111,7 @@ function EscrowStatusTracker() {
             })()}
             <span className="font-semibold text-foreground text-sm">{escrowStatuses[active].label}</span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {active === 0 && "الصفقة بدأت — بانتظار إيداع المبلغ من المشتري في حساب ضمان المنصة."}
-            {active === 1 && "تم إيداع المبلغ بنجاح — المبلغ مجمّد بأمان في حساب الضمان حتى إتمام النقل."}
-            {active === 2 && "البائع يقوم حالياً بإجراءات نقل الملكية وتسليم النشاط التجاري."}
-            {active === 3 && "المشتري أكّد استلام النشاط — جاري تجهيز تحويل المبلغ للبائع."}
-            {active === 4 && "تم إتمام الصفقة بنجاح — المبلغ حُوِّل للبائع. مبروك! 🎉"}
-          </p>
+          <p className="text-xs text-muted-foreground">{escrowStatuses[active].desc}</p>
           <p className="text-[10px] text-muted-foreground/60 mt-2">اضغط على أي مرحلة لمعرفة التفاصيل</p>
         </CardContent>
       </Card>
@@ -128,8 +119,8 @@ function EscrowStatusTracker() {
   );
 }
 
-
-  export default function EscrowPage() {
+export default function EscrowPage() {
+  useSEO({
     title: "نظام ضمان الصفقات | سوق تقبيل",
     description: "تعرّف على نظام ضمان الصفقات في سوق تقبيل — حماية كاملة للبائع والمشتري حتى إتمام الصفقة بنجاح.",
     canonical: "/escrow",
@@ -194,6 +185,7 @@ function EscrowStatusTracker() {
         <EscrowStatusTracker />
       </section>
 
+      {/* Guarantees */}
       <section className="max-w-3xl mx-auto px-4 pb-12">
         <h2 className="text-xl font-bold text-foreground text-center mb-6">ماذا يضمن لك النظام؟</h2>
         <div className="grid sm:grid-cols-3 gap-4">
