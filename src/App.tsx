@@ -49,6 +49,7 @@ const MessagesPage = lazy(() => import("./pages/MessagesPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const InvoicePage = lazy(() => import("./pages/InvoicePage"));
 const VerifySellerPage = lazy(() => import("./pages/VerifySellerPage"));
+const AdminVerificationsPage = lazy(() => import("./pages/AdminVerificationsPage"));
 
 const queryClient = new QueryClient();
 
@@ -172,6 +173,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={["platform_owner", "supervisor"]}>
                       <AdminDealsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/verifications"
+                  element={
+                    <ProtectedRoute allowedRoles={["platform_owner", "supervisor"]}>
+                      <AdminVerificationsPage />
                     </ProtectedRoute>
                   }
                 />
