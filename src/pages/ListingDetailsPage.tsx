@@ -1,6 +1,6 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
@@ -55,6 +55,7 @@ const ListingDetailsPage = () => {
   const [interestMessage, setInterestMessage] = useState("");
   const [wantsMeeting, setWantsMeeting] = useState<boolean | null>(null);
   const [submittingInterest, setSubmittingInterest] = useState(false);
+  const [interestCount, setInterestCount] = useState(0);
 
   const loadListing = async () => {
     if (!id) return;
@@ -71,6 +72,8 @@ const ListingDetailsPage = () => {
           getSellerReviews(data.owner_id),
           getLikesAndViews([data.id]),
         ]);
+        const { count: dealCount } = await supabase.from("deals").select("id", { count: "exact", head: true }).eq("listing_id", data.id);
+        setInterestCount(dealCount || 0);
         setSellerProfile(profile);
         setSellerReviews(reviews);
         setViewCount(social.views[data.id] || 0);
@@ -540,6 +543,13 @@ const ListingDetailsPage = () => {
                   {startingDeal ? <Loader2 size={18} className="animate-spin" /> : <Heart size={18} strokeWidth={1.5} />}
                   أبدِ اهتمامك بهذه الفرصة
                 </Button>
+              )}
+
+              {interestCount > 0 && (
+                <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground mt-2">
+                  <Users size={15} />
+                  <span>{interestCount} مستخدمين أبدوا اهتمامهم</span>
+                </div>
               )}
 
               {/* Seller Reviews */}
