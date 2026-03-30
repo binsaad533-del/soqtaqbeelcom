@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { Loader2, Handshake, ChevronLeft, Search, Shield } from "lucide-react";
+import { Loader2, Handshake, ChevronLeft, Search } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import SarSymbol from "@/components/SarSymbol";
 import { cn } from "@/lib/utils";

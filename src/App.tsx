@@ -44,6 +44,7 @@ const EscrowPage = lazy(() => import("./pages/EscrowPage"));
 const ViewCustomerPage = lazy(() => import("./pages/ViewCustomerPage"));
 const DealPipelinePage = lazy(() => import("./pages/DealPipelinePage"));
 const AdminRevenuePage = lazy(() => import("./pages/AdminRevenuePage"));
+const AdminDealsPage = lazy(() => import("./pages/AdminDealsPage"));
 const MessagesPage = lazy(() => import("./pages/MessagesPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 
