@@ -489,6 +489,7 @@ const ListingDetailsPage = () => {
                         ) : (
                           <span className="text-sm font-medium truncate">{sellerProfile.full_name || "بائع"}</span>
                         )}
+                        <VerifiedSellerBadge userId={sellerProfile.user_id} size="md" />
                       </div>
                       <p className="text-[11px] text-muted-foreground">صاحب الفرصة</p>
                     </div>
