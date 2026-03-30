@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["placeholder.svg", "robots.txt", "pwa-icon-192.png", "pwa-icon-512.png"],
       workbox: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        navigateFallback: "/offline.html",
         navigateFallbackDenylist: [/^\/~oauth/],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
