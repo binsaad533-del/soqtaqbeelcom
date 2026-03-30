@@ -1,4 +1,5 @@
-import { Shield, Lock, CheckCircle, ArrowDown, FileText, Banknote, AlertTriangle, HelpCircle } from "lucide-react";
+import { useState } from "react";
+import { Shield, Lock, CheckCircle, ArrowDown, FileText, Banknote, AlertTriangle, HelpCircle, Clock, Truck, CircleCheckBig, PartyPopper } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
@@ -48,6 +49,75 @@ const faqs = [
   { q: "هل هناك رسوم إضافية على نظام الضمان؟", a: "لا توجد رسوم إضافية — خدمة الضمان مشمولة ضمن عمولة المنصة." },
   { q: "ماذا يحدث في حال نزاع بين الطرفين؟", a: "يتدخل فريق المنصة المتخصص لمراجعة الأدلة والوساطة للوصول لحل عادل." },
 ];
+
+const escrowStatuses = [
+  { id: "awaiting_deposit", label: "بانتظار الإيداع", icon: Clock, color: "text-amber-500", bg: "bg-amber-500", desc: "الصفقة بدأت — بانتظار إيداع المبلغ من المشتري في حساب ضمان المنصة." },
+  { id: "deposited", label: "تم الإيداع", icon: Banknote, color: "text-blue-500", bg: "bg-blue-500", desc: "تم إيداع المبلغ بنجاح — المبلغ مجمّد بأمان في حساب الضمان حتى إتمام النقل." },
+  { id: "transferring", label: "جاري النقل", icon: Truck, color: "text-orange-500", bg: "bg-orange-500", desc: "البائع يقوم حالياً بإجراءات نقل الملكية وتسليم النشاط التجاري." },
+  { id: "confirmed", label: "تم التأكيد", icon: CircleCheckBig, color: "text-emerald-500", bg: "bg-emerald-500", desc: "المشتري أكّد استلام النشاط — جاري تجهيز تحويل المبلغ للبائع." },
+  { id: "completed", label: "مكتمل", icon: PartyPopper, color: "text-primary", bg: "bg-primary", desc: "تم إتمام الصفقة بنجاح — المبلغ حُوِّل للبائع. مبروك! 🎉" },
+];
+
+function EscrowStatusTracker() {
+  const [active, setActive] = useState(2);
+
+  return (
+    <div className="space-y-6">
+      {/* Interactive status bar */}
+      <div className="relative flex items-center justify-between px-2">
+        <div className="absolute top-5 right-5 left-5 h-0.5 bg-border" />
+        <div
+          className="absolute top-5 right-5 h-0.5 bg-primary transition-all duration-500"
+          style={{ width: `${(active / (escrowStatuses.length - 1)) * 100}%`, maxWidth: "calc(100% - 2.5rem)" }}
+        />
+        {escrowStatuses.map((s, i) => {
+          const isActive = i <= active;
+          const isCurrent = i === active;
+          return (
+            <button
+              key={s.id}
+              onClick={() => setActive(i)}
+              className="relative z-10 flex flex-col items-center gap-2 group cursor-pointer"
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border-2 ${
+                  isCurrent
+                    ? `${s.bg} text-white border-transparent shadow-lg scale-110`
+                    : isActive
+                    ? `${s.bg} text-white border-transparent`
+                    : "bg-background border-border text-muted-foreground"
+                }`}
+              >
+                <s.icon className="w-4 h-4" />
+              </div>
+              <span
+                className={`text-[11px] font-medium text-center leading-tight max-w-[70px] transition-colors ${
+                  isCurrent ? "text-foreground" : isActive ? s.color : "text-muted-foreground"
+                }`}
+              >
+                {s.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <Card className="border-border/60">
+        <CardContent className="p-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            {(() => {
+              const S = escrowStatuses[active];
+              return <S.icon className={`w-4 h-4 ${S.color}`} />;
+            })()}
+            <span className="font-semibold text-foreground text-sm">{escrowStatuses[active].label}</span>
+          </div>
+          <p className="text-xs text-muted-foreground">{escrowStatuses[active].desc}</p>
+          <p className="text-[10px] text-muted-foreground/60 mt-2">اضغط على أي مرحلة لمعرفة التفاصيل</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export default function EscrowPage() {
   useSEO({
@@ -106,6 +176,13 @@ export default function EscrowPage() {
             )}
           </div>
         ))}
+      </section>
+
+      {/* Escrow Status Tracker */}
+      <section className="max-w-3xl mx-auto px-4 pb-12">
+        <h2 className="text-xl font-bold text-foreground text-center mb-2">مراحل حالة الضمان</h2>
+        <p className="text-sm text-muted-foreground text-center mb-8">تتبّع حالة ضمان صفقتك في كل مرحلة</p>
+        <EscrowStatusTracker />
       </section>
 
       {/* Guarantees */}
