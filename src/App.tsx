@@ -47,6 +47,7 @@ const AdminRevenuePage = lazy(() => import("./pages/AdminRevenuePage"));
 const AdminDealsPage = lazy(() => import("./pages/AdminDealsPage"));
 const MessagesPage = lazy(() => import("./pages/MessagesPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
+const InvoicePage = lazy(() => import("./pages/InvoicePage"));
 
 const queryClient = new QueryClient();
 
