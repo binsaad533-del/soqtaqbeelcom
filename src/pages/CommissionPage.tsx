@@ -1,8 +1,10 @@
 import { CheckCircle, Percent, Building2, FileText, ShieldCheck, HelpCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { COMMISSION_RATE, BANK_DETAILS } from "@/hooks/useCommissions";
+import { COMMISSION_TIERS, BANK_DETAILS, getCommissionRate, calculateCommission } from "@/hooks/useCommissions";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import SarSymbol from "@/components/SarSymbol";
 import { useSEO } from "@/hooks/useSEO";
+import { useState } from "react";
 
 const steps = [
   {
@@ -18,7 +20,7 @@ const steps = [
   {
     icon: Percent,
     title: "٣. احتساب العمولة",
-    desc: `تُحتسب العمولة تلقائياً بنسبة ${COMMISSION_RATE * 100}% من قيمة الصفقة المتفق عليها.`,
+    desc: "تُحتسب العمولة تلقائياً حسب شريحة قيمة الصفقة المتفق عليها (من 2.5% إلى 5%).",
   },
   {
     icon: Building2,
@@ -62,8 +64,9 @@ export default function CommissionPage() {
       "تعرّف على نموذج عمولة منصة سوق تقبيل: نسبة 1% فقط من قيمة الصفقة بعد إتمامها بنجاح. بدون رسوم مسبقة أو اشتراكات.",
   });
 
-  const exampleAmount = 500_000;
-  const exampleCommission = exampleAmount * COMMISSION_RATE;
+  const [calcAmount, setCalcAmount] = useState(500_000);
+  const calcRate = getCommissionRate(calcAmount);
+  const calcCommission = calculateCommission(calcAmount);
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -78,32 +81,74 @@ export default function CommissionPage() {
             كيف تعمل عمولة سوق تقبيل
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
-            نسبة <span className="font-bold text-primary">{COMMISSION_RATE * 100}%</span> فقط
-            من قيمة الصفقة — تُدفع بعد إتمامها بنجاح. بدون رسوم تسجيل أو اشتراكات شهرية.
+            عمولة تتناسب مع حجم صفقتك — كلما زادت القيمة، انخفضت النسبة. تُدفع بعد إتمام الصفقة فقط. بدون رسوم تسجيل أو اشتراكات.
           </p>
         </div>
       </section>
 
-      {/* Example calculator */}
+      {/* Tiers table */}
       <section className="container max-w-3xl mx-auto px-4 -mt-8 relative z-10">
         <Card className="border-primary/20 shadow-lg">
           <CardContent className="p-6 md:p-8">
-            <h2 className="text-lg font-semibold text-foreground mb-4">مثال توضيحي</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">جدول نسب العمولة</h2>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-right">قيمة الصفقة</TableHead>
+                  <TableHead className="text-center">نسبة العمولة</TableHead>
+                  <TableHead className="text-center">مثال</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {COMMISSION_TIERS.map((tier, i) => {
+                  const example = tier.max === Infinity ? 2_000_000 : Math.round((tier.min + Math.min(tier.max, tier.min + 100_000)) / 2);
+                  return (
+                    <TableRow key={i}>
+                      <TableCell className="font-medium">{tier.label}</TableCell>
+                      <TableCell className="text-center font-bold text-primary">{tier.rate * 100}%</TableCell>
+                      <TableCell className="text-center text-muted-foreground">
+                        {Math.round(example * tier.rate).toLocaleString("en-US")} <SarSymbol />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Interactive calculator */}
+      <section className="container max-w-3xl mx-auto px-4 py-10">
+        <Card>
+          <CardContent className="p-6 md:p-8">
+            <h2 className="text-lg font-semibold text-foreground mb-4">حاسبة العمولة</h2>
+            <div className="mb-4">
+              <label className="text-sm text-muted-foreground mb-1 block">أدخل قيمة الصفقة (ريال)</label>
+              <input
+                type="number"
+                min={0}
+                value={calcAmount}
+                onChange={(e) => setCalcAmount(Math.max(0, Number(e.target.value)))}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground text-lg"
+                dir="ltr"
+              />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-xs text-muted-foreground mb-1">قيمة الصفقة</p>
                 <p className="text-xl font-bold text-foreground">
-                  {exampleAmount.toLocaleString("en-US")} <SarSymbol />
+                  {calcAmount.toLocaleString("en-US")} <SarSymbol />
                 </p>
               </div>
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-xs text-muted-foreground mb-1">نسبة العمولة</p>
-                <p className="text-xl font-bold text-primary">{COMMISSION_RATE * 100}%</p>
+                <p className="text-xl font-bold text-primary">{calcRate * 100}%</p>
               </div>
               <div className="bg-primary/10 rounded-lg p-4 border border-primary/20">
                 <p className="text-xs text-muted-foreground mb-1">مبلغ العمولة</p>
                 <p className="text-xl font-bold text-primary">
-                  {exampleCommission.toLocaleString("en-US")} <SarSymbol />
+                  {calcCommission.toLocaleString("en-US")} <SarSymbol />
                 </p>
               </div>
             </div>
