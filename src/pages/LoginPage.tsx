@@ -6,7 +6,7 @@ import logoIconGold from "@/assets/logo-icon-gold.png";
 import SocialIcons from "@/components/SocialIcons";
 import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown, Sparkles, ShieldCheck, Zap, Info } from "lucide-react";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
-import { checkPasswordStrength } from "@/lib/security";
+import { checkPasswordStrength, isRateLimited } from "@/lib/security";
 import PasswordStrengthBar from "@/components/PasswordStrengthBar";
 import { useSecurityIncidents } from "@/hooks/useSecurityIncidents";
 import { useSEO } from "@/hooks/useSEO";
