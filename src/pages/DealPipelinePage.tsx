@@ -335,14 +335,17 @@ const DealPipelinePage = () => {
                   <div key={col.id} className="flex flex-col min-w-[200px] w-[200px]">
                     {/* Column header */}
                     <div
-                      className="flex items-center gap-1.5 mb-2 px-2 py-1.5 rounded-md"
+                      className="mb-2 px-2 py-2 rounded-md"
                       style={{ background: `${col.accent}15` }}
                     >
-                      <Icon className={`h-3.5 w-3.5 ${col.color}`} />
-                      <span className="font-semibold text-xs text-foreground">{col.label}</span>
-                      <Badge variant="secondary" className="mr-auto text-[10px] h-4 px-1">
-                        {colDeals.length}
-                      </Badge>
+                      <div className="flex items-center gap-1.5">
+                        <Icon className={`h-4 w-4 ${col.color}`} />
+                        <span className="font-semibold text-xs text-foreground">{col.label}</span>
+                        <Badge variant="secondary" className="mr-auto text-[10px] h-4 px-1">
+                          {colDeals.length}
+                        </Badge>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-1 leading-tight">{col.desc}</p>
                     </div>
 
                     <Droppable droppableId={col.id}>
