@@ -35,16 +35,16 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-/* ── 8 pipeline stages ── */
+/* ── 8 pipeline stages — gradient: gray → blue → green ── */
 const PIPELINE_COLUMNS = [
-  { id: "listing",       label: "الإعلان",     desc: "إعلانات جديدة بانتظار الاهتمام",        icon: Store,          color: "text-slate-500",  accent: "hsl(var(--muted-foreground))", action: "عرض الإعلان",    actionRoute: (d: PipelineDeal) => `/listing/${d.listing_id}` },
-  { id: "interest",      label: "الاهتمام",    desc: "عروض أسعار مقدّمة من المشترين",          icon: Heart,          color: "text-pink-500",   accent: "hsl(330, 70%, 55%)",          action: "مراجعة العروض",  actionRoute: (d: PipelineDeal) => `/listing/${d.listing_id}` },
-  { id: "communication", label: "التواصل",     desc: "محادثات جارية بين الأطراف",              icon: MessageSquare,  color: "text-indigo-500", accent: "hsl(240, 60%, 55%)",          action: "فتح المحادثة",   actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
-  { id: "negotiation",   label: "التفاوض",     desc: "مفاوضات نشطة على السعر والشروط",         icon: Handshake,      color: "text-blue-500",   accent: "hsl(var(--primary))",         action: "متابعة التفاوض", actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
-  { id: "agreement",     label: "الاتفاقية",   desc: "تم إعداد الاتفاقية بانتظار التوقيع",     icon: FileText,       color: "text-violet-500", accent: "hsl(270, 60%, 55%)",          action: "عرض الاتفاقية",  actionRoute: (d: PipelineDeal) => `/agreement/${d.id}` },
-  { id: "payment",       label: "الدفع",       desc: "بانتظار تأكيد الدفع والعمولة",           icon: CreditCard,     color: "text-amber-500",  accent: "hsl(40, 90%, 50%)",           action: "تفاصيل الدفع",   actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
-  { id: "transfer",      label: "النقل",       desc: "جاري نقل الملكية والأصول",               icon: ArrowRightLeft, color: "text-teal-500",   accent: "hsl(170, 60%, 45%)",          action: "متابعة النقل",   actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
-  { id: "closed",        label: "مُغلقة",      desc: "صفقات مكتملة أو ملغاة",                  icon: Lock,           color: "text-green-600",  accent: "hsl(140, 60%, 40%)",          action: "عرض الملخص",     actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
+  { id: "listing",       label: "الإعلان",     desc: "إعلانات جديدة بانتظار الاهتمام",        icon: Store,          color: "text-slate-400",    accent: "hsl(220, 10%, 65%)",  action: "عرض الإعلان",    actionRoute: (d: PipelineDeal) => `/listing/${d.listing_id}` },
+  { id: "interest",      label: "الاهتمام",    desc: "عروض أسعار مقدّمة من المشترين",          icon: Heart,          color: "text-slate-500",    accent: "hsl(220, 15%, 55%)",  action: "مراجعة العروض",  actionRoute: (d: PipelineDeal) => `/listing/${d.listing_id}` },
+  { id: "communication", label: "التواصل",     desc: "محادثات جارية بين الأطراف",              icon: MessageSquare,  color: "text-blue-400",     accent: "hsl(210, 60%, 60%)",  action: "فتح المحادثة",   actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
+  { id: "negotiation",   label: "التفاوض",     desc: "مفاوضات نشطة على السعر والشروط",         icon: Handshake,      color: "text-blue-500",     accent: "hsl(210, 70%, 50%)",  action: "متابعة التفاوض", actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
+  { id: "agreement",     label: "الاتفاقية",   desc: "تم إعداد الاتفاقية بانتظار التوقيع",     icon: FileText,       color: "text-blue-600",     accent: "hsl(200, 70%, 45%)",  action: "عرض الاتفاقية",  actionRoute: (d: PipelineDeal) => `/agreement/${d.id}` },
+  { id: "payment",       label: "الدفع",       desc: "بانتظار تأكيد الدفع والعمولة",           icon: CreditCard,     color: "text-cyan-500",     accent: "hsl(180, 60%, 42%)",  action: "تفاصيل الدفع",   actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
+  { id: "transfer",      label: "النقل",       desc: "جاري نقل الملكية والأصول",               icon: ArrowRightLeft, color: "text-emerald-500",  accent: "hsl(155, 60%, 42%)",  action: "متابعة النقل",   actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
+  { id: "closed",        label: "مُغلقة",      desc: "صفقات مكتملة أو ملغاة",                  icon: Lock,           color: "text-green-600",    accent: "hsl(140, 65%, 38%)",  action: "عرض الملخص",     actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
 ] as const;
 
 type ColumnId = (typeof PIPELINE_COLUMNS)[number]["id"];
