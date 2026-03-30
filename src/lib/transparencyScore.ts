@@ -78,17 +78,19 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
   if (includesAssets) {
     totalRequired++;
     const photoCount = listing.photos ? Object.values(listing.photos).flat().length : 0;
+    const photosFilled = photoCount >= 1;
+    checklist.push({ label: "صور الإعلان", filled: photosFilled, category: "media" });
     if (photoCount >= 6) { photosScore = 20; requiredFilled++; }
     else if (photoCount >= 3) { photosScore = 15; requiredFilled++; }
     else if (photoCount >= 1) { photosScore = 10; requiredFilled++; }
     else { missing.push("صور الإعلان"); }
   } else {
-    photosScore = 20; // not applicable, full score
+    photosScore = 20;
   }
 
   // --- Invoices / maintenance contracts as required (weight: 20 points) ---
   let docsScore = 0;
-  const hasAssetScope = rules.imageRequired; // asset-related deals
+  const hasAssetScope = rules.imageRequired;
   if (hasAssetScope) {
     totalRequired++;
     const docs = listing.documents || [];
@@ -100,19 +102,23 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
       const name = (d?.name || d?.type || "").toLowerCase();
       return name.includes("صيانة") || name.includes("maintenance") || name.includes("عقد صيانة");
     });
+    checklist.push({ label: "فواتير أو عقود صيانة", filled: hasInvoices || hasMaintenanceContracts, category: "docs" });
 
     if (hasInvoices && hasMaintenanceContracts) { docsScore = 20; requiredFilled++; }
     else if (hasInvoices || hasMaintenanceContracts) { docsScore = 10; }
     else { missing.push("فواتير الشراء أو عقود الصيانة"); }
   } else {
-    docsScore = 20; // not applicable
+    docsScore = 20;
   }
 
   // --- Optional fields (weight: 10 points) ---
   let optionalFilled = 0;
   for (const field of rules.optionalFields) {
     const value = (listing as any)[field];
-    if (value !== null && value !== undefined && String(value).trim() !== "" && value !== 0) {
+    const label = FIELD_LABELS[field] || field;
+    const isFilled = value !== null && value !== undefined && String(value).trim() !== "" && value !== 0;
+    checklist.push({ label, filled: isFilled, category: "optional" });
+    if (isFilled) {
       optionalFilled++;
     }
   }
@@ -124,6 +130,7 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
   let inventoryScore = 0;
   if (hasAssetScope) {
     const invCount = listing.inventory?.length || 0;
+    checklist.push({ label: "جرد المخزون", filled: invCount >= 1, category: "optional" });
     if (invCount >= 5) inventoryScore = 10;
     else if (invCount >= 1) inventoryScore = 5;
   } else {
@@ -153,6 +160,7 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
     missingFields: missing,
     totalRequired,
     filledRequired: requiredFilled,
+    checklist,
   };
 }
 
