@@ -1,14 +1,13 @@
 import { cn } from "@/lib/utils";
-import { FileText, MessageSquare, HandshakeIcon, Shield, ScrollText } from "lucide-react";
+import { Handshake, FileCheck, ArrowRightLeft, CheckCircle2 } from "lucide-react";
 
-type DealStage = "listing" | "offer" | "negotiation" | "confirmation" | "agreement";
+type DealStage = "negotiation" | "agreement" | "transfer" | "completed";
 
 const stages: { key: DealStage; label: string; icon: React.ElementType }[] = [
-  { key: "listing", label: "الإعلان", icon: FileText },
-  { key: "offer", label: "العرض", icon: HandshakeIcon },
-  { key: "negotiation", label: "التفاوض", icon: MessageSquare },
-  { key: "confirmation", label: "التأكيد", icon: Shield },
-  { key: "agreement", label: "الاتفاقية", icon: ScrollText },
+  { key: "negotiation", label: "التفاوض", icon: Handshake },
+  { key: "agreement", label: "اتفاق", icon: FileCheck },
+  { key: "transfer", label: "نقل الملكية", icon: ArrowRightLeft },
+  { key: "completed", label: "مكتملة", icon: CheckCircle2 },
 ];
 
 interface DealProgressBarProps {
@@ -20,14 +19,22 @@ export function getDealStage(deal: {
   status?: string;
   agreed_price?: number | null;
   locked?: boolean;
+  escrow_status?: string;
 }, hasAgreement?: boolean, bothApproved?: boolean): DealStage {
-  if (bothApproved) return "agreement";
-  if (hasAgreement) return "agreement";
-  if (deal.status === "completed" || deal.status === "finalized") return "agreement";
-  if (deal.locked) return "confirmation";
-  if (deal.status === "negotiating" && deal.agreed_price && Number(deal.agreed_price) > 0) return "confirmation";
-  if (deal.status === "negotiating") return "negotiation";
-  return "offer";
+  // Completed / finalized
+  if (deal.status === "completed" || deal.status === "finalized") return "completed";
+
+  // Transfer stage: escrow_status indicates transfer started
+  if (deal.escrow_status === "transferring" || deal.escrow_status === "confirmed") return "transfer";
+
+  // Agreement stage: confirmed status or locked with agreement
+  if (deal.status === "confirmed") return "agreement";
+  if (hasAgreement && deal.locked) return "transfer";
+  if (hasAgreement || bothApproved) return "agreement";
+  if (deal.locked) return "agreement";
+
+  // Default: negotiation
+  return "negotiation";
 }
 
 const DealProgressBar = ({ currentStage, className }: DealProgressBarProps) => {
