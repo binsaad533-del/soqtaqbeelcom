@@ -1,4 +1,4 @@
-import { Shield, ChevronDown, ChevronUp, TrendingUp, CheckCircle2, AlertCircle, Circle, CheckCircle } from "lucide-react";
+import { Shield, TrendingUp, CheckCircle2, AlertCircle, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { calculateTransparency, type ChecklistItem } from "@/lib/transparencyScore";
 import { useState } from "react";
@@ -29,7 +29,7 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
   const result = calculateTransparency(listing);
   const style = getScoreStyle(result.score);
   const tier = TIER_INFO[style.tier];
-  const [expanded, setExpanded] = useState(false);
+  const [_expanded] = useState(false);
 
   if (compact) {
     return (
@@ -90,55 +90,27 @@ const TransparencyIndicator = ({ listing, compact = false, className, onFieldCli
         </div>
       </div>
 
-      {/* Checklist */}
-      <div className="border-t border-border/15">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="w-full px-3.5 py-2.5 flex items-center justify-between hover:bg-background/20 transition-colors"
-        >
-          <span className="text-[11px] font-medium text-foreground flex items-center gap-1.5">
-            <CheckCircle size={12} className="text-primary" />
-            قائمة الاكتمال
-            <span className="text-muted-foreground font-normal">
-              ({filledItems.length}/{result.checklist.length})
-            </span>
-          </span>
-          {expanded ? <ChevronUp size={13} className="text-muted-foreground" /> : <ChevronDown size={13} className="text-muted-foreground" />}
-        </button>
-
-        {expanded && (
-          <div className="px-3.5 pb-3 space-y-1">
-            {/* Filled items */}
-            {filledItems.map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 bg-success/5"
-              >
-                <CheckCircle2 size={13} className="text-success shrink-0" />
-                <span className="text-[11px] text-muted-foreground line-through decoration-success/30">{item.label}</span>
-              </div>
-            ))}
-            {/* Missing items */}
-            {missingItems.map((item) => (
-              <div
-                key={item.label}
-                className={cn(
-                  "flex items-center justify-between rounded-lg px-2.5 py-1.5 bg-background/50 border border-border/15",
-                  onFieldClick && "cursor-pointer hover:bg-background/70 transition-colors"
-                )}
-                onClick={() => onFieldClick?.(item.label)}
-              >
-                <div className="flex items-center gap-2">
-                  <Circle size={13} className="text-muted-foreground/40 shrink-0" />
-                  <span className="text-[11px] text-foreground">{item.label}</span>
-                </div>
-                {onFieldClick && (
-                  <span className="text-[10px] text-primary font-medium">أكمل ←</span>
-                )}
-              </div>
-            ))}
+      {/* Checklist — always visible */}
+      <div className="border-t border-border/15 px-3.5 py-3 space-y-1.5">
+        {filledItems.map((item) => (
+          <div key={item.label} className="flex items-center gap-2">
+            <CheckCircle2 size={14} className="text-success shrink-0" />
+            <span className="text-[11px] text-foreground">{item.label}</span>
           </div>
-        )}
+        ))}
+        {missingItems.map((item) => (
+          <div
+            key={item.label}
+            className={cn(
+              "flex items-center gap-2",
+              onFieldClick && "cursor-pointer hover:text-primary transition-colors"
+            )}
+            onClick={() => onFieldClick?.(item.label)}
+          >
+            <Square size={14} className="text-muted-foreground/30 shrink-0" />
+            <span className="text-[11px] text-muted-foreground">{item.label}</span>
+          </div>
+        ))}
       </div>
 
       {/* Impact hint */}
