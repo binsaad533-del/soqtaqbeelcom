@@ -1,7 +1,14 @@
 import { cn } from "@/lib/utils";
 import { Handshake, FileCheck, ArrowRightLeft, CheckCircle2 } from "lucide-react";
 
-type DealStage = "negotiation" | "agreement" | "transfer" | "completed";
+export type DealStage = "negotiation" | "agreement" | "transfer" | "completed";
+
+export interface StageTimestamps {
+  negotiation?: string | null;
+  agreement?: string | null;
+  transfer?: string | null;
+  completed?: string | null;
+}
 
 const stages: { key: DealStage; label: string; icon: React.ElementType }[] = [
   { key: "negotiation", label: "التفاوض", icon: Handshake },
@@ -12,6 +19,7 @@ const stages: { key: DealStage; label: string; icon: React.ElementType }[] = [
 
 interface DealProgressBarProps {
   currentStage: DealStage;
+  timestamps?: StageTimestamps;
   className?: string;
 }
 
@@ -21,23 +29,55 @@ export function getDealStage(deal: {
   locked?: boolean;
   escrow_status?: string;
 }, hasAgreement?: boolean, bothApproved?: boolean): DealStage {
-  // Completed / finalized
   if (deal.status === "completed" || deal.status === "finalized") return "completed";
-
-  // Transfer stage: escrow_status indicates transfer started
   if (deal.escrow_status === "transferring" || deal.escrow_status === "confirmed") return "transfer";
-
-  // Agreement stage: confirmed status or locked with agreement
   if (deal.status === "confirmed") return "agreement";
   if (hasAgreement && deal.locked) return "transfer";
   if (hasAgreement || bothApproved) return "agreement";
   if (deal.locked) return "agreement";
-
-  // Default: negotiation
   return "negotiation";
 }
 
-const DealProgressBar = ({ currentStage, className }: DealProgressBarProps) => {
+/** Derive stage timestamps from deal data */
+export function getStageTimestamps(deal: {
+  created_at?: string;
+  updated_at?: string;
+  completed_at?: string | null;
+  status?: string;
+  escrow_status?: string;
+}): StageTimestamps {
+  const ts: StageTimestamps = {};
+  // Negotiation always starts at deal creation
+  ts.negotiation = deal.created_at || null;
+
+  const stage = getDealStage(deal as any);
+  const stageOrder: DealStage[] = ["negotiation", "agreement", "transfer", "completed"];
+  const currentIdx = stageOrder.indexOf(stage);
+
+  // For completed deals, use completed_at
+  if (currentIdx >= 3 && deal.completed_at) {
+    ts.completed = deal.completed_at;
+  }
+
+  // For stages between negotiation and current, we use updated_at as approximation
+  if (currentIdx >= 1) {
+    ts.agreement = deal.updated_at || null;
+  }
+  if (currentIdx >= 2) {
+    ts.transfer = deal.updated_at || null;
+  }
+
+  return ts;
+}
+
+function formatTimestamp(iso: string) {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+  const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+  return `${date} ${time}`;
+}
+
+const DealProgressBar = ({ currentStage, timestamps, className }: DealProgressBarProps) => {
   const currentIndex = stages.findIndex(s => s.key === currentStage);
 
   return (
@@ -54,6 +94,7 @@ const DealProgressBar = ({ currentStage, className }: DealProgressBarProps) => {
           const isCompleted = i < currentIndex;
           const isCurrent = i === currentIndex;
           const Icon = stage.icon;
+          const ts = timestamps?.[stage.key];
 
           return (
             <div key={stage.key} className="flex flex-col items-center gap-1.5 z-10 flex-1">
@@ -81,6 +122,11 @@ const DealProgressBar = ({ currentStage, className }: DealProgressBarProps) => {
               >
                 {stage.label}
               </span>
+              {ts && (isCompleted || isCurrent) && (
+                <span className="text-[8px] text-muted-foreground/60 leading-none">
+                  {formatTimestamp(ts)}
+                </span>
+              )}
             </div>
           );
         })}
