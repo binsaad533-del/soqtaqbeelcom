@@ -170,9 +170,9 @@ const LoginPage = () => {
             <img src={logoIconGold} alt="سوق تقبيل" className="h-16 md:h-20 w-auto" />
             <span className="text-sm md:text-base font-semibold tracking-[0.25em] text-foreground/70 mt-2 uppercase">SOQ TAQBEEL</span>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">
+          <h1 className="text-sm text-muted-foreground mt-2">
             {isLogin ? "تسجيل الدخول إلى حسابك" : "إنشاء حساب جديد"}
-          </p>
+          </h1>
         </div>
 
         {/* AI & ease-of-use highlights */}

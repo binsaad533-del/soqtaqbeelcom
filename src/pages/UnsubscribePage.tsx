@@ -59,7 +59,7 @@ const UnsubscribePage = () => {
           {status === "valid" && (
             <>
               <MailX className="w-12 h-12 mx-auto text-destructive" />
-              <h2 className="text-xl font-semibold text-foreground">إلغاء الاشتراك</h2>
+              <h1 className="text-xl font-semibold text-foreground">إلغاء الاشتراك</h1>
               <p className="text-muted-foreground">هل تريد إلغاء تلقي رسائل البريد الإلكتروني من سوق تقبيل؟</p>
               <Button onClick={handleUnsubscribe} disabled={processing} variant="destructive" className="w-full">
                 {processing ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : null}
