@@ -36,6 +36,7 @@ export const PASSWORD_STRENGTH_COLORS = [
 // ─── Input Sanitization ────────────────────────────────────
 export function sanitizeText(input: string): string {
   return input
+    .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
@@ -44,8 +45,64 @@ export function sanitizeText(input: string): string {
 }
 
 export function sanitizeForSearch(input: string): string {
-  // Remove SQL injection patterns
-  return input.replace(/[';\\\-\-]/g, "").trim();
+  // Remove SQL injection patterns and dangerous characters
+  return input
+    .replace(/['";\\%_\-\-]/g, "")
+    .replace(/\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|EXEC|EXECUTE|CREATE)\b/gi, "")
+    .trim()
+    .slice(0, 200); // Enforce max length
+}
+
+// ─── URL Validation ────────────────────────────────────────
+export function isValidUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return ["http:", "https:"].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
+// ─── Safe JSON-LD serializer (prevents XSS in script tags) ─
+export function safeJsonLd(data: Record<string, unknown>): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
+}
+
+// ─── CSRF Token ────────────────────────────────────────────
+let _csrfToken: string | null = null;
+export function getCsrfToken(): string {
+  if (!_csrfToken) {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    _csrfToken = Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  return _csrfToken;
+}
+
+// ─── Rate Limiter (client-side) ────────────────────────────
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+export function isRateLimited(key: string, maxAttempts: number, windowMs: number): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
+    return false;
+  }
+  entry.count++;
+  return entry.count > maxAttempts;
+}
+
+// ─── Data Masking ──────────────────────────────────────────
+export function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  if (!domain) return "***";
+  const visible = local.slice(0, 2);
+  return `${visible}***@${domain}`;
+}
+
+export function maskPhone(phone: string): string {
+  if (phone.length < 6) return "***";
+  return phone.slice(0, 4) + "****" + phone.slice(-2);
 }
 
 // ─── File Upload Security ──────────────────────────────────
