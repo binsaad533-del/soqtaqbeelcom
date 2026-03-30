@@ -467,6 +467,7 @@ const NegotiationPage = () => {
           </Link>
           <span className="text-border">|</span>
           <span>{listingTitle}</span>
+          <h1 className="sr-only">التفاوض — {listingTitle}</h1>
         </div>
 
         {/* Suspension Banner */}
