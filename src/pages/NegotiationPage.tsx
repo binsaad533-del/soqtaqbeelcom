@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { sanitizeInput, isRateLimited } from "@/lib/security";
 import { Send, ArrowRight, ArrowRightLeft, Zap, Loader2, Shield, Scale, Sparkles, MessageSquare, Target, RefreshCw, TrendingUp, Info, FileCheck, CheckCircle2, X, MapPin, ShieldAlert } from "lucide-react";
 import ChatAttachmentButton from "@/components/chat/ChatAttachmentButton";
 import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
@@ -372,8 +373,14 @@ const NegotiationPage = () => {
 
   const handleSend = async () => {
     if (!input.trim() || !dealId || sending) return;
+
+    // Rate limit: max 30 messages per minute
+    if (isRateLimited(`msg_${dealId}`, 30, 60 * 1000)) {
+      return;
+    }
+
     setSending(true);
-    const trimmed = input.trim();
+    const trimmed = sanitizeInput(input, 2000);
     const msg = await sendMessage(dealId, trimmed);
     if (msg) setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
     if (user) monitorChat(dealId, trimmed, user.id).catch(() => {});

@@ -2,6 +2,7 @@ import { useState, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Loader2, X, Bell, Mail, Phone } from "lucide-react";
+import { sanitizeForSearch } from "@/lib/security";
 import type { FilterState } from "./MarketplaceFilters";
 import AiStar from "@/components/AiStar";
 import { toast } from "sonner";
@@ -47,7 +48,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
   }, [aiMessage, resultCount, hasSearched, noResults]);
 
   const handleSearch = async (text?: string) => {
-    const q = text || query;
+    const q = sanitizeForSearch(text || query);
     if (!q.trim()) return;
 
     setLoading(true);

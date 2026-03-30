@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { sanitizeInput } from "@/lib/security";
 
 interface Props {
   dealId: string;
@@ -41,7 +42,7 @@ const SellerReviewForm = ({ dealId, sellerId, onSubmitted }: Props) => {
       honesty: ratings.honesty,
       responsiveness: ratings.responsiveness,
       overall_experience: ratings.overall_experience,
-      comment: comment.trim() || null,
+      comment: sanitizeInput(comment, 1000) || null,
     });
 
     if (error) {
