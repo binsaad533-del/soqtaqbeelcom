@@ -61,6 +61,11 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
 
     // Create a deal with agreed price — other offers stay pending (on hold)
     const { data: dealData } = await createDeal(listingId, listingOwnerId, offer.buyer_id, offer.offered_price);
+
+    // Auto-advance deal to "confirmed" since price is already agreed via offer
+    if (dealData) {
+      await supabase.from("deals").update({ status: "confirmed" }).eq("id", dealData.id);
+    }
     if (dealData) {
       setOffers(prev => prev.map(o =>
         o.id === offer.id ? { ...o, status: "accepted", deal_id: dealData.id } : o

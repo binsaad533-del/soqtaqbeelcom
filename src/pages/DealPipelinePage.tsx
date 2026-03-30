@@ -91,6 +91,9 @@ function mapToStage(deal: PipelineDeal): ColumnId {
   // Negotiating with agreed price → negotiation
   if (s === "negotiating" && deal.agreed_price && deal.agreed_price > 0) return "negotiation";
 
+  // Confirmed (offer accepted with agreed price) → agreement stage
+  if (s === "confirmed" && !deal.has_agreement) return "agreement";
+
   // Has messages → communication
   if (deal.has_messages) return "communication";
 
