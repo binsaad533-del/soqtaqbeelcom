@@ -1,6 +1,6 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users, CheckCircle2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
@@ -8,6 +8,7 @@ import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
+import { calculateTransparency } from "@/lib/transparencyScore";
 import QuickPriceEdit from "@/components/QuickPriceEdit";
 import ListingEditDialog from "@/components/ListingEditDialog";
 import ListingOfferForm from "@/components/ListingOfferForm";
@@ -447,6 +448,35 @@ const ListingDetailsPage = () => {
 
               {/* Deal-type-aware Transparency Indicator */}
               <TransparencyIndicator listing={listing} className="mb-4" />
+
+              {/* Listing Completion Progress Bar */}
+              {(() => {
+                const result = calculateTransparency(listing);
+                const score = result.score;
+                const barColor = score >= 80 ? "bg-emerald-500" : score >= 50 ? "bg-amber-500" : "bg-destructive";
+                return (
+                  <div className="mb-4 p-3 bg-muted/20 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1 font-medium text-foreground">
+                        <CheckCircle2 size={13} className="text-primary" />
+                        اكتمال الإعلان
+                      </span>
+                      <span className="font-semibold text-foreground">{score}%</span>
+                    </div>
+                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className={cn("h-full rounded-full transition-all duration-500", barColor)}
+                        style={{ width: `${score}%` }}
+                      />
+                    </div>
+                    {result.missingFields.length > 0 && (
+                      <p className="text-[10px] text-muted-foreground">
+                        ينقص: {result.missingFields.slice(0, 3).join("، ")}{result.missingFields.length > 3 ? ` و${result.missingFields.length - 3} أخرى` : ""}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Seller Info Card */}
               {sellerProfile && (
