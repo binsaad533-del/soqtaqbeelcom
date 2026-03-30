@@ -260,3 +260,10 @@
 .animate-step-slide-in-prev {
   animation: step-slide-in-prev 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Print styles for invoice */
+@media print {
+  body { background: white !important; }
+  header, footer, nav, .print\\:hidden { display: none !important; }
+  main { padding: 0 !important; margin: 0 !important; }
+}
