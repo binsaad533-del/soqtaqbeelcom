@@ -1,4 +1,4 @@
-import { Shield, Eye, ChevronDown, ChevronUp, TrendingUp, CheckCircle2, AlertCircle } from "lucide-react";
+import { Shield, ChevronDown, ChevronUp, TrendingUp, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { calculateTransparency } from "@/lib/transparencyScore";
 import { useState } from "react";

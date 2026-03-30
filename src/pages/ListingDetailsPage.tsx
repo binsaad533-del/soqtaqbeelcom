@@ -1,6 +1,6 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users, CheckCircle2 } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
@@ -8,7 +8,7 @@ import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
-import { calculateTransparency } from "@/lib/transparencyScore";
+
 import QuickPriceEdit from "@/components/QuickPriceEdit";
 import ListingEditDialog from "@/components/ListingEditDialog";
 import ListingOfferForm from "@/components/ListingOfferForm";
