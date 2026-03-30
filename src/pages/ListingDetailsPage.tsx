@@ -49,6 +49,10 @@ const ListingDetailsPage = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [viewCount, setViewCount] = useState(0);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showInterestForm, setShowInterestForm] = useState(false);
+  const [interestMessage, setInterestMessage] = useState("");
+  const [wantsMeeting, setWantsMeeting] = useState<boolean | null>(null);
+  const [submittingInterest, setSubmittingInterest] = useState(false);
 
   const loadListing = async () => {
     if (!id) return;
