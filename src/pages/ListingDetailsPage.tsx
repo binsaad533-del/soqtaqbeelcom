@@ -26,7 +26,7 @@ import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import PriceDisplay from "@/components/PriceDisplay";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
-import { t, DEAL_TYPE_LABELS, getArabicDealType } from "@/lib/translations";
+import { getArabicDealType } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
 import ReportListingDialog from "@/components/ReportListingDialog";
 
