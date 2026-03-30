@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import logoIconGold from "@/assets/logo-icon-gold.png";
 import SocialIcons from "@/components/SocialIcons";
@@ -37,6 +37,8 @@ const LoginPage = () => {
   const [success, setSuccess] = useState("");
   const { signIn, signUp, user } = useAuthContext();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectReason = searchParams.get("redirect");
 
   // MFA state
   const [mfaRequired, setMfaRequired] = useState(false);
@@ -418,6 +420,14 @@ const LoginPage = () => {
                   </Link>
                 </span>
               </label>
+            )}
+
+            {/* Redirect message */}
+            {redirectReason === "auth_required" && !error && !success && (
+              <div className="bg-primary/5 text-primary text-xs p-3 rounded-xl flex items-center gap-2 border border-primary/10">
+                <ShieldCheck className="h-4 w-4 shrink-0" />
+                <span>يجب تسجيل الدخول للوصول إلى هذه الصفحة</span>
+              </div>
             )}
 
             {/* Messages */}
