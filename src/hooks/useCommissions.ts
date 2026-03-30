@@ -43,14 +43,7 @@ export const COMMISSION_STATUS_COLORS: Record<CommissionStatus, string> = {
   verified: "text-emerald-600",
 };
 
-export const COMMISSION_TIERS = [
-  { min: 0, max: 100_000, rate: 0.05, label: "أقل من 100,000 ﷼" },
-  { min: 100_000, max: 500_000, rate: 0.04, label: "100,000 – 500,000 ﷼" },
-  { min: 500_000, max: 1_000_000, rate: 0.03, label: "500,000 – 1,000,000 ﷼" },
-  { min: 1_000_000, max: Infinity, rate: 0.025, label: "أكثر من 1,000,000 ﷼" },
-] as const;
-
-export const COMMISSION_RATE = 0.05; // default / max tier (kept for backward compat)
+export const COMMISSION_RATE = 0.01; // flat 1%
 
 export const BANK_DETAILS = {
   beneficiary: "شركة عين جساس",
@@ -62,14 +55,12 @@ export const BANK_DETAILS = {
 
 export const COMMISSION_ACKNOWLEDGMENT_KEY = "commission_acknowledged";
 
-export function getCommissionRate(amount: number): number {
-  const tier = COMMISSION_TIERS.find((t) => amount >= t.min && amount < t.max);
-  return tier?.rate ?? COMMISSION_TIERS[0].rate;
+export function getCommissionRate(_amount?: number): number {
+  return COMMISSION_RATE;
 }
 
 export function calculateCommission(amount: number): number {
-  const rate = getCommissionRate(amount);
-  return Math.round(amount * rate * 100) / 100;
+  return Math.round(amount * COMMISSION_RATE * 100) / 100;
 }
 
 export function useCommissions() {

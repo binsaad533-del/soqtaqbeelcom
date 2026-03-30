@@ -1,7 +1,6 @@
 import { CheckCircle, Percent, Building2, FileText, ShieldCheck, HelpCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { COMMISSION_TIERS, BANK_DETAILS, getCommissionRate, calculateCommission } from "@/hooks/useCommissions";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { BANK_DETAILS, COMMISSION_RATE, calculateCommission } from "@/hooks/useCommissions";
 import SarSymbol from "@/components/SarSymbol";
 import { useSEO } from "@/hooks/useSEO";
 import { useState } from "react";
@@ -20,7 +19,7 @@ const steps = [
   {
     icon: Percent,
     title: "٣. احتساب العمولة",
-    desc: "تُحتسب العمولة تلقائياً حسب شريحة قيمة الصفقة المتفق عليها (من 2.5% إلى 5%).",
+    desc: "تُحتسب العمولة تلقائياً بنسبة 1% ثابتة من قيمة الصفقة المتفق عليها.",
   },
   {
     icon: Building2,
@@ -65,7 +64,6 @@ export default function CommissionPage() {
   });
 
   const [calcAmount, setCalcAmount] = useState(500_000);
-  const calcRate = getCommissionRate(calcAmount);
   const calcCommission = calculateCommission(calcAmount);
 
   return (
@@ -81,43 +79,24 @@ export default function CommissionPage() {
             كيف تعمل عمولة سوق تقبيل
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
-            عمولة تتناسب مع حجم صفقتك — كلما زادت القيمة، انخفضت النسبة. تُدفع بعد إتمام الصفقة فقط. بدون رسوم تسجيل أو اشتراكات.
+            عمولة ثابتة وبسيطة — تُدفع بعد إتمام الصفقة فقط. بدون رسوم تسجيل أو اشتراكات.
           </p>
         </div>
       </section>
 
-      {/* Tiers table */}
+      {/* Flat rate card */}
       <section className="container max-w-3xl mx-auto px-4 -mt-8 relative z-10">
         <Card className="border-primary/20 shadow-lg">
-          <CardContent className="p-6 md:p-8">
-            <h2 className="text-lg font-semibold text-foreground mb-2">جدول نسب العمولة</h2>
-            <p className="text-sm text-muted-foreground mb-4 flex items-center gap-1.5">
+          <CardContent className="p-6 md:p-8 text-center">
+            <h2 className="text-lg font-semibold text-foreground mb-4">نسبة العمولة</h2>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <span className="text-5xl md:text-6xl font-bold text-primary">{COMMISSION_RATE * 100}%</span>
+              <span className="text-xl text-muted-foreground">من قيمة الصفقة</span>
+            </div>
+            <p className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
-              العمولة تُخصم فقط عند إتمام الصفقة بنجاح — لا رسوم على التصفح أو التفاوض أو الإعلان.
+              عمولة ثابتة على جميع الصفقات — تُخصم فقط عند إتمام الصفقة بنجاح. لا رسوم على التصفح أو التفاوض أو الإعلان.
             </p>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-right">قيمة الصفقة</TableHead>
-                  <TableHead className="text-center">نسبة العمولة</TableHead>
-                  <TableHead className="text-center">مثال</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {COMMISSION_TIERS.map((tier, i) => {
-                  const example = tier.max === Infinity ? 2_000_000 : Math.round((tier.min + Math.min(tier.max, tier.min + 100_000)) / 2);
-                  return (
-                    <TableRow key={i}>
-                      <TableCell className="font-medium">{tier.label}</TableCell>
-                      <TableCell className="text-center font-bold text-primary">{tier.rate * 100}%</TableCell>
-                      <TableCell className="text-center text-muted-foreground">
-                        {Math.round(example * tier.rate).toLocaleString("en-US")} <SarSymbol />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
           </CardContent>
         </Card>
       </section>
@@ -147,7 +126,7 @@ export default function CommissionPage() {
               </div>
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-xs text-muted-foreground mb-1">نسبة العمولة</p>
-                <p className="text-xl font-bold text-primary">{calcRate * 100}%</p>
+                <p className="text-xl font-bold text-primary">{COMMISSION_RATE * 100}%</p>
               </div>
               <div className="bg-primary/10 rounded-lg p-4 border border-primary/20">
                 <p className="text-xs text-muted-foreground mb-1">مبلغ العمولة</p>
