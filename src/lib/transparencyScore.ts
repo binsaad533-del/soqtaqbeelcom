@@ -52,15 +52,19 @@ export function calculateTransparency(listing: ListingData): TransparencyResult 
 
   // --- Required text fields (weight: 40 points) ---
   const missing: string[] = [];
+  const checklist: ChecklistItem[] = [];
   let requiredFilled = 0;
   let totalRequired = rules.requiredFields.length;
 
   for (const field of rules.requiredFields) {
     const value = (listing as any)[field];
-    if (value !== null && value !== undefined && String(value).trim() !== "" && value !== 0) {
+    const label = FIELD_LABELS[field] || field;
+    const isFilled = value !== null && value !== undefined && String(value).trim() !== "" && value !== 0;
+    checklist.push({ label, filled: isFilled, category: "required" });
+    if (isFilled) {
       requiredFilled++;
     } else {
-      missing.push(FIELD_LABELS[field] || field);
+      missing.push(label);
     }
   }
 
