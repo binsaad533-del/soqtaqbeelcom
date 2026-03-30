@@ -37,14 +37,14 @@ import {
 
 /* ── 8 pipeline stages ── */
 const PIPELINE_COLUMNS = [
-  { id: "listing",       label: "الإعلان",     icon: Store,          color: "text-slate-500",  accent: "hsl(var(--muted-foreground))" },
-  { id: "interest",      label: "الاهتمام",    icon: Heart,          color: "text-pink-500",   accent: "hsl(330, 70%, 55%)" },
-  { id: "communication", label: "التواصل",     icon: MessageSquare,  color: "text-indigo-500", accent: "hsl(240, 60%, 55%)" },
-  { id: "negotiation",   label: "التفاوض",     icon: Handshake,      color: "text-blue-500",   accent: "hsl(var(--primary))" },
-  { id: "agreement",     label: "الاتفاقية",   icon: FileText,       color: "text-violet-500", accent: "hsl(270, 60%, 55%)" },
-  { id: "payment",       label: "الدفع",       icon: CreditCard,     color: "text-amber-500",  accent: "hsl(40, 90%, 50%)" },
-  { id: "transfer",      label: "النقل",       icon: ArrowRightLeft, color: "text-teal-500",   accent: "hsl(170, 60%, 45%)" },
-  { id: "closed",        label: "مُغلقة",      icon: Lock,           color: "text-green-600",  accent: "hsl(140, 60%, 40%)" },
+  { id: "listing",       label: "الإعلان",     desc: "إعلانات جديدة بانتظار الاهتمام",        icon: Store,          color: "text-slate-500",  accent: "hsl(var(--muted-foreground))", action: "عرض الإعلان",    actionRoute: (d: PipelineDeal) => `/listing/${d.listing_id}` },
+  { id: "interest",      label: "الاهتمام",    desc: "عروض أسعار مقدّمة من المشترين",          icon: Heart,          color: "text-pink-500",   accent: "hsl(330, 70%, 55%)",          action: "مراجعة العروض",  actionRoute: (d: PipelineDeal) => `/listing/${d.listing_id}` },
+  { id: "communication", label: "التواصل",     desc: "محادثات جارية بين الأطراف",              icon: MessageSquare,  color: "text-indigo-500", accent: "hsl(240, 60%, 55%)",          action: "فتح المحادثة",   actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
+  { id: "negotiation",   label: "التفاوض",     desc: "مفاوضات نشطة على السعر والشروط",         icon: Handshake,      color: "text-blue-500",   accent: "hsl(var(--primary))",         action: "متابعة التفاوض", actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
+  { id: "agreement",     label: "الاتفاقية",   desc: "تم إعداد الاتفاقية بانتظار التوقيع",     icon: FileText,       color: "text-violet-500", accent: "hsl(270, 60%, 55%)",          action: "عرض الاتفاقية",  actionRoute: (d: PipelineDeal) => `/agreement/${d.id}` },
+  { id: "payment",       label: "الدفع",       desc: "بانتظار تأكيد الدفع والعمولة",           icon: CreditCard,     color: "text-amber-500",  accent: "hsl(40, 90%, 50%)",           action: "تفاصيل الدفع",   actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
+  { id: "transfer",      label: "النقل",       desc: "جاري نقل الملكية والأصول",               icon: ArrowRightLeft, color: "text-teal-500",   accent: "hsl(170, 60%, 45%)",          action: "متابعة النقل",   actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
+  { id: "closed",        label: "مُغلقة",      desc: "صفقات مكتملة أو ملغاة",                  icon: Lock,           color: "text-green-600",  accent: "hsl(140, 60%, 40%)",          action: "عرض الملخص",     actionRoute: (d: PipelineDeal) => `/negotiate/${d.id}` },
 ] as const;
 
 type ColumnId = (typeof PIPELINE_COLUMNS)[number]["id"];
@@ -335,14 +335,17 @@ const DealPipelinePage = () => {
                   <div key={col.id} className="flex flex-col min-w-[200px] w-[200px]">
                     {/* Column header */}
                     <div
-                      className="flex items-center gap-1.5 mb-2 px-2 py-1.5 rounded-md"
+                      className="mb-2 px-2 py-2 rounded-md"
                       style={{ background: `${col.accent}15` }}
                     >
-                      <Icon className={`h-3.5 w-3.5 ${col.color}`} />
-                      <span className="font-semibold text-xs text-foreground">{col.label}</span>
-                      <Badge variant="secondary" className="mr-auto text-[10px] h-4 px-1">
-                        {colDeals.length}
-                      </Badge>
+                      <div className="flex items-center gap-1.5">
+                        <Icon className={`h-4 w-4 ${col.color}`} />
+                        <span className="font-semibold text-xs text-foreground">{col.label}</span>
+                        <Badge variant="secondary" className="mr-auto text-[10px] h-4 px-1">
+                          {colDeals.length}
+                        </Badge>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-1 leading-tight">{col.desc}</p>
                     </div>
 
                     <Droppable droppableId={col.id}>
@@ -407,10 +410,10 @@ const DealPipelinePage = () => {
                                       variant="ghost"
                                       size="sm"
                                       className="w-full h-6 text-[10px]"
-                                      onClick={() => navigate(`/negotiate/${deal.id}`)}
+                                      onClick={() => navigate(col.actionRoute(deal))}
                                     >
                                       <Eye className="h-3 w-3 ml-1" />
-                                      التفاصيل
+                                      {col.action}
                                     </Button>
                                   </CardContent>
                                 </Card>
