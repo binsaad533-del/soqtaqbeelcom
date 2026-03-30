@@ -17,6 +17,7 @@ const Footer = () => {
     { label: tx("تواصل معنا", "Contact"), path: "/contact" },
     { label: tx("مركز المساعدة", "Help Center"), path: "/help" },
     { label: tx("المدونة", "Blog"), path: "/blog" },
+    { label: tx("العمولة", "Commission"), path: "/commission" },
     { label: tx("تثبيت التطبيق", "Install App"), path: "/install" },
   ];
 
