@@ -75,7 +75,7 @@ const VerifySellerPage = () => {
           <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
             <ShieldCheck className="w-6 h-6 text-primary" />
           </div>
-          <CardTitle>التحقق من هوية البائع</CardTitle>
+          <CardTitle asChild><h1>التحقق من هوية البائع</h1></CardTitle>
           <CardDescription>أكمل بياناتك للحصول على شارة "بائع موثق"</CardDescription>
         </CardHeader>
         <CardContent>

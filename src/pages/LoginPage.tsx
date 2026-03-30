@@ -171,7 +171,7 @@ const LoginPage = () => {
             <span className="text-sm md:text-base font-semibold tracking-[0.25em] text-foreground/70 mt-2 uppercase">SOQ TAQBEEL</span>
           </div>
           <p className="text-sm text-muted-foreground mt-2">
-            {isLogin ? "تسجيل الدخول إلى حسابك" : "إنشاء حساب جديد"}
+            <h1 className="text-sm text-muted-foreground">{isLogin ? "تسجيل الدخول إلى حسابك" : "إنشاء حساب جديد"}</h1>
           </p>
         </div>
 
