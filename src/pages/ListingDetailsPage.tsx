@@ -4,6 +4,7 @@ import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriang
 import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
+import VerifiedSellerBadge from "@/components/VerifiedSellerBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
@@ -424,6 +425,7 @@ const ListingDetailsPage = () => {
                     {sellerProfile.full_name?.charAt(0) || "?"}
                   </div>
                   <span className="text-xs text-muted-foreground group-hover/seller:text-primary transition-colors">{sellerProfile.full_name || "بائع"}</span>
+                  <VerifiedSellerBadge userId={sellerProfile.user_id} size="sm" />
                 </Link>
               )}
               {listing.location_lat && listing.location_lng ? (
@@ -487,6 +489,7 @@ const ListingDetailsPage = () => {
                         ) : (
                           <span className="text-sm font-medium truncate">{sellerProfile.full_name || "بائع"}</span>
                         )}
+                        <VerifiedSellerBadge userId={sellerProfile.user_id} size="md" />
                       </div>
                       <p className="text-[11px] text-muted-foreground">صاحب الفرصة</p>
                     </div>
