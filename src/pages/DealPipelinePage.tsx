@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { DEAL_TYPE_LABELS } from "@/lib/translations";
@@ -31,6 +31,7 @@ import {
   CreditCard,
   ArrowRightLeft,
   Lock,
+  Shield,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -266,6 +267,12 @@ const DealPipelinePage = () => {
           <p className="text-sm text-muted-foreground mt-1">8 مراحل: من الإعلان حتى الإغلاق</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/escrow" className="flex items-center gap-1.5">
+              <Shield className="h-4 w-4" />
+              نظام الضمان
+            </Link>
+          </Button>
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="بحث..." className="pr-9 w-48" value={search} onChange={(e) => setSearch(e.target.value)} />
