@@ -48,6 +48,7 @@ const AdminDealsPage = lazy(() => import("./pages/AdminDealsPage"));
 const MessagesPage = lazy(() => import("./pages/MessagesPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const InvoicePage = lazy(() => import("./pages/InvoicePage"));
+const VerifySellerPage = lazy(() => import("./pages/VerifySellerPage"));
 
 const queryClient = new QueryClient();
 
@@ -187,6 +188,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <InvoicePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/verify-seller"
+                  element={
+                    <ProtectedRoute>
+                      <VerifySellerPage />
                     </ProtectedRoute>
                   }
                 />
