@@ -78,6 +78,7 @@ const NegotiationPage = () => {
   const [otherProfile, setOtherProfile] = useState<any>(null);
   const [showLegalPanel, setShowLegalPanel] = useState(false);
   const [commission, setCommission] = useState<Commission | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   
   // AI Mediator state
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
@@ -453,7 +454,7 @@ const NegotiationPage = () => {
     );
   }
 
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
 
   const isPostAgreement = deal.status === "completed";
   const isConfirmedStage = deal.status === "confirmed" || deal.status === "finalized";
