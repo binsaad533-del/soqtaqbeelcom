@@ -39,6 +39,7 @@ const SellerProfilePage = lazy(() => import("./pages/SellerProfilePage"));
 const HelpCenterPage = lazy(() => import("./pages/HelpCenterPage"));
 const BlogPage = lazy(() => import("./pages/BlogPage"));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
+const CommissionPage = lazy(() => import("./pages/CommissionPage"));
 const ViewCustomerPage = lazy(() => import("./pages/ViewCustomerPage"));
 const DealPipelinePage = lazy(() => import("./pages/DealPipelinePage"));
 const MessagesPage = lazy(() => import("./pages/MessagesPage"));
@@ -86,6 +87,7 @@ const App = () => (
                 <Route path="/help" element={<HelpCenterPage />} />
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:slug" element={<BlogPostPage />} />
+                <Route path="/commission" element={<CommissionPage />} />
                 <Route path="/listing/:id" element={<ListingDetailsPage />} />
                 <Route
                   path="/create-listing"
