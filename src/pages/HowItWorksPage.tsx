@@ -151,15 +151,17 @@ const HowItWorksPage = () => {
                       stage.color
                     )}>
                       <h3 className="text-base font-semibold text-foreground mb-3">{stage.title}</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className={cn("grid gap-3", stage.buyer === "—" ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2")}>
                         <div className="rounded-xl bg-primary/[0.03] p-3">
                           <span className="text-[9px] font-bold text-primary uppercase tracking-wider">البائع</span>
                           <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">{stage.seller}</p>
                         </div>
-                        <div className="rounded-xl bg-accent/30 p-3">
-                          <span className="text-[9px] font-bold text-accent-foreground uppercase tracking-wider">المشتري</span>
-                          <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">{stage.buyer}</p>
-                        </div>
+                        {stage.buyer !== "—" && (
+                          <div className="rounded-xl bg-accent/30 p-3">
+                            <span className="text-[9px] font-bold text-accent-foreground uppercase tracking-wider">المشتري</span>
+                            <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">{stage.buyer}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
