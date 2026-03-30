@@ -4,7 +4,7 @@ import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import logoIconGold from "@/assets/logo-icon-gold.png";
 import SocialIcons from "@/components/SocialIcons";
-import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown, Sparkles, ShieldCheck, Zap } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown, Sparkles, ShieldCheck, Zap, Info } from "lucide-react";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 import { checkPasswordStrength } from "@/lib/security";
 import PasswordStrengthBar from "@/components/PasswordStrengthBar";
