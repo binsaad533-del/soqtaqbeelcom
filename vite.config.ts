@@ -26,7 +26,6 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       navigateFallback: "/index.html",
       navigateFallbackDenylist: [/^\/~oauth/],
-      offlineFallbackPage: "/offline.html",
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
           // Cache First — static assets (images, fonts)
