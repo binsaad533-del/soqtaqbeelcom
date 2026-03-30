@@ -51,6 +51,7 @@ const InvoicePage = lazy(() => import("./pages/InvoicePage"));
 const VerifySellerPage = lazy(() => import("./pages/VerifySellerPage"));
 const AdminVerificationsPage = lazy(() => import("./pages/AdminVerificationsPage"));
 const SellerDashboardPage = lazy(() => import("./pages/SellerDashboardPage"));
+const NotificationSettingsPage = lazy(() => import("./pages/NotificationSettingsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -227,6 +228,14 @@ const App = () => (
                   }
                 />
                 <Route path="/install" element={<InstallPage />} />
+                <Route
+                  path="/notification-settings"
+                  element={
+                    <ProtectedRoute>
+                      <NotificationSettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

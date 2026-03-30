@@ -8,6 +8,8 @@ import NotificationBell from "./NotificationBell";
 import ThemeToggle from "./ThemeToggle";
 import LanguageToggle from "./LanguageToggle";
 import CurrencyToggle from "./CurrencyToggle";
+import CookieConsent from "./CookieConsent";
+import SmartInstallPrompt from "./SmartInstallPrompt";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -191,6 +193,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
       <main className="flex-1">{children}</main>
       <AiAssistant />
+      <CookieConsent />
+      <SmartInstallPrompt />
       <Footer />
     </div>
   );
