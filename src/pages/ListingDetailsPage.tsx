@@ -494,9 +494,14 @@ const ListingDetailsPage = () => {
               )}
 
               {isSimulation && (
-                <div className="w-full text-center py-3 rounded-xl bg-muted/40 text-muted-foreground text-sm">
-                  عرض توضيحي — التفاوض غير متاح
-                </div>
+                <Button
+                  onClick={handleStartNegotiation}
+                  disabled={startingDeal}
+                  className="w-full rounded-xl text-base h-12 active:scale-[0.98]"
+                >
+                  {startingDeal ? <Loader2 size={18} className="animate-spin" /> : <Heart size={18} strokeWidth={1.5} />}
+                  أبدِ اهتمامك بهذه الفرصة
+                </Button>
               )}
 
               {/* Seller Reviews */}
