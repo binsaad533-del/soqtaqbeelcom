@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { playNotificationSound } from "@/lib/notificationSound";
 
 export interface Notification {
   id: string;
@@ -100,6 +101,9 @@ export function useNotifications() {
         const newNotif = payload.new as unknown as Notification;
         setNotifications(prev => [newNotif, ...prev]);
         setUnreadCount(prev => prev + 1);
+
+        // Play notification sound
+        playNotificationSound();
 
         // Show browser push notification
         showBrowserNotification(newNotif);
