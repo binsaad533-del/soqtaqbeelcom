@@ -1,23 +1,35 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+Allow: /marketplace
+Allow: /blog
+Allow: /deal-pipeline
+Allow: /how-it-works
+Allow: /commission
+Allow: /escrow
+Allow: /about
+Allow: /contact
+Allow: /help
+Allow: /login
+Allow: /install
+Allow: /terms
+Allow: /privacy
+
 Disallow: /dashboard
+Disallow: /admin-*
+Disallow: /owner-dashboard
+Disallow: /supervisor-dashboard
 Disallow: /monitoring
 Disallow: /negotiate/
 Disallow: /agreement/
 Disallow: /agreements-archive
+Disallow: /invoice/
 Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /onboarding
 Disallow: /unauthorized
+Disallow: /unsubscribe
+Disallow: /messages
+Disallow: /verify-seller
+Disallow: /view-customer/
 
 Sitemap: https://soqtaqbeel.com/sitemap.xml
