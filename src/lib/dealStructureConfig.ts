@@ -158,7 +158,12 @@ export const DEAL_TYPES: DealTypeConfig[] = [
 ];
 
 // Map of deal type IDs for quick lookup
-export const DEAL_TYPE_MAP = Object.fromEntries(DEAL_TYPES.map(dt => [dt.id, dt]));
+export const DEAL_TYPE_MAP: Record<string, DealTypeConfig> = Object.fromEntries(DEAL_TYPES.map(dt => [dt.id, dt]));
+
+// Aliases so DB values like "full_transfer" / "assets_operating" resolve too
+DEAL_TYPE_MAP["full_transfer"] ??= DEAL_TYPE_MAP["full_takeover"];
+DEAL_TYPE_MAP["assets_operating"] ??= DEAL_TYPE_MAP["assets_setup"];
+DEAL_TYPE_MAP["full"] ??= DEAL_TYPE_MAP["full_takeover"];
 
 // Conflicting combinations that must be warned about
 export interface ConflictRule {
