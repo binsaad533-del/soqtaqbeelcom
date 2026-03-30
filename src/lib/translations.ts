@@ -5,13 +5,21 @@
 /** Deal type ID → Arabic label */
 export const DEAL_TYPE_LABELS: Record<string, string> = {
   full_takeover: "تقبيل كامل",
+  full_transfer: "تقبيل كامل",
   transfer_no_liabilities: "نقل أعمال بدون التزامات",
   business_transfer: "نقل أعمال",
   assets_setup: "أصول + تجهيز تشغيلي",
-  assets_only: "أصول فقط",
+  assets_operating: "تقبيل أصول + تجهيز تشغيلي",
+  assets_only: "تقبيل أصول فقط",
   full: "تقبيل كامل",
   partial: "تقبيل جزئي",
 };
+
+/** Helper: get Arabic deal type label */
+export function getArabicDealType(type: string | null | undefined): string {
+  if (!type) return "—";
+  return DEAL_TYPE_LABELS[type] || type;
+}
 
 /** Deal/listing status → Arabic label */
 export const STATUS_LABELS: Record<string, string> = {

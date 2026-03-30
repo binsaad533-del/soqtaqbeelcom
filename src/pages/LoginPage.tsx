@@ -151,7 +151,7 @@ const LoginPage = () => {
       if (error) {
         setError(error.message);
       } else {
-        navigate("/");
+        navigate("/onboarding");
       }
     }
     setLoading(false);

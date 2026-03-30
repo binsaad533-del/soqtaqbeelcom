@@ -459,6 +459,9 @@ const ListingCard = ({ listing, isComparing, onToggleCompare, likeCount, viewCou
           <div className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">
             {listing.title || listing.business_activity || "فرصة تقبيل"}
           </div>
+          <div className="text-[10px] text-muted-foreground mb-1">
+            {getArabicDealType(listing.primary_deal_type || listing.deal_type)}
+          </div>
           {listing.location_lat && listing.location_lng ? (
             <button
               type="button"
