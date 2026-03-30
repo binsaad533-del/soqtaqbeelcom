@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp, Check, X, MessageSquare, Loader2, TrendingUp, Clock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useListingOffers, type ListingOffer } from "@/hooks/useListingOffers";
 import { useDeals } from "@/hooks/useDeals";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
-import { cn } from "@/lib/utils";
 import { useNavigate, Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
@@ -61,12 +60,8 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
     }).catch(() => {});
 
     // Create a deal with agreed price — other offers stay pending (on hold)
+    // Deal stays at "negotiating" so both parties can go through legal confirmation
     const { data: dealData } = await createDeal(listingId, listingOwnerId, offer.buyer_id, offer.offered_price);
-
-    // Auto-advance deal to "confirmed" since price is already agreed via offer
-    if (dealData) {
-      await supabase.from("deals").update({ status: "confirmed" }).eq("id", dealData.id);
-    }
     if (dealData) {
       setOffers(prev => prev.map(o =>
         o.id === offer.id ? { ...o, status: "accepted", deal_id: dealData.id } : o
