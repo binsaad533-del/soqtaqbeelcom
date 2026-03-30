@@ -191,6 +191,14 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/verify-seller"
+                  element={
+                    <ProtectedRoute>
+                      <VerifySellerPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/install" element={<InstallPage />} />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
                 <Route path="*" element={<NotFound />} />
