@@ -410,10 +410,10 @@ const DealPipelinePage = () => {
                                       variant="ghost"
                                       size="sm"
                                       className="w-full h-6 text-[10px]"
-                                      onClick={() => navigate(`/negotiate/${deal.id}`)}
+                                      onClick={() => navigate(col.actionRoute(deal))}
                                     >
                                       <Eye className="h-3 w-3 ml-1" />
-                                      التفاصيل
+                                      {col.action}
                                     </Button>
                                   </CardContent>
                                 </Card>
