@@ -39,6 +39,8 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectReason = searchParams.get("redirect");
+  const fromPage = searchParams.get("from");
+  const isFromProtectedPage = fromPage === "/create-listing" || fromPage === "/dashboard";
 
   // MFA state
   const [mfaRequired, setMfaRequired] = useState(false);
