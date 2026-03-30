@@ -453,6 +453,8 @@ const NegotiationPage = () => {
     );
   }
 
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
   const isPostAgreement = deal.status === "completed";
   const isConfirmedStage = deal.status === "confirmed" || deal.status === "finalized";
   const isTransferStage = deal.escrow_status === "transferring";

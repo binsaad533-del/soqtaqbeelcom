@@ -118,55 +118,59 @@ const ListingDetailsPage = () => {
   const handleSubmitInterest = async () => {
     if (!listing || !user) return;
     setSubmittingInterest(true);
-    const { data, error } = await createDeal(listing.id, listing.owner_id);
-    if (error) {
-      toast.error("حدث خطأ أثناء بدء التفاوض");
+    try {
+      const { data, error } = await createDeal(listing.id, listing.owner_id);
+      if (error) {
+        const msg = error?.message?.includes("Rate limit") ? "تم تجاوز الحد المسموح، حاول لاحقاً" : "حدث خطأ أثناء بدء التفاوض. يرجى إعادة المحاولة";
+        toast.error(msg);
+        setSubmittingInterest(false);
+        return;
+      }
+      if (data) {
+        const msgParts: string[] = [];
+        if (interestMessage.trim()) msgParts.push(interestMessage.trim());
+        if (wantsMeeting === true) msgParts.push("🤝 أرغب بترتيب مقابلة للاطلاع على الفرصة");
+        if (wantsMeeting === false) msgParts.push("💬 أفضل إتمام التفاوض إلكترونياً");
+        const fullMsg = msgParts.length > 0 ? msgParts.join("\n\n") : "مرحباً، أنا مهتم بهذه الفرصة وأود معرفة المزيد من التفاصيل.";
+
+        await supabase.from("negotiation_messages").insert({
+          deal_id: data.id,
+          sender_id: user.id,
+          message: fullMsg,
+          message_type: "text",
+        });
+
+        const conversationId = crypto.randomUUID();
+        const defaultFirstMsg = "مرحباً، أنا مهتم بهذه الفرصة";
+        await supabase.from("conversations").insert({
+          id: conversationId,
+          listing_id: listing.id,
+          buyer_id: user.id,
+          seller_id: listing.owner_id,
+          last_message: defaultFirstMsg,
+          last_message_at: new Date().toISOString(),
+          status: "active",
+        });
+        await supabase.from("messages").insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          receiver_id: listing.owner_id,
+          listing_id: listing.id,
+          content: defaultFirstMsg,
+        });
+
+        setShowInterestForm(false);
+        setInterestMessage("");
+        setWantsMeeting(null);
+        toast.success("تم إرسال اهتمامك بنجاح!");
+        navigate(`/negotiate/${data.id}`);
+      }
+    } catch (err: any) {
+      console.error("[ListingDetails] submitInterest failed:", err?.message);
+      toast.error("تعذر إرسال الاهتمام. تحقق من اتصالك بالإنترنت وأعد المحاولة");
+    } finally {
       setSubmittingInterest(false);
-      return;
     }
-    if (data) {
-      // Build first message
-      const msgParts: string[] = [];
-      if (interestMessage.trim()) msgParts.push(interestMessage.trim());
-      if (wantsMeeting === true) msgParts.push("🤝 أرغب بترتيب مقابلة للاطلاع على الفرصة");
-      if (wantsMeeting === false) msgParts.push("💬 أفضل إتمام التفاوض إلكترونياً");
-      const fullMsg = msgParts.length > 0 ? msgParts.join("\n\n") : "مرحباً، أنا مهتم بهذه الفرصة وأود معرفة المزيد من التفاصيل.";
-
-      // Send negotiation message (existing flow)
-      await supabase.from("negotiation_messages").insert({
-        deal_id: data.id,
-        sender_id: user.id,
-        message: fullMsg,
-        message_type: "text",
-      });
-
-      // Create conversation + first message in messages table
-      const conversationId = crypto.randomUUID();
-      const defaultFirstMsg = "مرحباً، أنا مهتم بهذه الفرصة";
-      await supabase.from("conversations").insert({
-        id: conversationId,
-        listing_id: listing.id,
-        buyer_id: user.id,
-        seller_id: listing.owner_id,
-        last_message: defaultFirstMsg,
-        last_message_at: new Date().toISOString(),
-        status: "active",
-      });
-      await supabase.from("messages").insert({
-        conversation_id: conversationId,
-        sender_id: user.id,
-        receiver_id: listing.owner_id,
-        listing_id: listing.id,
-        content: defaultFirstMsg,
-      });
-
-      setShowInterestForm(false);
-      setInterestMessage("");
-      setWantsMeeting(null);
-      toast.success("تم إرسال اهتمامك بنجاح!");
-      navigate(`/negotiate/${data.id}`);
-    }
-    setSubmittingInterest(false);
   };
 
   if (loading) {
