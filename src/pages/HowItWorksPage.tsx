@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import {
-  Store, Search, Heart, Gavel, FileText, ArrowRightLeft, Shield,
+  Store, Search, Heart, Gavel, FileText, ArrowRightLeft,
   CheckCircle, Plus, Zap, Lock, BarChart3, Award, Wallet,
   BadgeCheck, Sparkles, ShieldCheck, Eye, Landmark,
 } from "lucide-react";
