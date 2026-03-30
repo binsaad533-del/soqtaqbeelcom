@@ -422,6 +422,28 @@ const DealPipelinePage = () => {
                                       <Eye className="h-3 w-3 ml-1" />
                                       {col.action}
                                     </Button>
+
+                                    {col.id === "transfer" && user && deal.buyer_id === user.id && (
+                                      <Button
+                                        size="sm"
+                                        className="w-full h-7 text-[10px] mt-1"
+                                        onClick={async (e) => {
+                                          e.stopPropagation();
+                                          const { error } = await supabase
+                                            .from("deals")
+                                            .update({ status: "completed", completed_at: new Date().toISOString() })
+                                            .eq("id", deal.id);
+                                          if (error) {
+                                            console.error("[DealPipeline] confirm receipt error", error);
+                                          } else {
+                                            load();
+                                          }
+                                        }}
+                                      >
+                                        <CheckCircle2 className="h-3 w-3 ml-1" />
+                                        تأكيد استلام النشاط
+                                      </Button>
+                                    )}
                                   </CardContent>
                                 </Card>
                               )}
