@@ -129,7 +129,7 @@ function EscrowStatusTracker() {
 }
 
 
-  useSEO({
+  export default function EscrowPage() {
     title: "نظام ضمان الصفقات | سوق تقبيل",
     description: "تعرّف على نظام ضمان الصفقات في سوق تقبيل — حماية كاملة للبائع والمشتري حتى إتمام الصفقة بنجاح.",
     canonical: "/escrow",
