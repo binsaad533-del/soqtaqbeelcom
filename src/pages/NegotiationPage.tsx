@@ -701,6 +701,80 @@ const NegotiationPage = () => {
                 </div>
               )}
 
+              {/* Seller: Start Transfer button at agreement stage */}
+              {!isBuyer && isConfirmedStage && !isTransferStage && (
+                <div className="bg-gradient-to-b from-accent/10 to-card rounded-2xl p-4 shadow-soft border border-accent/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ArrowRightLeft size={13} strokeWidth={1.5} className="text-primary" />
+                    <h3 className="font-medium text-xs">بدء نقل الملكية</h3>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+                    تم الاتفاق على الشروط. ابدأ إجراءات نقل ملكية النشاط التجاري للمشتري.
+                  </p>
+                  <Button
+                    onClick={async () => {
+                      await supabase.from("deals").update({ escrow_status: "transferring", updated_at: new Date().toISOString() }).eq("id", deal.id);
+                      // Notify buyer
+                      await supabase.from("notifications").insert({
+                        user_id: deal.buyer_id,
+                        title: "🔄 بدأ البائع نقل الملكية",
+                        body: `بدأ البائع إجراءات نقل ملكية "${listingTitle}". يرجى المتابعة وتأكيد الاستلام بعد اكتمال النقل.`,
+                        type: "deal",
+                        reference_type: "deal",
+                        reference_id: deal.id,
+                      } as any);
+                      toast.success("تم بدء إجراءات نقل الملكية ✅");
+                      loadData();
+                    }}
+                    className="w-full rounded-xl text-xs"
+                  >
+                    <ArrowRightLeft size={14} className="ml-1.5" />
+                    بدء نقل الملكية
+                  </Button>
+                </div>
+              )}
+
+              {/* Transfer in progress — show for both parties */}
+              {isTransferStage && (
+                <div className="bg-gradient-to-b from-emerald-500/5 to-card rounded-2xl p-4 shadow-soft border border-emerald-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ArrowRightLeft size={13} strokeWidth={1.5} className="text-emerald-500" />
+                    <h3 className="font-medium text-xs text-emerald-600">جاري نقل الملكية</h3>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+                    {isBuyer
+                      ? "البائع بدأ إجراءات النقل. بعد استلام النشاط، اضغط تأكيد الاستلام لإتمام الصفقة."
+                      : "تم بدء إجراءات النقل. انتظر تأكيد المشتري لاستلام النشاط."}
+                  </p>
+                  {isBuyer && (
+                    <Button
+                      onClick={async () => {
+                        if (!confirm("هل تأكد من استلام النشاط التجاري؟ سيتم إتمام الصفقة نهائياً.")) return;
+                        await supabase.from("deals").update({
+                          status: "completed",
+                          escrow_status: "completed",
+                          completed_at: new Date().toISOString(),
+                          updated_at: new Date().toISOString(),
+                        }).eq("id", deal.id);
+                        await supabase.from("listings").update({ status: "sold" }).eq("id", deal.listing_id);
+                        // Notify both parties
+                        const notifications = [
+                          { user_id: deal.seller_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `أكد المشتري استلام "${listingTitle}". تمت الصفقة بنجاح!`, type: "deal", reference_type: "deal", reference_id: deal.id },
+                          { user_id: deal.buyer_id, title: "🎉 تم إتمام الصفقة بنجاح", body: `تم تأكيد استلامك لـ "${listingTitle}". مبارك!`, type: "deal", reference_type: "deal", reference_id: deal.id },
+                        ];
+                        await supabase.from("notifications").insert(notifications as any);
+                        toast.success("🎉 تم إتمام الصفقة بنجاح!");
+                        loadData();
+                      }}
+                      className="w-full rounded-xl text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                    >
+                      <CheckCircle2 size={14} className="ml-1.5" />
+                      تأكيد استلام النشاط
+                    </Button>
+                  )}
+                </div>
+              )}
+
 
               {commission && isPostAgreement && (
                 <CommissionPaymentPanel commission={commission} isSeller={user?.id === deal.seller_id} onUpdate={loadData} />
