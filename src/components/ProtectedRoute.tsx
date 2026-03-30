@@ -25,7 +25,7 @@ const ProtectedRoute = ({ children, allowedRoles, requireAuth = true }: Props) =
   }
 
   if (requireAuth && !user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login?redirect=auth_required" replace />;
   }
 
   if (allowedRoles && role && !allowedRoles.includes(role)) {
