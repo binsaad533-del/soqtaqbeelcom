@@ -1,6 +1,7 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
@@ -15,6 +16,7 @@ import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useListingSocial } from "@/hooks/useListingSocial";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import { useDeals } from "@/hooks/useDeals";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
@@ -49,6 +51,10 @@ const ListingDetailsPage = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [viewCount, setViewCount] = useState(0);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showInterestForm, setShowInterestForm] = useState(false);
+  const [interestMessage, setInterestMessage] = useState("");
+  const [wantsMeeting, setWantsMeeting] = useState<boolean | null>(null);
+  const [submittingInterest, setSubmittingInterest] = useState(false);
 
   const loadListing = async () => {
     if (!id) return;
@@ -97,11 +103,41 @@ const ListingDetailsPage = () => {
     const myDeals = await getMyDeals();
     const existing = myDeals.find(d => d.listing_id === listing.id);
     if (existing) { navigate(`/negotiate/${existing.id}`); return; }
-    setStartingDeal(true);
+    // Show interest form instead of creating deal directly
+    setShowInterestForm(true);
+  };
+
+  const handleSubmitInterest = async () => {
+    if (!listing || !user) return;
+    setSubmittingInterest(true);
     const { data, error } = await createDeal(listing.id, listing.owner_id);
-    if (error) { toast.error("حدث خطأ أثناء بدء التفاوض"); }
-    else if (data) { navigate(`/negotiate/${data.id}`); }
-    setStartingDeal(false);
+    if (error) {
+      toast.error("حدث خطأ أثناء بدء التفاوض");
+      setSubmittingInterest(false);
+      return;
+    }
+    if (data) {
+      // Send first message + meeting preference
+      const msgParts: string[] = [];
+      if (interestMessage.trim()) msgParts.push(interestMessage.trim());
+      if (wantsMeeting === true) msgParts.push("🤝 أرغب بترتيب مقابلة للاطلاع على الفرصة");
+      if (wantsMeeting === false) msgParts.push("💬 أفضل إتمام التفاوض إلكترونياً");
+      const fullMsg = msgParts.length > 0 ? msgParts.join("\n\n") : "مرحباً، أنا مهتم بهذه الفرصة وأود معرفة المزيد من التفاصيل.";
+
+      await supabase.from("negotiation_messages").insert({
+        deal_id: data.id,
+        sender_id: user.id,
+        message: fullMsg,
+        message_type: "text",
+      });
+
+      setShowInterestForm(false);
+      setInterestMessage("");
+      setWantsMeeting(null);
+      toast.success("تم إرسال اهتمامك بنجاح!");
+      navigate(`/negotiate/${data.id}`);
+    }
+    setSubmittingInterest(false);
   };
 
   if (loading) {
@@ -552,6 +588,82 @@ const ListingDetailsPage = () => {
             </Button>
             <Button variant="outline" className="w-full rounded-xl h-11" onClick={() => navigate("/login?tab=register")}>
               إنشاء حساب جديد
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Interest form dialog (logged-in users) */}
+      <Dialog open={showInterestForm} onOpenChange={setShowInterestForm}>
+        <DialogContent className="max-w-md" dir="rtl">
+          <DialogHeader>
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+              <Heart className="h-6 w-6 text-primary" />
+            </div>
+            <DialogTitle className="text-lg">أبدِ اهتمامك</DialogTitle>
+            <DialogDescription className="text-sm">
+              أرسل رسالتك الأولى للبائع وابدأ التفاوض
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-2">
+            {/* First message */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                رسالتك الأولى
+              </label>
+              <Textarea
+                placeholder="مرحباً، أنا مهتم بهذه الفرصة وأود معرفة المزيد..."
+                value={interestMessage}
+                onChange={(e) => setInterestMessage(e.target.value)}
+                className="min-h-[80px] resize-none rounded-xl"
+              />
+            </div>
+
+            {/* Meeting preference */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+                هل ترغب بترتيب مقابلة؟
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setWantsMeeting(true)}
+                  className={cn(
+                    "flex-1 py-2.5 rounded-xl border text-sm font-medium transition-all",
+                    wantsMeeting === true
+                      ? "bg-primary/10 border-primary text-primary"
+                      : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50"
+                  )}
+                >
+                  ✅ نعم، أرغب بمقابلة
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWantsMeeting(false)}
+                  className={cn(
+                    "flex-1 py-2.5 rounded-xl border text-sm font-medium transition-all",
+                    wantsMeeting === false
+                      ? "bg-primary/10 border-primary text-primary"
+                      : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50"
+                  )}
+                >
+                  💬 لا، إلكترونياً
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button
+              className="w-full rounded-xl h-11"
+              onClick={handleSubmitInterest}
+              disabled={submittingInterest}
+            >
+              {submittingInterest ? <Loader2 size={16} className="animate-spin" /> : <Heart size={16} />}
+              إرسال اهتمامي
             </Button>
           </DialogFooter>
         </DialogContent>
