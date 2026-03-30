@@ -50,7 +50,85 @@ const faqs = [
   { q: "ماذا يحدث في حال نزاع بين الطرفين؟", a: "يتدخل فريق المنصة المتخصص لمراجعة الأدلة والوساطة للوصول لحل عادل." },
 ];
 
-export default function EscrowPage() {
+const escrowStatuses = [
+  { id: "awaiting_deposit", label: "بانتظار الإيداع", icon: Clock, color: "text-amber-500", bg: "bg-amber-500" },
+  { id: "deposited", label: "تم الإيداع", icon: Banknote, color: "text-blue-500", bg: "bg-blue-500" },
+  { id: "transferring", label: "جاري النقل", icon: Truck, color: "text-orange-500", bg: "bg-orange-500" },
+  { id: "confirmed", label: "تم التأكيد", icon: CircleCheckBig, color: "text-emerald-500", bg: "bg-emerald-500" },
+  { id: "completed", label: "مكتمل", icon: PartyPopper, color: "text-primary", bg: "bg-primary" },
+];
+
+function EscrowStatusTracker() {
+  const [active, setActive] = useState(2); // demo default at "جاري النقل"
+
+  return (
+    <div className="space-y-6">
+      {/* Interactive status bar */}
+      <div className="relative flex items-center justify-between px-2">
+        {/* Background line */}
+        <div className="absolute top-5 right-5 left-5 h-0.5 bg-border" />
+        {/* Active line */}
+        <div
+          className="absolute top-5 right-5 h-0.5 bg-primary transition-all duration-500"
+          style={{ width: `${(active / (escrowStatuses.length - 1)) * 100}%`, maxWidth: "calc(100% - 2.5rem)" }}
+        />
+        {escrowStatuses.map((s, i) => {
+          const isActive = i <= active;
+          const isCurrent = i === active;
+          return (
+            <button
+              key={s.id}
+              onClick={() => setActive(i)}
+              className="relative z-10 flex flex-col items-center gap-2 group cursor-pointer"
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border-2 ${
+                  isCurrent
+                    ? `${s.bg} text-white border-transparent shadow-lg scale-110`
+                    : isActive
+                    ? `${s.bg} text-white border-transparent`
+                    : "bg-background border-border text-muted-foreground"
+                }`}
+              >
+                <s.icon className="w-4 h-4" />
+              </div>
+              <span
+                className={`text-[11px] font-medium text-center leading-tight max-w-[70px] transition-colors ${
+                  isCurrent ? "text-foreground" : isActive ? s.color : "text-muted-foreground"
+                }`}
+              >
+                {s.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Status description card */}
+      <Card className="border-border/60">
+        <CardContent className="p-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            {(() => {
+              const S = escrowStatuses[active];
+              return <S.icon className={`w-4 h-4 ${S.color}`} />;
+            })()}
+            <span className="font-semibold text-foreground text-sm">{escrowStatuses[active].label}</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {active === 0 && "الصفقة بدأت — بانتظار إيداع المبلغ من المشتري في حساب ضمان المنصة."}
+            {active === 1 && "تم إيداع المبلغ بنجاح — المبلغ مجمّد بأمان في حساب الضمان حتى إتمام النقل."}
+            {active === 2 && "البائع يقوم حالياً بإجراءات نقل الملكية وتسليم النشاط التجاري."}
+            {active === 3 && "المشتري أكّد استلام النشاط — جاري تجهيز تحويل المبلغ للبائع."}
+            {active === 4 && "تم إتمام الصفقة بنجاح — المبلغ حُوِّل للبائع. مبروك! 🎉"}
+          </p>
+          <p className="text-[10px] text-muted-foreground/60 mt-2">اضغط على أي مرحلة لمعرفة التفاصيل</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+
   useSEO({
     title: "نظام ضمان الصفقات | سوق تقبيل",
     description: "تعرّف على نظام ضمان الصفقات في سوق تقبيل — حماية كاملة للبائع والمشتري حتى إتمام الصفقة بنجاح.",
