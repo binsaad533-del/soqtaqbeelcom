@@ -425,6 +425,7 @@ const ListingDetailsPage = () => {
                     {sellerProfile.full_name?.charAt(0) || "?"}
                   </div>
                   <span className="text-xs text-muted-foreground group-hover/seller:text-primary transition-colors">{sellerProfile.full_name || "بائع"}</span>
+                  <VerifiedSellerBadge userId={sellerProfile.user_id} size="sm" />
                 </Link>
               )}
               {listing.location_lat && listing.location_lng ? (
