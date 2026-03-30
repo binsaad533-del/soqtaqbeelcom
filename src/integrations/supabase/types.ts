@@ -1481,6 +1481,48 @@ export type Database = {
           },
         ]
       }
+      seller_verifications: {
+        Row: {
+          business_name: string | null
+          commercial_register_number: string | null
+          id: string
+          id_number: string
+          id_type: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          submitted_at: string
+          user_id: string
+          verification_status: string
+        }
+        Insert: {
+          business_name?: string | null
+          commercial_register_number?: string | null
+          id?: string
+          id_number: string
+          id_type?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string
+          user_id: string
+          verification_status?: string
+        }
+        Update: {
+          business_name?: string | null
+          commercial_register_number?: string | null
+          id?: string
+          id_number?: string
+          id_type?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string
+          user_id?: string
+          verification_status?: string
+        }
+        Relationships: []
+      }
       session_logs: {
         Row: {
           created_at: string
