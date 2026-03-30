@@ -233,10 +233,10 @@ const HowItWorksPage = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/create-listing" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl gradient-primary text-primary-foreground text-sm font-medium hover:shadow-soft-lg transition-all active:scale-[0.98]">
-              <Plus size={16} /> أضف مشروعك
+              <Plus size={16} /> ابدأ البيع
             </Link>
             <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-card border border-border/50 text-foreground text-sm font-medium hover:shadow-soft transition-all active:scale-[0.98]">
-              <Search size={16} /> تصفح المشاريع
+              <Search size={16} /> تصفح الفرص
             </Link>
           </div>
         </div>
