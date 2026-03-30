@@ -531,6 +531,7 @@ export type Database = {
           created_at: string
           deal_details: Json | null
           deal_type: string | null
+          escrow_status: string
           fraud_flags: Json | null
           id: string
           listing_id: string
@@ -548,6 +549,7 @@ export type Database = {
           created_at?: string
           deal_details?: Json | null
           deal_type?: string | null
+          escrow_status?: string
           fraud_flags?: Json | null
           id?: string
           listing_id: string
@@ -565,6 +567,7 @@ export type Database = {
           created_at?: string
           deal_details?: Json | null
           deal_type?: string | null
+          escrow_status?: string
           fraud_flags?: Json | null
           id?: string
           listing_id?: string
