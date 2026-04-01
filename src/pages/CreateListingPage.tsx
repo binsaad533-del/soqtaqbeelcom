@@ -1614,32 +1614,8 @@ const CreateListingPage = () => {
                 )}
 
                 <div className="space-y-3">
-                  {/* Pre-filled fields summary */}
-                  {(() => {
-                    const preFilledFields: { label: string; value: string; key: string }[] = [];
-                    if (disclosure.business_activity && isFieldVisible(dealTypeForTransparency, "business_activity")) preFilledFields.push({ label: "النشاط", value: disclosure.business_activity, key: "business_activity" });
-                    if (disclosure.city && isFieldVisible(dealTypeForTransparency, "city")) preFilledFields.push({ label: "المدينة", value: disclosure.city, key: "city" });
-                    if (disclosure.district) preFilledFields.push({ label: "الحي", value: disclosure.district, key: "district" });
-                    if (disclosure.price) preFilledFields.push({ label: "السعر", value: `${Number(disclosure.price).toLocaleString("en-US")} ﷼`, key: "price" });
-                    
-                    return preFilledFields.length > 0 ? (
-                      <div className="bg-primary/5 border border-primary/15 rounded-xl p-3">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                          {preFilledFields.map((f) => (
-                            <div key={f.key} className="flex items-center justify-between gap-1.5 bg-background/60 rounded-lg px-2.5 py-2 border border-border/30">
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">{f.label}:</span>
-                                <span className="text-xs font-medium truncate">{f.value}</span>
-                              </div>
-                              <button onClick={() => setDisclosure((prev) => ({ ...prev, [f.key]: "" }))} className="text-muted-foreground/50 hover:text-destructive transition-colors shrink-0"><X size={10} /></button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null;
-                  })()}
-                  {/* Only show empty fields as editable */}
-                  {isFieldVisible(dealTypeForTransparency, "business_activity") && !disclosure.business_activity && (
+                  {/* Editable fields — always visible */}
+                  {isFieldVisible(dealTypeForTransparency, "business_activity") && (
                     <FormField
                       label={`نوع النشاط${activeRules.requiredFields.includes("business_activity") ? " *" : ""}`}
                       placeholder="مثال: مطعم وجبات سريعة"
@@ -1648,7 +1624,7 @@ const CreateListingPage = () => {
                       error={publishAttempted && disclosureErrors["business_activity"]}
                     />
                   )}
-                  {isFieldVisible(dealTypeForTransparency, "city") && !disclosure.city && (
+                  {isFieldVisible(dealTypeForTransparency, "city") && (
                     <FormField
                       label={`المدينة${activeRules.requiredFields.includes("city") ? " *" : ""}`}
                       placeholder="الرياض"
@@ -1657,16 +1633,14 @@ const CreateListingPage = () => {
                       error={publishAttempted && disclosureErrors["city"]}
                     />
                   )}
-                  {!disclosure.price && (
-                    <FormField
-                      label="السعر المطلوب *"
-                      placeholder="180000"
-                      suffix={<SarSymbol size={11} />}
-                      value={disclosure.price}
-                      onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))}
-                      error={publishAttempted && disclosureErrors["price"]}
-                    />
-                  )}
+                  <FormField
+                    label="السعر المطلوب *"
+                    placeholder="180000"
+                    suffix={<SarSymbol size={11} />}
+                    value={disclosure.price}
+                    onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))}
+                    error={publishAttempted && disclosureErrors["price"]}
+                  />
                   {isFieldVisible(dealTypeForTransparency, "annual_rent") && (
                     <div className="grid grid-cols-2 gap-3">
                       <FormField label="الإيجار السنوي" placeholder="45000" suffix={<SarSymbol size={11} />} value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} />
