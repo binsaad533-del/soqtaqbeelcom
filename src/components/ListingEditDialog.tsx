@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Check, Edit3, Camera, MapPin, Package, FileText, Plus, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -59,6 +59,31 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
 
   // ── Inventory ──
   const [inventory, setInventory] = useState<any[]>(listing.inventory || []);
+
+  // Reset state when listing changes or dialog reopens
+  useEffect(() => {
+    if (open) {
+      setFields({
+        business_activity: listing.business_activity || "",
+        city: listing.city || "",
+        district: listing.district || "",
+        price: listing.price != null ? String(listing.price) : "",
+        annual_rent: listing.annual_rent != null ? String(listing.annual_rent) : "",
+        lease_duration: listing.lease_duration || "",
+        lease_remaining: listing.lease_remaining || "",
+        liabilities: listing.liabilities || "",
+        overdue_salaries: listing.overdue_salaries || "",
+        overdue_rent: listing.overdue_rent || "",
+        municipality_license: listing.municipality_license || "",
+        civil_defense_license: listing.civil_defense_license || "",
+        surveillance_cameras: listing.surveillance_cameras || "",
+      });
+      setPhotos(listing.photos || {});
+      setLocationLat(listing.location_lat ?? null);
+      setLocationLng(listing.location_lng ?? null);
+      setInventory(listing.inventory || []);
+    }
+  }, [open, listing]);
 
   const set = (field: keyof typeof fields, value: string) =>
     setFields((prev) => ({ ...prev, [field]: value }));
