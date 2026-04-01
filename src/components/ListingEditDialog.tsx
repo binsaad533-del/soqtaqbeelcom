@@ -152,6 +152,9 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
     if (error) {
       toast.error("فشل حفظ التعديلات");
     } else {
+      // Invalidate all listing-related caches to ensure consistency
+      await queryClient.invalidateQueries({ queryKey: ["listing", listing.id] });
+      await queryClient.invalidateQueries({ queryKey: ["listings"] });
       toast.success("تم حفظ التعديلات بنجاح");
       onUpdated?.(updateData);
       onOpenChange(false);
