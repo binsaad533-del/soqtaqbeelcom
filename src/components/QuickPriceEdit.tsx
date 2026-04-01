@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Check, X, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useListings } from "@/hooks/useListings";
@@ -18,6 +19,7 @@ const QuickPriceEdit = ({ listingId, currentPrice, onUpdated, className }: Quick
   const [price, setPrice] = useState(currentPrice ? String(currentPrice) : "");
   const [saving, setSaving] = useState(false);
   const { updateListing } = useListings();
+  const queryClient = useQueryClient();
 
   const handleSave = async () => {
     const numPrice = Number(price);
@@ -33,6 +35,8 @@ const QuickPriceEdit = ({ listingId, currentPrice, onUpdated, className }: Quick
     } else {
       toast.success("تم تحديث السعر بنجاح");
       setEditing(false);
+      queryClient.invalidateQueries({ queryKey: ["listing", listingId] });
+      queryClient.invalidateQueries({ queryKey: ["listings"] });
       onUpdated?.(numPrice);
     }
   };

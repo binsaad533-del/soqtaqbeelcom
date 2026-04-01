@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Check, Edit3, Camera, MapPin, Package, FileText, Plus, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -25,6 +26,7 @@ const shouldShow = (dealType: string, field: string) =>
 const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }: ListingEditDialogProps) => {
   const dealType = listing.primary_deal_type || listing.deal_type || "full_takeover";
   const { updateListing, uploadFile, softDeleteListing } = useListings();
+  const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -150,6 +152,9 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
     if (error) {
       toast.error("فشل حفظ التعديلات");
     } else {
+      // Invalidate all listing-related caches to ensure consistency
+      await queryClient.invalidateQueries({ queryKey: ["listing", listing.id] });
+      await queryClient.invalidateQueries({ queryKey: ["listings"] });
       toast.success("تم حفظ التعديلات بنجاح");
       onUpdated?.(updateData);
       onOpenChange(false);
@@ -418,6 +423,7 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
               const { error } = await softDeleteListing(listing.id);
               setDeleting(false);
               if (error) { toast.error("فشل حذف الإعلان"); return; }
+              await queryClient.invalidateQueries({ queryKey: ["listings"] });
               toast.success("تم حذف الإعلان بنجاح");
               onOpenChange(false);
               onDeleted?.();
