@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Check, Edit3, Camera, MapPin, Package, FileText, Plus, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
