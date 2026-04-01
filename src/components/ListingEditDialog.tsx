@@ -26,6 +26,7 @@ const shouldShow = (dealType: string, field: string) =>
 const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }: ListingEditDialogProps) => {
   const dealType = listing.primary_deal_type || listing.deal_type || "full_takeover";
   const { updateListing, uploadFile, softDeleteListing } = useListings();
+  const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
