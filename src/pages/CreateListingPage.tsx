@@ -1633,6 +1633,12 @@ const CreateListingPage = () => {
                     />
                   )}
                   <FormField
+                    label="الحي"
+                    placeholder="حي النسيم"
+                    value={disclosure.district}
+                    onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))}
+                  />
+                  <FormField
                     label="السعر المطلوب *"
                     placeholder="180000"
                     suffix={<SarSymbol size={11} />}
