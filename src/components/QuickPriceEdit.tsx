@@ -35,6 +35,8 @@ const QuickPriceEdit = ({ listingId, currentPrice, onUpdated, className }: Quick
     } else {
       toast.success("تم تحديث السعر بنجاح");
       setEditing(false);
+      queryClient.invalidateQueries({ queryKey: ["listing", listingId] });
+      queryClient.invalidateQueries({ queryKey: ["listings"] });
       onUpdated?.(numPrice);
     }
   };
