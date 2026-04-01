@@ -423,6 +423,7 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
               const { error } = await softDeleteListing(listing.id);
               setDeleting(false);
               if (error) { toast.error("فشل حذف الإعلان"); return; }
+              await queryClient.invalidateQueries({ queryKey: ["listings"] });
               toast.success("تم حذف الإعلان بنجاح");
               onOpenChange(false);
               onDeleted?.();
