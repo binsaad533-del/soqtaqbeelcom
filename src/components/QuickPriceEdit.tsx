@@ -19,6 +19,7 @@ const QuickPriceEdit = ({ listingId, currentPrice, onUpdated, className }: Quick
   const [price, setPrice] = useState(currentPrice ? String(currentPrice) : "");
   const [saving, setSaving] = useState(false);
   const { updateListing } = useListings();
+  const queryClient = useQueryClient();
 
   const handleSave = async () => {
     const numPrice = Number(price);
