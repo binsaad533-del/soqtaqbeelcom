@@ -61,6 +61,7 @@ const ListingDetailsPage = () => {
   const [wantsMeeting, setWantsMeeting] = useState<boolean | null>(null);
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [interestCount, setInterestCount] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const loadListing = async () => {
     if (!id) return;
@@ -315,16 +316,56 @@ const ListingDetailsPage = () => {
             {/* Images */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {photos.length > 0 ? photos.slice(0, 6).map((url, i) => (
-                <div key={i} className="aspect-[4/3] bg-card rounded-xl shadow-soft overflow-hidden relative">
+                <button
+                  key={i}
+                  onClick={() => setLightboxIndex(i)}
+                  className="aspect-[4/3] bg-card rounded-xl shadow-soft overflow-hidden relative cursor-pointer hover:ring-2 hover:ring-primary/40 transition-all"
+                >
                   <img src={url} alt="" loading="lazy" className="w-full h-full object-cover" />
                   {isSimulationImage(url) && <SimulationOverlay size="sm" />}
-                </div>
+                  {i === 5 && photos.length > 6 && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <span className="text-white text-lg font-bold">+{photos.length - 6}</span>
+                    </div>
+                  )}
+                </button>
               )) : [1, 2, 3].map(i => (
                 <div key={i} className="aspect-[4/3] bg-card rounded-xl gradient-hero flex items-center justify-center shadow-soft">
                   <Building2 size={24} strokeWidth={1} className="text-muted-foreground/20" />
                 </div>
               ))}
             </div>
+
+            {/* Photo Lightbox */}
+            {lightboxIndex !== null && photos.length > 0 && (
+              <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setLightboxIndex(null)}>
+                <button
+                  className="absolute top-4 right-4 text-white/80 hover:text-white z-10 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
+                  onClick={() => setLightboxIndex(null)}
+                >✕</button>
+                {photos.length > 1 && (
+                  <>
+                    <button
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white z-10 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
+                      onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex - 1 + photos.length) % photos.length); }}
+                    >‹</button>
+                    <button
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white z-10 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
+                      onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex + 1) % photos.length); }}
+                    >›</button>
+                  </>
+                )}
+                <img
+                  src={photos[lightboxIndex]}
+                  alt=""
+                  className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm">
+                  {lightboxIndex + 1} / {photos.length}
+                </div>
+              </div>
+            )}
 
             {/* Social actions bar */}
             <div className="flex items-center justify-between bg-card rounded-xl px-4 py-2.5 shadow-soft">
