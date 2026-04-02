@@ -1157,11 +1157,89 @@ const CreateListingPage = () => {
                 </div>
               )}
 
-              {/* Photos */}
-              <div className="space-y-4">
+              {/* ── Bulk Upload Zone ── */}
+              <div
+                className={cn(
+                  "relative rounded-2xl border-2 border-dashed transition-all cursor-pointer p-8 text-center",
+                  draggingGroup === "bulk" ? "border-primary bg-primary/5 scale-[1.01]" : "border-border/50 bg-muted/20 hover:border-primary/40 hover:bg-primary/5"
+                )}
+                onClick={() => bulkInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDraggingGroup("bulk"); }}
+                onDragLeave={() => setDraggingGroup(null)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDraggingGroup(null);
+                  const dt = new DataTransfer();
+                  Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
+                  if (bulkInputRef.current) {
+                    bulkInputRef.current.files = dt.files;
+                    bulkInputRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+                  }
+                }}
+              >
+                {uploadingGroup === "bulk" ? (
+                  <div className="space-y-3 animate-fade-in">
+                    <Loader2 size={32} className="animate-spin text-primary mx-auto" />
+                    <p className="text-sm font-medium text-primary">جاري رفع الملفات... {uploadProgress.current}/{uploadProgress.total}</p>
+                    <div className="h-2 rounded-full bg-muted overflow-hidden max-w-xs mx-auto">
+                      <div className="h-full rounded-full gradient-primary transition-all duration-500" style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }} />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <Upload size={24} strokeWidth={1.5} className="text-primary" />
+                      </div>
+                    </div>
+                    <h3 className="text-sm font-semibold mb-1">ارفع كل الصور والمستندات دفعة واحدة</h3>
+                    <p className="text-xs text-muted-foreground mb-2">حتى 50 صورة و 50 مستند — اسحب وأفلت أو اضغط هنا</p>
+                    <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
+                      <span className="flex items-center gap-1"><Camera size={11} /> صور المحل والمعدات</span>
+                      <span className="flex items-center gap-1"><FileText size={11} /> عقود وسجلات ورخص</span>
+                    </div>
+                    <p className="text-xs font-medium text-primary mt-3 animate-fade-in">✦ الـAI يحلل كل شيء تلقائياً — بدون إدخال يدوي ✦</p>
+                  </>
+                )}
+              </div>
+
+              {/* Bulk uploaded previews */}
+              {(localPreviews["all"] || photos["all"] || []).length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Camera size={14} strokeWidth={1.5} className="text-primary" />
+                    <span className="text-xs font-medium">الصور المرفوعة ({(localPreviews["all"] || photos["all"] || []).length})</span>
+                  </div>
+                  <div className="flex gap-1.5 overflow-x-auto pb-1">
+                    {(localPreviews["all"] || photos["all"] || []).map((url, i) => (
+                      <div key={`all-${i}`} className="relative shrink-0 w-14 h-14 rounded-lg border border-border/30 overflow-hidden bg-muted/40">
+                        <img src={url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Bulk uploaded docs */}
+              {(uploadedDocs["general"] || []).length > 0 && (
                 <div className="flex items-center gap-2">
-                  <Camera size={16} strokeWidth={1.5} className="text-primary" />
-                  <h3 className="font-medium text-sm">الصور</h3>
+                  <FileText size={14} strokeWidth={1.5} className="text-primary" />
+                  <span className="text-xs font-medium">المستندات المرفوعة ({uploadedDocs["general"].length})</span>
+                  <span className="text-[10px] text-success">✓</span>
+                </div>
+              )}
+
+              {/* Photos by group (optional manual upload) */}
+              <details className="group">
+                <summary className="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  <Camera size={14} strokeWidth={1.5} />
+                  <span>رفع يدوي حسب التصنيف (اختياري)</span>
+                  <span className="text-[10px]">— إذا تفضل ترتيب الصور بنفسك</span>
+                </summary>
+                <div className="mt-3 space-y-4">
+              <div className="flex items-center gap-2">
+                <Camera size={16} strokeWidth={1.5} className="text-primary" />
+                <h3 className="font-medium text-sm">الصور</h3>
                   <div className="h-2 flex-1 rounded-full bg-muted overflow-hidden">
                     <div className="h-full rounded-full gradient-primary transition-all duration-500" style={{ width: `${Math.min(100, (totalPhotos / 12) * 100)}%` }} />
                   </div>
