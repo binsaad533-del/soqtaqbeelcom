@@ -129,6 +129,7 @@ const CreateListingPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
+  const bulkInputRef = useRef<HTMLInputElement>(null);
   const [activePhotoGroup, setActivePhotoGroup] = useState<string | null>(null);
   const [activeDocType, setActiveDocType] = useState<string | null>(null);
   const [draftRestored, setDraftRestored] = useState(false);
