@@ -1,9 +1,11 @@
 /// <reference types="google.maps" />
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MapPin, Loader2, X } from "lucide-react";
+import { MapPin, Loader2, X, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { findNearestCity } from "@/lib/saudiCities";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export interface PlaceDetails {
   city?: string;
@@ -57,6 +59,8 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [manualSearch, setManualSearch] = useState("");
+  const [searching, setSearching] = useState(false);
 
   const extractPlaceDetails = useCallback((components: google.maps.GeocoderAddressComponent[]): PlaceDetails => {
     let city = "";
@@ -86,10 +90,10 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
 
   const initMap = useCallback(async () => {
     try {
-      // Fetch API key from edge function
       const { data, error: fnError } = await supabase.functions.invoke("get-maps-key");
       if (fnError || !data?.key) {
-        setError("تعذر تحميل خرائط قوقل");
+        console.error("[GoogleMapPicker] Failed to get API key:", fnError);
+        setError("maps_key_failed");
         setLoading(false);
         return;
       }
@@ -136,7 +140,6 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         reverseGeocode(new google.maps.LatLng(lat, lng));
       }
 
-      // Click on map to place marker
       map.addListener("click", (e: google.maps.MapMouseEvent) => {
         if (!e.latLng) return;
         marker.setPosition(e.latLng);
@@ -144,14 +147,12 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         reverseGeocode(e.latLng);
       });
 
-      // Drag marker
       marker.addListener("dragend", () => {
         const pos = marker.getPosition();
         if (!pos) return;
         reverseGeocode(pos);
       });
 
-      // Search box
       const input = document.createElement("input");
       input.type = "text";
       input.placeholder = "ابحث عن موقع...";
@@ -181,14 +182,39 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
       setLoading(false);
     } catch (err) {
       console.error("Map init error:", err);
-      setError("تعذر تحميل الخريطة");
+      setError("maps_load_failed");
       setLoading(false);
     }
-  }, [lat, lng, onLocationChange, reverseGeocode]);
+  }, [lat, lng, onLocationChange, reverseGeocode, extractPlaceDetails]);
 
   useEffect(() => {
     initMap();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fallback geocode search using Nominatim (free, no key needed)
+  const handleFallbackSearch = async () => {
+    if (!manualSearch.trim()) return;
+    setSearching(true);
+    try {
+      const q = encodeURIComponent(manualSearch.trim() + " السعودية");
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&accept-language=ar`);
+      const results = await res.json();
+      if (results.length > 0) {
+        const r = results[0];
+        const rLat = parseFloat(r.lat);
+        const rLng = parseFloat(r.lon);
+        const nearest = findNearestCity(rLat, rLng);
+        const addr = r.display_name || `بالقرب من ${nearest.name}`;
+        setSelectedAddress(addr);
+        onLocationChange(rLat, rLng, addr, { city: nearest.name, address: addr });
+      } else {
+        setSelectedAddress("لم يتم العثور على نتائج");
+      }
+    } catch {
+      setSelectedAddress("فشل البحث");
+    }
+    setSearching(false);
+  };
 
   const clearLocation = () => {
     if (markerRef.current) {
@@ -198,11 +224,46 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     onLocationChange(0, 0);
   };
 
+  // Fallback UI when maps can't load
   if (error) {
     return (
-      <div className={cn("rounded-xl border border-border/50 bg-muted/30 p-6 text-center", className)}>
-        <MapPin size={24} className="text-muted-foreground mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">{error}</p>
+      <div className={cn("space-y-3", className)}>
+        <div className="rounded-xl border border-border/50 bg-muted/30 p-5 space-y-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <MapPin size={16} className="text-primary" />
+            <span>حدد الموقع بالبحث</span>
+          </div>
+          <div className="flex gap-2" dir="rtl">
+            <Input
+              placeholder="ابحث: اسم الحي، المدينة، الشارع..."
+              value={manualSearch}
+              onChange={(e) => setManualSearch(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleFallbackSearch()}
+              className="flex-1 rounded-lg text-sm"
+            />
+            <Button
+              size="sm"
+              onClick={handleFallbackSearch}
+              disabled={searching || !manualSearch.trim()}
+              className="rounded-lg gap-1.5"
+            >
+              {searching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+              بحث
+            </Button>
+          </div>
+          {selectedAddress && selectedAddress !== "لم يتم العثور على نتائج" && selectedAddress !== "فشل البحث" && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 rounded-lg px-3 py-2">
+              <MapPin size={12} className="text-primary shrink-0" />
+              <span className="flex-1 truncate">{selectedAddress}</span>
+              <button onClick={clearLocation} className="text-muted-foreground hover:text-foreground">
+                <X size={12} />
+              </button>
+            </div>
+          )}
+          {selectedAddress === "لم يتم العثور على نتائج" && (
+            <p className="text-xs text-destructive">لم يتم العثور على نتائج، حاول بكلمات مختلفة</p>
+          )}
+        </div>
       </div>
     );
   }
