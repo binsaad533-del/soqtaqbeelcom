@@ -479,7 +479,7 @@ const CreateListingPage = () => {
       return;
     }
 
-    const MAX_ANALYSIS_IMAGES = 20;
+    const MAX_ANALYSIS_IMAGES = 50;
     const totalImages = allPhotoUrlsForAnalysis.length;
     const limitedUrls = allPhotoUrlsForAnalysis.slice(0, MAX_ANALYSIS_IMAGES);
 
