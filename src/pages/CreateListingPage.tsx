@@ -755,7 +755,8 @@ const CreateListingPage = () => {
     return previews.length > 0 ? previews : remoteUrls;
   }, [localPreviews, photos]);
 
-  const totalPhotos = photoGroups.reduce((sum, group) => sum + getGroupDisplayUrls(group.id).length, 0);
+  const bulkPhotoCount = (localPreviews["all"] || photos["all"] || []).length;
+  const totalPhotos = photoGroups.reduce((sum, group) => sum + getGroupDisplayUrls(group.id).length, 0) + bulkPhotoCount;
   const allPhotoUrls = Object.values(photos).flat();
   const dealTypeForTransparency = dealStructure.primaryType || "full_takeover";
   const transparencyResult = calculateTransparency({
