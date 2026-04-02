@@ -583,8 +583,11 @@ const CreateListingPage = () => {
     }, 1500);
 
     try {
+      // Collect document URLs for AI extraction
+      const allDocUrls = Object.values(uploadedDocs).flat();
+
       const { data, error } = await supabase.functions.invoke("analyze-inventory", {
-        body: { photoUrls: limitedUrls, photoGroups: photos },
+        body: { photoUrls: limitedUrls, photoGroups: photos, documentUrls: allDocUrls },
       });
 
       clearInterval(progressInterval);
@@ -612,7 +615,31 @@ const CreateListingPage = () => {
       setAnalysisSummary(String((data as { analysis_summary?: string }).analysis_summary || ""));
       setDedupActions((((data as { dedup_actions?: DedupAction[] }).dedup_actions) || []));
       setAnalyzed(true);
-      toast.success("تم تحليل الصور وتحديد الأصول بدقة");
+
+      // Auto-fill disclosure from extracted document info
+      const extracted = (data as { extracted_info?: Record<string, string> }).extracted_info;
+      if (extracted) {
+        setDisclosure(prev => ({
+          ...prev,
+          ...(extracted.business_activity && !prev.business_activity ? { business_activity: extracted.business_activity } : {}),
+          ...(extracted.city && !prev.city ? { city: extracted.city } : {}),
+          ...(extracted.district && !prev.district ? { district: extracted.district } : {}),
+          ...(extracted.annual_rent && !prev.annual_rent ? { annual_rent: extracted.annual_rent } : {}),
+          ...(extracted.lease_duration && !prev.lease_duration ? { lease_duration: extracted.lease_duration } : {}),
+        }));
+        if (extracted.cr_number || extracted.entity_name) {
+          setCrExtraction(prev => ({
+            ...prev,
+            ...(extracted.cr_number ? { cr_number: extracted.cr_number } : {}),
+            ...(extracted.entity_name ? { entity_name: extracted.entity_name } : {}),
+            ...(extracted.business_activity ? { business_activity: extracted.business_activity } : {}),
+            ...(extracted.city ? { city: extracted.city } : {}),
+          }));
+          setCrExtractionDone(true);
+        }
+      }
+
+      toast.success("تم تحليل الصور والمستندات وتحديد الأصول بدقة");
     } catch (err) {
       clearInterval(progressInterval);
       toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء تحليل الصور");
