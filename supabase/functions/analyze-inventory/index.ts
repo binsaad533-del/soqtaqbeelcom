@@ -69,15 +69,29 @@ serve(async (req) => {
 
     imageContent.push({
       type: "text",
-      text: `${groupContext}\nحلّل الصور التالية واكتشف كل الأصول والمعدات. انتبه جيداً للتمييز بين صور متعددة لنفس الأصل وبين أصول متعددة متشابهة. عدد الصور الكلي: ${photoUrls.length}`
+      text: `${groupContext}\nحلّل الصور التالية واكتشف كل الأصول والمعدات. انتبه جيداً للتمييز بين صور متعددة لنفس الأصل وبين أصول متعددة متشابهة. عدد الصور الكلي: ${(photoUrls || []).length}`
     });
 
-    // Add each photo URL as image_url
-    for (const url of photoUrls.slice(0, 50)) { // Limit to 50 images
+    // Add each photo URL as image_url (up to 50)
+    for (const url of (photoUrls || []).slice(0, 50)) {
       imageContent.push({
         type: "image_url",
         image_url: { url, detail: "high" }
       });
+    }
+
+    // Add document URLs for extraction
+    if (documentUrls && documentUrls.length > 0) {
+      imageContent.push({
+        type: "text",
+        text: `\n\nالمستندات المرفقة (${documentUrls.length} مستند) — حاول استخراج معلومات النشاط والموقع والإيجار وأي بيانات مفيدة منها:`
+      });
+      for (const url of documentUrls.slice(0, 10)) {
+        imageContent.push({
+          type: "image_url",
+          image_url: { url, detail: "high" }
+        });
+      }
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
