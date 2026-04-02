@@ -43,12 +43,12 @@ serve(async (req) => {
   }
 
   try {
-    const { photoUrls, photoGroups } = await req.json();
+    const { photoUrls, photoGroups, documentUrls } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    if (!photoUrls || photoUrls.length === 0) {
-      return new Response(JSON.stringify({ error: "لا توجد صور للتحليل" }), {
+    if ((!photoUrls || photoUrls.length === 0) && (!documentUrls || documentUrls.length === 0)) {
+      return new Response(JSON.stringify({ error: "لا توجد صور أو مستندات للتحليل" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
