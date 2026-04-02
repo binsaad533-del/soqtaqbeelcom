@@ -511,7 +511,7 @@ const CreateListingPage = () => {
       setUploadingGroup(null);
       e.target.value = "";
     }
-  
+  };
 
   // ── CR document extraction ──
   const handleCrExtraction = useCallback(async (documentUrl: string) => {
