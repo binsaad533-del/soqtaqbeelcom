@@ -1432,15 +1432,15 @@ const CreateListingPage = () => {
                         </div>
                       ) : (
                         <>
-                          {allPhotoUrls.length > 20 && (
+                          {allPhotoUrls.length > 50 && (
                             <div className="bg-warning/10 border border-warning/30 rounded-xl px-4 py-2.5 flex items-start gap-2 mb-4 max-w-sm text-right">
                               <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
-                              <p className="text-xs text-warning">لديك {allPhotoUrls.length} صورة — سيتم تحليل أول 20 صورة فقط. الصور المتبقية ستُحفظ لكن لن تُحلل.</p>
+                              <p className="text-xs text-warning">لديك {allPhotoUrls.length} صورة — سيتم تحليل أول 50 صورة فقط. الصور المتبقية ستُحفظ لكن لن تُحلل.</p>
                             </div>
                           )}
                           <Button onClick={handleAnalyze} className="gradient-primary text-primary-foreground rounded-xl">
                             <Eye size={16} strokeWidth={1.5} />
-                            ابدأ التحليل الذكي ({Math.min(allPhotoUrls.length, 20)} من {allPhotoUrls.length} صورة)
+                            ابدأ التحليل الذكي ({Math.min(allPhotoUrls.length, 50)} من {allPhotoUrls.length} صورة)
                           </Button>
                         </>
                       )}
