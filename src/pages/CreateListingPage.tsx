@@ -129,6 +129,7 @@ const CreateListingPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
+  const bulkInputRef = useRef<HTMLInputElement>(null);
   const [activePhotoGroup, setActivePhotoGroup] = useState<string | null>(null);
   const [activeDocType, setActiveDocType] = useState<string | null>(null);
   const [draftRestored, setDraftRestored] = useState(false);
@@ -424,6 +425,94 @@ const CreateListingPage = () => {
     e.target.value = "";
   };
 
+  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const id = await ensureListing();
+    if (!id) return;
+
+    const allFiles = Array.from(e.target.files);
+    const imageExts = ["jpg", "jpeg", "png", "webp", "heic", "heif", "gif", "bmp", "avif"];
+    const imageFiles: File[] = [];
+    const docFiles: File[] = [];
+
+    for (const f of allFiles) {
+      const ext = f.name.split(".").pop()?.toLowerCase() || "";
+      const isImage = f.type.startsWith("image/") || imageExts.includes(ext);
+      if (isImage) {
+        if (imageFiles.length < 50) imageFiles.push(f);
+      } else {
+        if (docFiles.length < 50) docFiles.push(f);
+      }
+    }
+
+    if (imageFiles.length === 0 && docFiles.length === 0) return;
+
+    setSaving(true);
+    const totalFiles = imageFiles.length + docFiles.length;
+    setUploadProgress({ current: 0, total: totalFiles });
+    setUploadingGroup("bulk");
+
+    try {
+      // Upload images
+      const imageUrls: string[] = [];
+      for (let i = 0; i < imageFiles.length; i++) {
+        setUploadProgress({ current: i + 1, total: totalFiles });
+        try {
+          const validation = validateImageFile(imageFiles[i]);
+          if (!validation.valid) { toast.error(`${imageFiles[i].name}: ${validation.error}`); continue; }
+          const prepared = await convertToJpeg(imageFiles[i]);
+          const previewUrl = URL.createObjectURL(prepared);
+          setLocalPreviews(prev => ({ ...prev, all: [...(prev.all || []), previewUrl] }));
+          const url = await uploadFile(id, prepared, "photos/all");
+          if (url) imageUrls.push(url);
+        } catch {
+          toast.error(`تعذر تجهيز ${imageFiles[i].name}`);
+        }
+      }
+
+      if (imageUrls.length > 0) {
+        setPhotos(prev => {
+          const updated = { ...prev, all: [...(prev.all || []), ...imageUrls] };
+          updateListing(id, { photos: updated } as never).catch(console.error);
+          return updated;
+        });
+      }
+
+      // Upload documents
+      const docUrls: string[] = [];
+      for (let i = 0; i < docFiles.length; i++) {
+        setUploadProgress({ current: imageFiles.length + i + 1, total: totalFiles });
+        const validation = validateDocFile(docFiles[i]);
+        if (!validation.valid) { toast.error(`${docFiles[i].name}: ${validation.error}`); continue; }
+        const url = await uploadFile(id, docFiles[i], "docs/general");
+        if (url) docUrls.push(url);
+      }
+
+      if (docUrls.length > 0) {
+        setUploadedDocs(prev => {
+          const updated = { ...prev, general: [...(prev.general || []), ...docUrls] };
+          updateListing(id, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch(console.error);
+          return updated;
+        });
+
+        // Auto-trigger CR extraction on first PDF document
+        const firstPdfUrl = docUrls.find(url => url.toLowerCase().includes(".pdf"));
+        if (firstPdfUrl && !crExtractionDone) {
+          handleCrExtraction(firstPdfUrl);
+        }
+      }
+
+      const uploadedTotal = imageUrls.length + docUrls.length;
+      if (uploadedTotal > 0) {
+        toast.success(`تم رفع ${uploadedTotal} ملف بنجاح — ${imageUrls.length} صورة و ${docUrls.length} مستند`);
+      }
+    } finally {
+      setSaving(false);
+      setUploadingGroup(null);
+      e.target.value = "";
+    }
+  };
+
   // ── CR document extraction ──
   const handleCrExtraction = useCallback(async (documentUrl: string) => {
     setCrExtracting(true);
@@ -478,7 +567,7 @@ const CreateListingPage = () => {
       return;
     }
 
-    const MAX_ANALYSIS_IMAGES = 20;
+    const MAX_ANALYSIS_IMAGES = 50;
     const totalImages = allPhotoUrlsForAnalysis.length;
     const limitedUrls = allPhotoUrlsForAnalysis.slice(0, MAX_ANALYSIS_IMAGES);
 
@@ -494,8 +583,11 @@ const CreateListingPage = () => {
     }, 1500);
 
     try {
+      // Collect document URLs for AI extraction
+      const allDocUrls = Object.values(uploadedDocs).flat();
+
       const { data, error } = await supabase.functions.invoke("analyze-inventory", {
-        body: { photoUrls: limitedUrls, photoGroups: photos },
+        body: { photoUrls: limitedUrls, photoGroups: photos, documentUrls: allDocUrls },
       });
 
       clearInterval(progressInterval);
@@ -523,7 +615,31 @@ const CreateListingPage = () => {
       setAnalysisSummary(String((data as { analysis_summary?: string }).analysis_summary || ""));
       setDedupActions((((data as { dedup_actions?: DedupAction[] }).dedup_actions) || []));
       setAnalyzed(true);
-      toast.success("تم تحليل الصور وتحديد الأصول بدقة");
+
+      // Auto-fill disclosure from extracted document info
+      const extracted = (data as { extracted_info?: Record<string, string> }).extracted_info;
+      if (extracted) {
+        setDisclosure(prev => ({
+          ...prev,
+          ...(extracted.business_activity && !prev.business_activity ? { business_activity: extracted.business_activity } : {}),
+          ...(extracted.city && !prev.city ? { city: extracted.city } : {}),
+          ...(extracted.district && !prev.district ? { district: extracted.district } : {}),
+          ...(extracted.annual_rent && !prev.annual_rent ? { annual_rent: extracted.annual_rent } : {}),
+          ...(extracted.lease_duration && !prev.lease_duration ? { lease_duration: extracted.lease_duration } : {}),
+        }));
+        if (extracted.cr_number || extracted.entity_name) {
+          setCrExtraction(prev => ({
+            ...prev,
+            ...(extracted.cr_number ? { cr_number: extracted.cr_number } : {}),
+            ...(extracted.entity_name ? { entity_name: extracted.entity_name } : {}),
+            ...(extracted.business_activity ? { business_activity: extracted.business_activity } : {}),
+            ...(extracted.city ? { city: extracted.city } : {}),
+          }));
+          setCrExtractionDone(true);
+        }
+      }
+
+      toast.success("تم تحليل الصور والمستندات وتحديد الأصول بدقة");
     } catch (err) {
       clearInterval(progressInterval);
       toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء تحليل الصور");
@@ -754,7 +870,8 @@ const CreateListingPage = () => {
     return previews.length > 0 ? previews : remoteUrls;
   }, [localPreviews, photos]);
 
-  const totalPhotos = photoGroups.reduce((sum, group) => sum + getGroupDisplayUrls(group.id).length, 0);
+  const bulkPhotoCount = (localPreviews["all"] || photos["all"] || []).length;
+  const totalPhotos = photoGroups.reduce((sum, group) => sum + getGroupDisplayUrls(group.id).length, 0) + bulkPhotoCount;
   const allPhotoUrls = Object.values(photos).flat();
   const dealTypeForTransparency = dealStructure.primaryType || "full_takeover";
   const transparencyResult = calculateTransparency({
@@ -880,6 +997,7 @@ const CreateListingPage = () => {
 
         <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif,.raw,.cr2,.nef,.arw,.dng,.pdf" multiple className="hidden" onChange={handlePhotoUpload} />
         <input ref={docInputRef} type="file" accept="*/*" multiple className="hidden" onChange={handleDocUpload} />
+        <input ref={bulkInputRef} type="file" accept="image/*,.heic,.heif,.raw,.cr2,.nef,.arw,.dng,.pdf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple className="hidden" onChange={handleBulkUpload} />
 
         {/* 4-step progress */}
         <div className="flex items-center justify-between mb-8 pb-2 gap-1">
@@ -1066,11 +1184,89 @@ const CreateListingPage = () => {
                 </div>
               )}
 
-              {/* Photos */}
-              <div className="space-y-4">
+              {/* ── Bulk Upload Zone ── */}
+              <div
+                className={cn(
+                  "relative rounded-2xl border-2 border-dashed transition-all cursor-pointer p-8 text-center",
+                  draggingGroup === "bulk" ? "border-primary bg-primary/5 scale-[1.01]" : "border-border/50 bg-muted/20 hover:border-primary/40 hover:bg-primary/5"
+                )}
+                onClick={() => bulkInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDraggingGroup("bulk"); }}
+                onDragLeave={() => setDraggingGroup(null)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDraggingGroup(null);
+                  const dt = new DataTransfer();
+                  Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
+                  if (bulkInputRef.current) {
+                    bulkInputRef.current.files = dt.files;
+                    bulkInputRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+                  }
+                }}
+              >
+                {uploadingGroup === "bulk" ? (
+                  <div className="space-y-3 animate-fade-in">
+                    <Loader2 size={32} className="animate-spin text-primary mx-auto" />
+                    <p className="text-sm font-medium text-primary">جاري رفع الملفات... {uploadProgress.current}/{uploadProgress.total}</p>
+                    <div className="h-2 rounded-full bg-muted overflow-hidden max-w-xs mx-auto">
+                      <div className="h-full rounded-full gradient-primary transition-all duration-500" style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }} />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <Upload size={24} strokeWidth={1.5} className="text-primary" />
+                      </div>
+                    </div>
+                    <h3 className="text-sm font-semibold mb-1">ارفع كل الصور والمستندات دفعة واحدة</h3>
+                    <p className="text-xs text-muted-foreground mb-2">حتى 50 صورة و 50 مستند — اسحب وأفلت أو اضغط هنا</p>
+                    <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
+                      <span className="flex items-center gap-1"><Camera size={11} /> صور المحل والمعدات</span>
+                      <span className="flex items-center gap-1"><FileText size={11} /> عقود وسجلات ورخص</span>
+                    </div>
+                    <p className="text-xs font-medium text-primary mt-3 animate-fade-in">✦ الـAI يحلل كل شيء تلقائياً — بدون إدخال يدوي ✦</p>
+                  </>
+                )}
+              </div>
+
+              {/* Bulk uploaded previews */}
+              {(localPreviews["all"] || photos["all"] || []).length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Camera size={14} strokeWidth={1.5} className="text-primary" />
+                    <span className="text-xs font-medium">الصور المرفوعة ({(localPreviews["all"] || photos["all"] || []).length})</span>
+                  </div>
+                  <div className="flex gap-1.5 overflow-x-auto pb-1">
+                    {(localPreviews["all"] || photos["all"] || []).map((url, i) => (
+                      <div key={`all-${i}`} className="relative shrink-0 w-14 h-14 rounded-lg border border-border/30 overflow-hidden bg-muted/40">
+                        <img src={url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Bulk uploaded docs */}
+              {(uploadedDocs["general"] || []).length > 0 && (
                 <div className="flex items-center gap-2">
-                  <Camera size={16} strokeWidth={1.5} className="text-primary" />
-                  <h3 className="font-medium text-sm">الصور</h3>
+                  <FileText size={14} strokeWidth={1.5} className="text-primary" />
+                  <span className="text-xs font-medium">المستندات المرفوعة ({uploadedDocs["general"].length})</span>
+                  <span className="text-[10px] text-success">✓</span>
+                </div>
+              )}
+
+              {/* Photos by group (optional manual upload) */}
+              <details className="group">
+                <summary className="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  <Camera size={14} strokeWidth={1.5} />
+                  <span>رفع يدوي حسب التصنيف (اختياري)</span>
+                  <span className="text-[10px]">— إذا تفضل ترتيب الصور بنفسك</span>
+                </summary>
+                <div className="mt-3 space-y-4">
+              <div className="flex items-center gap-2">
+                <Camera size={16} strokeWidth={1.5} className="text-primary" />
+                <h3 className="font-medium text-sm">الصور</h3>
                   <div className="h-2 flex-1 rounded-full bg-muted overflow-hidden">
                     <div className="h-full rounded-full gradient-primary transition-all duration-500" style={{ width: `${Math.min(100, (totalPhotos / 12) * 100)}%` }} />
                   </div>
@@ -1158,7 +1354,8 @@ const CreateListingPage = () => {
                     يمكنك سحب الصور وإفلاتها مباشرة على أي مجموعة
                   </p>
                 </div>
-              </div>
+                </div>
+              </details>
 
               {/* Documents */}
               <div className="border-t border-border/50 pt-5 space-y-4">
@@ -1262,15 +1459,15 @@ const CreateListingPage = () => {
                         </div>
                       ) : (
                         <>
-                          {allPhotoUrls.length > 20 && (
+                          {allPhotoUrls.length > 50 && (
                             <div className="bg-warning/10 border border-warning/30 rounded-xl px-4 py-2.5 flex items-start gap-2 mb-4 max-w-sm text-right">
                               <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
-                              <p className="text-xs text-warning">لديك {allPhotoUrls.length} صورة — سيتم تحليل أول 20 صورة فقط. الصور المتبقية ستُحفظ لكن لن تُحلل.</p>
+                              <p className="text-xs text-warning">لديك {allPhotoUrls.length} صورة — سيتم تحليل أول 50 صورة فقط. الصور المتبقية ستُحفظ لكن لن تُحلل.</p>
                             </div>
                           )}
                           <Button onClick={handleAnalyze} className="gradient-primary text-primary-foreground rounded-xl">
                             <Eye size={16} strokeWidth={1.5} />
-                            ابدأ التحليل الذكي ({Math.min(allPhotoUrls.length, 20)} من {allPhotoUrls.length} صورة)
+                            ابدأ التحليل الذكي ({Math.min(allPhotoUrls.length, 50)} من {allPhotoUrls.length} صورة)
                           </Button>
                         </>
                       )}
