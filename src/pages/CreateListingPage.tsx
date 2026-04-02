@@ -425,6 +425,94 @@ const CreateListingPage = () => {
     e.target.value = "";
   };
 
+  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const id = await ensureListing();
+    if (!id) return;
+
+    const allFiles = Array.from(e.target.files);
+    const imageExts = ["jpg", "jpeg", "png", "webp", "heic", "heif", "gif", "bmp", "avif"];
+    const imageFiles: File[] = [];
+    const docFiles: File[] = [];
+
+    for (const f of allFiles) {
+      const ext = f.name.split(".").pop()?.toLowerCase() || "";
+      const isImage = f.type.startsWith("image/") || imageExts.includes(ext);
+      if (isImage) {
+        if (imageFiles.length < 50) imageFiles.push(f);
+      } else {
+        if (docFiles.length < 50) docFiles.push(f);
+      }
+    }
+
+    if (imageFiles.length === 0 && docFiles.length === 0) return;
+
+    setSaving(true);
+    const totalFiles = imageFiles.length + docFiles.length;
+    setUploadProgress({ current: 0, total: totalFiles });
+    setUploadingGroup("bulk");
+
+    try {
+      // Upload images
+      const imageUrls: string[] = [];
+      for (let i = 0; i < imageFiles.length; i++) {
+        setUploadProgress({ current: i + 1, total: totalFiles });
+        try {
+          const validation = validateImageFile(imageFiles[i]);
+          if (!validation.valid) { toast.error(`${imageFiles[i].name}: ${validation.error}`); continue; }
+          const prepared = await convertToJpeg(imageFiles[i]);
+          const previewUrl = URL.createObjectURL(prepared);
+          setLocalPreviews(prev => ({ ...prev, all: [...(prev.all || []), previewUrl] }));
+          const url = await uploadFile(id, prepared, "photos/all");
+          if (url) imageUrls.push(url);
+        } catch {
+          toast.error(`تعذر تجهيز ${imageFiles[i].name}`);
+        }
+      }
+
+      if (imageUrls.length > 0) {
+        setPhotos(prev => {
+          const updated = { ...prev, all: [...(prev.all || []), ...imageUrls] };
+          updateListing(id, { photos: updated } as never).catch(console.error);
+          return updated;
+        });
+      }
+
+      // Upload documents
+      const docUrls: string[] = [];
+      for (let i = 0; i < docFiles.length; i++) {
+        setUploadProgress({ current: imageFiles.length + i + 1, total: totalFiles });
+        const validation = validateDocFile(docFiles[i]);
+        if (!validation.valid) { toast.error(`${docFiles[i].name}: ${validation.error}`); continue; }
+        const url = await uploadFile(id, docFiles[i], "docs/general");
+        if (url) docUrls.push(url);
+      }
+
+      if (docUrls.length > 0) {
+        setUploadedDocs(prev => {
+          const updated = { ...prev, general: [...(prev.general || []), ...docUrls] };
+          updateListing(id, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch(console.error);
+          return updated;
+        });
+
+        // Auto-trigger CR extraction on first PDF document
+        const firstPdfUrl = docUrls.find(url => url.toLowerCase().includes(".pdf"));
+        if (firstPdfUrl && !crExtractionDone) {
+          handleCrExtraction(firstPdfUrl);
+        }
+      }
+
+      const uploadedTotal = imageUrls.length + docUrls.length;
+      if (uploadedTotal > 0) {
+        toast.success(`تم رفع ${uploadedTotal} ملف بنجاح — ${imageUrls.length} صورة و ${docUrls.length} مستند`);
+      }
+    } finally {
+      setSaving(false);
+      setUploadingGroup(null);
+      e.target.value = "";
+    }
+  
+
   // ── CR document extraction ──
   const handleCrExtraction = useCallback(async (documentUrl: string) => {
     setCrExtracting(true);
