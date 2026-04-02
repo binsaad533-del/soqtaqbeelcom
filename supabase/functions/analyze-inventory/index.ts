@@ -73,7 +73,7 @@ serve(async (req) => {
     });
 
     // Add each photo URL as image_url
-    for (const url of photoUrls.slice(0, 20)) { // Limit to 20 images
+    for (const url of photoUrls.slice(0, 50)) { // Limit to 50 images
       imageContent.push({
         type: "image_url",
         image_url: { url, detail: "high" }
