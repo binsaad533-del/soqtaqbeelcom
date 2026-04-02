@@ -145,6 +145,19 @@ serve(async (req) => {
                       required: ["description", "merged_count"]
                     },
                     description: "قائمة بإجراءات إزالة التكرار التي تمت"
+                  },
+                  extracted_info: {
+                    type: "object",
+                    description: "معلومات مستخرجة من المستندات والصور (إن وجدت)",
+                    properties: {
+                      business_activity: { type: "string", description: "نوع النشاط التجاري" },
+                      city: { type: "string", description: "المدينة" },
+                      district: { type: "string", description: "الحي" },
+                      annual_rent: { type: "string", description: "الإيجار السنوي" },
+                      lease_duration: { type: "string", description: "مدة العقد" },
+                      cr_number: { type: "string", description: "رقم السجل التجاري" },
+                      entity_name: { type: "string", description: "اسم المنشأة" },
+                    }
                   }
                 },
                 required: ["assets", "analysis_summary", "total_unique_assets", "dedup_actions"]
