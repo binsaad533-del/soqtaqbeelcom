@@ -1327,7 +1327,8 @@ const CreateListingPage = () => {
                     يمكنك سحب الصور وإفلاتها مباشرة على أي مجموعة
                   </p>
                 </div>
-              </div>
+                </div>
+              </details>
 
               {/* Documents */}
               <div className="border-t border-border/50 pt-5 space-y-4">
