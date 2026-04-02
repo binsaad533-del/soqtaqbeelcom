@@ -61,6 +61,7 @@ const ListingDetailsPage = () => {
   const [wantsMeeting, setWantsMeeting] = useState<boolean | null>(null);
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [interestCount, setInterestCount] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const loadListing = async () => {
     if (!id) return;
