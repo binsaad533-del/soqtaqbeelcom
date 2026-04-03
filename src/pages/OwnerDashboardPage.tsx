@@ -21,8 +21,11 @@ import {
   Users, FileText, Handshake, Settings, BarChart3, Search,
   Loader2, AlertTriangle, Landmark, ChevronLeft, ShieldCheck,
   ArrowUpDown, ImageOff, Bell, Shield, TrendingUp, Eye,
-  Activity, RefreshCw, UserCheck
+  Activity, RefreshCw, UserCheck, ChevronDown, Globe, Bot,
+  MessageSquare, Lock, ExternalLink
 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { SOCIAL_LINKS } from "@/lib/socialLinks";
 import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
