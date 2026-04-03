@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Loader2, Save, Eye, EyeOff, User, Phone, CheckCircle } from "lucide-react";
+import { Camera, Loader2, Save, Eye, EyeOff, User, Phone, CheckCircle, Mail, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import PhoneVerificationFlow from "@/components/PhoneVerificationFlow";
 
