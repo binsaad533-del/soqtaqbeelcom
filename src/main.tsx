@@ -21,4 +21,33 @@ if (isPreviewHost || isInIframe) {
   });
 }
 
+// Anti-copy protection layer (production only)
+if (!isPreviewHost && !isInIframe) {
+  // Disable right-click context menu
+  document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  // Block common dev-tools shortcuts
+  document.addEventListener("keydown", (e) => {
+    // F12
+    if (e.key === "F12") { e.preventDefault(); return; }
+    // Ctrl+Shift+I / Cmd+Option+I (Inspector)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "I") { e.preventDefault(); return; }
+    // Ctrl+Shift+J / Cmd+Option+J (Console)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "J") { e.preventDefault(); return; }
+    // Ctrl+U / Cmd+U (View Source)
+    if ((e.ctrlKey || e.metaKey) && e.key === "u") { e.preventDefault(); return; }
+    // Ctrl+Shift+C (Element picker)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "C") { e.preventDefault(); return; }
+    // Ctrl+S (Save page)
+    if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); return; }
+  });
+
+  // Disable text selection on the page (except inputs/textareas)
+  document.addEventListener("selectstart", (e) => {
+    const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+    if (tag === "input" || tag === "textarea" || (e.target as HTMLElement)?.isContentEditable) return;
+    e.preventDefault();
+  });
+}
+
 createRoot(document.getElementById("root")!).render(<App />);
