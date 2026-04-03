@@ -97,15 +97,15 @@ const BlogPostPage = () => {
         </Link>
 
         {/* Header */}
-        <article>
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <article dir={lang === "ar" ? "rtl" : "ltr"}>
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
             {category && (
-              <span className="text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary font-medium">
+              <span className="text-xs px-2.5 py-1 rounded-md bg-primary/10 text-primary font-medium">
                 {category}
               </span>
             )}
-            <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-              <Calendar size={10} />
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Calendar size={12} />
               {post.published_at
                 ? new Date(post.published_at).toLocaleDateString(lang === "ar" ? "ar-SA-u-nu-latn" : "en-US", {
                     year: "numeric",
@@ -114,28 +114,38 @@ const BlogPostPage = () => {
                   })
                 : ""}
             </span>
-            <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-              <Clock size={10} />
-              {tx(`${post.read_time_minutes} دقائق`, `${post.read_time_minutes} min read`)}
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock size={12} />
+              {tx(`${post.read_time_minutes} دقائق قراءة`, `${post.read_time_minutes} min read`)}
             </span>
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-medium mb-6 leading-snug">{title}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mb-8 leading-relaxed">{title}</h1>
 
           {/* Content */}
-          <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed">
+          <div className="prose prose-base dark:prose-invert max-w-none
+            prose-headings:font-bold prose-headings:leading-snug prose-headings:mb-4 prose-headings:mt-8
+            prose-h2:text-xl prose-h2:border-b prose-h2:border-border/20 prose-h2:pb-2
+            prose-h3:text-lg
+            prose-p:text-base prose-p:leading-[1.9] prose-p:mb-5 prose-p:text-foreground/85
+            prose-li:text-base prose-li:leading-[1.8] prose-li:mb-1.5 prose-li:text-foreground/80
+            prose-ul:my-4 prose-ul:ps-6
+            prose-ol:my-4 prose-ol:ps-6
+            prose-strong:text-foreground prose-strong:font-semibold
+            prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+          ">
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
 
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap mt-8 pt-6 border-t border-border/30">
+            <div className="flex items-center gap-2 flex-wrap mt-10 pt-6 border-t border-border/30">
               <Tag size={14} className="text-muted-foreground" />
               {post.tags.map((tag: string) => (
                 <Link
                   key={tag}
                   to={`/blog?tag=${encodeURIComponent(tag)}`}
-                  className="text-[11px] px-2.5 py-1 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground transition-colors"
+                  className="text-xs px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground transition-colors"
                 >
                   {tag}
                 </Link>
