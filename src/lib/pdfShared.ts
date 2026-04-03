@@ -240,7 +240,7 @@ export function buildPdfBankSection(bankDetails: {
   wrapper.innerHTML = `
     <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:16px;padding:16px 16px 14px;background:${PDF_COLORS.primaryLight};display:grid;gap:10px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;text-align:right;">
       <div style="display:flex;align-items:center;gap:10px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:8px;">
-        <h2 style="margin:0;font-size:12px;font-weight:600;color:${PDF_COLORS.text};">بيانات الحساب البنكي والعمولة</h2>
+        <h2 style="margin:0;font-size:14px;font-weight:600;color:${PDF_COLORS.text};">بيانات الحساب البنكي والعمولة</h2>
       </div>
       ${commissionHtml}
       <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
