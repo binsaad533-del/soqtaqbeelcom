@@ -93,6 +93,7 @@ const AdminDashboardPage = () => {
             { id: "crm" as Tab, label: "العملاء المحتملين", icon: UserPlus, badge: 0 },
             { id: "commissions" as Tab, label: "العمولات", icon: Database, badge: 0 },
             { id: "blog" as Tab, label: "المدونة", icon: Newspaper, badge: 0 },
+            { id: "emails" as Tab, label: "البريد", icon: Mail, badge: 0 },
             { id: "backup" as Tab, label: "النسخ الاحتياطي", icon: Shield, badge: 0 },
           ].map(tab => (
             <button
