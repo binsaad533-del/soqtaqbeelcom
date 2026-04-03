@@ -726,7 +726,7 @@ const OwnerDashboardPage = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                     {!isOwner && (
                       <Link
                         to={`/dashboard/view-customer/${p.user_id}`}
@@ -748,7 +748,6 @@ const OwnerDashboardPage = () => {
                         {isSupervisor ? "صلاحيات" : "ترقية لمشرف"}
                       </button>
                     )}
-                    {/* Suspend/Enable supervisor role without affecting customer account */}
                     {!isOwner && supervisorPerms.find(sp => sp.user_id === p.user_id) && (
                       <button
                         onClick={async () => {
