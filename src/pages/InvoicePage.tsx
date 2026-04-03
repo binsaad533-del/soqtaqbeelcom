@@ -81,8 +81,9 @@ const InvoicePage = () => {
     if (!invoice) return;
     setPdfLoading(true);
     try {
-      const [logoIconBase64, qrDataUrl] = await Promise.all([
+      const [logoBase64, logoIconBase64, qrDataUrl] = await Promise.all([
         loadPdfLogo(),
+        loadPdfLogoIcon(),
         generatePdfQR(`${window.location.origin}/invoice/${invoice.id}`),
         ensurePdfFontLoaded(),
       ]);
