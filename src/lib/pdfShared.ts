@@ -337,7 +337,10 @@ export function buildPdfInfoGrid(items: Array<{ label: string; value: string; em
     </div>`;
 }
 
-/* ── Get logo base64 ── */
+/* ── Get logos base64 ── */
 export async function loadPdfLogo(): Promise<string> {
+  return loadImageBase64(logoBlueUrl);
+}
+export async function loadPdfLogoIcon(): Promise<string> {
   return loadImageBase64(logoIconGoldUrl);
 }
