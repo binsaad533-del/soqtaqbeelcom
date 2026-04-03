@@ -118,7 +118,7 @@ const HowItWorksPage = () => {
           </div>
           <h1 className="text-2xl md:text-3xl font-semibold mb-3">كيف تتم الصفقة؟</h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            ٨ مراحل واضحة من الإعلان حتى إتمام نقل الملكية — بشفافية وحماية كاملة
+            9 مراحل واضحة من الإعلان حتى إتمام نقل الملكية — بشفافية وحماية كاملة
           </p>
         </div>
 
