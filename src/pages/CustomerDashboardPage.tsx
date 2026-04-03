@@ -598,6 +598,7 @@ const CustomerDashboardPage = () => {
                   { id: "saved" as const, label: "المحفوظة", icon: Heart, count: undefined },
                   { id: "notifications" as const, label: "الإشعارات", icon: Bell, count: undefined },
                   { id: "security" as const, label: "الأمان", icon: Shield, count: undefined },
+                  { id: "account" as const, label: "حسابي", icon: User, count: undefined },
                 ].map(tab => (
                   <button key={tab.id} onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }} className={cn(
                     "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs transition-all",
