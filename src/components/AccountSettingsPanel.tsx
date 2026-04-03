@@ -9,7 +9,7 @@ import { Camera, Loader2, Save, Eye, EyeOff, User } from "lucide-react";
 import { toast } from "sonner";
 
 const AccountSettingsPanel = () => {
-  const { profile, user, refreshProfile } = useAuthContext();
+  const { profile, user } = useAuthContext();
 
   /* ── Profile info state ── */
   const [fullName, setFullName] = useState(profile?.full_name || "");
