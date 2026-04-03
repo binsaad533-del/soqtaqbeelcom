@@ -47,10 +47,14 @@ export const COMMISSION_RATE = 0.01; // flat 1%
 
 export const BANK_DETAILS = {
   beneficiary: "شركة عين جساس",
+  legalName: "عين جساس للمقاولات",
   bank: "مصرف الراجحي",
   accountNumber: "611000010006086026222",
   iban: "SA4180000611608016026222",
   nationalId: "7017628152",
+  taxNumber: "000000000000003",
+  email: "a.almalki@soqtaqbeel.com",
+  phone: "0500668089",
 } as const;
 
 export const COMMISSION_ACKNOWLEDGMENT_KEY = "commission_acknowledged";
