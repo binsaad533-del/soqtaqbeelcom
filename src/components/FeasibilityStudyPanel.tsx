@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   TrendingUp, TrendingDown, DollarSign, Users, Shield,
   ChevronDown, ChevronUp, Loader2, BarChart3, Target, AlertTriangle,
