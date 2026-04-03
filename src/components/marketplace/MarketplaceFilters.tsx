@@ -207,19 +207,18 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
       </Section>
 
       {/* Hide simulation toggle */}
-      <div className="flex items-center gap-2 pt-2 border-t border-border/40">
-        <EyeOff className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-        <label htmlFor="hide-sim" className="text-xs text-muted-foreground cursor-pointer select-none flex-1">
-          إخفاء الإعلانات التجريبية
-        </label>
+      <label htmlFor="hide-sim" className="flex items-center gap-2 pt-3 mt-1 border-t border-border/30 cursor-pointer select-none group">
         <Switch
           id="hide-sim"
           dir="ltr"
           checked={filters.hideSimulation ?? false}
           onCheckedChange={(checked) => onChange({ ...filters, hideSimulation: checked })}
-          className="scale-90"
+          className="h-4 w-7 shrink-0 [&>span]:h-3 [&>span]:w-3 data-[state=checked]:[&>span]:translate-x-3"
         />
-      </div>
+        <span className="text-[11px] text-muted-foreground group-hover:text-foreground transition-colors">
+          إخفاء الإعلانات التجريبية
+        </span>
+      </label>
     </div>
   );
 };
