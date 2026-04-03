@@ -57,6 +57,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mapReady, setMapReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [manualSearch, setManualSearch] = useState("");
@@ -179,6 +180,26 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         setSelectedAddress(place.formatted_address || null);
       });
 
+      // Detect Google Maps auth failures (domain restrictions, etc.)
+      // Google fires an "authFailure" callback on window when API key is restricted
+      const origAuthFailure = (window as any).gm_authFailure;
+      (window as any).gm_authFailure = () => {
+        console.warn("[GoogleMapPicker] Google Maps auth failure — switching to fallback");
+        setMapReady(false);
+        setError("maps_auth_failed");
+        origAuthFailure?.();
+      };
+
+      // Check if tiles actually loaded after a timeout
+      setTimeout(() => {
+        const tiles = mapRef.current?.querySelectorAll("img");
+        const hasTiles = tiles && tiles.length > 2;
+        if (!hasTiles) {
+          console.warn("[GoogleMapPicker] Map tiles may not have loaded");
+        }
+      }, 5000);
+
+      setMapReady(true);
       setLoading(false);
     } catch (err) {
       console.error("Map init error:", err);
@@ -197,7 +218,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     setSearching(true);
     try {
       const q = encodeURIComponent(manualSearch.trim() + " السعودية");
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&accept-language=ar`);
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=5&accept-language=ar`);
       const results = await res.json();
       if (results.length > 0) {
         const r = results[0];
@@ -207,6 +228,15 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         const addr = r.display_name || `بالقرب من ${nearest.name}`;
         setSelectedAddress(addr);
         onLocationChange(rLat, rLng, addr, { city: nearest.name, address: addr });
+
+        // If map is ready, center it on the result
+        if (mapInstanceRef.current && markerRef.current) {
+          const pos = new google.maps.LatLng(rLat, rLng);
+          mapInstanceRef.current.setCenter(pos);
+          mapInstanceRef.current.setZoom(15);
+          markerRef.current.setPosition(pos);
+          markerRef.current.setVisible(true);
+        }
       } else {
         setSelectedAddress("لم يتم العثور على نتائج");
       }
@@ -224,8 +254,8 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     onLocationChange(0, 0);
   };
 
-  // Fallback UI when maps can't load
-  if (error) {
+  // Pure fallback UI when maps completely failed
+  if (error && !mapReady) {
     return (
       <div className={cn("space-y-3", className)}>
         <div className="rounded-xl border border-border/50 bg-muted/30 p-5 space-y-4">
@@ -233,36 +263,13 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
             <MapPin size={16} className="text-primary" />
             <span>حدد الموقع بالبحث</span>
           </div>
-          <div className="flex gap-2" dir="rtl">
-            <Input
-              placeholder="ابحث: اسم الحي، المدينة، الشارع..."
-              value={manualSearch}
-              onChange={(e) => setManualSearch(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleFallbackSearch()}
-              className="flex-1 rounded-lg text-sm"
-            />
-            <Button
-              size="sm"
-              onClick={handleFallbackSearch}
-              disabled={searching || !manualSearch.trim()}
-              className="rounded-lg gap-1.5"
-            >
-              {searching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-              بحث
-            </Button>
-          </div>
-          {selectedAddress && selectedAddress !== "لم يتم العثور على نتائج" && selectedAddress !== "فشل البحث" && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 rounded-lg px-3 py-2">
-              <MapPin size={12} className="text-primary shrink-0" />
-              <span className="flex-1 truncate">{selectedAddress}</span>
-              <button onClick={clearLocation} className="text-muted-foreground hover:text-foreground">
-                <X size={12} />
-              </button>
-            </div>
-          )}
-          {selectedAddress === "لم يتم العثور على نتائج" && (
-            <p className="text-xs text-destructive">لم يتم العثور على نتائج، حاول بكلمات مختلفة</p>
-          )}
+          <FallbackSearchBar
+            manualSearch={manualSearch}
+            setManualSearch={setManualSearch}
+            searching={searching}
+            onSearch={handleFallbackSearch}
+          />
+          <AddressDisplay address={selectedAddress} onClear={clearLocation} />
         </div>
       </div>
     );
@@ -278,15 +285,74 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         )}
         <div ref={mapRef} className="w-full h-[280px]" />
       </div>
-      {selectedAddress && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded-lg px-3 py-2">
-          <MapPin size={12} className="text-primary shrink-0" />
-          <span className="flex-1 truncate">{selectedAddress}</span>
-          <button onClick={clearLocation} className="text-muted-foreground hover:text-foreground">
-            <X size={12} />
-          </button>
+
+      {/* Always show fallback search below the map */}
+      <div className="rounded-xl border border-border/40 bg-muted/20 p-3 space-y-2">
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <Search size={11} />
+          <span>لا تظهر الخريطة؟ ابحث بالاسم:</span>
         </div>
-      )}
+        <FallbackSearchBar
+          manualSearch={manualSearch}
+          setManualSearch={setManualSearch}
+          searching={searching}
+          onSearch={handleFallbackSearch}
+        />
+      </div>
+
+      <AddressDisplay address={selectedAddress} onClear={clearLocation} />
+    </div>
+  );
+};
+
+/** Reusable fallback search input */
+const FallbackSearchBar = ({
+  manualSearch,
+  setManualSearch,
+  searching,
+  onSearch,
+}: {
+  manualSearch: string;
+  setManualSearch: (v: string) => void;
+  searching: boolean;
+  onSearch: () => void;
+}) => (
+  <div className="flex gap-2" dir="rtl">
+    <Input
+      placeholder="ابحث: اسم الحي، المدينة، الشارع..."
+      value={manualSearch}
+      onChange={(e) => setManualSearch(e.target.value)}
+      onKeyDown={(e) => e.key === "Enter" && onSearch()}
+      className="flex-1 rounded-lg text-sm"
+    />
+    <Button
+      size="sm"
+      onClick={onSearch}
+      disabled={searching || !manualSearch.trim()}
+      className="rounded-lg gap-1.5"
+    >
+      {searching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+      بحث
+    </Button>
+  </div>
+);
+
+/** Reusable address display */
+const AddressDisplay = ({ address, onClear }: { address: string | null; onClear: () => void }) => {
+  if (!address) return null;
+  if (address === "لم يتم العثور على نتائج") {
+    return <p className="text-xs text-destructive">لم يتم العثور على نتائج، حاول بكلمات مختلفة</p>;
+  }
+  if (address === "فشل البحث") {
+    return <p className="text-xs text-destructive">فشل البحث، حاول مرة أخرى</p>;
+  }
+  return (
+    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 rounded-lg px-3 py-2">
+      <MapPin size={12} className="text-primary shrink-0" />
+      <span className="flex-1 truncate">{address}</span>
+      <button onClick={onClear} className="text-muted-foreground hover:text-foreground">
+        <X size={12} />
+      </button>
     </div>
   );
 };
