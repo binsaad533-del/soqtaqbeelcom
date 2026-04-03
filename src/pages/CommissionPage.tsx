@@ -80,7 +80,7 @@ export default function CommissionPage() {
             كيف تعمل عمولة سوق تقبيل
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
-            عمولة ثابتة وبسيطة — يدفعها المشتري (العميل) بعد إتمام الصفقة فقط. بدون رسوم تسجيل أو اشتراكات.
+            عمولة ثابتة وبسيطة — يدفعها البائع بعد إتمام الصفقة فقط. بدون رسوم تسجيل أو اشتراكات.
           </p>
         </div>
       </section>
