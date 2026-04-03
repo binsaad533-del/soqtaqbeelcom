@@ -146,7 +146,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
         ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
         buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
         createPdfMount, renderPagesToPdf, paginateSections,
-        escapeHtml, formatPdfDate, PDF_COLORS,
+        escapeHtml, PDF_COLORS,
       } = await import("@/lib/pdfShared");
 
       const [logoBase64, logoIconBase64, qrDataUrl] = await Promise.all([
@@ -219,7 +219,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
         logoIconBase64,
         pageNumber,
         qrDataUrl,
-        showQrInFooter: true,
+        showQrInFooter: false,
       });
 
       const pages = paginateSections({ sections, mount, shellBuilder });

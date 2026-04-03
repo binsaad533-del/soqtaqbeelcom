@@ -1,50 +1,10 @@
 import { jsPDF } from "jspdf";
-import QRCode from "qrcode";
-import logoUrl from "@/assets/logo.png";
-import logoIconGoldUrl from "@/assets/logo-icon-gold.png";
 import { PAGE_HEIGHT_PX, PAGE_WIDTH_PX, buildAgreementPdfPages } from "@/lib/agreementPdf/template";
 import type { AgreementPdfData } from "@/lib/agreementPdf/types";
-import { protectPdf } from "@/lib/pdfShared";
+import { createPdfMount, ensurePdfFontLoaded, generatePdfQR, loadPdfLogo, loadPdfLogoIcon, protectPdf } from "@/lib/pdfShared";
 
 const PAGE_W = 210;
 const PAGE_H = 297;
-const FONT_URL = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700;800&display=swap";
-
-async function loadImageBase64(url: string): Promise<string> {
-  try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return "";
-  }
-}
-
-async function ensureFontLoaded() {
-  let link = document.querySelector<HTMLLinkElement>('link[data-agreement-pdf-font="true"]');
-  if (!link) {
-    link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = FONT_URL;
-    link.dataset.agreementPdfFont = "true";
-    document.head.appendChild(link);
-  }
-
-  if ("fonts" in document) {
-    await Promise.all([
-      document.fonts.load('400 16px "IBM Plex Sans Arabic"'),
-      document.fonts.load('700 16px "IBM Plex Sans Arabic"'),
-      document.fonts.ready,
-    ]);
-    return;
-  }
-
-  await new Promise((resolve) => setTimeout(resolve, 900));
-}
 
 const safeFileName = (title: string) => title.replace(/[\\/:*?"<>|]/g, "-");
 
@@ -55,30 +15,11 @@ export async function generateAgreementPdf(data: AgreementPdfData) {
 
   // Generate QR code linking to the agreement page
   const agreementUrl = `${window.location.origin}/agreement/${data.agreementNumber}`;
-  let qrDataUrl = "";
-  try {
-    qrDataUrl = await QRCode.toDataURL(agreementUrl, {
-      width: 100,
-      margin: 1,
-      color: { dark: "#2563a0", light: "#ffffff" },
-    });
-  } catch { /* QR is optional */ }
+  const qrDataUrl = await generatePdfQR(agreementUrl);
 
-  const [logoBase64, logoIconBase64] = await Promise.all([loadImageBase64(logoUrl), loadImageBase64(logoIconGoldUrl), ensureFontLoaded()]);
+  const [logoBase64, logoIconBase64] = await Promise.all([loadPdfLogo(), loadPdfLogoIcon(), ensurePdfFontLoaded()]);
 
-  const mount = document.createElement("div");
-  mount.style.cssText = [
-    "position:fixed",
-    "left:-99999px",
-    "top:0",
-    `width:${PAGE_WIDTH_PX}px`,
-    "display:grid",
-    "gap:20px",
-    "background:#ffffff",
-    "padding:12px",
-    "box-sizing:border-box",
-  ].join(";");
-  document.body.appendChild(mount);
+  const mount = createPdfMount();
 
   try {
     const pages = buildAgreementPdfPages({ data, logoBase64, logoIconBase64, qrDataUrl, mount });

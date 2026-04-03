@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { Printer, Download, ArrowRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SarSymbol from "@/components/SarSymbol";
@@ -9,9 +8,9 @@ import logoIcon from "@/assets/logo-icon-gold.png";
 import { useSEO } from "@/hooks/useSEO";
 import {
   ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
-  buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
+  buildPdfPageShell, buildPdfSection,
   createPdfMount, renderPagesToPdf, paginateSections,
-  formatPdfDate, formatPdfPrice, escapeHtml, PDF_FONT_FAMILY,
+  formatPdfDate, escapeHtml, PDF_FONT_FAMILY,
   PDF_COLORS,
 } from "@/lib/pdfShared";
 
@@ -46,7 +45,6 @@ const STATUS_MAP: Record<string, { label: string; cls: string }> = {
 const InvoicePage = () => {
   const { id } = useParams<{ id: string }>();
   useSEO({ title: "الفاتورة", description: "عرض فاتورة الصفقة على سوق تقبيل", canonical: `/invoice/${id}` });
-  const { user } = useAuthContext();
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [seller, setSeller] = useState<ProfileInfo | null>(null);
   const [buyer, setBuyer] = useState<ProfileInfo | null>(null);
@@ -175,7 +173,7 @@ const InvoicePage = () => {
         logoIconBase64,
         pageNumber,
         qrDataUrl,
-        showQrInFooter: true,
+        showQrInFooter: false,
       });
 
       const pages = paginateSections({ sections, mount, shellBuilder });

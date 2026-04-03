@@ -3,7 +3,7 @@
  * Provides shared header, footer, QR code, protection, and page management.
  */
 import QRCode from "qrcode";
-import logoBlueUrl from "@/assets/logo-blue.png";
+import logoBlueUrl from "@/assets/logo-blue-new.png";
 import logoIconGoldUrl from "@/assets/logo-icon-gold.png";
 
 /* ── Constants ── */
@@ -41,7 +41,13 @@ export const toEnDigits = (s: string) => s.replace(/[٠-٩]/g, (d) => String("٠
 export const formatPdfDate = (value?: string | null) => {
   if (!value) return "—";
   try {
-    return toEnDigits(new Intl.DateTimeFormat("ar-SA", { year: "numeric", month: "long", day: "numeric" }).format(new Date(value)));
+    const isoMatch = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) return `${isoMatch[1]}/${isoMatch[2]}/${isoMatch[3]}`;
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+
+    return `${parsed.getFullYear()}/${String(parsed.getMonth() + 1).padStart(2, "0")}/${String(parsed.getDate()).padStart(2, "0")}`;
   } catch {
     return value;
   }
@@ -75,11 +81,72 @@ export async function loadImageBase64(url: string): Promise<string> {
   try {
     const response = await fetch(url);
     const blob = await response.blob();
-    return await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.readAsDataURL(blob);
-    });
+
+    const objectUrl = URL.createObjectURL(blob);
+    try {
+      const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("image-load-failed"));
+        img.src = objectUrl;
+      });
+
+      const sourceCanvas = document.createElement("canvas");
+      const width = image.naturalWidth || image.width;
+      const height = image.naturalHeight || image.height;
+      sourceCanvas.width = width;
+      sourceCanvas.height = height;
+
+      const sourceCtx = sourceCanvas.getContext("2d");
+      if (!sourceCtx) return "";
+
+      sourceCtx.drawImage(image, 0, 0, width, height);
+      const { data } = sourceCtx.getImageData(0, 0, width, height);
+
+      let minX = width;
+      let minY = height;
+      let maxX = -1;
+      let maxY = -1;
+
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const index = (y * width + x) * 4;
+          const r = data[index];
+          const g = data[index + 1];
+          const b = data[index + 2];
+          const a = data[index + 3];
+          const isVisible = a > 10 && (r < 245 || g < 245 || b < 245);
+
+          if (!isVisible) continue;
+
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        }
+      }
+
+      if (maxX === -1 || maxY === -1) {
+        return sourceCanvas.toDataURL("image/png");
+      }
+
+      const padding = Math.max(12, Math.round(Math.min(width, height) * 0.02));
+      const cropX = Math.max(0, minX - padding);
+      const cropY = Math.max(0, minY - padding);
+      const cropWidth = Math.min(width - cropX, maxX - minX + 1 + padding * 2);
+      const cropHeight = Math.min(height - cropY, maxY - minY + 1 + padding * 2);
+
+      const trimmedCanvas = document.createElement("canvas");
+      trimmedCanvas.width = cropWidth;
+      trimmedCanvas.height = cropHeight;
+      const trimmedCtx = trimmedCanvas.getContext("2d");
+      if (!trimmedCtx) return sourceCanvas.toDataURL("image/png");
+
+      trimmedCtx.drawImage(sourceCanvas, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+      return trimmedCanvas.toDataURL("image/png");
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
   } catch {
     return "";
   }
@@ -144,13 +211,13 @@ export function buildPdfPageShell(options: {
   // ── Header ──
   const metaHtml = (documentMeta || []).map((m) => `<span>${escapeHtml(m)}</span>`).join("");
   const headerHtml = `
-    <header style="display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:12px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};">
-      <div style="display:grid;gap:5px;">
+    <header style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-bottom:14px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};">
+      <div style="display:grid;gap:5px;flex:1;text-align:right;">
         <div style="font-size:15px;font-weight:500;color:${PDF_COLORS.text};">${escapeHtml(documentTitle)}</div>
         ${documentSubtitle ? `<div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:1.7;">${escapeHtml(documentSubtitle)}</div>` : ""}
-        ${metaHtml ? `<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9px;color:${PDF_COLORS.textMuted};">${metaHtml}</div>` : ""}
+        ${metaHtml ? `<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9px;color:${PDF_COLORS.textMuted};justify-content:flex-start;">${metaHtml}</div>` : ""}
       </div>
-      ${logoBase64 ? `<img src="${logoBase64}" alt="سوق تقبيل" style="height:60px;width:auto;object-fit:contain;" />` : ""}
+      ${logoBase64 ? `<div style="width:230px;display:flex;align-items:center;justify-content:flex-start;flex-shrink:0;"><img src="${logoBase64}" alt="سوق تقبيل" style="height:82px;width:230px;object-fit:contain;object-position:left center;display:block;" /></div>` : ""}
     </header>
   `;
 
@@ -183,11 +250,11 @@ export function buildPdfPageShell(options: {
       <div style="font-size:9px;color:${PDF_COLORS.textMuted};line-height:1.8;">
         في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;">
+      ${showQrInFooter && qrDataUrl ? `<div style="display:grid;justify-items:center;gap:4px;padding-top:2px;"><img src="${qrDataUrl}" alt="QR" style="width:42px;height:42px;border-radius:4px;display:block;" /><div style="font-size:8px;color:${PDF_COLORS.textFaint};">تحقق إلكتروني</div></div>` : ""}
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
         <div style="font-size:8px;color:${PDF_COLORS.textFaint};line-height:1.8;">
           © ${new Date().getFullYear()} المنصة مملوكة ومدارة بواسطة شركة Ain Jasaas
         </div>
-        ${showQrInFooter && qrDataUrl ? `<img src="${qrDataUrl}" alt="QR" style="width:32px;height:32px;border-radius:3px;" />` : ""}
         <div style="font-size:8px;color:${PDF_COLORS.textFaint};white-space:nowrap;">صفحة ${pageNumber}</div>
       </div>
     </footer>
@@ -311,7 +378,7 @@ export function buildPdfSection(title: string, body: string, highlight = false):
   const bg = highlight ? PDF_COLORS.primaryLight : "#ffffff";
   const wrapper = document.createElement("div");
   wrapper.innerHTML = `
-    <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:16px;padding:16px 16px 14px;background:${bg};display:grid;gap:10px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;">
+    <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:16px;padding:16px 16px 14px;background:${bg};display:grid;gap:10px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;text-align:right;">
       <div style="display:flex;align-items:center;gap:10px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:8px;">
         <h2 style="margin:0;font-size:12px;font-weight:500;color:${PDF_COLORS.text};">${escapeHtml(title)}</h2>
       </div>
@@ -328,9 +395,9 @@ export function buildPdfInfoGrid(items: Array<{ label: string; value: string; em
       ${items
         .map(
           ({ label, value, emphasized }) => `
-          <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:16px;padding:12px 14px;background:${emphasized ? PDF_COLORS.primaryLight : PDF_COLORS.cardBg};">
+          <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:16px;padding:12px 14px;background:${emphasized ? PDF_COLORS.primaryLight : PDF_COLORS.cardBg};text-align:right;direction:rtl;">
             <div style="font-size:10px;color:${PDF_COLORS.textMuted};margin-bottom:4px;">${escapeHtml(label)}</div>
-            <div style="font-size:${emphasized ? "15px" : "12px"};font-weight:${emphasized ? 600 : 500};color:${emphasized ? PDF_COLORS.primary : PDF_COLORS.text};line-height:1.6;">${value}</div>
+            <div style="font-size:${emphasized ? "15px" : "12px"};font-weight:${emphasized ? 600 : 500};color:${emphasized ? PDF_COLORS.primary : PDF_COLORS.text};line-height:1.8;word-break:break-word;overflow-wrap:anywhere;">${value}</div>
           </div>`,
         )
         .join("")}
