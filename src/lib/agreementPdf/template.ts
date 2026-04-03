@@ -492,8 +492,7 @@ export function buildAgreementPdfPages(options: {
   const getAvailableHeight = () => {
     const pageRect = current.page.getBoundingClientRect();
     const contentRect = current.content.getBoundingClientRect();
-    // The available space is from content top to footer top (page bottom - footer height - padding)
-    return pageRect.bottom - contentRect.top - 90; // larger reserved area for footer
+    return pageRect.bottom - contentRect.top - 80;
   };
 
   sections.forEach((block) => {
