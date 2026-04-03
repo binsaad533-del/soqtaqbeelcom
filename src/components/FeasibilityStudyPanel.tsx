@@ -271,9 +271,9 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
   const rs = study.revenueProjections.realistic;
 
   return (
-    <div className="space-y-3">
+    <div ref={panelRef} id="feasibility" className="space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <AiStar size={18} />
           <h3 className="text-base font-semibold">دراسة الجدوى الاقتصادية</h3>
@@ -287,6 +287,10 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
               آخر تحديث: {new Date(cachedAt).toLocaleDateString("ar-SA")}
             </span>
           )}
+          <Button variant="outline" size="sm" onClick={shareStudy} className="gap-1.5 text-xs">
+            {copied ? <Check size={12} className="text-emerald-500" /> : <Share2 size={12} />}
+            {copied ? "تم النسخ" : "مشاركة"}
+          </Button>
           <Button variant="outline" size="sm" onClick={downloadPDF} disabled={pdfLoading} className="gap-1.5 text-xs">
             {pdfLoading ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
             PDF
