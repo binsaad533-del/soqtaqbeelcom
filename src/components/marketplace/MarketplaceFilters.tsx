@@ -35,7 +35,7 @@ const defaultFilters: FilterState = {
   activity: "الكل",
   priceRange: [0, 3000000],
   search: "",
-  hideSimulation: true,
+  hideSimulation: false,
 };
 
 interface Props {
