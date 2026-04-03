@@ -277,6 +277,8 @@ const AdminDashboardPage = () => {
 
         {activeTab === "blog" && <BlogAdminPanel />}
 
+        {activeTab === "emails" && <EmailMonitorPanel />}
+
         {activeTab === "backup" && <BackupPanel />}
       </div>
     </div>
