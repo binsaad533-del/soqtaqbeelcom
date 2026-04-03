@@ -430,6 +430,8 @@ const AgreementPage = () => {
                 canApprove={!bothApproved && isSeller && !agreement.seller_approved}
                 onApprove={() => handleApprove("seller")}
                 loading={approving}
+                isSeller
+                agreedPrice={Number(agreedPrice)}
               />
               <PartyApprovalCard
                 label="المشتري"
