@@ -239,6 +239,7 @@ const App = () => (
                   }
                 />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
+                <Route path="/pdf-preview" element={<PdfPreviewPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
