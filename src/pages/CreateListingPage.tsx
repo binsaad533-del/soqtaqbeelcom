@@ -224,6 +224,7 @@ const CreateListingPage = () => {
           // Restore location
           if ((draft as any).location_lat) setLocationLat((draft as any).location_lat);
           if ((draft as any).location_lng) setLocationLng((draft as any).location_lng);
+          if ((draft as any).area_sqm) setAreaSqm(String((draft as any).area_sqm));
           setDraftRestored(true);
           toast.success("تم استعادة مسودتك السابقة تلقائياً", { icon: "📋" });
         }
