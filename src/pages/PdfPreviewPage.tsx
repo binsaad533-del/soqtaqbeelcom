@@ -5,7 +5,7 @@ import { useSEO } from "@/hooks/useSEO";
 import {
   ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
   buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
-  buildPdfBankSection, buildPdfQrSection,
+  buildPdfBankSection, buildPdfQrSection, buildPdfDisclaimer,
   createPdfMount, renderPagesToPdf, paginateSections,
   formatPdfPrice, formatPdfDate, escapeHtml, PDF_COLORS,
 } from "@/lib/pdfShared";
@@ -120,6 +120,7 @@ const PdfPreviewPage = () => {
     `));
 
     sections.push(buildPdfBankSection(BANK_DETAILS, { rate: COMMISSION_RATE, amount: commissionAmount, dealAmount }));
+    sections.push(buildPdfDisclaimer());
     if (qrDataUrl) sections.push(buildPdfQrSection(qrDataUrl));
 
     const shellBuilder = (pageNumber: number) => buildPdfPageShell({
@@ -203,6 +204,7 @@ const PdfPreviewPage = () => {
       { label: "التوصية", value: "فرصة استثمارية جيدة مع إدارة حكيمة", emphasized: true },
     ])));
 
+    sections.push(buildPdfDisclaimer("feasibility"));
     if (qrDataUrl) sections.push(buildPdfQrSection(qrDataUrl));
 
     const shellBuilder = (pageNumber: number) => buildPdfPageShell({
@@ -254,6 +256,7 @@ const PdfPreviewPage = () => {
       </div>
     `));
 
+    sections.push(buildPdfDisclaimer());
     if (qrDataUrl) sections.push(buildPdfQrSection(qrDataUrl));
 
     const shellBuilder = (pageNumber: number) => buildPdfPageShell({
@@ -319,25 +322,6 @@ const PdfPreviewPage = () => {
         </p>
       </div>
 
-      <div className="mt-6 space-y-4">
-        <div className="p-5 rounded-xl border border-destructive/30 bg-destructive/5">
-          <h3 className="text-sm font-semibold text-destructive mb-2 flex items-center gap-2">
-            <span>⚠️</span> إخلاء المسؤولية
-          </h3>
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            منصة سوق تقبيل هي وسيط تقني فقط تسهّل التواصل بين أطراف الصفقة. لا تتحمل المنصة أي مسؤولية قانونية أو مالية تجاه صحة المعلومات المقدمة من البائعين أو المشترين، ولا تجاه نتائج أي صفقة يتم إبرامها عبرها. يتحمل كل طرف المسؤولية الكاملة عن التحقق من المعلومات واتخاذ قراراته الاستثمارية. تنصح المنصة بالاستعانة بمستشار قانوني ومالي مختص قبل إتمام أي صفقة.
-          </p>
-        </div>
-
-        <div className="p-5 rounded-xl border border-primary/20 bg-primary/5">
-          <h3 className="text-sm font-semibold text-primary mb-2 flex items-center gap-2">
-            <span>📊</span> تنويه بخصوص دراسة الجدوى
-          </h3>
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            دراسة الجدوى الاقتصادية المقدمة عبر المنصة تُعد تقديرية وإرشادية فقط، وتعتمد على بيانات عامة وتحليلات آلية بالذكاء الاصطناعي. لا تُعتبر هذه الدراسة بديلاً عن دراسة جدوى احترافية معتمدة من جهة استشارية مرخصة. الأرقام والتوقعات الواردة قابلة للتغير بناءً على ظروف السوق الفعلية، ولا تضمن المنصة تحقيق أي عوائد محددة.
-          </p>
-        </div>
-      </div>
     </div>
   );
 };

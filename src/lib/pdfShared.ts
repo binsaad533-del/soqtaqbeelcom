@@ -504,6 +504,24 @@ export function buildPdfInfoGrid(items: Array<{ label: string; value: string; em
     </div>`;
 }
 
+/* ── Disclaimer (small print) ── */
+const DISCLAIMER_GENERAL = "منصة سوق تقبيل وسيط تقني فقط تسهّل التواصل بين أطراف الصفقة، ولا تتحمل أي مسؤولية قانونية أو مالية تجاه صحة المعلومات المقدمة أو نتائج أي صفقة. يتحمل كل طرف مسؤولية التحقق واتخاذ قراراته. يُنصح بالاستعانة بمستشار قانوني ومالي مختص.";
+const DISCLAIMER_FEASIBILITY = "هذه الدراسة تقديرية وإرشادية فقط، تعتمد على بيانات عامة وتحليلات آلية بالذكاء الاصطناعي، ولا تُعد بديلاً عن دراسة جدوى احترافية معتمدة. الأرقام والتوقعات قابلة للتغير ولا تضمن المنصة تحقيق أي عوائد محددة.";
+
+export function buildPdfDisclaimer(type: "general" | "feasibility" = "general"): HTMLElement {
+  const text = type === "feasibility"
+    ? `${DISCLAIMER_FEASIBILITY}\n${DISCLAIMER_GENERAL}`
+    : DISCLAIMER_GENERAL;
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = `
+    <div style="border-top:0.5px solid ${PDF_COLORS.borderLight};padding-top:8px;margin-top:4px;font-family:${PDF_FONT_FAMILY};direction:rtl;text-align:right;">
+      <div style="font-size:7px;font-weight:600;color:${PDF_COLORS.textMuted};margin-bottom:3px;">⚠ إخلاء مسؤولية</div>
+      <div style="font-size:6.5px;line-height:1.8;color:${PDF_COLORS.textMuted};white-space:pre-line;">${escapeHtml(text)}</div>
+    </div>
+  `;
+  return wrapper.firstElementChild as HTMLElement;
+}
+
 /* ── Get logos base64 ── */
 export async function loadPdfLogo(): Promise<string> {
   return loadImageBase64(logoBlueUrl);

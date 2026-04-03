@@ -4,7 +4,7 @@ import {
   PDF_PAGE_WIDTH_PX, PDF_PAGE_HEIGHT_PX, PDF_FONT_FAMILY, PDF_COLORS,
   escapeHtml, safeText, formatPdfDate, formatPdfPrice,
   buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
-  buildPdfBankSection, buildPdfQrSection,
+  buildPdfBankSection, buildPdfQrSection, buildPdfDisclaimer,
 } from "@/lib/pdfShared";
 
 export const PAGE_WIDTH_PX = PDF_PAGE_WIDTH_PX;
@@ -292,6 +292,9 @@ const buildSections = (data: AgreementPdfData, qrDataUrl = "") => {
       </div>
     `),
   );
+
+  // ── Disclaimer ──
+  sections.push(buildPdfDisclaimer());
 
   // ── QR Code (shared component) ──
   if (qrDataUrl) {

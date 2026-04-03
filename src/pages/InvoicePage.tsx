@@ -11,7 +11,7 @@ import {
   buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
   createPdfMount, renderPagesToPdf, paginateSections,
   formatPdfDate, escapeHtml, PDF_FONT_FAMILY,
-  PDF_COLORS,
+  PDF_COLORS, buildPdfDisclaimer,
 } from "@/lib/pdfShared";
 
 interface InvoiceData {
@@ -168,6 +168,8 @@ const InvoicePage = () => {
         dealAmount: invoice.deal_amount,
       }));
 
+      // Disclaimer
+      sections.push(buildPdfDisclaimer());
       // QR verification section (outside footer)
       if (qrDataUrl) {
         sections.push(buildPdfQrSection(qrDataUrl));
