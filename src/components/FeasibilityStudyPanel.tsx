@@ -17,6 +17,7 @@ import {
   createPdfMount, renderPagesToPdf, paginateSections,
   formatPdfPrice, escapeHtml, PDF_COLORS,
 } from "@/lib/pdfShared";
+import { BANK_DETAILS } from "@/hooks/useCommissions";
 
 /* ── Types ── */
 interface Scenario {
