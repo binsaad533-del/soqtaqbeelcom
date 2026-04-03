@@ -131,8 +131,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </Link>
                 <NotificationBell />
                 <button
+                  onClick={() => { console.log("Dashboard click"); navigate("/dashboard"); }}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors text-[12px]"
+                  title={tx("لوحة التحكم", "Dashboard")}
+                >
+                  <User size={15} strokeWidth={1.5} />
+                  <span className="hidden lg:inline">{tx("لوحة التحكم", "Dashboard")}</span>
+                </button>
+                <button
                   onClick={() => navigate("/dashboard")}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                  className="sm:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
                   title={tx("لوحة التحكم", "Dashboard")}
                 >
                   <User size={17} strokeWidth={1.5} />
