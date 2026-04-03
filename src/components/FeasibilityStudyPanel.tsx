@@ -101,6 +101,7 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
   const [loadingCache, setLoadingCache] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cachedAt, setCachedAt] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     summary: true,
     investment: true,
@@ -112,6 +113,14 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
   });
   const [pdfLoading, setPdfLoading] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to panel if URL has #feasibility hash
+  useEffect(() => {
+    if (window.location.hash === "#feasibility" && panelRef.current) {
+      setTimeout(() => panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 500);
+    }
+  }, [study]);
 
   const toggleSection = (key: string) =>
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
