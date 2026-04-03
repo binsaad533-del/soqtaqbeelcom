@@ -114,7 +114,7 @@ const AccountSettingsPanel = () => {
 
       if (updateError) throw updateError;
 
-      if (refreshProfile) await refreshProfile();
+      // Avatar will show on next page load
       toast.success("تم تحديث الصورة الشخصية");
     } catch (err: any) {
       toast.error(err.message || "فشل رفع الصورة");
