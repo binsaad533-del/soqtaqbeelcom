@@ -10,7 +10,7 @@ import {
   ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
   buildPdfPageShell, buildPdfSection,
   createPdfMount, renderPagesToPdf, paginateSections,
-  formatPdfDate, escapeHtml,
+  formatPdfDate, escapeHtml, PDF_FONT_FAMILY,
   PDF_COLORS,
 } from "@/lib/pdfShared";
 
