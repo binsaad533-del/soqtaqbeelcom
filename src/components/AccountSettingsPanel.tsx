@@ -17,6 +17,8 @@ const AccountSettingsPanel = () => {
   const [email, setEmail] = useState(user?.email || "");
   const [phone, setPhone] = useState(profile?.phone || "");
   const [savingProfile, setSavingProfile] = useState(false);
+  const [emailPendingConfirmation, setEmailPendingConfirmation] = useState(false);
+  const emailChanged = email.trim() !== (user?.email || "").trim() && email.trim().length > 0;
 
   /* ── Phone verification state ── */
   const originalPhone = profile?.phone || "";
