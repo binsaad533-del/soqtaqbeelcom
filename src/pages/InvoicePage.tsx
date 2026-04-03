@@ -11,7 +11,7 @@ import {
   buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
   createPdfMount, renderPagesToPdf, paginateSections,
   formatPdfDate, escapeHtml, PDF_FONT_FAMILY,
-  PDF_COLORS,
+  PDF_COLORS, buildPdfDisclaimer,
 } from "@/lib/pdfShared";
 
 interface InvoiceData {
