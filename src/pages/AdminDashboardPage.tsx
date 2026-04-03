@@ -5,16 +5,18 @@ import { useDeals, type Deal } from "@/hooks/useDeals";
 import { useProfiles, type Profile } from "@/hooks/useProfiles";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
+import { Mail } from "lucide-react";
 import { BarChart3, Users, FileText, Handshake, ChevronLeft, Loader2, Shield, Database, UserPlus, ShieldAlert, Newspaper } from "lucide-react";
 import BackupPanel from "@/components/BackupPanel";
 import CommissionAdminPanel from "@/components/CommissionAdminPanel";
 import CrmDashboard from "@/components/crm/CrmDashboard";
 import BlogAdminPanel from "@/components/BlogAdminPanel";
+import EmailMonitorPanel from "@/components/EmailMonitorPanel";
 import SarSymbol from "@/components/SarSymbol";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/hooks/useSEO";
 
-type Tab = "overview" | "crm" | "commissions" | "blog" | "backup" | "actions";
+type Tab = "overview" | "crm" | "commissions" | "blog" | "emails" | "backup" | "actions";
 
 interface AuditLog {
   id: string;
@@ -91,6 +93,7 @@ const AdminDashboardPage = () => {
             { id: "crm" as Tab, label: "العملاء المحتملين", icon: UserPlus, badge: 0 },
             { id: "commissions" as Tab, label: "العمولات", icon: Database, badge: 0 },
             { id: "blog" as Tab, label: "المدونة", icon: Newspaper, badge: 0 },
+            { id: "emails" as Tab, label: "البريد", icon: Mail, badge: 0 },
             { id: "backup" as Tab, label: "النسخ الاحتياطي", icon: Shield, badge: 0 },
           ].map(tab => (
             <button
@@ -273,6 +276,8 @@ const AdminDashboardPage = () => {
         {activeTab === "commissions" && <CommissionAdminPanel />}
 
         {activeTab === "blog" && <BlogAdminPanel />}
+
+        {activeTab === "emails" && <EmailMonitorPanel />}
 
         {activeTab === "backup" && <BackupPanel />}
       </div>
