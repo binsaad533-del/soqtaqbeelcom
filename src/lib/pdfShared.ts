@@ -306,21 +306,22 @@ export function buildPdfPageShell(options: {
   watermark.textContent = "سوق تقبيل";
   page.appendChild(watermark);
 
-  // ── Header ──
-  const metaHtml = (documentMeta || []).map((m) => `<span>${escapeHtml(m)}</span>`).join("");
-  const headerHtml = `
-    <header style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:12px;border-bottom:2px solid ${PDF_COLORS.gold};">
-      ${logoBase64 ? `<div style="flex-shrink:0;display:grid;justify-items:center;gap:2px;"><img src="${logoBase64}" alt="سوق تقبيل" style="width:180px;max-height:64px;object-fit:contain;display:block;" /><div style="font-size:9px;font-weight:600;color:${PDF_COLORS.textMuted};letter-spacing:2px;">SOQ TAQBEEL</div></div>` : ""}
-      <div style="display:grid;gap:4px;flex:1;text-align:left;">
-        <div style="font-size:16px;font-weight:700;color:${PDF_COLORS.primary};">${escapeHtml(documentTitle)}</div>
-        ${documentSubtitle ? `<div style="font-size:10px;font-weight:500;color:${PDF_COLORS.text};line-height:1.6;">${escapeHtml(documentSubtitle)}</div>` : ""}
-        ${metaHtml ? `<div style="display:grid;gap:2px;font-size:9px;color:${PDF_COLORS.textMuted};text-align:left;">${metaHtml}</div>` : ""}
-      </div>
-    </header>
-  `;
-
+  // ── Header (first page only) ──
   const header = document.createElement("div");
-  header.innerHTML = headerHtml.trim();
+  if (pageNumber === 1) {
+    const metaHtml = (documentMeta || []).map((m) => `<span>${escapeHtml(m)}</span>`).join("");
+    const headerHtml = `
+      <header style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:12px;border-bottom:2px solid ${PDF_COLORS.gold};">
+        ${logoBase64 ? `<div style="flex-shrink:0;display:grid;justify-items:center;gap:2px;"><img src="${logoBase64}" alt="سوق تقبيل" style="width:180px;max-height:64px;object-fit:contain;display:block;" /><div style="font-size:9px;font-weight:600;color:${PDF_COLORS.textMuted};letter-spacing:2px;">SOQ TAQBEEL</div></div>` : ""}
+        <div style="display:grid;gap:4px;flex:1;text-align:left;">
+          <div style="font-size:16px;font-weight:700;color:${PDF_COLORS.primary};">${escapeHtml(documentTitle)}</div>
+          ${documentSubtitle ? `<div style="font-size:10px;font-weight:500;color:${PDF_COLORS.text};line-height:1.6;">${escapeHtml(documentSubtitle)}</div>` : ""}
+          ${metaHtml ? `<div style="display:grid;gap:2px;font-size:9px;color:${PDF_COLORS.textMuted};text-align:left;">${metaHtml}</div>` : ""}
+        </div>
+      </header>
+    `;
+    header.innerHTML = headerHtml.trim();
+  }
 
   // ── Content ──
   const content = document.createElement("div");
