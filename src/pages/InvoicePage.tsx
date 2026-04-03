@@ -79,6 +79,11 @@ const InvoicePage = () => {
     if (!invoice) return;
     setPdfLoading(true);
     try {
+      const [{ BANK_DETAILS, COMMISSION_RATE, calculateCommission }, { safeText }] = await Promise.all([
+        import("@/hooks/useCommissions"),
+        import("@/lib/pdfShared"),
+      ]);
+
       const [logoBase64, logoIconBase64, qrDataUrl] = await Promise.all([
         loadPdfLogo(),
         loadPdfLogoIcon(),
@@ -87,7 +92,9 @@ const InvoicePage = () => {
       ]);
 
       const mount = createPdfMount();
-      const commissionAmount = invoice.commission_amount ?? invoice.deal_amount * invoice.commission_rate;
+      const commissionRate = COMMISSION_RATE;
+      const commissionAmount = calculateCommission(invoice.deal_amount);
+      const totalWithVat = commissionAmount * 1.15;
       const statusLabel = STATUS_MAP[invoice.status]?.label || "قيد الانتظار";
 
       const partyCard = (label: string, profile: ProfileInfo | null) => `
@@ -101,9 +108,8 @@ const InvoicePage = () => {
 
       const sections: HTMLElement[] = [];
 
-      // Status badge
       sections.push(buildPdfSection("حالة الفاتورة", `
-        <div style="display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
           <div style="padding:8px 18px;border-radius:999px;background:${PDF_COLORS.primaryLight};color:${PDF_COLORS.primary};font-size:13px;font-weight:600;">
             ${escapeHtml(statusLabel)}
           </div>
@@ -111,7 +117,6 @@ const InvoicePage = () => {
         </div>
       `, true));
 
-      // Parties
       sections.push(buildPdfSection("أطراف الفاتورة", `
         <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
           ${partyCard("البائع", seller)}
@@ -119,7 +124,6 @@ const InvoicePage = () => {
         </div>
       `));
 
-      // Financial details
       sections.push(buildPdfSection("تفاصيل الصفقة", `
         <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:16px;overflow:hidden;">
           <table style="width:100%;font-size:12px;color:${PDF_COLORS.text};border-collapse:collapse;font-family:${PDF_FONT_FAMILY};">
@@ -138,37 +142,57 @@ const InvoicePage = () => {
                 <td style="padding:12px 16px;text-align:left;font-family:monospace;font-weight:500;">${formatCurrency(invoice.deal_amount)} ﷼</td>
               </tr>
               <tr style="border-top:0.5px solid ${PDF_COLORS.border};background:${PDF_COLORS.cardBg};">
-                <td style="padding:12px 16px;">عمولة المنصة (${(invoice.commission_rate * 100).toFixed(0)}%)</td>
+                <td style="padding:12px 16px;">عمولة المنصة (${(commissionRate * 100).toFixed(0)}%)</td>
                 <td style="padding:12px 16px;text-align:left;font-family:monospace;">${formatCurrency(commissionAmount)} ﷼</td>
+              </tr>
+              <tr style="border-top:0.5px solid ${PDF_COLORS.border};">
+                <td style="padding:12px 16px;">ضريبة القيمة المضافة (15%)</td>
+                <td style="padding:12px 16px;text-align:left;font-family:monospace;">${formatCurrency(totalWithVat - commissionAmount)} ﷼</td>
               </tr>
             </tbody>
             <tfoot>
               <tr style="border-top:2px solid ${PDF_COLORS.primary};">
-                <td style="padding:14px 16px;font-weight:700;font-size:14px;color:${PDF_COLORS.primary};">الإجمالي</td>
-                <td style="padding:14px 16px;text-align:left;font-weight:700;font-size:14px;font-family:monospace;color:${PDF_COLORS.primary};">${formatCurrency(invoice.total_amount)} ﷼</td>
+                <td style="padding:14px 16px;font-weight:700;font-size:14px;color:${PDF_COLORS.primary};">الإجمالي المستحق</td>
+                <td style="padding:14px 16px;text-align:left;font-weight:700;font-size:14px;font-family:monospace;color:${PDF_COLORS.primary};">${formatCurrency(totalWithVat)} ﷼</td>
               </tr>
             </tfoot>
           </table>
         </div>
       `));
 
-      // QR section
+      sections.push(buildPdfSection("بيانات الحساب البنكي", buildPdfInfoGrid([
+        { label: "اسم المستفيد", value: escapeHtml(BANK_DETAILS.beneficiary) },
+        { label: "الاسم القانوني", value: escapeHtml(BANK_DETAILS.legalName) },
+        { label: "البنك", value: escapeHtml(BANK_DETAILS.bank) },
+        { label: "رقم الحساب", value: escapeHtml(BANK_DETAILS.accountNumber) },
+        { label: "رقم الآيبان (IBAN)", value: escapeHtml(BANK_DETAILS.iban), emphasized: true },
+        { label: "السجل التجاري", value: escapeHtml(BANK_DETAILS.nationalId) },
+        { label: "الرقم الضريبي", value: escapeHtml(BANK_DETAILS.taxNumber) },
+        { label: "التواصل المالي", value: escapeHtml(`${BANK_DETAILS.email} — ${BANK_DETAILS.phone}`) },
+      ]), true));
+
       if (qrDataUrl) {
         sections.push(buildPdfSection("التحقق الإلكتروني", `
-          <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:12px;">
-            <img src="${qrDataUrl}" alt="QR" style="width:64px;height:64px;border-radius:8px;" />
-            <div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:2;text-align:center;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px;">
+            <div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:2;text-align:right;flex:1;">
               يمكنكم مسح الرمز للتحقق من الفاتورة إلكترونياً<br />
               جميع المبالغ بالريال السعودي
+            </div>
+            <div style="display:grid;justify-items:center;gap:6px;flex-shrink:0;">
+              <img src="${qrDataUrl}" alt="QR" style="width:72px;height:72px;border-radius:8px;" />
+              <div style="font-size:9px;color:${PDF_COLORS.textFaint};">تحقق إلكتروني</div>
             </div>
           </div>
         `));
       }
 
       const shellBuilder = (pageNumber: number) => buildPdfPageShell({
-        documentTitle: "فاتورة",
+        documentTitle: "فاتورة ضريبية",
         documentSubtitle: `#${String(invoice.invoice_number).padStart(6, "0")} — ${escapeHtml(invoice.listing_title || "صفقة تجارية")}`,
-        documentMeta: [`تاريخ الإصدار: ${formatPdfDate(invoice.created_at)}`],
+        documentMeta: [
+          `تاريخ الإصدار: ${formatPdfDate(invoice.created_at)}`,
+          `الرقم الضريبي: ${BANK_DETAILS.taxNumber}`,
+        ],
         logoBase64,
         logoIconBase64,
         pageNumber,
