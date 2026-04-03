@@ -6,6 +6,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
 import { sanitizeInput, isRateLimited } from "@/lib/security";
@@ -73,6 +74,11 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
       setPrice("");
       setMessage("");
       getOffersSummary(listingId).then(setSummary);
+
+      // Send SMS notification to seller (fire-and-forget)
+      supabase.functions.invoke("notify-offer-sms", {
+        body: { listing_id: listingId, offered_price: numPrice },
+      }).catch(() => {});
     }
   };
 
