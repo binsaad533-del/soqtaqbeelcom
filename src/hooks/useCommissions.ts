@@ -48,7 +48,7 @@ export const COMMISSION_RATE = 0.01; // flat 1%
 export const BANK_DETAILS = {
   beneficiary: "شركة عين جساس للمقاولات",
   legalName: "عين جساس للمقاولات",
-  bank: "مصرف الراجحي",
+  bank: "مصرف الراجحي (Al Rajhi Bank)",
   accountNumber: "611000010006086026222",
   iban: "SA4180000611608016026222",
   nationalId: "7017628152",
