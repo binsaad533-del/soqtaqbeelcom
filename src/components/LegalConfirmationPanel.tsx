@@ -144,7 +144,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
     try {
       const {
         ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
-        buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
+        buildPdfPageShell, buildPdfSection, buildPdfInfoGrid, buildPdfQrSection,
         createPdfMount, renderPagesToPdf, paginateSections,
         escapeHtml, PDF_COLORS,
       } = await import("@/lib/pdfShared");
