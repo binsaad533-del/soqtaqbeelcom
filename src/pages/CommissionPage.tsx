@@ -173,7 +173,7 @@ export default function CommissionPage() {
               <BankRow label="البنك" value={BANK_DETAILS.bank} />
               <BankRow label="رقم الحساب" value={BANK_DETAILS.accountNumber} />
               <BankRow label="الآيبان (IBAN)" value={BANK_DETAILS.iban} />
-              <BankRow label="الهوية الوطنية" value={BANK_DETAILS.nationalId} />
+              <BankRow label="السجل التجاري" value={BANK_DETAILS.nationalId} />
             </div>
           </CardContent>
         </Card>
