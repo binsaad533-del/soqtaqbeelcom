@@ -73,6 +73,11 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
       setPrice("");
       setMessage("");
       getOffersSummary(listingId).then(setSummary);
+
+      // Send SMS notification to seller (fire-and-forget)
+      supabase.functions.invoke("notify-offer-sms", {
+        body: { listing_id: listingId, offered_price: numPrice },
+      }).catch(() => {});
     }
   };
 
