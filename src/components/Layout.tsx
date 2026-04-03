@@ -50,7 +50,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     { label: tx("كيف تتم الصفقة", "Deal Pipeline"), path: "/deal-pipeline" },
     { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing" },
     { label: tx("لوحة التحكم", "Dashboard"), path: "/dashboard" },
-    { label: tx("نماذج PDF", "PDF Templates"), path: "/pdf-preview" },
+    { label: tx("النماذج", "Templates"), path: "/pdf-preview" },
   ];
 
   useEffect(() => {
