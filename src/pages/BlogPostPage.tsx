@@ -120,18 +120,18 @@ const BlogPostPage = () => {
             </span>
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-bold mb-8 leading-relaxed">{title}</h1>
+          <h1 className="text-xl md:text-2xl font-semibold mb-6 leading-relaxed">{title}</h1>
 
           {/* Content */}
-          <div className="prose prose-base dark:prose-invert max-w-none
-            prose-headings:font-bold prose-headings:leading-snug prose-headings:mb-4 prose-headings:mt-8
-            prose-h2:text-xl prose-h2:border-b prose-h2:border-border/20 prose-h2:pb-2
-            prose-h3:text-lg
-            prose-p:text-base prose-p:leading-[1.9] prose-p:mb-5 prose-p:text-foreground/85
-            prose-li:text-base prose-li:leading-[1.8] prose-li:mb-1.5 prose-li:text-foreground/80
-            prose-ul:my-4 prose-ul:ps-6
-            prose-ol:my-4 prose-ol:ps-6
-            prose-strong:text-foreground prose-strong:font-semibold
+          <div className="prose prose-sm dark:prose-invert max-w-none
+            prose-headings:font-semibold prose-headings:leading-normal prose-headings:mb-3 prose-headings:mt-7
+            prose-h2:text-base prose-h2:border-b prose-h2:border-border/15 prose-h2:pb-2
+            prose-h3:text-[15px]
+            prose-p:text-sm prose-p:leading-[2] prose-p:mb-4 prose-p:text-foreground/80 prose-p:font-normal
+            prose-li:text-sm prose-li:leading-[1.9] prose-li:mb-1 prose-li:text-foreground/75 prose-li:font-normal
+            prose-ul:my-3 prose-ul:ps-5
+            prose-ol:my-3 prose-ol:ps-5
+            prose-strong:text-foreground/90 prose-strong:font-medium
             prose-a:text-primary prose-a:no-underline hover:prose-a:underline
           ">
             <ReactMarkdown>{content}</ReactMarkdown>
