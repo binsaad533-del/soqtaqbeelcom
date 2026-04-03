@@ -200,16 +200,9 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
         </div>
       `, true));
 
-      // QR
+      // QR verification section (outside footer)
       if (qrDataUrl) {
-        sections.push(buildPdfSection("التحقق الإلكتروني", `
-          <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:12px;">
-            <img src="${qrDataUrl}" alt="QR" style="width:64px;height:64px;border-radius:8px;" />
-            <div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:2;text-align:center;">
-              يمكنكم مسح الرمز للتحقق من الوثيقة إلكترونياً
-            </div>
-          </div>
-        `));
+        sections.push(buildPdfQrSection(qrDataUrl));
       }
 
       const shellBuilder = (pageNumber: number) => buildPdfPageShell({
