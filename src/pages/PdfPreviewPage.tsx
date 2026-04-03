@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Loader2, Receipt, BarChart3, Scale } from "lucide-react";
+import { FileText, Download, Loader2, BarChart3, Scale } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import SarSymbol from "@/components/SarSymbol";
 import { useSEO } from "@/hooks/useSEO";
 import {
   ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
