@@ -102,6 +102,7 @@ const CreateListingPage = () => {
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
   const [sellerNote, setSellerNote] = useState("");
+  const [areaSqm, setAreaSqm] = useState<string>("");
   const SELLER_NOTE_MAX = 300;
   const [inventoryPricingMode, setInventoryPricingMode] = useState<InventoryPricingMode>("per_item");
   const [bulkInventoryPrice, setBulkInventoryPrice] = useState<string>("");
@@ -223,6 +224,7 @@ const CreateListingPage = () => {
           // Restore location
           if ((draft as any).location_lat) setLocationLat((draft as any).location_lat);
           if ((draft as any).location_lng) setLocationLng((draft as any).location_lng);
+          if ((draft as any).area_sqm) setAreaSqm(String((draft as any).area_sqm));
           setDraftRestored(true);
           toast.success("تم استعادة مسودتك السابقة تلقائياً", { icon: "📋" });
         }
@@ -256,6 +258,7 @@ const CreateListingPage = () => {
         required_documents: dealStructure.requiredDocuments,
         location_lat: locationLat,
         location_lng: locationLng,
+        area_sqm: areaSqm ? Number(areaSqm) : null,
       } as never);
       setAutoSaveStatus("saved");
       setTimeout(() => setAutoSaveStatus("idle"), 3000);
@@ -627,6 +630,10 @@ const CreateListingPage = () => {
           ...(extracted.annual_rent && !prev.annual_rent ? { annual_rent: extracted.annual_rent } : {}),
           ...(extracted.lease_duration && !prev.lease_duration ? { lease_duration: extracted.lease_duration } : {}),
         }));
+        // Auto-fill area from documents
+        if (extracted.area_sqm && !areaSqm) {
+          setAreaSqm(extracted.area_sqm);
+        }
         if (extracted.cr_number || extracted.entity_name) {
           setCrExtraction(prev => ({
             ...prev,
@@ -771,6 +778,10 @@ const CreateListingPage = () => {
       toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر");
       return;
     }
+    if (locationLat == null || locationLng == null) {
+      toast.error("يجب تحديد الموقع على الخريطة قبل النشر");
+      return;
+    }
 
     const nextListingPayload = buildListingPayload();
     const nextInputKey = JSON.stringify(nextListingPayload);
@@ -834,6 +845,7 @@ const CreateListingPage = () => {
         ai_structure_validation: dealCheckResult || null,
         location_lat: locationLat,
         location_lng: locationLng,
+        area_sqm: areaSqm ? Number(areaSqm) : null,
         status: "published",
         published_at: new Date().toISOString(),
         title: isCrOnly
@@ -940,7 +952,8 @@ const CreateListingPage = () => {
   const imageReq = getImageRequirement(dealStructure.primaryType);
   const photosOk = imageReq === "none" || imageReq === "optional" || totalPhotos > 0;
   const disclosureErrors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
-  const canPublish = photosOk && Object.keys(disclosureErrors).length === 0;
+  const locationOk = locationLat != null && locationLng != null;
+  const canPublish = photosOk && Object.keys(disclosureErrors).length === 0 && locationOk;
   const [publishAttempted, setPublishAttempted] = useState(false);
 
   // Debug logging for schema verification
@@ -1387,7 +1400,7 @@ const CreateListingPage = () => {
                 <div className="flex items-center gap-2">
                   <MapPin size={16} strokeWidth={1.5} className="text-primary" />
                   <h3 className="font-medium text-sm">موقع المشروع على الخريطة</h3>
-                  <span className="text-[10px] text-muted-foreground">(اختياري — يساعد المشترين القريبين)</span>
+                  <span className="text-[10px] text-destructive font-medium">(مطلوب)</span>
                 </div>
                 <GoogleMapPicker
                   lat={locationLat}
@@ -1418,6 +1431,30 @@ const CreateListingPage = () => {
                       onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))}
                     />
                   </div>
+                )}
+
+                {/* Area field */}
+                <div className="mt-3">
+                  <FormField
+                    label="مساحة الموقع (م²)"
+                    placeholder="مثال: 120"
+                    value={areaSqm}
+                    onChange={(v) => setAreaSqm(toEnglishNumerals(v))}
+                  />
+                  {areaSqm && (
+                    <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                      {Number(areaSqm) > 0 && <AiInlineStar />}
+                      {Number(areaSqm) > 0 ? "تم استخراج المساحة تلقائياً — يمكنك تعديلها" : ""}
+                    </p>
+                  )}
+                </div>
+
+                {/* Location required warning */}
+                {publishAttempted && !locationOk && (
+                  <p className="text-[11px] text-destructive flex items-center gap-1 mt-2">
+                    <AlertTriangle size={12} />
+                    يجب تحديد الموقع على الخريطة قبل النشر
+                  </p>
                 )}
               </div>
             </div>
