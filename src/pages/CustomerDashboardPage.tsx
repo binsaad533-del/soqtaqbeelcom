@@ -743,6 +743,7 @@ const CustomerDashboardPage = () => {
             {activeTab === "saved" && <SavedListingsTab />}
             {activeTab === "notifications" && <NotificationPreferencesPanel />}
             {activeTab === "security" && <SecuritySettingsPanel />}
+            {activeTab === "account" && <AccountSettingsPanel />}
         </div>
       </div>
     </div>
