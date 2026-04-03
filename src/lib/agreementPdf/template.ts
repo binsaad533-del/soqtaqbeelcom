@@ -123,22 +123,22 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, logoIconBase
   page.style.cssText = PAGE_SHELL_STYLE;
 
   const header = createNode(`
-    <header style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-bottom:14px;border-bottom:0.5px solid hsl(214 32% 93%);">
-      <div style="display:grid;gap:5px;flex:1;text-align:right;">
-        <div style="font-size:15px;font-weight:500;color:hsl(215 28% 17%);">اتفاقية الصفقة</div>
-        <div style="font-size:10px;color:hsl(215 16% 45%);line-height:1.7;">${safeText(data.dealTitle)} — ${safeText(data.location)}</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9px;color:hsl(215 16% 45%);">
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:12px;border-bottom:1.5px solid hsl(212 84% 42%);">
+      ${logoBase64 ? `<div style="flex-shrink:0;"><img src="${logoBase64}" alt="سوق تقبيل" style="height:56px;object-fit:contain;display:block;" /></div>` : ""}
+      <div style="display:grid;gap:3px;flex:1;text-align:left;">
+        <div style="font-size:16px;font-weight:700;color:hsl(212 84% 42%);">اتفاقية الصفقة</div>
+        <div style="font-size:10px;color:hsl(215 16% 45%);line-height:1.6;">${safeText(data.dealTitle)} — ${safeText(data.location)}</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9px;color:hsl(215 16% 45%);justify-content:flex-end;">
           <span>رقم الاتفاقية: ${safeText(data.agreementNumber)}</span>
           <span>الإصدار: ${data.version}</span>
           <span>التاريخ: ${formatDate(data.createdAt)}</span>
         </div>
       </div>
-      ${logoBase64 ? `<div style="width:320px;display:flex;align-items:center;justify-content:flex-start;flex-shrink:0;"><img src="${logoBase64}" alt="سوق تقبيل" style="height:112px;width:320px;object-fit:contain;object-position:left center;display:block;" /></div>` : ""}
     </header>
   `);
 
   const content = document.createElement("div");
-  content.style.cssText = "display:flex;flex-direction:column;flex:1;gap:12px;padding-top:2px;overflow:visible;";
+  content.style.cssText = "display:flex;flex-direction:column;flex:1;gap:10px;padding-top:2px;overflow:visible;";
 
   const navLinks = [
     { label: "الرئيسية", href: "https://soqtaqbeel.com/" },
@@ -149,29 +149,25 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, logoIconBase
     { label: "العمولة", href: "https://soqtaqbeel.com/commission" },
   ];
   const navHtml = navLinks.map(
-    (l, i) => `${i > 0 ? '<span style="color:hsl(214 32% 93%);font-size:9px;padding:0 4px;">|</span>' : ''}<a href="${l.href}" style="color:hsl(215 16% 45%);text-decoration:none;font-size:9px;">${escapeHtml(l.label)}</a>`
+    (l, i) => `${i > 0 ? '<span style="color:hsl(214 32% 93%);font-size:8px;padding:0 3px;">|</span>' : ''}<a href="${l.href}" style="color:hsl(215 16% 45%);text-decoration:none;font-size:8px;">${escapeHtml(l.label)}</a>`
   ).join("");
 
   const footer = createNode(`
-    <footer style="padding-top:10px;border-top:0.5px solid hsl(214 32% 93%);display:grid;gap:6px;text-align:center;">
-      <div style="display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap;line-height:2;">
+    <footer style="padding-top:6px;border-top:0.5px solid hsl(214 32% 93%);display:grid;gap:3px;text-align:center;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:1px;flex-wrap:wrap;line-height:1.8;">
         ${navHtml}
       </div>
-      ${logoIconBase64 ? `<div style="text-align:center;"><img src="${logoIconBase64}" alt="سوق تقبيل" style="height:28px;width:28px;object-fit:contain;opacity:0.5;" /></div>` : ""}
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;opacity:0.45;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5"><path d="M12 2c-2.5 0-4.5 1.5-5 4l-.5 3c-.1.5-.5.8-1 .8-.3 0-.5.2-.5.5s.2.5.5.5c.5 0 1 .2 1.3.5.3.4.2.8-.2 1.2-.5.5-1.5 1-2.5 1.5-.3.2-.5.5-.3.8.2.5.8.7 1.5.8.3 0 .5.2.5.5 0 .3.2.5.5.5h.5c.5 0 1 .2 1.5.5s1.2.8 2.2.8 1.7-.5 2.2-.8.9-.5 1.5-.5h.5c.3 0 .5-.2.5-.5 0-.3.2-.5.5-.5.7-.1 1.3-.3 1.5-.8.2-.3 0-.6-.3-.8-1-.5-2-1-2.5-1.5-.4-.4-.5-.8-.2-1.2.3-.3.8-.5 1.3-.5.3 0 .5-.2.5-.5s-.2-.5-.5-.5c-.5 0-.9-.3-1-.8l-.5-3c-.5-2.5-2.5-4-5-4z"/></svg>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5"><path d="M4 4l11.733 16h4.267l-11.733 -16z"/><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/></svg>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
-      </div>
-      <div style="font-size:9px;color:hsl(215 16% 45%);line-height:1.8;">
-        في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;opacity:0.4;">
+        ${logoIconBase64 ? `<img src="${logoIconBase64}" alt="" style="height:16px;width:16px;object-fit:contain;" />` : ""}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5"><path d="M12 2c-2.5 0-4.5 1.5-5 4l-.5 3c-.1.5-.5.8-1 .8-.3 0-.5.2-.5.5s.2.5.5.5c.5 0 1 .2 1.3.5.3.4.2.8-.2 1.2-.5.5-1.5 1-2.5 1.5-.3.2-.5.5-.3.8.2.5.8.7 1.5.8.3 0 .5.2.5.5 0 .3.2.5.5.5h.5c.5 0 1 .2 1.5.5s1.2.8 2.2.8 1.7-.5 2.2-.8.9-.5 1.5-.5h.5c.3 0 .5-.2.5-.5 0-.3.2-.5.5-.5.7-.1 1.3-.3 1.5-.8.2-.3 0-.6-.3-.8-1-.5-2-1-2.5-1.5-.4-.4-.5-.8-.2-1.2.3-.3.8-.5 1.3-.5.3 0 .5-.2.5-.5s-.2-.5-.5-.5c-.5 0-.9-.3-1-.8l-.5-3c-.5-2.5-2.5-4-5-4z"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5"><path d="M4 4l11.733 16h4.267l-11.733 -16z"/><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:8px;color:hsl(215 16% 55%);line-height:1.8;">
-          © ${new Date().getFullYear()} المنصة مملوكة ومدارة بواسطة شركة Ain Jasaas
-        </div>
-        <div style="font-size:8px;color:hsl(215 16% 45%);white-space:nowrap;">صفحة ${pageNumber}</div>
+        <div style="font-size:7px;color:hsl(215 16% 55%);">© ${new Date().getFullYear()} شركة Ain Jasaas</div>
+        <div style="font-size:7px;color:hsl(215 16% 55%);">صُنع في 🇸🇦</div>
+        <div style="font-size:7px;color:hsl(215 16% 45%);">صفحة ${pageNumber}</div>
       </div>
     </footer>
   `);
