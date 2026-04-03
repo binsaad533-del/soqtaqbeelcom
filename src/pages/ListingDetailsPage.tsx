@@ -472,6 +472,9 @@ const ListingDetailsPage = () => {
             </div>
 
             <DealCheckPanel listing={listing} savedAnalysis={listing.ai_structure_validation} />
+
+            {/* دراسة الجدوى الاقتصادية وتحليل المنافسين */}
+            <FeasibilityStudyPanel listing={listing} />
           </div>
 
           {/* Sidebar */}
