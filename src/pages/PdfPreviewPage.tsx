@@ -144,17 +144,7 @@ const PdfPreviewPage = () => {
     const mount = createPdfMount();
     const pages = buildAgreementPdfPages({ data: SAMPLE_AGREEMENT, logoBase64, logoIconBase64, qrDataUrl, mount });
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-    const html2canvas = (await import("html2canvas")).default;
-    const { jsPDF } = await import("jspdf");
-    const { protectPdf } = await import("@/lib/pdfShared");
-    const pdf = new jsPDF("p", "mm", "a4");
-    protectPdf(pdf);
-    for (const [i, page] of pages.entries()) {
-      const canvas = await html2canvas(page, { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff", width: 794, height: 1123, windowWidth: 794, windowHeight: 1123 });
-      if (i > 0) pdf.addPage();
-      pdf.addImage(canvas.toDataURL("image/jpeg", 0.98), "JPEG", 0, 0, 210, 297, undefined, "FAST");
-    }
-    pdf.save("نموذج-اتفاقية.pdf");
+    await renderPagesToPdf({ pages, fileName: "نموذج-اتفاقية.pdf" });
     document.body.removeChild(mount);
   };
 
