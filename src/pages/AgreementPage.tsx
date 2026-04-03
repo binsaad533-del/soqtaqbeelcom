@@ -430,6 +430,8 @@ const AgreementPage = () => {
                 canApprove={!bothApproved && isSeller && !agreement.seller_approved}
                 onApprove={() => handleApprove("seller")}
                 loading={approving}
+                isSeller
+                agreedPrice={Number(agreedPrice)}
               />
               <PartyApprovalCard
                 label="المشتري"
@@ -600,11 +602,12 @@ const AgreementPage = () => {
 
 /* ── Unified Party + Approval Card ── */
 const PartyApprovalCard = ({
-  label, name, contact, approved, approvedAt, canApprove, onApprove, loading,
+  label, name, contact, approved, approvedAt, canApprove, onApprove, loading, isSeller, agreedPrice,
 }: {
   label: string; name: string | null; contact: string | null;
   approved: boolean; approvedAt: string | null;
   canApprove: boolean; onApprove: () => void; loading: boolean;
+  isSeller?: boolean; agreedPrice?: number;
 }) => (
   <div className={cn(
     "rounded-xl p-4 border transition-colors",
@@ -615,16 +618,30 @@ const PartyApprovalCard = ({
     {contact && <p className="text-[11px] text-muted-foreground mb-3" dir="ltr">{contact}</p>}
 
     {approved ? (
-      <div className="flex items-center gap-1.5 text-primary">
-        <CheckCircle2 size={15} strokeWidth={1.3} />
-        <span className="text-xs font-medium">تم الاعتماد</span>
+      <div>
+        <div className="flex items-center gap-1.5 text-primary">
+          <CheckCircle2 size={15} strokeWidth={1.3} />
+          <span className="text-xs font-medium">تم القبول</span>
+        </div>
+        {isSeller && agreedPrice && agreedPrice > 0 && (
+          <p className="text-[10px] text-muted-foreground mt-1.5">
+            التزام العمولة: {Math.round(agreedPrice * 0.01).toLocaleString("en-US")} ﷼ (١٪)
+          </p>
+        )}
       </div>
     ) : canApprove ? (
-      <Button size="sm" onClick={onApprove} disabled={loading} className="w-full rounded-lg h-8 text-xs gradient-primary text-primary-foreground active:scale-[0.98]">
-        {loading ? <Loader2 size={13} className="animate-spin" /> : <><Check size={13} strokeWidth={1.5} /> اعتماد الاتفاقية</>}
-      </Button>
+      <div>
+        <Button size="sm" onClick={onApprove} disabled={loading} className="w-full rounded-lg h-8 text-xs gradient-primary text-primary-foreground active:scale-[0.98]">
+          {loading ? <Loader2 size={13} className="animate-spin" /> : <><Check size={13} strokeWidth={1.5} /> قبول الصفقة</>}
+        </Button>
+        {isSeller && agreedPrice && agreedPrice > 0 && (
+          <p className="text-[10px] text-muted-foreground mt-2 text-center">
+            بالقبول، تلتزم بعمولة ١٪ ({Math.round(agreedPrice * 0.01).toLocaleString("en-US")} ﷼)
+          </p>
+        )}
+      </div>
     ) : (
-      <span className="text-[11px] text-primary/60">في انتظار الاعتماد</span>
+      <span className="text-[11px] text-primary/60">في انتظار القبول</span>
     )}
 
     {approvedAt && (
