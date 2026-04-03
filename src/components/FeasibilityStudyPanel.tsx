@@ -11,8 +11,12 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import SarSymbol from "@/components/SarSymbol";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import {
+  ensurePdfFontLoaded, loadPdfLogo, generatePdfQR,
+  buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
+  createPdfMount, renderPagesToPdf, paginateSections,
+  formatPdfPrice, escapeHtml, PDF_COLORS,
+} from "@/lib/pdfShared";
 
 /* ── Types ── */
 interface Scenario {
