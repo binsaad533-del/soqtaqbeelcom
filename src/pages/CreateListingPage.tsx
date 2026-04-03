@@ -1425,6 +1425,31 @@ const CreateListingPage = () => {
                     />
                   </div>
                 )}
+
+                {/* Area field */}
+                <div className="mt-3">
+                  <FormField
+                    label="مساحة الموقع (م²)"
+                    placeholder="مثال: 120"
+                    value={areaSqm}
+                    onChange={(v) => setAreaSqm(toEnglishNumerals(v))}
+                    type="number"
+                  />
+                  {areaSqm && (
+                    <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                      {Number(areaSqm) > 0 && <AiInlineStar />}
+                      {Number(areaSqm) > 0 ? "تم استخراج المساحة تلقائياً — يمكنك تعديلها" : ""}
+                    </p>
+                  )}
+                </div>
+
+                {/* Location required warning */}
+                {publishAttempted && !locationOk && (
+                  <p className="text-[11px] text-destructive flex items-center gap-1 mt-2">
+                    <AlertTriangle size={12} />
+                    يجب تحديد الموقع على الخريطة قبل النشر
+                  </p>
+                )}
               </div>
             </div>
           )}
