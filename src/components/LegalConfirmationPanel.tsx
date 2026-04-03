@@ -140,40 +140,89 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
   };
 
   const handleExportPdf = async () => {
-    if (!contentRef.current) return;
     setPdfLoading(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
-      const { jsPDF } = await import("jspdf");
+      const {
+        ensurePdfFontLoaded, loadPdfLogo, generatePdfQR,
+        buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
+        createPdfMount, renderPagesToPdf, paginateSections,
+        escapeHtml, formatPdfDate, PDF_COLORS,
+      } = await import("@/lib/pdfShared");
 
-      const canvas = await html2canvas(contentRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-      });
+      const [logoIconBase64, qrDataUrl] = await Promise.all([
+        loadPdfLogo(),
+        generatePdfQR(`${window.location.origin}/negotiation/${deal.id}`),
+        ensurePdfFontLoaded(),
+      ]);
 
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgData = canvas.toDataURL("image/png");
+      const mount = createPdfMount();
+      const sections: HTMLElement[] = [];
 
-      let heightLeft = imgHeight;
-      let position = 0;
+      const title = listing?.title || listing?.business_activity || "صفقة";
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Deal summary
+      sections.push(buildPdfSection("ملخص الصفقة", buildPdfInfoGrid([
+        { label: "عنوان الصفقة", value: escapeHtml(title), emphasized: true },
+        { label: "نوع الصفقة", value: escapeHtml(primaryType?.label || deal.deal_type || "—") },
+        { label: "السعر المتفق عليه", value: `${(agreedPrice || 0).toLocaleString("en-US")} ﷼`, emphasized: true },
+        { label: "الحالة", value: deal.status === "finalized" ? "مكتملة" : "قيد الاستكمال" },
+      ]), true));
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      // Parties
+      const partyCard = (label: string, profile: Profile | null) => `
+        <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:18px;padding:16px;background:${PDF_COLORS.cardBg};display:grid;gap:6px;">
+          <div style="font-size:10px;color:${PDF_COLORS.primary};font-weight:600;">${escapeHtml(label)}</div>
+          <div style="font-size:14px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(profile?.full_name || "—")}</div>
+          ${profile?.phone ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};direction:ltr;text-align:right;">${escapeHtml(profile.phone)}</div>` : ""}
+          ${profile?.city ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};">${escapeHtml(profile.city)}</div>` : ""}
+        </div>`;
+      sections.push(buildPdfSection("أطراف الصفقة", `
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
+          ${partyCard("البائع", sellerProfile)}
+          ${partyCard("المشتري", buyerProfile)}
+        </div>
+      `));
+
+      // Confirmation status
+      sections.push(buildPdfSection("حالة الموافقة النهائية", `
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
+          <div style="text-align:center;padding:16px;border-radius:16px;background:${buyerConfirmed ? PDF_COLORS.primaryLight : PDF_COLORS.cardBg};border:0.5px solid ${PDF_COLORS.border};">
+            <div style="font-size:20px;margin-bottom:6px;">${buyerConfirmed ? "✓" : "⏳"}</div>
+            <div style="font-size:12px;font-weight:600;color:${PDF_COLORS.text};">المشتري</div>
+            <div style="font-size:11px;color:${buyerConfirmed ? PDF_COLORS.primary : PDF_COLORS.textMuted};">${buyerConfirmed ? "تمت الموافقة" : "بانتظار الموافقة"}</div>
+          </div>
+          <div style="text-align:center;padding:16px;border-radius:16px;background:${sellerConfirmed ? PDF_COLORS.primaryLight : PDF_COLORS.cardBg};border:0.5px solid ${PDF_COLORS.border};">
+            <div style="font-size:20px;margin-bottom:6px;">${sellerConfirmed ? "✓" : "⏳"}</div>
+            <div style="font-size:12px;font-weight:600;color:${PDF_COLORS.text};">البائع</div>
+            <div style="font-size:11px;color:${sellerConfirmed ? PDF_COLORS.primary : PDF_COLORS.textMuted};">${sellerConfirmed ? "تمت الموافقة" : "بانتظار الموافقة"}</div>
+          </div>
+        </div>
+      `, true));
+
+      // QR
+      if (qrDataUrl) {
+        sections.push(buildPdfSection("التحقق الإلكتروني", `
+          <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:12px;">
+            <img src="${qrDataUrl}" alt="QR" style="width:64px;height:64px;border-radius:8px;" />
+            <div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:2;text-align:center;">
+              يمكنكم مسح الرمز للتحقق من الوثيقة إلكترونياً
+            </div>
+          </div>
+        `));
       }
 
-      const title = listing?.title || listing?.business_activity || "agreement";
-      pdf.save(`وثيقة-تأكيد-${title}.pdf`);
+      const shellBuilder = (pageNumber: number) => buildPdfPageShell({
+        documentTitle: "وثيقة التأكيد النهائي",
+        documentSubtitle: title,
+        logoIconBase64,
+        pageNumber,
+        qrDataUrl,
+        showQrInFooter: true,
+      });
+
+      const pages = paginateSections({ sections, mount, shellBuilder });
+      await renderPagesToPdf({ pages, fileName: `وثيقة-تأكيد-${title}.pdf` });
+      document.body.removeChild(mount);
       toast.success("تم تحميل الوثيقة بنجاح");
     } catch {
       toast.error("حدث خطأ أثناء إنشاء ملف PDF");

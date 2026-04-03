@@ -11,8 +11,12 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import SarSymbol from "@/components/SarSymbol";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import {
+  ensurePdfFontLoaded, loadPdfLogo, generatePdfQR,
+  buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
+  createPdfMount, renderPagesToPdf, paginateSections,
+  formatPdfPrice, escapeHtml, PDF_COLORS,
+} from "@/lib/pdfShared";
 
 /* ── Types ── */
 interface Scenario {
@@ -198,32 +202,126 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
   };
 
   const downloadPDF = async () => {
-    if (!reportRef.current) return;
+    if (!reportRef.current || !study) return;
     setPdfLoading(true);
     try {
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-      });
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      let heightLeft = pdfHeight;
-      let position = 0;
-      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pdf.internal.pageSize.getHeight();
-      while (heightLeft > 0) {
-        position -= pdf.internal.pageSize.getHeight();
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pdf.internal.pageSize.getHeight();
+      const [logoIconBase64, qrDataUrl] = await Promise.all([
+        loadPdfLogo(),
+        generatePdfQR(`${window.location.origin}/listing/${listing.id}#feasibility`),
+        ensurePdfFontLoaded(),
+      ]);
+
+      const mount = createPdfMount();
+      const sections: HTMLElement[] = [];
+
+      // Executive Summary
+      sections.push(buildPdfSection("الملخص التنفيذي", `
+        <div style="font-size:12px;line-height:2;color:${PDF_COLORS.text};">${escapeHtml(study.executiveSummary)}</div>
+      `, true));
+
+      // Investment Overview
+      sections.push(buildPdfSection("نظرة على الاستثمار", buildPdfInfoGrid([
+        { label: "إجمالي الاستثمار", value: `${formatPdfPrice(study.investmentOverview.totalInvestment)} ﷼`, emphasized: true },
+        ...study.investmentOverview.breakdownItems.map(item => ({
+          label: item.label,
+          value: `${formatPdfPrice(item.amount)} ﷼${item.note ? ` (${item.note})` : ""}`,
+        })),
+      ])));
+
+      // Operational Costs
+      sections.push(buildPdfSection("التكاليف التشغيلية الشهرية", buildPdfInfoGrid([
+        { label: "الإجمالي الشهري", value: `${formatPdfPrice(study.operationalCosts.monthlyTotal)} ﷼`, emphasized: true },
+        ...study.operationalCosts.items.map(item => ({
+          label: item.label,
+          value: `${formatPdfPrice(item.monthlyCost)} ﷼`,
+        })),
+      ])));
+
+      // Revenue Projections
+      const scenarioHtml = (label: string, s: FeasibilityStudy["revenueProjections"]["realistic"]) => `
+        <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:16px;padding:14px;background:${PDF_COLORS.cardBg};display:grid;gap:6px;">
+          <div style="font-size:12px;font-weight:600;color:${PDF_COLORS.primary};">${escapeHtml(label)}</div>
+          <div style="font-size:11px;color:${PDF_COLORS.text};line-height:1.8;">
+            ربح شهري: ${formatPdfPrice(s.monthlyProfit)} ﷼ &nbsp;|&nbsp; ROI: ${s.annualROI}% &nbsp;|&nbsp; استرداد: ${s.roiMonths} شهر
+          </div>
+          <div style="font-size:10px;color:${PDF_COLORS.textMuted};">${escapeHtml(s.assumptions)}</div>
+        </div>`;
+      sections.push(buildPdfSection("التوقعات المالية", `
+        <div style="display:grid;gap:10px;">
+          ${scenarioHtml("السيناريو المتفائل", study.revenueProjections.optimistic)}
+          ${scenarioHtml("السيناريو الواقعي", study.revenueProjections.realistic)}
+          ${scenarioHtml("السيناريو المتحفظ", study.revenueProjections.conservative)}
+        </div>
+      `));
+
+      // Competitor Analysis
+      sections.push(buildPdfSection("تحليل المنافسين", `
+        <div style="display:grid;gap:8px;">
+          <div style="font-size:11px;line-height:2;color:${PDF_COLORS.text};">${escapeHtml(study.competitorAnalysis.summary)}</div>
+          ${buildPdfInfoGrid([
+            { label: "كثافة المنافسة", value: study.competitorAnalysis.competitiveDensity },
+            { label: "المنافسون القريبون", value: String(study.competitorAnalysis.nearbyCount) },
+          ])}
+        </div>
+      `));
+
+      // Risk Assessment
+      const riskItems = [
+        ...(study.riskAssessment.financialRisks || []).map(r => `مالي: ${r}`),
+        ...(study.riskAssessment.operationalRisks || []).map(r => `تشغيلي: ${r}`),
+        ...(study.riskAssessment.marketRisks || []).map(r => `سوقي: ${r}`),
+      ];
+      if (riskItems.length > 0) {
+        sections.push(buildPdfSection("تقييم المخاطر", `
+          <div style="display:grid;gap:8px;">
+            <div style="font-size:12px;font-weight:600;color:${PDF_COLORS.primary};">مستوى المخاطر: ${escapeHtml(study.riskAssessment.overallRisk)}</div>
+            ${riskItems.map(r => `<div style="font-size:11px;color:${PDF_COLORS.text};line-height:1.8;padding:8px 12px;background:${PDF_COLORS.cardBg};border-radius:12px;border:0.5px solid ${PDF_COLORS.border};">• ${escapeHtml(r)}</div>`).join("")}
+          </div>
+        `));
       }
-      const fileName = `feasibility-study-${listing.title?.replace(/\s+/g, "-") || listing.id || "report"}.pdf`;
-      pdf.save(fileName);
+
+      // Recommendations
+      sections.push(buildPdfSection("التوصيات", `
+        <div style="display:grid;gap:8px;">
+          ${study.recommendations.map((r, i) => `
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:14px;background:${PDF_COLORS.cardBg};border:0.5px solid ${PDF_COLORS.border};">
+              <div style="width:22px;height:22px;border-radius:999px;background:hsl(212 84% 42% / 0.1);color:${PDF_COLORS.primary};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">${i + 1}</div>
+              <div style="font-size:11px;line-height:1.9;color:${PDF_COLORS.text};">${escapeHtml(r)}</div>
+            </div>
+          `).join("")}
+        </div>
+      `));
+
+      // Verdict
+      sections.push(buildPdfSection("الحكم النهائي", `
+        <div style="text-align:center;padding:16px;background:${PDF_COLORS.primaryLight};border-radius:16px;border:0.5px solid hsl(212 84% 82%);">
+          <div style="font-size:16px;font-weight:700;color:${PDF_COLORS.primary};">${escapeHtml(study.verdict)}</div>
+          <div style="font-size:11px;color:${PDF_COLORS.textMuted};margin-top:6px;">مستوى الثقة: ${escapeHtml(study.confidenceLevel)}</div>
+        </div>
+      `, true));
+
+      // Disclaimer
+      sections.push(buildPdfSection("إخلاء المسؤولية", `
+        <div style="font-size:10px;line-height:2;color:${PDF_COLORS.textMuted};">${escapeHtml(study.disclaimer)}</div>
+      `));
+
+      const shellBuilder = (pageNumber: number) => buildPdfPageShell({
+        documentTitle: "دراسة الجدوى الاقتصادية",
+        documentSubtitle: listing.title || listing.business_activity || "فرصة استثمارية",
+        documentMeta: [listing.city ? `الموقع: ${listing.city}` : "", listing.price ? `السعر: ${formatPdfPrice(listing.price)} ﷼` : ""].filter(Boolean),
+        logoIconBase64,
+        pageNumber,
+        qrDataUrl,
+        showQrInFooter: true,
+      });
+
+      const pages = paginateSections({ sections, mount, shellBuilder });
+      const fileName = `دراسة-جدوى-${listing.title?.replace(/\s+/g, "-") || listing.id || "report"}.pdf`;
+      await renderPagesToPdf({ pages, fileName });
+      document.body.removeChild(mount);
+      toast.success("تم تحميل دراسة الجدوى بنجاح");
     } catch {
-      console.error("PDF generation failed");
+      toast.error("حدث خطأ أثناء إنشاء ملف PDF");
     } finally {
       setPdfLoading(false);
     }

@@ -4,6 +4,7 @@ import logoUrl from "@/assets/logo.png";
 import logoIconGoldUrl from "@/assets/logo-icon-gold.png";
 import { PAGE_HEIGHT_PX, PAGE_WIDTH_PX, buildAgreementPdfPages } from "@/lib/agreementPdf/template";
 import type { AgreementPdfData } from "@/lib/agreementPdf/types";
+import { protectPdf } from "@/lib/pdfShared";
 
 const PAGE_W = 210;
 const PAGE_H = 297;
@@ -49,6 +50,7 @@ const safeFileName = (title: string) => title.replace(/[\\/:*?"<>|]/g, "-");
 
 export async function generateAgreementPdf(data: AgreementPdfData) {
   const pdf = new jsPDF("p", "mm", "a4");
+  protectPdf(pdf);
   const html2canvas = (await import("html2canvas")).default;
 
   // Generate QR code linking to the agreement page
