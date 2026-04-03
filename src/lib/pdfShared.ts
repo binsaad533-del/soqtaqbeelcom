@@ -185,7 +185,7 @@ export function buildPdfQrSection(qrDataUrl: string): HTMLElement {
   wrapper.innerHTML = `
     <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:16px;padding:18px;background:${PDF_COLORS.primaryLight};display:flex;align-items:center;justify-content:space-between;gap:20px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;">
       <div style="display:grid;gap:6px;flex:1;text-align:right;">
-        <div style="font-size:12px;font-weight:600;color:${PDF_COLORS.text};">التحقق الإلكتروني</div>
+        <div style="font-size:14px;font-weight:600;color:${PDF_COLORS.text};">التحقق الإلكتروني</div>
         <div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:2;">
           يمكنكم مسح رمز QR للتحقق من صحة هذه الوثيقة إلكترونياً عبر منصة سوق تقبيل.<br/>
           جميع المبالغ بالريال السعودي (﷼)
@@ -240,7 +240,7 @@ export function buildPdfBankSection(bankDetails: {
   wrapper.innerHTML = `
     <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:16px;padding:16px 16px 14px;background:${PDF_COLORS.primaryLight};display:grid;gap:10px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;text-align:right;">
       <div style="display:flex;align-items:center;gap:10px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:8px;">
-        <h2 style="margin:0;font-size:12px;font-weight:600;color:${PDF_COLORS.text};">بيانات الحساب البنكي والعمولة</h2>
+        <h2 style="margin:0;font-size:14px;font-weight:600;color:${PDF_COLORS.text};">بيانات الحساب البنكي والعمولة</h2>
       </div>
       ${commissionHtml}
       <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
@@ -448,7 +448,7 @@ export function buildPdfSection(title: string, body: string, highlight = false):
   wrapper.innerHTML = `
     <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:14px;padding:14px 14px 12px;background:${bg};display:grid;gap:8px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;text-align:right;">
       <div style="display:flex;align-items:center;gap:10px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:6px;">
-        <h2 style="margin:0;font-size:11px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(title)}</h2>
+        <h2 style="margin:0;font-size:14px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(title)}</h2>
       </div>
       ${body}
     </section>
