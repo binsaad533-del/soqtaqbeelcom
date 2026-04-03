@@ -213,8 +213,23 @@ const AccountSettingsPanel = () => {
             <Input value={fullName} onChange={e => setFullName(e.target.value)} className="text-sm" />
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground mb-1.5 block">البريد الإلكتروني</Label>
-            <Input value={email} onChange={e => setEmail(e.target.value)} className="text-sm" dir="ltr" type="email" />
+            <Label className="text-xs text-muted-foreground mb-1.5 block flex items-center gap-2">
+              <Mail size={12} />
+              البريد الإلكتروني
+              {emailChanged && (
+                <span className="text-[10px] text-warning flex items-center gap-1">
+                  <AlertCircle size={10} />
+                  سيتطلب تأكيد عبر رابط
+                </span>
+              )}
+              {emailPendingConfirmation && !emailChanged && (
+                <span className="text-[10px] text-primary flex items-center gap-1">
+                  <Mail size={10} />
+                  بانتظار التأكيد — تحقق من بريدك
+                </span>
+              )}
+            </Label>
+            <Input value={email} onChange={e => { setEmail(e.target.value); setEmailPendingConfirmation(false); }} className="text-sm" dir="ltr" type="email" />
           </div>
           <div>
             <Label className="text-xs text-muted-foreground mb-1.5 block flex items-center gap-2">
