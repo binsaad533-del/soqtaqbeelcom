@@ -268,7 +268,15 @@ const CustomerDashboardPage = () => {
         <h1 className="sr-only">لوحة تحكم العميل</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6 animate-reveal" style={{ animationDelay: '80ms' }}>
           {/* Personal Info Card */}
-          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 sm:col-span-2 lg:col-span-1">
+          <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 sm:col-span-2 lg:col-span-1 relative">
+            {/* Settings shortcut */}
+            <button
+              onClick={() => { setActiveTab("account"); setSearchQuery(""); }}
+              className="absolute top-3 left-3 p-1.5 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
+              title="إعدادات الحساب"
+            >
+              <Settings size={15} />
+            </button>
             {/* Avatar + Name + Badge */}
             <div className="flex items-center gap-3 mb-5">
               <label className="relative w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl cursor-pointer group overflow-hidden ring-2 ring-background shadow-sm shrink-0">
