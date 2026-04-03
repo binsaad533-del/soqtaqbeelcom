@@ -9,6 +9,7 @@ import VerifiedSellerBadge from "@/components/VerifiedSellerBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
+import FeasibilityStudyPanel from "@/components/FeasibilityStudyPanel";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
 
 import QuickPriceEdit from "@/components/QuickPriceEdit";
