@@ -25,15 +25,13 @@ const escapeHtml = (value: string) =>
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
+    .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
 const safeText = (value?: string | null, fallback = "—") => {
   const cleaned = value?.toString().trim();
   return escapeHtml(cleaned && cleaned.length > 0 ? cleaned : fallback);
 };
-
-const toEnDigits = (s: string) => s.replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
 
 const formatDate = (value?: string | null) => {
   if (!value) return "—";
@@ -90,7 +88,7 @@ const infoGrid = (items: Array<{ label: string; value: string; emphasized?: bool
       .join("")}
   </div>`;
 
-const listCard = (items: string[], tone: "neutral" | "success" | "warning" = "neutral") => {
+const listCard = (items: string[], _tone: "neutral" | "success" | "warning" = "neutral") => {
   // Unified blue palette regardless of tone
   const accent = "hsl(212 84% 42%)";
 
