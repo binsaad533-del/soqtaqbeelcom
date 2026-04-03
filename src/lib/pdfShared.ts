@@ -130,7 +130,7 @@ export async function loadImageBase64(url: string): Promise<string> {
         return sourceCanvas.toDataURL("image/png");
       }
 
-      const padding = Math.max(12, Math.round(Math.min(width, height) * 0.02));
+      const padding = Math.max(8, Math.round(Math.min(width, height) * 0.015));
       const cropX = Math.max(0, minX - padding);
       const cropY = Math.max(0, minY - padding);
       const cropWidth = Math.min(width - cropX, maxX - minX + 1 + padding * 2);
@@ -155,7 +155,7 @@ export async function loadImageBase64(url: string): Promise<string> {
 /* ── QR Code ── */
 export async function generatePdfQR(url: string): Promise<string> {
   try {
-    return await QRCode.toDataURL(url, { width: 100, margin: 1, color: { dark: "#2563a0", light: "#ffffff" } });
+    return await QRCode.toDataURL(url, { width: 120, margin: 1, color: { dark: "#2563a0", light: "#ffffff" } });
   } catch {
     return "";
   }
@@ -163,10 +163,10 @@ export async function generatePdfQR(url: string): Promise<string> {
 
 /* ── Social Icons SVG (inline for PDF) ── */
 const SOCIAL_SVGS = {
-  snapchat: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2.5 0-4.5 1.5-5 4l-.5 3c-.1.5-.5.8-1 .8-.3 0-.5.2-.5.5s.2.5.5.5c.5 0 1 .2 1.3.5.3.4.2.8-.2 1.2-.5.5-1.5 1-2.5 1.5-.3.2-.5.5-.3.8.2.5.8.7 1.5.8.3 0 .5.2.5.5 0 .3.2.5.5.5h.5c.5 0 1 .2 1.5.5s1.2.8 2.2.8 1.7-.5 2.2-.8.9-.5 1.5-.5h.5c.3 0 .5-.2.5-.5 0-.3.2-.5.5-.5.7-.1 1.3-.3 1.5-.8.2-.3 0-.6-.3-.8-1-.5-2-1-2.5-1.5-.4-.4-.5-.8-.2-1.2.3-.3.8-.5 1.3-.5.3 0 .5-.2.5-.5s-.2-.5-.5-.5c-.5 0-.9-.3-1-.8l-.5-3c-.5-2.5-2.5-4-5-4z"/></svg>`,
-  tiktok: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>`,
-  x: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16z"/><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/></svg>`,
-  linkedin: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>`,
+  snapchat: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2.5 0-4.5 1.5-5 4l-.5 3c-.1.5-.5.8-1 .8-.3 0-.5.2-.5.5s.2.5.5.5c.5 0 1 .2 1.3.5.3.4.2.8-.2 1.2-.5.5-1.5 1-2.5 1.5-.3.2-.5.5-.3.8.2.5.8.7 1.5.8.3 0 .5.2.5.5 0 .3.2.5.5.5h.5c.5 0 1 .2 1.5.5s1.2.8 2.2.8 1.7-.5 2.2-.8.9-.5 1.5-.5h.5c.3 0 .5-.2.5-.5 0-.3.2-.5.5-.5.7-.1 1.3-.3 1.5-.8.2-.3 0-.6-.3-.8-1-.5-2-1-2.5-1.5-.4-.4-.5-.8-.2-1.2.3-.3.8-.5 1.3-.5.3 0 .5-.2.5-.5s-.2-.5-.5-.5c-.5 0-.9-.3-1-.8l-.5-3c-.5-2.5-2.5-4-5-4z"/></svg>`,
+  tiktok: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>`,
+  x: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16z"/><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/></svg>`,
+  linkedin: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>`,
 };
 
 /* ── Footer nav links (matches website footer) ── */
@@ -179,6 +179,82 @@ const FOOTER_NAV_LINKS = [
   { label: "العمولة", href: "https://soqtaqbeel.com/commission" },
 ];
 
+/* ── QR Verification Section (standalone, outside footer) ── */
+export function buildPdfQrSection(qrDataUrl: string): HTMLElement {
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = `
+    <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:16px;padding:18px;background:${PDF_COLORS.primaryLight};display:flex;align-items:center;justify-content:space-between;gap:20px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;">
+      <div style="display:grid;gap:6px;flex:1;text-align:right;">
+        <div style="font-size:12px;font-weight:600;color:${PDF_COLORS.text};">التحقق الإلكتروني</div>
+        <div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:2;">
+          يمكنكم مسح رمز QR للتحقق من صحة هذه الوثيقة إلكترونياً عبر منصة سوق تقبيل.<br/>
+          جميع المبالغ بالريال السعودي (﷼)
+        </div>
+      </div>
+      <div style="display:grid;justify-items:center;gap:4px;flex-shrink:0;">
+        <img src="${qrDataUrl}" alt="QR" style="width:80px;height:80px;border-radius:10px;border:1px solid ${PDF_COLORS.border};" />
+        <div style="font-size:8px;color:${PDF_COLORS.textFaint};">تحقق إلكتروني</div>
+      </div>
+    </section>
+  `.trim();
+  return wrapper.firstElementChild as HTMLElement;
+}
+
+/* ── Bank Details Section (reusable across all PDFs) ── */
+export function buildPdfBankSection(bankDetails: {
+  beneficiary: string;
+  legalName: string;
+  bank: string;
+  accountNumber: string;
+  iban: string;
+  nationalId: string;
+  taxNumber: string;
+  email: string;
+  phone: string;
+}, commissionInfo?: { rate: number; amount: number; dealAmount: number; currency?: string }): HTMLElement {
+  const wrapper = document.createElement("div");
+  const items = [
+    { label: "اسم المستفيد", value: bankDetails.beneficiary },
+    { label: "الاسم القانوني", value: bankDetails.legalName },
+    { label: "البنك", value: bankDetails.bank },
+    { label: "رقم الحساب", value: bankDetails.accountNumber },
+    { label: "رقم الآيبان (IBAN)", value: bankDetails.iban },
+    { label: "السجل التجاري", value: bankDetails.nationalId },
+    { label: "الرقم الضريبي", value: bankDetails.taxNumber },
+    { label: "التواصل المالي", value: `${bankDetails.email} — ${bankDetails.phone}` },
+  ];
+
+  const commissionHtml = commissionInfo ? `
+    <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-bottom:8px;">
+      <div style="border-radius:18px;padding:16px;background:linear-gradient(135deg, ${PDF_COLORS.primary}, hsl(196 85% 45%));color:white;display:grid;gap:6px;">
+        <div style="font-size:10px;opacity:0.86;">المبلغ المستحق للمنصة</div>
+        <div style="font-size:20px;font-weight:700;line-height:1.3;">${formatPdfPrice(commissionInfo.amount)} ﷼</div>
+        <div style="font-size:10px;opacity:0.9;">${commissionInfo.rate * 100}% من قيمة الصفقة ${formatPdfPrice(commissionInfo.dealAmount)} ${escapeHtml(commissionInfo.currency || "﷼")}</div>
+      </div>
+      <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:18px;padding:16px;background:${PDF_COLORS.cardBg};display:grid;gap:6px;">
+        <div style="font-size:11px;font-weight:600;color:${PDF_COLORS.text};">تعليمات السداد</div>
+        <div style="font-size:10px;line-height:1.9;color:${PDF_COLORS.textMuted};">يرجى تحويل العمولة إلى حساب الشركة التالي ثم رفع إثبات السداد عبر المنصة.</div>
+      </div>
+    </div>` : "";
+
+  wrapper.innerHTML = `
+    <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:16px;padding:16px 16px 14px;background:${PDF_COLORS.primaryLight};display:grid;gap:10px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;text-align:right;">
+      <div style="display:flex;align-items:center;gap:10px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:8px;">
+        <h2 style="margin:0;font-size:12px;font-weight:600;color:${PDF_COLORS.text};">بيانات الحساب البنكي والعمولة</h2>
+      </div>
+      ${commissionHtml}
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+        ${items.map(({ label, value }) => `
+          <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:14px;padding:10px 12px;background:#ffffff;display:grid;gap:3px;text-align:center;">
+            <div style="font-size:9px;color:${PDF_COLORS.textMuted};">${escapeHtml(label)}</div>
+            <div style="font-size:11px;font-weight:600;color:${PDF_COLORS.text};line-height:1.7;direction:ltr;word-break:break-all;">${escapeHtml(value)}</div>
+          </div>`).join("")}
+      </div>
+    </section>
+  `.trim();
+  return wrapper.firstElementChild as HTMLElement;
+}
+
 /* ── Unified Page Shell ── */
 export function buildPdfPageShell(options: {
   documentTitle: string;
@@ -190,7 +266,7 @@ export function buildPdfPageShell(options: {
   qrDataUrl?: string;
   showQrInFooter?: boolean;
 }) {
-  const { documentTitle, documentSubtitle, documentMeta, logoBase64, logoIconBase64, pageNumber, qrDataUrl, showQrInFooter } = options;
+  const { documentTitle, documentSubtitle, documentMeta, logoBase64, logoIconBase64, pageNumber } = options;
 
   const page = document.createElement("div");
   page.style.cssText = [
@@ -203,21 +279,21 @@ export function buildPdfPageShell(options: {
     "display:flex",
     "flex-direction:column",
     "box-sizing:border-box",
-    "padding:34px 34px 20px",
-    "gap:14px",
+    "padding:30px 34px 18px",
+    "gap:12px",
     "overflow:hidden",
   ].join(";");
 
   // ── Header ──
   const metaHtml = (documentMeta || []).map((m) => `<span>${escapeHtml(m)}</span>`).join("");
   const headerHtml = `
-    <header style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-bottom:14px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};">
-      <div style="display:grid;gap:5px;flex:1;text-align:right;">
-        <div style="font-size:15px;font-weight:500;color:${PDF_COLORS.text};">${escapeHtml(documentTitle)}</div>
-        ${documentSubtitle ? `<div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:1.7;">${escapeHtml(documentSubtitle)}</div>` : ""}
-        ${metaHtml ? `<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9px;color:${PDF_COLORS.textMuted};justify-content:flex-start;">${metaHtml}</div>` : ""}
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:12px;border-bottom:1.5px solid ${PDF_COLORS.primary};">
+      ${logoBase64 ? `<div style="flex-shrink:0;"><img src="${logoBase64}" alt="سوق تقبيل" style="height:56px;object-fit:contain;display:block;" /></div>` : ""}
+      <div style="display:grid;gap:3px;flex:1;text-align:left;">
+        <div style="font-size:16px;font-weight:700;color:${PDF_COLORS.primary};">${escapeHtml(documentTitle)}</div>
+        ${documentSubtitle ? `<div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:1.6;">${escapeHtml(documentSubtitle)}</div>` : ""}
+        ${metaHtml ? `<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9px;color:${PDF_COLORS.textMuted};justify-content:flex-end;">${metaHtml}</div>` : ""}
       </div>
-      ${logoBase64 ? `<div style="width:320px;display:flex;align-items:center;justify-content:flex-start;flex-shrink:0;"><img src="${logoBase64}" alt="سوق تقبيل" style="height:112px;width:320px;object-fit:contain;object-position:left center;display:block;" /></div>` : ""}
     </header>
   `;
 
@@ -226,43 +302,31 @@ export function buildPdfPageShell(options: {
 
   // ── Content ──
   const content = document.createElement("div");
-  content.style.cssText = "display:flex;flex-direction:column;flex:1;gap:12px;padding-top:2px;overflow:visible;";
+  content.style.cssText = "display:flex;flex-direction:column;flex:1;gap:10px;padding-top:2px;overflow:visible;";
 
-  // ── Footer (matches website footer) ──
+  // ── Footer ──
   const navLinksHtml = FOOTER_NAV_LINKS.map(
     (link, i) =>
-      `${i > 0 ? `<span style="color:${PDF_COLORS.borderLight};font-size:9px;padding:0 4px;">|</span>` : ""}<a href="${link.href}" style="color:${PDF_COLORS.textMuted};text-decoration:none;font-size:9px;">${escapeHtml(link.label)}</a>`
+      `${i > 0 ? `<span style="color:${PDF_COLORS.borderLight};font-size:8px;padding:0 3px;">|</span>` : ""}<a href="${link.href}" style="color:${PDF_COLORS.textMuted};text-decoration:none;font-size:8px;">${escapeHtml(link.label)}</a>`
   ).join("");
 
   const socialIcons = Object.entries(SOCIAL_SVGS)
-    .map(([, svg]) => `<span style="opacity:0.45;">${svg}</span>`)
+    .map(([, svg]) => `<span style="opacity:0.4;">${svg}</span>`)
     .join("");
 
-  const qrHtml = showQrInFooter && qrDataUrl
-    ? `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;">
-        <img src="${qrDataUrl}" alt="QR" style="width:32px;height:32px;border-radius:3px;display:block;" />
-        <div style="font-size:7px;color:${PDF_COLORS.textFaint};">تحقق إلكتروني</div>
-      </div>`
-    : "";
-
   const footerHtml = `
-    <footer style="padding-top:8px;border-top:0.5px solid ${PDF_COLORS.borderLight};display:grid;gap:4px;text-align:center;">
-      <div style="display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap;line-height:2;">
+    <footer style="padding-top:6px;border-top:0.5px solid ${PDF_COLORS.borderLight};display:grid;gap:3px;text-align:center;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:1px;flex-wrap:wrap;line-height:1.8;">
         ${navLinksHtml}
       </div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
-        ${logoIconBase64 ? `<img src="${logoIconBase64}" alt="سوق تقبيل" style="height:20px;width:20px;object-fit:contain;opacity:0.5;" />` : ""}
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+        ${logoIconBase64 ? `<img src="${logoIconBase64}" alt="" style="height:16px;width:16px;object-fit:contain;opacity:0.4;" />` : ""}
         ${socialIcons}
       </div>
-      <div style="font-size:8px;color:${PDF_COLORS.textMuted};line-height:1.6;">
-        في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-        <div style="font-size:7px;color:${PDF_COLORS.textFaint};line-height:1.6;">
-          © ${new Date().getFullYear()} المنصة مملوكة ومدارة بواسطة شركة Ain Jasaas
-        </div>
-        ${qrHtml}
-        <div style="font-size:7px;color:${PDF_COLORS.textFaint};white-space:nowrap;">صفحة ${pageNumber}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:7px;color:${PDF_COLORS.textFaint};">© ${new Date().getFullYear()} شركة Ain Jasaas</div>
+        <div style="font-size:7px;color:${PDF_COLORS.textFaint};">صُنع في 🇸🇦</div>
+        <div style="font-size:7px;color:${PDF_COLORS.textFaint};">صفحة ${pageNumber}</div>
       </div>
     </footer>
   `;
@@ -276,9 +340,6 @@ export function buildPdfPageShell(options: {
 
 /* ── Protect PDF (no copy / no modify) ── */
 export function protectPdf(pdf: any) {
-  // jsPDF doesn't support granular permissions natively via the API in v4,
-  // but we can set user + owner passwords. The owner password enables restriction.
-  // Using the internal encryption API if available.
   try {
     if (typeof pdf.setDocumentProperties === "function") {
       pdf.setDocumentProperties({
@@ -339,7 +400,7 @@ export function paginateSections(options: {
   const getAvailableHeight = () => {
     const pageRect = current.page.getBoundingClientRect();
     const contentRect = current.content.getBoundingClientRect();
-    return pageRect.bottom - contentRect.top - 90;
+    return pageRect.bottom - contentRect.top - 80;
   };
 
   sections.forEach((block) => {
@@ -385,9 +446,9 @@ export function buildPdfSection(title: string, body: string, highlight = false):
   const bg = highlight ? PDF_COLORS.primaryLight : "#ffffff";
   const wrapper = document.createElement("div");
   wrapper.innerHTML = `
-    <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:16px;padding:16px 16px 14px;background:${bg};display:grid;gap:10px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;text-align:right;">
-      <div style="display:flex;align-items:center;gap:10px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:8px;">
-        <h2 style="margin:0;font-size:12px;font-weight:500;color:${PDF_COLORS.text};">${escapeHtml(title)}</h2>
+    <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:14px;padding:14px 14px 12px;background:${bg};display:grid;gap:8px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;text-align:right;">
+      <div style="display:flex;align-items:center;gap:10px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:6px;">
+        <h2 style="margin:0;font-size:11px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(title)}</h2>
       </div>
       ${body}
     </section>
@@ -398,13 +459,13 @@ export function buildPdfSection(title: string, body: string, highlight = false):
 /* ── Info grid (key-value pairs) ── */
 export function buildPdfInfoGrid(items: Array<{ label: string; value: string; emphasized?: boolean }>) {
   return `
-    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
       ${items
         .map(
           ({ label, value, emphasized }) => `
-          <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:16px;padding:12px 14px;background:${emphasized ? PDF_COLORS.primaryLight : PDF_COLORS.cardBg};text-align:right;direction:rtl;">
-            <div style="font-size:10px;color:${PDF_COLORS.textMuted};margin-bottom:4px;">${escapeHtml(label)}</div>
-            <div style="font-size:${emphasized ? "15px" : "12px"};font-weight:${emphasized ? 600 : 500};color:${emphasized ? PDF_COLORS.primary : PDF_COLORS.text};line-height:1.8;word-break:break-word;overflow-wrap:anywhere;">${value}</div>
+          <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:14px;padding:10px 12px;background:${emphasized ? PDF_COLORS.primaryLight : PDF_COLORS.cardBg};text-align:right;direction:rtl;">
+            <div style="font-size:9px;color:${PDF_COLORS.textMuted};margin-bottom:3px;">${escapeHtml(label)}</div>
+            <div style="font-size:${emphasized ? "14px" : "11px"};font-weight:${emphasized ? 600 : 500};color:${emphasized ? PDF_COLORS.primary : PDF_COLORS.text};line-height:1.7;word-break:break-word;overflow-wrap:anywhere;">${value}</div>
           </div>`,
         )
         .join("")}
