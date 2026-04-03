@@ -47,7 +47,7 @@ const AccountSettingsPanel = () => {
         toast.success("تم إرسال رابط تأكيد البريد الجديد");
       }
 
-      if (refreshProfile) await refreshProfile();
+      // Profile will refresh on next auth state change
       toast.success("تم تحديث المعلومات الشخصية");
     } catch (err: any) {
       toast.error(err.message || "حدث خطأ أثناء التحديث");
