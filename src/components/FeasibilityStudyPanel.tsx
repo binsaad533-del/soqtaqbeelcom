@@ -18,6 +18,7 @@ import {
   formatPdfPrice, escapeHtml, PDF_COLORS,
 } from "@/lib/pdfShared";
 
+
 /* ── Types ── */
 interface Scenario {
   monthlyRevenue: number;

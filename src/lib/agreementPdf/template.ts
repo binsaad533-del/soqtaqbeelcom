@@ -133,7 +133,7 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, logoIconBase
           <span>التاريخ: ${formatDate(data.createdAt)}</span>
         </div>
       </div>
-      ${logoBase64 ? `<div style="width:230px;display:flex;align-items:center;justify-content:flex-start;flex-shrink:0;"><img src="${logoBase64}" alt="سوق تقبيل" style="height:82px;width:230px;object-fit:contain;object-position:left center;display:block;" /></div>` : ""}
+      ${logoBase64 ? `<div style="width:320px;display:flex;align-items:center;justify-content:flex-start;flex-shrink:0;"><img src="${logoBase64}" alt="سوق تقبيل" style="height:112px;width:320px;object-fit:contain;object-position:left center;display:block;" /></div>` : ""}
     </header>
   `);
 
@@ -415,17 +415,19 @@ const buildSections = (data: AgreementPdfData, qrDataUrl = "") => {
             <div style="border:0.5px solid hsl(214 32% 91%);border-radius:20px;padding:16px;background:hsl(210 40% 98%);display:grid;gap:8px;">
               <div style="font-size:11px;font-weight:600;color:hsl(215 28% 17%);">تعليمات السداد</div>
               <div style="font-size:11px;line-height:1.9;color:hsl(215 16% 45%);">يرجى تحويل العمولة إلى حساب الشركة التالي ثم رفع إثبات السداد عبر المنصة لاستكمال التحقق.</div>
-              <div style="font-size:11px;line-height:1.9;color:hsl(215 16% 45%);">الحساب باسم شركة Ain Jasaas / شركة عين جساس.</div>
+              <div style="font-size:11px;line-height:1.9;color:hsl(215 16% 45%);">الحساب باسم ${BANK_DETAILS.legalName} / ${BANK_DETAILS.beneficiary}.</div>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
             ${[
               { label: "اسم المستفيد", value: BANK_DETAILS.beneficiary },
+              { label: "الاسم القانوني", value: BANK_DETAILS.legalName },
               { label: "البنك", value: BANK_DETAILS.bank },
               { label: "رقم الحساب", value: BANK_DETAILS.accountNumber },
               { label: "رقم الآيبان (IBAN)", value: BANK_DETAILS.iban },
               { label: "السجل التجاري", value: BANK_DETAILS.nationalId },
-              { label: "ملكية المنصة", value: "Ain Jasaas — شركة عين جساس" },
+              { label: "الرقم الضريبي", value: BANK_DETAILS.taxNumber },
+              { label: "التواصل المالي", value: `${BANK_DETAILS.email} — ${BANK_DETAILS.phone}` },
             ]
               .map(
                 ({ label, value }) => `
@@ -442,7 +444,7 @@ const buildSections = (data: AgreementPdfData, qrDataUrl = "") => {
           <div style="font-size:10px;line-height:2;color:hsl(212 60% 35%);font-weight:400;">
             عمولة المنصة مستحقة على البائع فقط بنسبة ${commissionRate * 100}% من قيمة الصفقة، وتُسدد بعد إتمام الصفقة واعتماد الطرفين.<br />
             تحتفظ المنصة بحقها الكامل في المطالبة بمستحقاتها، ونثق بالتزامكم الكريم بالسداد في الوقت المحدد 🤝<br />
-            للتواصل: a.almalki@soqtaqbeel.com — جوال: 0500668089
+            للتواصل: ${BANK_DETAILS.email} — جوال: ${BANK_DETAILS.phone}
           </div>
         </div>
       `,
@@ -487,7 +489,7 @@ export function buildAgreementPdfPages(options: {
     const pageRect = current.page.getBoundingClientRect();
     const contentRect = current.content.getBoundingClientRect();
     // The available space is from content top to footer top (page bottom - footer height - padding)
-    return pageRect.bottom - contentRect.top - 60; // 60px reserved for footer + gap
+    return pageRect.bottom - contentRect.top - 90; // larger reserved area for footer
   };
 
   sections.forEach((block) => {
