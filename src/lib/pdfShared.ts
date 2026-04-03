@@ -323,6 +323,8 @@ export function buildPdfPageShell(options: {
       </div>
       <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
         ${logoIconBase64 ? `<img src="${logoIconBase64}" alt="" style="height:16px;width:16px;object-fit:contain;opacity:0.4;" />` : ""}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
         ${socialIcons}
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
