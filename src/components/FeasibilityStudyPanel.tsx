@@ -307,6 +307,8 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
         <div style="font-size:10px;line-height:2;color:${PDF_COLORS.textMuted};">${escapeHtml(study.disclaimer)}</div>
       `));
 
+      // Feasibility disclaimer
+      sections.push(buildPdfDisclaimer("feasibility"));
       // QR verification section (outside footer)
       if (qrDataUrl) {
         sections.push(buildPdfQrSection(qrDataUrl));

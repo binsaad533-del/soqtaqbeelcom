@@ -293,6 +293,9 @@ const buildSections = (data: AgreementPdfData, qrDataUrl = "") => {
     `),
   );
 
+  // ── Disclaimer ──
+  sections.push(buildPdfDisclaimer());
+
   // ── QR Code (shared component) ──
   if (qrDataUrl) {
     sections.push(buildPdfQrSection(qrDataUrl));

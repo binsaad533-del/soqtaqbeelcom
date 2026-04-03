@@ -168,6 +168,8 @@ const InvoicePage = () => {
         dealAmount: invoice.deal_amount,
       }));
 
+      // Disclaimer
+      sections.push(buildPdfDisclaimer());
       // QR verification section (outside footer)
       if (qrDataUrl) {
         sections.push(buildPdfQrSection(qrDataUrl));
