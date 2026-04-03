@@ -1,7 +1,8 @@
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { Search, MapPin, RotateCcw, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Search, MapPin, RotateCcw, ChevronDown, ChevronUp, Loader2, EyeOff } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { requestGeolocation, findNearestCity, getNearbyCities } from "@/lib/saudiCities";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
