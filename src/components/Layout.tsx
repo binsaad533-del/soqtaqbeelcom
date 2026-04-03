@@ -10,6 +10,7 @@ import LanguageToggle from "./LanguageToggle";
 import CurrencyToggle from "./CurrencyToggle";
 import CookieConsent from "./CookieConsent";
 import SmartInstallPrompt from "./SmartInstallPrompt";
+import LaunchBanner from "./LaunchBanner";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
