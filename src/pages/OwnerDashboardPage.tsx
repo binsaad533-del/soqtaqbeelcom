@@ -23,6 +23,7 @@ import {
   ArrowUpDown, ImageOff, Bell, Shield, TrendingUp, Eye,
   Activity, RefreshCw, UserCheck
 } from "lucide-react";
+import OwnerSettingsPanel from "@/components/OwnerSettingsPanel";
 import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
@@ -853,23 +854,7 @@ const OwnerDashboardPage = () => {
         {activeTab === "security" && <SecurityIncidentPanel />}
 
         {activeTab === "settings" && (
-          <div className="space-y-2">
-            {[
-              { label: "إعدادات المنصة", desc: "الإعدادات العامة للمنصة" },
-              { label: "حسابات السوشل ميديا", desc: "تعديل روابط الحسابات الرسمية" },
-              { label: "إدارة الذكاء الاصطناعي", desc: "إعدادات الـAI والنماذج" },
-              { label: "إدارة الشكاوى والتواصل", desc: "رسائل التواصل والدعم" },
-              { label: "إعدادات الأمان", desc: "سياسات الحماية والصلاحيات" },
-            ].map((s, i) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all cursor-pointer">
-                <div>
-                  <div className="text-sm font-medium">{s.label}</div>
-                  <div className="text-[11px] text-muted-foreground">{s.desc}</div>
-                </div>
-                <ChevronLeft size={14} className="text-muted-foreground" strokeWidth={1.3} />
-              </div>
-            ))}
-          </div>
+           <OwnerSettingsPanel />
         )}
       </div>
     </div>
