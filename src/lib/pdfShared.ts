@@ -359,7 +359,8 @@ export function buildPdfPageShell(options: {
   const footer = document.createElement("div");
   footer.innerHTML = footerHtml.trim();
 
-  page.append(header.firstElementChild!, content, footer.firstElementChild!);
+  if (header.firstElementChild) page.appendChild(header.firstElementChild);
+  page.append(content, footer.firstElementChild!);
   return { page, content };
 }
 
