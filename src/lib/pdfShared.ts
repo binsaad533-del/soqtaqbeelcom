@@ -194,8 +194,8 @@ export function buildPdfQrSection(qrDataUrl: string): HTMLElement {
         </div>
       </div>
       <div style="display:grid;justify-items:center;gap:4px;flex-shrink:0;">
-        <img src="${qrDataUrl}" alt="QR" style="width:80px;height:80px;border-radius:10px;border:1px solid ${PDF_COLORS.border};" />
-        <div style="font-size:8px;color:${PDF_COLORS.textFaint};">تحقق إلكتروني</div>
+        <img src="${qrDataUrl}" alt="QR" style="width:48px;height:48px;border-radius:8px;border:1px solid ${PDF_COLORS.border};" />
+        <div style="font-size:8px;color:${PDF_COLORS.textFaint};">امسح للتحقق من صحة الوثيقة</div>
       </div>
     </section>
   `.trim();
