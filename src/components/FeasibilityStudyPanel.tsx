@@ -248,7 +248,12 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
             <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">بيانات Google Maps</span>
           )}
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 items-center">
+          {cachedAt && (
+            <span className="text-[10px] text-muted-foreground">
+              آخر تحديث: {new Date(cachedAt).toLocaleDateString("ar-SA")}
+            </span>
+          )}
           <Button variant="outline" size="sm" onClick={downloadPDF} disabled={pdfLoading} className="gap-1.5 text-xs">
             {pdfLoading ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
             PDF
