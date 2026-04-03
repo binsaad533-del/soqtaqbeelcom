@@ -209,6 +209,7 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
       <div className="flex items-center justify-between pt-1">
         <span className="text-xs text-muted-foreground">إخفاء الإعلانات التجريبية</span>
         <button
+          dir="ltr"
           onClick={() => onChange({ ...filters, hideSimulation: !filters.hideSimulation })}
           className={cn(
             "w-9 h-5 rounded-full transition-colors relative",
@@ -217,7 +218,7 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
         >
           <span className={cn(
             "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform",
-            filters.hideSimulation ? "right-0.5" : "left-0.5"
+            filters.hideSimulation ? "translate-x-4" : "translate-x-0.5"
           )} />
         </button>
       </div>
