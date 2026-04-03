@@ -302,7 +302,7 @@ export function buildPdfPageShell(options: {
 
   // ── Content ──
   const content = document.createElement("div");
-  content.style.cssText = "display:flex;flex-direction:column;flex:1;gap:10px;padding-top:2px;overflow:visible;";
+  content.style.cssText = "display:flex;flex-direction:column;flex:1;gap:16px;padding-top:2px;overflow:visible;";
 
   // ── Footer ──
   const navLinksHtml = FOOTER_NAV_LINKS.map(
