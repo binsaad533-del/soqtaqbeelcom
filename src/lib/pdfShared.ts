@@ -311,9 +311,9 @@ export function buildPdfSection(title: string, body: string, highlight = false):
   const bg = highlight ? PDF_COLORS.primaryLight : "#ffffff";
   const wrapper = document.createElement("div");
   wrapper.innerHTML = `
-    <section style="border:0.5px solid ${PDF_COLORS.border};border-radius:22px;padding:18px 18px 16px;background:${bg};display:grid;gap:12px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;">
-      <div style="display:flex;align-items:center;gap:12px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:10px;">
-        <h2 style="margin:0;font-size:14px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(title)}</h2>
+    <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:16px;padding:16px 16px 14px;background:${bg};display:grid;gap:10px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;">
+      <div style="display:flex;align-items:center;gap:10px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:8px;">
+        <h2 style="margin:0;font-size:12px;font-weight:500;color:${PDF_COLORS.text};">${escapeHtml(title)}</h2>
       </div>
       ${body}
     </section>
