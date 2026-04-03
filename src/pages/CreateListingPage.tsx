@@ -1387,7 +1387,7 @@ const CreateListingPage = () => {
                 <div className="flex items-center gap-2">
                   <MapPin size={16} strokeWidth={1.5} className="text-primary" />
                   <h3 className="font-medium text-sm">موقع المشروع على الخريطة</h3>
-                  <span className="text-[10px] text-muted-foreground">(اختياري — يساعد المشترين القريبين)</span>
+                  <span className="text-[10px] text-destructive font-medium">(مطلوب)</span>
                 </div>
                 <GoogleMapPicker
                   lat={locationLat}
