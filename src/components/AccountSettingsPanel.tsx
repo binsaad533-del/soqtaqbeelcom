@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Loader2, Save, Eye, EyeOff, User } from "lucide-react";
+import { Camera, Loader2, Save, Eye, EyeOff, User, Phone, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import PhoneVerificationFlow from "@/components/PhoneVerificationFlow";
 
 const AccountSettingsPanel = () => {
   const { profile, user } = useAuthContext();
@@ -16,6 +17,12 @@ const AccountSettingsPanel = () => {
   const [email, setEmail] = useState(user?.email || "");
   const [phone, setPhone] = useState(profile?.phone || "");
   const [savingProfile, setSavingProfile] = useState(false);
+
+  /* ── Phone verification state ── */
+  const originalPhone = profile?.phone || "";
+  const phoneChanged = phone.trim() !== originalPhone.trim() && phone.trim().length > 0;
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [showPhoneVerification, setShowPhoneVerification] = useState(false);
 
   /* ── Password state ── */
   const [newPassword, setNewPassword] = useState("");
@@ -30,12 +37,28 @@ const AccountSettingsPanel = () => {
   /* ── Save profile info ── */
   const handleSaveProfile = async () => {
     if (!user || !profile) return;
+
+    // If phone changed but not verified, prompt verification
+    if (phoneChanged && !phoneVerified) {
+      setShowPhoneVerification(true);
+      toast.error("يجب التحقق من رقم الجوال الجديد قبل الحفظ");
+      return;
+    }
+
     setSavingProfile(true);
     try {
-      // Update profile table
+      const updateData: Record<string, any> = { full_name: fullName.trim() };
+
+      // Only update phone if changed and verified
+      if (phoneChanged && phoneVerified) {
+        updateData.phone = phone.trim();
+        updateData.phone_verified = true;
+        updateData.phone_verified_at = new Date().toISOString();
+      }
+
       const { error: profileError } = await supabase
         .from("profiles")
-        .update({ full_name: fullName.trim(), phone: phone.trim() })
+        .update(updateData)
         .eq("user_id", user.id);
 
       if (profileError) throw profileError;
@@ -47,13 +70,22 @@ const AccountSettingsPanel = () => {
         toast.success("تم إرسال رابط تأكيد البريد الجديد");
       }
 
-      // Profile will refresh on next auth state change
+      // Reset verification state
+      setPhoneVerified(false);
+      setShowPhoneVerification(false);
       toast.success("تم تحديث المعلومات الشخصية");
     } catch (err: any) {
       toast.error(err.message || "حدث خطأ أثناء التحديث");
     } finally {
       setSavingProfile(false);
     }
+  };
+
+  /* ── Phone verified callback ── */
+  const handlePhoneVerified = () => {
+    setPhoneVerified(true);
+    setShowPhoneVerification(false);
+    toast.success("تم التحقق من الرقم — يمكنك الآن حفظ التغييرات");
   };
 
   /* ── Change password ── */
@@ -114,7 +146,6 @@ const AccountSettingsPanel = () => {
 
       if (updateError) throw updateError;
 
-      // Avatar will show on next page load
       toast.success("تم تحديث الصورة الشخصية");
     } catch (err: any) {
       toast.error(err.message || "فشل رفع الصورة");
@@ -122,6 +153,13 @@ const AccountSettingsPanel = () => {
       setUploadingAvatar(false);
       if (fileRef.current) fileRef.current.value = "";
     }
+  };
+
+  // Reset verification when phone input changes
+  const handlePhoneChange = (value: string) => {
+    setPhone(value);
+    setPhoneVerified(false);
+    setShowPhoneVerification(false);
   };
 
   const initials = (profile?.full_name || "U").slice(0, 2);
@@ -176,13 +214,60 @@ const AccountSettingsPanel = () => {
             <Input value={email} onChange={e => setEmail(e.target.value)} className="text-sm" dir="ltr" type="email" />
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground mb-1.5 block">رقم الجوال</Label>
-            <Input value={phone} onChange={e => setPhone(e.target.value)} className="text-sm" dir="ltr" placeholder="+966..." />
+            <Label className="text-xs text-muted-foreground mb-1.5 block flex items-center gap-2">
+              <Phone size={12} />
+              رقم الجوال
+              {phoneChanged && phoneVerified && (
+                <span className="flex items-center gap-1 text-[10px] text-success">
+                  <CheckCircle size={10} />
+                  تم التحقق
+                </span>
+              )}
+              {phoneChanged && !phoneVerified && (
+                <span className="text-[10px] text-warning">يتطلب التحقق</span>
+              )}
+            </Label>
+            <div className="flex gap-2 items-center">
+              <Input
+                value={phone}
+                onChange={e => handlePhoneChange(e.target.value)}
+                className="text-sm flex-1"
+                dir="ltr"
+                placeholder="+966..."
+              />
+              {phoneChanged && !phoneVerified && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-[11px] shrink-0 gap-1"
+                  onClick={() => setShowPhoneVerification(true)}
+                >
+                  <Phone size={12} />
+                  تحقق
+                </Button>
+              )}
+            </div>
           </div>
-          <Button size="sm" className="text-xs gap-1.5" onClick={handleSaveProfile} disabled={savingProfile}>
+
+          {/* ── Inline phone verification ── */}
+          {showPhoneVerification && phoneChanged && !phoneVerified && (
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+              <p className="text-xs text-muted-foreground mb-3">أدخل رقم الجوال الجديد وسنرسل لك رمز تحقق:</p>
+              <PhoneVerificationFlow
+                initialPhone={phone}
+                mode="inline"
+                onVerified={handlePhoneVerified}
+              />
+            </div>
+          )}
+
+          <Button size="sm" className="text-xs gap-1.5" onClick={handleSaveProfile} disabled={savingProfile || (phoneChanged && !phoneVerified)}>
             {savingProfile ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
             حفظ التغييرات
           </Button>
+          {phoneChanged && !phoneVerified && (
+            <p className="text-[10px] text-muted-foreground">⚠️ يجب التحقق من الرقم الجديد قبل الحفظ</p>
+          )}
         </div>
       </div>
 
