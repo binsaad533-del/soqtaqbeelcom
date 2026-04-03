@@ -130,13 +130,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   )}
                 </Link>
                 <NotificationBell />
-                <Link
-                  to="/dashboard"
+                <button
+                  onClick={() => navigate("/dashboard")}
                   className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
                   title={tx("لوحة التحكم", "Dashboard")}
                 >
                   <User size={17} strokeWidth={1.5} />
-                </Link>
+                </button>
                 <button
                   onClick={async () => { await signOut(); navigate("/"); }}
                   className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
