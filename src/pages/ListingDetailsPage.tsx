@@ -532,6 +532,12 @@ const ListingDetailsPage = () => {
                   {listing.district && `${listing.district}, `}{listing.city || "—"}
                 </div>
               )}
+              {(listing as any).area_sqm && (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2">
+                  <Building2 size={14} strokeWidth={1.3} />
+                  المساحة: {(listing as any).area_sqm} م²
+                </div>
+              )}
 
               <div className="mb-6">
                 <div className="text-2xl font-medium gradient-text">
