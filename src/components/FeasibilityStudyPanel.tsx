@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import {
-  TrendingUp, TrendingDown, DollarSign, Users, MapPin, Shield,
+  TrendingUp, TrendingDown, DollarSign, Users, Shield,
   ChevronDown, ChevronUp, Loader2, BarChart3, Target, AlertTriangle,
-  CheckCircle2, Building2, Clock, Lightbulb, Download, FileText,
+  CheckCircle2, Building2, Lightbulb, Download, FileText,
   ArrowUpRight, ArrowDownRight, Minus,
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
