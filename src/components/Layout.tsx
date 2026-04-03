@@ -10,6 +10,7 @@ import LanguageToggle from "./LanguageToggle";
 import CurrencyToggle from "./CurrencyToggle";
 import CookieConsent from "./CookieConsent";
 import SmartInstallPrompt from "./SmartInstallPrompt";
+import LaunchBanner from "./LaunchBanner";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -63,6 +64,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <LaunchBanner />
       <header
         className={cn(
           "sticky top-0 z-50 backdrop-blur-md transition-all duration-200 border-b border-primary/5",

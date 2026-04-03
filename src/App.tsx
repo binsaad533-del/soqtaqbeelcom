@@ -105,7 +105,8 @@ const App = () => (
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:slug" element={<BlogPostPage />} />
                 <Route path="/commission" element={<CommissionPage />} />
-                <Route path="/escrow" element={<EscrowPage />} />
+                {/* Escrow page disabled for launch — will re-enable with payment integration */}
+                {/* <Route path="/escrow" element={<EscrowPage />} /> */}
                 <Route path="/listing/:id" element={<ListingDetailsPage />} />
                 <Route
                   path="/create-listing"
