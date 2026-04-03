@@ -257,6 +257,7 @@ const CreateListingPage = () => {
         required_documents: dealStructure.requiredDocuments,
         location_lat: locationLat,
         location_lng: locationLng,
+        area_sqm: areaSqm ? Number(areaSqm) : null,
       } as never);
       setAutoSaveStatus("saved");
       setTimeout(() => setAutoSaveStatus("idle"), 3000);
