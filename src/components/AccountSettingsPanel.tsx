@@ -69,7 +69,8 @@ const AccountSettingsPanel = () => {
       if (email.trim() !== user.email) {
         const { error: emailError } = await supabase.auth.updateUser({ email: email.trim() });
         if (emailError) throw emailError;
-        toast.success("تم إرسال رابط تأكيد البريد الجديد");
+        setEmailPendingConfirmation(true);
+        toast.success("تم إرسال رابط تأكيد إلى بريدك الجديد — يرجى التحقق من صندوق الوارد");
       }
 
       // Reset verification state
