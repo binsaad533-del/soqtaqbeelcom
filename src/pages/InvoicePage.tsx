@@ -82,6 +82,7 @@ const InvoicePage = () => {
       const [{ BANK_DETAILS, COMMISSION_RATE, calculateCommission }] = await Promise.all([
         import("@/hooks/useCommissions"),
       ]);
+      const { buildPdfQrSection, buildPdfBankSection } = await import("@/lib/pdfShared");
 
       const [logoBase64, logoIconBase64, qrDataUrl] = await Promise.all([
         loadPdfLogo(),
@@ -93,96 +94,83 @@ const InvoicePage = () => {
       const mount = createPdfMount();
       const commissionRate = COMMISSION_RATE;
       const commissionAmount = calculateCommission(invoice.deal_amount);
-      const totalWithVat = commissionAmount * 1.15;
+      const vatAmount = commissionAmount * 0.15;
+      const totalWithVat = commissionAmount + vatAmount;
       const statusLabel = STATUS_MAP[invoice.status]?.label || "قيد الانتظار";
 
       const partyCard = (label: string, profile: ProfileInfo | null) => `
-        <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:18px;padding:16px;background:${PDF_COLORS.cardBg};display:grid;gap:6px;">
-          <div style="font-size:10px;color:${PDF_COLORS.primary};font-weight:600;">${escapeHtml(label)}</div>
-          <div style="font-size:14px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(profile?.full_name || "—")}</div>
-          ${profile?.email ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};">${escapeHtml(profile.email)}</div>` : ""}
-          ${profile?.phone ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};direction:ltr;text-align:right;">${escapeHtml(profile.phone)}</div>` : ""}
-          ${profile?.city ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};">${escapeHtml(profile.city)}</div>` : ""}
+        <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:14px;padding:14px;background:${PDF_COLORS.cardBg};display:grid;gap:5px;">
+          <div style="font-size:9px;color:${PDF_COLORS.primary};font-weight:600;">${escapeHtml(label)}</div>
+          <div style="font-size:13px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(profile?.full_name || "—")}</div>
+          ${profile?.email ? `<div style="font-size:10px;color:${PDF_COLORS.textMuted};">${escapeHtml(profile.email)}</div>` : ""}
+          ${profile?.phone ? `<div style="font-size:10px;color:${PDF_COLORS.textMuted};direction:ltr;text-align:right;">${escapeHtml(profile.phone)}</div>` : ""}
+          ${profile?.city ? `<div style="font-size:10px;color:${PDF_COLORS.textMuted};">${escapeHtml(profile.city)}</div>` : ""}
         </div>`;
 
       const sections: HTMLElement[] = [];
 
       sections.push(buildPdfSection("حالة الفاتورة", `
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-          <div style="padding:8px 18px;border-radius:999px;background:${PDF_COLORS.primaryLight};color:${PDF_COLORS.primary};font-size:13px;font-weight:600;">
+          <div style="padding:6px 16px;border-radius:999px;background:${PDF_COLORS.primaryLight};color:${PDF_COLORS.primary};font-size:12px;font-weight:600;">
             ${escapeHtml(statusLabel)}
           </div>
-          <div style="font-size:11px;color:${PDF_COLORS.textMuted};">تاريخ الإصدار: ${formatPdfDate(invoice.created_at)}</div>
+          <div style="font-size:10px;color:${PDF_COLORS.textMuted};">تاريخ الإصدار: ${formatPdfDate(invoice.created_at)}</div>
         </div>
       `, true));
 
       sections.push(buildPdfSection("أطراف الفاتورة", `
-        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
           ${partyCard("البائع", seller)}
           ${partyCard("المشتري", buyer)}
         </div>
       `));
 
       sections.push(buildPdfSection("تفاصيل الصفقة", `
-        <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:16px;overflow:hidden;">
-          <table style="width:100%;font-size:12px;color:${PDF_COLORS.text};border-collapse:collapse;font-family:${PDF_FONT_FAMILY};">
+        <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:14px;overflow:hidden;">
+          <table style="width:100%;font-size:11px;color:${PDF_COLORS.text};border-collapse:collapse;font-family:${PDF_FONT_FAMILY};">
             <thead>
               <tr style="background:${PDF_COLORS.cardBg};">
-                <th style="text-align:right;padding:12px 16px;font-weight:600;font-size:11px;color:${PDF_COLORS.textMuted};">الوصف</th>
-                <th style="text-align:left;padding:12px 16px;font-weight:600;font-size:11px;color:${PDF_COLORS.textMuted};">المبلغ</th>
+                <th style="text-align:right;padding:10px 14px;font-weight:600;font-size:10px;color:${PDF_COLORS.textMuted};">الوصف</th>
+                <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:10px;color:${PDF_COLORS.textMuted};">المبلغ</th>
               </tr>
             </thead>
             <tbody>
               <tr style="border-top:0.5px solid ${PDF_COLORS.border};">
-                <td style="padding:12px 16px;">
+                <td style="padding:10px 14px;">
                   <div style="font-weight:500;">${escapeHtml(invoice.listing_title || "صفقة تجارية")}</div>
-                  <div style="font-size:10px;color:${PDF_COLORS.textMuted};margin-top:2px;">رقم الصفقة: ${invoice.deal_id.slice(0, 8)}...</div>
+                  <div style="font-size:9px;color:${PDF_COLORS.textMuted};margin-top:2px;">رقم الصفقة: ${invoice.deal_id.slice(0, 8)}...</div>
                 </td>
-                <td style="padding:12px 16px;text-align:left;font-family:monospace;font-weight:500;">${formatCurrency(invoice.deal_amount)} ﷼</td>
+                <td style="padding:10px 14px;text-align:left;font-family:monospace;font-weight:500;">${formatCurrency(invoice.deal_amount)} ﷼</td>
               </tr>
               <tr style="border-top:0.5px solid ${PDF_COLORS.border};background:${PDF_COLORS.cardBg};">
-                <td style="padding:12px 16px;">عمولة المنصة (${(commissionRate * 100).toFixed(0)}%)</td>
-                <td style="padding:12px 16px;text-align:left;font-family:monospace;">${formatCurrency(commissionAmount)} ﷼</td>
+                <td style="padding:10px 14px;">عمولة المنصة (${(commissionRate * 100).toFixed(0)}%)</td>
+                <td style="padding:10px 14px;text-align:left;font-family:monospace;">${formatCurrency(commissionAmount)} ﷼</td>
               </tr>
               <tr style="border-top:0.5px solid ${PDF_COLORS.border};">
-                <td style="padding:12px 16px;">ضريبة القيمة المضافة (15%)</td>
-                <td style="padding:12px 16px;text-align:left;font-family:monospace;">${formatCurrency(totalWithVat - commissionAmount)} ﷼</td>
+                <td style="padding:10px 14px;">ضريبة القيمة المضافة (15%)</td>
+                <td style="padding:10px 14px;text-align:left;font-family:monospace;">${formatCurrency(vatAmount)} ﷼</td>
               </tr>
             </tbody>
             <tfoot>
               <tr style="border-top:2px solid ${PDF_COLORS.primary};">
-                <td style="padding:14px 16px;font-weight:700;font-size:14px;color:${PDF_COLORS.primary};">الإجمالي المستحق</td>
-                <td style="padding:14px 16px;text-align:left;font-weight:700;font-size:14px;font-family:monospace;color:${PDF_COLORS.primary};">${formatCurrency(totalWithVat)} ﷼</td>
+                <td style="padding:12px 14px;font-weight:700;font-size:13px;color:${PDF_COLORS.primary};">الإجمالي المستحق</td>
+                <td style="padding:12px 14px;text-align:left;font-weight:700;font-size:13px;font-family:monospace;color:${PDF_COLORS.primary};">${formatCurrency(totalWithVat)} ﷼</td>
               </tr>
             </tfoot>
           </table>
         </div>
       `));
 
-      sections.push(buildPdfSection("بيانات الحساب البنكي", buildPdfInfoGrid([
-        { label: "اسم المستفيد", value: escapeHtml(BANK_DETAILS.beneficiary) },
-        { label: "الاسم القانوني", value: escapeHtml(BANK_DETAILS.legalName) },
-        { label: "البنك", value: escapeHtml(BANK_DETAILS.bank) },
-        { label: "رقم الحساب", value: escapeHtml(BANK_DETAILS.accountNumber) },
-        { label: "رقم الآيبان (IBAN)", value: escapeHtml(BANK_DETAILS.iban), emphasized: true },
-        { label: "السجل التجاري", value: escapeHtml(BANK_DETAILS.nationalId) },
-        { label: "الرقم الضريبي", value: escapeHtml(BANK_DETAILS.taxNumber) },
-        { label: "التواصل المالي", value: escapeHtml(`${BANK_DETAILS.email} — ${BANK_DETAILS.phone}`) },
-      ]), true));
+      // Bank details section (reusable component)
+      sections.push(buildPdfBankSection(BANK_DETAILS, {
+        rate: commissionRate,
+        amount: commissionAmount,
+        dealAmount: invoice.deal_amount,
+      }));
 
+      // QR verification section (outside footer)
       if (qrDataUrl) {
-        sections.push(buildPdfSection("التحقق الإلكتروني", `
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px;">
-            <div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:2;text-align:right;flex:1;">
-              يمكنكم مسح الرمز للتحقق من الفاتورة إلكترونياً<br />
-              جميع المبالغ بالريال السعودي
-            </div>
-            <div style="display:grid;justify-items:center;gap:6px;flex-shrink:0;">
-              <img src="${qrDataUrl}" alt="QR" style="width:72px;height:72px;border-radius:8px;" />
-              <div style="font-size:9px;color:${PDF_COLORS.textFaint};">تحقق إلكتروني</div>
-            </div>
-          </div>
-        `));
+        sections.push(buildPdfQrSection(qrDataUrl));
       }
 
       const shellBuilder = (pageNumber: number) => buildPdfPageShell({
