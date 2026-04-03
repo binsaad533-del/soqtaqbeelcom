@@ -8,7 +8,7 @@ import logoIcon from "@/assets/logo-icon-gold.png";
 import { useSEO } from "@/hooks/useSEO";
 import {
   ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
-  buildPdfPageShell, buildPdfSection,
+  buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
   createPdfMount, renderPagesToPdf, paginateSections,
   formatPdfDate, escapeHtml, PDF_FONT_FAMILY,
   PDF_COLORS,
