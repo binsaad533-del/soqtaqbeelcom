@@ -102,6 +102,7 @@ const CreateListingPage = () => {
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
   const [sellerNote, setSellerNote] = useState("");
+  const [areaSqm, setAreaSqm] = useState<string>("");
   const SELLER_NOTE_MAX = 300;
   const [inventoryPricingMode, setInventoryPricingMode] = useState<InventoryPricingMode>("per_item");
   const [bulkInventoryPrice, setBulkInventoryPrice] = useState<string>("");
