@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Loader2, Save, Eye, EyeOff, User } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 const AccountSettingsPanel = () => {
   const { profile, user, refreshProfile } = useAuthContext();
