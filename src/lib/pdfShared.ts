@@ -185,7 +185,7 @@ export function buildPdfQrSection(qrDataUrl: string): HTMLElement {
   wrapper.innerHTML = `
     <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:16px;padding:18px;background:${PDF_COLORS.primaryLight};display:flex;align-items:center;justify-content:space-between;gap:20px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;">
       <div style="display:grid;gap:6px;flex:1;text-align:right;">
-        <div style="font-size:12px;font-weight:600;color:${PDF_COLORS.text};">التحقق الإلكتروني</div>
+        <div style="font-size:14px;font-weight:600;color:${PDF_COLORS.text};">التحقق الإلكتروني</div>
         <div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:2;">
           يمكنكم مسح رمز QR للتحقق من صحة هذه الوثيقة إلكترونياً عبر منصة سوق تقبيل.<br/>
           جميع المبالغ بالريال السعودي (﷼)
