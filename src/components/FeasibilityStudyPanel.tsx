@@ -174,6 +174,29 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
     }
   };
 
+  const shareStudy = async () => {
+    const url = `${window.location.origin}/listing/${listing.id}#feasibility`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `دراسة جدوى: ${listing.title || "فرصة استثمارية"}`,
+          text: `اطّلع على دراسة الجدوى الاقتصادية لـ ${listing.title || "هذه الفرصة"}`,
+          url,
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        toast.success("تم نسخ رابط الدراسة");
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success("تم نسخ رابط الدراسة");
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   const downloadPDF = async () => {
     if (!reportRef.current) return;
     setPdfLoading(true);
@@ -208,7 +231,7 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
 
   if (loadingCache) {
     return (
-      <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 flex items-center justify-center gap-2">
+      <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 flex items-center justify-center gap-2">
         <Loader2 size={16} className="animate-spin text-primary" />
         <span className="text-sm text-muted-foreground">جاري تحميل الدراسة...</span>
       </div>
@@ -217,7 +240,7 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
 
   if (!study) {
     return (
-      <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
+      <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
         <div className="flex items-center gap-2">
           <AiStar size={18} />
           <h3 className="text-base font-semibold">دراسة الجدوى الاقتصادية</h3>
