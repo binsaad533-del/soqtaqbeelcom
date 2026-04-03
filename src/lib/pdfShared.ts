@@ -238,24 +238,31 @@ export function buildPdfPageShell(options: {
     .map(([, svg]) => `<span style="opacity:0.45;">${svg}</span>`)
     .join("");
 
+  const qrHtml = showQrInFooter && qrDataUrl
+    ? `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;">
+        <img src="${qrDataUrl}" alt="QR" style="width:32px;height:32px;border-radius:3px;display:block;" />
+        <div style="font-size:7px;color:${PDF_COLORS.textFaint};">تحقق إلكتروني</div>
+      </div>`
+    : "";
+
   const footerHtml = `
-    <footer style="padding-top:10px;border-top:0.5px solid ${PDF_COLORS.borderLight};display:grid;gap:6px;text-align:center;">
+    <footer style="padding-top:8px;border-top:0.5px solid ${PDF_COLORS.borderLight};display:grid;gap:4px;text-align:center;">
       <div style="display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap;line-height:2;">
         ${navLinksHtml}
       </div>
-      ${logoIconBase64 ? `<div style="text-align:center;"><img src="${logoIconBase64}" alt="سوق تقبيل" style="height:28px;width:28px;object-fit:contain;opacity:0.5;" /></div>` : ""}
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+        ${logoIconBase64 ? `<img src="${logoIconBase64}" alt="سوق تقبيل" style="height:20px;width:20px;object-fit:contain;opacity:0.5;" />` : ""}
         ${socialIcons}
       </div>
-      <div style="font-size:9px;color:${PDF_COLORS.textMuted};line-height:1.8;">
+      <div style="font-size:8px;color:${PDF_COLORS.textMuted};line-height:1.6;">
         في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦
       </div>
-      ${showQrInFooter && qrDataUrl ? `<div style="display:grid;justify-items:center;gap:4px;padding-top:2px;"><img src="${qrDataUrl}" alt="QR" style="width:42px;height:42px;border-radius:4px;display:block;" /><div style="font-size:8px;color:${PDF_COLORS.textFaint};">تحقق إلكتروني</div></div>` : ""}
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-        <div style="font-size:8px;color:${PDF_COLORS.textFaint};line-height:1.8;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div style="font-size:7px;color:${PDF_COLORS.textFaint};line-height:1.6;">
           © ${new Date().getFullYear()} المنصة مملوكة ومدارة بواسطة شركة Ain Jasaas
         </div>
-        <div style="font-size:8px;color:${PDF_COLORS.textFaint};white-space:nowrap;">صفحة ${pageNumber}</div>
+        ${qrHtml}
+        <div style="font-size:7px;color:${PDF_COLORS.textFaint};white-space:nowrap;">صفحة ${pageNumber}</div>
       </div>
     </footer>
   `;
@@ -332,7 +339,7 @@ export function paginateSections(options: {
   const getAvailableHeight = () => {
     const pageRect = current.page.getBoundingClientRect();
     const contentRect = current.content.getBoundingClientRect();
-    return pageRect.bottom - contentRect.top - 60;
+    return pageRect.bottom - contentRect.top - 90;
   };
 
   sections.forEach((block) => {
