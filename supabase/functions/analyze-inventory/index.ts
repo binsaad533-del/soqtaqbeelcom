@@ -161,6 +161,7 @@ serve(async (req) => {
                       lease_duration: { type: "string", description: "مدة العقد" },
                       cr_number: { type: "string", description: "رقم السجل التجاري" },
                       entity_name: { type: "string", description: "اسم المنشأة" },
+                      area_sqm: { type: "string", description: "مساحة الموقع بالمتر المربع (إن وجدت في المستندات أو العقد)" },
                     }
                   }
                 },

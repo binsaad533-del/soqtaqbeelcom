@@ -45,6 +45,7 @@ export interface Listing {
   location_lng: number | null;
   fraud_flags: any[];
   fraud_score: number | null;
+  area_sqm: number | null;
 }
 
 export function useListings() {

@@ -940,7 +940,8 @@ const CreateListingPage = () => {
   const imageReq = getImageRequirement(dealStructure.primaryType);
   const photosOk = imageReq === "none" || imageReq === "optional" || totalPhotos > 0;
   const disclosureErrors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
-  const canPublish = photosOk && Object.keys(disclosureErrors).length === 0;
+  const locationOk = locationLat != null && locationLng != null;
+  const canPublish = photosOk && Object.keys(disclosureErrors).length === 0 && locationOk;
   const [publishAttempted, setPublishAttempted] = useState(false);
 
   // Debug logging for schema verification
