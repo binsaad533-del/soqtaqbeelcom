@@ -204,6 +204,7 @@ const PdfPreviewPage = () => {
       { label: "التوصية", value: "فرصة استثمارية جيدة مع إدارة حكيمة", emphasized: true },
     ])));
 
+    sections.push(buildPdfDisclaimer("feasibility"));
     if (qrDataUrl) sections.push(buildPdfQrSection(qrDataUrl));
 
     const shellBuilder = (pageNumber: number) => buildPdfPageShell({
