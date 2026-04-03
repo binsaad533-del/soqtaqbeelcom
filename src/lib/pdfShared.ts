@@ -5,7 +5,6 @@
 import QRCode from "qrcode";
 import logoBlueUrl from "@/assets/logo-blue.png";
 import logoIconGoldUrl from "@/assets/logo-icon-gold.png";
-import { SOCIAL_LINKS } from "@/lib/socialLinks";
 
 /* ── Constants ── */
 export const PDF_PAGE_WIDTH_PX = 794;
