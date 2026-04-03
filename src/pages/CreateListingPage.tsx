@@ -777,6 +777,10 @@ const CreateListingPage = () => {
       toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر");
       return;
     }
+    if (locationLat == null || locationLng == null) {
+      toast.error("يجب تحديد الموقع على الخريطة قبل النشر");
+      return;
+    }
 
     const nextListingPayload = buildListingPayload();
     const nextInputKey = JSON.stringify(nextListingPayload);
