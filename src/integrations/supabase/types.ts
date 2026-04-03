@@ -691,6 +691,38 @@ export type Database = {
         }
         Relationships: []
       }
+      feasibility_studies: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          requested_by: string
+          study_data: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          requested_by: string
+          study_data?: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          requested_by?: string
+          study_data?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feasibility_studies_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: true
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           buyer_id: string
