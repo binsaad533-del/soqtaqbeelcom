@@ -342,17 +342,23 @@ export function buildPdfPageShell(options: {
   return { page, content };
 }
 
-/* ── Protect PDF (no copy / no modify) ── */
+/* ── Protect PDF (metadata + tamper protection) ── */
 export function protectPdf(pdf: any) {
   try {
     if (typeof pdf.setDocumentProperties === "function") {
       pdf.setDocumentProperties({
         title: "سوق تقبيل — وثيقة رسمية",
         creator: "Soq Taqbeel Platform",
-        author: "Ain Jasaas",
+        author: "شركة عين جساس للمقاولات — Ain Jasaas",
+        subject: "وثيقة رسمية صادرة من منصة سوق تقبيل",
+        keywords: "سوق تقبيل, وثيقة رسمية, Soq Taqbeel",
       });
     }
-  } catch { /* optional */ }
+    // Set read-only permissions (no modify, no copy, no annotate)
+    if (typeof pdf.setPermissions === "function") {
+      pdf.setPermissions(["print"], { userPassword: "", ownerPassword: "soqtaqbeel_protected_2026" });
+    }
+  } catch { /* optional — jsPDF may not support all features */ }
 }
 
 /* ── Full Pipeline: Render pages → jsPDF with protection ── */
