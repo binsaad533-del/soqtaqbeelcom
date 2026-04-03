@@ -50,7 +50,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     { label: tx("كيف تتم الصفقة", "Deal Pipeline"), path: "/deal-pipeline" },
     { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing" },
     { label: tx("لوحة التحكم", "Dashboard"), path: "/dashboard" },
-    { label: tx("النماذج", "Templates"), path: "/pdf-preview" },
+    { label: tx("نماذج PDF", "PDF Templates"), path: "/pdf-preview" },
   ];
 
   useEffect(() => {
@@ -83,7 +83,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
           <nav className="hidden md:flex items-center gap-0.5">
             {navLinks.map((link) => {
-              const isActive = location.pathname === link.path;
+              const isActive = location.pathname === link.path && link.path !== "/pdf-preview";
               return (
                 <Link
                   key={link.path}
