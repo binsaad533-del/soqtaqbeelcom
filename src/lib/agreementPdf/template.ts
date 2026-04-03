@@ -448,18 +448,26 @@ const buildSections = (data: AgreementPdfData, qrDataUrl = "") => {
     ),
   );
 
-  // ── Recommendation + QR code ──
-  sections.push(
-    createNode(`
-      <div style="display:grid;justify-items:center;gap:8px;padding:16px 20px;font-family:${FONT_FAMILY};text-align:center;">
-        ${qrDataUrl ? `<img src="${qrDataUrl}" alt="QR" style="width:56px;height:56px;border-radius:6px;" />` : ""}
-        <div style="font-size:9px;line-height:2;color:hsl(215 16% 45%);text-align:center;">
-          ننصح بتوثيق هذه الاتفاقية لدى الجهات الرسمية المعتمدة لضمان حفظ حقوق جميع الأطراف<br />
-          يمكنكم مسح الرمز للتحقق من الاتفاقية إلكترونياً
-        </div>
-      </div>
-    `),
-  );
+  // ── QR Code verification section (standalone) ──
+  if (qrDataUrl) {
+    sections.push(
+      createNode(`
+        <section style="border:0.5px solid hsl(214 32% 93%);border-radius:14px;padding:16px;background:hsl(210 100% 98%);display:flex;align-items:center;justify-content:space-between;gap:20px;font-family:${FONT_FAMILY};direction:rtl;">
+          <div style="display:grid;gap:4px;flex:1;text-align:right;">
+            <div style="font-size:11px;font-weight:600;color:hsl(215 25% 18%);">التحقق الإلكتروني</div>
+            <div style="font-size:9px;line-height:2;color:hsl(215 16% 45%);">
+              ننصح بتوثيق هذه الاتفاقية لدى الجهات الرسمية المعتمدة لضمان حفظ حقوق جميع الأطراف<br />
+              يمكنكم مسح رمز QR للتحقق من الاتفاقية إلكترونياً
+            </div>
+          </div>
+          <div style="display:grid;justify-items:center;gap:3px;flex-shrink:0;">
+            <img src="${qrDataUrl}" alt="QR" style="width:72px;height:72px;border-radius:8px;border:1px solid hsl(214 32% 91%);" />
+            <div style="font-size:7px;color:hsl(215 16% 55%);">تحقق إلكتروني</div>
+          </div>
+        </section>
+      `),
+    );
+  }
 
   return sections;
 };
