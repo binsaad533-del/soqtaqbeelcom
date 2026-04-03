@@ -16,7 +16,7 @@ import SarSymbol from "@/components/SarSymbol";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/hooks/useSEO";
 
-type Tab = "overview" | "crm" | "commissions" | "blog" | "backup" | "actions";
+type Tab = "overview" | "crm" | "commissions" | "blog" | "emails" | "backup" | "actions";
 
 interface AuditLog {
   id: string;
