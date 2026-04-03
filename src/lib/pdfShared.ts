@@ -448,7 +448,7 @@ export function buildPdfSection(title: string, body: string, highlight = false):
   wrapper.innerHTML = `
     <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:14px;padding:14px 14px 12px;background:${bg};display:grid;gap:8px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;text-align:right;">
       <div style="display:flex;align-items:center;gap:10px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:6px;">
-        <h2 style="margin:0;font-size:11px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(title)}</h2>
+        <h2 style="margin:0;font-size:14px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(title)}</h2>
       </div>
       ${body}
     </section>
