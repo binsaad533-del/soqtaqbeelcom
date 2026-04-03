@@ -21,17 +21,18 @@ import {
   Users, FileText, Handshake, Settings, BarChart3, Search,
   Loader2, AlertTriangle, Landmark, ChevronLeft, ShieldCheck,
   ArrowUpDown, ImageOff, Bell, Shield, TrendingUp, Eye,
-  Activity, RefreshCw, UserCheck
+  Activity, RefreshCw, UserCheck, User
 } from "lucide-react";
 import OwnerSettingsPanel from "@/components/OwnerSettingsPanel";
 import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
+import AccountSettingsPanel from "@/components/AccountSettingsPanel";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import CrmDashboard from "@/components/crm/CrmDashboard";
 import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
 import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 
-type Tab = "overview" | "crm" | "deals" | "users" | "listings" | "security" | "settings";
+type Tab = "overview" | "crm" | "deals" | "users" | "listings" | "security" | "account" | "settings";
 
 const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: "overview", label: "نظرة عامة", icon: BarChart3 },
@@ -40,13 +41,14 @@ const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: "users", label: "المستخدمون", icon: Users },
   { id: "listings", label: "الإعلانات", icon: FileText },
   { id: "security", label: "الأمان", icon: Shield },
-  { id: "settings", label: "الإعدادات", icon: Settings },
+  { id: "account", label: "حسابي", icon: User },
+  { id: "settings", label: "إعدادات المنصة", icon: Settings },
 ];
 
 const OwnerDashboardPage = () => {
   useSEO({ title: "لوحة مالك المنصة", description: "لوحة تحكم مالك المنصة — إدارة شاملة لسوق تقبيل", canonical: "/owner-dashboard" });
   const navigate = useNavigate();
-  const { profile, signOut } = useAuthContext();
+  const { profile } = useAuthContext();
   const { getAllListings } = useListings();
   const { getAllDeals } = useDeals();
   const { getAllProfiles, getAllRoles, updateProfile } = useProfiles();
@@ -852,10 +854,8 @@ const OwnerDashboardPage = () => {
 
         {activeTab === "crm" && <CrmDashboard />}
         {activeTab === "security" && <SecurityIncidentPanel />}
-
-        {activeTab === "settings" && (
-           <OwnerSettingsPanel />
-        )}
+        {activeTab === "account" && <AccountSettingsPanel />}
+        {activeTab === "settings" && <OwnerSettingsPanel />}
       </div>
     </div>
   );
