@@ -432,7 +432,7 @@ export function paginateSections(options: {
   const getAvailableHeight = () => {
     const pageRect = current.page.getBoundingClientRect();
     const contentRect = current.content.getBoundingClientRect();
-    return pageRect.bottom - contentRect.top - 80;
+    return pageRect.bottom - contentRect.top - 110;
   };
 
   sections.forEach((block) => {
