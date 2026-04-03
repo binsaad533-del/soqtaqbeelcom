@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Loader2, Save, Eye, EyeOff, User, Phone, CheckCircle } from "lucide-react";
+import { Camera, Loader2, Save, Eye, EyeOff, User, Phone, CheckCircle, Mail, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import PhoneVerificationFlow from "@/components/PhoneVerificationFlow";
 
@@ -17,6 +17,8 @@ const AccountSettingsPanel = () => {
   const [email, setEmail] = useState(user?.email || "");
   const [phone, setPhone] = useState(profile?.phone || "");
   const [savingProfile, setSavingProfile] = useState(false);
+  const [emailPendingConfirmation, setEmailPendingConfirmation] = useState(false);
+  const emailChanged = email.trim() !== (user?.email || "").trim() && email.trim().length > 0;
 
   /* ── Phone verification state ── */
   const originalPhone = profile?.phone || "";
@@ -67,7 +69,8 @@ const AccountSettingsPanel = () => {
       if (email.trim() !== user.email) {
         const { error: emailError } = await supabase.auth.updateUser({ email: email.trim() });
         if (emailError) throw emailError;
-        toast.success("تم إرسال رابط تأكيد البريد الجديد");
+        setEmailPendingConfirmation(true);
+        toast.success("تم إرسال رابط تأكيد إلى بريدك الجديد — يرجى التحقق من صندوق الوارد");
       }
 
       // Reset verification state
@@ -210,8 +213,23 @@ const AccountSettingsPanel = () => {
             <Input value={fullName} onChange={e => setFullName(e.target.value)} className="text-sm" />
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground mb-1.5 block">البريد الإلكتروني</Label>
-            <Input value={email} onChange={e => setEmail(e.target.value)} className="text-sm" dir="ltr" type="email" />
+            <Label className="text-xs text-muted-foreground mb-1.5 block flex items-center gap-2">
+              <Mail size={12} />
+              البريد الإلكتروني
+              {emailChanged && (
+                <span className="text-[10px] text-warning flex items-center gap-1">
+                  <AlertCircle size={10} />
+                  سيتطلب تأكيد عبر رابط
+                </span>
+              )}
+              {emailPendingConfirmation && !emailChanged && (
+                <span className="text-[10px] text-primary flex items-center gap-1">
+                  <Mail size={10} />
+                  بانتظار التأكيد — تحقق من بريدك
+                </span>
+              )}
+            </Label>
+            <Input value={email} onChange={e => { setEmail(e.target.value); setEmailPendingConfirmation(false); }} className="text-sm" dir="ltr" type="email" />
           </div>
           <div>
             <Label className="text-xs text-muted-foreground mb-1.5 block flex items-center gap-2">
