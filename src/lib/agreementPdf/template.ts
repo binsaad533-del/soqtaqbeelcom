@@ -38,12 +38,13 @@ const toEnDigits = (s: string) => s.replace(/[٠-٩]/g, (d) => String("٠١٢٣�
 const formatDate = (value?: string | null) => {
   if (!value) return "—";
   try {
-    const formatted = new Intl.DateTimeFormat("ar-SA", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(new Date(value));
-    return toEnDigits(formatted);
+    const isoMatch = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) return `${isoMatch[1]}/${isoMatch[2]}/${isoMatch[3]}`;
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+
+    return `${parsed.getFullYear()}/${String(parsed.getMonth() + 1).padStart(2, "0")}/${String(parsed.getDate()).padStart(2, "0")}`;
   } catch {
     return value;
   }
@@ -77,13 +78,13 @@ const infoGrid = (items: Array<{ label: string; value: string; emphasized?: bool
     ${items
       .map(
         ({ label, value, emphasized }) => `
-          <div style="border:0.5px solid hsl(214 32% 91%);border-radius:16px;padding:12px 14px;background:${
+          <div style="border:0.5px solid hsl(214 32% 91%);border-radius:16px;padding:12px 14px;text-align:right;direction:rtl;background:${
             emphasized ? "hsl(210 100% 98%)" : "hsl(210 40% 98%)"
           }">
             <div style="font-size:10px;color:hsl(215 16% 45%);margin-bottom:4px;">${escapeHtml(label)}</div>
             <div style="font-size:${emphasized ? "16px" : "12px"};font-weight:${emphasized ? 600 : 500};color:${
               emphasized ? "hsl(212 84% 42%)" : "hsl(215 25% 18%)"
-            };line-height:1.6;">${value}</div>
+            };line-height:1.8;word-break:break-word;overflow-wrap:anywhere;">${value}</div>
           </div>`,
       )
       .join("")}
@@ -110,7 +111,7 @@ const listCard = (items: string[], tone: "neutral" | "success" | "warning" = "ne
 const section = (title: string, body: string, tone: "default" | "highlight" = "default") => {
   const background = tone === "highlight" ? "hsl(210 100% 98%)" : "#ffffff";
   return createNode(`
-    <section style="border:0.5px solid hsl(214 32% 91%);border-radius:22px;padding:18px 18px 16px;background:${background};display:grid;gap:12px;break-inside:avoid;">
+    <section style="border:0.5px solid hsl(214 32% 91%);border-radius:22px;padding:18px 18px 16px;background:${background};display:grid;gap:12px;break-inside:avoid;text-align:right;direction:rtl;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:0.5px solid hsl(214 32% 93%);padding-bottom:10px;">
         <h2 style="margin:0;font-size:15px;font-weight:600;color:hsl(215 28% 17%);">${escapeHtml(title)}</h2>
       </div>
@@ -124,8 +125,8 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, logoIconBase
   page.style.cssText = PAGE_SHELL_STYLE;
 
   const header = createNode(`
-    <header style="display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:12px;border-bottom:0.5px solid hsl(214 32% 93%);">
-      <div style="display:grid;gap:5px;">
+    <header style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-bottom:14px;border-bottom:0.5px solid hsl(214 32% 93%);">
+      <div style="display:grid;gap:5px;flex:1;text-align:right;">
         <div style="font-size:15px;font-weight:500;color:hsl(215 28% 17%);">اتفاقية الصفقة</div>
         <div style="font-size:10px;color:hsl(215 16% 45%);line-height:1.7;">${safeText(data.dealTitle)} — ${safeText(data.location)}</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9px;color:hsl(215 16% 45%);">
@@ -134,7 +135,7 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, logoIconBase
           <span>التاريخ: ${formatDate(data.createdAt)}</span>
         </div>
       </div>
-      ${logoBase64 ? `<img src="${logoBase64}" alt="سوق تقبيل" style="height:60px;width:auto;object-fit:contain;" />` : ""}
+      ${logoBase64 ? `<div style="width:230px;display:flex;align-items:center;justify-content:flex-start;flex-shrink:0;"><img src="${logoBase64}" alt="سوق تقبيل" style="height:82px;width:230px;object-fit:contain;object-position:left center;display:block;" /></div>` : ""}
     </header>
   `);
 
@@ -454,7 +455,7 @@ const buildSections = (data: AgreementPdfData, qrDataUrl = "") => {
   // ── Recommendation + QR code ──
   sections.push(
     createNode(`
-      <div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:14px 20px;opacity:0.5;font-family:${FONT_FAMILY};">
+      <div style="display:grid;justify-items:center;gap:8px;padding:16px 20px;font-family:${FONT_FAMILY};text-align:center;">
         ${qrDataUrl ? `<img src="${qrDataUrl}" alt="QR" style="width:56px;height:56px;border-radius:6px;" />` : ""}
         <div style="font-size:9px;line-height:2;color:hsl(215 16% 45%);text-align:center;">
           ننصح بتوثيق هذه الاتفاقية لدى الجهات الرسمية المعتمدة لضمان حفظ حقوق جميع الأطراف<br />

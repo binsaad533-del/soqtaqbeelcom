@@ -219,7 +219,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
         logoIconBase64,
         pageNumber,
         qrDataUrl,
-        showQrInFooter: true,
+        showQrInFooter: false,
       });
 
       const pages = paginateSections({ sections, mount, shellBuilder });

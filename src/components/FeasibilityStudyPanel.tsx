@@ -314,7 +314,7 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
         logoIconBase64,
         pageNumber,
         qrDataUrl,
-        showQrInFooter: true,
+        showQrInFooter: false,
       });
 
       const pages = paginateSections({ sections, mount, shellBuilder });
