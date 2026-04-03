@@ -97,7 +97,10 @@ const BlogPostPage = () => {
         </Link>
 
         {/* Header */}
-        <article dir={lang === "ar" ? "rtl" : "ltr"}>
+        <article
+          dir={lang === "ar" ? "rtl" : "ltr"}
+          className={`max-w-2xl mx-auto ${lang === "ar" ? "text-right" : "text-left"}`}
+        >
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             {category && (
               <span className="text-xs px-2.5 py-1 rounded-md bg-primary/10 text-primary font-medium">
@@ -120,24 +123,46 @@ const BlogPostPage = () => {
             </span>
           </div>
 
-          <h1 className="text-xl md:text-2xl font-semibold mb-6 leading-relaxed">{title}</h1>
+          <h1 className="text-xl md:text-2xl font-semibold mb-7 leading-[1.9]">{title}</h1>
 
-          {/* Content */}
-          <div className="prose prose-sm dark:prose-invert max-w-none
-            prose-headings:font-semibold prose-headings:leading-relaxed prose-headings:mb-4 prose-headings:mt-9
-            prose-h2:text-base prose-h2:border-b prose-h2:border-border/15 prose-h2:pb-2
-            prose-h3:text-[15px]
-            prose-p:text-sm prose-p:leading-[2.25] prose-p:mb-6 prose-p:text-foreground/80 prose-p:font-normal
-            prose-li:text-sm prose-li:leading-[2.1] prose-li:mb-2 prose-li:text-foreground/75 prose-li:font-normal
-            prose-ul:my-5 prose-ul:ps-6
-            prose-ol:my-5 prose-ol:ps-6
-            prose-strong:text-foreground/90 prose-strong:font-medium
-            prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-          ">
-            <ReactMarkdown>{content}</ReactMarkdown>
+          <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-inherit prose-strong:text-inherit prose-a:text-primary">
+            <ReactMarkdown
+              components={{
+                h2: ({ children }) => (
+                  <h2 className="mt-12 mb-5 pb-3 text-lg md:text-xl font-semibold leading-[2] border-b border-border/15 text-start">
+                    {children}
+                  </h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="mt-10 mb-4 text-base md:text-lg font-semibold leading-[2] text-start">
+                    {children}
+                  </h3>
+                ),
+                p: ({ children }) => (
+                  <p className="mb-7 text-[15px] leading-[2.45] text-foreground/80 font-normal text-start">
+                    {children}
+                  </p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="my-7 space-y-3 ps-7 text-start text-foreground/75 marker:text-muted-foreground">
+                    {children}
+                  </ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="my-7 space-y-3 ps-7 text-start text-foreground/75 marker:text-foreground/70">
+                    {children}
+                  </ol>
+                ),
+                li: ({ children }) => (
+                  <li className="text-[15px] leading-[2.3] ps-1 font-normal">{children}</li>
+                ),
+                strong: ({ children }) => <strong className="font-medium text-foreground/90">{children}</strong>,
+              }}
+            >
+              {content}
+            </ReactMarkdown>
           </div>
 
-          {/* Tags */}
           {post.tags && post.tags.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap mt-10 pt-6 border-t border-border/30">
               <Tag size={14} className="text-muted-foreground" />
