@@ -57,8 +57,8 @@ const SAMPLE_AGREEMENT: AgreementPdfData = {
 
 type TemplateKey = "invoice" | "agreement" | "feasibility" | "legal";
 
-const TEMPLATES: { key: TemplateKey; label: string; icon: LucideIcon }[] = [
-  { key: "invoice", label: "الفاتورة", icon: Receipt },
+const TEMPLATES: { key: TemplateKey; label: string; icon: LucideIcon | "sar" }[] = [
+  { key: "invoice", label: "الفاتورة", icon: "sar" },
   { key: "agreement", label: "الاتفاقية", icon: FileText },
   { key: "feasibility", label: "دراسة الجدوى", icon: BarChart3 },
   { key: "legal", label: "التأكيد القانوني", icon: Scale },
