@@ -215,6 +215,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
       const shellBuilder = (pageNumber: number) => buildPdfPageShell({
         documentTitle: "وثيقة التأكيد النهائي",
         documentSubtitle: title,
+        logoBase64,
         logoIconBase64,
         pageNumber,
         qrDataUrl,

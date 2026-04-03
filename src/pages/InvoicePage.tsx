@@ -171,6 +171,7 @@ const InvoicePage = () => {
         documentTitle: "فاتورة",
         documentSubtitle: `#${String(invoice.invoice_number).padStart(6, "0")} — ${escapeHtml(invoice.listing_title || "صفقة تجارية")}`,
         documentMeta: [`تاريخ الإصدار: ${formatPdfDate(invoice.created_at)}`],
+        logoBase64,
         logoIconBase64,
         pageNumber,
         qrDataUrl,

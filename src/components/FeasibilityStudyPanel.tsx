@@ -310,6 +310,7 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
         documentTitle: "دراسة الجدوى الاقتصادية",
         documentSubtitle: listing.title || listing.business_activity || "فرصة استثمارية",
         documentMeta: [listing.city ? `الموقع: ${listing.city}` : "", listing.price ? `السعر: ${formatPdfPrice(listing.price)} ﷼` : ""].filter(Boolean),
+        logoBase64,
         logoIconBase64,
         pageNumber,
         qrDataUrl,
