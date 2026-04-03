@@ -133,7 +133,7 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, logoIconBase
           <span>التاريخ: ${formatDate(data.createdAt)}</span>
         </div>
       </div>
-      ${logoBase64 ? `<div style="width:230px;display:flex;align-items:center;justify-content:flex-start;flex-shrink:0;"><img src="${logoBase64}" alt="سوق تقبيل" style="height:82px;width:230px;object-fit:contain;object-position:left center;display:block;" /></div>` : ""}
+      ${logoBase64 ? `<div style="width:320px;display:flex;align-items:center;justify-content:flex-start;flex-shrink:0;"><img src="${logoBase64}" alt="سوق تقبيل" style="height:112px;width:320px;object-fit:contain;object-position:left center;display:block;" /></div>` : ""}
     </header>
   `);
 
