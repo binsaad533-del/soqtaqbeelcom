@@ -109,9 +109,9 @@ const listCard = (items: string[], _tone: "neutral" | "success" | "warning" = "n
 const section = (title: string, body: string, tone: "default" | "highlight" = "default") => {
   const background = tone === "highlight" ? "hsl(210 100% 98%)" : "#ffffff";
   return createNode(`
-    <section style="border:0.5px solid hsl(214 32% 91%);border-radius:22px;padding:18px 18px 16px;background:${background};display:grid;gap:12px;break-inside:avoid;text-align:right;direction:rtl;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:0.5px solid hsl(214 32% 93%);padding-bottom:10px;">
-        <h2 style="margin:0;font-size:15px;font-weight:600;color:hsl(215 28% 17%);">${escapeHtml(title)}</h2>
+    <section style="border:0.5px solid hsl(214 32% 91%);border-radius:14px;padding:14px 14px 12px;background:${background};display:grid;gap:8px;break-inside:avoid;text-align:right;direction:rtl;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:0.5px solid hsl(214 32% 93%);padding-bottom:6px;">
+        <h2 style="margin:0;font-size:11px;font-weight:600;color:hsl(215 28% 17%);">${escapeHtml(title)}</h2>
       </div>
       ${body}
     </section>
