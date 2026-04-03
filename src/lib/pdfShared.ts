@@ -3,6 +3,7 @@
  * Provides shared header, footer, QR code, protection, and page management.
  */
 import QRCode from "qrcode";
+import logoBlueUrl from "@/assets/logo-blue.png";
 import logoIconGoldUrl from "@/assets/logo-icon-gold.png";
 import { SOCIAL_LINKS } from "@/lib/socialLinks";
 
