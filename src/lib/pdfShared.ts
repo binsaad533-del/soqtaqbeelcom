@@ -329,7 +329,7 @@ export function buildPdfPageShell(options: {
       </div>
       <div style="text-align:center;font-size:8px;color:${PDF_COLORS.textMuted};">في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦</div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:7px;color:${PDF_COLORS.textFaint};">© ${new Date().getFullYear()} شركة Ain Jasaas</div>
+        <div style="font-size:7px;color:${PDF_COLORS.textFaint};">© ${new Date().getFullYear()} المنصة مملوكة ومدارة بواسطة شركة Ain Jasaas</div>
         <div style="font-size:7px;color:${PDF_COLORS.textFaint};">صفحة ${pageNumber}</div>
       </div>
     </footer>
