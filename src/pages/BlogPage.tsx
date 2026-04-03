@@ -168,7 +168,7 @@ const BlogPage = () => {
                           <Calendar size={10} />
                           {post.published_at
                             ? new Date(post.published_at).toLocaleDateString(
-                                lang === "ar" ? "ar-SA" : "en-US",
+                                lang === "ar" ? "ar-SA-u-nu-latn" : "en-US",
                                 { year: "numeric", month: "short", day: "numeric" }
                               )
                             : ""}

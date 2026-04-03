@@ -107,7 +107,7 @@ const BlogPostPage = () => {
             <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
               <Calendar size={10} />
               {post.published_at
-                ? new Date(post.published_at).toLocaleDateString(lang === "ar" ? "ar-SA" : "en-US", {
+                ? new Date(post.published_at).toLocaleDateString(lang === "ar" ? "ar-SA-u-nu-latn" : "en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
