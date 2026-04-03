@@ -287,7 +287,7 @@ export function buildPdfPageShell(options: {
   // ── Header ──
   const metaHtml = (documentMeta || []).map((m) => `<span>${escapeHtml(m)}</span>`).join("");
   const headerHtml = `
-    <header style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:12px;border-bottom:1.5px solid ${PDF_COLORS.primary};">
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:12px;border-bottom:2px solid ${PDF_COLORS.gold};">
       ${logoBase64 ? `<div style="flex-shrink:0;display:grid;justify-items:center;gap:2px;"><img src="${logoBase64}" alt="سوق تقبيل" style="width:180px;max-height:64px;object-fit:contain;display:block;" /><div style="font-size:9px;font-weight:600;color:${PDF_COLORS.textMuted};letter-spacing:2px;">SOQ TAQBEEL</div></div>` : ""}
       <div style="display:grid;gap:4px;flex:1;text-align:left;">
         <div style="font-size:16px;font-weight:700;color:${PDF_COLORS.primary};">${escapeHtml(documentTitle)}</div>
