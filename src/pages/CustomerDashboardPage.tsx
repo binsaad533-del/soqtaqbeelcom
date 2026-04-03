@@ -598,7 +598,7 @@ const CustomerDashboardPage = () => {
 
             {/* Tabs + Search */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="flex gap-1 bg-muted/40 rounded-xl p-1 w-fit">
+              <div className="flex gap-1 bg-muted/40 rounded-xl p-1 w-fit overflow-x-auto max-w-full scrollbar-hide">
                 {[
                   { id: "deals" as const, label: "صفقاتي", icon: Briefcase, count: deals.length },
                   { id: "listings" as const, label: "إعلاناتي", icon: Store, count: listings.length },
