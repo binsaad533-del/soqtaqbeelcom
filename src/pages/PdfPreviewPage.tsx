@@ -120,6 +120,7 @@ const PdfPreviewPage = () => {
     `));
 
     sections.push(buildPdfBankSection(BANK_DETAILS, { rate: COMMISSION_RATE, amount: commissionAmount, dealAmount }));
+    sections.push(buildPdfDisclaimer());
     if (qrDataUrl) sections.push(buildPdfQrSection(qrDataUrl));
 
     const shellBuilder = (pageNumber: number) => buildPdfPageShell({
