@@ -5,7 +5,7 @@ import { useSEO } from "@/hooks/useSEO";
 import {
   ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
   buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
-  buildPdfBankSection, buildPdfQrSection,
+  buildPdfBankSection, buildPdfQrSection, buildPdfDisclaimer,
   createPdfMount, renderPagesToPdf, paginateSections,
   formatPdfPrice, formatPdfDate, escapeHtml, PDF_COLORS,
 } from "@/lib/pdfShared";
