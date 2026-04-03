@@ -839,6 +839,7 @@ const CreateListingPage = () => {
         ai_structure_validation: dealCheckResult || null,
         location_lat: locationLat,
         location_lng: locationLng,
+        area_sqm: areaSqm ? Number(areaSqm) : null,
         status: "published",
         published_at: new Date().toISOString(),
         title: isCrOnly
