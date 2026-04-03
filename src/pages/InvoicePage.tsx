@@ -79,9 +79,8 @@ const InvoicePage = () => {
     if (!invoice) return;
     setPdfLoading(true);
     try {
-      const [{ BANK_DETAILS, COMMISSION_RATE, calculateCommission }, { safeText }] = await Promise.all([
+      const [{ BANK_DETAILS, COMMISSION_RATE, calculateCommission }] = await Promise.all([
         import("@/hooks/useCommissions"),
-        import("@/lib/pdfShared"),
       ]);
 
       const [logoBase64, logoIconBase64, qrDataUrl] = await Promise.all([
