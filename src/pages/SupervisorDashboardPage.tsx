@@ -357,6 +357,9 @@ const SupervisorDashboardPage = () => {
                 <p className="text-[11px] text-muted-foreground/60 mt-1">ستظهر هنا أي بلاغات جديدة فور وصولها</p>
               </div>
             )}
+
+            {/* Account tab */}
+            {activeTab === "account" && <AccountSettingsPanel />}
           </div>
 
           {/* Sidebar */}
