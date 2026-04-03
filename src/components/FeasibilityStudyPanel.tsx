@@ -3,7 +3,7 @@ import {
   TrendingUp, TrendingDown, DollarSign, Users, Shield,
   ChevronDown, ChevronUp, Loader2, BarChart3, Target, AlertTriangle,
   CheckCircle2, Building2, Lightbulb, Download, FileText,
-  ArrowUpRight, ArrowDownRight, Minus, Share2, Link, Check,
+  ArrowUpRight, ArrowDownRight, Minus, Share2, Check,
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { toast } from "sonner";
