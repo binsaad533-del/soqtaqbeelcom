@@ -628,6 +628,10 @@ const CreateListingPage = () => {
           ...(extracted.annual_rent && !prev.annual_rent ? { annual_rent: extracted.annual_rent } : {}),
           ...(extracted.lease_duration && !prev.lease_duration ? { lease_duration: extracted.lease_duration } : {}),
         }));
+        // Auto-fill area from documents
+        if (extracted.area_sqm && !areaSqm) {
+          setAreaSqm(extracted.area_sqm);
+        }
         if (extracted.cr_number || extracted.entity_name) {
           setCrExtraction(prev => ({
             ...prev,
