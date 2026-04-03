@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import SarSymbol from "@/components/SarSymbol";
 import {
   ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
-  buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
+  buildPdfPageShell, buildPdfSection, buildPdfInfoGrid, buildPdfQrSection,
   createPdfMount, renderPagesToPdf, paginateSections,
   formatPdfPrice, escapeHtml, PDF_COLORS,
 } from "@/lib/pdfShared";
