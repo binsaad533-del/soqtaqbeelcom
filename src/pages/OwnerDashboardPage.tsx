@@ -854,10 +854,8 @@ const OwnerDashboardPage = () => {
 
         {activeTab === "crm" && <CrmDashboard />}
         {activeTab === "security" && <SecurityIncidentPanel />}
-
-        {activeTab === "settings" && (
-           <OwnerSettingsPanel />
-        )}
+        {activeTab === "account" && <AccountSettingsPanel />}
+        {activeTab === "settings" && <OwnerSettingsPanel />}
       </div>
     </div>
   );
