@@ -1433,7 +1433,6 @@ const CreateListingPage = () => {
                     placeholder="مثال: 120"
                     value={areaSqm}
                     onChange={(v) => setAreaSqm(toEnglishNumerals(v))}
-                    type="number"
                   />
                   {areaSqm && (
                     <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
