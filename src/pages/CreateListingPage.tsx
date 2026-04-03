@@ -529,12 +529,12 @@ const CreateListingPage = () => {
       setCrExtraction(result);
       setCrExtractionDone(true);
 
-      // Auto-fill disclosure fields from extraction
+      // Auto-fill disclosure fields from extraction (only if user hasn't typed yet)
       setDisclosure((prev) => ({
         ...prev,
-        business_activity: result.business_activity || prev.business_activity,
-        city: result.city || prev.city,
-        district: result.district || prev.district,
+        ...(result.business_activity && !prev.business_activity ? { business_activity: result.business_activity } : {}),
+        ...(result.city && !prev.city ? { city: result.city } : {}),
+        ...(result.district && !prev.district ? { district: result.district } : {}),
       }));
 
       if (result.extraction_confidence === "high") {
