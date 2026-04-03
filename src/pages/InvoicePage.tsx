@@ -8,7 +8,7 @@ import SarSymbol from "@/components/SarSymbol";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { useSEO } from "@/hooks/useSEO";
 import {
-  ensurePdfFontLoaded, loadPdfLogo, generatePdfQR,
+  ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
   buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
   createPdfMount, renderPagesToPdf, paginateSections,
   formatPdfDate, formatPdfPrice, escapeHtml, PDF_FONT_FAMILY,
