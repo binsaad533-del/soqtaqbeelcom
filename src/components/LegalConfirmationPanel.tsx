@@ -140,7 +140,6 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
   };
 
   const handleExportPdf = async () => {
-    if (!contentRef.current) return;
     setPdfLoading(true);
     try {
       const {
