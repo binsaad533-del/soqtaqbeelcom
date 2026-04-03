@@ -307,6 +307,11 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
         <div style="font-size:10px;line-height:2;color:${PDF_COLORS.textMuted};">${escapeHtml(study.disclaimer)}</div>
       `));
 
+      // QR verification section (outside footer)
+      if (qrDataUrl) {
+        sections.push(buildPdfQrSection(qrDataUrl));
+      }
+
       const shellBuilder = (pageNumber: number) => buildPdfPageShell({
         documentTitle: "دراسة الجدوى الاقتصادية",
         documentSubtitle: listing.title || listing.business_activity || "فرصة استثمارية",
