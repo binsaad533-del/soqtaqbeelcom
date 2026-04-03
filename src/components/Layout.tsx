@@ -47,7 +47,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const navLinks = [
     { label: tx("الرئيسية", "Home"), path: "/" },
     { label: tx("سوق الفرص", "Marketplace"), path: "/marketplace" },
-    { label: tx("كيف تتم الصفقة", "Deal Pipeline"), path: "/deal-pipeline" },
+    { label: tx("كيف تتم الصفقة", "How It Works"), path: "/how-it-works" },
     { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing" },
     { label: tx("لوحة التحكم", "Dashboard"), path: "/dashboard" },
     { label: tx("نماذج PDF", "PDF Templates"), path: "/pdf-preview" },
