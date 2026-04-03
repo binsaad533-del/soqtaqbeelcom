@@ -11,13 +11,14 @@ import { cn } from "@/lib/utils";
 import {
   FileText, MessageSquare, AlertTriangle, CheckCircle, Clock,
   ChevronLeft, Loader2, Eye, Users, Handshake, TrendingUp,
-  Search, Bell, Activity, RefreshCw, Shield, UserCheck
+  Search, Bell, Activity, RefreshCw, Shield, UserCheck, User
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
+import AccountSettingsPanel from "@/components/AccountSettingsPanel";
 
-type Tab = "overview" | "listings" | "deals" | "users" | "reports";
+type Tab = "overview" | "listings" | "deals" | "users" | "reports" | "account";
 
 const ALL_TABS: { id: Tab; label: string; icon: any; perm?: string }[] = [
   { id: "overview", label: "نظرة عامة", icon: Eye },
@@ -25,6 +26,7 @@ const ALL_TABS: { id: Tab; label: string; icon: any; perm?: string }[] = [
   { id: "deals", label: "الصفقات", icon: Handshake, perm: "manage_deals" },
   { id: "users", label: "المستخدمون", icon: Users, perm: "manage_users" },
   { id: "reports", label: "البلاغات", icon: AlertTriangle, perm: "manage_reports" },
+  { id: "account", label: "حسابي", icon: User },
 ];
 
 const statusLabel = (s: string) => {
