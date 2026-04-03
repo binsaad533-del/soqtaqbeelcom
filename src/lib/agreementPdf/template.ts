@@ -152,12 +152,25 @@ const buildPageShell = (data: AgreementPdfData, logoBase64: string, logoIconBase
   content.style.cssText = "display:flex;flex-direction:column;flex:1;gap:12px;padding-top:2px;overflow:visible;";
 
   const footer = createNode(`
-    <footer style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:12px;border-top:0.5px solid hsl(214 32% 91%);font-size:10px;color:hsl(215 16% 45%);line-height:1.8;">
-      <div>
-        منصة سوق تقبيل مملوكة ومدارة بواسطة شركة Ain Jasaas — شركة عين جساس<br />
-        سجل تجاري: ${escapeHtml(BANK_DETAILS.nationalId)}
+    <footer style="padding-top:10px;border-top:0.5px solid hsl(214 32% 91%);display:grid;gap:6px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div style="font-size:8px;line-height:1.8;color:hsl(215 16% 45%);">
+          soqtaqbeel.com — منصة التقبيل الرقمية الأولى
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;opacity:0.5;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5"><path d="M4 4l11.733 16h4.267l-11.733 -16z"/><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+        </div>
       </div>
-      <div style="text-align:left;white-space:nowrap;">صفحة ${pageNumber}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:8px;color:hsl(215 16% 55%);line-height:1.8;">
+          في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦 &nbsp;|&nbsp;
+          © ${new Date().getFullYear()} المنصة مملوكة ومدارة بواسطة شركة Ain Jasaas &nbsp;|&nbsp;
+          سجل تجاري: ${escapeHtml(BANK_DETAILS.nationalId)}
+        </div>
+        <div style="font-size:9px;color:hsl(215 16% 45%);white-space:nowrap;">صفحة ${pageNumber}</div>
+      </div>
     </footer>
   `);
 

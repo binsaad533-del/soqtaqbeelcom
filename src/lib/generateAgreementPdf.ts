@@ -4,6 +4,7 @@ import logoUrl from "@/assets/logo.png";
 import logoIconGoldUrl from "@/assets/logo-icon-gold.png";
 import { PAGE_HEIGHT_PX, PAGE_WIDTH_PX, buildAgreementPdfPages } from "@/lib/agreementPdf/template";
 import type { AgreementPdfData } from "@/lib/agreementPdf/types";
+import { protectPdf } from "@/lib/pdfShared";
 
 const PAGE_W = 210;
 const PAGE_H = 297;
