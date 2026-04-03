@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Loader2, Receipt, BarChart3, Scale } from "lucide-react";
+import { FileText, Download, Loader2, BarChart3, Scale } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import SarSymbol from "@/components/SarSymbol";
 import { useSEO } from "@/hooks/useSEO";
 import {
   ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
@@ -56,8 +57,8 @@ const SAMPLE_AGREEMENT: AgreementPdfData = {
 
 type TemplateKey = "invoice" | "agreement" | "feasibility" | "legal";
 
-const TEMPLATES: { key: TemplateKey; label: string; icon: LucideIcon }[] = [
-  { key: "invoice", label: "الفاتورة", icon: Receipt },
+const TEMPLATES: { key: TemplateKey; label: string; icon: LucideIcon | "sar" }[] = [
+  { key: "invoice", label: "الفاتورة", icon: "sar" },
   { key: "agreement", label: "الاتفاقية", icon: FileText },
   { key: "feasibility", label: "دراسة الجدوى", icon: BarChart3 },
   { key: "legal", label: "التأكيد القانوني", icon: Scale },
@@ -286,14 +287,18 @@ const PdfPreviewPage = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {TEMPLATES.map(({ key, label, icon: Icon }) => (
+        {TEMPLATES.map(({ key, label, icon }) => (
           <button
             key={key}
             onClick={() => handleGenerate(key)}
             disabled={loading !== null}
             className="group relative flex items-center gap-4 p-6 rounded-2xl border border-border bg-card hover:bg-accent/50 hover:border-primary/30 transition-all duration-200 text-right disabled:opacity-60"
           >
-            <Icon className="w-7 h-7 text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.5} />
+            {icon === "sar" ? (
+              <SarSymbol size={28} className="text-muted-foreground group-hover:text-primary transition-colors" />
+            ) : (
+              (() => { const Icon = icon; return <Icon className="w-7 h-7 text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.5} />; })()
+            )}
             <div className="flex-1">
               <div className="font-semibold text-foreground group-hover:text-primary transition-colors">{label}</div>
               <div className="text-xs text-muted-foreground mt-1">تحميل نموذج تجريبي</div>
