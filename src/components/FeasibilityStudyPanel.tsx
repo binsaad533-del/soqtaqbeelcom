@@ -196,6 +196,15 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
     }
   };
 
+  if (loadingCache) {
+    return (
+      <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 flex items-center justify-center gap-2">
+        <Loader2 size={16} className="animate-spin text-primary" />
+        <span className="text-sm text-muted-foreground">جاري تحميل الدراسة...</span>
+      </div>
+    );
+  }
+
   if (!study) {
     return (
       <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
