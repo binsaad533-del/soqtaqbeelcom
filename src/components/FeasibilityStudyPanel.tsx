@@ -3,9 +3,10 @@ import {
   TrendingUp, TrendingDown, DollarSign, Users, Shield,
   ChevronDown, ChevronUp, Loader2, BarChart3, Target, AlertTriangle,
   CheckCircle2, Building2, Lightbulb, Download, FileText,
-  ArrowUpRight, ArrowDownRight, Minus,
+  ArrowUpRight, ArrowDownRight, Minus, Share2, Check,
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -100,6 +101,7 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
   const [loadingCache, setLoadingCache] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cachedAt, setCachedAt] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     summary: true,
     investment: true,
@@ -111,6 +113,14 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
   });
   const [pdfLoading, setPdfLoading] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to panel if URL has #feasibility hash
+  useEffect(() => {
+    if (window.location.hash === "#feasibility" && panelRef.current) {
+      setTimeout(() => panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 500);
+    }
+  }, [study]);
 
   const toggleSection = (key: string) =>
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -164,6 +174,29 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
     }
   };
 
+  const shareStudy = async () => {
+    const url = `${window.location.origin}/listing/${listing.id}#feasibility`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `دراسة جدوى: ${listing.title || "فرصة استثمارية"}`,
+          text: `اطّلع على دراسة الجدوى الاقتصادية لـ ${listing.title || "هذه الفرصة"}`,
+          url,
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        toast.success("تم نسخ رابط الدراسة");
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success("تم نسخ رابط الدراسة");
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   const downloadPDF = async () => {
     if (!reportRef.current) return;
     setPdfLoading(true);
@@ -198,7 +231,7 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
 
   if (loadingCache) {
     return (
-      <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 flex items-center justify-center gap-2">
+      <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 flex items-center justify-center gap-2">
         <Loader2 size={16} className="animate-spin text-primary" />
         <span className="text-sm text-muted-foreground">جاري تحميل الدراسة...</span>
       </div>
@@ -207,7 +240,7 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
 
   if (!study) {
     return (
-      <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
+      <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
         <div className="flex items-center gap-2">
           <AiStar size={18} />
           <h3 className="text-base font-semibold">دراسة الجدوى الاقتصادية</h3>
@@ -238,9 +271,9 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
   const rs = study.revenueProjections.realistic;
 
   return (
-    <div className="space-y-3">
+    <div ref={panelRef} id="feasibility" className="space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <AiStar size={18} />
           <h3 className="text-base font-semibold">دراسة الجدوى الاقتصادية</h3>
@@ -254,6 +287,10 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
               آخر تحديث: {new Date(cachedAt).toLocaleDateString("ar-SA")}
             </span>
           )}
+          <Button variant="outline" size="sm" onClick={shareStudy} className="gap-1.5 text-xs">
+            {copied ? <Check size={12} className="text-emerald-500" /> : <Share2 size={12} />}
+            {copied ? "تم النسخ" : "مشاركة"}
+          </Button>
           <Button variant="outline" size="sm" onClick={downloadPDF} disabled={pdfLoading} className="gap-1.5 text-xs">
             {pdfLoading ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
             PDF
