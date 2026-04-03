@@ -144,28 +144,35 @@ const BlogPage = () => {
           </div>
         )}
 
-        <div className="space-y-4">
-          {filtered.map((post) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {filtered.map((post, index) => {
             const title = lang === "ar" ? post.title_ar : (post.title_en || post.title_ar);
             const excerpt = lang === "ar" ? post.excerpt_ar : (post.excerpt_en || post.excerpt_ar);
             const category = lang === "ar" ? post.category_ar : (post.category_en || post.category_ar);
 
             return (
-              <Link key={post.id} to={`/blog/${post.slug}`}>
-                <article className="group bg-card rounded-2xl p-5 shadow-soft hover:shadow-soft-lg hover:scale-[1.01] transition-all duration-300">
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                      <Tag size={20} className="text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+              <Link key={post.id} to={`/blog/${post.slug}`} className="block">
+                <article
+                  className="group relative bg-card rounded-2xl p-5 border border-border/40 hover:border-primary/30 shadow-soft hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out h-full overflow-hidden cursor-pointer"
+                  style={{ animationDelay: `${index * 60}ms` }}
+                >
+                  {/* Hover gradient overlay */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/[0.03] group-hover:to-primary/[0.06] transition-all duration-500 pointer-events-none" />
+
+                  <div className="relative z-10">
+                    {/* Top row: icon + category + date */}
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:rotate-3 transition-all duration-300">
+                        <Tag size={18} className="text-primary" />
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap flex-1 pt-1">
                         {category && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary font-medium">
+                          <span className="text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary font-medium group-hover:bg-primary/15 transition-colors">
                             {category}
                           </span>
                         )}
                         <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                          <Calendar size={10} />
+                          <Calendar size={9} />
                           {post.published_at
                             ? new Date(post.published_at).toLocaleDateString(
                                 lang === "ar" ? "ar-SA-u-nu-latn" : "en-US",
@@ -173,30 +180,36 @@ const BlogPage = () => {
                               )
                             : ""}
                         </span>
-                        <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                          <Clock size={10} />
-                          {tx(`${post.read_time_minutes} دقائق`, `${post.read_time_minutes} min read`)}
-                        </span>
                       </div>
-                      <h2 className="font-medium mb-1.5 group-hover:text-primary transition-colors">
-                        {title}
-                      </h2>
-                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                        {excerpt}
-                      </p>
-                      {/* Tags */}
-                      {post.tags && (post.tags as string[]).length > 0 && (
-                        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                          {(post.tags as string[]).slice(0, 4).map((tag) => (
+                    </div>
+
+                    {/* Title */}
+                    <h2 className="font-semibold text-[15px] leading-snug mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-2">
+                      {title}
+                    </h2>
+
+                    {/* Excerpt */}
+                    <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-2 mb-3">
+                      {excerpt}
+                    </p>
+
+                    {/* Footer: tags + read time */}
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/30">
+                      <div className="flex items-center gap-1.5 flex-wrap flex-1 min-w-0">
+                        {post.tags && (post.tags as string[]).length > 0 &&
+                          (post.tags as string[]).slice(0, 3).map((tag) => (
                             <span
                               key={tag}
-                              className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
+                              className="text-[9px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/80 transition-colors"
                             >
                               {tag}
                             </span>
                           ))}
-                        </div>
-                      )}
+                      </div>
+                      <span className="flex items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+                        <Clock size={9} />
+                        {tx(`${post.read_time_minutes} دقائق`, `${post.read_time_minutes} min`)}
+                      </span>
                     </div>
                   </div>
                 </article>
