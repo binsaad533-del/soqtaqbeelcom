@@ -50,6 +50,7 @@ const safeFileName = (title: string) => title.replace(/[\\/:*?"<>|]/g, "-");
 
 export async function generateAgreementPdf(data: AgreementPdfData) {
   const pdf = new jsPDF("p", "mm", "a4");
+  protectPdf(pdf);
   const html2canvas = (await import("html2canvas")).default;
 
   // Generate QR code linking to the agreement page
