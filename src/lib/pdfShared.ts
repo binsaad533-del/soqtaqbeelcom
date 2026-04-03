@@ -284,7 +284,27 @@ export function buildPdfPageShell(options: {
     "padding:30px 34px 18px",
     "gap:12px",
     "overflow:hidden",
+    "position:relative",
   ].join(";");
+
+  // ── Watermark ──
+  const watermark = document.createElement("div");
+  watermark.style.cssText = [
+    "position:absolute",
+    "top:50%",
+    "left:50%",
+    "transform:translate(-50%,-50%) rotate(-35deg)",
+    "font-size:72px",
+    "font-weight:700",
+    `font-family:${PDF_FONT_FAMILY}`,
+    "color:rgba(0,0,0,0.03)",
+    "white-space:nowrap",
+    "pointer-events:none",
+    "user-select:none",
+    "z-index:0",
+  ].join(";");
+  watermark.textContent = "سوق تقبيل";
+  page.appendChild(watermark);
 
   // ── Header ──
   const metaHtml = (documentMeta || []).map((m) => `<span>${escapeHtml(m)}</span>`).join("");
