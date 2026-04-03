@@ -173,9 +173,11 @@ const SOCIAL_SVGS = {
 const FOOTER_NAV_LINKS = [
   { label: "الرئيسية", href: "https://soqtaqbeel.com/" },
   { label: "سوق الفرص", href: "https://soqtaqbeel.com/marketplace" },
+  { label: "أضف فرصة", href: "https://soqtaqbeel.com/create-listing" },
   { label: "كيف تعمل المنصة", href: "https://soqtaqbeel.com/how-it-works" },
   { label: "تواصل معنا", href: "https://soqtaqbeel.com/contact" },
   { label: "مركز المساعدة", href: "https://soqtaqbeel.com/help" },
+  { label: "المدونة", href: "https://soqtaqbeel.com/blog" },
   { label: "العمولة", href: "https://soqtaqbeel.com/commission" },
 ];
 
