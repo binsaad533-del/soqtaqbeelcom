@@ -24,6 +24,7 @@ import SecuritySettingsPanel from "@/components/SecuritySettingsPanel";
 import NotificationPreferencesPanel from "@/components/NotificationPreferencesPanel";
 import BuyerOffersTab from "@/components/dashboard/BuyerOffersTab";
 import SavedListingsTab from "@/components/dashboard/SavedListingsTab";
+import AccountSettingsPanel from "@/components/AccountSettingsPanel";
 
 /* ── Status helpers ── */
 const statusBadge = (s: string) => {
