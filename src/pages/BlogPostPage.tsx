@@ -124,13 +124,13 @@ const BlogPostPage = () => {
 
           {/* Content */}
           <div className="prose prose-sm dark:prose-invert max-w-none
-            prose-headings:font-semibold prose-headings:leading-normal prose-headings:mb-3 prose-headings:mt-7
+            prose-headings:font-semibold prose-headings:leading-relaxed prose-headings:mb-4 prose-headings:mt-9
             prose-h2:text-base prose-h2:border-b prose-h2:border-border/15 prose-h2:pb-2
             prose-h3:text-[15px]
-            prose-p:text-sm prose-p:leading-[2] prose-p:mb-4 prose-p:text-foreground/80 prose-p:font-normal
-            prose-li:text-sm prose-li:leading-[1.9] prose-li:mb-1 prose-li:text-foreground/75 prose-li:font-normal
-            prose-ul:my-3 prose-ul:ps-5
-            prose-ol:my-3 prose-ol:ps-5
+            prose-p:text-sm prose-p:leading-[2.25] prose-p:mb-6 prose-p:text-foreground/80 prose-p:font-normal
+            prose-li:text-sm prose-li:leading-[2.1] prose-li:mb-2 prose-li:text-foreground/75 prose-li:font-normal
+            prose-ul:my-5 prose-ul:ps-6
+            prose-ol:my-5 prose-ol:ps-6
             prose-strong:text-foreground/90 prose-strong:font-medium
             prose-a:text-primary prose-a:no-underline hover:prose-a:underline
           ">
