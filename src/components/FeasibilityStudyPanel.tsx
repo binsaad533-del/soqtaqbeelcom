@@ -97,7 +97,9 @@ function formatNum(n: number): string {
 const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
   const [study, setStudy] = useState<FeasibilityStudy | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingCache, setLoadingCache] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cachedAt, setCachedAt] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     summary: true,
     investment: true,
@@ -113,6 +115,26 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
   const toggleSection = (key: string) =>
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
+  // Load cached study on mount
+  useEffect(() => {
+    if (!listing?.id) { setLoadingCache(false); return; }
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("feasibility_studies")
+          .select("study_data, created_at")
+          .eq("listing_id", listing.id)
+          .maybeSingle();
+        if (data?.study_data) {
+          setStudy(data.study_data as unknown as FeasibilityStudy);
+          setCachedAt(data.created_at);
+          setExpandedSections({ summary: true, investment: true, costs: true, revenue: true, competitors: true, risks: true, recommendations: true });
+        }
+      } catch { /* ignore */ }
+      setLoadingCache(false);
+    })();
+  }, [listing?.id]);
+
   const runStudy = async () => {
     setLoading(true);
     setError(null);
@@ -123,7 +145,18 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
       if (fnError) throw new Error(fnError.message);
       if (!data?.success) throw new Error(data?.error || "فشل في إنشاء الدراسة");
       setStudy(data.study);
+      setCachedAt(new Date().toISOString());
       setExpandedSections({ summary: true, investment: true, costs: true, revenue: true, competitors: true, risks: true, recommendations: true });
+
+      // Save to database
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user) {
+        await supabase.from("feasibility_studies").upsert({
+          listing_id: listing.id,
+          requested_by: userData.user.id,
+          study_data: data.study,
+        }, { onConflict: "listing_id" });
+      }
     } catch (err: any) {
       setError(err.message || "حدث خطأ");
     } finally {
