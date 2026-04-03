@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import SarSymbol from "@/components/SarSymbol";
 import {
-  ensurePdfFontLoaded, loadPdfLogo, generatePdfQR,
+  ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
   buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
   createPdfMount, renderPagesToPdf, paginateSections,
   formatPdfPrice, escapeHtml, PDF_COLORS,
@@ -205,8 +205,9 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
     if (!reportRef.current || !study) return;
     setPdfLoading(true);
     try {
-      const [logoIconBase64, qrDataUrl] = await Promise.all([
+      const [logoBase64, logoIconBase64, qrDataUrl] = await Promise.all([
         loadPdfLogo(),
+        loadPdfLogoIcon(),
         generatePdfQR(`${window.location.origin}/listing/${listing.id}#feasibility`),
         ensurePdfFontLoaded(),
       ]);
@@ -309,6 +310,7 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
         documentTitle: "دراسة الجدوى الاقتصادية",
         documentSubtitle: listing.title || listing.business_activity || "فرصة استثمارية",
         documentMeta: [listing.city ? `الموقع: ${listing.city}` : "", listing.price ? `السعر: ${formatPdfPrice(listing.price)} ﷼` : ""].filter(Boolean),
+        logoBase64,
         logoIconBase64,
         pageNumber,
         qrDataUrl,

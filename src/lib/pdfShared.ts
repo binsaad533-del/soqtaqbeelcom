@@ -3,8 +3,8 @@
  * Provides shared header, footer, QR code, protection, and page management.
  */
 import QRCode from "qrcode";
+import logoBlueUrl from "@/assets/logo-blue.png";
 import logoIconGoldUrl from "@/assets/logo-icon-gold.png";
-import { SOCIAL_LINKS } from "@/lib/socialLinks";
 
 /* ── Constants ── */
 export const PDF_PAGE_WIDTH_PX = 794;
@@ -102,17 +102,28 @@ const SOCIAL_SVGS = {
   linkedin: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(215 16% 55%)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>`,
 };
 
+/* ── Footer nav links (matches website footer) ── */
+const FOOTER_NAV_LINKS = [
+  { label: "الرئيسية", href: "https://soqtaqbeel.com/" },
+  { label: "سوق الفرص", href: "https://soqtaqbeel.com/marketplace" },
+  { label: "كيف تعمل المنصة", href: "https://soqtaqbeel.com/how-it-works" },
+  { label: "تواصل معنا", href: "https://soqtaqbeel.com/contact" },
+  { label: "مركز المساعدة", href: "https://soqtaqbeel.com/help" },
+  { label: "العمولة", href: "https://soqtaqbeel.com/commission" },
+];
+
 /* ── Unified Page Shell ── */
 export function buildPdfPageShell(options: {
   documentTitle: string;
   documentSubtitle?: string;
   documentMeta?: string[];
+  logoBase64: string;
   logoIconBase64: string;
   pageNumber: number;
   qrDataUrl?: string;
   showQrInFooter?: boolean;
 }) {
-  const { documentTitle, documentSubtitle, documentMeta, logoIconBase64, pageNumber, qrDataUrl, showQrInFooter } = options;
+  const { documentTitle, documentSubtitle, documentMeta, logoBase64, logoIconBase64, pageNumber, qrDataUrl, showQrInFooter } = options;
 
   const page = document.createElement("div");
   page.style.cssText = [
@@ -133,19 +144,13 @@ export function buildPdfPageShell(options: {
   // ── Header ──
   const metaHtml = (documentMeta || []).map((m) => `<span>${escapeHtml(m)}</span>`).join("");
   const headerHtml = `
-    <header style="display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:12px;border-bottom:0.5px solid ${PDF_COLORS.border};">
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:12px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};">
       <div style="display:grid;gap:5px;">
-        <div style="font-size:17px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(documentTitle)}</div>
-        ${documentSubtitle ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};line-height:1.7;">${escapeHtml(documentSubtitle)}</div>` : ""}
-        ${metaHtml ? `<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:${PDF_COLORS.textMuted};">${metaHtml}</div>` : ""}
+        <div style="font-size:15px;font-weight:500;color:${PDF_COLORS.text};">${escapeHtml(documentTitle)}</div>
+        ${documentSubtitle ? `<div style="font-size:10px;color:${PDF_COLORS.textMuted};line-height:1.7;">${escapeHtml(documentSubtitle)}</div>` : ""}
+        ${metaHtml ? `<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:9px;color:${PDF_COLORS.textMuted};">${metaHtml}</div>` : ""}
       </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        ${logoIconBase64 ? `<img src="${logoIconBase64}" alt="Taqbeel" style="height:40px;width:40px;object-fit:contain;" />` : ""}
-        <div style="display:grid;gap:2px;text-align:left;">
-          <div style="font-size:13px;font-weight:700;color:${PDF_COLORS.primary};letter-spacing:0.12em;">SOQ TAQBEEL</div>
-          <div style="font-size:9px;color:${PDF_COLORS.textFaint};font-weight:400;">سوق تقبيل</div>
-        </div>
-      </div>
+      ${logoBase64 ? `<img src="${logoBase64}" alt="سوق تقبيل" style="height:60px;width:auto;object-fit:contain;" />` : ""}
     </header>
   `;
 
@@ -156,30 +161,34 @@ export function buildPdfPageShell(options: {
   const content = document.createElement("div");
   content.style.cssText = "display:flex;flex-direction:column;flex:1;gap:12px;padding-top:2px;overflow:visible;";
 
-  // ── Footer ──
+  // ── Footer (matches website footer) ──
+  const navLinksHtml = FOOTER_NAV_LINKS.map(
+    (link, i) =>
+      `${i > 0 ? `<span style="color:${PDF_COLORS.borderLight};font-size:9px;padding:0 4px;">|</span>` : ""}<a href="${link.href}" style="color:${PDF_COLORS.textMuted};text-decoration:none;font-size:9px;">${escapeHtml(link.label)}</a>`
+  ).join("");
+
   const socialIcons = Object.entries(SOCIAL_SVGS)
-    .map(([, svg]) => `<span style="opacity:0.5;">${svg}</span>`)
+    .map(([, svg]) => `<span style="opacity:0.45;">${svg}</span>`)
     .join("");
 
   const footerHtml = `
-    <footer style="padding-top:10px;border-top:0.5px solid ${PDF_COLORS.border};display:grid;gap:8px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          ${showQrInFooter && qrDataUrl ? `<img src="${qrDataUrl}" alt="QR" style="width:36px;height:36px;border-radius:4px;" />` : ""}
-          <div style="font-size:8px;line-height:1.8;color:${PDF_COLORS.textMuted};">
-            soqtaqbeel.com — منصة التقبيل الرقمية الأولى
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          ${socialIcons}
-        </div>
+    <footer style="padding-top:10px;border-top:0.5px solid ${PDF_COLORS.borderLight};display:grid;gap:6px;text-align:center;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap;line-height:2;">
+        ${navLinksHtml}
+      </div>
+      ${logoIconBase64 ? `<div style="text-align:center;"><img src="${logoIconBase64}" alt="سوق تقبيل" style="height:28px;width:28px;object-fit:contain;opacity:0.5;" /></div>` : ""}
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
+        ${socialIcons}
+      </div>
+      <div style="font-size:9px;color:${PDF_COLORS.textMuted};line-height:1.8;">
+        في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div style="font-size:8px;color:${PDF_COLORS.textFaint};line-height:1.8;">
-          في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦 &nbsp;|&nbsp;
           © ${new Date().getFullYear()} المنصة مملوكة ومدارة بواسطة شركة Ain Jasaas
         </div>
-        <div style="font-size:9px;color:${PDF_COLORS.textMuted};white-space:nowrap;">صفحة ${pageNumber}</div>
+        ${showQrInFooter && qrDataUrl ? `<img src="${qrDataUrl}" alt="QR" style="width:32px;height:32px;border-radius:3px;" />` : ""}
+        <div style="font-size:8px;color:${PDF_COLORS.textFaint};white-space:nowrap;">صفحة ${pageNumber}</div>
       </div>
     </footer>
   `;
@@ -302,9 +311,9 @@ export function buildPdfSection(title: string, body: string, highlight = false):
   const bg = highlight ? PDF_COLORS.primaryLight : "#ffffff";
   const wrapper = document.createElement("div");
   wrapper.innerHTML = `
-    <section style="border:0.5px solid ${PDF_COLORS.border};border-radius:22px;padding:18px 18px 16px;background:${bg};display:grid;gap:12px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;">
-      <div style="display:flex;align-items:center;gap:12px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:10px;">
-        <h2 style="margin:0;font-size:14px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(title)}</h2>
+    <section style="border:0.5px solid ${PDF_COLORS.borderLight};border-radius:16px;padding:16px 16px 14px;background:${bg};display:grid;gap:10px;break-inside:avoid;font-family:${PDF_FONT_FAMILY};direction:rtl;">
+      <div style="display:flex;align-items:center;gap:10px;border-bottom:0.5px solid ${PDF_COLORS.borderLight};padding-bottom:8px;">
+        <h2 style="margin:0;font-size:12px;font-weight:500;color:${PDF_COLORS.text};">${escapeHtml(title)}</h2>
       </div>
       ${body}
     </section>
@@ -328,7 +337,10 @@ export function buildPdfInfoGrid(items: Array<{ label: string; value: string; em
     </div>`;
 }
 
-/* ── Get logo base64 ── */
+/* ── Get logos base64 ── */
 export async function loadPdfLogo(): Promise<string> {
+  return loadImageBase64(logoBlueUrl);
+}
+export async function loadPdfLogoIcon(): Promise<string> {
   return loadImageBase64(logoIconGoldUrl);
 }

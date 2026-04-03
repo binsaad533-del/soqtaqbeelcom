@@ -8,7 +8,7 @@ import SarSymbol from "@/components/SarSymbol";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { useSEO } from "@/hooks/useSEO";
 import {
-  ensurePdfFontLoaded, loadPdfLogo, generatePdfQR,
+  ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
   buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
   createPdfMount, renderPagesToPdf, paginateSections,
   formatPdfDate, formatPdfPrice, escapeHtml, PDF_FONT_FAMILY,
@@ -81,8 +81,9 @@ const InvoicePage = () => {
     if (!invoice) return;
     setPdfLoading(true);
     try {
-      const [logoIconBase64, qrDataUrl] = await Promise.all([
+      const [logoBase64, logoIconBase64, qrDataUrl] = await Promise.all([
         loadPdfLogo(),
+        loadPdfLogoIcon(),
         generatePdfQR(`${window.location.origin}/invoice/${invoice.id}`),
         ensurePdfFontLoaded(),
       ]);
@@ -170,6 +171,7 @@ const InvoicePage = () => {
         documentTitle: "فاتورة",
         documentSubtitle: `#${String(invoice.invoice_number).padStart(6, "0")} — ${escapeHtml(invoice.listing_title || "صفقة تجارية")}`,
         documentMeta: [`تاريخ الإصدار: ${formatPdfDate(invoice.created_at)}`],
+        logoBase64,
         logoIconBase64,
         pageNumber,
         qrDataUrl,

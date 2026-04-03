@@ -143,14 +143,15 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
     setPdfLoading(true);
     try {
       const {
-        ensurePdfFontLoaded, loadPdfLogo, generatePdfQR,
+        ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
         buildPdfPageShell, buildPdfSection, buildPdfInfoGrid,
         createPdfMount, renderPagesToPdf, paginateSections,
         escapeHtml, formatPdfDate, PDF_COLORS,
       } = await import("@/lib/pdfShared");
 
-      const [logoIconBase64, qrDataUrl] = await Promise.all([
+      const [logoBase64, logoIconBase64, qrDataUrl] = await Promise.all([
         loadPdfLogo(),
+        loadPdfLogoIcon(),
         generatePdfQR(`${window.location.origin}/negotiation/${deal.id}`),
         ensurePdfFontLoaded(),
       ]);
@@ -214,6 +215,7 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
       const shellBuilder = (pageNumber: number) => buildPdfPageShell({
         documentTitle: "وثيقة التأكيد النهائي",
         documentSubtitle: title,
+        logoBase64,
         logoIconBase64,
         pageNumber,
         qrDataUrl,
