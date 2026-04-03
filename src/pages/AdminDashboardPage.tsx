@@ -11,6 +11,7 @@ import BackupPanel from "@/components/BackupPanel";
 import CommissionAdminPanel from "@/components/CommissionAdminPanel";
 import CrmDashboard from "@/components/crm/CrmDashboard";
 import BlogAdminPanel from "@/components/BlogAdminPanel";
+import EmailMonitorPanel from "@/components/EmailMonitorPanel";
 import SarSymbol from "@/components/SarSymbol";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/hooks/useSEO";
