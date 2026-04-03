@@ -256,6 +256,7 @@ const PdfPreviewPage = () => {
       </div>
     `));
 
+    sections.push(buildPdfDisclaimer());
     if (qrDataUrl) sections.push(buildPdfQrSection(qrDataUrl));
 
     const shellBuilder = (pageNumber: number) => buildPdfPageShell({
