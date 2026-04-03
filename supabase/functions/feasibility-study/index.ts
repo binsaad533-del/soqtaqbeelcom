@@ -1,0 +1,466 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+/* ── Activity-specific analysis templates ── */
+const ACTIVITY_TEMPLATES: Record<string, {
+  label: string;
+  keywords: string[];
+  operationalCosts: string[];
+  revenueDrivers: string[];
+  licenseRequirements: string[];
+  riskFactors: string[];
+  googlePlacesType: string;
+}> = {
+  gas_station: {
+    label: "محطة وقود / بنزين",
+    keywords: ["بنزين", "محطة وقود", "محطة بترول", "gas station", "fuel"],
+    operationalCosts: ["تكلفة شراء الوقود بالجملة", "رواتب العمالة (4-8 عامل)", "الكهرباء والمياه", "صيانة المضخات والخزانات", "التأمين", "الإيجار السنوي"],
+    revenueDrivers: ["بيع الوقود (هامش ربح 5-8%)", "مغسلة السيارات", "ميني ماركت", "كفتيريا", "خدمات إضافية (هواء، زيت)"],
+    licenseRequirements: ["رخصة أرامكو للتوزيع", "رخصة البلدية", "الدفاع المدني", "رخصة البيئة", "شهادة السلامة"],
+    riskFactors: ["تقلب أسعار الوقود", "منافسة محطات قريبة", "تكلفة صيانة الخزانات", "اشتراطات أرامكو"],
+    googlePlacesType: "gas_station",
+  },
+  medical: {
+    label: "مستوصف / مركز طبي",
+    keywords: ["مستوصف", "عيادة", "مركز طبي", "صيدلية", "clinic", "medical", "pharmacy"],
+    operationalCosts: ["رواتب الكادر الطبي", "المستلزمات الطبية", "التأمين الطبي", "الإيجار", "الكهرباء والمياه", "صيانة الأجهزة الطبية"],
+    revenueDrivers: ["الكشف والاستشارات", "التحاليل المخبرية", "الأشعة", "الصيدلية", "التأمين الطبي"],
+    licenseRequirements: ["ترخيص وزارة الصحة", "رخصة البلدية", "الدفاع المدني", "ترخيص الصيدلية", "اعتماد التأمينات"],
+    riskFactors: ["اشتراطات وزارة الصحة", "توفر الكادر الطبي المرخص", "المسؤولية الطبية", "تكلفة التجهيزات"],
+    googlePlacesType: "doctor",
+  },
+  grocery: {
+    label: "تموينات / سوبر ماركت",
+    keywords: ["تموينات", "بقالة", "سوبر ماركت", "ماركت", "grocery", "supermarket", "مواد غذائية"],
+    operationalCosts: ["شراء البضاعة", "رواتب العمالة (2-5 عامل)", "الإيجار", "الكهرباء (ثلاجات/مبردات)", "نقل وتوصيل", "هدر البضاعة"],
+    revenueDrivers: ["بيع المواد الغذائية (هامش 15-25%)", "المشروبات والحلويات (هامش 30-40%)", "منتجات التنظيف", "خدمة التوصيل"],
+    licenseRequirements: ["رخصة البلدية", "شهادة صحية", "الدفاع المدني", "سجل تجاري"],
+    riskFactors: ["منافسة سلاسل كبرى", "هدر المنتجات الطازجة", "تغيّر الأسعار", "موسمية بعض المنتجات"],
+    googlePlacesType: "grocery_or_supermarket",
+  },
+  restaurant: {
+    label: "مطعم / كافيه",
+    keywords: ["مطعم", "كافيه", "مقهى", "كافتيريا", "بوفيه", "restaurant", "cafe"],
+    operationalCosts: ["المواد الخام", "رواتب الطهاة والعمالة", "الإيجار", "الغاز والكهرباء", "التعبئة والتغليف", "التسويق"],
+    revenueDrivers: ["الوجبات الرئيسية", "المشروبات (هامش 60-70%)", "التوصيل عبر التطبيقات", "الحفلات والمناسبات"],
+    licenseRequirements: ["رخصة البلدية", "شهادة صحية", "الدفاع المدني", "رخصة الأغذية"],
+    riskFactors: ["المنافسة العالية", "تقلب أسعار المواد", "اعتمادية العمالة", "تطبيقات التوصيل (عمولات 15-30%)"],
+    googlePlacesType: "restaurant",
+  },
+  general: {
+    label: "نشاط تجاري عام",
+    keywords: [],
+    operationalCosts: ["الإيجار", "رواتب العمالة", "الكهرباء والمياه", "الصيانة", "التأمين"],
+    revenueDrivers: ["المبيعات المباشرة", "الخدمات"],
+    licenseRequirements: ["رخصة البلدية", "السجل التجاري", "الدفاع المدني"],
+    riskFactors: ["المنافسة", "تغيّر الطلب", "التكاليف التشغيلية"],
+    googlePlacesType: "establishment",
+  },
+};
+
+function detectActivityType(activity: string): typeof ACTIVITY_TEMPLATES[string] {
+  const lower = (activity || "").toLowerCase();
+  for (const [, template] of Object.entries(ACTIVITY_TEMPLATES)) {
+    if (template.keywords.some(kw => lower.includes(kw))) return template;
+  }
+  return ACTIVITY_TEMPLATES.general;
+}
+
+/* ── Google Places competitor search ── */
+async function searchNearbyCompetitors(
+  lat: number,
+  lng: number,
+  placeType: string,
+  keyword: string,
+  apiKey: string,
+): Promise<{ radius: number; places: any[] }[]> {
+  const radii = [500, 2000, 10000]; // same street, neighborhood, area
+  const results: { radius: number; places: any[] }[] = [];
+
+  for (const radius of radii) {
+    try {
+      const url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json");
+      url.searchParams.set("location", `${lat},${lng}`);
+      url.searchParams.set("radius", String(radius));
+      url.searchParams.set("type", placeType);
+      url.searchParams.set("keyword", keyword);
+      url.searchParams.set("language", "ar");
+      url.searchParams.set("key", apiKey);
+
+      const res = await fetch(url.toString());
+      if (!res.ok) {
+        console.error(`Places API error for radius ${radius}:`, res.status);
+        results.push({ radius, places: [] });
+        continue;
+      }
+
+      const data = await res.json();
+      const places = (data.results || []).slice(0, 10).map((p: any) => ({
+        name: p.name,
+        rating: p.rating || null,
+        totalRatings: p.user_ratings_total || 0,
+        address: p.vicinity || "",
+        isOpen: p.opening_hours?.open_now ?? null,
+        priceLevel: p.price_level ?? null,
+        distance: Math.round(
+          haversineDistance(lat, lng, p.geometry?.location?.lat, p.geometry?.location?.lng)
+        ),
+      }));
+
+      results.push({ radius, places });
+    } catch (err) {
+      console.error(`Places search error (radius ${radius}):`, err);
+      results.push({ radius, places: [] });
+    }
+  }
+
+  return results;
+}
+
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/* ── Build AI prompt ── */
+function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors: any[]): string {
+  const sections: string[] = [];
+
+  sections.push("# طلب دراسة جدوى اقتصادية شاملة لصفقة تقبيل");
+  sections.push("\n## بيانات الصفقة:");
+  if (listing.title) sections.push(`- العنوان: ${listing.title}`);
+  if (listing.business_activity) sections.push(`- النشاط التجاري: ${listing.business_activity}`);
+  sections.push(`- نوع النشاط المكتشف: ${activityTemplate.label}`);
+  if (listing.city) sections.push(`- المدينة: ${listing.city}`);
+  if (listing.district) sections.push(`- الحي: ${listing.district}`);
+  if (listing.price) sections.push(`- السعر المطلوب: ${listing.price} ريال سعودي`);
+  if (listing.annual_rent) sections.push(`- الإيجار السنوي: ${listing.annual_rent} ريال`);
+  if (listing.lease_duration) sections.push(`- مدة العقد: ${listing.lease_duration}`);
+  if (listing.lease_remaining) sections.push(`- المتبقي من العقد: ${listing.lease_remaining}`);
+  if (listing.deal_type) sections.push(`- نوع الصفقة: ${listing.deal_type}`);
+
+  // Inventory
+  if (Array.isArray(listing.inventory) && listing.inventory.length > 0) {
+    sections.push("\n## الأصول والمعدات:");
+    listing.inventory.forEach((item: any) => {
+      sections.push(`- ${item.name || "صنف"} × ${item.qty || 1} — حالة: ${item.condition || "غير محدد"}`);
+    });
+  }
+
+  // Activity-specific context
+  sections.push(`\n## سياق النشاط (${activityTemplate.label}):`);
+  sections.push(`- التكاليف التشغيلية النموذجية: ${activityTemplate.operationalCosts.join("، ")}`);
+  sections.push(`- مصادر الإيرادات: ${activityTemplate.revenueDrivers.join("، ")}`);
+  sections.push(`- التراخيص المطلوبة: ${activityTemplate.licenseRequirements.join("، ")}`);
+  sections.push(`- عوامل المخاطرة: ${activityTemplate.riskFactors.join("، ")}`);
+
+  // Competitor data
+  if (competitors.length > 0) {
+    sections.push("\n## بيانات المنافسين الحقيقية من Google Maps:");
+    const labels = ["في نطاق 500 متر (نفس الشارع)", "في نطاق 2 كم (نفس الحي)", "في نطاق 10 كم (المنطقة)"];
+    competitors.forEach((group, i) => {
+      sections.push(`\n### ${labels[i] || `نطاق ${group.radius}م`}:`);
+      sections.push(`- عدد المنافسين: ${group.places.length}`);
+      if (group.places.length > 0) {
+        group.places.forEach((p: any) => {
+          const parts = [p.name, p.rating ? `تقييم ${p.rating}/5 (${p.totalRatings} مراجعة)` : null, `${p.distance}م`];
+          sections.push(`  • ${parts.filter(Boolean).join(" — ")}`);
+        });
+      }
+    });
+  } else {
+    sections.push("\n## لا تتوفر بيانات منافسين (الموقع غير محدد على الخريطة)");
+    sections.push("- قدّم تحليل تنافسي تقديري بناءً على نوع النشاط والمدينة");
+  }
+
+  sections.push("\n---");
+  sections.push("## التعليمات:");
+  sections.push("أنتج دراسة جدوى اقتصادية احترافية شاملة باستخدام أداة feasibility_result");
+  sections.push("- استخدم الأرقام الإنجليزية فقط (0-9)");
+  sections.push("- كن دقيقاً وعملياً في التقديرات المالية");
+  sections.push("- اعتمد على بيانات المنافسين الحقيقية إن توفرت");
+  sections.push("- قدّم 3 سيناريوهات واقعية (متفائل، واقعي، متحفظ)");
+
+  return sections.join("\n");
+}
+
+const SYSTEM_PROMPT = `أنت مستشار مالي واقتصادي خبير متخصص في دراسات الجدوى للمشاريع التجارية في السوق السعودي.
+
+## مهمتك:
+تقديم دراسة جدوى اقتصادية احترافية وشاملة لصفقة تقبيل تجاري، تشمل:
+1. تحليل العائد على الاستثمار (ROI) وفترة استرداد رأس المال
+2. تقدير التكاليف التشغيلية الشهرية حسب نوع النشاط
+3. تحليل المنافسين القريبين جغرافياً (بناءً على بيانات حقيقية من Google Maps إن توفرت)
+4. تقييم المخاطر المالية والتشغيلية
+5. سيناريوهات الربحية (متفائل، واقعي، متحفظ)
+6. توصيات عملية للمشتري
+
+## قواعد صارمة:
+- استخدم الأرقام الإنجليزية فقط (0-9)
+- كن واقعياً في التقديرات — لا تبالغ في التفاؤل
+- وضّح الافتراضات وراء كل تقدير
+- هذه دراسة استرشادية وليست تقييم رسمي مرخص
+- قدّم التحليل بلغة مهنية واضحة
+- عند تحليل المنافسين، استخدم البيانات الفعلية من Google Maps`;
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { listing } = await req.json();
+    if (!listing) {
+      return new Response(JSON.stringify({ error: "بيانات الصفقة مطلوبة" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(JSON.stringify({ error: "AI service not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Detect activity type
+    const activityTemplate = detectActivityType(listing.business_activity || listing.title || "");
+
+    // Search for competitors via Google Places if location available
+    let competitors: { radius: number; places: any[] }[] = [];
+    const mapsKey = Deno.env.get("GOOGLE_MAPS_API_KEY");
+    if (mapsKey && listing.location_lat && listing.location_lng) {
+      competitors = await searchNearbyCompetitors(
+        listing.location_lat,
+        listing.location_lng,
+        activityTemplate.googlePlacesType,
+        listing.business_activity || activityTemplate.label,
+        mapsKey,
+      );
+    }
+
+    const userPrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors);
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-pro",
+        temperature: 0.2,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userPrompt },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "feasibility_result",
+              description: "Return a comprehensive feasibility study for the deal",
+              parameters: {
+                type: "object",
+                properties: {
+                  executiveSummary: { type: "string", description: "ملخص تنفيذي شامل للصفقة (3-5 أسطر)" },
+                  investmentOverview: {
+                    type: "object",
+                    properties: {
+                      totalInvestment: { type: "number", description: "إجمالي الاستثمار المطلوب بالريال" },
+                      breakdownItems: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            label: { type: "string" },
+                            amount: { type: "number" },
+                            note: { type: "string" },
+                          },
+                          required: ["label", "amount"],
+                        },
+                      },
+                    },
+                    required: ["totalInvestment", "breakdownItems"],
+                  },
+                  operationalCosts: {
+                    type: "object",
+                    properties: {
+                      monthlyTotal: { type: "number", description: "إجمالي التكاليف التشغيلية الشهرية" },
+                      items: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            label: { type: "string" },
+                            monthlyCost: { type: "number" },
+                            note: { type: "string" },
+                          },
+                          required: ["label", "monthlyCost"],
+                        },
+                      },
+                    },
+                    required: ["monthlyTotal", "items"],
+                  },
+                  revenueProjections: {
+                    type: "object",
+                    properties: {
+                      optimistic: {
+                        type: "object",
+                        properties: {
+                          monthlyRevenue: { type: "number" },
+                          monthlyProfit: { type: "number" },
+                          roiMonths: { type: "number", description: "فترة استرداد بالأشهر" },
+                          annualROI: { type: "number", description: "عائد سنوي %" },
+                          assumptions: { type: "string" },
+                        },
+                        required: ["monthlyRevenue", "monthlyProfit", "roiMonths", "annualROI", "assumptions"],
+                      },
+                      realistic: {
+                        type: "object",
+                        properties: {
+                          monthlyRevenue: { type: "number" },
+                          monthlyProfit: { type: "number" },
+                          roiMonths: { type: "number" },
+                          annualROI: { type: "number" },
+                          assumptions: { type: "string" },
+                        },
+                        required: ["monthlyRevenue", "monthlyProfit", "roiMonths", "annualROI", "assumptions"],
+                      },
+                      conservative: {
+                        type: "object",
+                        properties: {
+                          monthlyRevenue: { type: "number" },
+                          monthlyProfit: { type: "number" },
+                          roiMonths: { type: "number" },
+                          annualROI: { type: "number" },
+                          assumptions: { type: "string" },
+                        },
+                        required: ["monthlyRevenue", "monthlyProfit", "roiMonths", "annualROI", "assumptions"],
+                      },
+                    },
+                    required: ["optimistic", "realistic", "conservative"],
+                  },
+                  competitorAnalysis: {
+                    type: "object",
+                    properties: {
+                      summary: { type: "string", description: "ملخص البيئة التنافسية" },
+                      competitiveDensity: { type: "string", enum: ["منخفضة", "متوسطة", "عالية", "مشبعة"] },
+                      nearbyCount: { type: "number", description: "عدد المنافسين في 500م" },
+                      neighborhoodCount: { type: "number", description: "عدد المنافسين في 2كم" },
+                      areaCount: { type: "number", description: "عدد المنافسين في 10كم" },
+                      avgRating: { type: "number", description: "متوسط تقييم المنافسين" },
+                      topCompetitors: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string" },
+                            rating: { type: "number" },
+                            distance: { type: "number" },
+                            threat: { type: "string", enum: ["عالي", "متوسط", "منخفض"] },
+                          },
+                          required: ["name", "distance", "threat"],
+                        },
+                      },
+                      opportunities: { type: "array", items: { type: "string" } },
+                      threats: { type: "array", items: { type: "string" } },
+                    },
+                    required: ["summary", "competitiveDensity", "nearbyCount", "neighborhoodCount", "areaCount"],
+                  },
+                  riskAssessment: {
+                    type: "object",
+                    properties: {
+                      overallRisk: { type: "string", enum: ["منخفض", "متوسط", "مرتفع", "مرتفع جداً"] },
+                      financialRisks: { type: "array", items: { type: "string" } },
+                      operationalRisks: { type: "array", items: { type: "string" } },
+                      marketRisks: { type: "array", items: { type: "string" } },
+                      regulatoryRisks: { type: "array", items: { type: "string" } },
+                      mitigationStrategies: { type: "array", items: { type: "string" } },
+                    },
+                    required: ["overallRisk", "financialRisks", "operationalRisks", "marketRisks"],
+                  },
+                  recommendations: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "توصيات عملية للمشتري",
+                  },
+                  verdict: {
+                    type: "string",
+                    enum: ["استثمار ممتاز", "استثمار جيد", "استثمار مقبول بحذر", "استثمار عالي المخاطر", "غير موصى به"],
+                  },
+                  verdictColor: { type: "string", enum: ["green", "blue", "yellow", "orange", "red"] },
+                  confidenceLevel: { type: "string", enum: ["عالي", "متوسط", "منخفض"] },
+                  disclaimer: { type: "string", description: "إخلاء مسؤولية قانوني" },
+                },
+                required: [
+                  "executiveSummary", "investmentOverview", "operationalCosts",
+                  "revenueProjections", "competitorAnalysis", "riskAssessment",
+                  "recommendations", "verdict", "verdictColor", "confidenceLevel", "disclaimer",
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "feasibility_result" } },
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "تم تجاوز حد الطلبات، يرجى المحاولة لاحقاً" }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const t = await response.text();
+      console.error("AI gateway error:", response.status, t);
+      return new Response(JSON.stringify({ error: "خطأ في خدمة الذكاء الاصطناعي" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const data = await response.json();
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+
+    if (!toolCall) {
+      console.error("No tool call in response:", JSON.stringify(data));
+      return new Response(JSON.stringify({ error: "لم يتمكن الذكاء الاصطناعي من إنتاج الدراسة" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const result = JSON.parse(toolCall.function.arguments);
+    const study = {
+      ...result,
+      _meta: {
+        activityType: activityTemplate.label,
+        hasRealCompetitorData: competitors.some(g => g.places.length > 0),
+        generatedAt: new Date().toISOString(),
+      },
+    };
+
+    return new Response(JSON.stringify({ success: true, study }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    console.error("feasibility-study error:", e);
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
