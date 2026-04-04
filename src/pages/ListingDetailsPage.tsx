@@ -208,7 +208,7 @@ const ListingDetailsPage = () => {
     );
   }
 
-  const photos = listing.photos ? Object.values(listing.photos).flat() as string[] : [];
+  const photos = getOrderedPhotos(listing.photos as Record<string, string[]>);
   const inventory = (listing.inventory || []) as Array<{ name: string; qty: number; condition: string }>;
   const documents = (listing.documents || []) as Array<{ name: string; status: string; url?: string }>;
   const isOwner = user?.id === listing.owner_id;
