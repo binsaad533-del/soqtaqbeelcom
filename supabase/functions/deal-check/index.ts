@@ -140,6 +140,39 @@ function normalizeListingForAnalysis(listing: any) {
   };
 }
 
+/** Extract all document file URLs from listing for multimodal AI analysis */
+function extractDocumentUrls(listing: any): string[] {
+  if (!Array.isArray(listing?.documents)) return [];
+  const urls: string[] = [];
+  for (const doc of listing.documents) {
+    if (Array.isArray(doc?.files)) {
+      for (const url of doc.files) {
+        if (typeof url === "string" && url.startsWith("http")) {
+          urls.push(url);
+        }
+      }
+    }
+  }
+  return urls.slice(0, 20); // Limit to 20 document images
+}
+
+/** Build multimodal user message content with text + document images */
+function buildMultimodalContent(textPrompt: string, documentUrls: string[]): any {
+  if (documentUrls.length === 0) {
+    return textPrompt;
+  }
+  const content: any[] = [
+    { type: "text", text: textPrompt + "\n\n## ⚠️ الوثائق المرفقة أدناه (صور مستندات — حلّلها واستخرج منها أي بيانات مفيدة للتحليل):\nهذه الوثائق سرية ولا تُعرض للمشتري — لكن يجب استخدام بياناتها في التقييم." },
+  ];
+  for (const url of documentUrls) {
+    content.push({
+      type: "image_url",
+      image_url: { url },
+    });
+  }
+  return content;
+}
+
 async function createInputSignature(listing: any, perspective: AnalysisPerspective, sellerName?: string): Promise<string> {
   const payload = JSON.stringify({
     listing,
@@ -234,6 +267,12 @@ function buildSystemPrompt(perspective: AnalysisPerspective, mode: AnalysisMode,
   const perspectiveBlock = perspective === "seller" ? buildSellerPerspective(sellerName) : BUYER_PERSPECTIVE;
 
   return `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية دقيقة وثابتة لكل صفقة.
+
+## تحليل الوثائق المرفقة:
+- إذا تم إرفاق صور مستندات (سجل تجاري، عقد إيجار، رخص، فواتير)، حلّلها واستخرج منها كل المعلومات المفيدة
+- استخدم البيانات المستخرجة من الوثائق في التقييم والتحليل
+- هذه الوثائق سرية ولا تُعرض للمشتري — لكن بياناتها أساسية للتحليل الدقيق
+- إذا وجدت تناقضاً بين بيانات الإفصاح والوثائق المرفقة، نبّه إلى ذلك
 
 ${perspectiveBlock}
 ${buildConsistencyRules(mode)}
@@ -478,8 +517,10 @@ serve(async (req) => {
     }
 
     const normalizedListing = normalizeListingForAnalysis(listing);
+    const documentUrls = extractDocumentUrls(listing);
     const inputSignature = await createInputSignature(normalizedListing, perspective, sellerName);
     const userPrompt = buildAnalysisPrompt(normalizedListing, mode, previousAnalysis, inputSignature);
+    const userContent = buildMultimodalContent(userPrompt, documentUrls);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -493,7 +534,7 @@ serve(async (req) => {
         top_p: 0.1,
         messages: [
           { role: "system", content: buildSystemPrompt(perspective, mode, sellerName) },
-          { role: "user", content: userPrompt },
+          { role: "user", content: userContent },
         ],
         tools: [
           {

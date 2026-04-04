@@ -63,6 +63,39 @@ const ACTIVITY_TEMPLATES: Record<string, {
   },
 };
 
+/** Extract all document file URLs from listing for multimodal AI analysis */
+function extractDocumentUrls(listing: any): string[] {
+  if (!Array.isArray(listing?.documents)) return [];
+  const urls: string[] = [];
+  for (const doc of listing.documents) {
+    if (Array.isArray(doc?.files)) {
+      for (const url of doc.files) {
+        if (typeof url === "string" && url.startsWith("http")) {
+          urls.push(url);
+        }
+      }
+    }
+  }
+  return urls.slice(0, 20);
+}
+
+/** Build multimodal user message content with text + document images */
+function buildMultimodalContent(textPrompt: string, documentUrls: string[]): any {
+  if (documentUrls.length === 0) {
+    return textPrompt;
+  }
+  const content: any[] = [
+    { type: "text", text: textPrompt + "\n\n## ⚠️ الوثائق المرفقة أدناه (صور مستندات — حلّلها واستخرج منها أي بيانات مفيدة لدراسة الجدوى):\nهذه الوثائق سرية ولا تُعرض للمشتري — لكن يجب استخدام بياناتها في الدراسة والتحليل المالي." },
+  ];
+  for (const url of documentUrls) {
+    content.push({
+      type: "image_url",
+      image_url: { url },
+    });
+  }
+  return content;
+}
+
 function detectActivityType(activity: string): typeof ACTIVITY_TEMPLATES[string] {
   const lower = (activity || "").toLowerCase();
   for (const [, template] of Object.entries(ACTIVITY_TEMPLATES)) {
@@ -203,6 +236,11 @@ const SYSTEM_PROMPT = `أنت مستشار مالي واقتصادي خبير م
 5. سيناريوهات الربحية (متفائل، واقعي، متحفظ)
 6. توصيات عملية للمشتري
 
+## تحليل الوثائق المرفقة:
+- إذا تم إرفاق صور مستندات (سجل تجاري، عقد إيجار، رخص، فواتير، ميزانيات)، حلّلها واستخرج منها كل المعلومات المالية والتشغيلية
+- استخدم أي أرقام أو بيانات مالية من الوثائق لتحسين دقة التقديرات
+- هذه الوثائق سرية ولا تُعرض للمشتري — لكن بياناتها أساسية لدقة الدراسة
+
 ## قواعد صارمة:
 - استخدم الأرقام الإنجليزية فقط (0-9)
 - كن واقعياً في التقديرات — لا تبالغ في التفاؤل
@@ -250,6 +288,8 @@ serve(async (req) => {
     }
 
     const userPrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors);
+    const documentUrls = extractDocumentUrls(listing);
+    const userContent = buildMultimodalContent(userPrompt, documentUrls);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -262,7 +302,7 @@ serve(async (req) => {
         temperature: 0.2,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userPrompt },
+          { role: "user", content: userContent },
         ],
         tools: [
           {
