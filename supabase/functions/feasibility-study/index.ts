@@ -63,6 +63,39 @@ const ACTIVITY_TEMPLATES: Record<string, {
   },
 };
 
+/** Extract all document file URLs from listing for multimodal AI analysis */
+function extractDocumentUrls(listing: any): string[] {
+  if (!Array.isArray(listing?.documents)) return [];
+  const urls: string[] = [];
+  for (const doc of listing.documents) {
+    if (Array.isArray(doc?.files)) {
+      for (const url of doc.files) {
+        if (typeof url === "string" && url.startsWith("http")) {
+          urls.push(url);
+        }
+      }
+    }
+  }
+  return urls.slice(0, 20);
+}
+
+/** Build multimodal user message content with text + document images */
+function buildMultimodalContent(textPrompt: string, documentUrls: string[]): any {
+  if (documentUrls.length === 0) {
+    return textPrompt;
+  }
+  const content: any[] = [
+    { type: "text", text: textPrompt + "\n\n## ⚠️ الوثائق المرفقة أدناه (صور مستندات — حلّلها واستخرج منها أي بيانات مفيدة لدراسة الجدوى):\nهذه الوثائق سرية ولا تُعرض للمشتري — لكن يجب استخدام بياناتها في الدراسة والتحليل المالي." },
+  ];
+  for (const url of documentUrls) {
+    content.push({
+      type: "image_url",
+      image_url: { url },
+    });
+  }
+  return content;
+}
+
 function detectActivityType(activity: string): typeof ACTIVITY_TEMPLATES[string] {
   const lower = (activity || "").toLowerCase();
   for (const [, template] of Object.entries(ACTIVITY_TEMPLATES)) {
