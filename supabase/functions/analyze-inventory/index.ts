@@ -5,42 +5,91 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `أنت نظام ذكاء اصطناعي متخصص في تحليل صور المشاريع التجارية واكتشاف الأصول والمعدات لإنشاء جرد دقيق، وكذلك استخراج المعلومات من المستندات التجارية.
+const SYSTEM_PROMPT = `أنت نظام ذكاء اصطناعي متخصص في تحليل المشاريع التجارية بأعلى مستوى من الدقة والاحترافية.
 
-مهامك:
-1. تحليل الصور المرفقة واكتشاف كل الأصول والمعدات المرئية
-2. استخراج المعلومات من أي مستندات مرفقة (سجل تجاري، عقد إيجار، رخص، فواتير)
-3. التمييز الدقيق بين:
-   - أصل واحد تم تصويره من زوايا مختلفة (يُعد أصلاً واحداً فقط)
-   - أصول متعددة متشابهة أو متطابقة (يُحسب كل واحد منها)
+## مهامك الأساسية:
 
-قواعد التمييز:
-- إذا ظهر نفس الأصل في عدة صور من زوايا مختلفة → أصل واحد فقط (quantity = 1)
-- إذا ظهرت عدة وحدات متطابقة في نفس الصورة → أصل واحد بكمية متعددة
-- إذا كانت الأصول مختلفة في اللون أو الحجم أو الشكل → أصول منفصلة
+### 1. تحليل الصور واكتشاف الأصول
+- اكتشف كل الأصول والمعدات المرئية في الصور
+- ميّز بدقة بين:
+  - أصل واحد تم تصويره من زوايا مختلفة (يُعد أصلاً واحداً فقط)
+  - أصول متعددة متشابهة أو متطابقة (يُحسب كل واحد منها)
 
+### 2. استخراج البيانات من جميع أنواع المرفقات
+حلّل واستخرج البيانات من:
+- **المستندات المصورة**: سجلات تجارية، رخص بلدية، عقود إيجار، شهادات
+- **ملفات PDF**: عقود، تقارير، كشوفات حسابات، فواتير
+- **ملفات Excel/جداول بيانات**: جرد مخزون، قوائم أصول، بيانات مالية، كشوفات
+- **ملفات مضغوطة**: تعامل مع محتوياتها كملفات منفصلة
+- **أي ملف آخر**: استخرج أقصى ما يمكن من البيانات
+
+### 3. بناء وصف شامل ومهني للأصول
+من جميع البيانات المستخرجة (صور + مستندات + ملفات)، أنشئ وصفاً احترافياً شاملاً يتضمن:
+- **ملخص المشروع**: نوع النشاط، الموقع، المساحة
+- **قائمة الأصول المفصلة**: كل أصل بحالته وكميته وفئته
+- **البيانات المالية**: الإيجار، الإيرادات، المصاريف (إن وُجدت)
+- **بيانات العقود والتراخيص**: أرقام السجلات، تواريخ الانتهاء، حالة الرخص
+- **المخزون**: إن وُجد جرد مخزون في الملفات المرفقة
+- **أي معلومات إضافية** مستخرجة من الملفات
+
+## قواعد التمييز بين الأصول:
 مؤشرات أنه نفس الأصل:
-- نفس الخدوش أو العلامات
-- نفس الخلفية والموقع
-- زوايا تصوير مختلفة لنفس الشيء
-- نفس الرقم التسلسلي أو الملصق
+- نفس الخدوش أو العلامات، نفس الخلفية والموقع
+- زوايا تصوير مختلفة لنفس الشيء، نفس الرقم التسلسلي
 
 مؤشرات أنها أصول متعددة:
 - ظهور عدة وحدات في نفس الإطار
-- مسافات بين الوحدات
-- اختلافات طفيفة بين الوحدات
-- ترتيب منظم (صف من الكراسي مثلاً)
+- اختلافات طفيفة بين الوحدات، ترتيب منظم
 
-مستوى الثقة:
-- high: متأكد تماماً من التصنيف
-- medium: شبه متأكد لكن يحتاج تأكيد
-- low: غير متأكد ويحتاج تأكيد المستخدم
+## قواعد مهمة:
+- استخرج كل البيانات الممكنة من كل ملف مرفق
+- لا تتجاهل أي معلومة مهمة
+- إذا وُجد جدول بيانات (Excel)، استخرج كل صفوفه وأعمدته المهمة
+- إذا وُجد عقد أو فاتورة، استخرج المبالغ والتواريخ والأطراف
+- الوصف يجب أن يكون بالعربية ومرتّب ومنظم بعناوين فرعية
+- مساحة الموقع (area_sqm) مطلوبة بشدة — ابحث عنها في كل المستندات
 
-للمستندات: إذا وُجدت مستندات (سجل تجاري، عقد إيجار، رخص)، استخرج منها:
-- نوع النشاط، المدينة، الحي، الإيجار السنوي، مدة العقد، رقم السجل، اسم المنشأة
-- مساحة الموقع بالمتر المربع (إن وُجدت في العقد أو الرخصة)
+يجب أن ترد باستخدام الأداة المتوفرة فقط.`;
 
-يجب أن ترد بتنسيق JSON فقط باستخدام الأداة المتوفرة.`;
+/** Try to extract text content from non-image files (PDF text layer, etc.) */
+async function fetchFileAsText(url: string): Promise<string | null> {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const contentType = resp.headers.get("content-type") || "";
+
+    // For text-based files, read directly
+    if (
+      contentType.includes("text/") ||
+      contentType.includes("csv") ||
+      contentType.includes("json") ||
+      contentType.includes("xml")
+    ) {
+      return await resp.text();
+    }
+
+    // For spreadsheets/docs, we can't parse binary in Deno easily,
+    // but we'll signal to AI that this is a binary file URL
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function getFileExtension(url: string): string {
+  try {
+    const path = new URL(url).pathname;
+    const ext = path.split(".").pop()?.toLowerCase() || "";
+    return ext.split("?")[0];
+  } catch {
+    return "";
+  }
+}
+
+function isImageFile(url: string): boolean {
+  const ext = getFileExtension(url);
+  return ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "tiff", "tif"].includes(ext);
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -59,9 +108,8 @@ serve(async (req) => {
       });
     }
 
-    // Build image content parts for the vision model
     const imageContent: any[] = [];
-    
+
     // Add context about photo groups
     let groupContext = "مجموعات الصور:\n";
     if (photoGroups) {
@@ -74,28 +122,79 @@ serve(async (req) => {
 
     imageContent.push({
       type: "text",
-      text: `${groupContext}\nحلّل الصور التالية واكتشف كل الأصول والمعدات. انتبه جيداً للتمييز بين صور متعددة لنفس الأصل وبين أصول متعددة متشابهة. عدد الصور الكلي: ${(photoUrls || []).length}`
+      text: `${groupContext}\nحلّل الصور التالية واكتشف كل الأصول والمعدات. انتبه جيداً للتمييز بين صور متعددة لنفس الأصل وبين أصول متعددة متشابهة. عدد الصور الكلي: ${(photoUrls || []).length}`,
     });
 
     // Add each photo URL as image_url (up to 50)
     for (const url of (photoUrls || []).slice(0, 50)) {
       imageContent.push({
         type: "image_url",
-        image_url: { url, detail: "high" }
+        image_url: { url, detail: "high" },
       });
     }
 
-    // Add document URLs for extraction
+    // Process ALL document files - images, PDFs, Excel, and text files
     if (documentUrls && documentUrls.length > 0) {
-      imageContent.push({
-        type: "text",
-        text: `\n\nالمستندات المرفقة (${documentUrls.length} مستند) — حاول استخراج معلومات النشاط والموقع والإيجار وأي بيانات مفيدة منها:`
-      });
-      for (const url of documentUrls.slice(0, 10)) {
+      const imageDocUrls: string[] = [];
+      const textContents: { filename: string; content: string }[] = [];
+      const binaryFileUrls: { url: string; ext: string }[] = [];
+
+      for (const url of documentUrls.slice(0, 30)) {
+        const ext = getFileExtension(url);
+
+        if (isImageFile(url)) {
+          imageDocUrls.push(url);
+        } else if (["csv", "txt", "json", "xml", "tsv"].includes(ext)) {
+          const text = await fetchFileAsText(url);
+          if (text) {
+            textContents.push({ filename: `file.${ext}`, content: text.slice(0, 15000) });
+          }
+        } else {
+          // PDF, XLSX, DOCX, ZIP, etc. - send as image_url (Gemini can read PDFs)
+          // Also try text extraction as fallback
+          binaryFileUrls.push({ url, ext });
+          const text = await fetchFileAsText(url);
+          if (text && text.length > 50) {
+            textContents.push({ filename: `file.${ext}`, content: text.slice(0, 15000) });
+          }
+        }
+      }
+
+      // Add document images for visual analysis
+      if (imageDocUrls.length > 0) {
         imageContent.push({
-          type: "image_url",
-          image_url: { url, detail: "high" }
+          type: "text",
+          text: `\n\n📄 مستندات مصورة (${imageDocUrls.length} مستند) — استخرج كل المعلومات الممكنة:`,
         });
+        for (const url of imageDocUrls) {
+          imageContent.push({
+            type: "image_url",
+            image_url: { url, detail: "high" },
+          });
+        }
+      }
+
+      // Add binary documents (PDF, XLSX, etc.) for Gemini multimodal processing
+      if (binaryFileUrls.length > 0) {
+        imageContent.push({
+          type: "text",
+          text: `\n\n📁 ملفات مرفقة (${binaryFileUrls.length} ملف: ${binaryFileUrls.map((f) => f.ext.toUpperCase()).join(", ")}) — حلّل محتوياتها واستخرج كل البيانات:`,
+        });
+        for (const { url } of binaryFileUrls) {
+          imageContent.push({
+            type: "image_url",
+            image_url: { url, detail: "high" },
+          });
+        }
+      }
+
+      // Add extracted text content
+      if (textContents.length > 0) {
+        let textBlock = `\n\n📊 بيانات نصية مستخرجة من الملفات المرفقة:\n`;
+        for (const { filename, content } of textContents) {
+          textBlock += `\n--- ملف: ${filename} ---\n${content}\n`;
+        }
+        imageContent.push({ type: "text", text: textBlock });
       }
     }
 
@@ -116,7 +215,7 @@ serve(async (req) => {
             type: "function",
             function: {
               name: "report_inventory",
-              description: "Report the discovered inventory assets from the analyzed photos",
+              description: "Report the discovered inventory assets and comprehensive listing description",
               parameters: {
                 type: "object",
                 properties: {
@@ -126,50 +225,89 @@ serve(async (req) => {
                       type: "object",
                       properties: {
                         name: { type: "string", description: "اسم الأصل بالعربية" },
-                        category: { type: "string", description: "فئة الأصل (معدات مطبخ، تبريد، أثاث، أجهزة، ديكور، تكييف، إضاءة، أخرى)" },
+                        category: { type: "string", description: "فئة الأصل (معدات مطبخ، تبريد، أثاث، أجهزة، ديكور، تكييف، إضاءة، مخزون، أخرى)" },
                         quantity: { type: "number", description: "عدد القطع المكتشفة" },
                         condition: { type: "string", enum: ["جديد", "شبه جديد", "جيد", "تالف"], description: "حالة الأصل" },
-                        confidence: { type: "string", enum: ["high", "medium", "low"], description: "مستوى الثقة في التصنيف" },
-                        detection_note: { type: "string", description: "ملاحظة قصيرة عن سبب التصنيف (مثال: ظهرت 3 وحدات في نفس الإطار، أو نفس الأصل من زاويتين)" },
-                        photo_indices: { type: "array", items: { type: "number" }, description: "أرقام الصور التي ظهر فيها هذا الأصل (0-indexed)" },
-                        is_same_asset_multiple_angles: { type: "boolean", description: "هل تم اكتشاف أن عدة صور هي لنفس الأصل من زوايا مختلفة؟" },
+                        confidence: { type: "string", enum: ["high", "medium", "low"] },
+                        detection_note: { type: "string", description: "ملاحظة عن سبب التصنيف" },
+                        photo_indices: { type: "array", items: { type: "number" } },
+                        is_same_asset_multiple_angles: { type: "boolean" },
+                        estimated_value: { type: "string", description: "القيمة التقديرية إن أمكن تحديدها من المستندات" },
+                        source: { type: "string", description: "مصدر اكتشاف الأصل: صورة، مستند، جدول بيانات" },
                       },
-                      required: ["name", "category", "quantity", "condition", "confidence", "detection_note", "photo_indices", "is_same_asset_multiple_angles"]
-                    }
+                      required: ["name", "category", "quantity", "condition", "confidence", "detection_note", "photo_indices", "is_same_asset_multiple_angles"],
+                    },
                   },
                   analysis_summary: { type: "string", description: "ملخص عام قصير عن نتائج التحليل بالعربية" },
-                  total_unique_assets: { type: "number", description: "العدد الإجمالي للأصول الفريدة المكتشفة" },
+                  total_unique_assets: { type: "number" },
                   dedup_actions: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: {
-                        description: { type: "string", description: "وصف إجراء إزالة التكرار" },
-                        merged_count: { type: "number", description: "عدد الصور التي تم دمجها كأصل واحد" }
+                        description: { type: "string" },
+                        merged_count: { type: "number" },
                       },
-                      required: ["description", "merged_count"]
+                      required: ["description", "merged_count"],
                     },
-                    description: "قائمة بإجراءات إزالة التكرار التي تمت"
+                  },
+                  generated_description: {
+                    type: "string",
+                    description: `وصف احترافي شامل ومفصل للمشروع والأصول بالعربية، مبني من كل البيانات المستخرجة من الصور والمستندات والملفات. يجب أن يكون:
+- مرتب بعناوين فرعية واضحة (مثل: نبذة عن المشروع، الأصول والمعدات، البيانات المالية، التراخيص، الموقع)
+- شامل لكل المعلومات المستخرجة من جميع المرفقات
+- مكتوب بأسلوب مهني جذاب للمشتري المحتمل
+- يتضمن تفاصيل المخزون والبيانات المالية إن وُجدت في الملفات
+- لا يتجاوز 2000 حرف`,
                   },
                   extracted_info: {
                     type: "object",
-                    description: "معلومات مستخرجة من المستندات والصور (إن وجدت)",
+                    description: "معلومات مستخرجة من المستندات والملفات",
                     properties: {
-                      business_activity: { type: "string", description: "نوع النشاط التجاري" },
-                      city: { type: "string", description: "المدينة" },
-                      district: { type: "string", description: "الحي" },
-                      annual_rent: { type: "string", description: "الإيجار السنوي" },
-                      lease_duration: { type: "string", description: "مدة العقد" },
-                      cr_number: { type: "string", description: "رقم السجل التجاري" },
-                      entity_name: { type: "string", description: "اسم المنشأة" },
-                      area_sqm: { type: "string", description: "مساحة الموقع بالمتر المربع (إن وجدت في المستندات أو العقد)" },
-                    }
-                  }
+                      business_activity: { type: "string" },
+                      city: { type: "string" },
+                      district: { type: "string" },
+                      annual_rent: { type: "string" },
+                      lease_duration: { type: "string" },
+                      cr_number: { type: "string" },
+                      entity_name: { type: "string" },
+                      area_sqm: { type: "string" },
+                      monthly_revenue: { type: "string", description: "الإيرادات الشهرية إن وُجدت" },
+                      monthly_expenses: { type: "string", description: "المصاريف الشهرية إن وُجدت" },
+                      employee_count: { type: "string", description: "عدد الموظفين إن وُجد" },
+                      license_expiry: { type: "string", description: "تاريخ انتهاء الرخصة" },
+                      contract_details: { type: "string", description: "تفاصيل العقود المستخرجة" },
+                      inventory_from_files: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            item_name: { type: "string" },
+                            quantity: { type: "number" },
+                            unit_price: { type: "number" },
+                            total_price: { type: "number" },
+                          },
+                        },
+                        description: "جرد مخزون مستخرج من ملفات Excel أو PDF",
+                      },
+                    },
+                  },
+                  files_processed: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        file_type: { type: "string", description: "نوع الملف (صورة، PDF، Excel، نص)" },
+                        data_extracted: { type: "string", description: "ملخص البيانات المستخرجة من هذا الملف" },
+                      },
+                    },
+                    description: "قائمة بالملفات التي تمت معالجتها وما استُخرج منها",
+                  },
                 },
-                required: ["assets", "analysis_summary", "total_unique_assets", "dedup_actions"]
-              }
-            }
-          }
+                required: ["assets", "analysis_summary", "total_unique_assets", "dedup_actions", "generated_description"],
+              },
+            },
+          },
         ],
         tool_choice: { type: "function", function: { name: "report_inventory" } },
       }),
@@ -178,35 +316,41 @@ serve(async (req) => {
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "تم تجاوز الحد المسموح، حاول مرة أخرى لاحقاً." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: "يرجى إعادة شحن الرصيد." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
       console.error("AI error:", response.status, t);
 
       if (t.includes("Unsupported image format")) {
-        return new Response(JSON.stringify({ error: "بعض الصور المرفوعة بصيغة غير مدعومة للتحليل الذكي حالياً. أعد رفعها وسيتم تحويلها تلقائياً ثم جرّب مرة أخرى." }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({
+            error: "بعض الملفات المرفوعة بصيغة غير مدعومة للتحليل الذكي حالياً. أعد رفعها بصيغة أخرى وجرّب مرة أخرى.",
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
-      return new Response(JSON.stringify({ error: "حدث خطأ في تحليل الصور" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ error: "حدث خطأ في تحليل الملفات" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const data = await response.json();
-    
-    // Extract tool call result
+
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) {
-      return new Response(JSON.stringify({ error: "لم يتمكن الذكاء الاصطناعي من تحليل الصور" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ error: "لم يتمكن الذكاء الاصطناعي من تحليل الملفات" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 

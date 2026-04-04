@@ -103,7 +103,7 @@ const CreateListingPage = () => {
   const [locationLng, setLocationLng] = useState<number | null>(null);
   const [sellerNote, setSellerNote] = useState("");
   const [areaSqm, setAreaSqm] = useState<string>("");
-  const SELLER_NOTE_MAX = 300;
+  const SELLER_NOTE_MAX = 2000;
   const [inventoryPricingMode, setInventoryPricingMode] = useState<InventoryPricingMode>("per_item");
   const [bulkInventoryPrice, setBulkInventoryPrice] = useState<string>("");
 
@@ -614,13 +614,37 @@ const CreateListingPage = () => {
         userConfirmed: asset.confidence === "high",
       }));
 
+      // Merge inventory items extracted from files (Excel, PDF tables)
+      const extracted = (data as { extracted_info?: Record<string, any> }).extracted_info;
+      if (extracted?.inventory_from_files && Array.isArray(extracted.inventory_from_files)) {
+        const fileItems: InventoryItem[] = extracted.inventory_from_files.map((item: any, i: number) => ({
+          id: `file-${i + 1}`,
+          name: String(item.item_name || "عنصر من الملفات"),
+          qty: Number(item.quantity || 1),
+          condition: "غير واضح",
+          category: "مخزون",
+          included: true,
+          confidence: "medium" as const,
+          detectionNote: `مستخرج من ملف مرفق${item.unit_price ? ` — سعر الوحدة: ${item.unit_price} ر.س` : ""}`,
+          photoIndices: [],
+          isSameAssetMultipleAngles: false,
+          userConfirmed: false,
+        }));
+        assets.push(...fileItems);
+      }
+
       setInventory(assets);
       setAnalysisSummary(String((data as { analysis_summary?: string }).analysis_summary || ""));
       setDedupActions((((data as { dedup_actions?: DedupAction[] }).dedup_actions) || []));
       setAnalyzed(true);
 
+      // Auto-fill the AI-generated description
+      const generatedDesc = (data as { generated_description?: string }).generated_description;
+      if (generatedDesc && !sellerNote) {
+        setSellerNote(generatedDesc.slice(0, 2000));
+      }
+
       // Auto-fill disclosure from extracted document info
-      const extracted = (data as { extracted_info?: Record<string, string> }).extracted_info;
       if (extracted) {
         setDisclosure(prev => ({
           ...prev,
@@ -646,7 +670,13 @@ const CreateListingPage = () => {
         }
       }
 
-      toast.success("تم تحليل الصور والمستندات وتحديد الأصول بدقة");
+      // Log files processed
+      const filesProcessed = (data as { files_processed?: any[] }).files_processed;
+      if (filesProcessed && filesProcessed.length > 0) {
+        console.log("[AI] Files processed:", filesProcessed);
+      }
+
+      toast.success("تم تحليل جميع الملفات والصور واستخراج البيانات بنجاح ✦");
     } catch (err) {
       clearInterval(progressInterval);
       toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء تحليل الصور");
