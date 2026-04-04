@@ -511,8 +511,10 @@ serve(async (req) => {
     }
 
     const normalizedListing = normalizeListingForAnalysis(listing);
+    const documentUrls = extractDocumentUrls(listing);
     const inputSignature = await createInputSignature(normalizedListing, perspective, sellerName);
     const userPrompt = buildAnalysisPrompt(normalizedListing, mode, previousAnalysis, inputSignature);
+    const userContent = buildMultimodalContent(userPrompt, documentUrls);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -526,7 +528,7 @@ serve(async (req) => {
         top_p: 0.1,
         messages: [
           { role: "system", content: buildSystemPrompt(perspective, mode, sellerName) },
-          { role: "user", content: userPrompt },
+          { role: "user", content: userContent },
         ],
         tools: [
           {
