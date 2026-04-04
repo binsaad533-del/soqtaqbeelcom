@@ -1,6 +1,6 @@
 /// <reference types="google.maps" />
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MapPin, Loader2, X, Search } from "lucide-react";
+import { MapPin, Loader2, X, Search, ClipboardPaste } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { findNearestCity } from "@/lib/saudiCities";
