@@ -468,10 +468,12 @@ const PasteLocationBar = ({
   pasteInput,
   setPasteInput,
   onPaste,
+  loading: pasteLoading,
 }: {
   pasteInput: string;
   setPasteInput: (v: string) => void;
   onPaste: () => void;
+  loading?: boolean;
 }) => (
   <div className="flex gap-2" dir="ltr">
     <Input
@@ -485,10 +487,10 @@ const PasteLocationBar = ({
     <Button
       size="sm"
       onClick={onPaste}
-      disabled={!pasteInput.trim()}
+      disabled={!pasteInput.trim() || pasteLoading}
       className="rounded-lg gap-1.5"
     >
-      <ClipboardPaste size={14} />
+      {pasteLoading ? <Loader2 size={14} className="animate-spin" /> : <ClipboardPaste size={14} />}
       تحديد
     </Button>
   </div>
