@@ -62,6 +62,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [manualSearch, setManualSearch] = useState("");
   const [searching, setSearching] = useState(false);
+  const [pasteInput, setPasteInput] = useState("");
 
   const extractPlaceDetails = useCallback((components: google.maps.GeocoderAddressComponent[]): PlaceDetails => {
     let city = "";
