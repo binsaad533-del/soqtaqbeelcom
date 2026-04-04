@@ -140,6 +140,39 @@ function normalizeListingForAnalysis(listing: any) {
   };
 }
 
+/** Extract all document file URLs from listing for multimodal AI analysis */
+function extractDocumentUrls(listing: any): string[] {
+  if (!Array.isArray(listing?.documents)) return [];
+  const urls: string[] = [];
+  for (const doc of listing.documents) {
+    if (Array.isArray(doc?.files)) {
+      for (const url of doc.files) {
+        if (typeof url === "string" && url.startsWith("http")) {
+          urls.push(url);
+        }
+      }
+    }
+  }
+  return urls.slice(0, 20); // Limit to 20 document images
+}
+
+/** Build multimodal user message content with text + document images */
+function buildMultimodalContent(textPrompt: string, documentUrls: string[]): any {
+  if (documentUrls.length === 0) {
+    return textPrompt;
+  }
+  const content: any[] = [
+    { type: "text", text: textPrompt + "\n\n## ⚠️ الوثائق المرفقة أدناه (صور مستندات — حلّلها واستخرج منها أي بيانات مفيدة للتحليل):\nهذه الوثائق سرية ولا تُعرض للمشتري — لكن يجب استخدام بياناتها في التقييم." },
+  ];
+  for (const url of documentUrls) {
+    content.push({
+      type: "image_url",
+      image_url: { url },
+    });
+  }
+  return content;
+}
+
 async function createInputSignature(listing: any, perspective: AnalysisPerspective, sellerName?: string): Promise<string> {
   const payload = JSON.stringify({
     listing,
