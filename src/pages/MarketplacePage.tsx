@@ -458,10 +458,9 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
                 {hasSimulationPhotos(listing.photos as Record<string, unknown>) && <SimulationOverlay size="sm" />}
               </>
             ) : (
-            </>
-          ) : (
-            <Eye size={24} className="text-muted-foreground/30" strokeWidth={1} />
-          )}
+              <Eye size={24} className="text-muted-foreground/30" strokeWidth={1} />
+            );
+          })()}
         </div>
         <div className="p-4">
           {seller && (
