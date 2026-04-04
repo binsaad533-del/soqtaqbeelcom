@@ -1,6 +1,6 @@
 /// <reference types="google.maps" />
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MapPin, Loader2, X, Search } from "lucide-react";
+import { MapPin, Loader2, X, Search, ClipboardPaste } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { findNearestCity } from "@/lib/saudiCities";
@@ -62,6 +62,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [manualSearch, setManualSearch] = useState("");
   const [searching, setSearching] = useState(false);
+  const [pasteInput, setPasteInput] = useState("");
 
   const extractPlaceDetails = useCallback((components: google.maps.GeocoderAddressComponent[]): PlaceDetails => {
     let city = "";
@@ -254,6 +255,28 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     onLocationChange(0, 0);
   };
 
+  const handlePasteLocation = () => {
+    const parsed = parseLocationInput(pasteInput);
+    if (!parsed) {
+      setSelectedAddress("لم يتم التعرف على الإحداثيات — جرب لصق رابط خرائط قوقل أو إحداثيات مثل: 24.7136, 46.6753");
+      return;
+    }
+    const { lat: pLat, lng: pLng } = parsed;
+    const nearest = findNearestCity(pLat, pLng);
+    const addr = `${nearest.name} (${pLat.toFixed(5)}, ${pLng.toFixed(5)})`;
+    setSelectedAddress(addr);
+    onLocationChange(pLat, pLng, addr, { city: nearest.name, address: addr });
+    setPasteInput("");
+
+    if (mapInstanceRef.current && markerRef.current) {
+      const pos = new google.maps.LatLng(pLat, pLng);
+      mapInstanceRef.current.setCenter(pos);
+      mapInstanceRef.current.setZoom(15);
+      markerRef.current.setPosition(pos);
+      markerRef.current.setVisible(true);
+    }
+  };
+
   // Pure fallback UI when maps completely failed
   if (error && !mapReady) {
     return (
@@ -261,8 +284,9 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         <div className="rounded-xl border border-border/50 bg-muted/30 p-5 space-y-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin size={16} className="text-primary" />
-            <span>حدد الموقع بالبحث</span>
+            <span>حدد الموقع بالبحث أو لصق الإحداثيات</span>
           </div>
+          <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} />
           <FallbackSearchBar
             manualSearch={manualSearch}
             setManualSearch={setManualSearch}
@@ -286,11 +310,20 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         <div ref={mapRef} className="w-full h-[280px]" />
       </div>
 
+      {/* Paste coordinates / Google Maps link */}
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2">
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <ClipboardPaste size={11} className="text-primary" />
+          <span>الصق رابط خرائط قوقل أو إحداثيات GPS:</span>
+        </div>
+        <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} />
+      </div>
+
       {/* Always show fallback search below the map */}
       <div className="rounded-xl border border-border/40 bg-muted/20 p-3 space-y-2">
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <Search size={11} />
-          <span>لا تظهر الخريطة؟ ابحث بالاسم:</span>
+          <span>أو ابحث بالاسم:</span>
         </div>
         <FallbackSearchBar
           manualSearch={manualSearch}
@@ -304,6 +337,58 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     </div>
   );
 };
+
+/** Parse Google Maps URL or raw coordinates */
+function parseLocationInput(input: string): { lat: number; lng: number } | null {
+  const trimmed = input.trim();
+
+  // Try raw coordinates: "24.7136, 46.6753" or "24.7136 46.6753"
+  const coordMatch = trimmed.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
+  if (coordMatch) {
+    const lat = parseFloat(coordMatch[1]);
+    const lng = parseFloat(coordMatch[2]);
+    if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng };
+  }
+
+  // Try Google Maps URL patterns
+  // https://www.google.com/maps/@24.7136,46.6753,15z
+  const atMatch = trimmed.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (atMatch) {
+    return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]) };
+  }
+
+  // https://www.google.com/maps/place/.../@24.7136,46.6753
+  // https://maps.google.com/?q=24.7136,46.6753
+  const qMatch = trimmed.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (qMatch) {
+    return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
+  }
+
+  // https://maps.app.goo.gl or goo.gl/maps short links — can't resolve without redirect
+  // https://www.google.com/maps/place/24°42'49.0"N+46°40'31.1"E
+  const dmsMatch = trimmed.match(/(\d+)°(\d+)'([\d.]+)"([NS])\+?(\d+)°(\d+)'([\d.]+)"([EW])/);
+  if (dmsMatch) {
+    let lat = parseInt(dmsMatch[1]) + parseInt(dmsMatch[2]) / 60 + parseFloat(dmsMatch[3]) / 3600;
+    let lng = parseInt(dmsMatch[5]) + parseInt(dmsMatch[6]) / 60 + parseFloat(dmsMatch[7]) / 3600;
+    if (dmsMatch[4] === "S") lat = -lat;
+    if (dmsMatch[8] === "W") lng = -lng;
+    return { lat, lng };
+  }
+
+  // /place/ pattern with decimal coords
+  const placeMatch = trimmed.match(/\/place\/[^/]*\/(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (placeMatch) {
+    return { lat: parseFloat(placeMatch[1]), lng: parseFloat(placeMatch[2]) };
+  }
+
+  // ll= parameter
+  const llMatch = trimmed.match(/ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (llMatch) {
+    return { lat: parseFloat(llMatch[1]), lng: parseFloat(llMatch[2]) };
+  }
+
+  return null;
+}
 
 /** Reusable fallback search input */
 const FallbackSearchBar = ({
@@ -337,6 +422,37 @@ const FallbackSearchBar = ({
   </div>
 );
 
+/** Reusable paste location input */
+const PasteLocationBar = ({
+  pasteInput,
+  setPasteInput,
+  onPaste,
+}: {
+  pasteInput: string;
+  setPasteInput: (v: string) => void;
+  onPaste: () => void;
+}) => (
+  <div className="flex gap-2" dir="ltr">
+    <Input
+      placeholder="مثال: 24.7136, 46.6753 أو رابط خرائط قوقل"
+      value={pasteInput}
+      onChange={(e) => setPasteInput(e.target.value)}
+      onKeyDown={(e) => e.key === "Enter" && onPaste()}
+      className="flex-1 rounded-lg text-sm text-left"
+      dir="ltr"
+    />
+    <Button
+      size="sm"
+      onClick={onPaste}
+      disabled={!pasteInput.trim()}
+      className="rounded-lg gap-1.5"
+    >
+      <ClipboardPaste size={14} />
+      تحديد
+    </Button>
+  </div>
+);
+
 /** Reusable address display */
 const AddressDisplay = ({ address, onClear }: { address: string | null; onClear: () => void }) => {
   if (!address) return null;
@@ -345,6 +461,9 @@ const AddressDisplay = ({ address, onClear }: { address: string | null; onClear:
   }
   if (address === "فشل البحث") {
     return <p className="text-xs text-destructive">فشل البحث، حاول مرة أخرى</p>;
+  }
+  if (address.startsWith("لم يتم التعرف على")) {
+    return <p className="text-xs text-destructive">{address}</p>;
   }
   return (
     <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 rounded-lg px-3 py-2">
