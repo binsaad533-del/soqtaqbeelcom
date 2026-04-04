@@ -305,6 +305,58 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   );
 };
 
+/** Parse Google Maps URL or raw coordinates */
+function parseLocationInput(input: string): { lat: number; lng: number } | null {
+  const trimmed = input.trim();
+
+  // Try raw coordinates: "24.7136, 46.6753" or "24.7136 46.6753"
+  const coordMatch = trimmed.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
+  if (coordMatch) {
+    const lat = parseFloat(coordMatch[1]);
+    const lng = parseFloat(coordMatch[2]);
+    if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng };
+  }
+
+  // Try Google Maps URL patterns
+  // https://www.google.com/maps/@24.7136,46.6753,15z
+  const atMatch = trimmed.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (atMatch) {
+    return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]) };
+  }
+
+  // https://www.google.com/maps/place/.../@24.7136,46.6753
+  // https://maps.google.com/?q=24.7136,46.6753
+  const qMatch = trimmed.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (qMatch) {
+    return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
+  }
+
+  // https://maps.app.goo.gl or goo.gl/maps short links — can't resolve without redirect
+  // https://www.google.com/maps/place/24°42'49.0"N+46°40'31.1"E
+  const dmsMatch = trimmed.match(/(\d+)°(\d+)'([\d.]+)"([NS])\+?(\d+)°(\d+)'([\d.]+)"([EW])/);
+  if (dmsMatch) {
+    let lat = parseInt(dmsMatch[1]) + parseInt(dmsMatch[2]) / 60 + parseFloat(dmsMatch[3]) / 3600;
+    let lng = parseInt(dmsMatch[5]) + parseInt(dmsMatch[6]) / 60 + parseFloat(dmsMatch[7]) / 3600;
+    if (dmsMatch[4] === "S") lat = -lat;
+    if (dmsMatch[8] === "W") lng = -lng;
+    return { lat, lng };
+  }
+
+  // /place/ pattern with decimal coords
+  const placeMatch = trimmed.match(/\/place\/[^/]*\/(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (placeMatch) {
+    return { lat: parseFloat(placeMatch[1]), lng: parseFloat(placeMatch[2]) };
+  }
+
+  // ll= parameter
+  const llMatch = trimmed.match(/ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (llMatch) {
+    return { lat: parseFloat(llMatch[1]), lng: parseFloat(llMatch[2]) };
+  }
+
+  return null;
+}
+
 /** Reusable fallback search input */
 const FallbackSearchBar = ({
   manualSearch,
