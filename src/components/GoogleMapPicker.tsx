@@ -255,6 +255,28 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     onLocationChange(0, 0);
   };
 
+  const handlePasteLocation = () => {
+    const parsed = parseLocationInput(pasteInput);
+    if (!parsed) {
+      setSelectedAddress("لم يتم التعرف على الإحداثيات — جرب لصق رابط خرائط قوقل أو إحداثيات مثل: 24.7136, 46.6753");
+      return;
+    }
+    const { lat: pLat, lng: pLng } = parsed;
+    const nearest = findNearestCity(pLat, pLng);
+    const addr = `${nearest.name} (${pLat.toFixed(5)}, ${pLng.toFixed(5)})`;
+    setSelectedAddress(addr);
+    onLocationChange(pLat, pLng, addr, { city: nearest.name, address: addr });
+    setPasteInput("");
+
+    if (mapInstanceRef.current && markerRef.current) {
+      const pos = new google.maps.LatLng(pLat, pLng);
+      mapInstanceRef.current.setCenter(pos);
+      mapInstanceRef.current.setZoom(15);
+      markerRef.current.setPosition(pos);
+      markerRef.current.setVisible(true);
+    }
+  };
+
   // Pure fallback UI when maps completely failed
   if (error && !mapReady) {
     return (
@@ -262,8 +284,9 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         <div className="rounded-xl border border-border/50 bg-muted/30 p-5 space-y-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin size={16} className="text-primary" />
-            <span>حدد الموقع بالبحث</span>
+            <span>حدد الموقع بالبحث أو لصق الإحداثيات</span>
           </div>
+          <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} />
           <FallbackSearchBar
             manualSearch={manualSearch}
             setManualSearch={setManualSearch}
