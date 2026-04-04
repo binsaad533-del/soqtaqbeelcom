@@ -33,6 +33,7 @@ import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { getArabicDealType } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
 import ReportListingDialog from "@/components/ReportListingDialog";
+import { getOrderedPhotos } from "@/lib/photoOrdering";
 
 
 const ListingDetailsPage = () => {
