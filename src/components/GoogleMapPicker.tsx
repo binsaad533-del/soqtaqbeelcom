@@ -310,11 +310,20 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         <div ref={mapRef} className="w-full h-[280px]" />
       </div>
 
+      {/* Paste coordinates / Google Maps link */}
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2">
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <ClipboardPaste size={11} className="text-primary" />
+          <span>الصق رابط خرائط قوقل أو إحداثيات GPS:</span>
+        </div>
+        <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} />
+      </div>
+
       {/* Always show fallback search below the map */}
       <div className="rounded-xl border border-border/40 bg-muted/20 p-3 space-y-2">
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <Search size={11} />
-          <span>لا تظهر الخريطة؟ ابحث بالاسم:</span>
+          <span>أو ابحث بالاسم:</span>
         </div>
         <FallbackSearchBar
           manualSearch={manualSearch}
