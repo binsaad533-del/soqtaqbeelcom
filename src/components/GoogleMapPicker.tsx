@@ -300,7 +300,22 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   }
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-3", className)}>
+      {/* Paste coordinates / Google Maps link — PROMINENT at top */}
+      <div className="rounded-xl border-2 border-primary/50 bg-primary/10 p-4 space-y-2">
+        <div className="flex items-center gap-2 text-sm font-medium text-primary">
+          <ClipboardPaste size={16} />
+          <span>📍 الصق رابط خرائط قوقل أو إحداثيات GPS لتحديد الموقع بدقة</span>
+        </div>
+        <p className="text-[11px] text-muted-foreground leading-relaxed">
+          افتح خرائط قوقل → اضغط على الموقع → انسخ الرابط أو الإحداثيات والصقها هنا
+        </p>
+        <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} />
+      </div>
+
+      <AddressDisplay address={selectedAddress} onClear={clearLocation} />
+
+      {/* Map */}
       <div className="relative rounded-xl overflow-hidden border border-border/50">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-muted/50 backdrop-blur-sm">
@@ -310,16 +325,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         <div ref={mapRef} className="w-full h-[280px]" />
       </div>
 
-      {/* Paste coordinates / Google Maps link */}
-      <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2">
-        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <ClipboardPaste size={11} className="text-primary" />
-          <span>الصق رابط خرائط قوقل أو إحداثيات GPS:</span>
-        </div>
-        <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} />
-      </div>
-
-      {/* Always show fallback search below the map */}
+      {/* Fallback search below the map */}
       <div className="rounded-xl border border-border/40 bg-muted/20 p-3 space-y-2">
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <Search size={11} />
@@ -332,8 +338,6 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
           onSearch={handleFallbackSearch}
         />
       </div>
-
-      <AddressDisplay address={selectedAddress} onClear={clearLocation} />
     </div>
   );
 };
