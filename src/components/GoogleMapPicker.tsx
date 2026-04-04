@@ -422,6 +422,37 @@ const FallbackSearchBar = ({
   </div>
 );
 
+/** Reusable paste location input */
+const PasteLocationBar = ({
+  pasteInput,
+  setPasteInput,
+  onPaste,
+}: {
+  pasteInput: string;
+  setPasteInput: (v: string) => void;
+  onPaste: () => void;
+}) => (
+  <div className="flex gap-2" dir="ltr">
+    <Input
+      placeholder="مثال: 24.7136, 46.6753 أو رابط خرائط قوقل"
+      value={pasteInput}
+      onChange={(e) => setPasteInput(e.target.value)}
+      onKeyDown={(e) => e.key === "Enter" && onPaste()}
+      className="flex-1 rounded-lg text-sm text-left"
+      dir="ltr"
+    />
+    <Button
+      size="sm"
+      onClick={onPaste}
+      disabled={!pasteInput.trim()}
+      className="rounded-lg gap-1.5"
+    >
+      <ClipboardPaste size={14} />
+      تحديد
+    </Button>
+  </div>
+);
+
 /** Reusable address display */
 const AddressDisplay = ({ address, onClear }: { address: string | null; onClear: () => void }) => {
   if (!address) return null;
