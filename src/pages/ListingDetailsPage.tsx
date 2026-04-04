@@ -1,7 +1,7 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { safeJsonLd } from "@/lib/security";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users } from "lucide-react";
+import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users, ExternalLink } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
@@ -35,6 +35,67 @@ import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/com
 import ReportListingDialog from "@/components/ReportListingDialog";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
 
+
+type ListingDocumentItem = {
+  id: string;
+  label: string;
+  url?: string;
+  type?: string;
+};
+
+const normalizeListingDocuments = (documents: unknown[]): ListingDocumentItem[] => {
+  if (!Array.isArray(documents)) return [];
+
+  return documents.flatMap((doc, groupIndex) => {
+    if (typeof doc === "string") {
+      return [{ id: `legacy-${groupIndex}`, label: `مستند ${groupIndex + 1}`, url: doc }];
+    }
+
+    if (!doc || typeof doc !== "object") return [];
+
+    const record = doc as {
+      name?: string;
+      label?: string;
+      url?: string;
+      type?: string;
+      files?: unknown;
+      status?: string;
+    };
+
+    if (typeof record.url === "string") {
+      return [{
+        id: `single-${groupIndex}`,
+        label: record.name || record.label || record.type || `مستند ${groupIndex + 1}`,
+        url: record.url,
+        type: record.type,
+      }];
+    }
+
+    if (Array.isArray(record.files)) {
+      const files = record.files.filter((file): file is string => typeof file === "string" && file.length > 0);
+
+      return files.map((file, fileIndex) => ({
+        id: `group-${groupIndex}-${fileIndex}`,
+        label: files.length > 1
+          ? `${record.type || record.name || record.label || "مستند"} ${fileIndex + 1}`
+          : record.type || record.name || record.label || `مستند ${groupIndex + 1}`,
+        url: file,
+        type: record.type,
+      }));
+    }
+
+    if (record.name || record.label) {
+      return [{
+        id: `meta-${groupIndex}`,
+        label: record.name || record.label || `مستند ${groupIndex + 1}`,
+        url: undefined,
+        type: record.type,
+      }];
+    }
+
+    return [];
+  });
+};
 
 const ListingDetailsPage = () => {
   const { id } = useParams();
@@ -210,7 +271,7 @@ const ListingDetailsPage = () => {
 
   const photos = getOrderedPhotos(listing.photos as Record<string, string[]>);
   const inventory = (listing.inventory || []) as Array<{ name: string; qty: number; condition: string }>;
-  const documents = (listing.documents || []) as Array<{ name: string; status: string; url?: string }>;
+  const documents = normalizeListingDocuments(listing.documents || []);
   const isOwner = user?.id === listing.owner_id;
   const isSimulation = hasSimulationPhotos(listing.photos as Record<string, unknown>);
 
@@ -459,7 +520,7 @@ const ListingDetailsPage = () => {
                 )} />
               )}
 
-              {/* Documents — available on request */}
+              {/* Documents — hidden from public, visible to owner */}
               {documents.length > 0 && (
                 <div className="rounded-xl border border-border/40 bg-card p-4" dir="rtl">
                   <div className="flex items-center gap-2 mb-2">
@@ -468,21 +529,49 @@ const ListingDetailsPage = () => {
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
                     <Shield size={12} />
-                    <span>{documents.length} مستند متاح — يمكن الاطلاع عليها بعد بدء التفاوض</span>
+                    <span>
+                      {isOwner
+                        ? `${documents.length} مستند مرفوع — ظاهرة لك لأنك مالك الإعلان`
+                        : `${documents.length} مستند متاح — يمكن الاطلاع عليها بعد بدء التفاوض`}
+                    </span>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {documents.map((doc, i) => (
-                      <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted text-[11px] text-muted-foreground">
-                        <FileText size={10} />
-                        {doc.name}
-                      </span>
-                    ))}
-                  </div>
-                  {!isOwner && (
-                    <p className="mt-3 text-[11px] text-muted-foreground/70 flex items-center gap-1">
-                      <MessageCircle size={10} />
-                      ابدأ التفاوض للاطلاع على الوثائق الكاملة
-                    </p>
+
+                  {isOwner ? (
+                    <div className="space-y-2">
+                      {documents.map((doc) => (
+                        <a
+                          key={doc.id}
+                          href={doc.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/20 px-3 py-2 text-xs text-foreground transition-colors hover:bg-muted/40"
+                        >
+                          <div className="flex min-w-0 items-center gap-2">
+                            <FileText size={12} className="shrink-0 text-primary" />
+                            <span className="truncate">{doc.label}</span>
+                          </div>
+                          <span className="inline-flex items-center gap-1 text-primary shrink-0">
+                            فتح
+                            <ExternalLink size={12} />
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap gap-2">
+                        {documents.map((doc) => (
+                          <span key={doc.id} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted text-[11px] text-muted-foreground">
+                            <FileText size={10} />
+                            {doc.type || doc.label}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="mt-3 text-[11px] text-muted-foreground/70 flex items-center gap-1">
+                        <MessageCircle size={10} />
+                        ابدأ التفاوض للاطلاع على الوثائق الكاملة
+                      </p>
+                    </>
                   )}
                 </div>
               )}
