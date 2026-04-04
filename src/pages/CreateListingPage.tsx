@@ -442,7 +442,7 @@ const CreateListingPage = () => {
       const ext = f.name.split(".").pop()?.toLowerCase() || "";
       const isImage = f.type.startsWith("image/") || imageExts.includes(ext);
       if (isImage) {
-        if (imageFiles.length < 100) imageFiles.push(f);
+        if (imageFiles.length < 200) imageFiles.push(f);
       } else {
         if (docFiles.length < 50) docFiles.push(f);
       }
