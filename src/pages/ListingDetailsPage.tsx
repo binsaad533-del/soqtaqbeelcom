@@ -72,16 +72,16 @@ const normalizeListingDocuments = (documents: unknown[]): ListingDocumentItem[] 
     }
 
     if (Array.isArray(record.files)) {
-      return record.files
-        .filter((file): file is string => typeof file === "string" && file.length > 0)
-        .map((file, fileIndex) => ({
-          id: `group-${groupIndex}-${fileIndex}`,
-          label: record.files!.length > 1
-            ? `${record.type || record.name || record.label || "مستند"} ${fileIndex + 1}`
-            : record.type || record.name || record.label || `مستند ${groupIndex + 1}`,
-          url: file,
-          type: record.type,
-        }));
+      const files = record.files.filter((file): file is string => typeof file === "string" && file.length > 0);
+
+      return files.map((file, fileIndex) => ({
+        id: `group-${groupIndex}-${fileIndex}`,
+        label: files.length > 1
+          ? `${record.type || record.name || record.label || "مستند"} ${fileIndex + 1}`
+          : record.type || record.name || record.label || `مستند ${groupIndex + 1}`,
+        url: file,
+        type: record.type,
+      }));
     }
 
     if (record.name || record.label) {
