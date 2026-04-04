@@ -1233,7 +1233,7 @@ const CreateListingPage = () => {
                       </div>
                     </div>
                     <h3 className="text-sm font-semibold mb-1">ارفع كل الصور والمستندات دفعة واحدة</h3>
-                    <p className="text-xs text-muted-foreground mb-2">حتى 200 صورة و 50 مستند — اسحب وأفلت أو اضغط هنا</p>
+                    <p className="text-xs text-muted-foreground mb-2">حتى 200 صورة و 100 مستند — اسحب وأفلت أو اضغط هنا</p>
                     <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
                       <span className="flex items-center gap-1"><Camera size={11} /> صور المحل والمعدات</span>
                       <span className="flex items-center gap-1"><FileText size={11} /> عقود وسجلات ورخص</span>
