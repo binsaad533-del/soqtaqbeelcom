@@ -36,6 +36,67 @@ import ReportListingDialog from "@/components/ReportListingDialog";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
 
 
+type ListingDocumentItem = {
+  id: string;
+  label: string;
+  url?: string;
+  type?: string;
+};
+
+const normalizeListingDocuments = (documents: unknown[]): ListingDocumentItem[] => {
+  if (!Array.isArray(documents)) return [];
+
+  return documents.flatMap((doc, groupIndex) => {
+    if (typeof doc === "string") {
+      return [{ id: `legacy-${groupIndex}`, label: `مستند ${groupIndex + 1}`, url: doc }];
+    }
+
+    if (!doc || typeof doc !== "object") return [];
+
+    const record = doc as {
+      name?: string;
+      label?: string;
+      url?: string;
+      type?: string;
+      files?: unknown;
+      status?: string;
+    };
+
+    if (typeof record.url === "string") {
+      return [{
+        id: `single-${groupIndex}`,
+        label: record.name || record.label || record.type || `مستند ${groupIndex + 1}`,
+        url: record.url,
+        type: record.type,
+      }];
+    }
+
+    if (Array.isArray(record.files)) {
+      return record.files
+        .filter((file): file is string => typeof file === "string" && file.length > 0)
+        .map((file, fileIndex) => ({
+          id: `group-${groupIndex}-${fileIndex}`,
+          label: record.files!.length > 1
+            ? `${record.type || record.name || record.label || "مستند"} ${fileIndex + 1}`
+            : record.type || record.name || record.label || `مستند ${groupIndex + 1}`,
+          url: file,
+          type: record.type,
+        }));
+    }
+
+    if (record.name || record.label) {
+      return [{
+        id: `meta-${groupIndex}`,
+        label: record.name || record.label || `مستند ${groupIndex + 1}`,
+        url: undefined,
+        type: record.type,
+      }];
+    }
+
+    return [];
+  });
+};
+
 const ListingDetailsPage = () => {
   const { id } = useParams();
   useSEO({ title: "تفاصيل الإعلان", description: "عرض تفاصيل فرصة تقبيل على سوق تقبيل", canonical: `/listing/${id}` });
