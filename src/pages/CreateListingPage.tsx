@@ -638,6 +638,32 @@ const CreateListingPage = () => {
       setDedupActions((((data as { dedup_actions?: DedupAction[] }).dedup_actions) || []));
       setAnalyzed(true);
 
+      // Move document photos out of the gallery into a hidden group
+      const docPhotoIndices = (data as { document_photo_indices?: number[] }).document_photo_indices;
+      if (docPhotoIndices && docPhotoIndices.length > 0) {
+        const allPhotoUrlsFlat = Object.values(photos).flat();
+        const docPhotoUrls = new Set(docPhotoIndices.map(i => allPhotoUrlsFlat[i]).filter(Boolean));
+        
+        if (docPhotoUrls.size > 0) {
+          setPhotos(prev => {
+            const updated: Record<string, string[]> = {};
+            // Remove doc URLs from all groups
+            for (const [group, urls] of Object.entries(prev)) {
+              if (group === "document_photos") continue;
+              const filtered = urls.filter(u => !docPhotoUrls.has(u));
+              if (filtered.length > 0) updated[group] = filtered;
+            }
+            // Add hidden document_photos group
+            updated.document_photos = [...(prev.document_photos || []), ...Array.from(docPhotoUrls)];
+            // Save to DB
+            if (listingId) {
+              updateListing(listingId, { photos: updated } as never).catch(console.error);
+            }
+            return updated;
+          });
+        }
+      }
+
       // Auto-fill the AI-generated description
       const generatedDesc = (data as { generated_description?: string }).generated_description;
       if (generatedDesc && !sellerNote) {
