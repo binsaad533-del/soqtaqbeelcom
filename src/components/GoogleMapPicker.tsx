@@ -347,7 +347,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         <p className="text-[11px] text-muted-foreground leading-relaxed">
           افتح خرائط قوقل → اضغط على الموقع → انسخ الرابط أو الإحداثيات والصقها هنا
         </p>
-        <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} />
+        <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} loading={searching} />
       </div>
 
       <AddressDisplay address={selectedAddress} onClear={clearLocation} />
