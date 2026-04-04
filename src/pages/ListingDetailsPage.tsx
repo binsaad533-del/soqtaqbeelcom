@@ -33,6 +33,7 @@ import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import { getArabicDealType } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
 import ReportListingDialog from "@/components/ReportListingDialog";
+import { getOrderedPhotos } from "@/lib/photoOrdering";
 
 
 const ListingDetailsPage = () => {
@@ -207,7 +208,7 @@ const ListingDetailsPage = () => {
     );
   }
 
-  const photos = listing.photos ? Object.values(listing.photos).flat() as string[] : [];
+  const photos = getOrderedPhotos(listing.photos as Record<string, string[]>);
   const inventory = (listing.inventory || []) as Array<{ name: string; qty: number; condition: string }>;
   const documents = (listing.documents || []) as Array<{ name: string; status: string; url?: string }>;
   const isOwner = user?.id === listing.owner_id;
@@ -458,16 +459,32 @@ const ListingDetailsPage = () => {
                 )} />
               )}
 
-              {/* Documents */}
+              {/* Documents — available on request */}
               {documents.length > 0 && (
-                <CollapsibleList title="المستندات الداعمة" icon={<FileText size={16} strokeWidth={1.3} />} items={documents} threshold={5} renderItem={(doc, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
-                    <span className="text-sm">{doc.name}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-md ${doc.status === "مرفق" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                      {doc.status}
-                    </span>
+                <div className="rounded-xl border border-border/40 bg-card p-4" dir="rtl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FileText size={16} strokeWidth={1.3} className="text-primary" />
+                    <span className="text-sm font-medium text-foreground">المستندات والوثائق</span>
                   </div>
-                )} />
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                    <Shield size={12} />
+                    <span>{documents.length} مستند متاح — يمكن الاطلاع عليها بعد بدء التفاوض</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {documents.map((doc, i) => (
+                      <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted text-[11px] text-muted-foreground">
+                        <FileText size={10} />
+                        {doc.name}
+                      </span>
+                    ))}
+                  </div>
+                  {!isOwner && (
+                    <p className="mt-3 text-[11px] text-muted-foreground/70 flex items-center gap-1">
+                      <MessageCircle size={10} />
+                      ابدأ التفاوض للاطلاع على الوثائق الكاملة
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 

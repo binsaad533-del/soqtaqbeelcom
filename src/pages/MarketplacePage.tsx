@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, memo } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { calculateTransparency } from "@/lib/transparencyScore";
+import { getOrderedPhotos } from "@/lib/photoOrdering";
 import { Link } from "react-router-dom";
 import { type Listing } from "@/hooks/useListings";
 import { type Profile } from "@/hooks/useProfiles";
@@ -449,14 +450,17 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
 
       <Link to={`/listing/${listing.id}`}>
         <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center relative">
-          {listing.photos && Object.values(listing.photos).flat().length > 0 ? (
-            <>
-              <img src={(Object.values(listing.photos).flat() as string[])[0]} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
-              {hasSimulationPhotos(listing.photos as Record<string, unknown>) && <SimulationOverlay size="sm" />}
-            </>
-          ) : (
-            <Eye size={24} className="text-muted-foreground/30" strokeWidth={1} />
-          )}
+          {(() => {
+            const orderedPhotos = getOrderedPhotos(listing.photos as Record<string, string[]>);
+            return orderedPhotos.length > 0 ? (
+              <>
+                <img src={orderedPhotos[0]} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                {hasSimulationPhotos(listing.photos as Record<string, unknown>) && <SimulationOverlay size="sm" />}
+              </>
+            ) : (
+              <Eye size={24} className="text-muted-foreground/30" strokeWidth={1} />
+            );
+          })()}
         </div>
         <div className="p-4">
           {seller && (
