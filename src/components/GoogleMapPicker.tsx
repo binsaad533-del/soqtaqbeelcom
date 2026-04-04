@@ -323,7 +323,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
             <MapPin size={16} className="text-primary" />
             <span>حدد الموقع بالبحث أو لصق الإحداثيات</span>
           </div>
-          <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} />
+          <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} loading={searching} />
           <FallbackSearchBar
             manualSearch={manualSearch}
             setManualSearch={setManualSearch}
