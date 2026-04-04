@@ -255,13 +255,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     onLocationChange(0, 0);
   };
 
-  const handlePasteLocation = () => {
-    const parsed = parseLocationInput(pasteInput);
-    if (!parsed) {
-      setSelectedAddress("لم يتم التعرف على الإحداثيات — جرب لصق رابط خرائط قوقل أو إحداثيات مثل: 24.7136, 46.6753");
-      return;
-    }
-    const { lat: pLat, lng: pLng } = parsed;
+  const applyParsedLocation = (pLat: number, pLng: number) => {
     const nearest = findNearestCity(pLat, pLng);
     const addr = `${nearest.name} (${pLat.toFixed(5)}, ${pLng.toFixed(5)})`;
     setSelectedAddress(addr);
@@ -275,6 +269,49 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
       markerRef.current.setPosition(pos);
       markerRef.current.setVisible(true);
     }
+  };
+
+  const isShortLink = (input: string) =>
+    /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps)\//i.test(input.trim());
+
+  const handlePasteLocation = async () => {
+    const trimmed = pasteInput.trim();
+    if (!trimmed) return;
+
+    // Try direct parse first
+    const parsed = parseLocationInput(trimmed);
+    if (parsed) {
+      applyParsedLocation(parsed.lat, parsed.lng);
+      return;
+    }
+
+    // If it's a short link, resolve it server-side
+    if (isShortLink(trimmed)) {
+      setSearching(true);
+      setSelectedAddress("جارٍ تحليل الرابط...");
+      try {
+        const { data, error: fnErr } = await supabase.functions.invoke("resolve-maps-url", {
+          body: { url: trimmed },
+        });
+        if (fnErr || !data?.finalUrl) {
+          setSelectedAddress("فشل تحليل الرابط — جرب لصق الإحداثيات مباشرة");
+          setSearching(false);
+          return;
+        }
+        const resolved = parseLocationInput(data.finalUrl);
+        if (resolved) {
+          applyParsedLocation(resolved.lat, resolved.lng);
+        } else {
+          setSelectedAddress("لم يتم العثور على إحداثيات في الرابط — جرب نسخ الإحداثيات من خرائط قوقل");
+        }
+      } catch {
+        setSelectedAddress("فشل تحليل الرابط — جرب لصق الإحداثيات مباشرة");
+      }
+      setSearching(false);
+      return;
+    }
+
+    setSelectedAddress("لم يتم التعرف على الإحداثيات — جرب لصق رابط خرائط قوقل أو إحداثيات مثل: 24.7136, 46.6753");
   };
 
   // Pure fallback UI when maps completely failed
