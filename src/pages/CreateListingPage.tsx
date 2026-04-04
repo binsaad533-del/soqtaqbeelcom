@@ -442,7 +442,7 @@ const CreateListingPage = () => {
       const ext = f.name.split(".").pop()?.toLowerCase() || "";
       const isImage = f.type.startsWith("image/") || imageExts.includes(ext);
       if (isImage) {
-        if (imageFiles.length < 100) imageFiles.push(f);
+        if (imageFiles.length < 200) imageFiles.push(f);
       } else {
         if (docFiles.length < 50) docFiles.push(f);
       }
@@ -570,7 +570,7 @@ const CreateListingPage = () => {
       return;
     }
 
-    const MAX_ANALYSIS_IMAGES = 100;
+    const MAX_ANALYSIS_IMAGES = 200;
     const totalImages = allPhotoUrlsForAnalysis.length;
     const limitedUrls = allPhotoUrlsForAnalysis.slice(0, MAX_ANALYSIS_IMAGES);
 
@@ -1233,7 +1233,7 @@ const CreateListingPage = () => {
                       </div>
                     </div>
                     <h3 className="text-sm font-semibold mb-1">ارفع كل الصور والمستندات دفعة واحدة</h3>
-                    <p className="text-xs text-muted-foreground mb-2">حتى 100 صورة و 50 مستند — اسحب وأفلت أو اضغط هنا</p>
+                    <p className="text-xs text-muted-foreground mb-2">حتى 200 صورة و 50 مستند — اسحب وأفلت أو اضغط هنا</p>
                     <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
                       <span className="flex items-center gap-1"><Camera size={11} /> صور المحل والمعدات</span>
                       <span className="flex items-center gap-1"><FileText size={11} /> عقود وسجلات ورخص</span>
@@ -1496,15 +1496,15 @@ const CreateListingPage = () => {
                         </div>
                       ) : (
                         <>
-                          {allPhotoUrls.length > 100 && (
+                          {allPhotoUrls.length > 200 && (
                             <div className="bg-warning/10 border border-warning/30 rounded-xl px-4 py-2.5 flex items-start gap-2 mb-4 max-w-sm text-right">
                               <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
-                              <p className="text-xs text-warning">لديك {allPhotoUrls.length} صورة — سيتم تحليل أول 100 صورة فقط. الصور المتبقية ستُحفظ لكن لن تُحلل.</p>
+                              <p className="text-xs text-warning">لديك {allPhotoUrls.length} صورة — سيتم تحليل أول 200 صورة فقط. الصور المتبقية ستُحفظ لكن لن تُحلل.</p>
                             </div>
                           )}
                           <Button onClick={handleAnalyze} className="gradient-primary text-primary-foreground rounded-xl">
                             <Eye size={16} strokeWidth={1.5} />
-                            ابدأ التحليل الذكي ({Math.min(allPhotoUrls.length, 100)} من {allPhotoUrls.length} صورة)
+                            ابدأ التحليل الذكي ({Math.min(allPhotoUrls.length, 200)} من {allPhotoUrls.length} صورة)
                           </Button>
                         </>
                       )}
