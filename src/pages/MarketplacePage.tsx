@@ -450,10 +450,14 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
 
       <Link to={`/listing/${listing.id}`}>
         <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center relative">
-          {listing.photos && Object.values(listing.photos).flat().length > 0 ? (
-            <>
-              <img src={(Object.values(listing.photos).flat() as string[])[0]} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
-              {hasSimulationPhotos(listing.photos as Record<string, unknown>) && <SimulationOverlay size="sm" />}
+          {(() => {
+            const orderedPhotos = getOrderedPhotos(listing.photos as Record<string, string[]>);
+            return orderedPhotos.length > 0 ? (
+              <>
+                <img src={orderedPhotos[0]} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                {hasSimulationPhotos(listing.photos as Record<string, unknown>) && <SimulationOverlay size="sm" />}
+              </>
+            ) : (
             </>
           ) : (
             <Eye size={24} className="text-muted-foreground/30" strokeWidth={1} />
