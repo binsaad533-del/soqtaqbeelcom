@@ -255,13 +255,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     onLocationChange(0, 0);
   };
 
-  const handlePasteLocation = () => {
-    const parsed = parseLocationInput(pasteInput);
-    if (!parsed) {
-      setSelectedAddress("لم يتم التعرف على الإحداثيات — جرب لصق رابط خرائط قوقل أو إحداثيات مثل: 24.7136, 46.6753");
-      return;
-    }
-    const { lat: pLat, lng: pLng } = parsed;
+  const applyParsedLocation = (pLat: number, pLng: number) => {
     const nearest = findNearestCity(pLat, pLng);
     const addr = `${nearest.name} (${pLat.toFixed(5)}, ${pLng.toFixed(5)})`;
     setSelectedAddress(addr);
@@ -277,6 +271,49 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     }
   };
 
+  const isShortLink = (input: string) =>
+    /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps)\//i.test(input.trim());
+
+  const handlePasteLocation = async () => {
+    const trimmed = pasteInput.trim();
+    if (!trimmed) return;
+
+    // Try direct parse first
+    const parsed = parseLocationInput(trimmed);
+    if (parsed) {
+      applyParsedLocation(parsed.lat, parsed.lng);
+      return;
+    }
+
+    // If it's a short link, resolve it server-side
+    if (isShortLink(trimmed)) {
+      setSearching(true);
+      setSelectedAddress("جارٍ تحليل الرابط...");
+      try {
+        const { data, error: fnErr } = await supabase.functions.invoke("resolve-maps-url", {
+          body: { url: trimmed },
+        });
+        if (fnErr || !data?.finalUrl) {
+          setSelectedAddress("فشل تحليل الرابط — جرب لصق الإحداثيات مباشرة");
+          setSearching(false);
+          return;
+        }
+        const resolved = parseLocationInput(data.finalUrl);
+        if (resolved) {
+          applyParsedLocation(resolved.lat, resolved.lng);
+        } else {
+          setSelectedAddress("لم يتم العثور على إحداثيات في الرابط — جرب نسخ الإحداثيات من خرائط قوقل");
+        }
+      } catch {
+        setSelectedAddress("فشل تحليل الرابط — جرب لصق الإحداثيات مباشرة");
+      }
+      setSearching(false);
+      return;
+    }
+
+    setSelectedAddress("لم يتم التعرف على الإحداثيات — جرب لصق رابط خرائط قوقل أو إحداثيات مثل: 24.7136, 46.6753");
+  };
+
   // Pure fallback UI when maps completely failed
   if (error && !mapReady) {
     return (
@@ -286,7 +323,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
             <MapPin size={16} className="text-primary" />
             <span>حدد الموقع بالبحث أو لصق الإحداثيات</span>
           </div>
-          <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} />
+          <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} loading={searching} />
           <FallbackSearchBar
             manualSearch={manualSearch}
             setManualSearch={setManualSearch}
@@ -310,7 +347,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         <p className="text-[11px] text-muted-foreground leading-relaxed">
           افتح خرائط قوقل → اضغط على الموقع → انسخ الرابط أو الإحداثيات والصقها هنا
         </p>
-        <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} />
+        <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} loading={searching} />
       </div>
 
       <AddressDisplay address={selectedAddress} onClear={clearLocation} />
@@ -431,10 +468,12 @@ const PasteLocationBar = ({
   pasteInput,
   setPasteInput,
   onPaste,
+  loading: pasteLoading,
 }: {
   pasteInput: string;
   setPasteInput: (v: string) => void;
   onPaste: () => void;
+  loading?: boolean;
 }) => (
   <div className="flex gap-2" dir="ltr">
     <Input
@@ -448,10 +487,10 @@ const PasteLocationBar = ({
     <Button
       size="sm"
       onClick={onPaste}
-      disabled={!pasteInput.trim()}
+      disabled={!pasteInput.trim() || pasteLoading}
       className="rounded-lg gap-1.5"
     >
-      <ClipboardPaste size={14} />
+      {pasteLoading ? <Loader2 size={14} className="animate-spin" /> : <ClipboardPaste size={14} />}
       تحديد
     </Button>
   </div>
