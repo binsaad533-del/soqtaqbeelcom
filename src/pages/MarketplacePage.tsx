@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, memo } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { calculateTransparency } from "@/lib/transparencyScore";
+import { getOrderedPhotos } from "@/lib/photoOrdering";
 import { Link } from "react-router-dom";
 import { type Listing } from "@/hooks/useListings";
 import { type Profile } from "@/hooks/useProfiles";
