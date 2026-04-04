@@ -271,7 +271,7 @@ const ListingDetailsPage = () => {
 
   const photos = getOrderedPhotos(listing.photos as Record<string, string[]>);
   const inventory = (listing.inventory || []) as Array<{ name: string; qty: number; condition: string }>;
-  const documents = (listing.documents || []) as Array<{ name: string; status: string; url?: string }>;
+  const documents = normalizeListingDocuments(listing.documents || []);
   const isOwner = user?.id === listing.owner_id;
   const isSimulation = hasSimulationPhotos(listing.photos as Record<string, unknown>);
 
