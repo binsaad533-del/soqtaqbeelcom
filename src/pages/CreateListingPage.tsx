@@ -444,7 +444,7 @@ const CreateListingPage = () => {
       if (isImage) {
         if (imageFiles.length < 200) imageFiles.push(f);
       } else {
-        if (docFiles.length < 50) docFiles.push(f);
+        if (docFiles.length < 100) docFiles.push(f);
       }
     }
 
