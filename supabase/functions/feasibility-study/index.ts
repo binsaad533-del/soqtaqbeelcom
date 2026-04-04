@@ -283,6 +283,8 @@ serve(async (req) => {
     }
 
     const userPrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors);
+    const documentUrls = extractDocumentUrls(listing);
+    const userContent = buildMultimodalContent(userPrompt, documentUrls);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -295,7 +297,7 @@ serve(async (req) => {
         temperature: 0.2,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userPrompt },
+          { role: "user", content: userContent },
         ],
         tools: [
           {
