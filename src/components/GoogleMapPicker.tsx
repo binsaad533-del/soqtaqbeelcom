@@ -462,6 +462,9 @@ const AddressDisplay = ({ address, onClear }: { address: string | null; onClear:
   if (address === "فشل البحث") {
     return <p className="text-xs text-destructive">فشل البحث، حاول مرة أخرى</p>;
   }
+  if (address.startsWith("لم يتم التعرف على")) {
+    return <p className="text-xs text-destructive">{address}</p>;
+  }
   return (
     <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 rounded-lg px-3 py-2">
       <MapPin size={12} className="text-primary shrink-0" />
