@@ -428,6 +428,18 @@ function parseLocationInput(input: string): { lat: number; lng: number } | null 
     return { lat: parseFloat(llMatch[1]), lng: parseFloat(llMatch[2]) };
   }
 
+  // Google internal !3dLAT!4dLNG (used in directions, place, and share URLs)
+  const bangMatch = trimmed.match(/!3d(-?\d+\.?\d+)!4d(-?\d+\.?\d+)/);
+  if (bangMatch) {
+    return { lat: parseFloat(bangMatch[1]), lng: parseFloat(bangMatch[2]) };
+  }
+
+  // /dir/LAT,LNG/ pattern (Google directions start point)
+  const dirMatch = trimmed.match(/\/dir\/(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (dirMatch) {
+    return { lat: parseFloat(dirMatch[1]), lng: parseFloat(dirMatch[2]) };
+  }
+
   return null;
 }
 
