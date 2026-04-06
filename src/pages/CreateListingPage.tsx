@@ -439,7 +439,12 @@ const CreateListingPage = () => {
         toast.error(validation.error);
         continue;
       }
-      const result = await uploadFile(id, file, `docs/${activeDocType}`);
+      // Sanitize folder name: replace Arabic/non-ASCII chars with a safe slug
+      const safeFolder = activeDocType
+        .replace(/[^a-zA-Z0-9_-]/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_|_$/g, "") || "general";
+      const result = await uploadFile(id, file, `docs/${safeFolder}`);
       if (result.url) {
         urls.push(result.url);
       } else {
