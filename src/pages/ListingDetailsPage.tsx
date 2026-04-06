@@ -103,6 +103,7 @@ const ListingDetailsPage = () => {
   useSEO({ title: "تفاصيل الإعلان", description: "عرض تفاصيل فرصة تقبيل على سوق تقبيل", canonical: `/listing/${id}` });
   const navigate = useNavigate();
   const { user, role } = useAuthContext();
+  const analysisCache = useAnalysisCache(id);
   const { recordView, toggleLike, getLikesAndViews } = useListingSocial();
   const { getListing } = useListings();
   const { createDeal, getMyDeals } = useDeals();
