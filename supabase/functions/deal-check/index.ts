@@ -265,8 +265,8 @@ function buildConsistencyRules(mode: AnalysisMode): string {
 - عند الشك، قدّم حكماً محافظاً وثابتاً يستند إلى الأدلة`; 
 }
 
-function buildSystemPrompt(perspective: AnalysisPerspective, mode: AnalysisMode, sellerName?: string): string {
-  const perspectiveBlock = perspective === "seller" ? buildSellerPerspective(sellerName) : BUYER_PERSPECTIVE;
+function buildSystemPrompt(perspective: AnalysisPerspective, mode: AnalysisMode): string {
+  const perspectiveBlock = perspective === "seller" ? buildSellerPerspective() : BUYER_PERSPECTIVE;
 
   return `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية دقيقة وثابتة لكل صفقة.
 
