@@ -520,7 +520,7 @@ serve(async (req) => {
 
     const normalizedListing = normalizeListingForAnalysis(listing);
     const documentUrls = extractDocumentUrls(listing);
-    const inputSignature = await createInputSignature(normalizedListing, perspective, sellerName);
+    const inputSignature = await createInputSignature(normalizedListing, perspective);
     const userPrompt = buildAnalysisPrompt(normalizedListing, mode, previousAnalysis, inputSignature);
     const userContent = buildMultimodalContent(userPrompt, documentUrls);
 
