@@ -85,9 +85,9 @@ const CONFIDENCE_BADGE: Record<string, { bg: string; text: string }> = {
 };
 
 const SOURCE_LABELS: Record<string, { icon: typeof ImageIcon; label: string }> = {
-  images: { icon: ImageIcon, label: "من الصور" },
-  files: { icon: FileText, label: "من المستندات" },
-  "images+files": { icon: Package, label: "صور + مستندات" },
+  image: { icon: ImageIcon, label: "من الصور" },
+  file: { icon: FileText, label: "من المستندات" },
+  both: { icon: Package, label: "صور + مستندات" },
 };
 
 const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
