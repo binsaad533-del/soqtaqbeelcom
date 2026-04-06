@@ -108,6 +108,31 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     }
   }, [isStale, analysis]);
 
+  const detectAssets = async (): Promise<any> => {
+    if (!listing?.photos) return null;
+    // Get all photo URLs
+    const photos = listing.photos as Record<string, string[]>;
+    const allUrls = Object.values(photos).flat().filter((u: any): u is string => typeof u === "string" && u.startsWith("http"));
+    if (allUrls.length === 0) return null;
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("detect-assets", {
+        body: { photoUrls: allUrls, businessActivity: listing.business_activity || listing.category },
+      });
+      if (fnError || !data?.success) return null;
+      // Save to DB
+      if (listing.id) {
+        await supabase
+          .from("listings")
+          .update({ ai_detected_assets: data.detected as any })
+          .eq("id", listing.id);
+      }
+      return data.detected;
+    } catch {
+      return null;
+    }
+  };
+
   const runDealCheck = async (background = false) => {
     if (!background) {
       setLoading(true);
@@ -118,8 +143,16 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     setError("");
 
     try {
+      // Step 1: Detect assets from images if not already detected
+      let detectedAssets = listing?.ai_detected_assets;
+      if (!detectedAssets && listing?.photos) {
+        detectedAssets = await detectAssets();
+      }
+
+      // Step 2: Run deal check with detected assets included
+      const listingWithAssets = { ...listing, ai_detected_assets: detectedAssets };
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: { listing, perspective: "buyer" },
+        body: { listing: listingWithAssets, perspective: "buyer" },
       });
 
       if (fnError) throw new Error(fnError.message);
