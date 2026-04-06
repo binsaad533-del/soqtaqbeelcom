@@ -632,10 +632,30 @@ serve(async (req) => {
     // --- COMBINE ---
     const { combined, confidence } = combineResults(imageResult, fileResult);
 
+    // --- VALUATION ---
+    let priceAnalysis: any = null;
+    const combinedAssets = combined?.assets || [];
+    if (combinedAssets.length > 0) {
+      const valuationResult = await valuateAssets(
+        combinedAssets,
+        activity,
+        typeof dealPrice === "number" ? dealPrice : null,
+        LOVABLE_API_KEY
+      );
+      if (valuationResult) {
+        priceAnalysis = buildPriceAnalysis(
+          combinedAssets,
+          valuationResult,
+          typeof dealPrice === "number" ? dealPrice : null
+        );
+      }
+    }
+
     const output = {
       images: imageResult,
       files: fileResult,
       combined: { ...combined, confidence },
+      priceAnalysis,
       detectedAt: new Date().toISOString(),
     };
 
