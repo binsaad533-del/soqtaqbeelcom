@@ -66,6 +66,7 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
       }
       if (data.ai_analysis_updated_at) setAnalysisUpdatedAt(data.ai_analysis_updated_at as string);
       if (data.ai_price_analysis) setPriceAnalysis(data.ai_price_analysis);
+      if (data.ai_trust_score) setTrustScore(data.ai_trust_score);
 
       if (data.ai_analysis_cache && typeof data.ai_analysis_cache === "object") {
         const c = data.ai_analysis_cache as any;
