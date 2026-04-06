@@ -97,6 +97,19 @@ const CreateListingPage = () => {
   const [dedupActions, setDedupActions] = useState<DedupAction[]>([]);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, string[]>>({});
   const [listingId, setListingId] = useState<string | null>(null);
+
+  // Per-file upload tracking
+  interface FileUploadStatus {
+    id: string;
+    name: string;
+    size: number;
+    type: "image" | "document";
+    status: "uploading" | "uploaded" | "failed";
+    error?: string;
+    url?: string;
+    previewUrl?: string;
+  }
+  const [fileStatuses, setFileStatuses] = useState<FileUploadStatus[]>([]);
   const [saving, setSaving] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [locationLat, setLocationLat] = useState<number | null>(null);
