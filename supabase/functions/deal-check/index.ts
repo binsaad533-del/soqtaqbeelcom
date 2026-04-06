@@ -467,24 +467,34 @@ function buildAnalysisPrompt(listing: any, mode: AnalysisMode, previousAnalysis:
     });
   }
 
-  // Include AI-detected assets from images
-  if (scope.analyzeFields.includes("assets") && listing.ai_detected_assets) {
-    const detected = listing.ai_detected_assets;
-    if (Array.isArray(detected.assets) && detected.assets.length > 0) {
-      sections.push("\n## أصول مكتشفة تلقائياً من الصور (تم التعرف عليها بالذكاء الاصطناعي):");
-      sections.push(`⚠️ مستوى الثقة: ${detected.confidence || "متوسط"} — هذه أصول تم اكتشافها من الصور وليست موثقة رسمياً`);
-      sections.push(`تم تحليل ${detected.imagesAnalyzed || "عدة"} صورة`);
-      for (const asset of detected.assets) {
+  // Include AI-detected assets (combined from images + files)
+  if (scope.analyzeFields.includes("assets")) {
+    const combined = listing.ai_assets_combined || listing.ai_detected_assets;
+    if (combined && Array.isArray(combined.assets) && combined.assets.length > 0) {
+      sections.push("\n## أصول مكتشفة تلقائياً (ذكاء اصطناعي — صور + مستندات):");
+      sections.push(`⚠️ مستوى الثقة: ${combined.confidence || "متوسط"}`);
+      
+      const imgAssets = listing.ai_detected_assets_images;
+      const fileAssets = listing.ai_detected_assets_files;
+      if (imgAssets?.imagesAnalyzed) sections.push(`تم تحليل ${imgAssets.imagesAnalyzed} صورة`);
+      if (fileAssets?.assets?.length) sections.push(`تم استخراج ${fileAssets.assets.length} عنصر من المستندات`);
+      
+      for (const asset of combined.assets) {
+        const sourceLabel = asset.source === "files" ? "(من المستندات)" : asset.source === "images+files" ? "(صور + مستندات)" : "(من الصور)";
         const parts = [
           asset.name,
           asset.quantity > 1 ? `${asset.quantity}x` : null,
           asset.condition ? `حالة: ${asset.condition}` : null,
+          sourceLabel,
           asset.details || null,
         ].filter(Boolean).join(" — ");
         sections.push(`- ${parts}`);
       }
-      sections.push(`\n### ملخص الأصول المكتشفة: ${detected.summary}`);
-      sections.push("⚠️ لا تقل 'الأصول غير معروفة' — بل قل 'تم اكتشاف أصول من الصور لكنها غير موثقة رسمياً بجرد مفصل'");
+      sections.push(`\n### ملخص: ${combined.summary}`);
+      sections.push("⚠️ لا تقل 'الأصول غير معروفة' — بل قل 'تم اكتشاف أصول من الصور والمستندات لكنها غير موثقة رسمياً بجرد مفصل'");
+      if (fileAssets?.financialInfo) {
+        sections.push(`\n### معلومات مالية مستخرجة من المستندات:\n${fileAssets.financialInfo}`);
+      }
     }
   }
 

@@ -47,6 +47,10 @@ export interface Listing {
   ai_structure_validation: any | null;
   ai_analysis_cache: any | null;
   ai_detected_assets: any | null;
+  ai_detected_assets_images: any | null;
+  ai_detected_assets_files: any | null;
+  ai_assets_combined: any | null;
+  ai_analysis_updated_at: string | null;
   deleted_at: string | null;
   deleted_by: string | null;
   location_lat: number | null;

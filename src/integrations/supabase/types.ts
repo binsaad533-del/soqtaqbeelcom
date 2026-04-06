@@ -967,7 +967,11 @@ export type Database = {
       listings: {
         Row: {
           ai_analysis_cache: Json | null
+          ai_analysis_updated_at: string | null
+          ai_assets_combined: Json | null
           ai_detected_assets: Json | null
+          ai_detected_assets_files: Json | null
+          ai_detected_assets_images: Json | null
           ai_rating: string | null
           ai_structure_validation: Json | null
           ai_summary: string | null
@@ -1014,7 +1018,11 @@ export type Database = {
         }
         Insert: {
           ai_analysis_cache?: Json | null
+          ai_analysis_updated_at?: string | null
+          ai_assets_combined?: Json | null
           ai_detected_assets?: Json | null
+          ai_detected_assets_files?: Json | null
+          ai_detected_assets_images?: Json | null
           ai_rating?: string | null
           ai_structure_validation?: Json | null
           ai_summary?: string | null
@@ -1061,7 +1069,11 @@ export type Database = {
         }
         Update: {
           ai_analysis_cache?: Json | null
+          ai_analysis_updated_at?: string | null
+          ai_assets_combined?: Json | null
           ai_detected_assets?: Json | null
+          ai_detected_assets_files?: Json | null
+          ai_detected_assets_images?: Json | null
           ai_rating?: string | null
           ai_structure_validation?: Json | null
           ai_summary?: string | null
