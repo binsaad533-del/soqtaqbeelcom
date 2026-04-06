@@ -384,8 +384,12 @@ const CreateListingPage = () => {
             }));
           }
 
-          const url = await uploadFile(id, preparedFile, `photos/${group}`);
-          if (url) uploadedUrls.push(url);
+          const result = await uploadFile(id, preparedFile, `photos/${group}`);
+          if (result.url) {
+            uploadedUrls.push(result.url);
+          } else {
+            toast.error(`${originalFile.name}: ${result.error || "فشل الرفع"}`);
+          }
         } catch (error) {
           console.error("photo preparation failed", error);
           toast.error(`تعذّر تجهيز الصورة ${originalFile.name}`);
