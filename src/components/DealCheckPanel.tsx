@@ -3,7 +3,7 @@ import {
   ShieldCheck, AlertTriangle, TrendingUp, MessageCircle,
   ChevronDown, ChevronUp, MapPin, BarChart3, Briefcase, CheckCircle2,
   FileQuestion, Target, Loader2, Activity, ShoppingCart, Store,
-  RefreshCw, Clock, Package, FileText, ImageIcon, DollarSign, ArrowDownRight, ArrowUpRight, Equal
+  RefreshCw, Clock, Package, FileText, ImageIcon, DollarSign, ArrowDownRight, ArrowUpRight, Equal, Star
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
@@ -94,7 +94,8 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const {
     cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing,
     assetsCombined, detectedAssetsImages, detectedAssetsFiles, analysisUpdatedAt, saveDetectedAssets,
-    priceAnalysis, savePriceAnalysis
+    priceAnalysis, savePriceAnalysis,
+    trustScore, saveTrustScore
   } = analysisCache;
 
   const [open, setOpen] = useState(!!cachedDealCheck);
@@ -150,6 +151,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           fileUrls,
           businessActivity: listing.business_activity || listing.category,
           dealPrice: listing.price || null,
+          listingData: listing,
         },
       });
       if (fnError || !data?.success) return null;
@@ -160,6 +162,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
       // Save price analysis if returned
       if (detected.priceAnalysis) {
         await savePriceAnalysis(detected.priceAnalysis);
+      }
+
+      // Save trust score if returned
+      if (detected.trustScore) {
+        await saveTrustScore(detected.trustScore);
       }
 
       return detected.combined;
@@ -331,6 +338,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                 </div>
                 <p className={cn("text-lg font-medium", ratingStyle.text)}>{analysis.rating}</p>
               </div>
+
+              {/* Trust Score Section */}
+              {trustScore && (
+                <TrustScoreSection trustScore={trustScore} />
+              )}
 
               {/* Recommendation */}
               <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
@@ -612,6 +624,118 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               </div>
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const TRUST_LEVEL_CONFIG: Record<string, { bg: string; text: string; border: string; barColor: string }> = {
+  "ممتاز": { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", barColor: "bg-emerald-500" },
+  "جيد جداً": { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200", barColor: "bg-blue-500" },
+  "جيد": { bg: "bg-sky-50", text: "text-sky-700", border: "border-sky-200", barColor: "bg-sky-500" },
+  "متوسط": { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", barColor: "bg-amber-500" },
+  "ضعيف": { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", barColor: "bg-red-500" },
+};
+
+const FACTOR_LABELS: Record<string, string> = {
+  data_completeness: "اكتمال البيانات",
+  asset_verification: "التحقق من الأصول",
+  price_logic: "منطقية السعر",
+  legal_clarity: "الوضوح القانوني",
+  media_quality: "جودة الوسائط",
+};
+
+const FACTOR_WEIGHTS: Record<string, number> = {
+  data_completeness: 20,
+  asset_verification: 25,
+  price_logic: 20,
+  legal_clarity: 20,
+  media_quality: 15,
+};
+
+const TrustScoreSection = ({ trustScore }: { trustScore: any }) => {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const levelStyle = TRUST_LEVEL_CONFIG[trustScore.level] || TRUST_LEVEL_CONFIG["متوسط"];
+  const scorePercent = Math.min(100, (trustScore.trust_score / 10) * 100);
+
+  return (
+    <div className={cn("rounded-xl p-4 border", levelStyle.bg, levelStyle.border)}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Star size={16} strokeWidth={1.3} className={levelStyle.text} />
+          <span className={cn("text-sm font-medium", levelStyle.text)}>مؤشر موثوقية الصفقة</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={cn("text-lg font-bold", levelStyle.text)}>
+            {trustScore.trust_score} / 10
+          </span>
+          <span className={cn("text-[10px] px-2 py-0.5 rounded-md font-medium", levelStyle.bg, levelStyle.text, levelStyle.border, "border")}>
+            {trustScore.level}
+          </span>
+        </div>
+      </div>
+
+      {/* Score bar */}
+      <div className="w-full h-2 rounded-full bg-background/60 mb-3">
+        <div className={cn("h-2 rounded-full transition-all", levelStyle.barColor)} style={{ width: `${scorePercent}%` }} />
+      </div>
+
+      <p className="text-sm leading-relaxed mb-3">{trustScore.summary}</p>
+
+      {/* Strengths / Weaknesses / Warnings */}
+      {trustScore.strengths?.length > 0 && (
+        <div className="mb-2">
+          <div className="text-[10px] font-medium text-emerald-700 mb-1">نقاط القوة:</div>
+          <div className="flex flex-wrap gap-1">
+            {trustScore.strengths.map((s: string, i: number) => (
+              <span key={i} className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md">✓ {s}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {trustScore.weaknesses?.length > 0 && (
+        <div className="mb-2">
+          <div className="text-[10px] font-medium text-amber-700 mb-1">نقاط الضعف:</div>
+          <div className="flex flex-wrap gap-1">
+            {trustScore.weaknesses.map((w: string, i: number) => (
+              <span key={i} className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md">• {w}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {trustScore.warnings?.length > 0 && (
+        <div className="mb-2">
+          <div className="text-[10px] font-medium text-red-700 mb-1">تحذيرات:</div>
+          <div className="flex flex-wrap gap-1">
+            {trustScore.warnings.map((w: string, i: number) => (
+              <span key={i} className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-md">⚠ {w}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Factor breakdown toggle */}
+      {trustScore.factors && (
+        <button onClick={() => setDetailsOpen(!detailsOpen)} className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1 mt-2">
+          {detailsOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+          تفصيل المعايير
+        </button>
+      )}
+      {detailsOpen && trustScore.factors && (
+        <div className="mt-2 space-y-1.5">
+          {Object.entries(trustScore.factors).map(([key, value]) => (
+            <div key={key} className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground w-24 shrink-0">{FACTOR_LABELS[key] || key} ({FACTOR_WEIGHTS[key]}%)</span>
+              <div className="flex-1 h-1.5 rounded-full bg-background/60">
+                <div className={cn("h-1.5 rounded-full",
+                  (value as number) >= 7 ? "bg-emerald-500" :
+                  (value as number) >= 5 ? "bg-amber-500" : "bg-red-500"
+                )} style={{ width: `${((value as number) / 10) * 100}%` }} />
+              </div>
+              <span className="text-[10px] font-medium w-6 text-left">{value as number}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

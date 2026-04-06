@@ -545,13 +545,149 @@ function buildPriceAnalysis(
   };
 }
 
+// ---- Trust Score Calculation ----
+const TRUST_SCORE_TOOL = {
+  type: "function" as const,
+  function: {
+    name: "report_trust_score",
+    description: "Report the deal trust score with detailed breakdown",
+    parameters: {
+      type: "object",
+      properties: {
+        trust_score: { type: "number", description: "الدرجة من 0 إلى 10 بفاصلة عشرية واحدة" },
+        level: { type: "string", enum: ["ممتاز", "جيد جداً", "جيد", "متوسط", "ضعيف"] },
+        summary: { type: "string", description: "ملخص قصير لسبب الدرجة" },
+        strengths: { type: "array", items: { type: "string" }, description: "نقاط القوة" },
+        weaknesses: { type: "array", items: { type: "string" }, description: "نقاط الضعف" },
+        warnings: { type: "array", items: { type: "string" }, description: "تحذيرات مهمة" },
+        factors: {
+          type: "object",
+          properties: {
+            data_completeness: { type: "number", description: "0-10 اكتمال البيانات" },
+            asset_verification: { type: "number", description: "0-10 التحقق من الأصول" },
+            price_logic: { type: "number", description: "0-10 منطقية السعر" },
+            legal_clarity: { type: "number", description: "0-10 الوضوح القانوني والتشغيلي" },
+            media_quality: { type: "number", description: "0-10 جودة الوسائط" },
+          },
+          required: ["data_completeness", "asset_verification", "price_logic", "legal_clarity", "media_quality"],
+        },
+      },
+      required: ["trust_score", "level", "summary", "strengths", "weaknesses", "warnings", "factors"],
+    },
+  },
+};
+
+async function calculateTrustScore(
+  listing: any,
+  combinedAssets: any,
+  priceAnalysis: any,
+  imageResult: any,
+  fileResult: any,
+  apiKey: string
+): Promise<any> {
+  try {
+    const photoCount = listing.photos ? Object.values(listing.photos as Record<string, any[]>).flat().length : 0;
+    const docCount = Array.isArray(listing.documents) ? listing.documents.length : 0;
+    const imageAssetCount = imageResult?.assets?.length || 0;
+    const fileAssetCount = fileResult?.assets?.length || 0;
+    const combinedAssetCount = combinedAssets?.assets?.length || 0;
+    const inventoryCount = Array.isArray(listing.inventory) ? listing.inventory.length : 0;
+
+    const listingInfo = `
+بيانات الإعلان:
+- العنوان: ${listing.title || "غير محدد"}
+- نوع الصفقة: ${listing.primary_deal_type || listing.deal_type || "غير محدد"}
+- النشاط التجاري: ${listing.business_activity || "غير محدد"}
+- المدينة: ${listing.city || "غير محدد"}
+- الحي: ${listing.district || "غير محدد"}
+- السعر: ${listing.price ? listing.price.toLocaleString() + " ريال" : "غير محدد"}
+- الإيجار السنوي: ${listing.annual_rent || "غير محدد"}
+- مدة العقد: ${listing.lease_duration || "غير محدد"}
+- المتبقي من العقد: ${listing.lease_remaining || "غير محدد"}
+- الالتزامات: ${listing.liabilities || "غير محدد"}
+- رواتب متأخرة: ${listing.overdue_salaries || "غير محدد"}
+- إيجار متأخر: ${listing.overdue_rent || "غير محدد"}
+- رخصة بلدية: ${listing.municipality_license || "غير محدد"}
+- الدفاع المدني: ${listing.civil_defense_license || "غير محدد"}
+- كاميرات مراقبة: ${listing.surveillance_cameras || "غير محدد"}
+- الوصف: ${listing.description ? listing.description.slice(0, 500) : "غير محدد"}
+- عدد الصور: ${photoCount}
+- عدد المستندات: ${docCount}
+- أصول مكتشفة من الصور: ${imageAssetCount}
+- أصول مكتشفة من المستندات: ${fileAssetCount}
+- إجمالي الأصول المدمجة: ${combinedAssetCount}
+- عناصر الجرد اليدوي: ${inventoryCount}
+${priceAnalysis ? `- تحليل السعر: القيمة التقديرية ${priceAnalysis.estimated_value?.toLocaleString()} ريال، الفارق ${priceAnalysis.overpriced_percentage}%، القرار: ${priceAnalysis.decision}` : "- لا يوجد تحليل سعر"}
+- المساحة: ${listing.area_sqm || "غير محددة"}
+- الموقع الجغرافي: ${listing.location_lat && listing.location_lng ? "محدد" : "غير محدد"}
+`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        temperature: 0.15,
+        messages: [
+          {
+            role: "system",
+            content: `أنت خبير تقييم صفقات تجارية. مهمتك حساب مؤشر موثوقية الصفقة من 0 إلى 10.
+
+## معايير التقييم (بالأوزان):
+A) اكتمال البيانات (20%): نوع الصفقة، النشاط، الموقع، السعر، الوصف، المستندات، الصور
+B) التحقق من الأصول (25%): أصول مكتشفة من الصور، أصول من المستندات، تطابق بينهما
+C) منطقية السعر (20%): مقارنة السعر المعروض بالقيمة التقديرية للأصول
+D) الوضوح القانوني والتشغيلي (20%): عقد الإيجار، الالتزامات، التراخيص
+E) جودة الوسائط (15%): عدد الصور وتغطيتها
+
+## مستويات الدرجة:
+- 9.0-10: ممتاز
+- 7.5-8.9: جيد جداً
+- 6.0-7.4: جيد
+- 4.0-5.9: متوسط
+- 0-3.9: ضعيف
+
+## تعليمات:
+- كن دقيقاً وموضوعياً
+- كل درجة يجب أن تكون مبررة
+- اذكر نقاط القوة والضعف بوضوح
+- أضف تحذيرات إذا وجدت تناقضات أو مخاطر
+- لا تعطِ درجات عشوائية`,
+          },
+          { role: "user", content: `احسب مؤشر موثوقية الصفقة التالية:\n${listingInfo}` },
+        ],
+        tools: [TRUST_SCORE_TOOL],
+        tool_choice: { type: "function", function: { name: "report_trust_score" } },
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Trust score calculation failed:", response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall) return null;
+
+    const result = JSON.parse(toolCall.function.arguments);
+    return { ...result, generated_at: new Date().toISOString() };
+  } catch (e) {
+    console.error("Trust score error:", e);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { photoUrls, fileUrls, businessActivity, dealPrice } = await req.json();
+    const { photoUrls, fileUrls, businessActivity, dealPrice, listingData } = await req.json();
 
     const hasPhotos = Array.isArray(photoUrls) && photoUrls.length > 0;
     const hasFiles = Array.isArray(fileUrls) && fileUrls.length > 0;
@@ -651,11 +787,25 @@ serve(async (req) => {
       }
     }
 
+    // --- TRUST SCORE ---
+    let trustScore: any = null;
+    if (listingData) {
+      trustScore = await calculateTrustScore(
+        listingData,
+        combined,
+        priceAnalysis,
+        imageResult,
+        fileResult,
+        LOVABLE_API_KEY
+      );
+    }
+
     const output = {
       images: imageResult,
       files: fileResult,
       combined: { ...combined, confidence },
       priceAnalysis,
+      trustScore,
       detectedAt: new Date().toISOString(),
     };
 

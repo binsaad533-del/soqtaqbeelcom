@@ -19,12 +19,14 @@ export interface UseAnalysisCacheReturn {
   detectedAssetsFiles: any | null;
   assetsCombined: any | null;
   priceAnalysis: any | null;
+  trustScore: any | null;
   analysisUpdatedAt: string | null;
   loadCache: () => Promise<void>;
   saveDealCheck: (analysis: any) => Promise<void>;
   saveFeasibility: (study: any) => Promise<void>;
   saveDetectedAssets: (images: any, files: any, combined: any) => Promise<void>;
   savePriceAnalysis: (analysis: any) => Promise<void>;
+  saveTrustScore: (score: any) => Promise<void>;
   setRefreshing: (v: boolean) => void;
 }
 
@@ -35,6 +37,7 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
   const [detectedAssetsFiles, setDetectedAssetsFiles] = useState<any>(null);
   const [assetsCombined, setAssetsCombined] = useState<any>(null);
   const [priceAnalysis, setPriceAnalysis] = useState<any>(null);
+  const [trustScore, setTrustScore] = useState<any>(null);
   const [analysisUpdatedAt, setAnalysisUpdatedAt] = useState<string | null>(null);
   const loadedRef = useRef(false);
 
@@ -47,7 +50,7 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
     try {
       const { data } = await supabase
         .from("listings")
-        .select("ai_analysis_cache, ai_structure_validation, ai_detected_assets, ai_detected_assets_images, ai_detected_assets_files, ai_assets_combined, ai_analysis_updated_at, ai_price_analysis")
+        .select("ai_analysis_cache, ai_structure_validation, ai_detected_assets, ai_detected_assets_images, ai_detected_assets_files, ai_assets_combined, ai_analysis_updated_at, ai_price_analysis, ai_trust_score")
         .eq("id", listingId)
         .maybeSingle();
 
@@ -63,6 +66,7 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
       }
       if (data.ai_analysis_updated_at) setAnalysisUpdatedAt(data.ai_analysis_updated_at as string);
       if (data.ai_price_analysis) setPriceAnalysis(data.ai_price_analysis);
+      if (data.ai_trust_score) setTrustScore(data.ai_trust_score);
 
       if (data.ai_analysis_cache && typeof data.ai_analysis_cache === "object") {
         const c = data.ai_analysis_cache as any;
@@ -160,6 +164,19 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
     }
   }, [listingId]);
 
+  const saveTrustScore = useCallback(async (score: any) => {
+    if (!listingId) return;
+    setTrustScore(score);
+    try {
+      await supabase
+        .from("listings")
+        .update({ ai_trust_score: score as any } as any)
+        .eq("id", listingId);
+    } catch {
+      // ignore
+    }
+  }, [listingId]);
+
   return {
     cachedDealCheck: cache?.dealCheck || null,
     cachedFeasibility: cache?.feasibility || null,
@@ -170,12 +187,14 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
     detectedAssetsFiles,
     assetsCombined,
     priceAnalysis,
+    trustScore,
     analysisUpdatedAt,
     loadCache,
     saveDealCheck,
     saveFeasibility,
     saveDetectedAssets,
     savePriceAnalysis,
+    saveTrustScore,
     setRefreshing: setIsRefreshing,
   };
 }
