@@ -173,11 +173,10 @@ function buildMultimodalContent(textPrompt: string, documentUrls: string[]): any
   return content;
 }
 
-async function createInputSignature(listing: any, perspective: AnalysisPerspective, sellerName?: string): Promise<string> {
+async function createInputSignature(listing: any, perspective: AnalysisPerspective): Promise<string> {
   const payload = JSON.stringify({
     listing,
     perspective,
-    sellerName: normalizeText(sellerName),
     analysisVersion: ANALYSIS_VERSION,
   });
   const bytes = new TextEncoder().encode(payload);
@@ -220,29 +219,31 @@ function buildDealTypeContext(listing: any): string {
   return context;
 }
 
-function buildSellerPerspective(sellerName?: string): string {
-  const nameGreeting = sellerName ? `- خاطب البائع باسمه "${sellerName}" عند التوصيات والإرشادات (مثل: "يا ${sellerName}، ننصحك...")` : '- خاطب البائع بضمير المخاطب ("إعلانك", "سعرك", "صفقتك")';
+function buildSellerPerspective(): string {
   return `
-## منظور التحليل: البائع (قبل النشر)
-${nameGreeting}
-- لا تستخدم عبارة "يا بائع" أبداً — استخدم الاسم إن وُجد أو ضمير المخاطب
-- قدّم توصيات عملية لتحسين الإعلان قبل النشر
+## منظور التحليل: البائع (تحليل عام محايد)
+- ⚠️ ممنوع مخاطبة البائع بالاسم أو بضمير المخاطب (لا "يا أحمد"، لا "إعلانك"، لا "ننصحك"، لا "أنت")
+- استخدم صيغة الغائب والعبارات المحايدة فقط: "الإعلان"، "الصفقة"، "يُنصح"، "يُلاحظ"، "قد يؤثر"
+- قدّم التوصيات كرؤية سوقية عامة وليس كنصيحة شخصية
 - وصِّ بسعر أقل بـ 10% من متوسط السوق لجذب المشترين بسرعة
-- في التوصية والإرشادات: اقترح تحسينات على البيانات والصور والسعر
+- في التوصية والإرشادات: اقترح تحسينات على البيانات والصور والسعر بصيغة محايدة
 - نبّه إلى النقاط التي قد تُثير تساؤلات المشترين
-- في negotiationGuidance: قدّم نصائح حول كيف يتفاوض ويدافع عن سعره
-- مثال على التوصية: "${sellerName ? `يا ${sellerName}، ننصحك` : 'ننصحك'} بتسعير صفقتك بـ X ريال (أقل بـ 10% من متوسط السوق) لتسريع البيع"`;
+- في negotiationGuidance: قدّم إرشادات تفاوض عامة بصيغة محايدة
+- مثال صحيح: "يُنصح بتسعير الصفقة بـ X ريال (أقل بـ 10% من متوسط السوق) لتسريع البيع"
+- مثال خاطئ: "يا أحمد، ننصحك بتسعير صفقتك..."`;
 }
 
 const BUYER_PERSPECTIVE = `
-## منظور التحليل: المشتري (بعد النشر)
-- خاطب المشتري مباشرةً بضمير المخاطب ("هذه الصفقة أمامك", "يمكنك", "انتبه")
-- ساعد المشتري على اتخاذ قرار الشراء
-- قيّم ما إذا كان السعر المعروض عادلاً بالنسبة للمشتري
-- في التوصية: وضّح للمشتري هل يستحق الدخول في هذه الصفقة أم لا
-- نبّه المشتري إلى المخاطر والنقاط التي يجب فحصها ميدانياً
-- في negotiationGuidance: قدّم نصائح للمشتري حول كيف يتفاوض ويحصل على سعر أفضل
-- مثال: "يمكنك التفاوض لخفض السعر إلى X ريال بناءً على حالة الأصول"`;
+## منظور التحليل: المشتري (تحليل عام محايد)
+- ⚠️ ممنوع مخاطبة المشتري بالاسم أو بضمير المخاطب (لا "يمكنك"، لا "أنت"، لا "انتبه")
+- استخدم صيغة الغائب والعبارات المحايدة فقط: "الصفقة"، "يُلاحظ"، "يُنصح"، "قد يكون"، "من المهم"
+- قدّم التحليل كتقييم سوقي محايد وليس كنصيحة شخصية
+- قيّم ما إذا كان السعر المعروض عادلاً بناءً على بيانات السوق
+- في التوصية: وضّح ما إذا كانت الصفقة تستحق الدخول فيها بصيغة محايدة
+- نبّه إلى المخاطر والنقاط التي تستدعي الفحص الميداني
+- في negotiationGuidance: قدّم إرشادات تفاوض عامة بصيغة محايدة
+- مثال صحيح: "يمكن التفاوض لخفض السعر إلى X ريال بناءً على حالة الأصول"
+- مثال خاطئ: "يمكنك التفاوض..."، "انتبه لهذه النقطة"`;
 
 function buildConsistencyRules(mode: AnalysisMode): string {
   if (mode === "update") {
@@ -263,8 +264,8 @@ function buildConsistencyRules(mode: AnalysisMode): string {
 - عند الشك، قدّم حكماً محافظاً وثابتاً يستند إلى الأدلة`; 
 }
 
-function buildSystemPrompt(perspective: AnalysisPerspective, mode: AnalysisMode, sellerName?: string): string {
-  const perspectiveBlock = perspective === "seller" ? buildSellerPerspective(sellerName) : BUYER_PERSPECTIVE;
+function buildSystemPrompt(perspective: AnalysisPerspective, mode: AnalysisMode): string {
+  const perspectiveBlock = perspective === "seller" ? buildSellerPerspective() : BUYER_PERSPECTIVE;
 
   return `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية دقيقة وثابتة لكل صفقة.
 
@@ -518,7 +519,7 @@ serve(async (req) => {
 
     const normalizedListing = normalizeListingForAnalysis(listing);
     const documentUrls = extractDocumentUrls(listing);
-    const inputSignature = await createInputSignature(normalizedListing, perspective, sellerName);
+    const inputSignature = await createInputSignature(normalizedListing, perspective);
     const userPrompt = buildAnalysisPrompt(normalizedListing, mode, previousAnalysis, inputSignature);
     const userContent = buildMultimodalContent(userPrompt, documentUrls);
 
@@ -533,7 +534,7 @@ serve(async (req) => {
         temperature: 0.1,
         top_p: 0.1,
         messages: [
-          { role: "system", content: buildSystemPrompt(perspective, mode, sellerName) },
+          { role: "system", content: buildSystemPrompt(perspective, mode) },
           { role: "user", content: userContent },
         ],
         tools: [
