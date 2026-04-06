@@ -48,6 +48,19 @@ serve(async (req) => {
       });
     }
 
+    // Check if the URL points to a non-image file (PDF, docx, etc.)
+    const urlLower = documentUrl.toLowerCase().split("?")[0];
+    const imageExtensions = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".heic"];
+    const isImage = imageExtensions.some((ext) => urlLower.endsWith(ext));
+    if (!isImage) {
+      return new Response(
+        JSON.stringify({
+          error: "يرجى رفع صورة للسجل التجاري (PNG أو JPG أو WebP). لا يمكن تحليل ملفات PDF أو Word مباشرة.",
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const content: any[] = [
       {
         type: "text",
