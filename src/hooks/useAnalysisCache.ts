@@ -62,6 +62,7 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
         setAssetsCombined(data.ai_detected_assets);
       }
       if (data.ai_analysis_updated_at) setAnalysisUpdatedAt(data.ai_analysis_updated_at as string);
+      if (data.ai_price_analysis) setPriceAnalysis(data.ai_price_analysis);
 
       if (data.ai_analysis_cache && typeof data.ai_analysis_cache === "object") {
         const c = data.ai_analysis_cache as any;
