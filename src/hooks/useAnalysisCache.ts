@@ -147,6 +147,19 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
     }
   }, [listingId]);
 
+  const savePriceAnalysis = useCallback(async (analysis: any) => {
+    if (!listingId) return;
+    setPriceAnalysis(analysis);
+    try {
+      await supabase
+        .from("listings")
+        .update({ ai_price_analysis: analysis as any } as any)
+        .eq("id", listingId);
+    } catch {
+      // ignore
+    }
+  }, [listingId]);
+
   return {
     cachedDealCheck: cache?.dealCheck || null,
     cachedFeasibility: cache?.feasibility || null,
@@ -156,11 +169,13 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
     detectedAssetsImages,
     detectedAssetsFiles,
     assetsCombined,
+    priceAnalysis,
     analysisUpdatedAt,
     loadCache,
     saveDealCheck,
     saveFeasibility,
     saveDetectedAssets,
+    savePriceAnalysis,
     setRefreshing: setIsRefreshing,
   };
 }
