@@ -459,7 +459,17 @@ const CreateListingPage = () => {
     const imageFiles: File[] = [];
     const docFiles: File[] = [];
 
+    // Duplicate detection by name+size
+    const existingKeys = new Set(fileStatuses.map(f => `${f.name}-${f.size}`));
+
     for (const f of allFiles) {
+      const key = `${f.name}-${f.size}`;
+      if (existingKeys.has(key)) {
+        toast.info(`الملف "${f.name}" مرفوع بالفعل — تم تخطيه`);
+        continue;
+      }
+      existingKeys.add(key);
+      
       const ext = f.name.split(".").pop()?.toLowerCase() || "";
       const isImage = f.type.startsWith("image/") || imageExts.includes(ext);
       if (isImage) {
@@ -476,21 +486,52 @@ const CreateListingPage = () => {
     setUploadProgress({ current: 0, total: totalFiles });
     setUploadingGroup("bulk");
 
+    // Create initial file status entries
+    const newStatuses: FileUploadStatus[] = [
+      ...imageFiles.map((f, i) => ({
+        id: `img-${Date.now()}-${i}`,
+        name: f.name,
+        size: f.size,
+        type: "image" as const,
+        status: "uploading" as const,
+      })),
+      ...docFiles.map((f, i) => ({
+        id: `doc-${Date.now()}-${i}`,
+        name: f.name,
+        size: f.size,
+        type: "document" as const,
+        status: "uploading" as const,
+      })),
+    ];
+    setFileStatuses(prev => [...prev, ...newStatuses]);
+
     try {
       // Upload images
       const imageUrls: string[] = [];
       for (let i = 0; i < imageFiles.length; i++) {
+        const statusId = newStatuses[i].id;
         setUploadProgress({ current: i + 1, total: totalFiles });
         try {
           const validation = validateImageFile(imageFiles[i]);
-          if (!validation.valid) { toast.error(`${imageFiles[i].name}: ${validation.error}`); continue; }
+          if (!validation.valid) {
+            toast.error(`${imageFiles[i].name}: ${validation.error}`);
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: validation.error } : f));
+            continue;
+          }
           const prepared = await convertToJpeg(imageFiles[i]);
           const previewUrl = URL.createObjectURL(prepared);
           setLocalPreviews(prev => ({ ...prev, all: [...(prev.all || []), previewUrl] }));
           const url = await uploadFile(id, prepared, "photos/all");
-          if (url) imageUrls.push(url);
-        } catch {
+          if (url) {
+            imageUrls.push(url);
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url, previewUrl } : f));
+          } else {
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "فشل الرفع إلى الخادم" } : f));
+          }
+        } catch (err) {
+          console.error(`[BulkUpload] Image failed: ${imageFiles[i].name}`, err);
           toast.error(`تعذر تجهيز ${imageFiles[i].name}`);
+          setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "تعذر تجهيز الملف" } : f));
         }
       }
 
@@ -505,11 +546,26 @@ const CreateListingPage = () => {
       // Upload documents
       const docUrls: string[] = [];
       for (let i = 0; i < docFiles.length; i++) {
+        const statusId = newStatuses[imageFiles.length + i].id;
         setUploadProgress({ current: imageFiles.length + i + 1, total: totalFiles });
         const validation = validateDocFile(docFiles[i]);
-        if (!validation.valid) { toast.error(`${docFiles[i].name}: ${validation.error}`); continue; }
-        const url = await uploadFile(id, docFiles[i], "docs/general");
-        if (url) docUrls.push(url);
+        if (!validation.valid) {
+          toast.error(`${docFiles[i].name}: ${validation.error}`);
+          setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: validation.error } : f));
+          continue;
+        }
+        try {
+          const url = await uploadFile(id, docFiles[i], "docs/general");
+          if (url) {
+            docUrls.push(url);
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url } : f));
+          } else {
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "فشل الرفع إلى الخادم" } : f));
+          }
+        } catch (err) {
+          console.error(`[BulkUpload] Doc failed: ${docFiles[i].name}`, err);
+          setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "خطأ غير متوقع" } : f));
+        }
       }
 
       if (docUrls.length > 0) {
@@ -527,8 +583,13 @@ const CreateListingPage = () => {
       }
 
       const uploadedTotal = imageUrls.length + docUrls.length;
-      if (uploadedTotal > 0) {
+      const failedTotal = totalFiles - uploadedTotal;
+      if (uploadedTotal > 0 && failedTotal === 0) {
         toast.success(`تم رفع ${uploadedTotal} ملف بنجاح — ${imageUrls.length} صورة و ${docUrls.length} مستند`);
+      } else if (uploadedTotal > 0 && failedTotal > 0) {
+        toast.warning(`تم رفع ${uploadedTotal} ملف بنجاح — فشل ${failedTotal} ملف (اضغط "إعادة المحاولة" أدناه)`);
+      } else if (failedTotal > 0) {
+        toast.error(`فشل رفع جميع الملفات (${failedTotal}) — تحقق من اتصال الإنترنت وأعد المحاولة`);
       }
     } finally {
       setSaving(false);
