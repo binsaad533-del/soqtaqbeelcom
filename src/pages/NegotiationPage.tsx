@@ -21,6 +21,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/hooks/useSEO";
 import CommissionBanner from "@/components/CommissionBanner";
+import DealFilesPanel from "@/components/DealFilesPanel";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import VerificationGate from "@/components/VerificationGate";
