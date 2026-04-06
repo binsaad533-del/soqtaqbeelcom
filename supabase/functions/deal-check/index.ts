@@ -173,11 +173,10 @@ function buildMultimodalContent(textPrompt: string, documentUrls: string[]): any
   return content;
 }
 
-async function createInputSignature(listing: any, perspective: AnalysisPerspective, sellerName?: string): Promise<string> {
+async function createInputSignature(listing: any, perspective: AnalysisPerspective): Promise<string> {
   const payload = JSON.stringify({
     listing,
     perspective,
-    sellerName: normalizeText(sellerName),
     analysisVersion: ANALYSIS_VERSION,
   });
   const bytes = new TextEncoder().encode(payload);
