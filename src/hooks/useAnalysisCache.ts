@@ -19,12 +19,14 @@ export interface UseAnalysisCacheReturn {
   detectedAssetsFiles: any | null;
   assetsCombined: any | null;
   priceAnalysis: any | null;
+  trustScore: any | null;
   analysisUpdatedAt: string | null;
   loadCache: () => Promise<void>;
   saveDealCheck: (analysis: any) => Promise<void>;
   saveFeasibility: (study: any) => Promise<void>;
   saveDetectedAssets: (images: any, files: any, combined: any) => Promise<void>;
   savePriceAnalysis: (analysis: any) => Promise<void>;
+  saveTrustScore: (score: any) => Promise<void>;
   setRefreshing: (v: boolean) => void;
 }
 
