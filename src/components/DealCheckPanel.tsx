@@ -93,7 +93,8 @@ const SOURCE_LABELS: Record<string, { icon: typeof ImageIcon; label: string }> =
 const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const {
     cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing,
-    assetsCombined, detectedAssetsImages, detectedAssetsFiles, analysisUpdatedAt, saveDetectedAssets
+    assetsCombined, detectedAssetsImages, detectedAssetsFiles, analysisUpdatedAt, saveDetectedAssets,
+    priceAnalysis, savePriceAnalysis
   } = analysisCache;
 
   const [open, setOpen] = useState(!!cachedDealCheck);
