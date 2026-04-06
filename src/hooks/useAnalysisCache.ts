@@ -47,7 +47,7 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
     try {
       const { data } = await supabase
         .from("listings")
-        .select("ai_analysis_cache, ai_structure_validation, ai_detected_assets, ai_detected_assets_images, ai_detected_assets_files, ai_assets_combined, ai_analysis_updated_at")
+        .select("ai_analysis_cache, ai_structure_validation, ai_detected_assets, ai_detected_assets_images, ai_detected_assets_files, ai_assets_combined, ai_analysis_updated_at, ai_price_analysis")
         .eq("id", listingId)
         .maybeSingle();
 
