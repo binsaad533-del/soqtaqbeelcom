@@ -3,7 +3,7 @@ import {
   ShieldCheck, AlertTriangle, TrendingUp, MessageCircle,
   ChevronDown, ChevronUp, MapPin, BarChart3, Briefcase, CheckCircle2,
   FileQuestion, Target, Loader2, Activity, ShoppingCart, Store,
-  RefreshCw, Clock, Package, FileText, ImageIcon
+  RefreshCw, Clock, Package, FileText, ImageIcon, DollarSign, ArrowDownRight, ArrowUpRight, Equal
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
