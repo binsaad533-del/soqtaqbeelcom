@@ -2,6 +2,12 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 
+export interface UploadResult {
+  url: string | null;
+  error?: string;
+  path?: string;
+}
+
 export interface Listing {
   id: string;
   owner_id: string;
