@@ -811,6 +811,9 @@ const NegotiationPage = () => {
                 </div>
               )}
 
+              {/* Deal Files */}
+              <DealFilesPanel dealId={deal.id} />
+
 
               {commission && isPostAgreement && (
                 <CommissionPaymentPanel commission={commission} isSeller={user?.id === deal.seller_id} onUpdate={loadData} />
