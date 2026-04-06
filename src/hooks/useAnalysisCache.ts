@@ -9,7 +9,7 @@ interface CacheEntry {
   generated_at: string;
 }
 
-interface UseAnalysisCacheReturn {
+export interface UseAnalysisCacheReturn {
   cachedDealCheck: any | null;
   cachedFeasibility: any | null;
   cacheAge: string | null;
