@@ -384,8 +384,12 @@ const CreateListingPage = () => {
             }));
           }
 
-          const url = await uploadFile(id, preparedFile, `photos/${group}`);
-          if (url) uploadedUrls.push(url);
+          const result = await uploadFile(id, preparedFile, `photos/${group}`);
+          if (result.url) {
+            uploadedUrls.push(result.url);
+          } else {
+            toast.error(`${originalFile.name}: ${result.error || "فشل الرفع"}`);
+          }
         } catch (error) {
           console.error("photo preparation failed", error);
           toast.error(`تعذّر تجهيز الصورة ${originalFile.name}`);
@@ -434,8 +438,12 @@ const CreateListingPage = () => {
         toast.error(validation.error);
         continue;
       }
-      const url = await uploadFile(id, file, `docs/${activeDocType}`);
-      if (url) urls.push(url);
+      const result = await uploadFile(id, file, `docs/${activeDocType}`);
+      if (result.url) {
+        urls.push(result.url);
+      } else {
+        toast.error(`${file.name}: ${result.error || "فشل الرفع"}`);
+      }
     }
 
     setUploadedDocs((prev) => ({
@@ -521,12 +529,12 @@ const CreateListingPage = () => {
           const prepared = await convertToJpeg(imageFiles[i]);
           const previewUrl = URL.createObjectURL(prepared);
           setLocalPreviews(prev => ({ ...prev, all: [...(prev.all || []), previewUrl] }));
-          const url = await uploadFile(id, prepared, "photos/all");
-          if (url) {
-            imageUrls.push(url);
-            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url, previewUrl } : f));
+          const result = await uploadFile(id, prepared, "photos/all");
+          if (result.url) {
+            imageUrls.push(result.url);
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url: result.url!, previewUrl } : f));
           } else {
-            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "فشل الرفع إلى الخادم" } : f));
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || "فشل الرفع إلى الخادم" } : f));
           }
         } catch (err) {
           console.error(`[BulkUpload] Image failed: ${imageFiles[i].name}`, err);
@@ -555,12 +563,12 @@ const CreateListingPage = () => {
           continue;
         }
         try {
-          const url = await uploadFile(id, docFiles[i], "docs/general");
-          if (url) {
-            docUrls.push(url);
-            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url } : f));
+          const result = await uploadFile(id, docFiles[i], "docs/general");
+          if (result.url) {
+            docUrls.push(result.url);
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url: result.url! } : f));
           } else {
-            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "فشل الرفع إلى الخادم" } : f));
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || "فشل الرفع إلى الخادم" } : f));
           }
         } catch (err) {
           console.error(`[BulkUpload] Doc failed: ${docFiles[i].name}`, err);

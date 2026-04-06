@@ -104,8 +104,8 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
 
     for (const file of Array.from(e.target.files)) {
       try {
-        const url = await uploadFile(listing.id, file, `photos/${group}`);
-        if (url) uploadedUrls.push(url);
+        const result = await uploadFile(listing.id, file, `photos/${group}`);
+        if (result.url) uploadedUrls.push(result.url);
       } catch {
         toast.error(`فشل رفع ${file.name}`);
       }

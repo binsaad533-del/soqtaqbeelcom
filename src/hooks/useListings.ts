@@ -2,6 +2,12 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 
+export interface UploadResult {
+  url: string | null;
+  error?: string;
+  path?: string;
+}
+
 export interface Listing {
   id: string;
   owner_id: string;
@@ -142,25 +148,53 @@ export function useListings() {
     return data as unknown as Listing | null;
   }, []);
 
-  const uploadFile = useCallback(async (listingId: string, file: File, folder: string) => {
-    if (!user) return null;
+  const uploadFile = useCallback(async (listingId: string, file: File, folder: string): Promise<UploadResult> => {
+    if (!user) return { url: null, error: "غير مسجّل الدخول — يرجى تسجيل الدخول أولاً" };
+    if (!listingId) return { url: null, error: "لا يوجد معرّف إعلان — احفظ المسودة أولاً" };
+
     // Sanitize filename: replace non-ASCII/special chars with underscore, keep extension
     const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
     const safeName = file.name
       .replace(/\.[^.]+$/, "") // remove extension
       .replace(/[^a-zA-Z0-9_-]/g, "_") // replace non-safe chars (Arabic, spaces, etc.)
       .replace(/_+/g, "_") // collapse multiple underscores
+      .replace(/^_|_$/g, "") // trim leading/trailing underscores
       .slice(0, 60) || "file";
     const path = `${user.id}/${listingId}/${folder}/${Date.now()}-${safeName}.${ext}`;
+
+    console.info("[uploadFile] Starting upload:", {
+      originalName: file.name,
+      sanitizedPath: path,
+      size: file.size,
+      type: file.type || "unknown",
+      folder,
+    });
+
     const { data, error } = await supabase.storage
       .from("listings")
       .upload(path, file, { contentType: file.type || "application/octet-stream", upsert: false });
+
     if (error) {
-      console.error("[uploadFile] Storage upload failed:", { path, error: error.message, fileSize: file.size, fileType: file.type });
-      return null;
+      const errorMsg = error.message.includes("Payload too large")
+        ? `الملف كبير جداً (${(file.size / 1024 / 1024).toFixed(1)} MB)`
+        : error.message.includes("mime type")
+        ? `نوع الملف غير مدعوم (${file.type})`
+        : error.message.includes("policy")
+        ? "ليس لديك صلاحية الرفع — تأكد من تسجيل الدخول"
+        : `فشل رفع الملف: ${error.message}`;
+
+      console.error("[uploadFile] Storage upload failed:", {
+        path,
+        error: error.message,
+        fileSize: file.size,
+        fileType: file.type,
+      });
+      return { url: null, error: errorMsg, path };
     }
+
     const { data: urlData } = supabase.storage.from("listings").getPublicUrl(data.path);
-    return urlData.publicUrl;
+    console.info("[uploadFile] Upload successful:", { path: data.path, publicUrl: urlData.publicUrl });
+    return { url: urlData.publicUrl, path: data.path };
   }, [user]);
 
   const softDeleteListing = useCallback(async (id: string) => {
