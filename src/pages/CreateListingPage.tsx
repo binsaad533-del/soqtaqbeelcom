@@ -97,6 +97,19 @@ const CreateListingPage = () => {
   const [dedupActions, setDedupActions] = useState<DedupAction[]>([]);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, string[]>>({});
   const [listingId, setListingId] = useState<string | null>(null);
+
+  // Per-file upload tracking
+  interface FileUploadStatus {
+    id: string;
+    name: string;
+    size: number;
+    type: "image" | "document";
+    status: "uploading" | "uploaded" | "failed";
+    error?: string;
+    url?: string;
+    previewUrl?: string;
+  }
+  const [fileStatuses, setFileStatuses] = useState<FileUploadStatus[]>([]);
   const [saving, setSaving] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [locationLat, setLocationLat] = useState<number | null>(null);
@@ -202,7 +215,15 @@ const CreateListingPage = () => {
             setAnalyzed(true);
           }
           if (Array.isArray(draft.documents) && draft.documents.length > 0) {
-            // Restore docs grouped - keep as flat for now
+            const restoredDocs: Record<string, string[]> = {};
+            for (const doc of draft.documents as Array<{ type?: string; files?: string[] }>) {
+              if (doc?.type && Array.isArray(doc.files)) {
+                restoredDocs[doc.type] = doc.files;
+              }
+            }
+            if (Object.keys(restoredDocs).length > 0) {
+              setUploadedDocs(restoredDocs);
+            }
           }
           setDisclosure((prev) => ({
             ...prev,
@@ -438,7 +459,17 @@ const CreateListingPage = () => {
     const imageFiles: File[] = [];
     const docFiles: File[] = [];
 
+    // Duplicate detection by name+size
+    const existingKeys = new Set(fileStatuses.map(f => `${f.name}-${f.size}`));
+
     for (const f of allFiles) {
+      const key = `${f.name}-${f.size}`;
+      if (existingKeys.has(key)) {
+        toast.info(`الملف "${f.name}" مرفوع بالفعل — تم تخطيه`);
+        continue;
+      }
+      existingKeys.add(key);
+      
       const ext = f.name.split(".").pop()?.toLowerCase() || "";
       const isImage = f.type.startsWith("image/") || imageExts.includes(ext);
       if (isImage) {
@@ -455,21 +486,52 @@ const CreateListingPage = () => {
     setUploadProgress({ current: 0, total: totalFiles });
     setUploadingGroup("bulk");
 
+    // Create initial file status entries
+    const newStatuses: FileUploadStatus[] = [
+      ...imageFiles.map((f, i) => ({
+        id: `img-${Date.now()}-${i}`,
+        name: f.name,
+        size: f.size,
+        type: "image" as const,
+        status: "uploading" as const,
+      })),
+      ...docFiles.map((f, i) => ({
+        id: `doc-${Date.now()}-${i}`,
+        name: f.name,
+        size: f.size,
+        type: "document" as const,
+        status: "uploading" as const,
+      })),
+    ];
+    setFileStatuses(prev => [...prev, ...newStatuses]);
+
     try {
       // Upload images
       const imageUrls: string[] = [];
       for (let i = 0; i < imageFiles.length; i++) {
+        const statusId = newStatuses[i].id;
         setUploadProgress({ current: i + 1, total: totalFiles });
         try {
           const validation = validateImageFile(imageFiles[i]);
-          if (!validation.valid) { toast.error(`${imageFiles[i].name}: ${validation.error}`); continue; }
+          if (!validation.valid) {
+            toast.error(`${imageFiles[i].name}: ${validation.error}`);
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: validation.error } : f));
+            continue;
+          }
           const prepared = await convertToJpeg(imageFiles[i]);
           const previewUrl = URL.createObjectURL(prepared);
           setLocalPreviews(prev => ({ ...prev, all: [...(prev.all || []), previewUrl] }));
           const url = await uploadFile(id, prepared, "photos/all");
-          if (url) imageUrls.push(url);
-        } catch {
+          if (url) {
+            imageUrls.push(url);
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url, previewUrl } : f));
+          } else {
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "فشل الرفع إلى الخادم" } : f));
+          }
+        } catch (err) {
+          console.error(`[BulkUpload] Image failed: ${imageFiles[i].name}`, err);
           toast.error(`تعذر تجهيز ${imageFiles[i].name}`);
+          setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "تعذر تجهيز الملف" } : f));
         }
       }
 
@@ -484,11 +546,26 @@ const CreateListingPage = () => {
       // Upload documents
       const docUrls: string[] = [];
       for (let i = 0; i < docFiles.length; i++) {
+        const statusId = newStatuses[imageFiles.length + i].id;
         setUploadProgress({ current: imageFiles.length + i + 1, total: totalFiles });
         const validation = validateDocFile(docFiles[i]);
-        if (!validation.valid) { toast.error(`${docFiles[i].name}: ${validation.error}`); continue; }
-        const url = await uploadFile(id, docFiles[i], "docs/general");
-        if (url) docUrls.push(url);
+        if (!validation.valid) {
+          toast.error(`${docFiles[i].name}: ${validation.error}`);
+          setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: validation.error } : f));
+          continue;
+        }
+        try {
+          const url = await uploadFile(id, docFiles[i], "docs/general");
+          if (url) {
+            docUrls.push(url);
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url } : f));
+          } else {
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "فشل الرفع إلى الخادم" } : f));
+          }
+        } catch (err) {
+          console.error(`[BulkUpload] Doc failed: ${docFiles[i].name}`, err);
+          setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "خطأ غير متوقع" } : f));
+        }
       }
 
       if (docUrls.length > 0) {
@@ -506,8 +583,13 @@ const CreateListingPage = () => {
       }
 
       const uploadedTotal = imageUrls.length + docUrls.length;
-      if (uploadedTotal > 0) {
+      const failedTotal = totalFiles - uploadedTotal;
+      if (uploadedTotal > 0 && failedTotal === 0) {
         toast.success(`تم رفع ${uploadedTotal} ملف بنجاح — ${imageUrls.length} صورة و ${docUrls.length} مستند`);
+      } else if (uploadedTotal > 0 && failedTotal > 0) {
+        toast.warning(`تم رفع ${uploadedTotal} ملف بنجاح — فشل ${failedTotal} ملف (اضغط "إعادة المحاولة" أدناه)`);
+      } else if (failedTotal > 0) {
+        toast.error(`فشل رفع جميع الملفات (${failedTotal}) — تحقق من اتصال الإنترنت وأعد المحاولة`);
       }
     } finally {
       setSaving(false);
@@ -1289,15 +1371,96 @@ const CreateListingPage = () => {
                       </div>
                     </div>
                     <h3 className="text-sm font-semibold mb-1">ارفع كل الصور والمستندات دفعة واحدة</h3>
-                    <p className="text-xs text-muted-foreground mb-2">حتى 200 صورة و 100 مستند — اسحب وأفلت أو اضغط هنا</p>
-                    <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
-                      <span className="flex items-center gap-1"><Camera size={11} /> صور المحل والمعدات</span>
-                      <span className="flex items-center gap-1"><FileText size={11} /> عقود وسجلات ورخص</span>
+                    <p className="text-xs text-muted-foreground mb-1">حتى 200 صورة و 100 مستند — اسحب وأفلت أو اضغط هنا</p>
+                    <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground mb-1">
+                      <span className="flex items-center gap-1"><Camera size={11} /> JPG, PNG, WEBP, HEIC</span>
+                      <span className="flex items-center gap-1"><FileText size={11} /> PDF, DOC, DOCX, XLS, XLSX</span>
                     </div>
+                    <p className="text-[10px] text-muted-foreground">الحد الأقصى: 15 MB للصور — 25 MB للمستندات</p>
                     <p className="text-xs font-medium text-primary mt-3 animate-fade-in">✦ الـAI يحلل كل شيء تلقائياً — بدون إدخال يدوي ✦</p>
                   </>
                 )}
               </div>
+
+              {/* Per-file status list */}
+              {fileStatuses.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium">الملفات ({fileStatuses.length})</span>
+                    {fileStatuses.some(f => f.status === "failed") && (
+                      <button
+                        onClick={() => {
+                          // Remove failed entries so user can re-upload
+                          setFileStatuses(prev => prev.filter(f => f.status !== "failed"));
+                          toast.info("تم حذف الملفات الفاشلة — يمكنك إعادة رفعها");
+                        }}
+                        className="text-[10px] text-destructive hover:underline"
+                      >
+                        حذف الفاشلة وإعادة المحاولة
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-48 overflow-y-auto space-y-1 border border-border/30 rounded-xl p-2 bg-muted/10">
+                    {fileStatuses.map((file) => (
+                      <div key={file.id} className="flex items-center gap-2 text-[11px] py-1 px-2 rounded-lg bg-background/50">
+                        {file.type === "image" ? <Camera size={12} className="text-primary shrink-0" /> : <FileText size={12} className="text-primary shrink-0" />}
+                        <span className="truncate flex-1 min-w-0">{file.name}</span>
+                        <span className="text-[9px] text-muted-foreground shrink-0">{(file.size / 1024).toFixed(0)} KB</span>
+                        {file.status === "uploading" && <Loader2 size={12} className="animate-spin text-primary shrink-0" />}
+                        {file.status === "uploaded" && <Check size={12} className="text-success shrink-0" />}
+                        {file.status === "failed" && (
+                          <span className="text-[9px] text-destructive shrink-0 flex items-center gap-1">
+                            <AlertTriangle size={10} />
+                            {file.error || "فشل"}
+                          </span>
+                        )}
+                        {file.status === "uploaded" && (
+                          <button
+                            onClick={() => {
+                              // Remove from file statuses and from photos/docs
+                              setFileStatuses(prev => prev.filter(f => f.id !== file.id));
+                              if (file.type === "image" && file.url) {
+                                setPhotos(prev => {
+                                  const updated = { ...prev };
+                                  for (const group in updated) {
+                                    updated[group] = updated[group].filter(u => u !== file.url);
+                                  }
+                                  if (listingId) updateListing(listingId, { photos: updated } as never).catch(console.error);
+                                  return updated;
+                                });
+                                if (file.previewUrl) {
+                                  setLocalPreviews(prev => {
+                                    const updated = { ...prev };
+                                    for (const group in updated) {
+                                      updated[group] = updated[group].filter(u => u !== file.previewUrl);
+                                    }
+                                    return updated;
+                                  });
+                                }
+                              }
+                              if (file.type === "document" && file.url) {
+                                setUploadedDocs(prev => {
+                                  const updated = { ...prev };
+                                  for (const group in updated) {
+                                    updated[group] = updated[group].filter(u => u !== file.url);
+                                  }
+                                  if (listingId) updateListing(listingId, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch(console.error);
+                                  return updated;
+                                });
+                              }
+                              toast.success(`تم حذف "${file.name}"`);
+                            }}
+                            className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                            title="حذف الملف"
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Bulk uploaded previews */}
               {(localPreviews["all"] || photos["all"] || []).length > 0 && (
@@ -1308,8 +1471,26 @@ const CreateListingPage = () => {
                   </div>
                   <div className="flex gap-1.5 overflow-x-auto pb-1">
                     {(localPreviews["all"] || photos["all"] || []).map((url, i) => (
-                      <div key={`all-${i}`} className="relative shrink-0 w-14 h-14 rounded-lg border border-border/30 overflow-hidden bg-muted/40">
+                      <div key={`all-${i}`} className="relative shrink-0 w-14 h-14 rounded-lg border border-border/30 overflow-hidden bg-muted/40 group/thumb">
                         <img src={url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const targetUrl = (photos["all"] || [])[i];
+                            if (targetUrl) {
+                              setPhotos(prev => {
+                                const updated = { ...prev, all: (prev.all || []).filter((_, idx) => idx !== i) };
+                                if (listingId) updateListing(listingId, { photos: updated } as never).catch(console.error);
+                                return updated;
+                              });
+                            }
+                            setLocalPreviews(prev => ({ ...prev, all: (prev.all || []).filter((_, idx) => idx !== i) }));
+                            setFileStatuses(prev => prev.filter(f => f.url !== targetUrl && f.previewUrl !== url));
+                          }}
+                          className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-destructive/80 text-white flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={8} />
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -1318,10 +1499,12 @@ const CreateListingPage = () => {
 
               {/* Bulk uploaded docs */}
               {(uploadedDocs["general"] || []).length > 0 && (
-                <div className="flex items-center gap-2">
-                  <FileText size={14} strokeWidth={1.5} className="text-primary" />
-                  <span className="text-xs font-medium">المستندات المرفوعة ({uploadedDocs["general"].length})</span>
-                  <span className="text-[10px] text-success">✓</span>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <FileText size={14} strokeWidth={1.5} className="text-primary" />
+                    <span className="text-xs font-medium">المستندات المرفوعة ({uploadedDocs["general"].length})</span>
+                    <span className="text-[10px] text-success">✓</span>
+                  </div>
                 </div>
               )}
 

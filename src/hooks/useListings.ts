@@ -144,11 +144,21 @@ export function useListings() {
 
   const uploadFile = useCallback(async (listingId: string, file: File, folder: string) => {
     if (!user) return null;
-    const path = `${user.id}/${listingId}/${folder}/${Date.now()}-${file.name}`;
+    // Sanitize filename: replace non-ASCII/special chars with underscore, keep extension
+    const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
+    const safeName = file.name
+      .replace(/\.[^.]+$/, "") // remove extension
+      .replace(/[^a-zA-Z0-9_-]/g, "_") // replace non-safe chars (Arabic, spaces, etc.)
+      .replace(/_+/g, "_") // collapse multiple underscores
+      .slice(0, 60) || "file";
+    const path = `${user.id}/${listingId}/${folder}/${Date.now()}-${safeName}.${ext}`;
     const { data, error } = await supabase.storage
       .from("listings")
-      .upload(path, file);
-    if (error) return null;
+      .upload(path, file, { contentType: file.type || "application/octet-stream", upsert: false });
+    if (error) {
+      console.error("[uploadFile] Storage upload failed:", { path, error: error.message, fileSize: file.size, fileType: file.type });
+      return null;
+    }
     const { data: urlData } = supabase.storage.from("listings").getPublicUrl(data.path);
     return urlData.publicUrl;
   }, [user]);
