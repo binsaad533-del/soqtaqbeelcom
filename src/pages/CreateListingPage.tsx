@@ -438,8 +438,12 @@ const CreateListingPage = () => {
         toast.error(validation.error);
         continue;
       }
-      const url = await uploadFile(id, file, `docs/${activeDocType}`);
-      if (url) urls.push(url);
+      const result = await uploadFile(id, file, `docs/${activeDocType}`);
+      if (result.url) {
+        urls.push(result.url);
+      } else {
+        toast.error(`${file.name}: ${result.error || "فشل الرفع"}`);
+      }
     }
 
     setUploadedDocs((prev) => ({
