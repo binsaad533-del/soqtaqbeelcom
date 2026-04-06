@@ -101,7 +101,7 @@ function formatNum(n: number): string {
   return n.toLocaleString("en-US");
 }
 
-const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
+const FeasibilityStudyPanel = ({ listing, analysisCache }: FeasibilityStudyPanelProps) => {
   const [study, setStudy] = useState<FeasibilityStudy | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingCache, setLoadingCache] = useState(true);
