@@ -202,7 +202,15 @@ const CreateListingPage = () => {
             setAnalyzed(true);
           }
           if (Array.isArray(draft.documents) && draft.documents.length > 0) {
-            // Restore docs grouped - keep as flat for now
+            const restoredDocs: Record<string, string[]> = {};
+            for (const doc of draft.documents as Array<{ type?: string; files?: string[] }>) {
+              if (doc?.type && Array.isArray(doc.files)) {
+                restoredDocs[doc.type] = doc.files;
+              }
+            }
+            if (Object.keys(restoredDocs).length > 0) {
+              setUploadedDocs(restoredDocs);
+            }
           }
           setDisclosure((prev) => ({
             ...prev,
