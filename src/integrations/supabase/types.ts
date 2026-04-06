@@ -1017,6 +1017,7 @@ export type Database = {
           ai_rating: string | null
           ai_structure_validation: Json | null
           ai_summary: string | null
+          ai_trust_score: Json | null
           annual_rent: number | null
           area_sqm: number | null
           business_activity: string | null
@@ -1069,6 +1070,7 @@ export type Database = {
           ai_rating?: string | null
           ai_structure_validation?: Json | null
           ai_summary?: string | null
+          ai_trust_score?: Json | null
           annual_rent?: number | null
           area_sqm?: number | null
           business_activity?: string | null
@@ -1121,6 +1123,7 @@ export type Database = {
           ai_rating?: string | null
           ai_structure_validation?: Json | null
           ai_summary?: string | null
+          ai_trust_score?: Json | null
           annual_rent?: number | null
           area_sqm?: number | null
           business_activity?: string | null
