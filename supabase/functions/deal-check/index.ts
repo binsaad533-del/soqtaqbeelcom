@@ -480,7 +480,7 @@ function buildAnalysisPrompt(listing: any, mode: AnalysisMode, previousAnalysis:
       if (fileAssets?.assets?.length) sections.push(`تم استخراج ${fileAssets.assets.length} عنصر من المستندات`);
       
       for (const asset of combined.assets) {
-        const sourceLabel = asset.source === "files" ? "(من المستندات)" : asset.source === "images+files" ? "(صور + مستندات)" : "(من الصور)";
+        const sourceLabel = asset.source === "file" ? "(من المستندات)" : asset.source === "both" ? "(صور + مستندات)" : "(من الصور)";
         const parts = [
           asset.name,
           asset.quantity > 1 ? `${asset.quantity}x` : null,

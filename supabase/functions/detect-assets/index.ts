@@ -310,7 +310,7 @@ function mergeAndDeduplicate(batches: any[]): any {
         existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
         if (asset.details && !existing.details) existing.details = asset.details;
         if (asset.source && existing.source && asset.source !== existing.source) {
-          existing.source = "images+files";
+          existing.source = "both";
         }
         found = true;
         break;
@@ -352,7 +352,7 @@ function combineResults(
       if (existingKey === key || existingKey.includes(key) || key.includes(existingKey)) {
         const existing = deduplicated[idx];
         existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
-        if (existing.source !== asset.source) existing.source = "images+files";
+        if (existing.source !== asset.source) existing.source = "both";
         found = true;
         break;
       }
