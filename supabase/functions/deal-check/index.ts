@@ -467,6 +467,27 @@ function buildAnalysisPrompt(listing: any, mode: AnalysisMode, previousAnalysis:
     });
   }
 
+  // Include AI-detected assets from images
+  if (scope.analyzeFields.includes("assets") && listing.ai_detected_assets) {
+    const detected = listing.ai_detected_assets;
+    if (Array.isArray(detected.assets) && detected.assets.length > 0) {
+      sections.push("\n## أصول مكتشفة تلقائياً من الصور (تم التعرف عليها بالذكاء الاصطناعي):");
+      sections.push(`⚠️ مستوى الثقة: ${detected.confidence || "متوسط"} — هذه أصول تم اكتشافها من الصور وليست موثقة رسمياً`);
+      sections.push(`تم تحليل ${detected.imagesAnalyzed || "عدة"} صورة`);
+      for (const asset of detected.assets) {
+        const parts = [
+          asset.name,
+          asset.quantity > 1 ? `${asset.quantity}x` : null,
+          asset.condition ? `حالة: ${asset.condition}` : null,
+          asset.details || null,
+        ].filter(Boolean).join(" — ");
+        sections.push(`- ${parts}`);
+      }
+      sections.push(`\n### ملخص الأصول المكتشفة: ${detected.summary}`);
+      sections.push("⚠️ لا تقل 'الأصول غير معروفة' — بل قل 'تم اكتشاف أصول من الصور لكنها غير موثقة رسمياً بجرد مفصل'");
+    }
+  }
+
   if (listing.documents?.length) {
     sections.push("\n## المستندات:");
     listing.documents.forEach((doc: any) => {

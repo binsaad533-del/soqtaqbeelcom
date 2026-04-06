@@ -45,6 +45,8 @@ export interface Listing {
   required_documents: any[];
   primary_deal_type: string | null;
   ai_structure_validation: any | null;
+  ai_analysis_cache: any | null;
+  ai_detected_assets: any | null;
   deleted_at: string | null;
   deleted_by: string | null;
   location_lat: number | null;

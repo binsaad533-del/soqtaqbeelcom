@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import {
-  ShieldCheck, AlertTriangle, TrendingUp, Lightbulb, MessageCircle,
+  ShieldCheck, AlertTriangle, TrendingUp, MessageCircle,
   ChevronDown, ChevronUp, MapPin, BarChart3, Briefcase, CheckCircle2,
-  FileQuestion, Scale, Target, Loader2, Activity, ShoppingCart, Store,
-  RefreshCw, Clock
+  FileQuestion, Target, Loader2, Activity, ShoppingCart, Store,
+  RefreshCw, Clock, Package
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
@@ -108,6 +108,31 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     }
   }, [isStale, analysis]);
 
+  const detectAssets = async (): Promise<any> => {
+    if (!listing?.photos) return null;
+    // Get all photo URLs
+    const photos = listing.photos as Record<string, string[]>;
+    const allUrls = Object.values(photos).flat().filter((u: any): u is string => typeof u === "string" && u.startsWith("http"));
+    if (allUrls.length === 0) return null;
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("detect-assets", {
+        body: { photoUrls: allUrls, businessActivity: listing.business_activity || listing.category },
+      });
+      if (fnError || !data?.success) return null;
+      // Save to DB
+      if (listing.id) {
+        await supabase
+          .from("listings")
+          .update({ ai_detected_assets: data.detected as any })
+          .eq("id", listing.id);
+      }
+      return data.detected;
+    } catch {
+      return null;
+    }
+  };
+
   const runDealCheck = async (background = false) => {
     if (!background) {
       setLoading(true);
@@ -118,8 +143,16 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     setError("");
 
     try {
+      // Step 1: Detect assets from images if not already detected
+      let detectedAssets = listing?.ai_detected_assets;
+      if (!detectedAssets && listing?.photos) {
+        detectedAssets = await detectAssets();
+      }
+
+      // Step 2: Run deal check with detected assets included
+      const listingWithAssets = { ...listing, ai_detected_assets: detectedAssets };
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: { listing, perspective: "buyer" },
+        body: { listing: listingWithAssets, perspective: "buyer" },
       });
 
       if (fnError) throw new Error(fnError.message);
@@ -308,6 +341,54 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                   <AnalysisSection icon={Briefcase} title="نظرة عامة على الصفقة" content={analysis.dealOverview} />
                   <AnalysisSection icon={Activity} title="النشاط التجاري" content={analysis.businessActivity} />
                   <AnalysisSection icon={CheckCircle2} title="تقييم الأصول والمعدات" content={analysis.assetAssessment} />
+
+                  {/* AI Detected Assets from Photos */}
+                  {listing?.ai_detected_assets?.assets?.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-sm flex items-center gap-2 mb-2.5">
+                        <Package size={15} strokeWidth={1.3} className="text-primary/60" />
+                        الأصول المكتشفة تلقائياً
+                      </h4>
+                      <div className="bg-accent/30 rounded-xl p-3 mb-2">
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {listing.ai_detected_assets.summary}
+                        </p>
+                        <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
+                          listing.ai_detected_assets.confidence === "عالي" ? "bg-emerald-50 text-emerald-700" :
+                          listing.ai_detected_assets.confidence === "متوسط" ? "bg-amber-50 text-amber-700" :
+                          "bg-red-50 text-red-700"
+                        )}>
+                          ثقة: {listing.ai_detected_assets.confidence} (بناءً على تحليل الصور فقط)
+                        </span>
+                      </div>
+                      <div className="border border-border/50 rounded-xl overflow-hidden">
+                        <div className="divide-y divide-border/30">
+                          {listing.ai_detected_assets.assets.map((asset: any, i: number) => (
+                            <div key={i} className="px-3 py-2 flex items-center justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="text-xs font-medium">{asset.quantity > 1 ? `${asset.quantity}x ` : ""}{asset.name}</div>
+                                <div className="text-[10px] text-muted-foreground">
+                                  {asset.type}{asset.details ? ` • ${asset.details}` : ""}
+                                </div>
+                              </div>
+                              <span className={cn("text-[10px] px-2 py-0.5 rounded-md shrink-0",
+                                asset.condition === "جديد" ? "bg-emerald-50 text-emerald-700" :
+                                asset.condition === "جيد" ? "bg-blue-50 text-blue-700" :
+                                asset.condition === "مستعمل" ? "bg-amber-50 text-amber-700" :
+                                asset.condition === "تالف" ? "bg-red-50 text-red-700" :
+                                "bg-muted text-muted-foreground"
+                              )}>
+                                {asset.condition}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground/60 text-center mt-2">
+                        تم تحليل {listing.ai_detected_assets.imagesAnalyzed} صورة — النتائج تقديرية وتحتاج تأكيد ميداني
+                      </p>
+                    </div>
+                  )}
                   <AnalysisSection icon={MapPin} title="تقييم الموقع" content={analysis.locationAssessment} />
                   <AnalysisSection icon={BarChart3} title="المنافسة والسوق" content={analysis.competitionSnapshot} />
                   <AnalysisSection icon={ShieldCheck} title="الجاهزية التشغيلية" content={analysis.operationalReadiness} />
