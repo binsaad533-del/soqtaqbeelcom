@@ -311,8 +311,9 @@ serve(async (req) => {
       });
     }
 
-    // Detect activity type
+    // Detect activity type and industrial zone
     const activityTemplate = detectActivityType(listing.business_activity || listing.title || "");
+    const industrial = isIndustrialZone(listing);
 
     // Search for competitors via Google Places if location available
     let competitors: { radius: number; places: any[] }[] = [];
@@ -324,10 +325,11 @@ serve(async (req) => {
         activityTemplate.googlePlacesType,
         listing.business_activity || activityTemplate.label,
         mapsKey,
+        industrial,
       );
     }
 
-    const userPrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors);
+    const userPrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors, industrial);
     const documentUrls = extractDocumentUrls(listing);
     const userContent = buildMultimodalContent(userPrompt, documentUrls);
 
