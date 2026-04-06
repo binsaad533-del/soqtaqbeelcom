@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import {
-  ShieldCheck, AlertTriangle, TrendingUp, Lightbulb, MessageCircle,
+  ShieldCheck, AlertTriangle, TrendingUp, MessageCircle,
   ChevronDown, ChevronUp, MapPin, BarChart3, Briefcase, CheckCircle2,
-  FileQuestion, Scale, Target, Loader2, Activity, ShoppingCart, Store,
-  RefreshCw, Clock
+  FileQuestion, Target, Loader2, Activity, ShoppingCart, Store,
+  RefreshCw, Clock, Package
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
