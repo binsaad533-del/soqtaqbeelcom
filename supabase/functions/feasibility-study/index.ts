@@ -52,6 +52,15 @@ const ACTIVITY_TEMPLATES: Record<string, {
     riskFactors: ["المنافسة العالية", "تقلب أسعار المواد", "اعتمادية العمالة", "تطبيقات التوصيل (عمولات 15-30%)"],
     googlePlacesType: "restaurant",
   },
+  industrial: {
+    label: "مصنع / ورشة صناعية",
+    keywords: ["مصنع", "ورشة", "نجارة", "حدادة", "تصنيع", "ديكور", "مشغل", "معمل", "لحام", "دهانات", "فايبر", "ألمنيوم"],
+    operationalCosts: ["المواد الخام", "رواتب العمالة الفنية (5-15 عامل)", "الإيجار", "الكهرباء (استهلاك عالي)", "صيانة المعدات", "النقل والشحن", "التأمين"],
+    revenueDrivers: ["المنتجات المصنّعة", "خدمات التصنيع حسب الطلب", "عقود المقاولين", "البيع بالجملة"],
+    licenseRequirements: ["رخصة البلدية", "السجل التجاري الصناعي", "الدفاع المدني", "رخصة البيئة", "شهادة السلامة المهنية"],
+    riskFactors: ["تقلب أسعار المواد الخام", "توفر العمالة الماهرة", "أعطال المعدات", "المنافسة السعرية", "تكلفة الطاقة"],
+    googlePlacesType: "establishment",
+  },
   general: {
     label: "نشاط تجاري عام",
     keywords: [],
@@ -62,6 +71,14 @@ const ACTIVITY_TEMPLATES: Record<string, {
     googlePlacesType: "establishment",
   },
 };
+
+/* ── Industrial zone detection ── */
+const INDUSTRIAL_KEYWORDS = ["مصنع", "ورشة", "مستودع", "نجارة", "حدادة", "تصنيع", "صناعي", "صناعية", "ديكور", "مشغل", "معمل", "مصبغة", "تغليف", "لحام", "دهانات", "بلاستيك", "فايبر", "حديد", "ألمنيوم", "خشب"];
+
+function isIndustrialZone(listing: any): boolean {
+  const text = [listing?.business_activity, listing?.title, listing?.district, listing?.category].filter(Boolean).join(" ").toLowerCase();
+  return INDUSTRIAL_KEYWORDS.some(kw => text.includes(kw));
+}
 
 /** Extract all document file URLs from listing for multimodal AI analysis */
 function extractDocumentUrls(listing: any): string[] {
@@ -104,52 +121,62 @@ function detectActivityType(activity: string): typeof ACTIVITY_TEMPLATES[string]
   return ACTIVITY_TEMPLATES.general;
 }
 
-/* ── Google Places competitor search ── */
+/* ── Google Places competitor search with industrial zone awareness ── */
 async function searchNearbyCompetitors(
   lat: number,
   lng: number,
   placeType: string,
   keyword: string,
   apiKey: string,
+  isIndustrial: boolean,
 ): Promise<{ radius: number; places: any[] }[]> {
-  const radii = [500, 2000, 10000]; // same street, neighborhood, area
+  const radii = [500, 2000, 10000];
   const results: { radius: number; places: any[] }[] = [];
 
+  // For industrial zones, search with multiple keywords to catch hidden competitors
+  const keywords = isIndustrial
+    ? [keyword, ...INDUSTRIAL_KEYWORDS.slice(0, 5).filter(kw => !keyword.includes(kw))]
+    : [keyword];
+
   for (const radius of radii) {
-    try {
-      const url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json");
-      url.searchParams.set("location", `${lat},${lng}`);
-      url.searchParams.set("radius", String(radius));
-      url.searchParams.set("type", placeType);
-      url.searchParams.set("keyword", keyword);
-      url.searchParams.set("language", "ar");
-      url.searchParams.set("key", apiKey);
+    const allPlaces: any[] = [];
+    const seenNames = new Set<string>();
 
-      const res = await fetch(url.toString());
-      if (!res.ok) {
-        console.error(`Places API error for radius ${radius}:`, res.status);
-        results.push({ radius, places: [] });
-        continue;
+    for (const kw of keywords) {
+      try {
+        const url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json");
+        url.searchParams.set("location", `${lat},${lng}`);
+        url.searchParams.set("radius", String(radius));
+        if (!isIndustrial) url.searchParams.set("type", placeType);
+        url.searchParams.set("keyword", kw);
+        url.searchParams.set("language", "ar");
+        url.searchParams.set("key", apiKey);
+
+        const res = await fetch(url.toString());
+        if (!res.ok) continue;
+
+        const data = await res.json();
+        for (const p of (data.results || []).slice(0, 10)) {
+          if (seenNames.has(p.name)) continue;
+          seenNames.add(p.name);
+          allPlaces.push({
+            name: p.name,
+            rating: p.rating || null,
+            totalRatings: p.user_ratings_total || 0,
+            address: p.vicinity || "",
+            isOpen: p.opening_hours?.open_now ?? null,
+            priceLevel: p.price_level ?? null,
+            distance: Math.round(
+              haversineDistance(lat, lng, p.geometry?.location?.lat, p.geometry?.location?.lng)
+            ),
+          });
+        }
+      } catch {
+        // continue with next keyword
       }
-
-      const data = await res.json();
-      const places = (data.results || []).slice(0, 10).map((p: any) => ({
-        name: p.name,
-        rating: p.rating || null,
-        totalRatings: p.user_ratings_total || 0,
-        address: p.vicinity || "",
-        isOpen: p.opening_hours?.open_now ?? null,
-        priceLevel: p.price_level ?? null,
-        distance: Math.round(
-          haversineDistance(lat, lng, p.geometry?.location?.lat, p.geometry?.location?.lng)
-        ),
-      }));
-
-      results.push({ radius, places });
-    } catch (err) {
-      console.error(`Places search error (radius ${radius}):`, err);
-      results.push({ radius, places: [] });
     }
+
+    results.push({ radius, places: allPlaces.slice(0, 15) });
   }
 
   return results;
@@ -164,7 +191,7 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 /* ── Build AI prompt ── */
-function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors: any[]): string {
+function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors: any[], industrial: boolean): string {
   const sections: string[] = [];
 
   sections.push("# طلب دراسة جدوى اقتصادية شاملة لصفقة تقبيل");
@@ -195,13 +222,25 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
   sections.push(`- التراخيص المطلوبة: ${activityTemplate.licenseRequirements.join("، ")}`);
   sections.push(`- عوامل المخاطرة: ${activityTemplate.riskFactors.join("، ")}`);
 
+  // Industrial zone context
+  if (industrial) {
+    sections.push("\n## ⚠️ تنبيه: منطقة صناعية");
+    sections.push("- هذا النشاط يقع في منطقة صناعية — المنافسون غالباً لا يظهرون في Google Maps");
+    sections.push("- قدّر عدد المنافسين المحتملين بناءً على نوع النشاط والمنطقة (لا تقل عن 5-15 منافس تقديري)");
+    sections.push("- لا تُظهر 0 منافسين في أي نطاق — المناطق الصناعية مليئة بالورش والمصانع غير المسجلة");
+    sections.push("- اذكر بوضوح أن الأعداد تقديرية وليست دقيقة");
+  }
+
   // Competitor data
   if (competitors.length > 0) {
-    sections.push("\n## بيانات المنافسين الحقيقية من Google Maps:");
+    sections.push("\n## بيانات المنافسين من Google Maps:");
     const labels = ["في نطاق 500 متر (نفس الشارع)", "في نطاق 2 كم (نفس الحي)", "في نطاق 10 كم (المنطقة)"];
     competitors.forEach((group, i) => {
       sections.push(`\n### ${labels[i] || `نطاق ${group.radius}م`}:`);
-      sections.push(`- عدد المنافسين: ${group.places.length}`);
+      sections.push(`- عدد المنافسين المرصودين: ${group.places.length}`);
+      if (industrial && group.places.length === 0) {
+        sections.push("- ⚠️ لم تظهر نتائج — لكن المناطق الصناعية تحتوي على منافسين غير مسجلين (قدّر 3-8 على الأقل)");
+      }
       if (group.places.length > 0) {
         group.places.forEach((p: any) => {
           const parts = [p.name, p.rating ? `تقييم ${p.rating}/5 (${p.totalRatings} مراجعة)` : null, `${p.distance}م`];
@@ -212,7 +251,16 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
   } else {
     sections.push("\n## لا تتوفر بيانات منافسين (الموقع غير محدد على الخريطة)");
     sections.push("- قدّم تحليل تنافسي تقديري بناءً على نوع النشاط والمدينة");
+    if (industrial) {
+      sections.push("- المناطق الصناعية تحتوي عادةً على 10-30 منافس في نطاق 10 كم — لا تقل 0");
+    }
   }
+
+  // Market price estimation
+  sections.push("\n## تقدير سعر السوق (إلزامي):");
+  sections.push("- يجب تقديم نطاق سعري تقديري للصفقة (لا تترك الحقل فارغاً أو 'غير محدد')");
+  sections.push("- الأولوية: 1) مقارنة بصفقات مشابهة 2) تقدير بناءً على الأصول والموقع والإيجار 3) تقدير AI");
+  sections.push("- اذكر مصدر التقدير: 'تقديري' أو 'بناءً على بيانات'");
 
   sections.push("\n---");
   sections.push("## التعليمات:");
@@ -221,6 +269,7 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
   sections.push("- كن دقيقاً وعملياً في التقديرات المالية");
   sections.push("- اعتمد على بيانات المنافسين الحقيقية إن توفرت");
   sections.push("- قدّم 3 سيناريوهات واقعية (متفائل، واقعي، متحفظ)");
+  sections.push("- لا تترك أي حقل رقمي بقيمة 0 أو 'غير محدد' — قدّم تقديراً حتى لو كان بمستوى ثقة منخفض");
 
   return sections.join("\n");
 }
@@ -271,8 +320,9 @@ serve(async (req) => {
       });
     }
 
-    // Detect activity type
+    // Detect activity type and industrial zone
     const activityTemplate = detectActivityType(listing.business_activity || listing.title || "");
+    const industrial = isIndustrialZone(listing);
 
     // Search for competitors via Google Places if location available
     let competitors: { radius: number; places: any[] }[] = [];
@@ -284,10 +334,11 @@ serve(async (req) => {
         activityTemplate.googlePlacesType,
         listing.business_activity || activityTemplate.label,
         mapsKey,
+        industrial,
       );
     }
 
-    const userPrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors);
+    const userPrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors, industrial);
     const documentUrls = extractDocumentUrls(listing);
     const userContent = buildMultimodalContent(userPrompt, documentUrls);
 

@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ShieldCheck, AlertTriangle, TrendingUp, Lightbulb, MessageCircle,
   ChevronDown, ChevronUp, MapPin, BarChart3, Briefcase, CheckCircle2,
-  FileQuestion, Scale, Target, Loader2, Activity, ShoppingCart, Store
+  FileQuestion, Scale, Target, Loader2, Activity, ShoppingCart, Store,
+  RefreshCw, Clock
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import type { UseAnalysisCacheReturn } from "@/hooks/useAnalysisCache";
 
 interface AssetBreakdownItem {
   assetName: string;
@@ -48,7 +50,7 @@ interface DealCheckAnalysis {
 
 interface DealCheckPanelProps {
   listing: any;
-  savedAnalysis?: any;
+  analysisCache: UseAnalysisCacheReturn;
 }
 
 const RATING_CONFIG: Record<string, { bg: string; text: string; border: string }> = {
@@ -66,17 +68,54 @@ const FAIRNESS_ICONS: Record<string, string> = {
   "غير واضح": "⚪",
 };
 
-const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
-  const [open, setOpen] = useState(!!savedAnalysis);
+function formatCacheAge(dateStr: string | null): string {
+  if (!dateStr) return "";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  if (hours < 1) return "الآن";
+  if (hours < 24) return `منذ ${hours} ساعة`;
+  const days = Math.floor(hours / 24);
+  return `منذ ${days} يوم`;
+}
+
+const CONFIDENCE_BADGE: Record<string, { bg: string; text: string }> = {
+  "عالي": { bg: "bg-emerald-50", text: "text-emerald-700" },
+  "متوسط": { bg: "bg-amber-50", text: "text-amber-700" },
+  "منخفض": { bg: "bg-red-50", text: "text-red-700" },
+};
+
+const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
+  const { cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing } = analysisCache;
+
+  const [open, setOpen] = useState(!!cachedDealCheck);
   const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<DealCheckAnalysis | null>(savedAnalysis || null);
+  const [analysis, setAnalysis] = useState<DealCheckAnalysis | null>(cachedDealCheck || null);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
 
-  const runDealCheck = async () => {
-    setLoading(true);
+  // Sync from cache when it loads
+  useEffect(() => {
+    if (cachedDealCheck && !analysis) {
+      setAnalysis(cachedDealCheck);
+      setOpen(true);
+    }
+  }, [cachedDealCheck]);
+
+  // Auto-trigger background refresh if stale
+  useEffect(() => {
+    if (analysis && isStale && !loading && !isRefreshing) {
+      runDealCheck(true);
+    }
+  }, [isStale, analysis]);
+
+  const runDealCheck = async (background = false) => {
+    if (!background) {
+      setLoading(true);
+      setOpen(true);
+    } else {
+      setRefreshing(true);
+    }
     setError("");
-    setOpen(true);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
@@ -87,8 +126,9 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
 
       setAnalysis(data.analysis);
+      await saveDealCheck(data.analysis);
 
-      // Save analysis back to listing
+      // Also update legacy field
       if (listing?.id) {
         await supabase
           .from("listings")
@@ -96,9 +136,12 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
           .eq("id", listing.id);
       }
     } catch (e: any) {
-      setError(e.message || "حدث خطأ أثناء التحليل");
+      if (!background) {
+        setError(e.message || "حدث خطأ أثناء التحليل");
+      }
     } finally {
-      setLoading(false);
+      if (!background) setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -129,6 +172,12 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {isRefreshing && (
+            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <RefreshCw size={10} className="animate-spin" />
+              جاري التحديث...
+            </span>
+          )}
           {analysis && (
             <span className={cn("text-[11px] px-2.5 py-1 rounded-lg border", ratingStyle.bg, ratingStyle.text, ratingStyle.border)}>
               {analysis.rating}
@@ -168,7 +217,7 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={runDealCheck}
+                onClick={() => runDealCheck()}
                 className="rounded-xl text-xs"
               >
                 إعادة المحاولة
@@ -179,6 +228,25 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
           {/* Analysis Result */}
           {analysis && !loading && (
             <div className="space-y-5">
+              {/* Cache Info Bar */}
+              {cacheAge && (
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground/70">
+                  <div className="flex items-center gap-1.5">
+                    <Clock size={10} />
+                    <span>آخر تحديث: {formatCacheAge(cacheAge)}</span>
+                    {isStale && <span className="text-amber-500">(قديم — يتم التحديث)</span>}
+                  </div>
+                  {analysis.confidenceLevel && (
+                    <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium",
+                      CONFIDENCE_BADGE[analysis.confidenceLevel]?.bg || "bg-muted",
+                      CONFIDENCE_BADGE[analysis.confidenceLevel]?.text || "text-muted-foreground"
+                    )}>
+                      ثقة: {analysis.confidenceLevel}
+                    </span>
+                  )}
+                </div>
+              )}
+
               {/* Rating Banner */}
               <div className={cn("rounded-xl p-4 border", ratingStyle.bg, ratingStyle.border)}>
                 <div className="flex items-center justify-between mb-2">
@@ -190,15 +258,12 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
                     <span className="text-[11px] text-muted-foreground">
                       عدالة السعر: {FAIRNESS_ICONS[analysis.fairnessVerdict]} {analysis.fairnessVerdict}
                     </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      ثقة: {analysis.confidenceLevel}
-                    </span>
                   </div>
                 </div>
                 <p className={cn("text-lg font-medium", ratingStyle.text)}>{analysis.rating}</p>
               </div>
 
-              {/* Recommendation - always visible */}
+              {/* Recommendation */}
               <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
                 <div className="flex items-center gap-2 mb-2">
                   <AiStar size={14} animate={false} />
@@ -207,7 +272,7 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
                 <p className="text-sm leading-relaxed">{analysis.recommendation}</p>
               </div>
 
-              {/* Strengths - always visible */}
+              {/* Strengths */}
               <ListSection
                 icon={TrendingUp}
                 title="نقاط القوة"
@@ -216,7 +281,7 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
                 iconClass="text-emerald-600"
               />
 
-              {/* Risks - always visible */}
+              {/* Risks */}
               <ListSection
                 icon={AlertTriangle}
                 title="المخاطر"
@@ -240,7 +305,6 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
 
               {expanded && (
                 <>
-                  {/* Deal Overview */}
                   <AnalysisSection icon={Briefcase} title="نظرة عامة على الصفقة" content={analysis.dealOverview} />
                   <AnalysisSection icon={Activity} title="النشاط التجاري" content={analysis.businessActivity} />
                   <AnalysisSection icon={CheckCircle2} title="تقييم الأصول والمعدات" content={analysis.assetAssessment} />
@@ -357,7 +421,7 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={runDealCheck}
+                  onClick={() => runDealCheck()}
                   className="text-xs text-muted-foreground hover:text-foreground rounded-xl"
                 >
                   <Loader2 size={12} strokeWidth={1.5} className="ml-1" />

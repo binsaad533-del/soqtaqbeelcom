@@ -72,6 +72,7 @@ interface FeasibilityStudy {
 
 interface FeasibilityStudyPanelProps {
   listing: any;
+  analysisCache: import("@/hooks/useAnalysisCache").UseAnalysisCacheReturn;
 }
 
 const VERDICT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -100,7 +101,7 @@ function formatNum(n: number): string {
   return n.toLocaleString("en-US");
 }
 
-const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
+const FeasibilityStudyPanel = ({ listing, analysisCache }: FeasibilityStudyPanelProps) => {
   const [study, setStudy] = useState<FeasibilityStudy | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingCache, setLoadingCache] = useState(true);
@@ -163,7 +164,8 @@ const FeasibilityStudyPanel = ({ listing }: FeasibilityStudyPanelProps) => {
       setCachedAt(new Date().toISOString());
       setExpandedSections({ summary: true, investment: true, costs: true, revenue: true, competitors: true, risks: true, recommendations: true });
 
-      // Save to database
+      // Save to unified cache + database
+      await analysisCache.saveFeasibility(data.study);
       const { data: userData } = await supabase.auth.getUser();
       if (userData?.user) {
         await supabase.from("feasibility_studies").upsert({

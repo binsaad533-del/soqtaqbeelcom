@@ -1,0 +1,1 @@
+ALTER TABLE public.listings ADD COLUMN IF NOT EXISTS ai_analysis_cache JSONB DEFAULT NULL;
