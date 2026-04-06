@@ -34,6 +34,7 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
   const [detectedAssetsImages, setDetectedAssetsImages] = useState<any>(null);
   const [detectedAssetsFiles, setDetectedAssetsFiles] = useState<any>(null);
   const [assetsCombined, setAssetsCombined] = useState<any>(null);
+  const [priceAnalysis, setPriceAnalysis] = useState<any>(null);
   const [analysisUpdatedAt, setAnalysisUpdatedAt] = useState<string | null>(null);
   const loadedRef = useRef(false);
 
