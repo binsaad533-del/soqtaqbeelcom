@@ -339,6 +339,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                 <p className={cn("text-lg font-medium", ratingStyle.text)}>{analysis.rating}</p>
               </div>
 
+              {/* Trust Score Section */}
+              {trustScore && (
+                <TrustScoreSection trustScore={trustScore} />
+              )}
+
               {/* Recommendation */}
               <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
                 <div className="flex items-center gap-2 mb-2">
