@@ -10,6 +10,7 @@ import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
 import FeasibilityStudyPanel from "@/components/FeasibilityStudyPanel";
+import { useAnalysisCache } from "@/hooks/useAnalysisCache";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
 
 import QuickPriceEdit from "@/components/QuickPriceEdit";
