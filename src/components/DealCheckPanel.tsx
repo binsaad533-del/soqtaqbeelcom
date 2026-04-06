@@ -3,7 +3,7 @@ import {
   ShieldCheck, AlertTriangle, TrendingUp, MessageCircle,
   ChevronDown, ChevronUp, MapPin, BarChart3, Briefcase, CheckCircle2,
   FileQuestion, Target, Loader2, Activity, ShoppingCart, Store,
-  RefreshCw, Clock, Package, FileText, ImageIcon
+  RefreshCw, Clock, Package, FileText, ImageIcon, DollarSign, ArrowDownRight, ArrowUpRight, Equal
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
@@ -93,7 +93,8 @@ const SOURCE_LABELS: Record<string, { icon: typeof ImageIcon; label: string }> =
 const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const {
     cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing,
-    assetsCombined, detectedAssetsImages, detectedAssetsFiles, analysisUpdatedAt, saveDetectedAssets
+    assetsCombined, detectedAssetsImages, detectedAssetsFiles, analysisUpdatedAt, saveDetectedAssets,
+    priceAnalysis, savePriceAnalysis
   } = analysisCache;
 
   const [open, setOpen] = useState(!!cachedDealCheck);
@@ -148,13 +149,18 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           photoUrls,
           fileUrls,
           businessActivity: listing.business_activity || listing.category,
+          dealPrice: listing.price || null,
         },
       });
       if (fnError || !data?.success) return null;
 
       const detected = data.detected;
-      // Save all three: images, files, combined
       await saveDetectedAssets(detected.images, detected.files, detected.combined);
+
+      // Save price analysis if returned
+      if (detected.priceAnalysis) {
+        await savePriceAnalysis(detected.priceAnalysis);
+      }
 
       return detected.combined;
     } catch {
@@ -418,6 +424,96 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                         {detectedAssetsFiles?.assets?.length > 0 ? ` و ${detectedAssetsFiles.assets.length} عنصر من المستندات` : ""}
                         {" — النتائج تقديرية وتحتاج تأكيد ميداني"}
                       </p>
+                    </div>
+                  )}
+
+                  {/* Price Analysis Section */}
+                  {priceAnalysis && (
+                    <div>
+                      <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
+                        <DollarSign size={15} strokeWidth={1.3} className="text-primary/60" />
+                        تحليل السعر
+                      </h4>
+                      <div className={cn("rounded-xl p-4 border mb-3",
+                        priceAnalysis.decision === "فرصة ممتازة" || priceAnalysis.decision === "صفقة جيدة"
+                          ? "bg-emerald-50 border-emerald-200"
+                          : priceAnalysis.decision === "سعر عادل"
+                          ? "bg-blue-50 border-blue-200"
+                          : priceAnalysis.decision === "أعلى قليلاً"
+                          ? "bg-amber-50 border-amber-200"
+                          : priceAnalysis.decision === "مبالغ فيه"
+                          ? "bg-red-50 border-red-200"
+                          : "bg-muted border-border"
+                      )}>
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <div>
+                            <div className="text-[10px] text-muted-foreground">💰 القيمة التقديرية</div>
+                            <div className="text-sm font-semibold">{priceAnalysis.estimated_value?.toLocaleString()} ر.س</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-muted-foreground">🏷️ السعر المعروض</div>
+                            <div className="text-sm font-semibold">{priceAnalysis.deal_price?.toLocaleString()} ر.س</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {priceAnalysis.overpriced_percentage > 10 ? (
+                              <ArrowUpRight size={16} className="text-red-500" />
+                            ) : priceAnalysis.overpriced_percentage < -10 ? (
+                              <ArrowDownRight size={16} className="text-emerald-500" />
+                            ) : (
+                              <Equal size={16} className="text-blue-500" />
+                            )}
+                            <span className={cn("text-sm font-medium",
+                              priceAnalysis.decision === "فرصة ممتازة" || priceAnalysis.decision === "صفقة جيدة" ? "text-emerald-700" :
+                              priceAnalysis.decision === "سعر عادل" ? "text-blue-700" :
+                              priceAnalysis.decision === "أعلى قليلاً" ? "text-amber-700" :
+                              "text-red-700"
+                            )}>
+                              {priceAnalysis.decision}
+                            </span>
+                          </div>
+                          {priceAnalysis.overpriced_percentage !== 0 && (
+                            <span className="text-xs text-muted-foreground">
+                              {priceAnalysis.overpriced_percentage > 0 ? "+" : ""}{priceAnalysis.overpriced_percentage}%
+                              {priceAnalysis.overpriced_percentage > 0 ? " أعلى" : " أقل"} من التقدير
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {priceAnalysis.items?.length > 0 && (
+                        <div className="border border-border/50 rounded-xl overflow-hidden">
+                          <div className="bg-muted/30 px-3 py-2 text-xs font-medium flex items-center gap-1.5">
+                            <ShoppingCart size={12} strokeWidth={1.3} />
+                            تفصيل تقييم الأصول
+                          </div>
+                          <div className="divide-y divide-border/30">
+                            {priceAnalysis.items.map((item: any, i: number) => (
+                              <div key={i} className="px-3 py-2 flex items-center justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-xs font-medium">{item.quantity > 1 ? `${item.quantity}x ` : ""}{item.name}</div>
+                                  <div className="text-[10px] text-muted-foreground">
+                                    {item.type} • {item.condition} ({Math.round(item.condition_multiplier * 100)}%)
+                                  </div>
+                                </div>
+                                <div className="text-left shrink-0">
+                                  <div className="text-xs font-medium">{item.total_value?.toLocaleString()} ر.س</div>
+                                  {item.quantity > 1 && (
+                                    <div className="text-[10px] text-muted-foreground">{item.adjusted_price?.toLocaleString()} × {item.quantity}</div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="bg-muted/30 px-3 py-2 flex justify-between items-center border-t border-border/30">
+                            <span className="text-xs font-medium">الإجمالي التقديري</span>
+                            <span className="text-sm font-semibold">{priceAnalysis.estimated_value?.toLocaleString()} ر.س</span>
+                          </div>
+                        </div>
+                      )}
+                      {priceAnalysis.market_notes && (
+                        <p className="text-[10px] text-muted-foreground/60 text-center mt-2">{priceAnalysis.market_notes}</p>
+                      )}
                     </div>
                   )}
 

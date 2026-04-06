@@ -1013,6 +1013,7 @@ export type Database = {
           ai_detected_assets: Json | null
           ai_detected_assets_files: Json | null
           ai_detected_assets_images: Json | null
+          ai_price_analysis: Json | null
           ai_rating: string | null
           ai_structure_validation: Json | null
           ai_summary: string | null
@@ -1064,6 +1065,7 @@ export type Database = {
           ai_detected_assets?: Json | null
           ai_detected_assets_files?: Json | null
           ai_detected_assets_images?: Json | null
+          ai_price_analysis?: Json | null
           ai_rating?: string | null
           ai_structure_validation?: Json | null
           ai_summary?: string | null
@@ -1115,6 +1117,7 @@ export type Database = {
           ai_detected_assets?: Json | null
           ai_detected_assets_files?: Json | null
           ai_detected_assets_images?: Json | null
+          ai_price_analysis?: Json | null
           ai_rating?: string | null
           ai_structure_validation?: Json | null
           ai_summary?: string | null

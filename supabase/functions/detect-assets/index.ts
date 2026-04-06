@@ -382,13 +382,176 @@ function combineResults(
   };
 }
 
+// ---- AI Asset Valuation ----
+const CONDITION_MULTIPLIER: Record<string, number> = {
+  "جديد": 1.0,
+  "ممتاز": 0.85,
+  "جيد": 0.70,
+  "مستعمل": 0.50,
+  "تالف": 0.30,
+  "غير واضح": 0.50,
+};
+
+const VALUATION_TOOL = {
+  type: "function" as const,
+  function: {
+    name: "report_valuations",
+    description: "Report estimated market value for each asset",
+    parameters: {
+      type: "object",
+      properties: {
+        valuations: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              base_price_sar: { type: "number", description: "السعر التقديري للوحدة بحالة جديدة بالريال السعودي" },
+              reasoning: { type: "string", description: "مبرر التقدير" },
+            },
+            required: ["name", "base_price_sar", "reasoning"],
+          },
+        },
+        market_notes: { type: "string", description: "ملاحظات عامة عن السوق" },
+      },
+      required: ["valuations", "market_notes"],
+    },
+  },
+};
+
+async function valuateAssets(
+  assets: any[],
+  businessActivity: string,
+  dealPrice: number | null,
+  apiKey: string
+): Promise<any> {
+  if (!assets.length) return null;
+
+  const assetList = assets.map((a: any) =>
+    `- ${a.name} (النوع: ${a.type}, الحالة: ${a.condition}, الكمية: ${a.quantity}${a.details ? `, تفاصيل: ${a.details}` : ""})`
+  ).join("\n");
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      temperature: 0.2,
+      messages: [
+        {
+          role: "system",
+          content: `أنت خبير تقييم أصول في السوق السعودي. قدّر السعر السوقي لكل أصل بحالة جديدة بالريال السعودي. استخدم معرفتك بأسعار المعدات والأجهزة في السوق السعودي.
+
+مهم جداً:
+- السعر يجب أن يكون للوحدة الواحدة بحالة جديدة
+- استخدم أسعار واقعية من السوق السعودي
+- إذا لم تعرف السعر الدقيق، قدّر نطاقاً معقولاً واستخدم المتوسط
+- لا تترك أي أصل بدون تقييم`
+        },
+        {
+          role: "user",
+          content: `قيّم الأصول التالية لنشاط: ${businessActivity || "تجاري عام"}${dealPrice ? `\nالسعر المعروض للصفقة: ${dealPrice.toLocaleString()} ريال` : ""}\n\nالأصول:\n${assetList}`
+        },
+      ],
+      tools: [VALUATION_TOOL],
+      tool_choice: { type: "function", function: { name: "report_valuations" } },
+    }),
+  });
+
+  if (!response.ok) {
+    console.error("Valuation failed:", response.status);
+    return null;
+  }
+
+  const data = await response.json();
+  const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+  if (!toolCall) return null;
+
+  try {
+    return JSON.parse(toolCall.function.arguments);
+  } catch {
+    return null;
+  }
+}
+
+function buildPriceAnalysis(
+  assets: any[],
+  valuationResult: any,
+  dealPrice: number | null
+): any {
+  if (!valuationResult?.valuations) return null;
+
+  const valuationMap = new Map<string, any>();
+  for (const v of valuationResult.valuations) {
+    valuationMap.set(v.name?.trim()?.toLowerCase(), v);
+  }
+
+  const itemizedValues: any[] = [];
+  let totalEstimatedValue = 0;
+
+  for (const asset of assets) {
+    const key = asset.name?.trim()?.toLowerCase();
+    const valuation = valuationMap.get(key);
+    const basePrice = valuation?.base_price_sar || 0;
+    const conditionMult = CONDITION_MULTIPLIER[asset.condition] || 0.50;
+    const qty = asset.quantity || 1;
+    const adjustedPrice = Math.round(basePrice * conditionMult);
+    const totalValue = adjustedPrice * qty;
+
+    totalEstimatedValue += totalValue;
+
+    itemizedValues.push({
+      name: asset.name,
+      type: asset.type,
+      condition: asset.condition,
+      quantity: qty,
+      base_price: basePrice,
+      condition_multiplier: conditionMult,
+      adjusted_price: adjustedPrice,
+      total_value: totalValue,
+      reasoning: valuation?.reasoning || "",
+      source: asset.source || "image",
+    });
+  }
+
+  // Decision logic
+  let decision = "غير محدد";
+  let overpricedPercentage = 0;
+  let difference = 0;
+
+  if (dealPrice && dealPrice > 0 && totalEstimatedValue > 0) {
+    difference = dealPrice - totalEstimatedValue;
+    overpricedPercentage = Math.round((difference / totalEstimatedValue) * 100);
+
+    if (overpricedPercentage <= -25) decision = "فرصة ممتازة";
+    else if (overpricedPercentage <= -10) decision = "صفقة جيدة";
+    else if (overpricedPercentage <= 10) decision = "سعر عادل";
+    else if (overpricedPercentage <= 25) decision = "أعلى قليلاً";
+    else decision = "مبالغ فيه";
+  }
+
+  return {
+    estimated_value: totalEstimatedValue,
+    deal_price: dealPrice || 0,
+    difference,
+    overpriced_percentage: overpricedPercentage,
+    decision,
+    items: itemizedValues,
+    market_notes: valuationResult.market_notes || "",
+    generated_at: new Date().toISOString(),
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { photoUrls, fileUrls, businessActivity } = await req.json();
+    const { photoUrls, fileUrls, businessActivity, dealPrice } = await req.json();
 
     const hasPhotos = Array.isArray(photoUrls) && photoUrls.length > 0;
     const hasFiles = Array.isArray(fileUrls) && fileUrls.length > 0;
@@ -469,10 +632,30 @@ serve(async (req) => {
     // --- COMBINE ---
     const { combined, confidence } = combineResults(imageResult, fileResult);
 
+    // --- VALUATION ---
+    let priceAnalysis: any = null;
+    const combinedAssets = combined?.assets || [];
+    if (combinedAssets.length > 0) {
+      const valuationResult = await valuateAssets(
+        combinedAssets,
+        activity,
+        typeof dealPrice === "number" ? dealPrice : null,
+        LOVABLE_API_KEY
+      );
+      if (valuationResult) {
+        priceAnalysis = buildPriceAnalysis(
+          combinedAssets,
+          valuationResult,
+          typeof dealPrice === "number" ? dealPrice : null
+        );
+      }
+    }
+
     const output = {
       images: imageResult,
       files: fileResult,
       combined: { ...combined, confidence },
+      priceAnalysis,
       detectedAt: new Date().toISOString(),
     };
 

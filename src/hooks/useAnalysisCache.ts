@@ -18,11 +18,13 @@ export interface UseAnalysisCacheReturn {
   detectedAssetsImages: any | null;
   detectedAssetsFiles: any | null;
   assetsCombined: any | null;
+  priceAnalysis: any | null;
   analysisUpdatedAt: string | null;
   loadCache: () => Promise<void>;
   saveDealCheck: (analysis: any) => Promise<void>;
   saveFeasibility: (study: any) => Promise<void>;
   saveDetectedAssets: (images: any, files: any, combined: any) => Promise<void>;
+  savePriceAnalysis: (analysis: any) => Promise<void>;
   setRefreshing: (v: boolean) => void;
 }
 
@@ -32,6 +34,7 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
   const [detectedAssetsImages, setDetectedAssetsImages] = useState<any>(null);
   const [detectedAssetsFiles, setDetectedAssetsFiles] = useState<any>(null);
   const [assetsCombined, setAssetsCombined] = useState<any>(null);
+  const [priceAnalysis, setPriceAnalysis] = useState<any>(null);
   const [analysisUpdatedAt, setAnalysisUpdatedAt] = useState<string | null>(null);
   const loadedRef = useRef(false);
 
@@ -44,7 +47,7 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
     try {
       const { data } = await supabase
         .from("listings")
-        .select("ai_analysis_cache, ai_structure_validation, ai_detected_assets, ai_detected_assets_images, ai_detected_assets_files, ai_assets_combined, ai_analysis_updated_at")
+        .select("ai_analysis_cache, ai_structure_validation, ai_detected_assets, ai_detected_assets_images, ai_detected_assets_files, ai_assets_combined, ai_analysis_updated_at, ai_price_analysis")
         .eq("id", listingId)
         .maybeSingle();
 
@@ -59,6 +62,7 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
         setAssetsCombined(data.ai_detected_assets);
       }
       if (data.ai_analysis_updated_at) setAnalysisUpdatedAt(data.ai_analysis_updated_at as string);
+      if (data.ai_price_analysis) setPriceAnalysis(data.ai_price_analysis);
 
       if (data.ai_analysis_cache && typeof data.ai_analysis_cache === "object") {
         const c = data.ai_analysis_cache as any;
@@ -143,6 +147,19 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
     }
   }, [listingId]);
 
+  const savePriceAnalysis = useCallback(async (analysis: any) => {
+    if (!listingId) return;
+    setPriceAnalysis(analysis);
+    try {
+      await supabase
+        .from("listings")
+        .update({ ai_price_analysis: analysis as any } as any)
+        .eq("id", listingId);
+    } catch {
+      // ignore
+    }
+  }, [listingId]);
+
   return {
     cachedDealCheck: cache?.dealCheck || null,
     cachedFeasibility: cache?.feasibility || null,
@@ -152,11 +169,13 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
     detectedAssetsImages,
     detectedAssetsFiles,
     assetsCombined,
+    priceAnalysis,
     analysisUpdatedAt,
     loadCache,
     saveDealCheck,
     saveFeasibility,
     saveDetectedAssets,
+    savePriceAnalysis,
     setRefreshing: setIsRefreshing,
   };
 }
