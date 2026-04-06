@@ -72,6 +72,7 @@ function getImageRequirement(dealType: string): "required" | "optional" | "none"
 import type { InventoryItem, InventoryPricingMode, DedupAction, CrExtractionResult } from "./create-listing/types";
 import { ConfirmationCard } from "./create-listing/ConfirmationCard";
 import { FormField, SelectField } from "./create-listing/FormFields";
+import AssetImportPanel from "@/components/AssetImportPanel";
 
 const CreateListingPage = () => {
   useSEO({ title: "أضف فرصة جديدة", description: "أنشئ إعلان تقبيل جديد على سوق تقبيل — أضف تفاصيل مشروعك واجذب المشترين", canonical: "/create-listing" });
@@ -1640,6 +1641,25 @@ const CreateListingPage = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Asset Import from Excel */}
+              <div className="border-t border-border/50 pt-5">
+                <AssetImportPanel
+                  listingId={listingId}
+                  existingInventory={inventory}
+                  onImport={(items) => {
+                    setInventory(items);
+                    setAnalyzed(true);
+                  }}
+                  onFileUploaded={(url) => {
+                    setUploadedDocs((prev) => ({
+                      ...prev,
+                      "قائمة الأصول (Excel)": [...(prev["قائمة الأصول (Excel)"] || []), url],
+                    }));
+                  }}
+                  uploadFile={uploadFile}
+                />
               </div>
 
               {/* Location Map Picker */}
