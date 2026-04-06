@@ -579,10 +579,10 @@ const ListingDetailsPage = () => {
               )}
             </div>
 
-            <DealCheckPanel listing={listing} savedAnalysis={listing.ai_structure_validation} />
+            <DealCheckPanel listing={listing} analysisCache={analysisCache} />
 
             {/* دراسة الجدوى الاقتصادية وتحليل المنافسين */}
-            <FeasibilityStudyPanel listing={listing} />
+            <FeasibilityStudyPanel listing={listing} analysisCache={analysisCache} />
           </div>
 
           {/* Sidebar */}
