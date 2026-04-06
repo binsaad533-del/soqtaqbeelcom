@@ -52,6 +52,7 @@ export interface Listing {
   ai_assets_combined: any | null;
   ai_analysis_updated_at: string | null;
   ai_price_analysis: any | null;
+  ai_trust_score: any | null;
   deleted_at: string | null;
   deleted_by: string | null;
   location_lat: number | null;

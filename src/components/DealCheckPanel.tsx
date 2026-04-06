@@ -151,6 +151,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           fileUrls,
           businessActivity: listing.business_activity || listing.category,
           dealPrice: listing.price || null,
+          listingData: listing,
         },
       });
       if (fnError || !data?.success) return null;
@@ -161,6 +162,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
       // Save price analysis if returned
       if (detected.priceAnalysis) {
         await savePriceAnalysis(detected.priceAnalysis);
+      }
+
+      // Save trust score if returned
+      if (detected.trustScore) {
+        await saveTrustScore(detected.trustScore);
       }
 
       return detected.combined;
