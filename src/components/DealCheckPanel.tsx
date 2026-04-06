@@ -3,7 +3,7 @@ import {
   ShieldCheck, AlertTriangle, TrendingUp, MessageCircle,
   ChevronDown, ChevronUp, MapPin, BarChart3, Briefcase, CheckCircle2,
   FileQuestion, Target, Loader2, Activity, ShoppingCart, Store,
-  RefreshCw, Clock, Package
+  RefreshCw, Clock, Package, FileText, ImageIcon
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
@@ -84,8 +84,17 @@ const CONFIDENCE_BADGE: Record<string, { bg: string; text: string }> = {
   "منخفض": { bg: "bg-red-50", text: "text-red-700" },
 };
 
+const SOURCE_LABELS: Record<string, { icon: typeof ImageIcon; label: string }> = {
+  images: { icon: ImageIcon, label: "من الصور" },
+  files: { icon: FileText, label: "من المستندات" },
+  "images+files": { icon: Package, label: "صور + مستندات" },
+};
+
 const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
-  const { cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing } = analysisCache;
+  const {
+    cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing,
+    assetsCombined, detectedAssetsImages, detectedAssetsFiles, analysisUpdatedAt, saveDetectedAssets
+  } = analysisCache;
 
   const [open, setOpen] = useState(!!cachedDealCheck);
   const [loading, setLoading] = useState(false);
@@ -93,7 +102,6 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
 
-  // Sync from cache when it loads
   useEffect(() => {
     if (cachedDealCheck && !analysis) {
       setAnalysis(cachedDealCheck);
@@ -101,33 +109,54 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     }
   }, [cachedDealCheck]);
 
-  // Auto-trigger background refresh if stale
   useEffect(() => {
     if (analysis && isStale && !loading && !isRefreshing) {
       runDealCheck(true);
     }
   }, [isStale, analysis]);
 
-  const detectAssets = async (): Promise<any> => {
-    if (!listing?.photos) return null;
-    // Get all photo URLs
+  const getAllPhotoUrls = (): string[] => {
+    if (!listing?.photos) return [];
     const photos = listing.photos as Record<string, string[]>;
-    const allUrls = Object.values(photos).flat().filter((u: any): u is string => typeof u === "string" && u.startsWith("http"));
-    if (allUrls.length === 0) return null;
+    return Object.values(photos).flat().filter((u: any): u is string => typeof u === "string" && u.startsWith("http"));
+  };
+
+  const getAllFileUrls = (): string[] => {
+    if (!Array.isArray(listing?.documents)) return [];
+    const urls: string[] = [];
+    for (const doc of listing.documents) {
+      if (Array.isArray(doc?.files)) {
+        for (const url of doc.files) {
+          if (typeof url === "string" && url.startsWith("http")) {
+            urls.push(url);
+          }
+        }
+      }
+    }
+    return urls;
+  };
+
+  const detectAssets = async (): Promise<any> => {
+    const photoUrls = getAllPhotoUrls();
+    const fileUrls = getAllFileUrls();
+
+    if (photoUrls.length === 0 && fileUrls.length === 0) return null;
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("detect-assets", {
-        body: { photoUrls: allUrls, businessActivity: listing.business_activity || listing.category },
+        body: {
+          photoUrls,
+          fileUrls,
+          businessActivity: listing.business_activity || listing.category,
+        },
       });
       if (fnError || !data?.success) return null;
-      // Save to DB
-      if (listing.id) {
-        await supabase
-          .from("listings")
-          .update({ ai_detected_assets: data.detected as any })
-          .eq("id", listing.id);
-      }
-      return data.detected;
+
+      const detected = data.detected;
+      // Save all three: images, files, combined
+      await saveDetectedAssets(detected.images, detected.files, detected.combined);
+
+      return detected.combined;
     } catch {
       return null;
     }
@@ -143,14 +172,19 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     setError("");
 
     try {
-      // Step 1: Detect assets from images if not already detected
-      let detectedAssets = listing?.ai_detected_assets;
-      if (!detectedAssets && listing?.photos) {
-        detectedAssets = await detectAssets();
+      // Step 1: Detect assets if not already done
+      let combinedAssets = assetsCombined;
+      if (!combinedAssets) {
+        combinedAssets = await detectAssets();
       }
 
-      // Step 2: Run deal check with detected assets included
-      const listingWithAssets = { ...listing, ai_detected_assets: detectedAssets };
+      // Step 2: Run deal check
+      const listingWithAssets = {
+        ...listing,
+        ai_detected_assets: combinedAssets,
+        ai_detected_assets_images: detectedAssetsImages,
+        ai_detected_assets_files: detectedAssetsFiles,
+      };
       const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
         body: { listing: listingWithAssets, perspective: "buyer" },
       });
@@ -161,7 +195,6 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
       setAnalysis(data.analysis);
       await saveDealCheck(data.analysis);
 
-      // Also update legacy field
       if (listing?.id) {
         await supabase
           .from("listings")
@@ -179,6 +212,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   };
 
   const ratingStyle = analysis ? RATING_CONFIG[analysis.ratingColor] || RATING_CONFIG.gray : RATING_CONFIG.gray;
+
+  // Combine assets for display from all sources
+  const displayAssets = assetsCombined?.assets || listing?.ai_detected_assets?.assets || [];
+  const displayConfidence = assetsCombined?.confidence || listing?.ai_detected_assets?.confidence;
+  const displaySummary = assetsCombined?.summary || listing?.ai_detected_assets?.summary;
 
   return (
     <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
@@ -227,7 +265,6 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
 
       {open && (
         <div className="px-5 pb-5">
-          {/* Loading State */}
           {loading && (
             <div className="py-16 flex flex-col items-center gap-4">
               <div className="relative">
@@ -237,36 +274,29 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               <div className="text-center">
                 <p className="text-sm font-medium">جاري تحليل الصفقة...</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  يتم فحص البيانات والأصول والموقع والسوق
+                  يتم فحص جميع الصور والمستندات والبيانات
                 </p>
               </div>
             </div>
           )}
 
-          {/* Error */}
           {error && !loading && (
             <div className="py-8 text-center">
               <p className="text-sm text-destructive mb-3">{error}</p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => runDealCheck()}
-                className="rounded-xl text-xs"
-              >
+              <Button variant="outline" size="sm" onClick={() => runDealCheck()} className="rounded-xl text-xs">
                 إعادة المحاولة
               </Button>
             </div>
           )}
 
-          {/* Analysis Result */}
           {analysis && !loading && (
             <div className="space-y-5">
               {/* Cache Info Bar */}
-              {cacheAge && (
+              {(cacheAge || analysisUpdatedAt) && (
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground/70">
                   <div className="flex items-center gap-1.5">
                     <Clock size={10} />
-                    <span>آخر تحديث: {formatCacheAge(cacheAge)}</span>
+                    <span>آخر تحديث: {formatCacheAge(analysisUpdatedAt || cacheAge)}</span>
                     {isStale && <span className="text-amber-500">(قديم — يتم التحديث)</span>}
                   </div>
                   {analysis.confidenceLevel && (
@@ -305,32 +335,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                 <p className="text-sm leading-relaxed">{analysis.recommendation}</p>
               </div>
 
-              {/* Strengths */}
-              <ListSection
-                icon={TrendingUp}
-                title="نقاط القوة"
-                items={analysis.strengths}
-                dotClass="bg-emerald-500/60"
-                iconClass="text-emerald-600"
-              />
+              <ListSection icon={TrendingUp} title="نقاط القوة" items={analysis.strengths} dotClass="bg-emerald-500/60" iconClass="text-emerald-600" />
+              <ListSection icon={AlertTriangle} title="المخاطر" items={analysis.risks} dotClass="bg-red-500/50" iconClass="text-red-500/70" />
 
-              {/* Risks */}
-              <ListSection
-                icon={AlertTriangle}
-                title="المخاطر"
-                items={analysis.risks}
-                dotClass="bg-red-500/50"
-                iconClass="text-red-500/70"
-              />
-
-              {/* Expandable details */}
               {!expanded && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setExpanded(true)}
-                  className="w-full rounded-xl text-xs gap-1.5"
-                >
+                <Button variant="outline" size="sm" onClick={() => setExpanded(true)} className="w-full rounded-xl text-xs gap-1.5">
                   <ChevronDown size={14} />
                   عرض التحليل الكامل
                 </Button>
@@ -342,58 +351,80 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                   <AnalysisSection icon={Activity} title="النشاط التجاري" content={analysis.businessActivity} />
                   <AnalysisSection icon={CheckCircle2} title="تقييم الأصول والمعدات" content={analysis.assetAssessment} />
 
-                  {/* AI Detected Assets from Photos */}
-                  {listing?.ai_detected_assets?.assets?.length > 0 && (
+                  {/* Combined Detected Assets */}
+                  {displayAssets.length > 0 && (
                     <div>
                       <h4 className="font-medium text-sm flex items-center gap-2 mb-2.5">
                         <Package size={15} strokeWidth={1.3} className="text-primary/60" />
                         الأصول المكتشفة تلقائياً
                       </h4>
                       <div className="bg-accent/30 rounded-xl p-3 mb-2">
-                        <p className="text-xs text-muted-foreground mb-2">
-                          {listing.ai_detected_assets.summary}
-                        </p>
-                        <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
-                          listing.ai_detected_assets.confidence === "عالي" ? "bg-emerald-50 text-emerald-700" :
-                          listing.ai_detected_assets.confidence === "متوسط" ? "bg-amber-50 text-amber-700" :
-                          "bg-red-50 text-red-700"
-                        )}>
-                          ثقة: {listing.ai_detected_assets.confidence} (بناءً على تحليل الصور فقط)
-                        </span>
+                        <p className="text-xs text-muted-foreground mb-2">{displaySummary}</p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {displayConfidence && (
+                            <span className={cn("text-[10px] px-2 py-0.5 rounded-md",
+                              displayConfidence === "عالي" ? "bg-emerald-50 text-emerald-700" :
+                              displayConfidence === "متوسط" ? "bg-amber-50 text-amber-700" :
+                              "bg-red-50 text-red-700"
+                            )}>
+                              ثقة: {displayConfidence}
+                            </span>
+                          )}
+                          {detectedAssetsImages?.assets?.length > 0 && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 flex items-center gap-1">
+                              <ImageIcon size={9} />
+                              {detectedAssetsImages.imagesAnalyzed} صورة
+                            </span>
+                          )}
+                          {detectedAssetsFiles?.assets?.length > 0 && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-md bg-violet-50 text-violet-700 flex items-center gap-1">
+                              <FileText size={9} />
+                              مستندات
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="border border-border/50 rounded-xl overflow-hidden">
                         <div className="divide-y divide-border/30">
-                          {listing.ai_detected_assets.assets.map((asset: any, i: number) => (
-                            <div key={i} className="px-3 py-2 flex items-center justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <div className="text-xs font-medium">{asset.quantity > 1 ? `${asset.quantity}x ` : ""}{asset.name}</div>
-                                <div className="text-[10px] text-muted-foreground">
-                                  {asset.type}{asset.details ? ` • ${asset.details}` : ""}
+                          {displayAssets.map((asset: any, i: number) => {
+                            const sourceInfo = SOURCE_LABELS[asset.source] || SOURCE_LABELS.images;
+                            return (
+                              <div key={i} className="px-3 py-2 flex items-center justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-xs font-medium">{asset.quantity > 1 ? `${asset.quantity}x ` : ""}{asset.name}</div>
+                                  <div className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                    {asset.type}{asset.details ? ` • ${asset.details}` : ""}
+                                    <span className="text-muted-foreground/50 mr-1">•</span>
+                                    <sourceInfo.icon size={8} />
+                                    <span>{sourceInfo.label}</span>
+                                  </div>
                                 </div>
+                                <span className={cn("text-[10px] px-2 py-0.5 rounded-md shrink-0",
+                                  asset.condition === "جديد" ? "bg-emerald-50 text-emerald-700" :
+                                  asset.condition === "جيد" ? "bg-blue-50 text-blue-700" :
+                                  asset.condition === "مستعمل" ? "bg-amber-50 text-amber-700" :
+                                  asset.condition === "تالف" ? "bg-red-50 text-red-700" :
+                                  "bg-muted text-muted-foreground"
+                                )}>
+                                  {asset.condition}
+                                </span>
                               </div>
-                              <span className={cn("text-[10px] px-2 py-0.5 rounded-md shrink-0",
-                                asset.condition === "جديد" ? "bg-emerald-50 text-emerald-700" :
-                                asset.condition === "جيد" ? "bg-blue-50 text-blue-700" :
-                                asset.condition === "مستعمل" ? "bg-amber-50 text-amber-700" :
-                                asset.condition === "تالف" ? "bg-red-50 text-red-700" :
-                                "bg-muted text-muted-foreground"
-                              )}>
-                                {asset.condition}
-                              </span>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                       <p className="text-[10px] text-muted-foreground/60 text-center mt-2">
-                        تم تحليل {listing.ai_detected_assets.imagesAnalyzed} صورة — النتائج تقديرية وتحتاج تأكيد ميداني
+                        {detectedAssetsImages?.imagesAnalyzed ? `تم تحليل ${detectedAssetsImages.imagesAnalyzed} صورة` : ""}
+                        {detectedAssetsFiles?.assets?.length > 0 ? ` و ${detectedAssetsFiles.assets.length} عنصر من المستندات` : ""}
+                        {" — النتائج تقديرية وتحتاج تأكيد ميداني"}
                       </p>
                     </div>
                   )}
+
                   <AnalysisSection icon={MapPin} title="تقييم الموقع" content={analysis.locationAssessment} />
                   <AnalysisSection icon={BarChart3} title="المنافسة والسوق" content={analysis.competitionSnapshot} />
                   <AnalysisSection icon={ShieldCheck} title="الجاهزية التشغيلية" content={analysis.operationalReadiness} />
 
-                  {/* Market Comparison */}
                   {analysis.marketComparison && (
                     <div>
                       <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
@@ -460,51 +491,25 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                     </div>
                   )}
 
-                  {/* Missing Info */}
                   {analysis.missingInfo.length > 0 && (
-                    <ListSection
-                      icon={FileQuestion}
-                      title="معلومات ناقصة / توضيحات مطلوبة"
-                      items={analysis.missingInfo}
-                      dotClass="bg-amber-500/50"
-                      iconClass="text-amber-500"
-                    />
+                    <ListSection icon={FileQuestion} title="معلومات ناقصة / توضيحات مطلوبة" items={analysis.missingInfo} dotClass="bg-amber-500/50" iconClass="text-amber-500" />
                   )}
 
-                  {/* Negotiation Guidance */}
-                  <ListSection
-                    icon={MessageCircle}
-                    title="إرشادات التفاوض"
-                    items={analysis.negotiationGuidance}
-                    dotClass="bg-blue-500/50"
-                    iconClass="text-blue-500"
-                  />
+                  <ListSection icon={MessageCircle} title="إرشادات التفاوض" items={analysis.negotiationGuidance} dotClass="bg-blue-500/50" iconClass="text-blue-500" />
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setExpanded(false)}
-                    className="w-full text-xs text-muted-foreground hover:text-foreground rounded-xl gap-1.5"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setExpanded(false)} className="w-full text-xs text-muted-foreground hover:text-foreground rounded-xl gap-1.5">
                     <ChevronUp size={14} />
                     إخفاء التفاصيل
                   </Button>
                 </>
               )}
 
-              {/* Disclaimer */}
               <div className="text-[10px] text-muted-foreground/60 text-center pt-2 border-t border-border/20">
                 هذا التحليل استرشادي ولا يُعد تقييماً رسمياً مرخصاً. يُنصح بالتحقق الميداني والاستشارة المتخصصة قبل اتخاذ القرار النهائي.
               </div>
 
-              {/* Re-run button */}
               <div className="flex justify-center pt-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => runDealCheck()}
-                  className="text-xs text-muted-foreground hover:text-foreground rounded-xl"
-                >
+                <Button variant="ghost" size="sm" onClick={() => runDealCheck()} className="text-xs text-muted-foreground hover:text-foreground rounded-xl">
                   <Loader2 size={12} strokeWidth={1.5} className="ml-1" />
                   إعادة التحليل
                 </Button>
