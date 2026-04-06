@@ -535,7 +535,7 @@ serve(async (req) => {
         temperature: 0.1,
         top_p: 0.1,
         messages: [
-          { role: "system", content: buildSystemPrompt(perspective, mode, sellerName) },
+          { role: "system", content: buildSystemPrompt(perspective, mode) },
           { role: "user", content: userContent },
         ],
         tools: [
