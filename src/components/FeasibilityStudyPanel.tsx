@@ -164,7 +164,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache }: FeasibilityStudyPanel
       setCachedAt(new Date().toISOString());
       setExpandedSections({ summary: true, investment: true, costs: true, revenue: true, competitors: true, risks: true, recommendations: true });
 
-      // Save to database
+      // Save to unified cache + database
+      await analysisCache.saveFeasibility(data.study);
       const { data: userData } = await supabase.auth.getUser();
       if (userData?.user) {
         await supabase.from("feasibility_studies").upsert({
