@@ -571,7 +571,7 @@ serve(async (req) => {
                       comparablesReviewed: { type: "number" },
                       matchQuality: { type: "string", enum: ["قوية", "متوسطة", "ضعيفة", "غير متاحة"] },
                       observedPriceRange: { type: "string" },
-                      marketPosition: { type: "string", enum: ["أقل من السوق", "قريب من السوق", "أعلى من السوق", "غير محدد"] },
+                      marketPosition: { type: "string", enum: ["أقل من السوق", "قريب من السوق", "أعلى من السوق"] },
                       confidence: { type: "string", enum: ["عالي", "متوسط", "منخفض"] },
                       details: { type: "string" },
                       assetBreakdown: {
