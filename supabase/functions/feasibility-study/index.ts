@@ -63,6 +63,14 @@ const ACTIVITY_TEMPLATES: Record<string, {
   },
 };
 
+/* ── Industrial zone detection ── */
+const INDUSTRIAL_KEYWORDS = ["مصنع", "ورشة", "مستودع", "نجارة", "حدادة", "تصنيع", "صناعي", "صناعية", "ديكور", "مشغل", "معمل", "مصبغة", "تغليف", "لحام", "دهانات", "بلاستيك", "فايبر", "حديد", "ألمنيوم", "خشب"];
+
+function isIndustrialZone(listing: any): boolean {
+  const text = [listing?.business_activity, listing?.title, listing?.district, listing?.category].filter(Boolean).join(" ").toLowerCase();
+  return INDUSTRIAL_KEYWORDS.some(kw => text.includes(kw));
+}
+
 /** Extract all document file URLs from listing for multimodal AI analysis */
 function extractDocumentUrls(listing: any): string[] {
   if (!Array.isArray(listing?.documents)) return [];
