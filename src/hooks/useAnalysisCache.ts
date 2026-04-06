@@ -164,6 +164,19 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
     }
   }, [listingId]);
 
+  const saveTrustScore = useCallback(async (score: any) => {
+    if (!listingId) return;
+    setTrustScore(score);
+    try {
+      await supabase
+        .from("listings")
+        .update({ ai_trust_score: score as any } as any)
+        .eq("id", listingId);
+    } catch {
+      // ignore
+    }
+  }, [listingId]);
+
   return {
     cachedDealCheck: cache?.dealCheck || null,
     cachedFeasibility: cache?.feasibility || null,
@@ -174,12 +187,14 @@ export function useAnalysisCache(listingId: string | undefined): UseAnalysisCach
     detectedAssetsFiles,
     assetsCombined,
     priceAnalysis,
+    trustScore,
     analysisUpdatedAt,
     loadCache,
     saveDealCheck,
     saveFeasibility,
     saveDetectedAssets,
     savePriceAnalysis,
+    saveTrustScore,
     setRefreshing: setIsRefreshing,
   };
 }
