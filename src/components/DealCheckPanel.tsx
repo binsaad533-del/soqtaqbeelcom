@@ -94,7 +94,8 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const {
     cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing,
     assetsCombined, detectedAssetsImages, detectedAssetsFiles, analysisUpdatedAt, saveDetectedAssets,
-    priceAnalysis, savePriceAnalysis
+    priceAnalysis, savePriceAnalysis,
+    trustScore, saveTrustScore
   } = analysisCache;
 
   const [open, setOpen] = useState(!!cachedDealCheck);
