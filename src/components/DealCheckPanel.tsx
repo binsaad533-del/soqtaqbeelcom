@@ -149,13 +149,18 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           photoUrls,
           fileUrls,
           businessActivity: listing.business_activity || listing.category,
+          dealPrice: listing.price || null,
         },
       });
       if (fnError || !data?.success) return null;
 
       const detected = data.detected;
-      // Save all three: images, files, combined
       await saveDetectedAssets(detected.images, detected.files, detected.combined);
+
+      // Save price analysis if returned
+      if (detected.priceAnalysis) {
+        await savePriceAnalysis(detected.priceAnalysis);
+      }
 
       return detected.combined;
     } catch {
