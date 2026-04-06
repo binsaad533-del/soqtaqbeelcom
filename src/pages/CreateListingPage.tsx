@@ -529,12 +529,12 @@ const CreateListingPage = () => {
           const prepared = await convertToJpeg(imageFiles[i]);
           const previewUrl = URL.createObjectURL(prepared);
           setLocalPreviews(prev => ({ ...prev, all: [...(prev.all || []), previewUrl] }));
-          const url = await uploadFile(id, prepared, "photos/all");
-          if (url) {
-            imageUrls.push(url);
-            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url, previewUrl } : f));
+          const result = await uploadFile(id, prepared, "photos/all");
+          if (result.url) {
+            imageUrls.push(result.url);
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url: result.url!, previewUrl } : f));
           } else {
-            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "فشل الرفع إلى الخادم" } : f));
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || "فشل الرفع إلى الخادم" } : f));
           }
         } catch (err) {
           console.error(`[BulkUpload] Image failed: ${imageFiles[i].name}`, err);
