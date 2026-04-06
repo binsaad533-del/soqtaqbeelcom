@@ -310,7 +310,7 @@ function mergeAndDeduplicate(batches: any[]): any {
         existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
         if (asset.details && !existing.details) existing.details = asset.details;
         if (asset.source && existing.source && asset.source !== existing.source) {
-          existing.source = "images+files";
+          existing.source = "both";
         }
         found = true;
         break;
