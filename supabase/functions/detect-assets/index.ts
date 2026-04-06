@@ -787,11 +787,25 @@ serve(async (req) => {
       }
     }
 
+    // --- TRUST SCORE ---
+    let trustScore: any = null;
+    if (listingData) {
+      trustScore = await calculateTrustScore(
+        listingData,
+        combined,
+        priceAnalysis,
+        imageResult,
+        fileResult,
+        LOVABLE_API_KEY
+      );
+    }
+
     const output = {
       images: imageResult,
       files: fileResult,
       combined: { ...combined, confidence },
       priceAnalysis,
+      trustScore,
       detectedAt: new Date().toISOString(),
     };
 
