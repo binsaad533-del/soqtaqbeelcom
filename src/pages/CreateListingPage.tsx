@@ -1643,6 +1643,25 @@ const CreateListingPage = () => {
                 </div>
               </div>
 
+              {/* Asset Import from Excel */}
+              <div className="border-t border-border/50 pt-5">
+                <AssetImportPanel
+                  listingId={listingId}
+                  existingInventory={inventory}
+                  onImport={(items) => {
+                    setInventory(items);
+                    setAnalyzed(true);
+                  }}
+                  onFileUploaded={(url) => {
+                    setUploadedDocs((prev) => ({
+                      ...prev,
+                      "قائمة الأصول (Excel)": [...(prev["قائمة الأصول (Excel)"] || []), url],
+                    }));
+                  }}
+                  uploadFile={uploadFile}
+                />
+              </div>
+
               {/* Location Map Picker */}
               <div className="border-t border-border/50 pt-5 space-y-3">
                 <div className="flex items-center gap-2">
