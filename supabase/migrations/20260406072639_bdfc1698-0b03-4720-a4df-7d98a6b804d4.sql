@@ -1,0 +1,1 @@
+UPDATE listings SET ai_structure_validation = NULL WHERE ai_structure_validation IS NOT NULL;

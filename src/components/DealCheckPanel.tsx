@@ -87,6 +87,14 @@ const DealCheckPanel = ({ listing, savedAnalysis }: DealCheckPanelProps) => {
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
 
       setAnalysis(data.analysis);
+
+      // Save analysis back to listing
+      if (listing?.id) {
+        await supabase
+          .from("listings")
+          .update({ ai_structure_validation: data.analysis as any })
+          .eq("id", listing.id);
+      }
     } catch (e: any) {
       setError(e.message || "حدث خطأ أثناء التحليل");
     } finally {
