@@ -563,12 +563,12 @@ const CreateListingPage = () => {
           continue;
         }
         try {
-          const url = await uploadFile(id, docFiles[i], "docs/general");
-          if (url) {
-            docUrls.push(url);
-            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url } : f));
+          const result = await uploadFile(id, docFiles[i], "docs/general");
+          if (result.url) {
+            docUrls.push(result.url);
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url: result.url! } : f));
           } else {
-            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "فشل الرفع إلى الخادم" } : f));
+            setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || "فشل الرفع إلى الخادم" } : f));
           }
         } catch (err) {
           console.error(`[BulkUpload] Doc failed: ${docFiles[i].name}`, err);
