@@ -1013,6 +1013,12 @@ const CreateListingPage = () => {
       }
 
       await logAudit("listing_published", "listing", listingId, { title: disclosure.business_activity }).catch(() => {});
+      
+      // Auto-trigger AI analysis in the background (don't await - fire and forget)
+      supabase.functions.invoke("auto-analyze-listing", {
+        body: { listingId },
+      }).catch(() => {});
+
       // Stop auto-save timer before navigating away
       if (autoSaveTimerRef.current) {
         clearInterval(autoSaveTimerRef.current);
