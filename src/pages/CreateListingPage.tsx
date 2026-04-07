@@ -32,7 +32,7 @@ import { cn } from "@/lib/utils";
 
 import { useListings } from "@/hooks/useListings";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
