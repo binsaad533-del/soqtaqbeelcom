@@ -120,6 +120,17 @@ const SellerDashboardPage = () => {
     }
   }, [user]);
 
+  const handleDelete = useCallback(async (id: string, title: string | null) => {
+    if (!confirm(`هل تريد حذف "${title || "بدون عنوان"}"؟`)) return;
+    const { error } = await softDeleteListing(id);
+    if (error) {
+      toast.error("فشل حذف الإعلان");
+    } else {
+      toast.success("تم حذف الإعلان");
+      setListings(prev => prev.filter(l => l.id !== id));
+    }
+  }, [softDeleteListing]);
+
   useEffect(() => { load(); }, [load]);
 
   if (loading) {
