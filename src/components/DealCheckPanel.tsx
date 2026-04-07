@@ -238,9 +238,8 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
         onClick={() => {
           if (!analysis && !loading) {
             runDealCheck();
-          } else {
-            setOpen(!open);
           }
+          setOpen(!open);
         }}
         className="w-full flex items-center justify-between p-5 hover:bg-accent/20 transition-colors"
       >
