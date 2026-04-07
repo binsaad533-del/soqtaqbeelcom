@@ -111,11 +111,16 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     }
   }, [cachedDealCheck]);
 
+  // Auto-run if stale or if no analysis exists yet
   useEffect(() => {
-    if (analysis && isStale && !loading && !isRefreshing) {
-      runDealCheck(true);
+    if (!loading && !isRefreshing) {
+      if (analysis && isStale) {
+        runDealCheck(true);
+      } else if (!analysis && !cachedDealCheck && listing?.status === "published") {
+        runDealCheck(true);
+      }
     }
-  }, [isStale, analysis]);
+  }, [isStale, analysis, cachedDealCheck, listing?.status]);
 
   const getAllPhotoUrls = (): string[] => {
     if (!listing?.photos) return [];
