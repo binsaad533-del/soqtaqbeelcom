@@ -233,9 +233,20 @@ const SellerDashboardPage = () => {
                           {new Date(listing.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                         </TableCell>
                         <TableCell className="text-center">
-                          <Link to={`/listing/${listing.id}`} className="text-muted-foreground hover:text-foreground transition-colors">
-                            <Eye size={14} />
-                          </Link>
+                          <div className="flex items-center justify-center gap-2">
+                            <Link to={`/listing/${listing.id}`} className="text-muted-foreground hover:text-foreground transition-colors">
+                              <Eye size={14} />
+                            </Link>
+                            {(listing.status === "draft" || listing.status === "suspended") && (
+                              <button
+                                onClick={() => handleDelete(listing.id, listing.title)}
+                                className="text-muted-foreground hover:text-destructive transition-colors"
+                                title="حذف الإعلان"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
