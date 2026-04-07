@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const CACHE_TTL_MS = 72 * 60 * 60 * 1000; // 72 hours
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 interface CacheEntry {
   dealCheck?: any;
