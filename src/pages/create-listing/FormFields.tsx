@@ -20,10 +20,11 @@ export const FormField = ({ label, placeholder, suffix, value, onChange, error }
         onChange={(e) => onChange(toEnglishNumerals(e.target.value))}
         className={cn(
           "w-full px-3 py-2 rounded-lg border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 transition-all",
+          suffix && "pl-10",
           error ? "border-destructive/60 focus:border-destructive/60 focus:ring-destructive/30" : "border-border/50 focus:border-primary/30 focus:ring-primary/20"
         )}
       />
-      {suffix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{suffix}</span>}
+      {suffix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">{suffix}</span>}
     </div>
     {error && <p className="text-[11px] text-destructive mt-1 flex items-center gap-1"><AlertTriangle size={11} /> {error}</p>}
   </div>
