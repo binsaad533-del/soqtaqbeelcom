@@ -32,7 +32,7 @@ import { cn } from "@/lib/utils";
 
 import { useListings } from "@/hooks/useListings";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
@@ -189,8 +189,15 @@ const CreateListingPage = () => {
     return id;
   }, [listingId, dealStructure, createListing]);
 
-  // ── Draft restore on mount ──
+  // ── Draft restore on mount (skip if ?new=1) ──
+  const [searchParams] = useSearchParams();
+  const isForceNew = searchParams.get("new") === "1";
+
   useEffect(() => {
+    if (isForceNew) {
+      setDraftLoading(false);
+      return;
+    }
     const restoreDraft = async () => {
       try {
         const draft = await getMyDraft();
@@ -243,7 +250,6 @@ const CreateListingPage = () => {
             civil_defense_license: draft.civil_defense_license || "",
             surveillance_cameras: draft.surveillance_cameras || "",
           }));
-          // Restore location
           if ((draft as any).location_lat) setLocationLat((draft as any).location_lat);
           if ((draft as any).location_lng) setLocationLng((draft as any).location_lng);
           if ((draft as any).area_sqm) setAreaSqm(String((draft as any).area_sqm));
@@ -257,7 +263,7 @@ const CreateListingPage = () => {
       }
     };
     restoreDraft();
-  }, [getMyDraft]);
+  }, [getMyDraft, isForceNew]);
 
   // ── Auto-save every 30 seconds ──
   const saveDraft = useCallback(async () => {

@@ -2,18 +2,21 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useListings } from "@/hooks/useListings";
 import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
   Store, ShoppingBag, Pause, Users, Handshake, CheckCircle2,
-  TrendingUp, ArrowLeft, Plus, MessageSquare, Percent, ExternalLink, Eye,
+  TrendingUp, ArrowLeft, Plus, MessageSquare, Percent, ExternalLink, Eye, Trash2,
 } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
+import { toast } from "sonner";
 
 interface SellerStats {
   activeListings: number;
@@ -68,6 +71,7 @@ const statusColor = (s: string) => {
 
 const SellerDashboardPage = () => {
   const { user } = useAuthContext();
+  const { softDeleteListing } = useListings();
   const [stats, setStats] = useState<SellerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState<ListingRow[]>([]);
@@ -116,6 +120,17 @@ const SellerDashboardPage = () => {
     }
   }, [user]);
 
+  const handleDelete = useCallback(async (id: string, title: string | null) => {
+    if (!confirm(`هل تريد حذف "${title || "بدون عنوان"}"؟`)) return;
+    const { error } = await softDeleteListing(id);
+    if (error) {
+      toast.error("فشل حذف الإعلان");
+    } else {
+      toast.success("تم حذف الإعلان");
+      setListings(prev => prev.filter(l => l.id !== id));
+    }
+  }, [softDeleteListing]);
+
   useEffect(() => { load(); }, [load]);
 
   if (loading) {
@@ -147,7 +162,7 @@ const SellerDashboardPage = () => {
         {/* Quick Links */}
         <div className="flex flex-wrap gap-2 mb-6">
           {[
-            { label: "إضافة إعلان", icon: Plus, to: "/create-listing", color: "bg-primary text-primary-foreground" },
+            { label: "إضافة إعلان", icon: Plus, to: "/create-listing?new=1", color: "bg-primary text-primary-foreground" },
             { label: "المحادثات", icon: MessageSquare, to: "/messages", color: "bg-secondary text-secondary-foreground" },
             { label: "صفقاتي", icon: Handshake, to: "/deal-pipeline", color: "bg-secondary text-secondary-foreground" },
           ].map(link => (
@@ -193,7 +208,7 @@ const SellerDashboardPage = () => {
                       <TableHead className="text-right">النوع</TableHead>
                       <TableHead className="text-right">الحالة</TableHead>
                       <TableHead className="text-right">التاريخ</TableHead>
-                      <TableHead className="text-center w-10"></TableHead>
+                      <TableHead className="text-center w-20"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -218,9 +233,20 @@ const SellerDashboardPage = () => {
                           {new Date(listing.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                         </TableCell>
                         <TableCell className="text-center">
-                          <Link to={`/listing/${listing.id}`} className="text-muted-foreground hover:text-foreground transition-colors">
-                            <Eye size={14} />
-                          </Link>
+                          <div className="flex items-center justify-center gap-2">
+                            <Link to={`/listing/${listing.id}`} className="text-muted-foreground hover:text-foreground transition-colors">
+                              <Eye size={14} />
+                            </Link>
+                            {(listing.status === "draft" || listing.status === "suspended") && (
+                              <button
+                                onClick={() => handleDelete(listing.id, listing.title)}
+                                className="text-muted-foreground hover:text-destructive transition-colors"
+                                title="حذف الإعلان"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
