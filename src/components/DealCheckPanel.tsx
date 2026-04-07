@@ -98,7 +98,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     trustScore, saveTrustScore
   } = analysisCache;
 
-  const [open, setOpen] = useState(!!cachedDealCheck);
+  const [open, setOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<DealCheckAnalysis | null>(cachedDealCheck || null);
   const [error, setError] = useState("");
