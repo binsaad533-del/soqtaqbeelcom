@@ -81,6 +81,9 @@ function isIndustrialZone(listing: any): boolean {
 }
 
 const SUPPORTED_IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".gif"];
+const MAX_DOCUMENT_IMAGES = 4;
+const MAX_INVENTORY_LINES = 12;
+const MAX_COMPETITORS_PER_RADIUS = 5;
 
 function isImageUrl(url: string): boolean {
   const pathname = new URL(url).pathname.toLowerCase();
@@ -100,7 +103,45 @@ function extractDocumentUrls(listing: any): string[] {
       }
     }
   }
-  return urls.slice(0, 20);
+  return urls.slice(0, MAX_DOCUMENT_IMAGES);
+}
+
+function estimateInventoryWeight(item: any): number {
+  const qty = Number(item?.qty) || 1;
+  const unitPrice = Number(item?.unitPrice) || 0;
+  return qty * Math.max(unitPrice, 1);
+}
+
+function summarizeInventory(items: any[] | undefined) {
+  const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
+  const sortedItems = [...safeItems].sort((a, b) => estimateInventoryWeight(b) - estimateInventoryWeight(a));
+  const totalLines = safeItems.length;
+  const totalUnits = safeItems.reduce((sum, item) => sum + (Number(item?.qty) > 0 ? Number(item.qty) : 1), 0);
+  const categoryMap = new Map<string, number>();
+
+  for (const item of safeItems) {
+    const category = typeof item?.category === "string" && item.category.trim() ? item.category.trim() : "أخرى";
+    categoryMap.set(category, (categoryMap.get(category) || 0) + 1);
+  }
+
+  const topCategories = [...categoryMap.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([category, count]) => `${category} (${count})`);
+
+  const highlightedItems = sortedItems.slice(0, MAX_INVENTORY_LINES).map((item) => {
+    const qty = Number(item?.qty) > 0 ? Number(item.qty) : 1;
+    const priceNote = Number(item?.unitPrice) > 0 ? ` — تقدير الوحدة ${Number(item.unitPrice)} ريال` : "";
+    return `- ${item?.name || "صنف"} × ${qty} — حالة: ${item?.condition || "غير محدد"}${priceNote}`;
+  });
+
+  return {
+    totalLines,
+    totalUnits,
+    topCategories,
+    highlightedItems,
+    omittedLines: Math.max(0, totalLines - highlightedItems.length),
+  };
 }
 
 /** Build multimodal user message content with text + document images */
@@ -126,6 +167,39 @@ function detectActivityType(activity: string): typeof ACTIVITY_TEMPLATES[string]
     if (template.keywords.some(kw => lower.includes(kw))) return template;
   }
   return ACTIVITY_TEMPLATES.general;
+}
+
+async function requestAiCompletion(apiKey: string, payload: Record<string, unknown>) {
+  const models = [String(payload.model || "google/gemini-3-flash-preview"), "google/gemini-2.5-flash"];
+  let lastFailure: { status: number; raw: string } = { status: 500, raw: "" };
+
+  for (const model of models) {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...payload, model }),
+    });
+
+    const raw = await response.text();
+
+    if (!response.ok) {
+      lastFailure = { status: response.status, raw };
+      if ([502, 503, 504].includes(response.status)) continue;
+      return { ok: false as const, ...lastFailure };
+    }
+
+    try {
+      return { ok: true as const, data: JSON.parse(raw) };
+    } catch {
+      console.error("Invalid AI JSON response:", raw.slice(0, 500));
+      lastFailure = { status: 502, raw };
+    }
+  }
+
+  return { ok: false as const, ...lastFailure };
 }
 
 /* ── Google Places competitor search with industrial zone awareness ── */
