@@ -355,24 +355,24 @@ const FeasibilityStudyPanel = ({ listing, analysisCache }: FeasibilityStudyPanel
           <AiStar size={18} />
           <h3 className="text-base font-semibold">دراسة الجدوى الاقتصادية</h3>
         </div>
-        <p className="text-sm text-muted-foreground">
-          تحليل شامل يتضمن: العائد على الاستثمار، التكاليف التشغيلية، تحليل المنافسين القريبين عبر خرائط قوقل، وسيناريوهات الربحية
-        </p>
-        {error && <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{error}</p>}
-        <Button onClick={runStudy} disabled={loading} className="w-full gap-2" size="lg">
-          {loading ? (
-            <>
-              <Loader2 size={16} className="animate-spin" />
-              جاري إعداد الدراسة... (قد تستغرق 30 ثانية)
-            </>
-          ) : (
-            <>
-              <BarChart3 size={16} />
-              إعداد دراسة الجدوى
-              <AiStar size={14} />
-            </>
-          )}
-        </Button>
+        {loading ? (
+          <div className="py-8 flex flex-col items-center gap-3">
+            <Loader2 size={24} className="animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">جاري إعداد الدراسة... (قد تستغرق 30 ثانية)</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">
+              الدراسة قيد الإعداد التلقائي وستكون جاهزة قريباً
+            </p>
+            {error && <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{error}</p>}
+            <Button onClick={runStudy} variant="outline" className="w-full gap-2" size="sm">
+              <BarChart3 size={14} />
+              إعداد الدراسة الآن
+              <AiStar size={12} />
+            </Button>
+          </>
+        )}
       </div>
     );
   }
