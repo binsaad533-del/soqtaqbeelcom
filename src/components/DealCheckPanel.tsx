@@ -305,23 +305,35 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           {analysis && !loading && (
             <div className="space-y-5">
               {/* Cache Info Bar */}
-              {(cacheAge || analysisUpdatedAt) && (
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground/70">
-                  <div className="flex items-center gap-1.5">
-                    <Clock size={10} />
-                    <span>آخر تحديث: {formatCacheAge(analysisUpdatedAt || cacheAge)}</span>
-                    {isStale && <span className="text-amber-500">(قديم — يتم التحديث)</span>}
+              {(cacheAge || analysisUpdatedAt) && (() => {
+                const updatedDate = analysisUpdatedAt || cacheAge;
+                const ageMs = updatedDate ? Date.now() - new Date(updatedDate).getTime() : 0;
+                const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
+                const isRecent = ageDays < 1;
+                return (
+                  <div className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                      <Clock size={11} />
+                      <span>آخر تحديث: {formatCacheAge(updatedDate)}</span>
+                      {isRecent && <span className="text-emerald-600 dark:text-emerald-400 font-medium">• محدّث</span>}
+                      {isStale && <span className="text-amber-500 font-medium">• يتم التحديث تلقائياً</span>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {!isStale && !isRecent && (
+                        <span className="text-[10px] text-muted-foreground/60">يُحدّث تلقائياً كل أسبوع</span>
+                      )}
+                      {analysis.confidenceLevel && (
+                        <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium",
+                          CONFIDENCE_BADGE[analysis.confidenceLevel]?.bg || "bg-muted",
+                          CONFIDENCE_BADGE[analysis.confidenceLevel]?.text || "text-muted-foreground"
+                        )}>
+                          ثقة: {analysis.confidenceLevel}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  {analysis.confidenceLevel && (
-                    <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium",
-                      CONFIDENCE_BADGE[analysis.confidenceLevel]?.bg || "bg-muted",
-                      CONFIDENCE_BADGE[analysis.confidenceLevel]?.text || "text-muted-foreground"
-                    )}>
-                      ثقة: {analysis.confidenceLevel}
-                    </span>
-                  )}
-                </div>
-              )}
+                );
+              })()}
 
               {/* Rating Banner */}
               <div className={cn("rounded-xl p-4 border", ratingStyle.bg, ratingStyle.border)}>

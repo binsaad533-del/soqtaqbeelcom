@@ -391,12 +391,21 @@ const FeasibilityStudyPanel = ({ listing, analysisCache }: FeasibilityStudyPanel
             <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">بيانات Google Maps</span>
           )}
         </div>
-        <div className="flex gap-1.5 items-center">
-          {cachedAt && (
-            <span className="text-[10px] text-muted-foreground">
-              آخر تحديث: {new Date(cachedAt).toLocaleDateString("ar-SA")}
-            </span>
-          )}
+        <div className="flex gap-1.5 items-center flex-wrap">
+          {cachedAt && (() => {
+            const ageMs = Date.now() - new Date(cachedAt).getTime();
+            const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
+            const isRecent = ageDays < 1;
+            const isOld = ageDays >= 7;
+            return (
+              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                آخر تحديث: {new Date(cachedAt).toLocaleDateString("ar-SA")}
+                {isRecent && <span className="text-emerald-600 dark:text-emerald-400 font-medium">• محدّث</span>}
+                {isOld && <span className="text-amber-500 font-medium">• يتم التحديث تلقائياً</span>}
+                {!isRecent && !isOld && <span className="text-muted-foreground/50">• يُحدّث كل أسبوع</span>}
+              </span>
+            );
+          })()}
           <Button variant="outline" size="sm" onClick={shareStudy} className="gap-1.5 text-xs">
             {copied ? <Check size={12} className="text-emerald-500" /> : <Share2 size={12} />}
             {copied ? "تم النسخ" : "مشاركة"}
