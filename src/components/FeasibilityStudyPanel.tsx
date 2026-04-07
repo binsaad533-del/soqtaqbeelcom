@@ -158,7 +158,21 @@ const FeasibilityStudyPanel = ({ listing, analysisCache }: FeasibilityStudyPanel
       const { data, error: fnError } = await supabase.functions.invoke("feasibility-study", {
         body: { listing },
       });
-      if (fnError) throw new Error(fnError.message);
+      if (fnError) {
+        const response = (fnError as any)?.context;
+        let message = "تعذّر إعداد الدراسة حالياً، يرجى المحاولة بعد قليل";
+        if (response instanceof Response) {
+          try {
+            const payload = await response.json();
+            if (typeof payload?.error === "string" && payload.error.trim()) {
+              message = payload.error;
+            }
+          } catch {
+            // ignore response parsing failure
+          }
+        }
+        throw new Error(message);
+      }
       if (!data?.success) throw new Error(data?.error || "فشل في إنشاء الدراسة");
       setStudy(data.study);
       setCachedAt(new Date().toISOString());
