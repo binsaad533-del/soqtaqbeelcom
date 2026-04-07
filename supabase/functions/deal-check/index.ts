@@ -140,20 +140,27 @@ function normalizeListingForAnalysis(listing: any) {
   };
 }
 
-/** Extract all document file URLs from listing for multimodal AI analysis */
+const SUPPORTED_IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".gif"];
+
+function isImageUrl(url: string): boolean {
+  const pathname = new URL(url).pathname.toLowerCase();
+  return SUPPORTED_IMAGE_EXTENSIONS.some(ext => pathname.endsWith(ext));
+}
+
+/** Extract only image document URLs from listing for multimodal AI analysis */
 function extractDocumentUrls(listing: any): string[] {
   if (!Array.isArray(listing?.documents)) return [];
   const urls: string[] = [];
   for (const doc of listing.documents) {
     if (Array.isArray(doc?.files)) {
       for (const url of doc.files) {
-        if (typeof url === "string" && url.startsWith("http")) {
+        if (typeof url === "string" && url.startsWith("http") && isImageUrl(url)) {
           urls.push(url);
         }
       }
     }
   }
-  return urls.slice(0, 20); // Limit to 20 document images
+  return urls.slice(0, 20);
 }
 
 /** Build multimodal user message content with text + document images */
