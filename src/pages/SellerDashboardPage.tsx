@@ -151,7 +151,7 @@ const SellerDashboardPage = () => {
         {/* Quick Links */}
         <div className="flex flex-wrap gap-2 mb-6">
           {[
-            { label: "إضافة إعلان", icon: Plus, to: "/create-listing", color: "bg-primary text-primary-foreground" },
+            { label: "إضافة إعلان", icon: Plus, to: "/create-listing?new=1", color: "bg-primary text-primary-foreground" },
             { label: "المحادثات", icon: MessageSquare, to: "/messages", color: "bg-secondary text-secondary-foreground" },
             { label: "صفقاتي", icon: Handshake, to: "/deal-pipeline", color: "bg-secondary text-secondary-foreground" },
           ].map(link => (
