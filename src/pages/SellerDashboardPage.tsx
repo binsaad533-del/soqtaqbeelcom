@@ -71,6 +71,7 @@ const statusColor = (s: string) => {
 
 const SellerDashboardPage = () => {
   const { user } = useAuthContext();
+  const { softDeleteListing } = useListings();
   const [stats, setStats] = useState<SellerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState<ListingRow[]>([]);
