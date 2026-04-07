@@ -208,7 +208,7 @@ const SellerDashboardPage = () => {
                       <TableHead className="text-right">النوع</TableHead>
                       <TableHead className="text-right">الحالة</TableHead>
                       <TableHead className="text-right">التاريخ</TableHead>
-                      <TableHead className="text-center w-10"></TableHead>
+                      <TableHead className="text-center w-20"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
