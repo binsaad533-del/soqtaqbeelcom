@@ -111,7 +111,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             {user ? (
               <>
                 <Link
-                  to="/create-listing"
+                  to="/create-listing?new=1"
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-l from-primary to-primary/70 text-primary-foreground text-[12px] font-medium hover:opacity-90 transition-all"
                 >
                   <Plus size={13} strokeWidth={2} />
