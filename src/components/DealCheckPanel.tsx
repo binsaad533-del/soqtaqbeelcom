@@ -111,11 +111,16 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     }
   }, [cachedDealCheck]);
 
+  // Auto-run if stale or if no analysis exists yet
   useEffect(() => {
-    if (analysis && isStale && !loading && !isRefreshing) {
-      runDealCheck(true);
+    if (!loading && !isRefreshing) {
+      if (analysis && isStale) {
+        runDealCheck(true);
+      } else if (!analysis && !cachedDealCheck && listing?.status === "published") {
+        runDealCheck(true);
+      }
     }
-  }, [isStale, analysis]);
+  }, [isStale, analysis, cachedDealCheck, listing?.status]);
 
   const getAllPhotoUrls = (): string[] => {
     if (!listing?.photos) return [];
@@ -235,12 +240,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
       {/* Header */}
       <button
-        onClick={() => {
-          if (!analysis && !loading) {
-            runDealCheck();
-          }
-          setOpen(!open);
-        }}
+        onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-5 hover:bg-accent/20 transition-colors"
       >
         <div className="flex items-center gap-3">
@@ -250,7 +250,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           <div className="text-start">
             <h3 className="font-medium text-sm">فحص الصفقة والجدوى المبدئية</h3>
             <p className="text-[11px] text-muted-foreground">
-              {analysis ? "تم إنشاء التحليل" : "تحليل ذكي شامل للصفقة"}
+              {analysis ? "تم إنشاء التحليل" : loading ? "جاري التحليل..." : "تحليل ذكي شامل للصفقة"}
             </p>
           </div>
         </div>
@@ -266,11 +266,12 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               {analysis.rating}
             </span>
           )}
-          {!analysis && !loading && (
-            <span className="text-[11px] px-3 py-1.5 rounded-lg bg-primary/8 text-primary border border-primary/15">
-              ابدأ الفحص
-            </span>
+          {!analysis && loading && (
+            <Loader2 size={16} className="animate-spin text-primary" />
           )}
+          <span className="text-[11px] px-3 py-1.5 rounded-lg bg-primary/8 text-primary border border-primary/15">
+            {analysis ? "استعرض الفحص" : loading ? "جاري التحليل" : "استعرض الفحص"}
+          </span>
           {open ? <ChevronUp size={16} strokeWidth={1.3} className="text-muted-foreground" /> : <ChevronDown size={16} strokeWidth={1.3} className="text-muted-foreground" />}
         </div>
       </button>
