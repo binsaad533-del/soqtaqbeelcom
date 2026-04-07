@@ -289,11 +289,18 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
   if (listing.deal_type) sections.push(`- نوع الصفقة: ${listing.deal_type}`);
 
   // Inventory
-  if (Array.isArray(listing.inventory) && listing.inventory.length > 0) {
+  const inventorySummary = summarizeInventory(listing.inventory);
+  if (inventorySummary.totalLines > 0) {
     sections.push("\n## الأصول والمعدات:");
-    listing.inventory.forEach((item: any) => {
-      sections.push(`- ${item.name || "صنف"} × ${item.qty || 1} — حالة: ${item.condition || "غير محدد"}`);
-    });
+    sections.push(`- عدد البنود في المخزون: ${inventorySummary.totalLines}`);
+    sections.push(`- إجمالي الوحدات التقريبي: ${inventorySummary.totalUnits}`);
+    if (inventorySummary.topCategories.length > 0) {
+      sections.push(`- أبرز الفئات: ${inventorySummary.topCategories.join("، ")}`);
+    }
+    inventorySummary.highlightedItems.forEach((line) => sections.push(line));
+    if (inventorySummary.omittedLines > 0) {
+      sections.push(`- يوجد ${inventorySummary.omittedLines} بند إضافي بالمخزون لم يُسرد بالتفصيل لتقليل حجم التحليل؛ اعتمد على الملخص في التقدير.`);
+    }
   }
 
   // Activity-specific context
@@ -317,16 +324,20 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
     sections.push("\n## بيانات المنافسين من Google Maps:");
     const labels = ["في نطاق 500 متر (نفس الشارع)", "في نطاق 2 كم (نفس الحي)", "في نطاق 10 كم (المنطقة)"];
     competitors.forEach((group, i) => {
+      const topPlaces = group.places.slice(0, MAX_COMPETITORS_PER_RADIUS);
       sections.push(`\n### ${labels[i] || `نطاق ${group.radius}م`}:`);
       sections.push(`- عدد المنافسين المرصودين: ${group.places.length}`);
       if (industrial && group.places.length === 0) {
         sections.push("- ⚠️ لم تظهر نتائج — لكن المناطق الصناعية تحتوي على منافسين غير مسجلين (قدّر 3-8 على الأقل)");
       }
-      if (group.places.length > 0) {
-        group.places.forEach((p: any) => {
+      if (topPlaces.length > 0) {
+        topPlaces.forEach((p: any) => {
           const parts = [p.name, p.rating ? `تقييم ${p.rating}/5 (${p.totalRatings} مراجعة)` : null, `${p.distance}م`];
           sections.push(`  • ${parts.filter(Boolean).join(" — ")}`);
         });
+        if (group.places.length > topPlaces.length) {
+          sections.push(`- تم اختصار عرض المنافسين إلى أهم ${topPlaces.length} نتائج لتقليل حجم التحليل.`);
+        }
       }
     });
   } else {
@@ -423,191 +434,189 @@ serve(async (req) => {
     const documentUrls = extractDocumentUrls(listing);
     const userContent = buildMultimodalContent(userPrompt, documentUrls);
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        temperature: 0.2,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userContent },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "feasibility_result",
-              description: "Return a comprehensive feasibility study for the deal",
-              parameters: {
-                type: "object",
-                properties: {
-                  executiveSummary: { type: "string", description: "ملخص تنفيذي شامل للصفقة (3-5 أسطر)" },
-                  investmentOverview: {
-                    type: "object",
-                    properties: {
-                      totalInvestment: { type: "number", description: "إجمالي الاستثمار المطلوب بالريال" },
-                      breakdownItems: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            label: { type: "string" },
-                            amount: { type: "number" },
-                            note: { type: "string" },
-                          },
-                          required: ["label", "amount"],
-                        },
-                      },
-                    },
-                    required: ["totalInvestment", "breakdownItems"],
-                  },
-                  operationalCosts: {
-                    type: "object",
-                    properties: {
-                      monthlyTotal: { type: "number", description: "إجمالي التكاليف التشغيلية الشهرية" },
+    const aiResult = await requestAiCompletion(LOVABLE_API_KEY, {
+      model: "google/gemini-3-flash-preview",
+      temperature: 0.15,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userContent },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "feasibility_result",
+            description: "Return a comprehensive feasibility study for the deal",
+            parameters: {
+              type: "object",
+              properties: {
+                executiveSummary: { type: "string", description: "ملخص تنفيذي شامل للصفقة (3-5 أسطر)" },
+                investmentOverview: {
+                  type: "object",
+                  properties: {
+                    totalInvestment: { type: "number", description: "إجمالي الاستثمار المطلوب بالريال" },
+                    breakdownItems: {
+                      type: "array",
                       items: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            label: { type: "string" },
-                            monthlyCost: { type: "number" },
-                            note: { type: "string" },
-                          },
-                          required: ["label", "monthlyCost"],
-                        },
-                      },
-                    },
-                    required: ["monthlyTotal", "items"],
-                  },
-                  revenueProjections: {
-                    type: "object",
-                    properties: {
-                      optimistic: {
                         type: "object",
                         properties: {
-                          monthlyRevenue: { type: "number" },
-                          monthlyProfit: { type: "number" },
-                          roiMonths: { type: "number", description: "فترة استرداد بالأشهر" },
-                          annualROI: { type: "number", description: "عائد سنوي %" },
-                          assumptions: { type: "string" },
+                          label: { type: "string" },
+                          amount: { type: "number" },
+                          note: { type: "string" },
                         },
-                        required: ["monthlyRevenue", "monthlyProfit", "roiMonths", "annualROI", "assumptions"],
-                      },
-                      realistic: {
-                        type: "object",
-                        properties: {
-                          monthlyRevenue: { type: "number" },
-                          monthlyProfit: { type: "number" },
-                          roiMonths: { type: "number" },
-                          annualROI: { type: "number" },
-                          assumptions: { type: "string" },
-                        },
-                        required: ["monthlyRevenue", "monthlyProfit", "roiMonths", "annualROI", "assumptions"],
-                      },
-                      conservative: {
-                        type: "object",
-                        properties: {
-                          monthlyRevenue: { type: "number" },
-                          monthlyProfit: { type: "number" },
-                          roiMonths: { type: "number" },
-                          annualROI: { type: "number" },
-                          assumptions: { type: "string" },
-                        },
-                        required: ["monthlyRevenue", "monthlyProfit", "roiMonths", "annualROI", "assumptions"],
+                        required: ["label", "amount"],
                       },
                     },
-                    required: ["optimistic", "realistic", "conservative"],
                   },
-                  competitorAnalysis: {
-                    type: "object",
-                    properties: {
-                      summary: { type: "string", description: "ملخص البيئة التنافسية" },
-                      competitiveDensity: { type: "string", enum: ["منخفضة", "متوسطة", "عالية", "مشبعة"] },
-                      nearbyCount: { type: "number", description: "عدد المنافسين في 500م" },
-                      neighborhoodCount: { type: "number", description: "عدد المنافسين في 2كم" },
-                      areaCount: { type: "number", description: "عدد المنافسين في 10كم" },
-                      avgRating: { type: "number", description: "متوسط تقييم المنافسين" },
-                      topCompetitors: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            name: { type: "string" },
-                            rating: { type: "number" },
-                            distance: { type: "number" },
-                            threat: { type: "string", enum: ["عالي", "متوسط", "منخفض"] },
-                          },
-                          required: ["name", "distance", "threat"],
-                        },
-                      },
-                      opportunities: { type: "array", items: { type: "string" } },
-                      threats: { type: "array", items: { type: "string" } },
-                    },
-                    required: ["summary", "competitiveDensity", "nearbyCount", "neighborhoodCount", "areaCount"],
-                  },
-                  riskAssessment: {
-                    type: "object",
-                    properties: {
-                      overallRisk: { type: "string", enum: ["منخفض", "متوسط", "مرتفع", "مرتفع جداً"] },
-                      financialRisks: { type: "array", items: { type: "string" } },
-                      operationalRisks: { type: "array", items: { type: "string" } },
-                      marketRisks: { type: "array", items: { type: "string" } },
-                      regulatoryRisks: { type: "array", items: { type: "string" } },
-                      mitigationStrategies: { type: "array", items: { type: "string" } },
-                    },
-                    required: ["overallRisk", "financialRisks", "operationalRisks", "marketRisks"],
-                  },
-                  recommendations: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "توصيات عملية للمشتري",
-                  },
-                  verdict: {
-                    type: "string",
-                    enum: ["استثمار ممتاز", "استثمار جيد", "استثمار مقبول بحذر", "استثمار عالي المخاطر", "غير موصى به"],
-                  },
-                  verdictColor: { type: "string", enum: ["green", "blue", "yellow", "orange", "red"] },
-                  confidenceLevel: { type: "string", enum: ["عالي", "متوسط", "منخفض"] },
-                  disclaimer: { type: "string", description: "إخلاء مسؤولية قانوني" },
+                  required: ["totalInvestment", "breakdownItems"],
                 },
-                required: [
-                  "executiveSummary", "investmentOverview", "operationalCosts",
-                  "revenueProjections", "competitorAnalysis", "riskAssessment",
-                  "recommendations", "verdict", "verdictColor", "confidenceLevel", "disclaimer",
-                ],
-                additionalProperties: false,
+                operationalCosts: {
+                  type: "object",
+                  properties: {
+                    monthlyTotal: { type: "number", description: "إجمالي التكاليف التشغيلية الشهرية" },
+                    items: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          label: { type: "string" },
+                          monthlyCost: { type: "number" },
+                          note: { type: "string" },
+                        },
+                        required: ["label", "monthlyCost"],
+                      },
+                    },
+                  },
+                  required: ["monthlyTotal", "items"],
+                },
+                revenueProjections: {
+                  type: "object",
+                  properties: {
+                    optimistic: {
+                      type: "object",
+                      properties: {
+                        monthlyRevenue: { type: "number" },
+                        monthlyProfit: { type: "number" },
+                        roiMonths: { type: "number", description: "فترة استرداد بالأشهر" },
+                        annualROI: { type: "number", description: "عائد سنوي %" },
+                        assumptions: { type: "string" },
+                      },
+                      required: ["monthlyRevenue", "monthlyProfit", "roiMonths", "annualROI", "assumptions"],
+                    },
+                    realistic: {
+                      type: "object",
+                      properties: {
+                        monthlyRevenue: { type: "number" },
+                        monthlyProfit: { type: "number" },
+                        roiMonths: { type: "number" },
+                        annualROI: { type: "number" },
+                        assumptions: { type: "string" },
+                      },
+                      required: ["monthlyRevenue", "monthlyProfit", "roiMonths", "annualROI", "assumptions"],
+                    },
+                    conservative: {
+                      type: "object",
+                      properties: {
+                        monthlyRevenue: { type: "number" },
+                        monthlyProfit: { type: "number" },
+                        roiMonths: { type: "number" },
+                        annualROI: { type: "number" },
+                        assumptions: { type: "string" },
+                      },
+                      required: ["monthlyRevenue", "monthlyProfit", "roiMonths", "annualROI", "assumptions"],
+                    },
+                  },
+                  required: ["optimistic", "realistic", "conservative"],
+                },
+                competitorAnalysis: {
+                  type: "object",
+                  properties: {
+                    summary: { type: "string", description: "ملخص البيئة التنافسية" },
+                    competitiveDensity: { type: "string", enum: ["منخفضة", "متوسطة", "عالية", "مشبعة"] },
+                    nearbyCount: { type: "number", description: "عدد المنافسين في 500م" },
+                    neighborhoodCount: { type: "number", description: "عدد المنافسين في 2كم" },
+                    areaCount: { type: "number", description: "عدد المنافسين في 10كم" },
+                    avgRating: { type: "number", description: "متوسط تقييم المنافسين" },
+                    topCompetitors: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          name: { type: "string" },
+                          rating: { type: "number" },
+                          distance: { type: "number" },
+                          threat: { type: "string", enum: ["عالي", "متوسط", "منخفض"] },
+                        },
+                        required: ["name", "distance", "threat"],
+                      },
+                    },
+                    opportunities: { type: "array", items: { type: "string" } },
+                    threats: { type: "array", items: { type: "string" } },
+                  },
+                  required: ["summary", "competitiveDensity", "nearbyCount", "neighborhoodCount", "areaCount"],
+                },
+                riskAssessment: {
+                  type: "object",
+                  properties: {
+                    overallRisk: { type: "string", enum: ["منخفض", "متوسط", "مرتفع", "مرتفع جداً"] },
+                    financialRisks: { type: "array", items: { type: "string" } },
+                    operationalRisks: { type: "array", items: { type: "string" } },
+                    marketRisks: { type: "array", items: { type: "string" } },
+                    regulatoryRisks: { type: "array", items: { type: "string" } },
+                    mitigationStrategies: { type: "array", items: { type: "string" } },
+                  },
+                  required: ["overallRisk", "financialRisks", "operationalRisks", "marketRisks"],
+                },
+                recommendations: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "توصيات عملية للمشتري",
+                },
+                verdict: {
+                  type: "string",
+                  enum: ["استثمار ممتاز", "استثمار جيد", "استثمار مقبول بحذر", "استثمار عالي المخاطر", "غير موصى به"],
+                },
+                verdictColor: { type: "string", enum: ["green", "blue", "yellow", "orange", "red"] },
+                confidenceLevel: { type: "string", enum: ["عالي", "متوسط", "منخفض"] },
+                disclaimer: { type: "string", description: "إخلاء مسؤولية قانوني" },
               },
+              required: [
+                "executiveSummary", "investmentOverview", "operationalCosts",
+                "revenueProjections", "competitorAnalysis", "riskAssessment",
+                "recommendations", "verdict", "verdictColor", "confidenceLevel", "disclaimer",
+              ],
+              additionalProperties: false,
             },
           },
-        ],
-        tool_choice: { type: "function", function: { name: "feasibility_result" } },
-      }),
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "feasibility_result" } },
     });
 
-    if (!response.ok) {
-      if (response.status === 429) {
+    if (!aiResult.ok) {
+      console.error("AI gateway error:", aiResult.status, aiResult.raw);
+      if (aiResult.status === 429) {
         return new Response(JSON.stringify({ error: "تم تجاوز حد الطلبات، يرجى المحاولة لاحقاً" }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
+      if ([502, 503, 504].includes(aiResult.status)) {
+        return new Response(JSON.stringify({ error: "خدمة إعداد الدراسة مشغولة مؤقتاً، حاول مرة أخرى بعد قليل" }), {
+          status: 503,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       return new Response(JSON.stringify({ error: "خطأ في خدمة الذكاء الاصطناعي" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const data = await response.json();
+    const data = aiResult.data;
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
 
-    if (!toolCall) {
+    if (!toolCall || !toolCall.function?.arguments) {
       console.error("No tool call in response:", JSON.stringify(data));
       return new Response(JSON.stringify({ error: "لم يتمكن الذكاء الاصطناعي من إنتاج الدراسة" }), {
         status: 500,
