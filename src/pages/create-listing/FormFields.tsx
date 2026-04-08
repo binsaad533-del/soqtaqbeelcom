@@ -2,22 +2,32 @@ import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
 
-export const FormField = ({ label, placeholder, suffix, value, onChange, error }: {
+export const FormField = ({ label, placeholder, suffix, value, onChange, error, numericOnly }: {
   label: string;
   placeholder: string;
   suffix?: React.ReactNode;
   value: string;
   onChange: (v: string) => void;
   error?: string;
+  numericOnly?: boolean;
 }) => (
   <div>
     <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
     <div className="relative">
       <input
         type="text"
+        inputMode={numericOnly ? "decimal" : "text"}
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange(toEnglishNumerals(e.target.value))}
+        onChange={(e) => {
+          const raw = toEnglishNumerals(e.target.value);
+          if (numericOnly) {
+            const cleaned = raw.replace(/[^\d.]/g, "");
+            onChange(cleaned);
+          } else {
+            onChange(raw);
+          }
+        }}
         className={cn(
           "w-full px-3 py-2 rounded-lg border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 transition-all",
           suffix && "pl-10",

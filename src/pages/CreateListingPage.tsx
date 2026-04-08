@@ -2163,10 +2163,11 @@ const CreateListingPage = () => {
                     value={disclosure.price}
                     onChange={(v) => setDisclosure((prev) => ({ ...prev, price: v }))}
                     error={publishAttempted && disclosureErrors["price"]}
+                    numericOnly
                   />
                   {isFieldVisible(dealTypeForTransparency, "annual_rent") && (
                     <div className="grid grid-cols-2 gap-3">
-                      <FormField label="الإيجار السنوي" placeholder="45000" suffix={<SarSymbol size={11} />} value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} />
+                      <FormField label="الإيجار السنوي" placeholder="45000" suffix={<SarSymbol size={11} />} value={disclosure.annual_rent} onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: v }))} numericOnly />
                       {isFieldVisible(dealTypeForTransparency, "lease_duration") && (
                         <FormField label="مدة العقد" placeholder="3 سنوات" value={disclosure.lease_duration} onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_duration: v }))} />
                       )}
