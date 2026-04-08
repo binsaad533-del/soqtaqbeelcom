@@ -19,12 +19,13 @@ const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
 const ListingDetailsPage = lazy(() => import("./pages/ListingDetailsPage"));
 const CreateListingPage = lazy(() => import("./pages/CreateListingPage"));
 
-/** Wrapper that forces a full remount when ?new=1 is toggled */
+/** Wrapper that forces a full remount when ?new=1 is present */
 const CreateListingPageKeyed = () => {
   const [sp] = useSearchParams();
   const isNew = sp.get("new") === "1";
-  const mountKey = isNew ? `new-${Date.now()}` : "draft";
-  return <CreateListingPage key={mountKey} />;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const mountId = useMemo(() => (isNew ? `new-${Date.now()}` : "draft"), [sp.toString()]);
+  return <CreateListingPage key={mountId} />;
 };
 const NegotiationPage = lazy(() => import("./pages/NegotiationPage"));
 const AgreementPage = lazy(() => import("./pages/AgreementPage"));
