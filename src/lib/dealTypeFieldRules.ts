@@ -183,9 +183,9 @@ export function validateDisclosure(
 
   for (const field of rules.requiredFields) {
     const value = disclosure[field];
-    if (field === "price") {
+    if (NUMERIC_FIELDS.has(field)) {
       if (!value || isNaN(Number(value)) || Number(value) <= 0) {
-        errors[field] = "السعر مطلوب ويجب أن يكون رقماً أكبر من صفر";
+        errors[field] = `${FIELD_LABELS[field] || field} مطلوب ويجب أن يكون رقماً أكبر من صفر`;
       }
     } else if (field === "city") {
       if (!value || value.trim() === "") {
