@@ -9,7 +9,7 @@ const Footer = () => {
   const footerLinks = [
     { label: tx("الرئيسية", "Home"), path: "/" },
     { label: tx("سوق الفرص", "Marketplace"), path: "/marketplace" },
-    { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing" },
+    { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing?new=1" },
     { label: tx("الشروط", "Terms"), path: "/terms" },
     { label: tx("الخصوصية", "Privacy"), path: "/privacy" },
     { label: tx("من نحن", "About"), path: "/about" },

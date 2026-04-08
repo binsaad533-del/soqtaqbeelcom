@@ -31,7 +31,7 @@ const OnboardingPage = () => {
         {/* Two big choices */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
-            onClick={() => navigate("/create-listing")}
+            onClick={() => navigate("/create-listing?new=1")}
             className="group flex flex-col items-center gap-4 p-8 rounded-2xl border border-border/40 bg-card shadow-soft hover:shadow-soft-hover hover:border-primary/30 transition-all"
           >
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">

@@ -234,7 +234,7 @@ export default function EscrowPage() {
                 <Link to="/marketplace">تصفّح الفرص</Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/create-listing">أضف فرصة</Link>
+                <Link to="/create-listing?new=1">أضف فرصة</Link>
               </Button>
             </div>
           </CardContent>

@@ -48,7 +48,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     { label: tx("الرئيسية", "Home"), path: "/" },
     { label: tx("سوق الفرص", "Marketplace"), path: "/marketplace" },
     { label: tx("كيف تتم الصفقة", "How It Works"), path: "/how-it-works" },
-    { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing" },
+    { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing?new=1" },
     { label: tx("لوحة التحكم", "Dashboard"), path: "/dashboard" },
     { label: tx("نماذج PDF", "PDF Templates"), path: "/pdf-preview" },
   ];
