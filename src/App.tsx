@@ -113,7 +113,7 @@ const App = () => (
                   path="/create-listing"
                   element={
                     <ProtectedRoute>
-                      <CreateListingPage />
+                      <CreateListingPageKeyed />
                     </ProtectedRoute>
                   }
                 />
