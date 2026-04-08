@@ -1,6 +1,6 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useSearchParams } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +18,15 @@ const HomePage = lazy(() => import("./pages/HomePage"));
 const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
 const ListingDetailsPage = lazy(() => import("./pages/ListingDetailsPage"));
 const CreateListingPage = lazy(() => import("./pages/CreateListingPage"));
+
+/** Wrapper that forces a full remount when ?new=1 is present */
+const CreateListingPageKeyed = () => {
+  const [sp] = useSearchParams();
+  const isNew = sp.get("new") === "1";
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const mountId = useMemo(() => (isNew ? `new-${Date.now()}` : "draft"), [sp.toString()]);
+  return <CreateListingPage key={mountId} />;
+};
 const NegotiationPage = lazy(() => import("./pages/NegotiationPage"));
 const AgreementPage = lazy(() => import("./pages/AgreementPage"));
 const DashboardRouter = lazy(() => import("./pages/DashboardRouter"));
@@ -113,7 +122,7 @@ const App = () => (
                   path="/create-listing"
                   element={
                     <ProtectedRoute>
-                      <CreateListingPage />
+                      <CreateListingPageKeyed />
                     </ProtectedRoute>
                   }
                 />
