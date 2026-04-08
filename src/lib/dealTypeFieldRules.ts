@@ -207,7 +207,7 @@ export function validateDisclosure(
   // Also validate optional fields if filled with gibberish
   for (const field of rules.optionalFields) {
     const value = disclosure[field];
-    if (value && value.trim() !== "" && isGibberish(value)) {
+    if (value && value.trim() !== "" && !NUMERIC_FIELDS.has(field) && isGibberish(value)) {
       errors[field] = `${FIELD_LABELS[field] || field} غير مفهوم — الوصف غير الواضح سيجعل الصفقة تبدو مشبوهة`;
     }
   }
