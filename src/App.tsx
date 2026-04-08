@@ -22,8 +22,9 @@ const CreateListingPage = lazy(() => import("./pages/CreateListingPage"));
 /** Wrapper that forces a full remount when ?new=1 is toggled */
 const CreateListingPageKeyed = () => {
   const [sp] = useSearchParams();
-  const forceKey = sp.get("new") === "1" ? "new" : "draft";
-  return <CreateListingPage key={forceKey} />;
+  const isNew = sp.get("new") === "1";
+  const mountKey = isNew ? `new-${Date.now()}` : "draft";
+  return <CreateListingPage key={mountKey} />;
 };
 const NegotiationPage = lazy(() => import("./pages/NegotiationPage"));
 const AgreementPage = lazy(() => import("./pages/AgreementPage"));
