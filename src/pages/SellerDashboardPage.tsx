@@ -193,7 +193,7 @@ const SellerDashboardPage = () => {
             <Card>
               <CardContent className="p-8 text-center text-sm text-muted-foreground">
                 لا توجد إعلانات بعد —{" "}
-                <Link to="/create-listing" className="text-primary underline">أضف إعلانك الأول</Link>
+                <Link to="/create-listing?new=1" className="text-primary underline">أضف إعلانك الأول</Link>
               </CardContent>
             </Card>
           ) : (
