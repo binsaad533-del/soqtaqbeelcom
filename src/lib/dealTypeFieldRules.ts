@@ -39,6 +39,9 @@ const LIABILITY_FIELDS = ["liabilities", "overdue_salaries", "overdue_rent"];
 const LICENSE_FIELDS = ["municipality_license", "civil_defense_license", "surveillance_cameras"];
 const ASSET_DISPLAY_FIELDS = [...LEASE_FIELDS, ...LIABILITY_FIELDS, ...LICENSE_FIELDS];
 
+/** Fields that accept numeric-only values — skip gibberish detection for these */
+const NUMERIC_FIELDS = new Set(["price", "annual_rent", "area_sqm"]);
+
 export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
   // ── Full Takeover ──
   full_takeover: {
@@ -180,9 +183,9 @@ export function validateDisclosure(
 
   for (const field of rules.requiredFields) {
     const value = disclosure[field];
-    if (field === "price") {
+    if (NUMERIC_FIELDS.has(field)) {
       if (!value || isNaN(Number(value)) || Number(value) <= 0) {
-        errors[field] = "السعر مطلوب ويجب أن يكون رقماً أكبر من صفر";
+        errors[field] = `${FIELD_LABELS[field] || field} مطلوب ويجب أن يكون رقماً أكبر من صفر`;
       }
     } else if (field === "city") {
       if (!value || value.trim() === "") {
@@ -204,7 +207,7 @@ export function validateDisclosure(
   // Also validate optional fields if filled with gibberish
   for (const field of rules.optionalFields) {
     const value = disclosure[field];
-    if (value && value.trim() !== "" && isGibberish(value)) {
+    if (value && value.trim() !== "" && !NUMERIC_FIELDS.has(field) && isGibberish(value)) {
       errors[field] = `${FIELD_LABELS[field] || field} غير مفهوم — الوصف غير الواضح سيجعل الصفقة تبدو مشبوهة`;
     }
   }
