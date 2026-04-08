@@ -366,7 +366,7 @@ const ListingDetailsPage = () => {
               </div>
               <div className="mt-3">
                 <Link 
-                  to="/create-listing" 
+                  to="/create-listing?new=1" 
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-l from-primary to-primary/70 text-primary-foreground text-sm font-medium hover:opacity-90 transition-all"
                 >
                   أضف فرصتك الآن

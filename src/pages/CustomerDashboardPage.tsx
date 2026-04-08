@@ -710,7 +710,7 @@ const CustomerDashboardPage = () => {
                   <div className="bg-card rounded-2xl p-12 shadow-soft border border-border/30 text-center">
                     <Store size={32} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
                     <p className="text-sm text-muted-foreground mb-2">{listings.length === 0 ? "لا توجد إعلانات" : "لا توجد نتائج"}</p>
-                    {listings.length === 0 && <Link to="/create-listing" className="text-xs text-primary hover:underline">أنشئ أول إعلان</Link>}
+                    {listings.length === 0 && <Link to="/create-listing?new=1" className="text-xs text-primary hover:underline">أنشئ أول إعلان</Link>}
                   </div>
                 ) : (
                   filteredListings.map(listing => {

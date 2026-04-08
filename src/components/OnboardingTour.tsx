@@ -30,7 +30,7 @@ const steps: Step[] = [
     icon: <PlusCircle size={28} className="text-primary" />,
     title: "اعرض مشروعك",
     description: "أنشئ إعلاناً جديداً بخطوات بسيطة. الذكاء الاصطناعي يساعدك في جرد المخزون وتقييم المشروع.",
-    action: { label: "أنشئ إعلان", path: "/create-listing" },
+    action: { label: "أنشئ إعلان", path: "/create-listing?new=1" },
   },
   {
     icon: <MessageSquare size={28} className="text-primary" />,

@@ -193,7 +193,7 @@ const AboutPage = () => {
           <p className="text-base md:text-lg font-semibold mb-6">ابدأ الآن وخلك أقرب لصفقة ناجحة.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button asChild size="default" className="gradient-primary text-primary-foreground rounded-xl shadow-soft active:scale-[0.98] transition-transform">
-              <Link to="/create-listing">ابدأ الآن</Link>
+              <Link to="/create-listing?new=1">ابدأ الآن</Link>
             </Button>
             <Button asChild variant="outline" size="default" className="rounded-xl border-border/60 hover:bg-accent/50 active:scale-[0.98] transition-transform">
               <Link to="/marketplace">تصفح المشاريع</Link>

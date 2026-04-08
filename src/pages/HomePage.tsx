@@ -278,7 +278,7 @@ const HomePage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft hover:shadow-soft-lg transition-shadow active:scale-[0.98]">
-                <Link to="/create-listing">
+                <Link to="/create-listing?new=1">
                   {tx("اعرض مشروعك", "List your business")}
                 </Link>
               </Button>
@@ -408,7 +408,7 @@ const HomePage = () => {
           <p className="text-muted-foreground mb-6">{tx("سواء تبي تعرض مشروعك أو تدور فرصة… المنصة جاهزة لك", "Whether you want to list your business or discover an opportunity, the platform is ready for you")}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft active:scale-[0.98]">
-              <Link to="/create-listing">{tx("اعرض مشروعك", "List your business")}</Link>
+              <Link to="/create-listing?new=1">{tx("اعرض مشروعك", "List your business")}</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="rounded-xl border-border/60 hover:bg-accent/50 active:scale-[0.98]">
               <Link to="/marketplace">{tx("تصفح الفرص", "Browse opportunities")}</Link>
