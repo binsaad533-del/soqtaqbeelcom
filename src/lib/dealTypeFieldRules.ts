@@ -39,6 +39,9 @@ const LIABILITY_FIELDS = ["liabilities", "overdue_salaries", "overdue_rent"];
 const LICENSE_FIELDS = ["municipality_license", "civil_defense_license", "surveillance_cameras"];
 const ASSET_DISPLAY_FIELDS = [...LEASE_FIELDS, ...LIABILITY_FIELDS, ...LICENSE_FIELDS];
 
+/** Fields that accept numeric-only values — skip gibberish detection for these */
+const NUMERIC_FIELDS = new Set(["price", "annual_rent", "area_sqm"]);
+
 export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
   // ── Full Takeover ──
   full_takeover: {
