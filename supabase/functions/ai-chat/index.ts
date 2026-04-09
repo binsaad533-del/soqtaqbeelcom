@@ -206,6 +206,47 @@ const TOOL_DEFS: Record<string, any> = {
     ["content"]),
 
   // ═══════════════════════════════════════════════
+  // DEAL LIFECYCLE — Negotiation → Agreement → Transfer (10)
+  // ═══════════════════════════════════════════════
+  send_negotiation_message: def("send_negotiation_message", "إرسال رسالة تفاوض داخل صفقة",
+    { deal_id: { type: "string" }, message: { type: "string" }, message_type: { type: "string", enum: ["text", "offer", "counter_offer", "system"], description: "نوع الرسالة" } },
+    ["deal_id", "message"]),
+
+  update_agreed_price: def("update_agreed_price", "تحديث السعر المتفق عليه في الصفقة بعد التفاوض",
+    { deal_id: { type: "string" }, agreed_price: { type: "number" } },
+    ["deal_id", "agreed_price"]),
+
+  submit_legal_confirmation: def("submit_legal_confirmation", "تقديم التأكيد القانوني — يقفل الصفقة عند موافقة الطرفين",
+    { deal_id: { type: "string" } },
+    ["deal_id"]),
+
+  start_ownership_transfer: def("start_ownership_transfer", "بدء نقل الملكية (للبائع فقط) بعد تأكيد الطرفين",
+    { deal_id: { type: "string" } },
+    ["deal_id"]),
+
+  generate_agreement: def("generate_agreement", "إنشاء اتفاقية رسمية للصفقة — تُنشئ سجل الاتفاقية في قاعدة البيانات",
+    { deal_id: { type: "string" } },
+    ["deal_id"]),
+
+  get_deal_full_details: def("get_deal_full_details", "عرض كافة تفاصيل الصفقة: الأطراف، السعر، الحالة، الاتفاقيات، المستندات، السجل الزمني",
+    { deal_id: { type: "string" } },
+    ["deal_id"]),
+
+  get_agreement_details: def("get_agreement_details", "عرض تفاصيل اتفاقية محددة مع بيانات PDF",
+    { agreement_id: { type: "string" } },
+    ["agreement_id"]),
+
+  get_my_agreements: def("get_my_agreements", "عرض كافة اتفاقياتي (كبائع أو مشتري)"),
+
+  get_deal_negotiation_history: def("get_deal_negotiation_history", "عرض سجل التفاوض الكامل لصفقة",
+    { deal_id: { type: "string" }, limit: { type: "number" } },
+    ["deal_id"]),
+
+  complete_deal_via_moqbil: def("complete_deal_via_moqbil", "إتمام دورة الصفقة الكاملة: تأكيد قانوني → إنشاء اتفاقية → توفير رابط PDF — يتطلب أن تكون الصفقة مؤهلة",
+    { deal_id: { type: "string" } },
+    ["deal_id"]),
+
+  // ═══════════════════════════════════════════════
   // SUPERVISOR READ (4)
   // ═══════════════════════════════════════════════
   get_my_tasks: def("get_my_tasks", "المهام المسندة: إعلانات تحتاج مراجعة، صفقات تحتاج متابعة"),
