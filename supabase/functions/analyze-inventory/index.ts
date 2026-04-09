@@ -272,6 +272,7 @@ serve(async (req) => {
                       cr_number: { type: "string" },
                       entity_name: { type: "string" },
                       area_sqm: { type: "string" },
+                      asking_price: { type: "string", description: "السعر المطلوب للتقبيل أو البيع إن وُجد في أي مستند أو إعلان مرفق" },
                       monthly_revenue: { type: "string", description: "الإيرادات الشهرية إن وُجدت" },
                       monthly_expenses: { type: "string", description: "المصاريف الشهرية إن وُجدت" },
                       employee_count: { type: "string", description: "عدد الموظفين إن وُجد" },
