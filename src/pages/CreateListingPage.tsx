@@ -30,13 +30,13 @@ import AiInlineStar from "@/components/AiInlineStar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { useListings } from "@/hooks/useListings";
+import { useListings, type Listing } from "@/hooks/useListings";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
-import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
+import { DEAL_TYPE_MAP, detectConflicts, getRequiredDisclosures, getRequiredDocuments } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { calculateTransparency } from "@/lib/transparencyScore";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
@@ -138,7 +138,7 @@ const CreateListingPage = () => {
     surveillance_cameras: "",
   });
 
-  const { createListing, updateListing, uploadFile, getMyDraft, loading } = useListings();
+  const { createListing, updateListing, uploadFile, getMyDraft, getListing, loading } = useListings();
   const { profile } = useAuthContext();
   const sellerName = profile?.full_name || "";
   const navigate = useNavigate();
@@ -192,6 +192,74 @@ const CreateListingPage = () => {
   // ── Draft restore on mount (skip if ?new=1) ──
   const [searchParams] = useSearchParams();
   const isForceNew = searchParams.get("new") === "1";
+  const requestedDraftId = searchParams.get("draft");
+
+  const applyDraftToState = useCallback((draft: Listing) => {
+    setListingId(draft.id);
+
+    const primaryType = draft.primary_deal_type || draft.deal_type || "";
+    const selectedTypes = Array.isArray(draft.deal_options) && draft.deal_options.length > 0
+      ? (draft.deal_options as Array<{ type_id: string; priority: number; is_primary: boolean }>)
+          .map((option) => option.type_id)
+          .filter(Boolean)
+      : primaryType
+        ? [primaryType]
+        : [];
+
+    setDealStructure({
+      selectedTypes,
+      primaryType: primaryType || selectedTypes[0] || "",
+      conflicts: detectConflicts(selectedTypes),
+      requiredDisclosures: getRequiredDisclosures(selectedTypes),
+      requiredDocuments: getRequiredDocuments(selectedTypes),
+      isValid: selectedTypes.length > 0,
+    });
+
+    if (draft.photos && typeof draft.photos === "object") {
+      setPhotos(draft.photos as Record<string, string[]>);
+      setLocalPreviews(draft.photos as Record<string, string[]>);
+    }
+
+    if (Array.isArray(draft.inventory) && draft.inventory.length > 0) {
+      setInventory(draft.inventory as InventoryItem[]);
+      setAnalyzed(true);
+    }
+
+    if (Array.isArray(draft.documents) && draft.documents.length > 0) {
+      const restoredDocs: Record<string, string[]> = {};
+      for (const doc of draft.documents as Array<{ type?: string; files?: string[] }>) {
+        if (doc?.type && Array.isArray(doc.files)) {
+          restoredDocs[doc.type] = doc.files;
+        }
+      }
+      if (Object.keys(restoredDocs).length > 0) {
+        setUploadedDocs(restoredDocs);
+      }
+    }
+
+    setDisclosure((prev) => ({
+      ...prev,
+      business_activity: draft.business_activity || "",
+      city: draft.city || "",
+      district: draft.district || "",
+      price: draft.price != null ? String(draft.price) : "",
+      annual_rent: draft.annual_rent != null ? String(draft.annual_rent) : "",
+      lease_duration: draft.lease_duration || "",
+      lease_paid_period: draft.lease_paid_period || "",
+      lease_remaining: draft.lease_remaining || "",
+      liabilities: draft.liabilities || "",
+      overdue_salaries: draft.overdue_salaries || "",
+      overdue_rent: draft.overdue_rent || "",
+      municipality_license: draft.municipality_license || "",
+      civil_defense_license: draft.civil_defense_license || "",
+      surveillance_cameras: draft.surveillance_cameras || "",
+    }));
+
+    setLocationLat(draft.location_lat ?? null);
+    setLocationLng(draft.location_lng ?? null);
+    setAreaSqm(draft.area_sqm != null ? String(draft.area_sqm) : "");
+    setDraftRestored(true);
+  }, []);
 
   useEffect(() => {
     if (isForceNew) {
@@ -200,61 +268,15 @@ const CreateListingPage = () => {
     }
     const restoreDraft = async () => {
       try {
-        const draft = await getMyDraft();
+        const draft = requestedDraftId
+          ? await getListing(requestedDraftId)
+          : await getMyDraft();
+
         if (draft) {
-          setListingId(draft.id);
-          if (draft.primary_deal_type) {
-            const selectedTypes = Array.isArray(draft.deal_options)
-              ? (draft.deal_options as Array<{ type_id: string; priority: number; is_primary: boolean }>).map((o) => o.type_id)
-              : [draft.primary_deal_type];
-            setDealStructure((prev) => ({
-              ...prev,
-              selectedTypes,
-              primaryType: draft.primary_deal_type || selectedTypes[0] || "",
-              isValid: selectedTypes.length > 0,
-            }));
-          }
-          if (draft.photos && typeof draft.photos === "object") {
-            setPhotos(draft.photos as Record<string, string[]>);
-            setLocalPreviews(draft.photos as Record<string, string[]>);
-          }
-          if (Array.isArray(draft.inventory) && draft.inventory.length > 0) {
-            setInventory(draft.inventory as InventoryItem[]);
-            setAnalyzed(true);
-          }
-          if (Array.isArray(draft.documents) && draft.documents.length > 0) {
-            const restoredDocs: Record<string, string[]> = {};
-            for (const doc of draft.documents as Array<{ type?: string; files?: string[] }>) {
-              if (doc?.type && Array.isArray(doc.files)) {
-                restoredDocs[doc.type] = doc.files;
-              }
-            }
-            if (Object.keys(restoredDocs).length > 0) {
-              setUploadedDocs(restoredDocs);
-            }
-          }
-          setDisclosure((prev) => ({
-            ...prev,
-            business_activity: draft.business_activity || "",
-            city: draft.city || "",
-            district: draft.district || "",
-            price: draft.price != null ? String(draft.price) : "",
-            annual_rent: draft.annual_rent != null ? String(draft.annual_rent) : "",
-            lease_duration: draft.lease_duration || "",
-            lease_paid_period: draft.lease_paid_period || "",
-            lease_remaining: draft.lease_remaining || "",
-            liabilities: draft.liabilities || "",
-            overdue_salaries: draft.overdue_salaries || "",
-            overdue_rent: draft.overdue_rent || "",
-            municipality_license: draft.municipality_license || "",
-            civil_defense_license: draft.civil_defense_license || "",
-            surveillance_cameras: draft.surveillance_cameras || "",
-          }));
-          if ((draft as any).location_lat) setLocationLat((draft as any).location_lat);
-          if ((draft as any).location_lng) setLocationLng((draft as any).location_lng);
-          if ((draft as any).area_sqm) setAreaSqm(String((draft as any).area_sqm));
-          setDraftRestored(true);
-          toast.success("تم استعادة مسودتك السابقة تلقائياً", { icon: "📋" });
+          applyDraftToState(draft as Listing);
+          toast.success(requestedDraftId ? "تم فتح المسودة المطلوبة" : "تم استعادة مسودتك السابقة تلقائياً", { icon: "📋" });
+        } else if (requestedDraftId) {
+          toast.error("لم أجد المسودة المطلوبة");
         }
       } catch (err) {
         console.error("Draft restore failed", err);
@@ -263,7 +285,7 @@ const CreateListingPage = () => {
       }
     };
     restoreDraft();
-  }, [getMyDraft, isForceNew]);
+  }, [applyDraftToState, getListing, getMyDraft, isForceNew, requestedDraftId]);
 
   // ── Auto-save every 30 seconds ──
   const saveDraft = useCallback(async () => {
