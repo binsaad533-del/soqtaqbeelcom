@@ -5,11 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Download, Bot, AlertTriangle, CheckCircle, XCircle, MessageSquare, Zap, ThumbsUp, ThumbsDown, TrendingUp } from "lucide-react";
+import { Search, Download, Bot, AlertTriangle, CheckCircle, XCircle, MessageSquare, Zap, ThumbsUp, ThumbsDown } from "lucide-react";
 import { format } from "date-fns";
 
 const ACTION_LABELS: Record<string, string> = {
