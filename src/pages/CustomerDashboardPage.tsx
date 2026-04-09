@@ -210,7 +210,7 @@ const CustomerDashboardPage = () => {
   /* ── Smart suggestions ── */
   const suggestions = useMemo(() => {
     const s: { text: string; link: string; icon: any; priority: "high" | "medium" }[] = [];
-    if (profileCompleteness < 100) s.push({ text: "أكمل ملفك الشخصي لزيادة الثقة", link: "#account", icon: UserCheck, priority: "high" });
+    
     if (deals.some(d => d.status === "negotiating")) s.push({ text: "لديك صفقات بانتظار ردك", link: "#", icon: MessageSquare, priority: "high" });
     if (listings.length === 0) s.push({ text: "أنشئ أول إعلان لك", link: "/create-listing", icon: Plus, priority: "medium" });
     if (listings.some(l => l.status === "draft")) s.push({ text: "لديك إعلانات مسودة - انشرها", link: "#", icon: FileText, priority: "medium" });
