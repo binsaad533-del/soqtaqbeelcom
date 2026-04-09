@@ -242,6 +242,15 @@ const SellerDashboardPage = () => {
                             <Link to={`/listing/${listing.id}`} className="text-muted-foreground hover:text-foreground transition-colors">
                               <Eye size={14} />
                             </Link>
+                            {listing.status === "published" && (
+                              <button
+                                onClick={() => { setPromoteId(listing.id); setPromoteTitle(listing.title); }}
+                                className="text-muted-foreground hover:text-amber-500 transition-colors"
+                                title="ترقية الإعلان"
+                              >
+                                <Sparkles size={13} />
+                              </button>
+                            )}
                             {(listing.status === "draft" || listing.status === "suspended") && (
                               <button
                                 onClick={() => handleDelete(listing.id, listing.title)}
