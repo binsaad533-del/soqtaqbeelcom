@@ -251,6 +251,22 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/seller-analytics"
+                  element={
+                    <ProtectedRoute>
+                      <SellerAnalyticsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/referrals"
+                  element={
+                    <ProtectedRoute>
+                      <ReferralPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/install" element={<InstallPage />} />
                 <Route
                   path="/notification-settings"
