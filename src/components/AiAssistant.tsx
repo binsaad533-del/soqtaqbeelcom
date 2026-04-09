@@ -205,18 +205,18 @@ const AiAssistant = () => {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 left-[-8px] z-50 flex items-center gap-1.5 group transition-all duration-300 hover:left-2"
+          className="fixed bottom-6 left-5 z-50 flex items-center gap-2 group transition-all duration-300"
         >
-          <div className="relative w-12 h-12 rounded-full gradient-primary flex items-center justify-center shadow-soft-lg group-hover:scale-110 transition-transform duration-300">
-            <AiStar size={26} className="ai-glow-slow [&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" animate={false} />
+          <div className="relative w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 ai-fab-pulse">
+            <AiStar size={28} className="[&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" animate />
             {hasInsights && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive flex items-center justify-center text-[9px] font-bold text-destructive-foreground">
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive flex items-center justify-center text-[10px] font-bold text-destructive-foreground shadow-sm">
                 {proactiveInsights.length}
               </span>
             )}
           </div>
-          <span className="text-[11px] font-medium text-foreground/70 bg-card/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full shadow-soft border border-border/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-            مقبل - المساعد الذكي
+          <span className="text-[12px] font-medium text-foreground bg-card/95 backdrop-blur-sm px-3 py-2 rounded-xl shadow-md border border-border/40 whitespace-nowrap opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-300">
+            مقبل ✨
           </span>
         </button>
       )}
