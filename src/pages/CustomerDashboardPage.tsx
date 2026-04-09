@@ -622,15 +622,15 @@ const CustomerDashboardPage = () => {
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="flex gap-1 bg-muted/40 rounded-xl p-1 w-fit overflow-x-auto max-w-full scrollbar-hide">
                 {[
-                  { id: "deals" as const, label: "صفقاتي", icon: Briefcase, count: deals.length },
-                  { id: "listings" as const, label: "إعلاناتي", icon: Store, count: listings.length },
-                  { id: "offers" as const, label: "عروضي", icon: ShoppingCart, count: undefined },
-                  { id: "saved" as const, label: "المحفوظة", icon: Heart, count: undefined },
-                  { id: "notifications" as const, label: "الإشعارات", icon: Bell, count: undefined },
-                  { id: "agent" as const, label: "وكيل مقبل", icon: Bot, count: undefined },
-                  { id: "intelligence" as const, label: "ذكاء مقبل", icon: Brain, count: undefined },
-                  { id: "security" as const, label: "الأمان", icon: Shield, count: undefined },
-                  { id: "account" as const, label: "حسابي", icon: User, count: undefined },
+                  { id: "deals" as const, label: "صفقاتي", icon: Briefcase, count: deals.length, desc: "تابع جميع صفقاتك الجارية والمكتملة" },
+                  { id: "listings" as const, label: "إعلاناتي", icon: Store, count: listings.length, desc: "إدارة إعلاناتك ومسوداتك" },
+                  { id: "offers" as const, label: "عروضي", icon: ShoppingCart, count: undefined, desc: "العروض التي قدمتها على إعلانات أخرى" },
+                  { id: "saved" as const, label: "المحفوظة", icon: Heart, count: undefined, desc: "الإعلانات التي حفظتها للمراجعة لاحقاً" },
+                  { id: "notifications" as const, label: "الإشعارات", icon: Bell, count: undefined, desc: "تفضيلات التنبيهات والإشعارات" },
+                  { id: "agent" as const, label: "وكيل مقبل", icon: Bot, count: undefined, desc: "مساعدك الذكي الذي يعمل بالنيابة عنك" },
+                  { id: "intelligence" as const, label: "ذكاء مقبل", icon: Brain, count: undefined, desc: "تحليلات وتوصيات ذكية لصفقاتك" },
+                  { id: "security" as const, label: "الأمان", icon: Shield, count: undefined, desc: "إعدادات الحماية وأمان الحساب" },
+                  { id: "account" as const, label: "حسابي", icon: User, count: undefined, desc: "تعديل بياناتك الشخصية وكلمة المرور" },
                 ].map(tab => (
                   <button key={tab.id} onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }} className={cn(
                     "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs transition-all",
