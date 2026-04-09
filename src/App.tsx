@@ -62,6 +62,7 @@ const VerifySellerPage = lazy(() => import("./pages/VerifySellerPage"));
 const AdminVerificationsPage = lazy(() => import("./pages/AdminVerificationsPage"));
 const SellerDashboardPage = lazy(() => import("./pages/SellerDashboardPage"));
 const NotificationSettingsPage = lazy(() => import("./pages/NotificationSettingsPage"));
+const AiChatPage = lazy(() => import("./pages/AiChatPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -238,6 +239,7 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/ai-chat" element={<AiChatPage />} />
                 <Route path="/install" element={<InstallPage />} />
                 <Route
                   path="/notification-settings"

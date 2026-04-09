@@ -320,9 +320,9 @@ const AiAssistant = () => {
   return (
     <>
       {/* AI Float Button */}
-      {!open && (
+      {!open && location.pathname !== "/ai-chat" && (
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => navigate("/ai-chat")}
           className="fixed bottom-6 left-5 z-50 flex items-center gap-2 group transition-all duration-300"
         >
           <div className="relative w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 ai-fab-pulse">
