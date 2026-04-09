@@ -2827,6 +2827,15 @@ serve(async (req) => {
     systemMessage += `\nمعرف المستخدم: ${userId}`;
     if (userName) systemMessage += `\nاسم المستخدم: ${userName}\n\nتعامل مع المستخدم باسمه "${userName}" — نادِه باسمه الأول بشكل ودود.`;
 
+    // Check phone verification for customer write operations gate
+    let isPhoneVerified = false;
+    if (userId) {
+      try {
+        const { data: pv } = await supabaseAdmin.from("profiles").select("phone_verified").eq("user_id", userId).single();
+        isPhoneVerified = !!pv?.phone_verified;
+      } catch { /* assume not verified */ }
+    }
+
     const allowedToolNames = ROLE_TOOLS[role] || ROLE_TOOLS.customer;
     const tools = allowedToolNames.filter((n) => TOOL_DEFS[n]).map((n) => TOOL_DEFS[n]);
 
@@ -2906,6 +2915,28 @@ serve(async (req) => {
             currentMessages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify({ error: "ليس لديك صلاحية" }) });
             continue;
           }
+
+          // Phone verification gate: block write tools for unverified customers
+          const READ_ONLY_TOOLS = [
+            "search_listings", "get_listing_details", "track_my_listings", "get_my_invoices",
+            "get_my_documents", "view_my_updates", "get_listing_status", "get_delivery_timeline",
+            "get_dashboard_summary", "get_workflow_bottlenecks", "get_pending_approvals",
+            "get_financial_summary", "get_audit_trail", "get_compliance_overview", "get_client_list",
+            "weekly_report", "get_pending_payments", "get_revenue_report", "get_team_workload",
+            "get_client_history", "get_overdue_tasks", "get_overdue_invoices", "get_aging_report",
+            "get_my_tasks", "get_missing_assets_status", "get_review_checklist", "get_my_performance",
+            "get_deal_full_details", "get_agreement_details", "get_my_agreements",
+            "get_deal_negotiation_history",
+          ];
+          const isReadOnly = READ_ONLY_TOOLS.includes(toolName);
+          if (!isReadOnly && role === "customer" && !isPhoneVerified) {
+            currentMessages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify({
+              error: "يجب توثيق رقم الجوال أولاً قبل تنفيذ أي عملية على المنصة. وثّق رقمك من إعدادات الحساب ثم ارجع كلمني.",
+              requires_phone_verification: true,
+            }) });
+            continue;
+          }
+
           try {
             const result = await executeTool(toolName, toolArgs, userId, role, supabaseAdmin);
             currentMessages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
