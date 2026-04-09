@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Sparkles, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Shield, Paperclip, Mic, MicOff, Volume2, VolumeX, Copy, Check, ChevronRight, Bot, FileText, File, X, Loader2 } from "lucide-react";
+import { Send, Sparkles, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Shield, Paperclip, Mic, MicOff, Volume2, VolumeX, Copy, Check, ChevronRight, Bot, FileText, File, X, Loader2, Upload } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
@@ -7,6 +7,7 @@ import { useAiMemory } from "@/hooks/useAiMemory";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { useMarketAlerts } from "@/hooks/useMarketAlerts";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,14 +15,17 @@ import MoqbilAvatar from "@/components/MoqbilAvatar";
 import AiRecommendations from "@/components/AiRecommendations";
 import SmartMatchPanel from "@/components/SmartMatchPanel";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 
 interface PendingFile {
   name: string;
   type: string;
   size: number;
-  dataUrl: string;       // base64 data URI
+  dataUrl?: string;       // base64 data URI (for small images only)
+  storageUrl?: string;     // signed URL from storage (for large files)
   isImage: boolean;
-  textContent?: string;  // extracted text for text-based files
+  textContent?: string;    // extracted text for text-based files
+  uploaded: boolean;       // whether file was uploaded to storage
 }
 
 interface ChatMsg {
