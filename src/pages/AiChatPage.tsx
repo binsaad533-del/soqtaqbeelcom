@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Sparkles, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Shield, Paperclip, Mic, MicOff, Volume2, VolumeX, Copy, Check, ChevronRight, Bot, FileText, File, X, Loader2 } from "lucide-react";
+import { Send, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Paperclip, Mic, MicOff, Volume2, VolumeX, Copy, Check, ChevronRight, FileText, Loader2 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
@@ -7,6 +7,7 @@ import { useAiMemory } from "@/hooks/useAiMemory";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { useMarketAlerts } from "@/hooks/useMarketAlerts";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,13 +16,16 @@ import AiRecommendations from "@/components/AiRecommendations";
 import SmartMatchPanel from "@/components/SmartMatchPanel";
 import { toast } from "sonner";
 
+
 interface PendingFile {
   name: string;
   type: string;
   size: number;
-  dataUrl: string;       // base64 data URI
+  dataUrl?: string;       // base64 data URI (for small images only)
+  storageUrl?: string;     // signed URL from storage (for large files)
   isImage: boolean;
-  textContent?: string;  // extracted text for text-based files
+  textContent?: string;    // extracted text for text-based files
+  uploaded: boolean;       // whether file was uploaded to storage
 }
 
 interface ChatMsg {
@@ -193,8 +197,9 @@ const AiChatPage = () => {
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
+  const _location = useLocation();
   const { user, role: authRole } = useAuthContext();
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -222,6 +227,22 @@ const AiChatPage = () => {
     return ctx;
   }, [pathname, role, pageData, getMemoryContext]);
 
+  const MAX_BASE64_SIZE = 4 * 1024 * 1024; // 4MB — keep base64 for small images only
+
+  const uploadToStorage = async (file: File): Promise<string> => {
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `ai-chat/${user?.id || "anon"}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("chat-attachments")
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (error) throw error;
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from("chat-attachments")
+      .createSignedUrl(path, 60 * 60 * 24 * 365);
+    if (signedError) throw signedError;
+    return signedData.signedUrl;
+  };
+
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -231,19 +252,51 @@ const AiChatPage = () => {
 
     for (const file of Array.from(files)) {
       try {
-        const dataUrl = await fileToBase64(file);
         const image = isImageFile(file);
+        let dataUrl: string | undefined;
+        let storageUrl: string | undefined;
         let textContent: string | undefined;
+        let uploaded = false;
 
-        // For text-based files, also extract text content
+        // Text-based files: extract text content directly
         if (isTextFile(file)) {
           try {
             textContent = await fileToText(file);
-            // Limit text to ~50k chars to avoid payload issues
             if (textContent.length > 50000) {
               textContent = textContent.slice(0, 50000) + "\n\n... [تم اختصار الملف - الحجم الأصلي: " + formatFileSize(file.size) + "]";
             }
-          } catch { /* fallback to base64 only */ }
+          } catch { /* fallback */ }
+          // Small text files don't need storage upload
+          uploaded = false;
+        }
+
+        // Small images: base64 for direct vision AI
+        if (image && file.size <= MAX_BASE64_SIZE) {
+          dataUrl = await fileToBase64(file);
+        }
+        // Large images: upload to storage, send URL
+        else if (image && file.size > MAX_BASE64_SIZE) {
+          try {
+            storageUrl = await uploadToStorage(file);
+            uploaded = true;
+            toast.success(`تم رفع ${file.name}`);
+          } catch (err) {
+            console.error("Upload failed:", err);
+            toast.error(`فشل رفع ${file.name}`);
+            continue;
+          }
+        }
+        // Binary documents (PDF, DOCX, XLSX, etc): upload to storage
+        else if (!isTextFile(file) && !image) {
+          try {
+            storageUrl = await uploadToStorage(file);
+            uploaded = true;
+            toast.success(`تم رفع ${file.name}`);
+          } catch (err) {
+            console.error("Upload failed:", err);
+            toast.error(`فشل رفع ${file.name}`);
+            continue;
+          }
         }
 
         newFiles.push({
@@ -251,8 +304,10 @@ const AiChatPage = () => {
           type: file.type || "application/octet-stream",
           size: file.size,
           dataUrl,
+          storageUrl,
           isImage: image,
           textContent,
+          uploaded,
         });
       } catch {
         toast.error(`فشل قراءة الملف: ${file.name}`);
@@ -260,16 +315,29 @@ const AiChatPage = () => {
     }
 
     if (newFiles.length > 0) {
-      setPendingFiles(prev => [...prev, ...newFiles].slice(0, 10));
+      setPendingFiles(prev => [...prev, ...newFiles]);
     }
     setLoadingFiles(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, []);
+  }, [user?.id]);
 
   const removePendingFile = (index: number) => setPendingFiles(prev => prev.filter((_, i) => i !== index));
 
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const dt = e.dataTransfer;
+    if (!dt.files || dt.files.length === 0) return;
+    // Reuse the same handler by creating a synthetic event
+    const fakeEvent = { target: { files: dt.files } } as unknown as React.ChangeEvent<HTMLInputElement>;
+    handleFileUpload(fakeEvent);
+  }, [handleFileUpload]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); }, []);
+  const handleDragLeave = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragging(false); }, []);
+
   const sendMessage = useCallback((text: string, files?: PendingFile[]) => {
-    const imageUrls = files?.filter(f => f.isImage).map(f => f.dataUrl);
+    const imageUrls = files?.filter(f => f.isImage).map(f => f.dataUrl || f.storageUrl).filter(Boolean) as string[];
     const fileMeta = files?.map(f => ({ name: f.name, type: f.type, size: f.size, isImage: f.isImage }));
 
     const userMsg: ChatMsg = {
@@ -285,11 +353,8 @@ const AiChatPage = () => {
 
     // Build multimodal content for the current message
     const buildContent = (msg: ChatMsg, msgFiles?: PendingFile[]): string | any[] => {
-      // For the new message being sent, use the files data
       if (msgFiles && msgFiles.length > 0) {
         const parts: any[] = [];
-
-        // Add text content
         let combinedText = msg.content || "";
 
         // Add text file contents
@@ -301,8 +366,17 @@ const AiChatPage = () => {
           }
         }
 
-        // Add non-image, non-text file descriptions
-        const otherFiles = msgFiles.filter(f => !f.isImage && !f.textContent);
+        // Add uploaded binary doc descriptions with URLs
+        const uploadedDocs = msgFiles.filter(f => !f.isImage && !f.textContent && f.storageUrl);
+        if (uploadedDocs.length > 0) {
+          combinedText += "\n\n";
+          for (const doc of uploadedDocs) {
+            combinedText += `\n📎 ملف مرفق: "${doc.name}" (${doc.type}, ${formatFileSize(doc.size)}) — رابط: ${doc.storageUrl}`;
+          }
+        }
+
+        // Add non-uploaded non-image files
+        const otherFiles = msgFiles.filter(f => !f.isImage && !f.textContent && !f.storageUrl);
         if (otherFiles.length > 0) {
           combinedText += "\n\n";
           for (const of_ of otherFiles) {
@@ -314,10 +388,13 @@ const AiChatPage = () => {
           parts.push({ type: "text", text: combinedText.trim() });
         }
 
-        // Add images as image_url
+        // Add images — use dataUrl (base64) or storageUrl
         const imageFiles = msgFiles.filter(f => f.isImage);
         for (const img of imageFiles) {
-          parts.push({ type: "image_url", image_url: { url: img.dataUrl } });
+          const url = img.dataUrl || img.storageUrl;
+          if (url) {
+            parts.push({ type: "image_url", image_url: { url } });
+          }
         }
 
         return parts.length > 0 ? parts : msg.content;
@@ -391,7 +468,17 @@ const AiChatPage = () => {
   const hasInsights = proactiveInsights.length > 0 || marketAlerts.length > 0;
 
   return (
-    <div className="flex h-[calc(100vh-60px)] overflow-hidden">
+    <div className="flex h-[calc(100vh-60px)] overflow-hidden" onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}>
+      {/* Drag overlay */}
+      {isDragging && (
+        <div className="absolute inset-0 z-50 bg-primary/10 border-2 border-dashed border-primary/40 rounded-xl flex items-center justify-center pointer-events-none">
+          <div className="bg-card/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-lg text-center">
+            <Paperclip size={32} className="text-primary mx-auto mb-2" />
+            <p className="text-sm font-medium text-foreground">أفلت الملفات هنا</p>
+            <p className="text-xs text-muted-foreground">أي نوع وأي حجم</p>
+          </div>
+        </div>
+      )}
       {/* Hidden file input - accept all */}
       <input ref={fileInputRef} type="file" accept="*/*" multiple className="hidden" onChange={handleFileUpload} />
 
@@ -640,12 +727,15 @@ const AiChatPage = () => {
               {pendingFiles.map((pf, i) => (
                 <div key={i} className="relative shrink-0">
                   {pf.isImage ? (
-                    <img src={pf.dataUrl} alt="" className="w-14 h-14 object-cover rounded-lg border border-primary/20" />
+                    <img src={pf.dataUrl || pf.storageUrl} alt="" className="w-14 h-14 object-cover rounded-lg border border-primary/20" />
                   ) : (
                     <div className="w-14 h-14 rounded-lg border border-primary/20 bg-muted/30 flex flex-col items-center justify-center gap-0.5 p-1">
                       <FileText size={16} className="text-primary/60" />
                       <span className="text-[7px] text-muted-foreground text-center leading-tight truncate w-full">{pf.name.split(".").pop()?.toUpperCase()}</span>
                     </div>
+                  )}
+                  {pf.uploaded && (
+                    <span className="absolute -bottom-1 -left-1 w-4 h-4 rounded-full bg-success text-success-foreground flex items-center justify-center text-[8px]">✓</span>
                   )}
                   <button onClick={() => removePendingFile(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-[8px]">✕</button>
                 </div>
