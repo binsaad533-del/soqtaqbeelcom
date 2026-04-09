@@ -58,9 +58,10 @@ const CustomerDashboardPage = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const hashToTab: Record<string, typeof activeTab> = { "#profile": "account", "#account": "account", "#deals": "deals", "#listings": "listings", "#offers": "offers", "#saved": "saved", "#notifications": "notifications", "#security": "security", "#agent": "agent", "#intelligence": "intelligence" };
+  type TabId = "deals" | "listings" | "offers" | "saved" | "notifications" | "security" | "account" | "agent" | "intelligence";
+  const hashToTab: Record<string, TabId> = { "#profile": "account", "#account": "account", "#deals": "deals", "#listings": "listings", "#offers": "offers", "#saved": "saved", "#notifications": "notifications", "#security": "security", "#agent": "agent", "#intelligence": "intelligence" };
   const initialTab = hashToTab[location.hash] || "deals";
-  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "offers" | "saved" | "notifications" | "security" | "account" | "agent" | "intelligence">(initialTab);
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dealStatusFilter, setDealStatusFilter] = useState<string>("all");
