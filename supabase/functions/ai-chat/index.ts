@@ -304,6 +304,25 @@ const TOOL_DEFS: Record<string, any> = {
     ["listing_id"]),
 
   // ═══════════════════════════════════════════════
+  // OPTIONAL SMART SERVICES (3) — مقبل يقترحها والطرفين يوافقون
+  // ═══════════════════════════════════════════════
+
+  schedule_meeting: def("schedule_meeting", "جدولة اجتماع افتراضي بين طرفي الصفقة — مقبل يقترح الموعد ويُعد الأجندة تلقائياً",
+    { deal_id: { type: "string" },
+      proposed_date: { type: "string", description: "التاريخ المقترح (YYYY-MM-DD)" },
+      proposed_time: { type: "string", description: "الوقت المقترح (HH:MM)" },
+      agenda_notes: { type: "string", description: "ملاحظات الأجندة (اختياري — مقبل يولّدها تلقائياً)" } },
+    ["deal_id"]),
+
+  generate_handover_checklist: def("generate_handover_checklist", "إنشاء قائمة تسليم ذكية بعد إتمام الصفقة — كل طرف يؤكد إتمام مهامه",
+    { deal_id: { type: "string" } },
+    ["deal_id"]),
+
+  generate_listing_card: def("generate_listing_card", "تصدير بطاقة إعلان احترافية جاهزة للمشاركة عبر واتساب أو تويتر",
+    { listing_id: { type: "string" } },
+    ["listing_id"]),
+
+  // ═══════════════════════════════════════════════
   // SUPERVISOR READ (4)
   // ═══════════════════════════════════════════════
   get_my_tasks: def("get_my_tasks", "المهام المسندة: إعلانات تحتاج مراجعة، صفقات تحتاج متابعة"),
