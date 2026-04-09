@@ -167,9 +167,13 @@ const getListingContext = () => ({
     { id: "deal-intel", icon: "🧠", label: "حلل لي الصفقة", description: "تحليل شامل مع المخاطر والفرص", priority: "high" as const },
     { id: "price-check", icon: "💰", label: "السعر عادل؟", description: "تسعير ذكي مقارنة بالسوق", priority: "high" as const },
     { id: "fraud-detect", icon: "🛡️", label: "فحص أمان", description: "أفحص الإعلان عن علامات الاحتيال", priority: "high" as const },
+    { id: "simulate", icon: "🧪", label: "محاكاة ماذا لو؟", description: "سيناريوهات مختلفة للسعر والشروط", priority: "high" as const },
+    { id: "financial", icon: "📊", label: "تحليل مالي", description: "ROI ونقطة التعادل والتدفق النقدي", priority: "medium" as const },
     { id: "start-negotiate", icon: "🤝", label: "أبغى أفاوض", description: "أساعدك تبدأ مفاوضة ذكية", priority: "medium" as const },
     { id: "similar", icon: "🔄", label: "فرص مشابهة", description: "أوريك فرص مشابهة قد تعجبك", priority: "medium" as const },
-    { id: "verify", icon: "✅", label: "البيانات كاملة؟", description: "أراجع مدى اكتمال المعلومات والمستندات", priority: "low" as const },
+    { id: "seller-rep", icon: "⭐", label: "شيّك على البائع", description: "حلل سمعة البائع وتقييماته", priority: "medium" as const },
+    { id: "lawyer", icon: "⚖️", label: "صيغ بنود حماية", description: "بنود عقد تحمي حقوقك", priority: "low" as const },
+    { id: "verify", icon: "✅", label: "البيانات كاملة؟", description: "أراجع مدى اكتمال المعلومات", priority: "low" as const },
   ],
 });
 
