@@ -686,6 +686,9 @@ const ListingDetailsPage = () => {
                 {listing.liabilities && <InfoRow label="الالتزامات" value={listing.liabilities} />}
               </div>
 
+              {/* AI Credibility Badge */}
+              <CredibilityBadge data={(listing as any).ai_trust_score as any} />
+
               {/* Deal-type-aware Transparency Indicator */}
               <TransparencyIndicator listing={listing} className="mb-4" />
 
