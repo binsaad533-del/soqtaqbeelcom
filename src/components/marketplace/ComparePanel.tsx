@@ -216,6 +216,29 @@ const ComparePanel = ({ items, onRemove, onClear }: Props) => {
                       عرض التفاصيل
                     </Link>
                   )} />
+                  {/* AI Recommendation */}
+                  {aiRecommendation && (
+                    <tr className="border-t-2 border-primary/20 bg-primary/5">
+                      <td className="py-3 px-3 text-xs font-semibold text-primary">
+                        <div className="flex items-center gap-1.5">
+                          <AiStar size={14} />
+                          توصية AI
+                        </div>
+                      </td>
+                      {items.map(item => (
+                        <td key={item.id} className="py-3 px-3 text-center">
+                          {aiRecommendation.id === item.id ? (
+                            <div className="space-y-1">
+                              <span className="text-xs font-bold text-primary">✓ الخيار الأفضل</span>
+                              <p className="text-[9px] text-muted-foreground">بناءً على السعر والشفافية وثقة البائع</p>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground/50">—</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
