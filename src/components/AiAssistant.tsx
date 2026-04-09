@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Sparkles, ChevronLeft, Zap } from "lucide-react";
-import { useAiContext, type AiSuggestion } from "@/hooks/useAiContext";
+import { X, Send, Sparkles, ChevronLeft, Zap, Command, ArrowRight, AlertTriangle, Info, Bell } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
+import ReactMarkdown from "react-markdown";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -72,29 +74,28 @@ async function streamChat({
       }
     }
     onDone();
-  } catch (e) {
+  } catch {
     onError("فشل الاتصال بالمساعد الذكي");
   }
 }
 
 const AiAssistant = () => {
   const [open, setOpen] = useState(false);
-  const [chatMode, setChatMode] = useState(false);
+  const [view, setView] = useState<"home" | "chat" | "commands">("home");
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
-  
-  const [hasInteracted, setHasInteracted] = useState(false);
+  const navigate = useNavigate();
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  const { greeting, role, suggestions, proactiveMessage, dismissProactive, pathname } = useAiContext();
+
+  const { greeting, role, suggestions, proactiveInsights, quickCommands, pathname } = useAiContext();
   const { pageData } = usePageData();
 
-  useEffect(() => { setChatMode(false); setMessages([]); }, [pathname]);
+  useEffect(() => { setView("home"); setMessages([]); }, [pathname]);
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
-  useEffect(() => { chatMode && inputRef.current?.focus(); }, [chatMode]);
-
+  useEffect(() => { view === "chat" && inputRef.current?.focus(); }, [view]);
 
   const now = () => new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
@@ -130,18 +131,13 @@ const AiAssistant = () => {
           return [...prev, { id: assistantId, role: "assistant", content: assistantText, time: now() }];
         });
       },
-      onDone: () => {
-        setStreaming(false);
-      },
+      onDone: () => setStreaming(false),
       onError: (err) => {
         setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: `⚠️ ${err}`, time: now() }]);
         setStreaming(false);
       },
     });
   }, [messages, buildContext]);
-
-  const sendMessageRef = useRef(sendMessage);
-  sendMessageRef.current = sendMessage;
 
   const handleSend = () => {
     if (!input.trim() || streaming) return;
@@ -151,41 +147,55 @@ const AiAssistant = () => {
   };
 
   const handleSuggestionClick = (s: AiSuggestion) => {
-    setChatMode(true);
+    setView("chat");
     sendMessage(s.label);
   };
 
-  const handleOpen = () => {
-    setOpen(true);
-    setHasInteracted(true);
+  const handleQuickCommand = (cmd: QuickCommand) => {
+    setView("chat");
+    sendMessage(cmd.action);
   };
+
+  const handleInsightAction = (path?: string) => {
+    if (path) {
+      setOpen(false);
+      navigate(path);
+    }
+  };
+
+  const hasInsights = proactiveInsights.length > 0;
 
   return (
     <>
-      {/* AI button */}
+      {/* AI Float Button */}
       {!open && (
         <button
-          onClick={handleOpen}
+          onClick={() => setOpen(true)}
           className="fixed bottom-6 left-[-8px] z-50 flex items-center gap-1.5 group transition-all duration-300 hover:left-2"
         >
-          <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center shadow-soft-lg group-hover:scale-110 transition-transform duration-300">
+          <div className="relative w-12 h-12 rounded-full gradient-primary flex items-center justify-center shadow-soft-lg group-hover:scale-110 transition-transform duration-300">
             <AiStar size={26} className="ai-glow-slow [&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" animate={false} />
+            {hasInsights && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive flex items-center justify-center text-[9px] font-bold text-destructive-foreground">
+                {proactiveInsights.length}
+              </span>
+            )}
           </div>
           <span className="text-[11px] font-medium text-foreground/70 bg-card/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full shadow-soft border border-border/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-            المساعد الذكي
+            مقبل - المساعد الذكي
           </span>
         </button>
       )}
 
-      {/* Chat Panel */}
+      {/* Panel */}
       {open && (
-        <div className="fixed bottom-4 left-4 z-50 w-[380px] max-h-[520px] bg-card rounded-2xl shadow-soft-lg border border-border/40 flex flex-col animate-fade-in overflow-hidden">
+        <div className="fixed bottom-4 left-4 z-50 w-[380px] max-h-[560px] bg-card rounded-2xl shadow-soft-lg border border-border/40 flex flex-col animate-fade-in overflow-hidden">
           {/* Header */}
-          <div className="p-3.5 border-b border-border/30 bg-gradient-to-l from-primary/5 to-transparent">
+          <div className="p-3.5 border-b border-border/30 bg-gradient-to-l from-primary/5 to-transparent shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                {chatMode && (
-                  <button onClick={() => setChatMode(false)} className="text-muted-foreground hover:text-foreground">
+                {view !== "home" && (
+                  <button onClick={() => setView("home")} className="text-muted-foreground hover:text-foreground transition-colors">
                     <ChevronLeft size={16} strokeWidth={1.5} />
                   </button>
                 )}
@@ -193,8 +203,8 @@ const AiAssistant = () => {
                   <AiStar size={22} className="ai-glow-slow [&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" animate={false} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium">المساعد الذكي</h3>
-                  <p className="text-[10px] text-muted-foreground">مدعوم بالذكاء الاصطناعي</p>
+                  <h3 className="text-sm font-medium">مقبل</h3>
+                  <p className="text-[10px] text-muted-foreground">{role}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -209,9 +219,55 @@ const AiAssistant = () => {
             </div>
           </div>
 
-          {!chatMode ? (
+          {/* ─── HOME VIEW ─── */}
+          {view === "home" && (
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3">{greeting}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{greeting}</p>
+
+              {/* Proactive Insights */}
+              {hasInsights && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1.5 px-1">
+                    <Bell size={11} className="text-primary" strokeWidth={2} />
+                    <span className="text-[10px] font-medium text-primary">تنبيهات ذكية</span>
+                  </div>
+                  {proactiveInsights.map((insight) => (
+                    <div
+                      key={insight.id}
+                      className={cn(
+                        "rounded-xl p-2.5 border text-[11px] leading-relaxed",
+                        insight.type === "warning"
+                          ? "bg-warning/5 border-warning/20 text-warning-foreground"
+                          : insight.type === "action"
+                            ? "bg-primary/5 border-primary/15"
+                            : "bg-muted/30 border-border/30"
+                      )}
+                    >
+                      <div className="flex items-start gap-2">
+                        {insight.type === "warning" ? (
+                          <AlertTriangle size={12} className="text-warning shrink-0 mt-0.5" />
+                        ) : (
+                          <Info size={12} className="text-primary shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <span className="text-foreground/80">{insight.message}</span>
+                          {insight.actionLabel && (
+                            <button
+                              onClick={() => handleInsightAction(insight.actionPath)}
+                              className="flex items-center gap-1 mt-1 text-primary text-[10px] font-medium hover:underline"
+                            >
+                              {insight.actionLabel}
+                              <ArrowRight size={9} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Context Suggestions */}
               {suggestions.map((s) => (
                 <button
                   key={s.id}
@@ -231,20 +287,53 @@ const AiAssistant = () => {
                   </div>
                 </button>
               ))}
+
+              {/* Quick Commands Button */}
               <button
-                onClick={() => setChatMode(true)}
-                className="w-full mt-2 py-2.5 rounded-xl border border-dashed border-primary/20 text-xs text-primary hover:bg-primary/[0.03] transition-colors"
+                onClick={() => setView("commands")}
+                className="w-full py-2 rounded-xl border border-dashed border-primary/20 text-xs text-primary hover:bg-primary/[0.03] transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Command size={12} strokeWidth={2} />
+                أوامر سريعة
+              </button>
+
+              {/* Free chat */}
+              <button
+                onClick={() => setView("chat")}
+                className="w-full py-2 rounded-xl border border-dashed border-border/30 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-colors"
               >
                 💬 اسألني أي شي...
               </button>
             </div>
-          ) : (
+          )}
+
+          {/* ─── COMMANDS VIEW ─── */}
+          {view === "commands" && (
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              <p className="text-[11px] text-muted-foreground mb-2">اختر أمر سريع وأنا أنفذه لك:</p>
+              <div className="grid grid-cols-2 gap-2">
+                {quickCommands.map((cmd) => (
+                  <button
+                    key={cmd.id}
+                    onClick={() => handleQuickCommand(cmd)}
+                    className="flex items-center gap-2 p-2.5 rounded-xl border border-border/40 hover:border-primary/20 hover:bg-primary/[0.03] transition-all text-right"
+                  >
+                    <span className="text-base shrink-0">{cmd.icon}</span>
+                    <span className="text-[11px] text-foreground/80 font-medium leading-tight">{cmd.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ─── CHAT VIEW ─── */}
+          {view === "chat" && (
             <>
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.map((msg) => (
                   <div key={msg.id} className={cn("max-w-[85%]", msg.role === "user" ? "mr-auto" : "ml-auto")}>
                     <div className={cn(
-                      "rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed whitespace-pre-line",
+                      "rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed",
                       msg.role === "user"
                         ? "bg-primary/8 border border-primary/10"
                         : "bg-accent/50 border border-accent-foreground/10"
@@ -252,10 +341,16 @@ const AiAssistant = () => {
                       {msg.role === "assistant" && (
                         <div className="flex items-center gap-1.5 mb-1.5">
                           <AiStar size={14} />
-                          <span className="text-[10px] text-accent-foreground font-medium">AI</span>
+                          <span className="text-[10px] text-accent-foreground font-medium">مقبل</span>
                         </div>
                       )}
-                      {msg.content}
+                      {msg.role === "assistant" ? (
+                        <div className="prose prose-xs prose-neutral dark:prose-invert max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_h1]:text-sm [&_h2]:text-xs [&_h3]:text-xs [&_strong]:text-foreground">
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        <span>{msg.content}</span>
+                      )}
                     </div>
                     <span className="text-[9px] text-muted-foreground mt-0.5 px-1 block">{msg.time}</span>
                   </div>
@@ -276,10 +371,9 @@ const AiAssistant = () => {
                     </div>
                   </div>
                 )}
-
               </div>
 
-              <div className="p-3 border-t border-border/30">
+              <div className="p-3 border-t border-border/30 shrink-0">
                 <div className="flex items-center gap-2">
                   <input
                     ref={inputRef}

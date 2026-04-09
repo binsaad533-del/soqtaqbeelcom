@@ -3,8 +3,8 @@ import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Extracts relevant page data (listing, deal, etc.) based on the current route
- * so the AI assistant can be context-aware without asking the user for info.
+ * Extracts relevant page data (listing, deal, dashboard summary, etc.)
+ * so the AI assistant can be fully context-aware.
  */
 export function usePageData() {
   const { pathname } = useLocation();
@@ -34,6 +34,7 @@ export function usePageData() {
       data.overdue_salaries ? `رواتب متأخرة: ${data.overdue_salaries}` : "",
       data.liabilities ? `التزامات: ${data.liabilities}` : "",
       data.surveillance_cameras ? `كاميرات مراقبة: ${data.surveillance_cameras}` : "",
+      data.area_sqm != null ? `المساحة: ${data.area_sqm} متر مربع` : "",
     ];
 
     if (data.inventory && Array.isArray(data.inventory) && (data.inventory as any[]).length > 0) {
@@ -45,16 +46,14 @@ export function usePageData() {
       const discLines = Object.entries(disc)
         .filter(([, v]) => v != null && v !== "")
         .map(([k, v]) => `  ${k}: ${v}`);
-      if (discLines.length > 0) {
-        lines.push(`الإفصاحات:`, ...discLines);
-      }
+      if (discLines.length > 0) lines.push(`الإفصاحات:`, ...discLines);
     }
 
     if (data.ai_summary) lines.push(`ملخص ذكي: ${data.ai_summary}`);
     if (data.ai_rating) lines.push(`تقييم ذكي: ${data.ai_rating}`);
 
     lines.push(`---`);
-    lines.push(`ملاحظة: كل هذه البيانات متوفرة لك من الإعلان مباشرة. لا تسأل المستخدم عنها. حلل وأجب مباشرة بناءً عليها.`);
+    lines.push(`ملاحظة: كل هذه البيانات متوفرة لك. لا تسأل المستخدم عنها. حلل وأجب مباشرة.`);
 
     return lines.filter(Boolean).join("\n");
   }, []);
@@ -91,6 +90,75 @@ export function usePageData() {
     return lines.filter(Boolean).join("\n");
   }, []);
 
+  const fetchDashboardSummary = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return "";
+
+    const lines: string[] = [`--- ملخص لوحة التحكم ---`];
+
+    try {
+      // My listings
+      const { data: listings } = await supabase
+        .from("listings")
+        .select("id, title, status, price, city, category")
+        .eq("owner_id", user.id)
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (listings && listings.length > 0) {
+        lines.push(`إعلاناتك (${listings.length}):`);
+        listings.forEach((l, i) => {
+          lines.push(`  ${i + 1}. ${l.title || "بدون عنوان"} - ${l.status} - ${l.price?.toLocaleString() || "بدون سعر"} ريال - ${l.city || ""}`);
+        });
+      } else {
+        lines.push("ما عندك إعلانات حالياً");
+      }
+
+      // Pending offers on my listings
+      if (listings && listings.length > 0) {
+        const ids = listings.map(l => l.id);
+        const { data: offers } = await supabase
+          .from("listing_offers")
+          .select("id, offered_price, status, listing_id, created_at")
+          .in("listing_id", ids)
+          .eq("status", "pending")
+          .limit(10);
+
+        if (offers && offers.length > 0) {
+          lines.push(`\nعروض معلّقة (${offers.length}):`);
+          offers.forEach((o, i) => {
+            const listing = listings.find(l => l.id === o.listing_id);
+            lines.push(`  ${i + 1}. عرض ${o.offered_price.toLocaleString()} ريال على "${listing?.title || "إعلان"}" - بانتظار ردّك`);
+          });
+        }
+      }
+
+      // My active deals
+      const { data: deals } = await supabase
+        .from("deals")
+        .select("id, status, agreed_price, deal_type, listing_id")
+        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+        .not("status", "eq", "completed")
+        .not("status", "eq", "cancelled")
+        .limit(5);
+
+      if (deals && deals.length > 0) {
+        lines.push(`\nصفقات نشطة (${deals.length}):`);
+        deals.forEach((d, i) => {
+          lines.push(`  ${i + 1}. صفقة ${d.agreed_price?.toLocaleString() || "—"} ريال - الحالة: ${d.status}`);
+        });
+      }
+    } catch (e) {
+      console.error("Dashboard summary fetch error:", e);
+    }
+
+    lines.push(`---`);
+    lines.push(`ملاحظة: هذا ملخص بيانات المستخدم الحالي. استخدمها للإجابة على أسئلته مباشرة.`);
+
+    return lines.filter(Boolean).join("\n");
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -107,6 +175,8 @@ export function usePageData() {
       } else if (pathname.startsWith("/agreement/")) {
         const id = pathname.split("/")[2];
         if (id) result = await fetchDealData(id);
+      } else if (pathname === "/dashboard" || pathname.startsWith("/dashboard/") || pathname === "/seller-dashboard") {
+        result = await fetchDashboardSummary();
       }
 
       if (!cancelled) {
@@ -117,7 +187,7 @@ export function usePageData() {
 
     load();
     return () => { cancelled = true; };
-  }, [pathname, fetchListingData, fetchDealData]);
+  }, [pathname, fetchListingData, fetchDealData, fetchDashboardSummary]);
 
   return { pageData, loading };
 }
