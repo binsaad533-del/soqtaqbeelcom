@@ -3,6 +3,7 @@ import { User, Menu, X, LogIn, LogOut, Plus, MessageSquare } from "lucide-react"
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { useState, useEffect } from "react";
 import AiAssistant from "./AiAssistant";
+import AiAutoAnalysis from "./AiAutoAnalysis";
 import Footer from "./Footer";
 import NotificationBell from "./NotificationBell";
 import ThemeToggle from "./ThemeToggle";
