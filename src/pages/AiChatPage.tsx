@@ -408,7 +408,7 @@ const AiChatPage = () => {
                 <MoqbilAvatar size={44} />
               </div>
               <div>
-                <h2 className="text-sm font-semibold">مقبل مرشدك الذكي</h2>
+                <h2 className="text-sm font-semibold">مقبل مرشدك الذكي طحطوح الصفقات</h2>
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                   <span className="text-[10px] text-success">نشط</span>
