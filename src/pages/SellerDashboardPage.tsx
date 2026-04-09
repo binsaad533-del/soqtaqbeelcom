@@ -13,10 +13,11 @@ import {
 } from "@/components/ui/table";
 import {
   Store, ShoppingBag, Pause, Users, Handshake, CheckCircle2,
-  TrendingUp, ArrowLeft, Plus, MessageSquare, Percent, ExternalLink, Eye, Trash2,
+  TrendingUp, ArrowLeft, Plus, MessageSquare, Percent, ExternalLink, Eye, Trash2, BarChart3, Sparkles, Link2,
 } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
 import { toast } from "sonner";
+import PromoteListingDialog from "@/components/PromoteListingDialog";
 
 interface SellerStats {
   activeListings: number;
@@ -75,6 +76,8 @@ const SellerDashboardPage = () => {
   const [stats, setStats] = useState<SellerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState<ListingRow[]>([]);
+  const [promoteId, setPromoteId] = useState<string | null>(null);
+  const [promoteTitle, setPromoteTitle] = useState<string | null>(null);
 
   useSEO({ title: "لوحة تحكم البائع | سوق تقبيل", description: "إحصائيات نشاطك كبائع في سوق تقبيل", canonical: "/seller-dashboard" });
 
