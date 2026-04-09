@@ -10,7 +10,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import AiStar from "@/components/AiStar";
+import MoqbilAvatar from "@/components/MoqbilAvatar";
 import AiRecommendations from "@/components/AiRecommendations";
 import SmartMatchPanel from "@/components/SmartMatchPanel";
 import { toast } from "sonner";
@@ -404,8 +404,8 @@ const AiChatPage = () => {
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {/* Header */}
             <div className="flex items-center gap-3 pb-3 border-b border-border/30">
-              <div className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center">
-                <AiStar size={24} className="[&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" animate />
+              <div className="w-11 h-11 rounded-full overflow-hidden">
+                <MoqbilAvatar size={44} />
               </div>
               <div>
                 <h2 className="text-sm font-semibold">مقبل</h2>
@@ -540,8 +540,8 @@ const AiChatPage = () => {
       <div className="flex-1 flex flex-col bg-background min-w-0">
         {/* Chat header */}
         <div className="px-6 py-3 border-b border-border/30 bg-gradient-to-l from-primary/5 to-transparent flex items-center gap-3 shrink-0">
-          <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">
-            <AiStar size={20} className="[&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" />
+          <div className="w-9 h-9 rounded-full overflow-hidden">
+            <MoqbilAvatar size={36} />
           </div>
           <div>
             <h1 className="text-sm font-semibold">محادثة مقبل</h1>
@@ -553,8 +553,8 @@ const AiChatPage = () => {
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center gap-4">
-              <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center opacity-60">
-                <AiStar size={32} className="[&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" />
+              <div className="w-16 h-16 rounded-full overflow-hidden opacity-80">
+                <MoqbilAvatar size={64} />
               </div>
               <div>
                 <h3 className="text-sm font-medium text-foreground/70">مرحباً، أنا مقبل</h3>
@@ -574,7 +574,7 @@ const AiChatPage = () => {
                 {msg.role === "assistant" && (
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-1.5">
-                      <AiStar size={16} />
+                      <MoqbilAvatar size={16} />
                       <span className="text-[11px] text-accent-foreground font-medium">مقبل</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -619,7 +619,7 @@ const AiChatPage = () => {
             <div className="ml-auto max-w-[70%]">
               <div className="rounded-2xl px-4 py-3 bg-accent/50 border border-accent-foreground/10">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <AiStar size={16} />
+                  <MoqbilAvatar size={16} />
                   <span className="text-[11px] text-accent-foreground font-medium">يفكر...</span>
                 </div>
                 <div className="flex gap-1.5">
