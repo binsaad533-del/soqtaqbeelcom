@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_user_memory: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string
+          id: string
+          interaction_count: number | null
+          last_search_query: string | null
+          notes: Json | null
+          preferences: Json | null
+          preferred_activities: string[] | null
+          preferred_cities: string[] | null
+          updated_at: string
+          user_id: string
+          viewed_listings: string[] | null
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          id?: string
+          interaction_count?: number | null
+          last_search_query?: string | null
+          notes?: Json | null
+          preferences?: Json | null
+          preferred_activities?: string[] | null
+          preferred_cities?: string[] | null
+          updated_at?: string
+          user_id: string
+          viewed_listings?: string[] | null
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          id?: string
+          interaction_count?: number | null
+          last_search_query?: string | null
+          notes?: Json | null
+          preferences?: Json | null
+          preferred_activities?: string[] | null
+          preferred_cities?: string[] | null
+          updated_at?: string
+          user_id?: string
+          viewed_listings?: string[] | null
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
