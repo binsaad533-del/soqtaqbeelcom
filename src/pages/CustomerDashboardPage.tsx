@@ -236,15 +236,6 @@ const CustomerDashboardPage = () => {
     <div className="min-h-[80vh] bg-background py-6">
       <div className="container max-w-6xl">
 
-    e.preventDefault();
-    e.stopPropagation();
-    if (!confirm(`هل تريد حذف "${title || "بدون عنوان"}"؟`)) return;
-    const { error } = await softDeleteListing(id);
-    if (error) { toast.error("فشل حذف الإعلان"); return; }
-    toast.success("تم حذف الإعلان");
-    setListings(prev => prev.filter(l => l.id !== id));
-  }, [softDeleteListing]);
-
         {loadError && (
           <div className="p-3 rounded-xl bg-destructive/10 flex items-center justify-between mb-4">
             <div className="flex items-center gap-2"><AlertCircle size={14} className="text-destructive" /><span className="text-xs text-destructive">{loadError}</span></div>
