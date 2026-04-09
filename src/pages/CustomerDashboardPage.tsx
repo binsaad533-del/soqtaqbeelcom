@@ -58,7 +58,9 @@ const CustomerDashboardPage = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "offers" | "saved" | "notifications" | "security" | "account" | "agent" | "intelligence">("deals");
+  const hashToTab: Record<string, typeof activeTab> = { "#profile": "account", "#account": "account", "#deals": "deals", "#listings": "listings", "#offers": "offers", "#saved": "saved", "#notifications": "notifications", "#security": "security", "#agent": "agent", "#intelligence": "intelligence" };
+  const initialTab = hashToTab[location.hash] || "deals";
+  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "offers" | "saved" | "notifications" | "security" | "account" | "agent" | "intelligence">(initialTab);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dealStatusFilter, setDealStatusFilter] = useState<string>("all");
@@ -207,7 +209,7 @@ const CustomerDashboardPage = () => {
   /* ── Smart suggestions ── */
   const suggestions = useMemo(() => {
     const s: { text: string; link: string; icon: any; priority: "high" | "medium" }[] = [];
-    if (profileCompleteness < 100) s.push({ text: "أكمل ملفك الشخصي لزيادة الثقة", link: "#profile", icon: UserCheck, priority: "high" });
+    if (profileCompleteness < 100) s.push({ text: "أكمل ملفك الشخصي لزيادة الثقة", link: "#account", icon: UserCheck, priority: "high" });
     if (deals.some(d => d.status === "negotiating")) s.push({ text: "لديك صفقات بانتظار ردك", link: "#", icon: MessageSquare, priority: "high" });
     if (listings.length === 0) s.push({ text: "أنشئ أول إعلان لك", link: "/create-listing", icon: Plus, priority: "medium" });
     if (listings.some(l => l.status === "draft")) s.push({ text: "لديك إعلانات مسودة - انشرها", link: "#", icon: FileText, priority: "medium" });
