@@ -439,6 +439,7 @@ const ROLE_TOOLS: Record<string, string[]> = {
     "get_listing_status", "get_delivery_timeline", "get_overdue_tasks",
     // Customer write (own)
     "create_listing", "edit_my_listing", "cancel_my_listing", "update_listing_pricing",
+    "publish_my_listing", "set_listing_location",
     "submit_offer", "withdraw_offer", "respond_to_offer", "express_interest",
     "confirm_receipt", "save_listing", "unsave_listing", "create_search_alert", "send_message",
     // Deal lifecycle
