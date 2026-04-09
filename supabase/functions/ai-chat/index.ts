@@ -3009,6 +3009,22 @@ serve(async (req) => {
     finalText = enforceVerifiedListingState(finalText, verifiedListingState);
     if (!finalText) finalText = "تم.";
 
+    // Log the full chat interaction to ai_chat_messages
+    if (userId) {
+      const sessionId = `${userId}-${new Date().toISOString().slice(0,10)}-${Date.now()}`;
+      const detectedIntent = isCreateListingIntent ? "create_listing" : isPublishIntent ? "publish" : isLocationIntent ? "set_location" : toolsUsed.length > 0 ? toolsUsed[0] : null;
+      supabaseAdmin.from("ai_chat_messages").insert({
+        user_id: userId,
+        session_id: sessionId,
+        user_message: lastUserText || "(مرفق)",
+        ai_response: finalText,
+        detected_intent: detectedIntent,
+        executed_action: toolsUsed.length > 0 ? toolsUsed.join(", ") : null,
+        status: "success",
+        metadata: { tools_used: toolsUsed, iterations, role },
+      }).then(() => {}).catch(() => {});
+    }
+
     if (toolsUsed.length > 0 && userId) {
       supabaseAdmin.from("agent_actions_log").insert({
         user_id: userId,
