@@ -248,6 +248,12 @@ const MessagesPage = () => {
                     {conv.lastMessage || tx("لا رسائل بعد", "No messages yet")}
                   </p>
                   <div className="flex items-center gap-1.5">
+                    {/* AI in-chat hint */}
+                    {conv.dealStatus === "negotiating" && (
+                      <span className="text-[9px] text-primary flex items-center gap-0.5" title="مقبل يراقب هذه المحادثة">
+                        <Sparkles size={9} />
+                      </span>
+                    )}
                     <Badge
                       variant="secondary"
                       className={cn("text-[10px] px-1.5 py-0", statusColor(conv.dealStatus))}
