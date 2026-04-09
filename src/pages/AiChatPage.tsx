@@ -6,6 +6,7 @@ import { usePageData } from "@/hooks/usePageData";
 import { useAiMemory } from "@/hooks/useAiMemory";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { useMarketAlerts } from "@/hooks/useMarketAlerts";
+import { useAuthContext } from "@/contexts/AuthContext";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
