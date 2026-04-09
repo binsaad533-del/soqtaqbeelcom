@@ -564,7 +564,7 @@ const AiChatPage = () => {
           )}
 
           {messages.map((msg) => (
-            <div key={msg.id} className={cn("max-w-[70%]", msg.role === "user" ? "mr-auto" : "ml-auto")}>
+            <div key={msg.id} className={cn("max-w-[70%] break-words overflow-hidden", msg.role === "user" ? "mr-auto" : "ml-auto")}>
               <div className={cn(
                 "rounded-2xl px-4 py-3 text-sm leading-relaxed",
                 msg.role === "user"
