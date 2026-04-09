@@ -2935,13 +2935,40 @@ serve(async (req) => {
 
     const formattedMessages = Array.isArray(messages) ? messages.map(sanitizeHistoryMessage) : [];
 
-    // Detect listing creation intent from the last user message
+    // Detect actionable intent from the last user message
     const lastUserMsg = formattedMessages.filter((m: any) => m.role === "user").pop();
     const lastUserText = typeof lastUserMsg?.content === "string" ? lastUserMsg.content : "";
+    
+    // Create / Sell intent
     const isCreateListingIntent = /أبي أبيع|ابي ابيع|أبغى أبيع|ابغا ابيع|أنزل إعلان|انزل اعلان|أضيف إعلان|اضيف اعلان|سوّ لي إعلان|سو لي اعلان|أنشئ إعلان|انشئ اعلان|بيع محل|بيع مطعم|بيع مقهى|بيع كافيه|بيع بقالة|عندي محل|عندي مطعم|أبي أعرض|ابي اعرض|حاب أبيع|حاب ابيع/i.test(lastUserText);
+    // Publish intent
     const isPublishIntent = /انشر|انشره|نشّره|نشره|انزله|نزله|اطلقه|خلاص انشر|publish/i.test(lastUserText);
+    // Location intent
     const isLocationIntent = /maps\.app\.goo\.gl|goo\.gl\/maps|google\.com\/maps|maps\.google|الموقع|الإحداثيات|خريطة/i.test(lastUserText);
-    const isToolForcedIntent = isCreateListingIntent || isPublishIntent || isLocationIntent;
+    // Search / Browse intent
+    const isSearchIntent = /ابي اشوف|أبي أشوف|ابحث|أبحث|ابغى اشوف|أبغى أشوف|وريني|عرض لي|دور لي|فيه محل|فيه مطعم|فرص|إعلانات|اعلانات|search|browse|مطاعم بـ|محلات بـ|كافيهات بـ|بقالات بـ/i.test(lastUserText);
+    // Edit intent
+    const isEditIntent = /عدّل|عدل|غيّر|غير|حدّث|حدث|بدّل|بدل|edit|update|change/i.test(lastUserText);
+    // Offer / Deal intent
+    const isOfferDealIntent = /عرض سعر|قدّم عرض|قدم عرض|ارسل عرض|أرسل عرض|أقبل|اقبل|ارفض|أرفض|صفقة|صفقات|عروض|offer|deal/i.test(lastUserText);
+    // Delete / Cancel intent
+    const isDeleteIntent = /احذف|أحذف|امسح|أمسح|الغ|ألغ|شيل|delete|cancel|remove/i.test(lastUserText);
+    // Report / Analysis intent
+    const isAnalysisIntent = /حلل|أحلل|تحليل|تقييم|قيّم|قيم|فحص|افحص|تقرير|report|analyze|check|feasibility|دراسة جدوى/i.test(lastUserText);
+    // Price / Financial intent
+    const isPriceIntent = /السعر|سعر|كم يسوى|كم سعر|تسعير|price|valuation/i.test(lastUserText);
+    // My listings / dashboard intent
+    const isMyDataIntent = /إعلاناتي|اعلاناتي|صفقاتي|عروضي|رسائلي|حسابي|my listing|my deal|my offer/i.test(lastUserText);
+    // Confirmation / affirmative (user said yes/ok/confirm after a question)
+    const isConfirmation = /^(نعم|أيوا|ايوا|اي|أي|ايه|أيه|تمام|اوكي|أوكي|ok|yes|يب|يس|صح|موافق|أكيد|اكيد|يلا|يالله|خلاص|ماشي|سو|سوي|نفذ|نفّذ|كمّل|كمل)$/i.test(lastUserText.trim());
+
+    // Force tool execution for any actionable intent
+    const isToolForcedIntent = isCreateListingIntent || isPublishIntent || isLocationIntent 
+      || isSearchIntent || isEditIntent || isOfferDealIntent || isDeleteIntent 
+      || isAnalysisIntent || isPriceIntent || isMyDataIntent || isConfirmation;
+    
+    // Conversational-only messages (greetings, small talk) → don't force tools
+    const isGreetingOnly = /^(مرحبا|هلا|السلام عليكم|كيفك|كيف حالك|شكرا|مشكور|hi|hello|hey|thanks)$/i.test(lastUserText.trim());
     
     // If user wants to create listing but isn't authenticated, tell them to login
     if ((isCreateListingIntent || isPublishIntent) && !userId) {
@@ -2962,8 +2989,8 @@ serve(async (req) => {
     const MAX_ITERATIONS = 5;
     let toolsUsed: string[] = [];
 
-    // Determine tool_choice: force "required" for first iteration when intent requires tool execution
-    const initialToolChoice = isToolForcedIntent ? "required" : "auto";
+    // Force "required" for actionable intents, "auto" for greetings/small talk
+    const initialToolChoice = (isToolForcedIntent && !isGreetingOnly) ? "required" : "auto";
 
     while (iterations < MAX_ITERATIONS) {
       console.log(`[moqbil] Tool loop iteration ${iterations}, tools: ${tools.length}, toolChoice: ${iterations === 0 ? initialToolChoice : "auto"}`);
