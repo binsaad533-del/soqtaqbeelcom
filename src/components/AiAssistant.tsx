@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Sparkles, ChevronLeft, Zap, Command, ArrowRight, AlertTriangle, Info, Bell } from "lucide-react";
+import { X, Send, Sparkles, ChevronLeft, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, FileText, Copy, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
+import { useAiMemory } from "@/hooks/useAiMemory";
 import ReactMarkdown from "react-markdown";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import AiStar from "@/components/AiStar";
+import AiRecommendations from "@/components/AiRecommendations";
+import { toast } from "sonner";
 
 interface ChatMsg {
   id: string;
@@ -79,6 +82,21 @@ async function streamChat({
   }
 }
 
+/** Copy button for AI messages */
+const CopyButton = ({ text }: { text: string }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button onClick={handleCopy} className="text-muted-foreground/50 hover:text-foreground transition-colors" title="نسخ">
+      {copied ? <Check size={10} className="text-success" /> : <Copy size={10} />}
+    </button>
+  );
+};
+
 const AiAssistant = () => {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"home" | "chat" | "commands">("home");
@@ -92,6 +110,7 @@ const AiAssistant = () => {
 
   const { greeting, role, suggestions, proactiveInsights, quickCommands, pathname } = useAiContext();
   const { pageData } = usePageData();
+  const { getMemoryContext, addAiNote, memory, loaded: memoryLoaded } = useAiMemory();
 
   useEffect(() => { setView("home"); setMessages([]); }, [pathname]);
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
@@ -101,9 +120,13 @@ const AiAssistant = () => {
 
   const buildContext = useCallback(() => {
     let ctx = `الصفحة الحالية: ${pathname}\nدور المستخدم: ${role}`;
+    // Add page data
     if (pageData) ctx += `\n\n${pageData}`;
+    // Add persistent memory
+    const memCtx = getMemoryContext();
+    if (memCtx) ctx += `\n\n${memCtx}`;
     return ctx;
-  }, [pathname, role, pageData]);
+  }, [pathname, role, pageData, getMemoryContext]);
 
   const sendMessage = useCallback((text: string) => {
     const userMsg: ChatMsg = { id: String(Date.now()), role: "user", content: text, time: now() };
@@ -131,13 +154,19 @@ const AiAssistant = () => {
           return [...prev, { id: assistantId, role: "assistant", content: assistantText, time: now() }];
         });
       },
-      onDone: () => setStreaming(false),
+      onDone: () => {
+        setStreaming(false);
+        // Save a note about this interaction for memory
+        if (assistantText.length > 20) {
+          addAiNote(`المستخدم سأل: "${text.slice(0, 50)}" في صفحة ${pathname}`);
+        }
+      },
       onError: (err) => {
         setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: `⚠️ ${err}`, time: now() }]);
         setStreaming(false);
       },
     });
-  }, [messages, buildContext]);
+  }, [messages, buildContext, addAiNote, pathname]);
 
   const handleSend = () => {
     if (!input.trim() || streaming) return;
@@ -164,6 +193,7 @@ const AiAssistant = () => {
   };
 
   const hasInsights = proactiveInsights.length > 0;
+  const showRecommendations = pathname === "/" || pathname === "/marketplace";
 
   return (
     <>
@@ -189,7 +219,7 @@ const AiAssistant = () => {
 
       {/* Panel */}
       {open && (
-        <div className="fixed bottom-4 left-4 z-50 w-[380px] max-h-[560px] bg-card rounded-2xl shadow-soft-lg border border-border/40 flex flex-col animate-fade-in overflow-hidden">
+        <div className="fixed bottom-4 left-4 z-50 w-[400px] max-h-[600px] bg-card rounded-2xl shadow-soft-lg border border-border/40 flex flex-col animate-fade-in overflow-hidden">
           {/* Header */}
           <div className="p-3.5 border-b border-border/30 bg-gradient-to-l from-primary/5 to-transparent shrink-0">
             <div className="flex items-center justify-between">
@@ -208,6 +238,11 @@ const AiAssistant = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {memoryLoaded && memory.interaction_count > 0 && (
+                  <span className="text-[9px] text-muted-foreground/60 bg-muted/30 px-1.5 py-0.5 rounded-full">
+                    {memory.interaction_count} تفاعل
+                  </span>
+                )}
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                   <span className="text-[10px] text-success">نشط</span>
@@ -237,7 +272,7 @@ const AiAssistant = () => {
                       className={cn(
                         "rounded-xl p-2.5 border text-[11px] leading-relaxed",
                         insight.type === "warning"
-                          ? "bg-warning/5 border-warning/20 text-warning-foreground"
+                          ? "bg-warning/5 border-warning/20"
                           : insight.type === "action"
                             ? "bg-primary/5 border-primary/15"
                             : "bg-muted/30 border-border/30"
@@ -288,7 +323,10 @@ const AiAssistant = () => {
                 </button>
               ))}
 
-              {/* Quick Commands Button */}
+              {/* Personalized Recommendations */}
+              {showRecommendations && <AiRecommendations />}
+
+              {/* Quick Commands */}
               <button
                 onClick={() => setView("commands")}
                 className="w-full py-2 rounded-xl border border-dashed border-primary/20 text-xs text-primary hover:bg-primary/[0.03] transition-colors flex items-center justify-center gap-1.5"
@@ -339,9 +377,12 @@ const AiAssistant = () => {
                         : "bg-accent/50 border border-accent-foreground/10"
                     )}>
                       {msg.role === "assistant" && (
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <AiStar size={14} />
-                          <span className="text-[10px] text-accent-foreground font-medium">مقبل</span>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <AiStar size={14} />
+                            <span className="text-[10px] text-accent-foreground font-medium">مقبل</span>
+                          </div>
+                          <CopyButton text={msg.content} />
                         </div>
                       )}
                       {msg.role === "assistant" ? (
