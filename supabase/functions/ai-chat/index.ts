@@ -1642,6 +1642,486 @@ async function executeTool(name: string, args: any, userId: string, role: string
       return { success: true, message: "تم إغلاق البلاغ" };
     }
 
+
+    // ═══════════════════════════════════════════════
+    // ADVANCED MOQBIL TOOLS — Implementations
+    // ═══════════════════════════════════════════════
+
+    case "valuate_business": {
+      const { data: listing } = await sb.from("listings")
+        .select("id, title, price, city, business_activity, deal_type, area_sqm, annual_rent, ai_price_analysis, ai_assets_combined, inventory")
+        .eq("id", args.listing_id).single();
+      if (!listing) return { error: "الإعلان غير موجود" };
+
+      const askingPrice = listing.price || 0;
+      const monthlyRev = args.monthly_revenue || 0;
+      const monthlyExp = args.monthly_expenses || 0;
+      const monthlyProfit = monthlyRev - monthlyExp;
+      const annualProfit = monthlyProfit * 12;
+      const yearsOp = args.years_operating || 1;
+
+      // Count assets
+      const assets = listing.ai_assets_combined || listing.inventory || [];
+      const assetCount = Array.isArray(assets) ? assets.length : 0;
+
+      // Valuation methods
+      const methods: any[] = [];
+
+      // Method 1: Earnings multiplier (2-5x annual profit based on years)
+      if (annualProfit > 0) {
+        const multiplier = Math.min(2 + yearsOp * 0.5, 5);
+        const earningsVal = annualProfit * multiplier;
+        methods.push({ method: "مضاعف الأرباح", value: Math.round(earningsVal), multiplier: `${multiplier.toFixed(1)}x`, note: `الربح السنوي ${annualProfit.toLocaleString()} × ${multiplier.toFixed(1)}` });
+      }
+
+      // Method 2: Asset-based
+      if (listing.ai_price_analysis) {
+        const pa = typeof listing.ai_price_analysis === "string" ? JSON.parse(listing.ai_price_analysis) : listing.ai_price_analysis;
+        const assetVal = pa.estimated_assets_value || pa.total_estimated_value;
+        if (assetVal) methods.push({ method: "قيمة الأصول", value: Math.round(assetVal), note: `تقدير AI للأصول (${assetCount} أصل)` });
+      }
+
+      // Method 3: Revenue-based (1.5-3x annual revenue)
+      if (monthlyRev > 0) {
+        const revMultiplier = yearsOp >= 3 ? 2.5 : yearsOp >= 1 ? 2 : 1.5;
+        const revVal = monthlyRev * 12 * revMultiplier;
+        methods.push({ method: "مضاعف الإيرادات", value: Math.round(revVal), multiplier: `${revMultiplier}x`, note: `الإيراد السنوي × ${revMultiplier}` });
+      }
+
+      // Method 4: Lease + setup (for asset-heavy businesses)
+      if (listing.annual_rent && listing.annual_rent > 0) {
+        const leaseSetupVal = listing.annual_rent * 2 + (assetCount * 5000);
+        methods.push({ method: "الإيجار + التجهيز", value: Math.round(leaseSetupVal), note: "إيجار سنتين + تقدير التجهيزات" });
+      }
+
+      // Calculate range
+      const values = methods.map(m => m.value).filter(v => v > 0);
+      const avgVal = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : askingPrice;
+      const minVal = Math.round(avgVal * 0.85);
+      const maxVal = Math.round(avgVal * 1.15);
+
+      // Compare with asking price
+      let priceVerdict = "عادل";
+      if (askingPrice > 0) {
+        const diff = ((askingPrice - avgVal) / avgVal) * 100;
+        if (diff > 25) priceVerdict = "مبالغ فيه";
+        else if (diff > 10) priceVerdict = "أعلى من التقييم قليلاً";
+        else if (diff < -25) priceVerdict = "فرصة ممتازة";
+        else if (diff < -10) priceVerdict = "أقل من التقييم";
+      }
+
+      return {
+        listing_title: listing.title, asking_price: askingPrice,
+        valuation: { min: minVal, max: maxVal, average: Math.round(avgVal) },
+        methods,
+        price_verdict: priceVerdict,
+        financial_summary: monthlyRev > 0 ? {
+          monthly_revenue: monthlyRev, monthly_expenses: monthlyExp,
+          monthly_profit: monthlyProfit, annual_profit: annualProfit,
+          profit_margin: `${Math.round((monthlyProfit / monthlyRev) * 100)}%`,
+        } : null,
+        recommendation: priceVerdict === "فرصة ممتازة" ? "فرصة ممتازة — السعر أقل من القيمة التقديرية" :
+          priceVerdict === "مبالغ فيه" ? "السعر مرتفع — حاول التفاوض" : "السعر معقول ضمن النطاق المتوقع",
+      };
+    }
+
+    case "check_seller_background": {
+      let sellerId = args.seller_id;
+      if (!sellerId && args.listing_id) {
+        const { data: l } = await sb.from("listings").select("owner_id").eq("id", args.listing_id).single();
+        sellerId = l?.owner_id;
+      }
+      if (!sellerId) return { error: "يجب تحديد البائع أو الإعلان" };
+
+      const [profile, deals, reviews, listings, commissions, reports] = await Promise.all([
+        sb.from("profiles").select("full_name, is_verified, verification_level, trust_score, completed_deals, cancelled_deals, disputes_count, created_at, phone_verified").eq("user_id", sellerId).single(),
+        sb.from("deals").select("id, status, created_at, completed_at").or(`seller_id.eq.${sellerId}`).order("created_at", { ascending: false }),
+        sb.from("seller_reviews").select("overall_experience, honesty, responsiveness, listing_accuracy, comment, created_at").eq("seller_id", sellerId).order("created_at", { ascending: false }).limit(10),
+        sb.from("listings").select("id, title, status, created_at").eq("owner_id", sellerId).is("deleted_at", null),
+        sb.from("deal_commissions").select("payment_status, commission_amount").eq("seller_id", sellerId),
+        sb.from("listing_reports").select("id, reason, status").eq("listing_id", sellerId),
+      ]);
+
+      const p = profile.data;
+      const allDeals = deals.data || [];
+      const completed = allDeals.filter((d: any) => d.status === "completed" || d.status === "finalized").length;
+      const cancelled = allDeals.filter((d: any) => d.status === "cancelled").length;
+      const totalDeals = allDeals.length;
+      const cancelRate = totalDeals > 0 ? Math.round((cancelled / totalDeals) * 100) : 0;
+
+      // Response time estimate
+      const avgCompletionDays = allDeals.filter((d: any) => d.completed_at)
+        .map((d: any) => (new Date(d.completed_at).getTime() - new Date(d.created_at).getTime()) / 86400000)
+        .reduce((a: number, b: number, _: number, arr: number[]) => a + b / arr.length, 0);
+
+      const allReviews = reviews.data || [];
+      const avgRating = allReviews.length > 0 ? allReviews.reduce((s: number, r: any) => s + r.overall_experience, 0) / allReviews.length : null;
+
+      const comms = commissions.data || [];
+      const unpaidComms = comms.filter((c: any) => c.payment_status !== "verified").length;
+
+      // Risk flags
+      const flags: string[] = [];
+      if (!p?.is_verified) flags.push("الحساب غير موثق");
+      if (cancelRate > 30) flags.push(`نسبة إلغاء مرتفعة (${cancelRate}%)`);
+      if (unpaidComms > 0) flags.push(`${unpaidComms} عمولة غير مسددة`);
+      if ((p?.disputes_count || 0) > 0) flags.push(`${p.disputes_count} نزاع سابق`);
+      if (avgRating && avgRating < 3) flags.push("تقييم منخفض من المشترين");
+      if (!p?.phone_verified) flags.push("الجوال غير مُوثق");
+
+      const accountAge = p?.created_at ? Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000) : 0;
+
+      let verdict = "آمن";
+      if (flags.length >= 3) verdict = "حذر شديد";
+      else if (flags.length >= 1) verdict = "تحقق إضافي مطلوب";
+
+      return {
+        seller_name: p?.full_name || "غير معروف",
+        trust_score: p?.trust_score || 0,
+        is_verified: p?.is_verified || false,
+        verification_level: p?.verification_level || "none",
+        account_age_days: accountAge,
+        deals: { total: totalDeals, completed, cancelled, cancel_rate: `${cancelRate}%` },
+        avg_completion_days: Math.round(avgCompletionDays) || null,
+        reviews: { count: allReviews.length, average_rating: avgRating ? Number(avgRating.toFixed(1)) : null,
+          recent: allReviews.slice(0, 3).map((r: any) => ({ rating: r.overall_experience, comment: r.comment?.slice(0, 100) })) },
+        commission_compliance: { total: comms.length, unpaid: unpaidComms },
+        active_listings: (listings.data || []).length,
+        risk_flags: flags,
+        verdict,
+        recommendation: verdict === "آمن" ? "البائع موثوق — يمكنك المتابعة بثقة" :
+          verdict === "حذر شديد" ? "تنبيه: عدة علامات مقلقة — تأكد من كل التفاصيل قبل المتابعة" :
+          "تحقق من بعض النقاط قبل إتمام الصفقة",
+      };
+    }
+
+    case "generate_deal_checklist": {
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id, status, agreed_price, listing_id, deal_type, locked")
+        .eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.buyer_id !== userId && deal.seller_id !== userId && role === "customer")
+        return { error: "ليس لديك صلاحية" };
+
+      const { data: listing } = await sb.from("listings")
+        .select("title, deal_type, business_activity, city, municipality_license, civil_defense_license, lease_remaining, documents")
+        .eq("id", deal.listing_id).single();
+
+      const dealType = listing?.deal_type || deal.deal_type || "full_takeover";
+      const iAmBuyer = deal.buyer_id === userId;
+      const iAmSeller = deal.seller_id === userId;
+
+      const sellerTasks: any[] = [
+        { task: "تجهيز جميع المستندات الرسمية", status: Array.isArray(listing?.documents) && listing.documents.length > 0 ? "done" : "pending", priority: "high" },
+        { task: "تأكيد بيانات الإعلان وصحة المعلومات", status: "pending", priority: "high" },
+        { task: "الموافقة على السعر النهائي", status: deal.agreed_price ? "done" : "pending", priority: "high" },
+        { task: "تقديم التأكيد القانوني", status: deal.locked ? "done" : "pending", priority: "high" },
+      ];
+
+      const buyerTasks: any[] = [
+        { task: "مراجعة تفاصيل الإعلان والأصول", status: "pending", priority: "high" },
+        { task: "التحقق من صحة المستندات", status: "pending", priority: "high" },
+        { task: "الموافقة على السعر النهائي", status: deal.agreed_price ? "done" : "pending", priority: "high" },
+        { task: "تقديم التأكيد القانوني", status: deal.locked ? "done" : "pending", priority: "high" },
+      ];
+
+      if (dealType === "full_takeover") {
+        sellerTasks.push(
+          { task: "تجهيز عقد نقل السجل التجاري", status: "pending", priority: "high" },
+          { task: "تصفية جميع الالتزامات المالية", status: "pending", priority: "high" },
+          { task: "إخلاء الموقع وتسليم المفاتيح", status: "pending", priority: "medium" },
+        );
+        buyerTasks.push(
+          { task: "التحقق من سلامة السجل التجاري", status: "pending", priority: "high" },
+          { task: "مراجعة التراخيص والرخص البلدية", status: listing?.municipality_license ? "done" : "pending", priority: "high" },
+          { task: "زيارة الموقع ومعاينة الأصول", status: "pending", priority: "medium" },
+        );
+      } else if (dealType === "assets_only" || dealType === "assets_setup") {
+        sellerTasks.push(
+          { task: "إعداد قائمة جرد الأصول النهائية", status: "pending", priority: "high" },
+          { task: "تجهيز فواتير شراء الأجهزة والمعدات", status: "pending", priority: "medium" },
+        );
+        buyerTasks.push(
+          { task: "معاينة الأصول والتحقق من حالتها", status: "pending", priority: "high" },
+          { task: "مطابقة الجرد مع القائمة المعلنة", status: "pending", priority: "high" },
+        );
+      }
+
+      // Common final tasks
+      sellerTasks.push({ task: "بدء نقل الملكية عبر المنصة", status: deal.status === "completed" ? "done" : "pending", priority: "high" });
+      buyerTasks.push({ task: "تأكيد استلام النشاط/الأصول", status: deal.status === "completed" ? "done" : "pending", priority: "high" });
+
+      const myTasks = iAmBuyer ? buyerTasks : iAmSeller ? sellerTasks : [];
+      const completedCount = myTasks.filter(t => t.status === "done").length;
+
+      return {
+        deal_id: deal.id, deal_type: dealType,
+        your_role: iAmBuyer ? "مشتري" : "بائع",
+        your_tasks: myTasks,
+        progress: `${completedCount}/${myTasks.length}`,
+        progress_percent: Math.round((completedCount / myTasks.length) * 100),
+        other_party_tasks_count: iAmBuyer ? sellerTasks.length : buyerTasks.length,
+        next_action: myTasks.find(t => t.status === "pending" && t.priority === "high")?.task || "جميع المهام مكتملة",
+      };
+    }
+
+    case "mediate_dispute": {
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id, status, agreed_price, listing_id, created_at, updated_at")
+        .eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.buyer_id !== userId && deal.seller_id !== userId && role === "customer")
+        return { error: "ليس لديك صلاحية" };
+
+      const [messages, listing, offers] = await Promise.all([
+        sb.from("negotiation_messages").select("sender_id, message, message_type, created_at").eq("deal_id", args.deal_id).order("created_at", { ascending: true }),
+        sb.from("listings").select("title, price, city, business_activity").eq("id", deal.listing_id).single(),
+        sb.from("listing_offers").select("offered_price, status, created_at").eq("listing_id", deal.listing_id).order("created_at", { ascending: false }).limit(10),
+      ]);
+
+      const msgs = messages.data || [];
+      const buyerMsgs = msgs.filter((m: any) => m.sender_id === deal.buyer_id);
+      const sellerMsgs = msgs.filter((m: any) => m.sender_id === deal.seller_id);
+
+      // Detect stall
+      const lastMsgTime = msgs.length > 0 ? new Date(msgs[msgs.length - 1].created_at).getTime() : 0;
+      const hoursSinceLastMsg = lastMsgTime ? (Date.now() - lastMsgTime) / 3600000 : 999;
+      const isStalled = hoursSinceLastMsg > 48;
+
+      // Find price positions
+      const askingPrice = listing.data?.price || 0;
+      const allOfferPrices = (offers.data || []).map((o: any) => o.offered_price).filter((p: number) => p > 0);
+      const highestOffer = allOfferPrices.length > 0 ? Math.max(...allOfferPrices) : 0;
+      const suggestedMiddle = askingPrice > 0 && highestOffer > 0 ? Math.round((askingPrice + highestOffer) / 2) : null;
+
+      return {
+        deal_status: deal.status,
+        is_stalled: isStalled,
+        hours_since_last_message: Math.round(hoursSinceLastMsg),
+        conversation_stats: {
+          total_messages: msgs.length,
+          buyer_messages: buyerMsgs.length,
+          seller_messages: sellerMsgs.length,
+        },
+        price_analysis: {
+          asking_price: askingPrice,
+          highest_offer: highestOffer,
+          suggested_middle_ground: suggestedMiddle,
+          gap_percent: askingPrice > 0 && highestOffer > 0 ? Math.round(((askingPrice - highestOffer) / askingPrice) * 100) : null,
+        },
+        mediation_proposal: suggestedMiddle ? {
+          proposed_price: suggestedMiddle,
+          rationale: `نقطة التقاء عادلة بين السعر المطلوب (${askingPrice.toLocaleString()} ر.س) وأعلى عرض (${highestOffer.toLocaleString()} ر.س)`,
+          savings_for_buyer: askingPrice - suggestedMiddle,
+          gain_over_offer_for_seller: suggestedMiddle - highestOffer,
+        } : null,
+        recommendation: isStalled ? "التفاوض متوقف — أقترح تقديم عرض وسط لإعادة المحادثة" :
+          (msgs.length > 10 ? "حوار طويل — حاول تحديد سعر نهائي" : "التفاوض نشط — تابع"),
+      };
+    }
+
+    case "post_deal_followup": {
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id, status, completed_at, listing_id, agreed_price")
+        .eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.status !== "completed" && deal.status !== "finalized")
+        return { error: "المتابعة متاحة فقط للصفقات المكتملة" };
+
+      const [listing, review, commission] = await Promise.all([
+        sb.from("listings").select("title, business_activity, city").eq("id", deal.listing_id).single(),
+        sb.from("seller_reviews").select("id").eq("deal_id", args.deal_id).eq("reviewer_id", deal.buyer_id).single(),
+        sb.from("deal_commissions").select("payment_status, commission_amount").eq("deal_id", args.deal_id).single(),
+      ]);
+
+      const daysSinceCompletion = deal.completed_at ? Math.floor((Date.now() - new Date(deal.completed_at).getTime()) / 86400000) : 0;
+      const hasReview = !!review.data;
+      const commissionPaid = commission.data?.payment_status === "verified";
+      const iAmBuyer = deal.buyer_id === userId;
+
+      const actions: any[] = [];
+      if (iAmBuyer && !hasReview) actions.push({ action: "تقييم البائع", description: "شاركنا تجربتك مع البائع لمساعدة الآخرين", priority: "medium" });
+      if (!iAmBuyer && !commissionPaid) actions.push({ action: "سداد العمولة", description: `عمولة ${commission.data?.commission_amount || 0} ر.س مستحقة`, priority: "high" });
+
+      const tips = iAmBuyer ? [
+        "تأكد من نقل جميع التراخيص باسمك",
+        "راجع عقود الموردين والعمالة",
+        "حدّث بيانات الضرائب والزكاة",
+        "تواصل مع العملاء الحاليين للتعريف بنفسك",
+        "راجع حسابات المصاريف الشهرية الفعلية",
+      ] : [
+        "تأكد من تسليم جميع المفاتيح والأكواد",
+        "سلّم قائمة الموردين والعملاء",
+        "أكمل تحويل الخطوط والاشتراكات",
+      ];
+
+      return {
+        deal_title: listing.data?.title,
+        days_since_completion: daysSinceCompletion,
+        pending_actions: actions,
+        has_buyer_review: hasReview,
+        commission_status: commission.data?.payment_status || "unknown",
+        tips_for_you: tips.slice(0, 4),
+        message: iAmBuyer
+          ? `مبروك على استلام "${listing.data?.title}" — إليك بعض النصائح المهمة`
+          : `تم إتمام الصفقة — تأكد من إكمال المتطلبات المتبقية`,
+      };
+    }
+
+    case "quick_feasibility": {
+      const { data: listing } = await sb.from("listings")
+        .select("id, title, price, city, business_activity, annual_rent, area_sqm, ai_price_analysis")
+        .eq("id", args.listing_id).single();
+      if (!listing) return { error: "الإعلان غير موجود" };
+
+      const investmentAmount = args.investment_amount || listing.price || 0;
+      const monthlyRevenue = args.monthly_revenue || 0;
+      const monthlyExpenses = args.monthly_expenses || (listing.annual_rent ? listing.annual_rent / 12 : 0);
+      const monthlyProfit = monthlyRevenue - monthlyExpenses;
+      const annualProfit = monthlyProfit * 12;
+
+      // Payback period
+      const paybackMonths = monthlyProfit > 0 ? Math.ceil(investmentAmount / monthlyProfit) : null;
+      const paybackYears = paybackMonths ? (paybackMonths / 12).toFixed(1) : null;
+
+      // ROI
+      const roi = investmentAmount > 0 && annualProfit > 0 ? Math.round((annualProfit / investmentAmount) * 100) : null;
+
+      // Break-even (monthly revenue needed to cover expenses + investment over 3 years)
+      const monthlyInvestmentCost = investmentAmount / 36;
+      const breakEvenRevenue = Math.round(monthlyExpenses + monthlyInvestmentCost);
+
+      // Scenarios
+      const scenarios = {
+        optimistic: { monthly_profit: Math.round(monthlyProfit * 1.3), annual_profit: Math.round(annualProfit * 1.3), payback_months: monthlyProfit > 0 ? Math.ceil(investmentAmount / (monthlyProfit * 1.3)) : null },
+        realistic: { monthly_profit: Math.round(monthlyProfit), annual_profit: Math.round(annualProfit), payback_months: paybackMonths },
+        pessimistic: { monthly_profit: Math.round(monthlyProfit * 0.7), annual_profit: Math.round(annualProfit * 0.7), payback_months: monthlyProfit > 0 ? Math.ceil(investmentAmount / (monthlyProfit * 0.7)) : null },
+      };
+
+      let verdict = "غير محدد";
+      if (roi && roi > 30) verdict = "فرصة استثمارية ممتازة";
+      else if (roi && roi > 15) verdict = "استثمار جيد";
+      else if (roi && roi > 5) verdict = "استثمار متوسط — يحتاج تقييم إضافي";
+      else if (roi !== null) verdict = "عائد ضعيف — فكّر مرتين";
+
+      return {
+        listing_title: listing.title,
+        investment: investmentAmount,
+        monthly: { revenue: monthlyRevenue, expenses: monthlyExpenses, profit: monthlyProfit },
+        annual_profit: annualProfit,
+        roi_percent: roi,
+        payback: { months: paybackMonths, years: paybackYears },
+        break_even_monthly_revenue: breakEvenRevenue,
+        scenarios,
+        verdict,
+        note: monthlyRevenue === 0 ? "لم تُحدد الإيرادات — النتائج تقديرية. زوّدني بالإيراد الشهري للحصول على تحليل دقيق." : null,
+      };
+    }
+
+    case "generate_user_report": {
+      const [myListings, myDeals, myOffers, alerts, views] = await Promise.all([
+        sb.from("listings").select("id, title, status, price, city, created_at").eq("owner_id", userId).is("deleted_at", null).order("created_at", { ascending: false }),
+        sb.from("deals").select("id, status, listing_id, agreed_price, created_at")
+          .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`).order("created_at", { ascending: false }).limit(10),
+        sb.from("listing_offers").select("id, listing_id, offered_price, status, created_at")
+          .eq("buyer_id", userId).order("created_at", { ascending: false }).limit(10),
+        sb.from("market_alerts").select("id, title, message, alert_type, priority, created_at")
+          .eq("user_id", userId).eq("is_read", false).order("created_at", { ascending: false }).limit(5),
+        // Get views for user's listings
+        sb.from("listing_views").select("listing_id, created_at")
+          .in("listing_id", (await sb.from("listings").select("id").eq("owner_id", userId).is("deleted_at", null)).data?.map((l: any) => l.id) || [])
+          .gte("created_at", new Date(Date.now() - 7 * 86400000).toISOString()),
+      ]);
+
+      const listings = myListings.data || [];
+      const publishedListings = listings.filter((l: any) => l.status === "published");
+      const totalViews7d = views.data?.length || 0;
+      const activeDeals = (myDeals.data || []).filter((d: any) => !["completed", "cancelled"].includes(d.status));
+
+      // Find matching opportunities (listings matching user's memory preferences)
+      const { data: memory } = await sb.from("ai_user_memory").select("preferred_cities, preferred_activities, budget_min, budget_max").eq("user_id", userId).single();
+      let matchingOpportunities: any[] = [];
+      if (memory) {
+        let q = sb.from("listings").select("id, title, price, city, business_activity").eq("status", "published").is("deleted_at", null)
+          .neq("owner_id", userId).gte("created_at", new Date(Date.now() - 7 * 86400000).toISOString()).limit(5);
+        if (memory.preferred_cities?.length > 0) q = q.in("city", memory.preferred_cities);
+        if (memory.budget_max) q = q.lte("price", memory.budget_max);
+        const { data: matches } = await q;
+        matchingOpportunities = matches || [];
+      }
+
+      return {
+        report_date: new Date().toISOString(),
+        period: "آخر 7 أيام",
+        my_listings: { total: listings.length, published: publishedListings.length, views_7d: totalViews7d,
+          top_viewed: publishedListings.slice(0, 3).map((l: any) => ({ title: l.title, price: l.price })) },
+        my_deals: { active: activeDeals.length, total: (myDeals.data || []).length,
+          active_list: activeDeals.slice(0, 3).map((d: any) => ({ id: d.id, status: d.status })) },
+        pending_offers: (myOffers.data || []).filter((o: any) => o.status === "pending").length,
+        unread_alerts: (alerts.data || []).length,
+        matching_opportunities: matchingOpportunities.map((m: any) => ({ title: m.title, price: m.price, city: m.city })),
+        message: `تقريرك الأسبوعي: ${publishedListings.length} إعلان نشط، ${totalViews7d} مشاهدة، ${activeDeals.length} صفقة جارية`,
+      };
+    }
+
+    case "analyze_location": {
+      const { data: listing } = await sb.from("listings")
+        .select("id, title, city, district, business_activity, location_lat, location_lng, area_sqm")
+        .eq("id", args.listing_id).single();
+      if (!listing) return { error: "الإعلان غير موجود" };
+
+      // Find competitors (same activity, same city)
+      const { data: competitors } = await sb.from("listings")
+        .select("id, title, price, city, district, business_activity")
+        .eq("status", "published").is("deleted_at", null)
+        .eq("city", listing.city).ilike("business_activity", `%${listing.business_activity}%`)
+        .neq("id", listing.id).limit(20);
+
+      const comps = competitors || [];
+      const sameDistrict = listing.district ? comps.filter((c: any) => c.district === listing.district) : [];
+      const avgCompPrice = comps.length > 0 ? Math.round(comps.reduce((s: number, c: any) => s + (c.price || 0), 0) / comps.length) : null;
+
+      // Check for feasibility study
+      const { data: study } = await sb.from("feasibility_studies")
+        .select("study_data").eq("listing_id", args.listing_id).single();
+      const studyData = study?.study_data as any;
+      const competitorDensity = studyData?.competitive_analysis?.competitors_nearby || null;
+
+      // Market saturation analysis
+      let saturation = "غير محدد";
+      if (comps.length >= 10) saturation = "سوق مشبع — منافسة عالية";
+      else if (comps.length >= 5) saturation = "سوق متوسط — منافسة معتدلة";
+      else if (comps.length >= 1) saturation = "سوق واعد — منافسة قليلة";
+      else saturation = "سوق جديد — لا منافسة مباشرة";
+
+      let locationVerdict = "مناسب";
+      if (comps.length > 10 && sameDistrict.length > 3) locationVerdict = "مزدحم — قد يكون صعباً";
+      else if (comps.length < 3) locationVerdict = "موقع مميز — منافسة قليلة";
+
+      return {
+        listing_title: listing.title,
+        location: { city: listing.city, district: listing.district || "غير محدد",
+          has_coordinates: !!(listing.location_lat && listing.location_lng) },
+        competitors: {
+          in_city: comps.length, in_district: sameDistrict.length,
+          avg_price: avgCompPrice,
+          closest: comps.slice(0, 5).map((c: any) => ({ title: c.title, price: c.price, district: c.district })),
+        },
+        google_analysis: competitorDensity ? {
+          nearby_500m: competitorDensity["500m"] || null,
+          nearby_2km: competitorDensity["2km"] || null,
+          nearby_10km: competitorDensity["10km"] || null,
+        } : null,
+        market_saturation: saturation,
+        location_verdict: locationVerdict,
+        recommendation: locationVerdict === "مزدحم — قد يكون صعباً"
+          ? "الموقع مزدحم بالمنافسين — ركّز على ما يميز هذا النشاط عن غيره"
+          : locationVerdict === "موقع مميز — منافسة قليلة"
+          ? "فرصة ممتازة — قلة المنافسين تعني إمكانية نمو أسرع"
+          : "الموقع مناسب — المنافسة معتدلة",
+      };
+    }
+
     default:
       return { error: `أداة غير معروفة: ${name}` };
   }
