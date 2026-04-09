@@ -263,6 +263,15 @@ const TOOL_DEFS: Record<string, any> = {
       listing_id: { type: "string", description: "معرف الإعلان (لبدء محادثة جديدة)" } },
     ["content"]),
 
+  publish_my_listing: def("publish_my_listing", "نشر إعلاني — يتحقق من اكتمال البيانات (السعر، الموقع، النشاط، المدينة) ثم ينشره مباشرة",
+    { listing_id: { type: "string" } }, ["listing_id"]),
+
+  set_listing_location: def("set_listing_location", "تحديد موقع الإعلان الجغرافي من إحداثيات أو رابط خريطة أو اسم مكان",
+    { listing_id: { type: "string" }, lat: { type: "number", description: "خط العرض" },
+      lng: { type: "number", description: "خط الطول" },
+      maps_url: { type: "string", description: "رابط قوقل ماب" } },
+    ["listing_id"]),
+
   // ═══════════════════════════════════════════════
   // DEAL LIFECYCLE — Negotiation → Agreement → Transfer (10)
   // ═══════════════════════════════════════════════
