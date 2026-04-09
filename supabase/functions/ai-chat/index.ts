@@ -1630,6 +1630,8 @@ async function executeTool(name: string, args: any, userId: string, role: string
           /ll=(-?\d+\.\d+),(-?\d+\.\d+)/,
           /q=(-?\d+\.\d+),(-?\d+\.\d+)/,
           /center=(-?\d+\.\d+),(-?\d+\.\d+)/,
+          /\/maps\/search\/(-?\d+\.\d+)\s*,\s*\+?(-?\d+\.\d+)/,
+          /\/maps\/search\/[^?]*?(-?\d+\.\d+)\s*,\s*\+?(-?\d+\.\d+)/,
         ];
         for (const p of patterns) {
           const m = resolvedUrl.match(p);
