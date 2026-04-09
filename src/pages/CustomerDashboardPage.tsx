@@ -109,8 +109,8 @@ const CustomerDashboardPage = () => {
       const { data: { publicUrl } } = supabase.storage.from("listings").getPublicUrl(path);
       const { error: updateErr } = await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", profile.user_id);
       if (updateErr) throw updateErr;
-      setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : prev);
       toast.success("تم تحديث الصورة");
+      window.location.reload();
     } catch (err: any) { toast.error(err?.message || "فشل الرفع"); }
     finally { setSaving(false); }
   }, [profile?.user_id]);
