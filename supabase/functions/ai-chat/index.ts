@@ -2491,6 +2491,107 @@ function extractOfficialUrlsFromToolMessages(messages: any[]) {
   return officialUrlsByPath;
 }
 
+type VerifiedListingState = {
+  status: string | null;
+  listingUrl: string | null;
+  editorUrl: string | null;
+};
+
+function extractLatestVerifiedListingState(messages: any[]): VerifiedListingState | null {
+  let latest: VerifiedListingState | null = null;
+
+  for (const msg of messages) {
+    if (msg?.role !== "tool" || typeof msg.content !== "string") continue;
+
+    try {
+      const parsed = JSON.parse(msg.content);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) continue;
+
+      const directStatus = typeof parsed.status === "string"
+        ? parsed.status
+        : typeof parsed.new_status === "string"
+          ? parsed.new_status
+          : typeof parsed.review_status === "string" && parsed.review_status === "approved"
+            ? "published"
+            : null;
+
+      const nestedStatus = parsed.listing && typeof parsed.listing === "object" && typeof parsed.listing.status === "string"
+        ? parsed.listing.status
+        : null;
+
+      const listingUrl = typeof parsed.listing_url === "string"
+        ? parsed.listing_url
+        : parsed.card && typeof parsed.card === "object" && typeof parsed.card.listing_url === "string"
+          ? parsed.card.listing_url
+          : null;
+
+      const editorUrl = typeof parsed.editor_url === "string" ? parsed.editor_url : null;
+      const status = nestedStatus || directStatus;
+
+      if (!status && !listingUrl && !editorUrl) continue;
+
+      latest = {
+        status: status || latest?.status || null,
+        listingUrl: listingUrl || latest?.listingUrl || null,
+        editorUrl: editorUrl || latest?.editorUrl || null,
+      };
+    } catch {
+      // ignore non-JSON tool payloads
+    }
+  }
+
+  return latest;
+}
+
+function buildVerifiedListingStatusInstruction(state: VerifiedListingState | null) {
+  if (!state?.status) return null;
+
+  if (state.status === "published") {
+    return [
+      `تنبيه موثق: آخر حالة مؤكدة للإعلان = published.`,
+      `لا تقل أي رابط إلا الرابط الرسمي الموثق فقط.`,
+      state.listingUrl ? `استخدم هذا الرابط حرفياً إذا احتجت رابط الإعلان: ${state.listingUrl}` : "",
+    ].filter(Boolean).join("\n");
+  }
+
+  return [
+    `تنبيه موثق: آخر حالة مؤكدة للإعلان = ${state.status}.`,
+    `ممنوع منعاً باتاً أن تقول إنه منشور أو مباشر أو ظاهر للكل.`,
+    `ممنوع إرسال أي رابط /listing لهذا الإعلان لأن حالته ليست published.`,
+    state.editorUrl ? `إذا احتجت رابطاً فاعرض رابط استكمال المسودة هذا حرفياً فقط: ${state.editorUrl}` : "",
+    `اشرح بوضوح أنه ما زال مسودة ويحتاج استكمال قبل النشر.`,
+  ].filter(Boolean).join("\n");
+}
+
+function enforceVerifiedListingState(finalText: string, state: VerifiedListingState | null) {
+  if (!state?.status) return finalText;
+
+  if (state.status === "published") {
+    if (!state.listingUrl) return finalText;
+    return finalText.replace(/https?:\/\/[^\s<>")'\]،؛!?؟]+/gi, (url) => {
+      try {
+        const pathname = new URL(url).pathname.replace(/\/+$/, "") || "/";
+        return /^\/listing\/[^/?#\s]+$/i.test(pathname) ? state.listingUrl! : url;
+      } catch {
+        return url;
+      }
+    });
+  }
+
+  const hasDraftClaim = /منشور|تم نشر|نشرته|نشرنا|مباشر|ظاهر للكل|موجود هناك ومنشور/i.test(finalText);
+  const hasPublicListingUrl = /https?:\/\/[^\s<>")'\]،؛!?؟]+\/listing\/[^\s<>")'\]،؛!?؟]+/i.test(finalText);
+
+  if (!hasDraftClaim && !hasPublicListingUrl) {
+    return finalText;
+  }
+
+  return [
+    "تم إنشاء الإعلان كمسودة فقط — ولسه ما اننشر.",
+    state.editorUrl ? `هذا رابط استكمال المسودة: ${state.editorUrl}` : "أكمل بيانات المسودة من صفحة إضافة الإعلان.",
+    "بعد اكتمال البيانات ونشره فعلياً أرسل لك الرابط العام مباشرة.",
+  ].filter(Boolean).join("\n\n");
+}
+
 function extractMessageText(content: any): string {
   if (typeof content === "string") return content;
 
@@ -2630,10 +2731,16 @@ serve(async (req) => {
       break;
     }
 
+    const verifiedListingState = extractLatestVerifiedListingState(currentMessages);
+    const verifiedListingInstruction = buildVerifiedListingStatusInstruction(verifiedListingState);
+    const finalMessages = verifiedListingInstruction
+      ? [...currentMessages, { role: "system", content: verifiedListingInstruction }]
+      : currentMessages;
+
     const finalResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: currentMessages, stream: false }),
+      body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: finalMessages, stream: false }),
     });
 
     if (!finalResponse.ok) {
@@ -2649,6 +2756,7 @@ serve(async (req) => {
     const officialUrlsByPath = extractOfficialUrlsFromToolMessages(currentMessages);
     let finalText = normalizeAssistantUrls(cleanAssistantText(extractMessageText(finalChoice.message?.content)), officialUrlsByPath);
     finalText = stripResourceLinksFromText(finalText, officialUrlsByPath);
+    finalText = enforceVerifiedListingState(finalText, verifiedListingState);
     if (!finalText) finalText = "تم.";
 
     if (toolsUsed.length > 0 && userId) {
