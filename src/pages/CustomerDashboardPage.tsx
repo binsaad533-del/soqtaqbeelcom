@@ -632,7 +632,7 @@ const CustomerDashboardPage = () => {
                   { id: "security" as const, label: "الأمان", icon: Shield, count: undefined, desc: "إعدادات الحماية وأمان الحساب" },
                   { id: "account" as const, label: "حسابي", icon: User, count: undefined, desc: "تعديل بياناتك الشخصية وكلمة المرور" },
                 ].map(tab => (
-                  <button key={tab.id} onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }} className={cn(
+                  <button key={tab.id} onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }} title={tab.desc} className={cn(
                     "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs transition-all",
                     activeTab === tab.id ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
                   )}>
