@@ -15,7 +15,7 @@ import MoqbilAvatar from "@/components/MoqbilAvatar";
 import AiRecommendations from "@/components/AiRecommendations";
 import SmartMatchPanel from "@/components/SmartMatchPanel";
 import { toast } from "sonner";
-import { Progress } from "@/components/ui/progress";
+
 
 interface PendingFile {
   name: string;
