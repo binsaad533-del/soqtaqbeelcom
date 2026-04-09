@@ -226,6 +226,15 @@ const CustomerDashboardPage = () => {
     <div className="min-h-[80vh] bg-background py-6">
       <div className="container max-w-6xl">
 
+  const handleDeleteListing = useCallback(async (e: React.MouseEvent, id: string, title: string | null) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm(`هل تريد حذف "${title || "بدون عنوان"}"؟`)) return;
+    const { error } = await softDeleteListing(id);
+    if (error) { toast.error("فشل حذف الإعلان"); return; }
+    toast.success("تم حذف الإعلان");
+    setListings(prev => prev.filter(l => l.id !== id));
+  }, [softDeleteListing]);
 
         {loadError && (
           <div className="p-3 rounded-xl bg-destructive/10 flex items-center justify-between mb-4">
