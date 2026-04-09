@@ -56,7 +56,7 @@ const CustomerDashboardPage = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "offers" | "saved" | "notifications" | "security" | "account">("deals");
+  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "offers" | "saved" | "notifications" | "security" | "account" | "agent">("deals");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dealStatusFilter, setDealStatusFilter] = useState<string>("all");
