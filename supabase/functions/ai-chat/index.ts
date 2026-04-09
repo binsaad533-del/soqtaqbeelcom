@@ -2505,7 +2505,7 @@ function cleanAssistantText(text: string) {
       if (/tool_code|call_as_tool|tools?\.[a-z0-9_.]+/i.test(line)) return false;
 
       const suspiciousScore = [
-        /\b(?:create_listing|edit_my_listing|cancel_my_listing|submit_offer|respond_to_offer|get_listing_status|approve_listing_publish|valuate_business|analyze_location|generate_[a-z_]+|check_[a-z_]+|quick_feasibility|post_deal_followup|mediate_dispute|schedule_meeting|generate_handover_checklist|generate_listing_card)\b/i,
+        /\b(?:create_listing|edit_my_listing|cancel_my_listing|submit_offer|respond_to_offer|get_listing_status|approve_listing_publish|valuate_business|analyze_location|generate_[a-z_]+|check_[a-z_]+|quick_feasibility|post_deal_followup|mediate_dispute|schedule_meeting|generate_handover_checklist|generate_listing_card|publish_my_listing|set_listing_location)\b/i,
         /[a-z_]+\s*=\s*['"{\[]/i,
         /(?:^|[\s,(])(?:description|parameters|category|listing_name|phone_number|assets|price|city|type)\s*=/i,
       ].filter((pattern) => pattern.test(line)).length;
