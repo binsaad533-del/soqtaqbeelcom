@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
-import logoIconGold from "@/assets/logo-icon-gold.png";
+import AnimatedLogo from "@/components/AnimatedLogo";
 import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown, Sparkles, ShieldCheck, Zap, Info } from "lucide-react";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 import { checkPasswordStrength, isRateLimited } from "@/lib/security";
