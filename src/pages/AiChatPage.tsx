@@ -698,7 +698,20 @@ const AiChatPage = () => {
                   <span>{msg.content}</span>
                 )}
               </div>
-              <span className="text-[10px] text-muted-foreground mt-1 px-1 block">{msg.time}</span>
+              <div className="flex items-center gap-2 mt-1 px-1">
+                <span className="text-[10px] text-muted-foreground">{msg.time}</span>
+                {msg.role === "assistant" && !streaming && (
+                  <FeedbackButtons
+                    messageId={msg.id}
+                    currentFeedback={msg.feedback || null}
+                    userMessage={messages[messages.indexOf(msg) - 1]?.content || ""}
+                    aiResponse={msg.content}
+                    onFeedback={(rating) => {
+                      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, feedback: rating } : m));
+                    }}
+                  />
+                )}
+              </div>
             </div>
           ))}
 
