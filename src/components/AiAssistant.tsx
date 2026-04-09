@@ -10,7 +10,7 @@ import ReactMarkdown from "react-markdown";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import AiStar from "@/components/AiStar";
+import MoqbilAvatar from "@/components/MoqbilAvatar";
 import AiRecommendations from "@/components/AiRecommendations";
 import { toast } from "sonner";
 import SmartMatchPanel from "@/components/SmartMatchPanel";
@@ -325,8 +325,8 @@ const AiAssistant = () => {
           onClick={() => navigate("/ai-chat")}
           className="fixed bottom-6 left-5 z-50 flex items-center gap-2 group transition-all duration-300"
         >
-          <div className="relative w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 ai-fab-pulse">
-            <AiStar size={28} className="[&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" animate />
+          <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-300 ai-fab-pulse">
+            <MoqbilAvatar size={56} />
             {hasInsights && (
               <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive flex items-center justify-center text-[10px] font-bold text-destructive-foreground shadow-sm">
                 {proactiveInsights.length + marketAlerts.length}
@@ -361,8 +361,8 @@ const AiAssistant = () => {
                     <ChevronLeft size={16} strokeWidth={1.5} />
                   </button>
                 )}
-                <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
-                  <AiStar size={22} className="ai-glow-slow [&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" animate={false} />
+                <div className="w-10 h-10 rounded-full overflow-hidden">
+                  <MoqbilAvatar size={40} />
                 </div>
                 <div>
                   <h3 className="text-sm font-medium">مقبل</h3>
@@ -630,7 +630,7 @@ const AiAssistant = () => {
                       {msg.role === "assistant" && (
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-1.5">
-                            <AiStar size={14} />
+                            <MoqbilAvatar size={14} />
                             <span className="text-[10px] text-accent-foreground font-medium">مقبل</span>
                           </div>
                           <div className="flex items-center gap-1.5">
@@ -668,7 +668,7 @@ const AiAssistant = () => {
                   <div className="ml-auto max-w-[85%]">
                     <div className="rounded-2xl px-3.5 py-2.5 bg-accent/50 border border-accent-foreground/10">
                       <div className="flex items-center gap-1.5 mb-1">
-                        <AiStar size={14} />
+                        <MoqbilAvatar size={14} />
                         <span className="text-[10px] text-accent-foreground font-medium">يفكر...</span>
                       </div>
                       <div className="flex gap-1">
