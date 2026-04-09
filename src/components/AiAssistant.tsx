@@ -403,7 +403,84 @@ const AiAssistant = () => {
                 </div>
               )}
 
-              {/* Negotiation Quick Actions */}
+              {/* Market Radar Alerts */}
+              {marketAlerts.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1.5 px-1">
+                    <Zap size={11} className="text-warning" strokeWidth={2} />
+                    <span className="text-[10px] font-medium text-warning">رادار السوق</span>
+                    <span className="text-[9px] text-muted-foreground mr-auto">{marketAlerts.length} تنبيه</span>
+                  </div>
+                  {marketAlerts.slice(0, 3).map((alert) => (
+                    <div
+                      key={alert.id}
+                      className={cn(
+                        "rounded-xl p-2.5 border text-[11px] leading-relaxed",
+                        alert.priority === "high"
+                          ? "bg-warning/5 border-warning/20"
+                          : alert.priority === "critical"
+                            ? "bg-destructive/5 border-destructive/20"
+                            : "bg-primary/5 border-primary/15"
+                      )}
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="text-sm shrink-0 mt-0.5">
+                          {alert.alert_type === "gold_opportunity" ? "💎" : alert.alert_type === "price_drop" ? "📉" : "🔔"}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <span className="font-medium text-foreground block text-[11px]">{alert.title}</span>
+                          <span className="text-foreground/70 text-[10px]">{alert.message}</span>
+                          <div className="flex items-center gap-2 mt-1">
+                            {alert.reference_id && (
+                              <button
+                                onClick={() => { markAlertRead(alert.id); navigate(`/listing/${alert.reference_id}`); setOpen(false); }}
+                                className="text-primary text-[10px] font-medium hover:underline flex items-center gap-0.5"
+                              >
+                                عرض الفرصة <ArrowRight size={8} />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => dismissAlert(alert.id)}
+                              className="text-muted-foreground text-[9px] hover:text-foreground mr-auto"
+                            >
+                              تجاهل
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Deal Autopilot Quick Actions */}
+              {pathname.startsWith("/negotiate") && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1.5 px-1">
+                    <Sparkles size={11} className="text-primary" strokeWidth={2} />
+                    <span className="text-[10px] font-medium text-primary">أتمتة الصفقة</span>
+                  </div>
+                  {[
+                    { label: "جهّز الاتفاقية", icon: "📋", desc: "سحب البيانات وملء الاتفاقية تلقائياً" },
+                    { label: "لخّص الصفقة", icon: "📊", desc: "ملخص شامل بالتفاصيل والمخاطر" },
+                    { label: "تابع الصفقة", icon: "🔄", desc: "حالة كل خطوة مع التوصية" },
+                    { label: "ذكّر الطرف الثاني", icon: "⏰", desc: "صياغة رسالة متابعة احترافية" },
+                  ].map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={() => { setView("chat"); sendMessage(item.label); }}
+                      className="w-full flex items-center gap-2.5 p-2.5 rounded-xl border border-border/40 hover:border-primary/20 hover:bg-primary/[0.03] transition-all text-right"
+                    >
+                      <span className="text-base shrink-0">{item.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[11px] font-medium text-foreground">{item.label}</span>
+                        <p className="text-[10px] text-muted-foreground">{item.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {isNegotiationPage && (
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5 px-1">
