@@ -144,6 +144,8 @@ export function isKnownCity(city: string): boolean {
 export function isGibberish(text: string): boolean {
   if (!text || text.trim().length < 3) return false;
   const trimmed = text.trim();
+  // Pure numeric values (with optional dots/commas) are never gibberish
+  if (/^[\d.,\s]+$/.test(trimmed)) return false;
 
   // Single repeated character (e.g. "ااااا", "xxxxx")
   if (/^(.)\1{2,}$/.test(trimmed)) return true;
