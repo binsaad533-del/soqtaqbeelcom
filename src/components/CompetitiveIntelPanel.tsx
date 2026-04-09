@@ -21,7 +21,7 @@ interface IntelData {
   ai_insights: string;
 }
 
-const CompetitiveIntelPanel = ({ listingId, currentPrice }: CompetitiveIntelProps) => {
+const CompetitiveIntelPanel = ({ listingId }: CompetitiveIntelProps) => {
   const [data, setData] = useState<IntelData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
