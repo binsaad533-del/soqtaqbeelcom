@@ -268,7 +268,9 @@ const CustomerDashboardPage = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-primary">أكمل ملفك الشخصي لزيادة الثقة</p>
-              <p className="text-[10px] text-muted-foreground">اكتمال الملف: {profileCompleteness}%</p>
+              <p className="text-[10px] text-muted-foreground">
+                ينقصك: {profileMissing.join(" · ")}
+              </p>
             </div>
             <div className="w-16 h-1.5 rounded-full bg-primary/10 shrink-0 overflow-hidden">
               <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${profileCompleteness}%` }} />
