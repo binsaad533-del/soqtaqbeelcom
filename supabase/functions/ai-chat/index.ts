@@ -878,6 +878,363 @@ async function executeTool(name: string, args: any, userId: string, role: string
         commission_note: deal.agreed_price ? `عمولة ${Math.round(deal.agreed_price * 0.01)} ر.س (1%) مستحقة على البائع` : null };
     }
 
+    // ═══════════════════════════════════════════════
+    // DEAL LIFECYCLE — Full deal management
+    // ═══════════════════════════════════════════════
+
+    case "send_negotiation_message": {
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id, status").eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.buyer_id !== userId && deal.seller_id !== userId && role === "customer")
+        return { error: "ليس لديك صلاحية في هذه الصفقة" };
+      if (["completed", "cancelled"].includes(deal.status))
+        return { error: "لا يمكن إرسال رسائل في صفقة مكتملة أو ملغاة" };
+
+      const { data: msg, error } = await sb.from("negotiation_messages").insert({
+        deal_id: args.deal_id, sender_id: userId, message: args.message,
+        message_type: args.message_type || "text", sender_type: "user",
+      }).select("id, created_at").single();
+      if (error) return { error: error.message };
+      return { success: true, message_id: msg.id, sent_at: msg.created_at,
+        message: "تم إرسال الرسالة في التفاوض" };
+    }
+
+    case "update_agreed_price": {
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id, status, locked").eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.buyer_id !== userId && deal.seller_id !== userId && role === "customer")
+        return { error: "ليس لديك صلاحية" };
+      if (deal.locked) return { error: "الصفقة مقفلة — لا يمكن تعديل السعر" };
+      if (["completed", "cancelled"].includes(deal.status))
+        return { error: "لا يمكن تعديل سعر صفقة مكتملة أو ملغاة" };
+
+      const { error } = await sb.from("deals").update({
+        agreed_price: args.agreed_price, updated_at: new Date().toISOString(),
+      }).eq("id", args.deal_id);
+      if (error) return { error: error.message };
+
+      // Log in negotiation
+      await sb.from("negotiation_messages").insert({
+        deal_id: args.deal_id, sender_id: userId,
+        message: `تم تحديث السعر المتفق عليه إلى ${args.agreed_price} ر.س`,
+        message_type: "system", sender_type: "system",
+      });
+
+      return { success: true, deal_id: args.deal_id, agreed_price: args.agreed_price,
+        commission: Math.round(args.agreed_price * 0.01),
+        message: `تم تحديث السعر إلى ${args.agreed_price} ر.س`,
+        next_step: "يمكن الآن تقديم التأكيد القانوني من الطرفين" };
+    }
+
+    case "submit_legal_confirmation": {
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id, status, agreed_price, listing_id, deal_type, deal_details, locked")
+        .eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.buyer_id !== userId && deal.seller_id !== userId)
+        return { error: "ليس لديك صلاحية في هذه الصفقة" };
+      if (!deal.agreed_price || deal.agreed_price <= 0)
+        return { error: "يجب الاتفاق على السعر أولاً قبل التأكيد القانوني" };
+
+      const partyRole = deal.buyer_id === userId ? "buyer" : "seller";
+
+      // Check if already confirmed
+      const { data: existing } = await sb.from("legal_confirmations")
+        .select("id").eq("deal_id", args.deal_id).eq("user_id", userId).is("invalidated_at", null).single();
+      if (existing) return { success: true, already_confirmed: true,
+        message: `أنت أكدت مسبقاً كـ${partyRole === "buyer" ? "مشتري" : "بائع"}` };
+
+      const { error } = await sb.from("legal_confirmations").insert({
+        deal_id: args.deal_id, user_id: userId, party_role: partyRole,
+        deal_snapshot: { agreed_price: deal.agreed_price, deal_type: deal.deal_type, details: deal.deal_details },
+        confirmations: { platform_terms: true, deal_terms: true, commission_acknowledged: partyRole === "seller" },
+      });
+      if (error) return { error: error.message };
+
+      // Check if both confirmed (the trigger fn_check_dual_approval handles locking)
+      const { data: otherConf } = await sb.from("legal_confirmations")
+        .select("id").eq("deal_id", args.deal_id).neq("user_id", userId).is("invalidated_at", null).single();
+
+      const bothConfirmed = !!otherConf;
+      return { success: true, party_role: partyRole, both_confirmed: bothConfirmed,
+        message: bothConfirmed
+          ? "تم تأكيد الطرفين ✅ — الصفقة مقفلة الآن. يمكن إنشاء الاتفاقية الرسمية."
+          : `تم تأكيدك كـ${partyRole === "buyer" ? "مشتري" : "بائع"} — بانتظار تأكيد الطرف الآخر`,
+        next_step: bothConfirmed ? "إنشاء الاتفاقية الرسمية (generate_agreement)" : "بانتظار الطرف الآخر" };
+    }
+
+    case "start_ownership_transfer": {
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id, status, locked, escrow_status")
+        .eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.seller_id !== userId) return { error: "فقط البائع يمكنه بدء نقل الملكية" };
+      if (!deal.locked || deal.status !== "finalized")
+        return { error: "يجب أن تكون الصفقة مؤكدة (finalized) ومقفلة أولاً" };
+
+      const { error } = await sb.from("deals").update({
+        escrow_status: "transferring", updated_at: new Date().toISOString(),
+      }).eq("id", args.deal_id);
+      if (error) return { error: error.message };
+
+      await sb.from("deal_history").insert({
+        deal_id: args.deal_id, action: "transfer_started", actor_id: userId,
+        details: { initiated_via: "moqbil" },
+      });
+
+      // Notify buyer
+      await sb.from("notifications").insert({
+        user_id: deal.buyer_id, title: "بدأ نقل الملكية ⚡",
+        body: "البائع بدأ عملية نقل الملكية — يمكنك تأكيد الاستلام بعد التسلم",
+        type: "deal", reference_id: args.deal_id, reference_type: "deal",
+      });
+
+      return { success: true, message: "تم بدء نقل الملكية — بانتظار تأكيد المشتري للاستلام",
+        next_step: "المشتري يؤكد الاستلام (confirm_receipt)" };
+    }
+
+    case "generate_agreement": {
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id, status, agreed_price, listing_id, deal_type, deal_details, locked")
+        .eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.buyer_id !== userId && deal.seller_id !== userId && role === "customer")
+        return { error: "ليس لديك صلاحية" };
+      if (!deal.agreed_price || deal.agreed_price <= 0)
+        return { error: "يجب الاتفاق على السعر أولاً" };
+
+      // Get listing details
+      const { data: listing } = await sb.from("listings")
+        .select("title, city, district, business_activity, deal_type, description, annual_rent, lease_remaining, lease_duration, municipality_license, civil_defense_license, surveillance_cameras, liabilities, overdue_salaries, overdue_rent, documents, inventory, photos")
+        .eq("id", deal.listing_id).single();
+
+      // Get parties
+      const [buyerProfile, sellerProfile] = await Promise.all([
+        sb.from("profiles").select("full_name, phone, email").eq("user_id", deal.buyer_id).single(),
+        sb.from("profiles").select("full_name, phone, email").eq("user_id", deal.seller_id).single(),
+      ]);
+
+      // Get version count
+      const { count } = await sb.from("deal_agreements")
+        .select("*", { count: "exact", head: true }).eq("deal_id", args.deal_id);
+      const version = (count || 0) + 1;
+      const agreementNumber = `AGR-${Date.now()}-V${version}`;
+
+      // Build agreement data
+      const { data: agreement, error: insertErr } = await sb.from("deal_agreements").insert({
+        deal_id: args.deal_id, version, agreement_number: agreementNumber,
+        buyer_name: buyerProfile.data?.full_name, buyer_contact: buyerProfile.data?.phone || buyerProfile.data?.email,
+        seller_name: sellerProfile.data?.full_name, seller_contact: sellerProfile.data?.phone || sellerProfile.data?.email,
+        deal_title: listing?.title, deal_type: listing?.deal_type || deal.deal_type,
+        location: listing ? `${listing.city || ""}${listing.district ? ` - ${listing.district}` : ""}` : null,
+        business_activity: listing?.business_activity,
+        financial_terms: { agreedPrice: deal.agreed_price, currency: "﷼" },
+        lease_details: listing ? { annualRent: listing.annual_rent?.toString(), remaining: listing.lease_remaining } : {},
+        license_status: listing ? { municipality: listing.municipality_license, civilDefense: listing.civil_defense_license, cameras: listing.surveillance_cameras } : {},
+        liabilities: listing ? { financialLiabilities: listing.liabilities, delayedSalaries: listing.overdue_salaries, unpaidRent: listing.overdue_rent } : {},
+        included_assets: listing?.inventory ? (Array.isArray(listing.inventory) ? listing.inventory.map((i: any) => typeof i === "string" ? i : `${i.name || i.category || "أصل"} (${i.quantity || 1})`) : []) : [],
+        excluded_assets: [],
+        documents_referenced: listing?.documents ? (Array.isArray(listing.documents) ? listing.documents.map((d: any) => typeof d === "string" ? d : d.name || "مستند") : []) : [],
+        declarations: { buyerDeclares: "أقر بمراجعة كافة بيانات الصفقة والموافقة عليها", sellerDeclares: "أقر بصحة جميع البيانات المقدمة", platformNote: "المنصة وسيط تقني فقط — الاتفاق يتم مباشرة بين الطرفين." },
+        important_notes: ["العمولة 1% من قيمة الصفقة مستحقة على البائع", "تُسدد العمولة بعد إتمام الصفقة واعتماد الطرفين"],
+        status: "active",
+      }).select("id, agreement_number, version, created_at").single();
+
+      if (insertErr) return { error: insertErr.message };
+
+      // Record history
+      await sb.from("deal_history").insert({
+        deal_id: args.deal_id, action: version === 1 ? "agreement_created" : "agreement_amended",
+        actor_id: userId, details: { agreement_id: agreement.id, version, agreement_number: agreementNumber },
+      });
+
+      await sb.from("audit_logs").insert({ user_id: userId, action: "agreement_generated_via_moqbil",
+        resource_type: "deal", resource_id: args.deal_id,
+        details: { agreement_id: agreement.id, agreement_number: agreementNumber } });
+
+      const agreementUrl = `https://soqtaqbeel.com/agreement/${agreementNumber}`;
+      return { success: true, agreement_id: agreement.id, agreement_number: agreementNumber,
+        version, created_at: agreement.created_at,
+        agreement_url: agreementUrl,
+        pdf_url: agreementUrl,
+        message: `تم إنشاء الاتفاقية رقم ${agreementNumber} (الإصدار ${version}) 📄`,
+        instructions: "يمكنك فتح رابط الاتفاقية لمراجعتها وتحميلها كـ PDF",
+        next_steps: deal.locked ? ["فتح رابط الاتفاقية", "تحميل PDF", "بدء نقل الملكية"] : ["اعتماد الطرفين أولاً"] };
+    }
+
+    case "get_deal_full_details": {
+      const { data: deal } = await sb.from("deals")
+        .select("*").eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.buyer_id !== userId && deal.seller_id !== userId && role === "customer")
+        return { error: "ليس لديك صلاحية" };
+
+      const [listing, agreements, history, messages, files, confirmations, buyerProfile, sellerProfile] = await Promise.all([
+        sb.from("listings").select("id, title, price, city, district, business_activity, deal_type, status, photos, description").eq("id", deal.listing_id).single(),
+        sb.from("deal_agreements").select("id, agreement_number, version, status, created_at, buyer_approved, seller_approved").eq("deal_id", args.deal_id).order("version", { ascending: false }),
+        sb.from("deal_history").select("action, actor_id, details, created_at").eq("deal_id", args.deal_id).order("created_at", { ascending: false }).limit(20),
+        sb.from("negotiation_messages").select("id, sender_id, message, message_type, created_at").eq("deal_id", args.deal_id).order("created_at", { ascending: false }).limit(10),
+        sb.from("deal_files").select("id, file_name, file_type, uploaded_at").eq("deal_id", args.deal_id),
+        sb.from("legal_confirmations").select("id, user_id, party_role, confirmed_at").eq("deal_id", args.deal_id).is("invalidated_at", null),
+        sb.from("profiles").select("full_name, phone, email, is_verified, trust_score").eq("user_id", deal.buyer_id).single(),
+        sb.from("profiles").select("full_name, phone, email, is_verified, trust_score").eq("user_id", deal.seller_id).single(),
+      ]);
+
+      const buyerConfirmed = (confirmations.data || []).some((c: any) => c.party_role === "buyer");
+      const sellerConfirmed = (confirmations.data || []).some((c: any) => c.party_role === "seller");
+
+      return {
+        deal: { id: deal.id, status: deal.status, agreed_price: deal.agreed_price, locked: deal.locked,
+          escrow_status: deal.escrow_status, created_at: deal.created_at, completed_at: deal.completed_at },
+        listing: listing.data ? { id: listing.data.id, title: listing.data.title, price: listing.data.price,
+          city: listing.data.city, business_activity: listing.data.business_activity, status: listing.data.status } : null,
+        buyer: buyerProfile.data ? { name: buyerProfile.data.full_name, verified: buyerProfile.data.is_verified, trust: buyerProfile.data.trust_score } : null,
+        seller: sellerProfile.data ? { name: sellerProfile.data.full_name, verified: sellerProfile.data.is_verified, trust: sellerProfile.data.trust_score } : null,
+        confirmations: { buyer_confirmed: buyerConfirmed, seller_confirmed: sellerConfirmed, both: buyerConfirmed && sellerConfirmed },
+        agreements: agreements.data || [],
+        recent_messages: messages.data || [],
+        files: files.data || [],
+        history: history.data || [],
+        commission: deal.agreed_price ? { amount: Math.round(deal.agreed_price * 0.01), rate: "1%" } : null,
+      };
+    }
+
+    case "get_agreement_details": {
+      const { data: agr } = await sb.from("deal_agreements").select("*").eq("id", args.agreement_id).single();
+      if (!agr) return { error: "الاتفاقية غير موجودة" };
+
+      const { data: deal } = await sb.from("deals").select("buyer_id, seller_id").eq("id", agr.deal_id).single();
+      if (deal && deal.buyer_id !== userId && deal.seller_id !== userId && role === "customer")
+        return { error: "ليس لديك صلاحية" };
+
+      const commissionAmount = Math.round((agr.financial_terms as any)?.agreedPrice * 0.01 || 0);
+      const agreementUrl = `https://soqtaqbeel.com/agreement/${agr.agreement_number}`;
+
+      return {
+        agreement: { ...agr, commission_amount: commissionAmount, commission_rate: 0.01 },
+        agreement_url: agreementUrl,
+        pdf_instructions: "افتح الرابط لمعاينة وتحميل الاتفاقية كـ PDF",
+      };
+    }
+
+    case "get_my_agreements": {
+      // Get deals where user is buyer or seller
+      const { data: deals } = await sb.from("deals")
+        .select("id").or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+      if (!deals || deals.length === 0) return { agreements: [], total: 0 };
+
+      const dealIds = deals.map((d: any) => d.id);
+      const { data: agreements } = await sb.from("deal_agreements")
+        .select("id, deal_id, agreement_number, version, status, deal_title, deal_type, location, created_at, buyer_approved, seller_approved, buyer_name, seller_name, financial_terms")
+        .in("deal_id", dealIds).order("created_at", { ascending: false });
+
+      return {
+        agreements: (agreements || []).map((a: any) => ({
+          ...a,
+          agreed_price: (a.financial_terms as any)?.agreedPrice,
+          both_approved: a.buyer_approved && a.seller_approved,
+          agreement_url: `https://soqtaqbeel.com/agreement/${a.agreement_number}`,
+        })),
+        total: agreements?.length || 0,
+      };
+    }
+
+    case "get_deal_negotiation_history": {
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id").eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.buyer_id !== userId && deal.seller_id !== userId && role === "customer")
+        return { error: "ليس لديك صلاحية" };
+
+      const { data: messages } = await sb.from("negotiation_messages")
+        .select("id, sender_id, message, message_type, sender_type, created_at, is_read")
+        .eq("deal_id", args.deal_id).order("created_at", { ascending: true }).limit(args.limit || 50);
+
+      // Enrich with names
+      const senderIds = [...new Set((messages || []).map((m: any) => m.sender_id))];
+      const { data: profiles } = await sb.from("profiles")
+        .select("user_id, full_name").in("user_id", senderIds);
+      const nameMap: Record<string, string> = {};
+      (profiles || []).forEach((p: any) => { nameMap[p.user_id] = p.full_name; });
+
+      return {
+        messages: (messages || []).map((m: any) => ({
+          ...m,
+          sender_name: nameMap[m.sender_id] || "مستخدم",
+          is_mine: m.sender_id === userId,
+        })),
+        total: messages?.length || 0,
+      };
+    }
+
+    case "complete_deal_via_moqbil": {
+      // Full deal completion flow: check → legal confirm → generate agreement
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id, status, agreed_price, listing_id, deal_type, locked")
+        .eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.buyer_id !== userId && deal.seller_id !== userId && role === "customer")
+        return { error: "ليس لديك صلاحية" };
+      if (!deal.agreed_price || deal.agreed_price <= 0)
+        return { error: "يجب الاتفاق على السعر أولاً — استخدم update_agreed_price" };
+      if (deal.status === "completed") return { error: "الصفقة مكتملة بالفعل" };
+
+      const steps: any[] = [];
+
+      // Step 1: Check legal confirmations
+      const { data: confs } = await sb.from("legal_confirmations")
+        .select("user_id, party_role").eq("deal_id", args.deal_id).is("invalidated_at", null);
+      const myConf = (confs || []).find((c: any) => c.user_id === userId);
+      const partyRole = deal.buyer_id === userId ? "buyer" : "seller";
+      const otherConf = (confs || []).find((c: any) => c.party_role === (partyRole === "buyer" ? "seller" : "buyer"));
+
+      if (!myConf) {
+        // Auto-submit legal confirmation
+        await sb.from("legal_confirmations").insert({
+          deal_id: args.deal_id, user_id: userId, party_role: partyRole,
+          deal_snapshot: { agreed_price: deal.agreed_price, deal_type: deal.deal_type },
+          confirmations: { platform_terms: true, deal_terms: true, commission_acknowledged: partyRole === "seller" },
+        });
+        steps.push({ action: "legal_confirmation", status: "done", detail: `تم تأكيدك كـ${partyRole === "buyer" ? "مشتري" : "بائع"}` });
+      } else {
+        steps.push({ action: "legal_confirmation", status: "already_done", detail: "مؤكد مسبقاً" });
+      }
+
+      const bothConfirmed = !!otherConf || (!!myConf && !!otherConf);
+      if (!otherConf && !myConf) {
+        // Just submitted mine, other not confirmed yet
+        steps.push({ action: "waiting", status: "pending", detail: "بانتظار تأكيد الطرف الآخر" });
+        return { success: true, steps, partial: true,
+          message: `تم تأكيدك — لكن الطرف الآخر لم يؤكد بعد. سيتم قفل الصفقة وإنشاء الاتفاقية تلقائياً عند تأكيد الطرفين.` };
+      }
+
+      // Step 2: Check/generate agreement
+      const { data: existingAgr } = await sb.from("deal_agreements")
+        .select("id, agreement_number").eq("deal_id", args.deal_id).order("version", { ascending: false }).limit(1).single();
+
+      let agreementResult: any;
+      if (existingAgr) {
+        agreementResult = existingAgr;
+        steps.push({ action: "agreement", status: "already_exists", detail: `اتفاقية ${existingAgr.agreement_number} موجودة` });
+      } else {
+        // Generate agreement via the same tool
+        agreementResult = await executeTool("generate_agreement", { deal_id: args.deal_id }, userId, role, sb);
+        if (agreementResult.error) return { error: agreementResult.error };
+        steps.push({ action: "agreement", status: "created", detail: `تم إنشاء اتفاقية ${agreementResult.agreement_number}` });
+      }
+
+      const agrNumber = agreementResult.agreement_number;
+      const agrUrl = `https://soqtaqbeel.com/agreement/${agrNumber}`;
+
+      return { success: true, steps, partial: false,
+        agreement_number: agrNumber, agreement_url: agrUrl,
+        commission: { amount: Math.round(deal.agreed_price * 0.01), note: "1% على البائع" },
+        message: `تم إتمام إجراءات الصفقة بنجاح 🎉\n\n📄 **اتفاقية رقم ${agrNumber}**\n🔗 [فتح الاتفاقية](${agrUrl})\n💰 عمولة: ${Math.round(deal.agreed_price * 0.01)} ر.س`,
+        next_steps: ["فتح رابط الاتفاقية لتحميل PDF", "بدء نقل الملكية (start_ownership_transfer)", "تأكيد الاستلام (confirm_receipt)"] };
+    }
+
     case "save_listing": {
       const { data: existing } = await sb.from("listing_likes")
         .select("id").eq("listing_id", args.listing_id).eq("user_id", userId).single();
