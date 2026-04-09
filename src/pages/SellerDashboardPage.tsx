@@ -270,6 +270,13 @@ const SellerDashboardPage = () => {
             </Card>
           )}
         </div>
+
+        <PromoteListingDialog
+          open={!!promoteId}
+          onOpenChange={(o) => { if (!o) { setPromoteId(null); setPromoteTitle(null); } }}
+          listingId={promoteId || ""}
+          listingTitle={promoteTitle}
+        />
       </div>
     </div>
   );

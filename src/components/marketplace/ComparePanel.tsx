@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { X, GitCompareArrows, MapPin, Eye, ShieldCheck, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
+import { X, GitCompareArrows, MapPin, Eye, ShieldCheck, ChevronUp, ChevronDown, Trash2, Sparkles } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
+import AiStar from "@/components/AiStar";
 
 export interface CompareItem {
   id: string;
