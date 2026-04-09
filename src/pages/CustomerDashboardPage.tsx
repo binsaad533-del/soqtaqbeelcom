@@ -218,10 +218,6 @@ const CustomerDashboardPage = () => {
     return s.slice(0, 4);
   }, [profileCompleteness, deals, listings, stats.completed]);
 
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={22} className="animate-spin text-primary" /></div>;
-  }
-
   const handleDeleteListing = useCallback(async (e: React.MouseEvent, id: string, title: string | null) => {
     e.preventDefault();
     e.stopPropagation();
@@ -231,6 +227,11 @@ const CustomerDashboardPage = () => {
     toast.success("تم حذف الإعلان");
     setListings(prev => prev.filter(l => l.id !== id));
   }, [softDeleteListing]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={22} className="animate-spin text-primary" /></div>;
+  }
+
 
   return (
     <div className="min-h-[80vh] bg-background py-6">
