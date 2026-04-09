@@ -244,47 +244,6 @@ const CustomerDashboardPage = () => {
           </div>
         )}
 
-        {/* ═══ DRAFT REMINDERS ═══ */}
-        {listings.filter(l => l.status === "draft").length > 0 && (
-          <div className="mb-5 animate-reveal" style={{ animationDelay: '60ms' }}>
-            {listings.filter(l => l.status === "draft").map(draft => {
-              const daysSince = Math.floor((Date.now() - new Date(draft.updated_at).getTime()) / 86400000);
-              const timeLabel = daysSince === 0 ? "اليوم" : daysSince === 1 ? "أمس" : `منذ ${daysSince} يوم`;
-              return (
-                <Link key={draft.id} to="/create-listing" className="flex items-center justify-between p-4 rounded-xl bg-muted/50 border border-border/40 hover:bg-muted/70 transition-all group mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
-                      <FileText size={16} className="text-primary" strokeWidth={1.5} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {draft.business_activity || draft.title || "إعلان غير مكتمل"}
-                        <span className="text-[10px] text-muted-foreground mr-2">({timeLabel})</span>
-                      </p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {draft.city ? `${draft.city} · ` : ""}
-                        {draft.price ? <>{Number(draft.price).toLocaleString("en-US")} <SarSymbol size={9} /></> : "بدون سعر بعد"}
-                        {" — "}
-                        أكمل بيانات الإعلان وانشره 🚀
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => handleDeleteListing(e, draft.id, draft.business_activity || draft.title || null)}
-                      className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                      title="حذف الإعلان"
-                    >
-                      <Trash2 size={14} strokeWidth={1.5} />
-                    </button>
-                    <span className="text-xs text-warning font-medium group-hover:underline">أكمل الإعلان</span>
-                    <ChevronLeft size={14} className="text-warning/50" />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
 
         {/* ═══ PROFILE & QUICK INFO BAR ═══ */}
         <h1 className="sr-only">لوحة تحكم العميل</h1>
