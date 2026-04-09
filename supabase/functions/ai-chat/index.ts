@@ -1653,7 +1653,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
         message: `تم تحديد الموقع بنجاح ✅ (${lat.toFixed(4)}, ${lng.toFixed(4)})` };
     }
 
-
+    case "assign_reviewer": {
       if (role === "customer") return { error: "ليس لديك صلاحية" };
       const { data: sv } = await sb.from("user_roles").select("user_id").eq("user_id", args.supervisor_id).eq("role", "supervisor").single();
       if (!sv) return { error: "المشرف غير موجود" };
