@@ -6,6 +6,11 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  build: {
+    modulePreload: {
+      polyfill: false,
+    },
+  },
   server: {
     host: "::",
     port: 8080,
