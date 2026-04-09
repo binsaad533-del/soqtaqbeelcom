@@ -2419,9 +2419,19 @@ serve(async (req) => {
     }
     console.log(`[moqbil] User: ${userId?.slice(0,8)}, Role: ${role}`);
 
+    // Fetch user profile name
+    let userName = "";
+    if (userId) {
+      try {
+        const { data: profile } = await supabaseAdmin.from("profiles").select("full_name").eq("user_id", userId).single();
+        if (profile?.full_name) userName = profile.full_name;
+      } catch { /* no profile */ }
+    }
+
     let systemMessage = context ? `${SYSTEM_PROMPT}\n${context}` : SYSTEM_PROMPT;
     systemMessage += `\nدور المستخدم: ${role}`;
     systemMessage += `\nمعرف المستخدم: ${userId}`;
+    if (userName) systemMessage += `\nاسم المستخدم: ${userName}\n\nتعامل مع المستخدم باسمه "${userName}" — نادِه باسمه الأول بشكل ودود.`;
 
     const allowedToolNames = ROLE_TOOLS[role] || ROLE_TOOLS.customer;
     const tools = allowedToolNames.filter((n) => TOOL_DEFS[n]).map((n) => TOOL_DEFS[n]);
