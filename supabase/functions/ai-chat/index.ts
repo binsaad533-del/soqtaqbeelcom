@@ -2401,6 +2401,28 @@ function getFallbackOfficialUrl(pathname: string, officialUrlsByPath: Map<string
   return matches.length === 1 ? matches[0] : null;
 }
 
+function stripResourceLinksFromText(text: string, officialUrlsByPath: Map<string, string>) {
+  if (!text) return "";
+
+  return text
+    .replace(RESOURCE_URL_PATTERN, (url) => {
+      const trailing = url.match(/[).,،؛!?؟]+$/)?.[0] || "";
+      const rawUrl = trailing ? url.slice(0, -trailing.length) : url;
+
+      try {
+        const parsed = new URL(rawUrl);
+        const pathname = parsed.pathname.replace(/\/+$/, "") || "/";
+        if (!isCanonicalResourcePath(pathname)) return url;
+        return officialUrlsByPath.has(pathname) ? url : "";
+      } catch {
+        return url;
+      }
+    })
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function normalizeToolUrl(url: string, officialUrlsByPath: Map<string, string>) {
   const trailing = url.match(/[).,،؛!?؟]+$/)?.[0] || "";
   const rawUrl = trailing ? url.slice(0, -trailing.length) : url;
@@ -2411,8 +2433,8 @@ function normalizeToolUrl(url: string, officialUrlsByPath: Map<string, string>) 
     if (!isCanonicalResourcePath(pathname)) return url;
 
     const canonical = officialUrlsByPath.get(pathname)
-      || getFallbackOfficialUrl(pathname, officialUrlsByPath)
-      || `${BASE_URL}${pathname}${parsed.search}${parsed.hash}`;
+      || getFallbackOfficialUrl(pathname, officialUrlsByPath);
+    if (!canonical) return "";
     return `${canonical}${trailing}`;
   } catch {
     return url;
@@ -2623,6 +2645,7 @@ serve(async (req) => {
 
     const officialUrlsByPath = extractOfficialUrlsFromToolMessages(currentMessages);
     let finalText = normalizeAssistantUrls(cleanAssistantText(extractMessageText(finalChoice.message?.content)), officialUrlsByPath);
+    finalText = stripResourceLinksFromText(finalText, officialUrlsByPath);
     if (!finalText) finalText = "تم.";
 
     if (toolsUsed.length > 0 && userId) {
