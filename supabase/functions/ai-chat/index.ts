@@ -2485,7 +2485,7 @@ const INTERNAL_TOOL_HINTS = [
   /tool_code/i,
   /call_as_tool/i,
   /tools?\.[a-z0-9_.]+/i,
-  /\b(?:create_listing|edit_my_listing|cancel_my_listing|submit_offer|respond_to_offer|get_listing_status|approve_listing_publish|valuate_business|analyze_location|generate_[a-z_]+|check_[a-z_]+|quick_feasibility|post_deal_followup|mediate_dispute|schedule_meeting|generate_handover_checklist|generate_listing_card)\b/i,
+  /\b(?:create_listing|edit_my_listing|cancel_my_listing|submit_offer|respond_to_offer|get_listing_status|approve_listing_publish|valuate_business|analyze_location|generate_[a-z_]+|check_[a-z_]+|quick_feasibility|post_deal_followup|mediate_dispute|schedule_meeting|generate_handover_checklist|generate_listing_card|publish_my_listing|set_listing_location)\b/i,
   /[a-z_]+\s*=\s*['"{\[]/i,
 ];
 
