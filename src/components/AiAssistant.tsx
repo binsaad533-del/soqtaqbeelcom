@@ -101,6 +101,38 @@ const CopyButton = ({ text }: { text: string }) => {
   );
 };
 
+/** TTS button for AI messages */
+const TTSButton = ({ text }: { text: string }) => {
+  const [speaking, setSpeaking] = useState(false);
+  const supported = typeof window !== "undefined" && "speechSynthesis" in window;
+  if (!supported) return null;
+
+  const toggle = () => {
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+    } else {
+      const clean = text.replace(/#{1,6}\s/g, "").replace(/\*{1,2}([^*]+)\*{1,2}/g, "$1").replace(/[`~>|]/g, "").replace(/\n{2,}/g, ". ").trim();
+      if (!clean) return;
+      const u = new SpeechSynthesisUtterance(clean);
+      u.lang = "ar-SA";
+      const voices = window.speechSynthesis.getVoices();
+      const arV = voices.find(v => v.lang.startsWith("ar"));
+      if (arV) u.voice = arV;
+      u.onstart = () => setSpeaking(true);
+      u.onend = () => setSpeaking(false);
+      u.onerror = () => setSpeaking(false);
+      window.speechSynthesis.speak(u);
+    }
+  };
+
+  return (
+    <button onClick={toggle} className="text-muted-foreground/50 hover:text-foreground transition-colors" title={speaking ? "إيقاف" : "استمع"}>
+      {speaking ? <VolumeX size={10} /> : <Volume2 size={10} />}
+    </button>
+  );
+};
+
 /** Convert file to base64 data URL */
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
