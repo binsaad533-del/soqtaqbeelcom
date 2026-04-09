@@ -5,6 +5,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AgentSettings {
   is_active: boolean;
@@ -202,17 +203,21 @@ const MoqbilAgentPanel = () => {
           {/* Response tone */}
           <div className="p-2.5 rounded-xl border border-border/30 space-y-1.5">
             <span className="text-xs font-medium">أسلوب الرد</span>
-            <select
+            <Select
               dir="rtl"
               value={settings.preferred_response_tone}
-              onChange={(e) => saveSettings({ preferred_response_tone: e.target.value })}
-              className="w-full px-2.5 py-1.5 rounded-lg border border-border/50 bg-background text-xs text-right appearance-none"
+              onValueChange={(value) => saveSettings({ preferred_response_tone: value })}
             >
-              <option value="professional">مهني واحترافي</option>
-              <option value="friendly">ودود وبسيط</option>
-              <option value="formal">رسمي</option>
-              <option value="brief">مختصر ومباشر</option>
-            </select>
+              <SelectTrigger className="w-full text-xs h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="professional">مهني واحترافي</SelectItem>
+                <SelectItem value="friendly">ودود وبسيط</SelectItem>
+                <SelectItem value="formal">رسمي</SelectItem>
+                <SelectItem value="brief">مختصر ومباشر</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       )}
