@@ -130,6 +130,7 @@ const AiAssistant = () => {
   const { greeting, role, suggestions, proactiveInsights, quickCommands, pathname } = useAiContext();
   const { pageData } = usePageData();
   const { getMemoryContext, addAiNote, memory, loaded: memoryLoaded } = useAiMemory();
+  const { alerts: marketAlerts, markAsRead: markAlertRead, dismissAlert } = useMarketAlerts();
 
   // Voice input
   const handleVoiceResult = useCallback((text: string) => {
