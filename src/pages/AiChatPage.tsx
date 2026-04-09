@@ -323,6 +323,19 @@ const AiChatPage = () => {
 
   const removePendingFile = (index: number) => setPendingFiles(prev => prev.filter((_, i) => i !== index));
 
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const dt = e.dataTransfer;
+    if (!dt.files || dt.files.length === 0) return;
+    // Reuse the same handler by creating a synthetic event
+    const fakeEvent = { target: { files: dt.files } } as unknown as React.ChangeEvent<HTMLInputElement>;
+    handleFileUpload(fakeEvent);
+  }, [handleFileUpload]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); }, []);
+  const handleDragLeave = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragging(false); }, []);
+
   const sendMessage = useCallback((text: string, files?: PendingFile[]) => {
     const imageUrls = files?.filter(f => f.isImage).map(f => f.dataUrl || f.storageUrl).filter(Boolean) as string[];
     const fileMeta = files?.map(f => ({ name: f.name, type: f.type, size: f.size, isImage: f.isImage }));
