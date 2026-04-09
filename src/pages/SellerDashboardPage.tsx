@@ -166,8 +166,10 @@ const SellerDashboardPage = () => {
         <div className="flex flex-wrap gap-2 mb-6">
           {[
             { label: "إضافة إعلان", icon: Plus, to: "/create-listing?new=1", color: "bg-primary text-primary-foreground" },
+            { label: "التحليلات", icon: BarChart3, to: "/seller-analytics", color: "bg-secondary text-secondary-foreground" },
             { label: "المحادثات", icon: MessageSquare, to: "/messages", color: "bg-secondary text-secondary-foreground" },
             { label: "صفقاتي", icon: Handshake, to: "/deal-pipeline", color: "bg-secondary text-secondary-foreground" },
+            { label: "الإحالات", icon: Link2, to: "/referrals", color: "bg-secondary text-secondary-foreground" },
           ].map(link => (
             <Link key={link.to} to={link.to} className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium transition-opacity hover:opacity-80 ${link.color}`}>
               <link.icon size={13} strokeWidth={2} />
