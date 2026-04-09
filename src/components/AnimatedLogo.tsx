@@ -1,16 +1,18 @@
 import logoIconGold from "@/assets/logo-icon-gold.png";
+import { useEffect, useState } from "react";
 
 /**
- * Animated logo that splits the original PNG into 6 pie-slice segments
- * using CSS clip-path, then animates each independently to suggest AI.
+ * Animated logo with strong AI-inspired motion.
+ * Uses clip-path to isolate 6 wings, each with independent
+ * rotation, pulse, and glow — fast and energetic.
  */
 const AnimatedLogo = ({ className = "h-14 md:h-16 w-14 md:w-16" }: { className?: string }) => {
-  // 6 pie slices, each 60°. We compute clip-path polygons from center.
-  // Points on unit circle at 60° intervals, starting from -90° (top)
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   const slices = Array.from({ length: 6 }, (_, i) => {
     const a1 = (i * 60 - 90) * (Math.PI / 180);
     const a2 = ((i + 1) * 60 - 90) * (Math.PI / 180);
-    // Use a large radius to ensure we cover the full image
     const r = 1.2;
     const x1 = 50 + r * Math.cos(a1) * 50;
     const y1 = 50 + r * Math.sin(a1) * 50;
@@ -19,68 +21,121 @@ const AnimatedLogo = ({ className = "h-14 md:h-16 w-14 md:w-16" }: { className?:
     return `polygon(50% 50%, ${x1}% ${y1}%, ${x2}% ${y2}%)`;
   });
 
-  // Different animation configs per wing for organic AI feel
-  const wingAnimations = [
-    { delay: "0s",    dur: "3s",   scale: [1, 1.06, 1],   rotate: [0, 3, -1, 0] },
-    { delay: "0.3s",  dur: "3.5s", scale: [1, 1.04, 1],   rotate: [0, -2, 2, 0] },
-    { delay: "0.1s",  dur: "2.8s", scale: [1, 1.07, 1],   rotate: [0, 2, -3, 0] },
-    { delay: "0.5s",  dur: "3.2s", scale: [1, 1.05, 1],   rotate: [0, -3, 1, 0] },
-    { delay: "0.2s",  dur: "3.8s", scale: [1, 1.03, 1],   rotate: [0, 1, -2, 0] },
-    { delay: "0.4s",  dur: "2.6s", scale: [1, 1.08, 1],   rotate: [0, -1, 3, 0] },
-  ];
-
   return (
     <div className={`relative ${className}`}>
-      {/* 6 animated wing segments */}
-      {slices.map((clipPath, i) => {
-        const anim = wingAnimations[i];
-        const scaleKf = anim.scale.join(", ");
-        const rotateKf = anim.rotate.map(r => `${r}deg`).join(", ");
+      {/* Outer glow ring */}
+      <div
+        className="absolute inset-[-18%] rounded-full"
+        style={{
+          background: "radial-gradient(circle, hsla(40, 90%, 60%, 0.25) 0%, transparent 70%)",
+          animation: "ai-outer-glow 1.8s ease-in-out infinite",
+        }}
+      />
 
-        return (
-          <img
-            key={i}
-            src={logoIconGold}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-contain"
+      {/* Rotating orbit dots */}
+      {[0, 1, 2].map(i => (
+        <div
+          key={`orbit-${i}`}
+          className="absolute inset-[-8%]"
+          style={{
+            animation: `ai-orbit ${2.5 + i * 0.6}s linear infinite`,
+            animationDelay: `${i * 0.8}s`,
+          }}
+        >
+          <div
+            className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full"
             style={{
-              clipPath,
-              transformOrigin: "50% 50%",
-              animation: `wing-pulse-${i} ${anim.dur} ease-in-out ${anim.delay} infinite, wing-rotate-${i} ${anim.dur} ease-in-out ${anim.delay} infinite`,
+              width: `${3 - i * 0.5}px`,
+              height: `${3 - i * 0.5}px`,
+              background: `hsla(40, 90%, ${65 + i * 10}%, ${0.9 - i * 0.2})`,
+              boxShadow: `0 0 ${6 - i}px hsla(40, 90%, 60%, 0.6)`,
             }}
           />
-        );
-      })}
+        </div>
+      ))}
 
-      {/* Center circle overlay (no clip, small circle) — stays stable */}
+      {/* 6 animated wing segments */}
+      {slices.map((clipPath, i) => (
+        <img
+          key={i}
+          src={logoIconGold}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{
+            clipPath,
+            transformOrigin: "50% 50%",
+            opacity: mounted ? 1 : 0,
+            transition: `opacity 0.3s ${i * 0.08}s`,
+            animation: mounted
+              ? `ai-wing-${i} ${1.2 + i * 0.15}s ease-in-out infinite`
+              : "none",
+          }}
+        />
+      ))}
+
+      {/* Center with strong pulse */}
       <img
         src={logoIconGold}
         alt="سوق تقبيل"
         className="absolute inset-0 w-full h-full object-contain"
         style={{
-          clipPath: "circle(8% at 50% 50%)",
-          animation: "center-pulse 2.5s ease-in-out infinite",
+          clipPath: "circle(10% at 50% 50%)",
+          animation: "ai-core-pulse 1.4s ease-in-out infinite",
         }}
       />
 
-      {/* Inline keyframes */}
+      {/* Scanning line effect */}
+      <div
+        className="absolute inset-0 rounded-full overflow-hidden pointer-events-none"
+        style={{ clipPath: "circle(48% at 50% 50%)" }}
+      >
+        <div
+          className="absolute w-full h-[2px]"
+          style={{
+            background: "linear-gradient(90deg, transparent, hsla(40, 90%, 65%, 0.4), transparent)",
+            animation: "ai-scan 2s ease-in-out infinite",
+          }}
+        />
+      </div>
+
       <style>{`
-        ${wingAnimations.map((anim, i) => `
-          @keyframes wing-pulse-${i} {
-            0%, 100% { transform: scale(${anim.scale[0]}); opacity: 1; }
-            50% { transform: scale(${anim.scale[1]}); opacity: 0.85; }
-          }
-          @keyframes wing-rotate-${i} {
-            0% { transform: rotate(${anim.rotate[0]}deg); }
-            33% { transform: rotate(${anim.rotate[1]}deg); }
-            66% { transform: rotate(${anim.rotate[2]}deg); }
-            100% { transform: rotate(${anim.rotate[3]}deg); }
-          }
-        `).join("")}
-        @keyframes center-pulse {
-          0%, 100% { transform: scale(1); filter: brightness(1); }
-          50% { transform: scale(1.1); filter: brightness(1.15); }
+        ${Array.from({ length: 6 }, (_, i) => {
+          const baseScale = 1;
+          const peakScale = 1.12 + (i % 2) * 0.06;
+          const r1 = (i % 2 === 0 ? 1 : -1) * (4 + i);
+          const r2 = -r1 * 0.7;
+          return `
+            @keyframes ai-wing-${i} {
+              0% { transform: scale(${baseScale}) rotate(0deg); opacity: 1; filter: brightness(1); }
+              25% { transform: scale(${peakScale}) rotate(${r1}deg); opacity: 0.75; filter: brightness(1.2); }
+              50% { transform: scale(${baseScale}) rotate(${r2}deg); opacity: 1; filter: brightness(1); }
+              75% { transform: scale(${peakScale * 0.97}) rotate(${r1 * 0.5}deg); opacity: 0.8; filter: brightness(1.15); }
+              100% { transform: scale(${baseScale}) rotate(0deg); opacity: 1; filter: brightness(1); }
+            }
+          `;
+        }).join("")}
+
+        @keyframes ai-core-pulse {
+          0%, 100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 4px hsla(40, 90%, 60%, 0.3)); }
+          50% { transform: scale(1.2); filter: brightness(1.3) drop-shadow(0 0 12px hsla(40, 90%, 60%, 0.7)); }
+        }
+
+        @keyframes ai-outer-glow {
+          0%, 100% { transform: scale(1); opacity: 0.4; }
+          50% { transform: scale(1.15); opacity: 0.8; }
+        }
+
+        @keyframes ai-orbit {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes ai-scan {
+          0% { top: 0%; opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { top: 100%; opacity: 0; }
         }
       `}</style>
     </div>
