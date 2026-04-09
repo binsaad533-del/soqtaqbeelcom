@@ -22,6 +22,7 @@ import QuickPriceEdit from "@/components/QuickPriceEdit";
 import ListingEditDialog from "@/components/ListingEditDialog";
 import ListingOfferForm from "@/components/ListingOfferForm";
 import SellerOffersPanel from "@/components/SellerOffersPanel";
+import MoqbilAgentPanel from "@/components/MoqbilAgentPanel";
 import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useListingSocial } from "@/hooks/useListingSocial";
