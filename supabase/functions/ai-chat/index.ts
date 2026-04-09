@@ -1643,8 +1643,46 @@ async function executeTool(name: string, args: any, userId: string, role: string
         }
       }
 
+      // If still no coords, try geocoding from city+district names
+      if ((!lat || !lng || isNaN(lat) || isNaN(lng)) && (args.city_name || args.district_name)) {
+        const searchParts: string[] = [];
+        if (args.district_name) searchParts.push(args.district_name);
+        if (args.city_name) searchParts.push(args.city_name);
+        searchParts.push("Saudi Arabia");
+        const searchQuery = searchParts.join(", ");
+
+        try {
+          const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&countrycodes=sa`, {
+            headers: { "User-Agent": "SouqTaqbeel/1.0" },
+          });
+          if (geoRes.ok) {
+            const geoData = await geoRes.json();
+            if (geoData && geoData.length > 0) {
+              lat = parseFloat(geoData[0].lat);
+              lng = parseFloat(geoData[0].lon);
+            }
+          }
+        } catch { /* fallback below */ }
+
+        // Fallback: try without district
+        if ((!lat || !lng || isNaN(lat) || isNaN(lng)) && args.city_name) {
+          try {
+            const geoRes2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(args.city_name + ", Saudi Arabia")}&limit=1&countrycodes=sa`, {
+              headers: { "User-Agent": "SouqTaqbeel/1.0" },
+            });
+            if (geoRes2.ok) {
+              const geoData2 = await geoRes2.json();
+              if (geoData2 && geoData2.length > 0) {
+                lat = parseFloat(geoData2[0].lat);
+                lng = parseFloat(geoData2[0].lon);
+              }
+            }
+          } catch { /* continue */ }
+        }
+      }
+
       if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
-        return { error: "لم أقدر أستخرج الإحداثيات — أرسل رابط قوقل ماب كامل أو الإحداثيات مباشرة (مثل: 24.7136, 46.6753)" };
+        return { error: "لم أقدر أحدد الموقع — جرب أرسل رابط قوقل ماب أو الإحداثيات مباشرة (مثل: 24.7136, 46.6753)" };
       }
 
       // Validate Saudi Arabia approximate bounds
