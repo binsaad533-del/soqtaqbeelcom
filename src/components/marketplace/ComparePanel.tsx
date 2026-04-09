@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { X, GitCompareArrows, MapPin, Eye, ShieldCheck, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
+import { X, GitCompareArrows, MapPin, Eye, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
+import AiStar from "@/components/AiStar";
 
 export interface CompareItem {
   id: string;
@@ -39,6 +40,33 @@ const dealTypeLabel = (dt: string | null) => {
 
 const ComparePanel = ({ items, onRemove, onClear }: Props) => {
   const [expanded, setExpanded] = useState(false);
+
+  // AI recommendation
+  const aiRecommendation = useMemo(() => {
+    if (items.length < 2) return null;
+    let best = items[0];
+    let bestScore = 0;
+    for (const item of items) {
+      let score = 0;
+      // Lower price is better (normalize)
+      const prices = items.filter(i => i.price && i.price > 0).map(i => i.price!);
+      if (item.price && prices.length > 1) {
+        const maxP = Math.max(...prices);
+        const minP = Math.min(...prices);
+        score += maxP > minP ? ((maxP - item.price) / (maxP - minP)) * 30 : 15;
+      }
+      // Higher disclosure
+      score += (item.disclosure_score || 0) * 0.3;
+      // Higher trust
+      score += (item.trust_score || 0) * 0.2;
+      // AI rating
+      if (item.ai_rating === "A") score += 20;
+      else if (item.ai_rating === "B") score += 12;
+      else if (item.ai_rating === "C") score += 5;
+      if (score > bestScore) { bestScore = score; best = item; }
+    }
+    return best;
+  }, [items]);
 
   if (items.length === 0) return null;
 
@@ -188,6 +216,29 @@ const ComparePanel = ({ items, onRemove, onClear }: Props) => {
                       عرض التفاصيل
                     </Link>
                   )} />
+                  {/* AI Recommendation */}
+                  {aiRecommendation && (
+                    <tr className="border-t-2 border-primary/20 bg-primary/5">
+                      <td className="py-3 px-3 text-xs font-semibold text-primary">
+                        <div className="flex items-center gap-1.5">
+                          <AiStar size={14} />
+                          توصية AI
+                        </div>
+                      </td>
+                      {items.map(item => (
+                        <td key={item.id} className="py-3 px-3 text-center">
+                          {aiRecommendation.id === item.id ? (
+                            <div className="space-y-1">
+                              <span className="text-xs font-bold text-primary">✓ الخيار الأفضل</span>
+                              <p className="text-[9px] text-muted-foreground">بناءً على السعر والشفافية وثقة البائع</p>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground/50">—</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

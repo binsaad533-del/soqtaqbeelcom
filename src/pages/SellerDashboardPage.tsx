@@ -7,16 +7,17 @@ import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
   Store, ShoppingBag, Pause, Users, Handshake, CheckCircle2,
-  TrendingUp, ArrowLeft, Plus, MessageSquare, Percent, ExternalLink, Eye, Trash2,
+  TrendingUp, ArrowLeft, Plus, MessageSquare, Percent, ExternalLink, Eye, Trash2, BarChart3, Sparkles, Link2,
 } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
 import { toast } from "sonner";
+import PromoteListingDialog from "@/components/PromoteListingDialog";
 
 interface SellerStats {
   activeListings: number;
@@ -75,6 +76,8 @@ const SellerDashboardPage = () => {
   const [stats, setStats] = useState<SellerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState<ListingRow[]>([]);
+  const [promoteId, setPromoteId] = useState<string | null>(null);
+  const [promoteTitle, setPromoteTitle] = useState<string | null>(null);
 
   useSEO({ title: "لوحة تحكم البائع | سوق تقبيل", description: "إحصائيات نشاطك كبائع في سوق تقبيل", canonical: "/seller-dashboard" });
 
@@ -163,8 +166,10 @@ const SellerDashboardPage = () => {
         <div className="flex flex-wrap gap-2 mb-6">
           {[
             { label: "إضافة إعلان", icon: Plus, to: "/create-listing?new=1", color: "bg-primary text-primary-foreground" },
+            { label: "التحليلات", icon: BarChart3, to: "/seller-analytics", color: "bg-secondary text-secondary-foreground" },
             { label: "المحادثات", icon: MessageSquare, to: "/messages", color: "bg-secondary text-secondary-foreground" },
             { label: "صفقاتي", icon: Handshake, to: "/deal-pipeline", color: "bg-secondary text-secondary-foreground" },
+            { label: "الإحالات", icon: Link2, to: "/referrals", color: "bg-secondary text-secondary-foreground" },
           ].map(link => (
             <Link key={link.to} to={link.to} className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium transition-opacity hover:opacity-80 ${link.color}`}>
               <link.icon size={13} strokeWidth={2} />
@@ -237,6 +242,15 @@ const SellerDashboardPage = () => {
                             <Link to={`/listing/${listing.id}`} className="text-muted-foreground hover:text-foreground transition-colors">
                               <Eye size={14} />
                             </Link>
+                            {listing.status === "published" && (
+                              <button
+                                onClick={() => { setPromoteId(listing.id); setPromoteTitle(listing.title); }}
+                                className="text-muted-foreground hover:text-amber-500 transition-colors"
+                                title="ترقية الإعلان"
+                              >
+                                <Sparkles size={13} />
+                              </button>
+                            )}
                             {(listing.status === "draft" || listing.status === "suspended") && (
                               <button
                                 onClick={() => handleDelete(listing.id, listing.title)}
@@ -256,6 +270,13 @@ const SellerDashboardPage = () => {
             </Card>
           )}
         </div>
+
+        <PromoteListingDialog
+          open={!!promoteId}
+          onOpenChange={(o) => { if (!o) { setPromoteId(null); setPromoteTitle(null); } }}
+          listingId={promoteId || ""}
+          listingTitle={promoteTitle}
+        />
       </div>
     </div>
   );

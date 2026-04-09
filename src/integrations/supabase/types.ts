@@ -1769,6 +1769,83 @@ export type Database = {
         }
         Relationships: []
       }
+      promoted_listings: {
+        Row: {
+          amount_paid: number | null
+          created_at: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          listing_id: string
+          promoted_by: string
+          promotion_type: string
+          starts_at: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          is_active?: boolean
+          listing_id: string
+          promoted_by: string
+          promotion_type?: string
+          starts_at?: string
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          listing_id?: string
+          promoted_by?: string
+          promotion_type?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promoted_listings_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          converted_at: string | null
+          created_at: string
+          id: string
+          referral_code: string
+          referred_user_id: string | null
+          referrer_id: string
+          reward_points: number
+          status: string
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_user_id?: string | null
+          referrer_id: string
+          reward_points?: number
+          status?: string
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_user_id?: string | null
+          referrer_id?: string
+          reward_points?: number
+          status?: string
+        }
+        Relationships: []
+      }
       search_alerts: {
         Row: {
           created_at: string

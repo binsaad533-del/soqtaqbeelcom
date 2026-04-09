@@ -64,6 +64,8 @@ const SellerDashboardPage = lazy(() => import("./pages/SellerDashboardPage"));
 const NotificationSettingsPage = lazy(() => import("./pages/NotificationSettingsPage"));
 const AiChatPage = lazy(() => import("./pages/AiChatPage"));
 const MoqbilLogPage = lazy(() => import("./pages/MoqbilLogPage"));
+const SellerAnalyticsPage = lazy(() => import("./pages/SellerAnalyticsPage"));
+const ReferralPage = lazy(() => import("./pages/ReferralPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -246,6 +248,22 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <MoqbilLogPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/seller-analytics"
+                  element={
+                    <ProtectedRoute>
+                      <SellerAnalyticsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/referrals"
+                  element={
+                    <ProtectedRoute>
+                      <ReferralPage />
                     </ProtectedRoute>
                   }
                 />
