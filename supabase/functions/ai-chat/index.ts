@@ -941,6 +941,8 @@ serve(async (req) => {
     let toolsUsed: string[] = [];
 
     while (iterations < MAX_ITERATIONS) {
+      console.log(`[moqbil] Tool loop iteration ${iterations}, tools available: ${tools.length}`);
+
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -951,6 +953,7 @@ serve(async (req) => {
           model: "google/gemini-2.5-flash",
           messages: currentMessages,
           tools: tools.length > 0 ? tools : undefined,
+          tool_choice: tools.length > 0 ? "auto" : undefined,
           stream: false,
         }),
       });
