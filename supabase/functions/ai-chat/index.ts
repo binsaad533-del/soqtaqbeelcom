@@ -359,6 +359,9 @@ const ROLE_TOOLS: Record<string, string[]> = {
     "send_negotiation_message", "update_agreed_price", "submit_legal_confirmation",
     "start_ownership_transfer", "generate_agreement", "get_deal_full_details",
     "get_agreement_details", "get_my_agreements", "get_deal_negotiation_history", "complete_deal_via_moqbil",
+    // Advanced Moqbil tools
+    "valuate_business", "check_seller_background", "generate_deal_checklist", "mediate_dispute",
+    "post_deal_followup", "quick_feasibility", "generate_user_report", "analyze_location",
     // Supervisor write
     "change_listing_status", "change_deal_status", "submit_review_status",
     "report_listing_issue", "approve_listing_publish", "reject_draft_listing",
