@@ -36,6 +36,7 @@ interface ChatMsg {
   time: string;
   images?: string[];
   files?: { name: string; type: string; size: number; isImage: boolean }[];
+  feedback?: "positive" | "negative" | null;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
