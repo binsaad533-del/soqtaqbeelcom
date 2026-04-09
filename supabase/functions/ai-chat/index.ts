@@ -2827,6 +2827,15 @@ serve(async (req) => {
     systemMessage += `\nمعرف المستخدم: ${userId}`;
     if (userName) systemMessage += `\nاسم المستخدم: ${userName}\n\nتعامل مع المستخدم باسمه "${userName}" — نادِه باسمه الأول بشكل ودود.`;
 
+    // Check phone verification for customer write operations gate
+    let isPhoneVerified = false;
+    if (userId) {
+      try {
+        const { data: pv } = await supabaseAdmin.from("profiles").select("phone_verified").eq("user_id", userId).single();
+        isPhoneVerified = !!pv?.phone_verified;
+      } catch { /* assume not verified */ }
+    }
+
     const allowedToolNames = ROLE_TOOLS[role] || ROLE_TOOLS.customer;
     const tools = allowedToolNames.filter((n) => TOOL_DEFS[n]).map((n) => TOOL_DEFS[n]);
 
