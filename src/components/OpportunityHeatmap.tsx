@@ -1,0 +1,125 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { MapPin, Flame, TrendingUp, Loader2 } from "lucide-react";
+import AiStar from "@/components/AiStar";
+import SarSymbol from "@/components/SarSymbol";
+
+interface CityHeat {
+  city: string;
+  count: number;
+  avgPrice: number;
+  topActivity: string;
+  heat: "hot" | "warm" | "cool";
+}
+
+const OpportunityHeatmap = () => {
+  const [cities, setCities] = useState<CityHeat[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data: listings } = await supabase
+        .from("listings")
+        .select("city, price, business_activity")
+        .eq("status", "published")
+        .is("deleted_at", null);
+
+      if (!listings) { setLoading(false); return; }
+
+      const cityMap: Record<string, { count: number; prices: number[]; activities: Record<string, number> }> = {};
+      
+      listings.forEach(l => {
+        const city = l.city || "غير محدد";
+        if (!cityMap[city]) cityMap[city] = { count: 0, prices: [], activities: {} };
+        cityMap[city].count++;
+        if (l.price) cityMap[city].prices.push(l.price);
+        const act = l.business_activity || "عام";
+        cityMap[city].activities[act] = (cityMap[city].activities[act] || 0) + 1;
+      });
+
+      const maxCount = Math.max(...Object.values(cityMap).map(c => c.count));
+
+      const result: CityHeat[] = Object.entries(cityMap)
+        .map(([city, data]) => {
+          const avgPrice = data.prices.length > 0
+            ? Math.round(data.prices.reduce((a, b) => a + b, 0) / data.prices.length)
+            : 0;
+          const topActivity = Object.entries(data.activities).sort((a, b) => b[1] - a[1])[0]?.[0] || "عام";
+          const ratio = data.count / maxCount;
+          const heat: CityHeat["heat"] = ratio > 0.6 ? "hot" : ratio > 0.3 ? "warm" : "cool";
+          return { city, count: data.count, avgPrice, topActivity, heat };
+        })
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 12);
+
+      setCities(result);
+      setLoading(false);
+    };
+
+    fetch();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="animate-spin text-primary" size={20} />
+      </div>
+    );
+  }
+
+  if (cities.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <AiStar size={16} />
+        <h3 className="text-sm font-semibold">خريطة الفرص الحرارية</h3>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+        {cities.map(c => (
+          <div
+            key={c.city}
+            className={`rounded-xl p-3 border transition-all hover:scale-[1.02] ${
+              c.heat === "hot"
+                ? "bg-destructive/5 border-destructive/20"
+                : c.heat === "warm"
+                  ? "bg-warning/5 border-warning/20"
+                  : "bg-muted/30 border-border/30"
+            }`}
+          >
+            <div className="flex items-center gap-1.5 mb-1">
+              {c.heat === "hot" ? (
+                <Flame size={12} className="text-destructive" />
+              ) : c.heat === "warm" ? (
+                <TrendingUp size={12} className="text-warning" />
+              ) : (
+                <MapPin size={12} className="text-muted-foreground" />
+              )}
+              <span className="text-xs font-semibold">{c.city}</span>
+            </div>
+            <div className="text-[10px] text-muted-foreground space-y-0.5">
+              <div>{c.count} فرصة</div>
+              {c.avgPrice > 0 && (
+                <div className="flex items-center gap-0.5">
+                  <span>متوسط</span>
+                  <SarSymbol size={8} />
+                  <span>{(c.avgPrice / 1000).toFixed(0)}K</span>
+                </div>
+              )}
+              <div className="text-[9px] text-foreground/60 truncate">{c.topActivity}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-3 text-[9px] text-muted-foreground px-1">
+        <span className="flex items-center gap-1"><Flame size={8} className="text-destructive" /> ساخن</span>
+        <span className="flex items-center gap-1"><TrendingUp size={8} className="text-warning" /> دافئ</span>
+        <span className="flex items-center gap-1"><MapPin size={8} className="text-muted-foreground" /> هادئ</span>
+      </div>
+    </div>
+  );
+};
+
+export default OpportunityHeatmap;
