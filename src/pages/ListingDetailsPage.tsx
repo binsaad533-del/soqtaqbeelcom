@@ -114,6 +114,22 @@ const ListingDetailsPage = () => {
   const { getProfile } = useProfiles();
   const { getSellerReviews } = useSellerReviews();
   const [listing, setListing] = useState<Listing | null>(null);
+
+  // Dynamic SEO with OG tags for smart social sharing
+  const ogTitle = listing ? (listing.title || listing.business_activity || "فرصة تقبيل") : "تفاصيل الإعلان";
+  const ogDesc = listing
+    ? `${listing.business_activity || ""} — ${listing.city || ""} ${listing.price ? `| ${Number(listing.price).toLocaleString("en-US")} ر.س` : ""}`
+    : "عرض تفاصيل فرصة تقبيل على سوق تقبيل";
+  const photos = listing?.photos as Record<string, string[]> | null;
+  const ogImage = photos ? (Object.values(photos).flat()[0] as string | undefined) : undefined;
+  useSEO({
+    title: ogTitle,
+    description: ogDesc,
+    ogImage: ogImage || undefined,
+    canonical: `/listing/${id}`,
+    type: "article",
+  });
+
   const [sellerProfile, setSellerProfile] = useState<any>(null);
   const [sellerReviews, setSellerReviews] = useState<SellerReview[]>([]);
   const [loading, setLoading] = useState(true);
