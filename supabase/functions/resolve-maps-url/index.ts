@@ -23,7 +23,7 @@ serve(async (req) => {
     const res = await fetch(url, { redirect: "follow" });
     const finalUrl = res.url;
 
-    return new Response(JSON.stringify({ finalUrl }), {
+    return new Response(JSON.stringify({ finalUrl, resolvedUrl: finalUrl }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

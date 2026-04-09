@@ -1616,7 +1616,9 @@ async function executeTool(name: string, args: any, userId: string, role: string
             });
             if (resolveRes.ok) {
               const resolved = await resolveRes.json();
-              if (resolved.resolvedUrl) resolvedUrl = resolved.resolvedUrl;
+              if (resolved.resolvedUrl || resolved.finalUrl) {
+                resolvedUrl = resolved.resolvedUrl || resolved.finalUrl;
+              }
             }
           } catch { /* continue with original */ }
         }
@@ -1628,6 +1630,8 @@ async function executeTool(name: string, args: any, userId: string, role: string
           /ll=(-?\d+\.\d+),(-?\d+\.\d+)/,
           /q=(-?\d+\.\d+),(-?\d+\.\d+)/,
           /center=(-?\d+\.\d+),(-?\d+\.\d+)/,
+          /\/maps\/search\/(-?\d+\.\d+)\s*,\s*\+?(-?\d+\.\d+)/,
+          /\/maps\/search\/[^?]*?(-?\d+\.\d+)\s*,\s*\+?(-?\d+\.\d+)/,
         ];
         for (const p of patterns) {
           const m = resolvedUrl.match(p);
