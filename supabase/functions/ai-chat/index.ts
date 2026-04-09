@@ -2827,6 +2827,53 @@ serve(async (req) => {
     systemMessage += `\nمعرف المستخدم: ${userId}`;
     if (userName) systemMessage += `\nاسم المستخدم: ${userName}\n\nتعامل مع المستخدم باسمه "${userName}" — نادِه باسمه الأول بشكل ودود.`;
 
+    // ═══ Feedback Learning: inject positive/negative examples from user ratings ═══
+    if (userId) {
+      try {
+        // Get recent negative feedback to avoid repeating mistakes
+        const { data: negFeedback } = await supabaseAdmin
+          .from("ai_chat_feedback")
+          .select("user_message_snapshot, ai_response_snapshot, comment, error_category, detected_intent")
+          .eq("rating", "negative")
+          .order("created_at", { ascending: false })
+          .limit(10);
+
+        // Get recent positive feedback as good examples
+        const { data: posFeedback } = await supabaseAdmin
+          .from("ai_chat_feedback")
+          .select("user_message_snapshot, ai_response_snapshot, detected_intent")
+          .eq("rating", "positive")
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        if ((negFeedback && negFeedback.length > 0) || (posFeedback && posFeedback.length > 0)) {
+          systemMessage += `\n\n═══ تعلّم من تقييمات المستخدمين ═══`;
+          
+          if (negFeedback && negFeedback.length > 0) {
+            systemMessage += `\n⚠️ ردود حصلت على تقييم سلبي (تجنّب تكرارها):`;
+            for (const nf of negFeedback.slice(0, 5)) {
+              systemMessage += `\n- سؤال: "${(nf.user_message_snapshot || "").slice(0, 80)}"`;
+              systemMessage += `  → رد سابق (سيء): "${(nf.ai_response_snapshot || "").slice(0, 100)}"`;
+              if (nf.comment) systemMessage += `  → سبب الرفض: "${nf.comment.slice(0, 80)}"`;
+              if (nf.error_category) systemMessage += `  → تصنيف الخطأ: ${nf.error_category}`;
+            }
+          }
+
+          if (posFeedback && posFeedback.length > 0) {
+            systemMessage += `\n✅ ردود حصلت على تقييم إيجابي (اتّبع نفس الأسلوب):`;
+            for (const pf of posFeedback.slice(0, 3)) {
+              systemMessage += `\n- سؤال: "${(pf.user_message_snapshot || "").slice(0, 80)}"`;
+              systemMessage += `  → رد جيد: "${(pf.ai_response_snapshot || "").slice(0, 100)}"`;
+            }
+          }
+
+          systemMessage += `\n═══════════════════════════════════════`;
+        }
+      } catch (e) {
+        console.error("[moqbil] Failed to load feedback:", e);
+      }
+    }
+
     // Check phone verification for customer write operations gate
     let isPhoneVerified = false;
     if (userId) {

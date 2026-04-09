@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Paperclip, Copy, Check, ChevronRight, FileText, Loader2 } from "lucide-react";
+import { Send, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Paperclip, Copy, Check, ChevronRight, FileText, Loader2, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
