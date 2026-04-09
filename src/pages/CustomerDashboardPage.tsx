@@ -15,7 +15,7 @@ import {
   DollarSign, Camera, Pencil,
   Check, X as XIcon, Phone, UserCheck, Shield, Bell,
   Store, Briefcase, ChevronLeft, Wallet, TrendingUp,
-  ArrowUpRight, Mail, Search, ShoppingCart, Heart, User, Settings
+  ArrowUpRight, Mail, Search, ShoppingCart, Heart, User, Settings, Bot
 } from "lucide-react";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
@@ -25,6 +25,7 @@ import NotificationPreferencesPanel from "@/components/NotificationPreferencesPa
 import BuyerOffersTab from "@/components/dashboard/BuyerOffersTab";
 import SavedListingsTab from "@/components/dashboard/SavedListingsTab";
 import AccountSettingsPanel from "@/components/AccountSettingsPanel";
+import MoqbilAgentPanel from "@/components/MoqbilAgentPanel";
 
 /* ── Status helpers ── */
 const statusBadge = (s: string) => {
@@ -56,7 +57,7 @@ const CustomerDashboardPage = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "offers" | "saved" | "notifications" | "security" | "account">("deals");
+  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "offers" | "saved" | "notifications" | "security" | "account" | "agent">("deals");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dealStatusFilter, setDealStatusFilter] = useState<string>("all");
@@ -605,6 +606,7 @@ const CustomerDashboardPage = () => {
                   { id: "offers" as const, label: "عروضي", icon: ShoppingCart, count: undefined },
                   { id: "saved" as const, label: "المحفوظة", icon: Heart, count: undefined },
                   { id: "notifications" as const, label: "الإشعارات", icon: Bell, count: undefined },
+                  { id: "agent" as const, label: "وكيل مقبل", icon: Bot, count: undefined },
                   { id: "security" as const, label: "الأمان", icon: Shield, count: undefined },
                   { id: "account" as const, label: "حسابي", icon: User, count: undefined },
                 ].map(tab => (
@@ -750,6 +752,7 @@ const CustomerDashboardPage = () => {
             {activeTab === "offers" && <BuyerOffersTab />}
             {activeTab === "saved" && <SavedListingsTab />}
             {activeTab === "notifications" && <NotificationPreferencesPanel />}
+            {activeTab === "agent" && <MoqbilAgentPanel />}
             {activeTab === "security" && <SecuritySettingsPanel />}
             {activeTab === "account" && <AccountSettingsPanel />}
         </div>

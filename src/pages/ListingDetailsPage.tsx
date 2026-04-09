@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { MapPin, FileText, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users, ExternalLink } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
+import CredibilityBadge from "@/components/CredibilityBadge";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import VerifiedSellerBadge from "@/components/VerifiedSellerBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
@@ -684,6 +685,9 @@ const ListingDetailsPage = () => {
                 
                 {listing.liabilities && <InfoRow label="الالتزامات" value={listing.liabilities} />}
               </div>
+
+              {/* AI Credibility Badge */}
+              <CredibilityBadge data={(listing as any).ai_trust_score as any} />
 
               {/* Deal-type-aware Transparency Indicator */}
               <TransparencyIndicator listing={listing} className="mb-4" />
