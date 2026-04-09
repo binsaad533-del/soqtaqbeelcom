@@ -296,7 +296,7 @@ const AiAssistant = () => {
             <AiStar size={28} className="[&_.ai-sparkle-big]:!fill-white [&_.ai-sparkle-small]:!fill-white/80" animate />
             {hasInsights && (
               <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive flex items-center justify-center text-[10px] font-bold text-destructive-foreground shadow-sm">
-                {proactiveInsights.length}
+                {proactiveInsights.length + marketAlerts.length}
               </span>
             )}
           </div>
