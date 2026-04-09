@@ -755,6 +755,7 @@ const CustomerDashboardPage = () => {
             {activeTab === "saved" && <SavedListingsTab />}
             {activeTab === "notifications" && <NotificationPreferencesPanel />}
             {activeTab === "agent" && <MoqbilAgentPanel />}
+            {activeTab === "intelligence" && <MoqbilDashboard />}
             {activeTab === "security" && <SecuritySettingsPanel />}
             {activeTab === "account" && <AccountSettingsPanel />}
         </div>
