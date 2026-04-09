@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import logoIconGold from "@/assets/logo-icon-gold.png";
-import SocialIcons from "@/components/SocialIcons";
 import { Eye, EyeOff, Mail, Lock, User as UserIcon, Phone, ChevronDown, Sparkles, ShieldCheck, Zap, Info } from "lucide-react";
 import { toEnglishNumerals, toDigitsOnly } from "@/lib/arabicNumerals";
 import { checkPasswordStrength, isRateLimited } from "@/lib/security";
@@ -36,6 +36,7 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const { signIn, signUp, user } = useAuthContext();
   const navigate = useNavigate();
@@ -50,7 +51,6 @@ const LoginPage = () => {
   const [mfaCode, setMfaCode] = useState("");
   const [mfaVerifying, setMfaVerifying] = useState(false);
 
-  // Redirect if already logged in
   useEffect(() => {
     if (user && !mfaRequired) {
       navigate("/", { replace: true });
@@ -58,24 +58,40 @@ const LoginPage = () => {
   }, [user, navigate, mfaRequired]);
   const { reportFailedLogin } = useSecurityIncidents();
 
-  // Auto-convert Arabic numerals on phone input
   const handlePhoneChange = useCallback((value: string) => {
     const digits = toDigitsOnly(value);
-    // Saudi mobile: starts with 5, max 9 digits
-    if (digits.length <= 9) {
-      setPhone(digits);
-    }
+    if (digits.length <= 9) setPhone(digits);
   }, []);
 
-  // Auto-convert Arabic numerals on password input
   const handlePasswordChange = useCallback((value: string) => {
     setPassword(toEnglishNumerals(value));
   }, []);
 
-  // Generate a deterministic email from phone for auth
   const phoneToEmail = (phoneNum: string, cc: string) => {
     const clean = cc.replace("+", "") + phoneNum;
     return `${clean}@phone.souqtaqbeel.app`;
+  };
+
+  /* ── Google Sign-In ── */
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    setError("");
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        setError("فشل تسجيل الدخول بحساب Google");
+        setGoogleLoading(false);
+        return;
+      }
+      if (result.redirected) return;
+      // Session set successfully
+      navigate("/");
+    } catch {
+      setError("حدث خطأ أثناء تسجيل الدخول بحساب Google");
+      setGoogleLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,10 +100,8 @@ const LoginPage = () => {
     setSuccess("");
     setLoading(true);
 
-    const authEmail =
-      loginMethod === "phone" ? phoneToEmail(phone, countryCode) : email;
+    const authEmail = loginMethod === "phone" ? phoneToEmail(phone, countryCode) : email;
 
-    // Client-side rate limiting: max 5 login attempts per 5 minutes
     if (isLogin && isRateLimited(`login_${authEmail}`, 5, 5 * 60 * 1000)) {
       setError("تم تجاوز عدد المحاولات المسموح بها. يرجى الانتظار 5 دقائق");
       setLoading(false);
@@ -109,9 +123,7 @@ const LoginPage = () => {
     if (isLogin) {
       const { error } = await signIn(authEmail, password);
       if (error) {
-        // Check if MFA is required
         if (error.message?.includes("mfa") || (error as any).status === 400) {
-          // Check for MFA factors
           const { data: factorsData } = await supabase.auth.mfa.listFactors();
           const verified = factorsData?.totp?.filter(f => f.status === "verified") || [];
           if (verified.length > 0) {
@@ -128,7 +140,6 @@ const LoginPage = () => {
             : error.message
         );
       } else {
-        // Check if user has MFA factors after login
         const { data: factorsData } = await supabase.auth.mfa.listFactors();
         const verified = factorsData?.totp?.filter(f => f.status === "verified") || [];
         if (verified.length > 0) {
@@ -172,37 +183,36 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex flex-col items-center mb-4">
-            <img src={logoIconGold} alt="سوق تقبيل" className="h-16 md:h-20 w-auto" />
-            <span className="text-sm md:text-base font-semibold tracking-[0.25em] text-foreground/70 mt-2 uppercase">SOQ TAQBEEL</span>
+        <div className="text-center mb-6">
+          <div className="flex flex-col items-center mb-3">
+            <img src={logoIconGold} alt="سوق تقبيل" className="h-14 md:h-16 w-auto" />
+            <span className="text-xs md:text-sm font-semibold tracking-[0.25em] text-foreground/70 mt-1.5 uppercase">SOQ TAQBEEL</span>
           </div>
-          <h1 className="text-sm text-muted-foreground mt-2">
-            {isLogin ? "تسجيل الدخول إلى حسابك" : "إنشاء حساب جديد"}
+          <h1 className="text-sm text-muted-foreground mt-1">
+            {isLogin ? "أهلاً بعودتك" : "ابدأ رحلتك في عالم التقبيل"}
           </h1>
         </div>
 
-        {/* AI & ease-of-use highlights */}
-        <div className="flex items-center justify-center gap-4 mb-6 text-[11px] text-muted-foreground" dir="rtl">
+        {/* Trust badges */}
+        <div className="flex items-center justify-center gap-4 mb-5 text-[11px] text-muted-foreground" dir="rtl">
           <span className="flex items-center gap-1">
-            <Sparkles size={13} strokeWidth={1.4} className="text-primary/60" />
+            <Sparkles size={12} strokeWidth={1.4} className="text-primary/60" />
             ذكاء اصطناعي
           </span>
           <span className="w-px h-3 bg-border/60" />
           <span className="flex items-center gap-1">
-            <Zap size={13} strokeWidth={1.4} className="text-primary/60" />
-            سهولة الاستخدام
+            <Zap size={12} strokeWidth={1.4} className="text-primary/60" />
+            سهل وسريع
           </span>
           <span className="w-px h-3 bg-border/60" />
           <span className="flex items-center gap-1">
-            <ShieldCheck size={13} strokeWidth={1.4} className="text-primary/60" />
-            صفقات آمنة
+            <ShieldCheck size={12} strokeWidth={1.4} className="text-primary/60" />
+            آمن 100%
           </span>
         </div>
 
-        <div className="bg-card rounded-2xl p-6 shadow-soft">
+        <div className="bg-card rounded-2xl p-6 shadow-soft border border-border/20">
           {mfaRequired ? (
-            /* MFA Verification Step */
             <div className="space-y-4" dir="rtl">
               <div className="text-center space-y-2">
                 <ShieldCheck size={32} className="mx-auto text-primary" />
@@ -245,263 +255,268 @@ const LoginPage = () => {
             </div>
           ) : (
             <>
-          {/* Login / Register toggle */}
-          <div className="flex bg-muted rounded-xl p-1 mb-5">
-            <button
-              onClick={() => { setIsLogin(true); setError(""); setSuccess(""); }}
-              className={`flex-1 py-2 rounded-lg text-sm transition-all ${
-                isLogin ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"
-              }`}
-            >
-              تسجيل الدخول
-            </button>
-            <button
-              onClick={() => { setIsLogin(false); setError(""); setSuccess(""); }}
-              className={`flex-1 py-2 rounded-lg text-sm transition-all ${
-                !isLogin ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"
-              }`}
-            >
-              حساب جديد
-            </button>
-          </div>
-
-          {/* Phone / Email method toggle */}
-          <div className="flex gap-2 mb-5">
-            <button
-              type="button"
-              onClick={() => { setLoginMethod("phone"); setError(""); }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs transition-all border ${
-                loginMethod === "phone"
-                  ? "border-primary/30 bg-primary/5 text-primary"
-                  : "border-border/50 text-muted-foreground hover:border-border"
-              }`}
-            >
-              <Phone size={14} strokeWidth={1.3} />
-              رقم الجوال
-            </button>
-            <button
-              type="button"
-              onClick={() => { setLoginMethod("email"); setError(""); }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs transition-all border ${
-                loginMethod === "email"
-                  ? "border-primary/30 bg-primary/5 text-primary"
-                  : "border-border/50 text-muted-foreground hover:border-border"
-              }`}
-            >
-              <Mail size={14} strokeWidth={1.3} />
-              البريد الإلكتروني
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full name (register only) */}
-            {!isLogin && (
-              <div className="relative">
-                <UserIcon size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="الاسم الكامل"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors"
-                  dir="rtl"
-                />
-              </div>
-            )}
-
-            {/* Phone input */}
-            {loginMethod === "phone" && (
-              <div className="relative flex gap-2">
-                {/* Country code selector */}
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setShowCountryCodes(!showCountryCodes)}
-                    className="flex items-center gap-1 h-full px-3 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 hover:border-primary/30 transition-colors whitespace-nowrap"
-                  >
-                    <span className="text-base leading-none">{selectedCountry?.flag}</span>
-                    <span className="text-xs text-muted-foreground" dir="ltr">{countryCode}</span>
-                    <ChevronDown size={12} strokeWidth={1.3} className="text-muted-foreground" />
-                  </button>
-
-                  {showCountryCodes && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setShowCountryCodes(false)} />
-                      <div className="absolute top-full mt-1 right-0 z-50 bg-card border border-border/50 rounded-xl shadow-lg py-1 min-w-[180px] max-h-[220px] overflow-y-auto">
-                        {COUNTRY_CODES.map((c) => (
-                          <button
-                            key={c.code}
-                            type="button"
-                            onClick={() => { setCountryCode(c.code); setShowCountryCodes(false); }}
-                            className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50 transition-colors ${
-                              c.code === countryCode ? "bg-primary/5 text-primary" : ""
-                            }`}
-                          >
-                            <span className="text-base">{c.flag}</span>
-                            <span className="flex-1 text-right text-xs">{c.name}</span>
-                            <span className="text-xs text-muted-foreground" dir="ltr">{c.code}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* Phone number input */}
-                <div className="relative flex-1">
-                  <Phone size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    placeholder="5XXXXXXXX"
-                    value={phone}
-                    onChange={(e) => handlePhoneChange(e.target.value)}
-                    className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors tracking-wider text-left"
-                    dir="ltr"
-                    lang="en"
-                    autoComplete="tel-national"
-                    required
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Email input */}
-            {loginMethod === "email" && (
-              <div className="relative">
-                <Mail size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="email"
-                  inputMode="email"
-                  placeholder="example@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(toEnglishNumerals(e.target.value))}
-                  className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors text-left"
-                  dir="ltr"
-                  lang="en"
-                  autoComplete="email"
-                  required
-                />
-              </div>
-            )}
-
-            {/* Password */}
-            <div className="relative">
-              <Lock size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type={showPassword ? "text" : "password"}
-                inputMode="text"
-                placeholder="كلمة المرور"
-                value={password}
-                onChange={(e) => handlePasswordChange(e.target.value)}
-                className="w-full pr-10 pl-10 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors text-left"
-                dir="ltr"
-                lang="en"
-                autoComplete={isLogin ? "current-password" : "new-password"}
-                required
-                minLength={6}
-              />
+              {/* ═══ GOOGLE SIGN-IN (Primary CTA) ═══ */}
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={handleGoogleSignIn}
+                disabled={googleLoading}
+                className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-border/50 bg-background hover:bg-muted/50 transition-all text-sm font-medium disabled:opacity-50 active:scale-[0.98]"
               >
-                {showPassword ? <EyeOff size={16} strokeWidth={1.3} /> : <Eye size={16} strokeWidth={1.3} />}
+                {googleLoading ? (
+                  <span className="w-4 h-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                  </svg>
+                )}
+                <span>{googleLoading ? "جاري التحويل..." : "المتابعة بحساب Google"}</span>
               </button>
-            </div>
-            {!isLogin && <PasswordStrengthBar password={password} />}
 
-            {/* Terms agreement (register only) */}
-            {!isLogin && (
-              <label className="flex items-start gap-2 cursor-pointer select-none" dir="rtl">
-                <input
-                  type="checkbox"
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="mt-1 w-4 h-4 rounded border-border accent-primary shrink-0"
-                />
-                <span className="text-xs text-muted-foreground leading-relaxed">
-                  أوافق على{" "}
-                  <Link to="/terms" target="_blank" className="text-primary hover:underline font-medium">
-                    الشروط والأحكام
-                  </Link>
-                  {" "}و{" "}
-                  <Link to="/privacy" target="_blank" className="text-primary hover:underline font-medium">
-                    سياسة الخصوصية
-                  </Link>
-                </span>
-              </label>
-            )}
+              {/* Divider */}
+              <div className="flex items-center gap-3 my-5">
+                <div className="flex-1 h-px bg-border/50" />
+                <span className="text-[11px] text-muted-foreground">أو</span>
+                <div className="flex-1 h-px bg-border/50" />
+              </div>
 
-            {/* Redirect message — specific pages */}
-            {isFromProtectedPage && !error && !success && (
-              <div className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs p-3 rounded-xl flex items-center justify-between gap-2 border border-blue-200 dark:border-blue-800">
-                <div className="flex items-center gap-2">
-                  <Info className="h-4 w-4 shrink-0" />
-                  <span>لإضافة فرصتك أو الوصول للوحة التحكم، يرجى تسجيل الدخول أولاً</span>
-                </div>
+              {/* Login / Register toggle */}
+              <div className="flex bg-muted rounded-xl p-1 mb-4">
                 <button
-                  type="button"
-                  onClick={() => setIsLogin(false)}
-                  className="shrink-0 text-[10px] font-semibold bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
+                  onClick={() => { setIsLogin(true); setError(""); setSuccess(""); }}
+                  className={`flex-1 py-2 rounded-lg text-sm transition-all ${
+                    isLogin ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground"
+                  }`}
                 >
-                  إنشاء حساب جديد
+                  تسجيل الدخول
+                </button>
+                <button
+                  onClick={() => { setIsLogin(false); setError(""); setSuccess(""); }}
+                  className={`flex-1 py-2 rounded-lg text-sm transition-all ${
+                    !isLogin ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground"
+                  }`}
+                >
+                  حساب جديد
                 </button>
               </div>
-            )}
 
-            {/* Redirect message — generic */}
-            {redirectReason === "auth_required" && !isFromProtectedPage && !error && !success && (
-              <div className="bg-primary/5 text-primary text-xs p-3 rounded-xl flex items-center gap-2 border border-primary/10">
-                <ShieldCheck className="h-4 w-4 shrink-0" />
-                <span>يجب تسجيل الدخول للوصول إلى هذه الصفحة</span>
+              {/* Phone / Email method toggle */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={() => { setLoginMethod("phone"); setError(""); }}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs transition-all border ${
+                    loginMethod === "phone"
+                      ? "border-primary/30 bg-primary/5 text-primary"
+                      : "border-border/50 text-muted-foreground hover:border-border"
+                  }`}
+                >
+                  <Phone size={13} strokeWidth={1.3} />
+                  رقم الجوال
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setLoginMethod("email"); setError(""); }}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs transition-all border ${
+                    loginMethod === "email"
+                      ? "border-primary/30 bg-primary/5 text-primary"
+                      : "border-border/50 text-muted-foreground hover:border-border"
+                  }`}
+                >
+                  <Mail size={13} strokeWidth={1.3} />
+                  البريد الإلكتروني
+                </button>
               </div>
-            )}
 
-            {/* Messages */}
-            {error && (
-              <div className="bg-destructive/5 text-destructive text-xs p-3 rounded-xl">{error}</div>
-            )}
-            {success && (
-              <div className="bg-green-50 text-green-700 text-xs p-3 rounded-xl">{success}</div>
-            )}
+              <form onSubmit={handleSubmit} className="space-y-3">
+                {/* Full name (register only) */}
+                {!isLogin && (
+                  <div className="relative">
+                    <UserIcon size={15} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="الاسم الكامل"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors"
+                      dir="rtl"
+                    />
+                  </div>
+                )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl text-sm font-medium text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-50"
-              style={{ background: "var(--gradient-primary)" }}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  جاري المعالجة...
-                </span>
-              ) : isLogin ? "تسجيل الدخول" : "إنشاء الحساب"}
-            </button>
+                {/* Phone input */}
+                {loginMethod === "phone" && (
+                  <div className="relative flex gap-2">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowCountryCodes(!showCountryCodes)}
+                        className="flex items-center gap-1 h-full px-3 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 hover:border-primary/30 transition-colors whitespace-nowrap"
+                      >
+                        <span className="text-base leading-none">{selectedCountry?.flag}</span>
+                        <span className="text-xs text-muted-foreground" dir="ltr">{countryCode}</span>
+                        <ChevronDown size={11} strokeWidth={1.3} className="text-muted-foreground" />
+                      </button>
+                      {showCountryCodes && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setShowCountryCodes(false)} />
+                          <div className="absolute top-full mt-1 right-0 z-50 bg-card border border-border/50 rounded-xl shadow-lg py-1 min-w-[180px] max-h-[220px] overflow-y-auto">
+                            {COUNTRY_CODES.map((c) => (
+                              <button
+                                key={c.code}
+                                type="button"
+                                onClick={() => { setCountryCode(c.code); setShowCountryCodes(false); }}
+                                className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted/50 transition-colors ${
+                                  c.code === countryCode ? "bg-primary/5 text-primary" : ""
+                                }`}
+                              >
+                                <span className="text-base">{c.flag}</span>
+                                <span className="flex-1 text-right text-xs">{c.name}</span>
+                                <span className="text-xs text-muted-foreground" dir="ltr">{c.code}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <div className="relative flex-1">
+                      <Phone size={15} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        placeholder="5XXXXXXXX"
+                        value={phone}
+                        onChange={(e) => handlePhoneChange(e.target.value)}
+                        className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors tracking-wider text-left"
+                        dir="ltr"
+                        lang="en"
+                        autoComplete="tel-national"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
 
-            {isLogin && (
-              <p className="text-center">
-                <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-                  نسيت كلمة المرور؟
-                </Link>
-              </p>
-            )}
-          </form>
+                {/* Email input */}
+                {loginMethod === "email" && (
+                  <div className="relative">
+                    <Mail size={15} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="email"
+                      inputMode="email"
+                      placeholder="example@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(toEnglishNumerals(e.target.value))}
+                      className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors text-left"
+                      dir="ltr"
+                      lang="en"
+                      autoComplete="email"
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* Password */}
+                <div className="relative">
+                  <Lock size={15} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    inputMode="text"
+                    placeholder="كلمة المرور"
+                    value={password}
+                    onChange={(e) => handlePasswordChange(e.target.value)}
+                    className="w-full pr-10 pl-10 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors text-left"
+                    dir="ltr"
+                    lang="en"
+                    autoComplete={isLogin ? "current-password" : "new-password"}
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={15} strokeWidth={1.3} /> : <Eye size={15} strokeWidth={1.3} />}
+                  </button>
+                </div>
+                {!isLogin && <PasswordStrengthBar password={password} />}
+
+                {/* Terms agreement (register only) */}
+                {!isLogin && (
+                  <label className="flex items-start gap-2 cursor-pointer select-none" dir="rtl">
+                    <input
+                      type="checkbox"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="mt-1 w-4 h-4 rounded border-border accent-primary shrink-0"
+                    />
+                    <span className="text-xs text-muted-foreground leading-relaxed">
+                      أوافق على{" "}
+                      <Link to="/terms" target="_blank" className="text-primary hover:underline font-medium">الشروط والأحكام</Link>
+                      {" "}و{" "}
+                      <Link to="/privacy" target="_blank" className="text-primary hover:underline font-medium">سياسة الخصوصية</Link>
+                    </span>
+                  </label>
+                )}
+
+                {/* Redirect messages */}
+                {isFromProtectedPage && !error && !success && (
+                  <div className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs p-3 rounded-xl flex items-center justify-between gap-2 border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-2">
+                      <Info className="h-4 w-4 shrink-0" />
+                      <span>لإضافة فرصتك أو الوصول للوحة التحكم، يرجى تسجيل الدخول أولاً</span>
+                    </div>
+                    <button type="button" onClick={() => setIsLogin(false)} className="shrink-0 text-[10px] font-semibold bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors">
+                      إنشاء حساب جديد
+                    </button>
+                  </div>
+                )}
+
+                {redirectReason === "auth_required" && !isFromProtectedPage && !error && !success && (
+                  <div className="bg-primary/5 text-primary text-xs p-3 rounded-xl flex items-center gap-2 border border-primary/10">
+                    <ShieldCheck className="h-4 w-4 shrink-0" />
+                    <span>يجب تسجيل الدخول للوصول إلى هذه الصفحة</span>
+                  </div>
+                )}
+
+                {error && <div className="bg-destructive/5 text-destructive text-xs p-3 rounded-xl">{error}</div>}
+                {success && <div className="bg-green-50 text-green-700 text-xs p-3 rounded-xl">{success}</div>}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 rounded-xl text-sm font-medium text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-50"
+                  style={{ background: "var(--gradient-primary)" }}
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      جاري المعالجة...
+                    </span>
+                  ) : isLogin ? "تسجيل الدخول" : "إنشاء الحساب"}
+                </button>
+
+                {isLogin && (
+                  <p className="text-center">
+                    <Link to="/forgot-password" className="text-xs text-primary hover:underline">نسيت كلمة المرور؟</Link>
+                  </p>
+                )}
+              </form>
             </>
           )}
         </div>
 
-        {/* Subtle AI tip */}
-        <div className="mt-5 mx-auto max-w-xs text-center">
+        {/* Moqbel AI tip */}
+        <div className="mt-4 mx-auto max-w-xs text-center">
           <p className="text-[11px] text-muted-foreground/70 leading-relaxed">
             <Sparkles size={11} strokeWidth={1.3} className="inline-block ml-1 text-primary/50 -mt-0.5" />
-            ارفع صور مشروعك… والذكاء الاصطناعي يكمل الباقي
+            سجّل دخولك… ومقبل يساعدك في كل خطوة
           </p>
         </div>
 
-        <div className="flex flex-col items-center gap-4 mt-4">
-          <SocialIcons />
+        <div className="flex flex-col items-center gap-3 mt-3">
           <p className="text-xs text-muted-foreground">
             <Link to="/" className="hover:text-foreground transition-colors">← العودة للرئيسية</Link>
           </p>
