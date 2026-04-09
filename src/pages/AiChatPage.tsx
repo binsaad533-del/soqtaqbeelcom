@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Paperclip, Mic, MicOff, Volume2, VolumeX, Copy, Check, ChevronRight, FileText, Loader2 } from "lucide-react";
+import { Send, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Paperclip, Copy, Check, ChevronRight, FileText, Loader2 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
 import { useAiMemory } from "@/hooks/useAiMemory";
-import { useVoiceInput } from "@/hooks/useVoiceInput";
+
 import { useMarketAlerts } from "@/hooks/useMarketAlerts";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -118,36 +118,6 @@ const CopyButton = ({ text }: { text: string }) => {
   );
 };
 
-const TTSButton = ({ text }: { text: string }) => {
-  const [speaking, setSpeaking] = useState(false);
-  const supported = typeof window !== "undefined" && "speechSynthesis" in window;
-  if (!supported) return null;
-
-  const toggle = () => {
-    if (speaking) {
-      window.speechSynthesis.cancel();
-      setSpeaking(false);
-    } else {
-      const clean = text.replace(/#{1,6}\s/g, "").replace(/\*{1,2}([^*]+)\*{1,2}/g, "$1").replace(/[`~>|]/g, "").replace(/\n{2,}/g, ". ").trim();
-      if (!clean) return;
-      const u = new SpeechSynthesisUtterance(clean);
-      u.lang = "ar-SA";
-      const voices = window.speechSynthesis.getVoices();
-      const arV = voices.find(v => v.lang.startsWith("ar"));
-      if (arV) u.voice = arV;
-      u.onstart = () => setSpeaking(true);
-      u.onend = () => setSpeaking(false);
-      u.onerror = () => setSpeaking(false);
-      window.speechSynthesis.speak(u);
-    }
-  };
-
-  return (
-    <button onClick={toggle} className="text-muted-foreground/50 hover:text-foreground transition-colors" title={speaking ? "إيقاف" : "استمع"}>
-      {speaking ? <VolumeX size={14} /> : <Volume2 size={14} />}
-    </button>
-  );
-};
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -211,8 +181,6 @@ const AiChatPage = () => {
   const { getMemoryContext, addAiNote, memory, loaded: memoryLoaded } = useAiMemory();
   const { alerts: marketAlerts, markRead: markAlertRead, dismissAlert } = useMarketAlerts();
 
-  const handleVoiceResult = useCallback((text: string) => { setInput(text); }, []);
-  const { isListening, startListening, stopListening, supported: voiceSupported } = useVoiceInput(handleVoiceResult);
 
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
   useEffect(() => { inputRef.current?.focus(); }, []);
@@ -666,7 +634,6 @@ const AiChatPage = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <CopyButton text={msg.content} />
-                      <TTSButton text={msg.content} />
                     </div>
                   </div>
                 )}
@@ -753,25 +720,10 @@ const AiChatPage = () => {
             </div>
           )}
 
-          {isListening && (
-            <div className="flex items-center justify-center gap-2 mb-3 py-2 rounded-lg bg-destructive/5 border border-destructive/15">
-              <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-              <span className="text-xs text-destructive font-medium">جاري الاستماع...</span>
-            </div>
-          )}
-
           <div className="flex items-center gap-3 max-w-3xl mx-auto">
             <button onClick={() => fileInputRef.current?.click()} disabled={streaming || loadingFiles} className="rounded-xl h-10 w-10 flex items-center justify-center transition-all shrink-0 text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30" title="ارفع ملف أو صورة">
               <Paperclip size={16} strokeWidth={1.5} />
             </button>
-            {voiceSupported && (
-              <button onClick={isListening ? stopListening : startListening} disabled={streaming} className={cn(
-                "rounded-xl h-10 w-10 flex items-center justify-center transition-all shrink-0",
-                isListening ? "bg-destructive/10 text-destructive border border-destructive/20" : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30"
-              )} title={isListening ? "إيقاف" : "تحدث"}>
-                {isListening ? <MicOff size={16} strokeWidth={1.5} /> : <Mic size={16} strokeWidth={1.5} />}
-              </button>
-            )}
             <input
               ref={inputRef}
               type="text"
