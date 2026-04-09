@@ -270,6 +270,13 @@ const CustomerDashboardPage = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => handleDeleteListing(e, draft.id, draft.business_activity || draft.title || null)}
+                      className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                      title="حذف الإعلان"
+                    >
+                      <Trash2 size={14} strokeWidth={1.5} />
+                    </button>
                     <span className="text-xs text-warning font-medium group-hover:underline">أكمل الإعلان</span>
                     <ChevronLeft size={14} className="text-warning/50" />
                   </div>
