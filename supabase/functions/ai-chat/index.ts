@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const BASE_URL = "https://soqtaqbeelcom.lovable.app";
+
 // ═══════════════════════════════════════════════
 // SYSTEM PROMPT
 // ═══════════════════════════════════════════════
@@ -94,6 +96,8 @@ const SYSTEM_PROMPT = `أنت "مقبل" — المساعد الذكي التن�
 - **بطاقة مشاركة** (generate_listing_card): عند نشر إعلان أو سؤال عن الترويج، اقترح "تبي أجهّز بطاقة للمشاركة بالواتساب؟"
 
 ⚠️ مهم: هذه الخدمات اقتراحية فقط — لا تنفّذها تلقائياً. اسأل بجملة واحدة قصيرة وانتظر الرد.
+
+🔗 الروابط: عند مشاركة رابط إعلان أو اتفاقية، استخدم فقط الرابط الموجود في نتيجة الأداة (listing_url أو agreement_url). لا تختلق روابط من عندك أبداً.
 
 السياق الحالي:`;
 
@@ -720,7 +724,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
         { stage: "استقبال عروض", date: offers.data?.[0]?.created_at, done: (offers.data?.length || 0) > 0 },
         { stage: "بدء صفقة", date: deals.data?.[0]?.created_at, done: (deals.data?.length || 0) > 0 },
       ];
-      return { listing, deals: deals.data || [], offers: offers.data || [], timeline };
+      return { listing, listing_url: `${BASE_URL}/listing/${listing.id}`, deals: deals.data || [], offers: offers.data || [], timeline };
     }
 
     case "get_delivery_timeline": {
@@ -821,6 +825,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
       await sb.from("audit_logs").insert({ user_id: userId, action: "listing_created_via_moqbil", resource_type: "listing",
         resource_id: data.id, details: { title: listing.title, city: args.city } });
       return { success: true, listing_id: data.id, title: data.title, status: "draft",
+        listing_url: `${BASE_URL}/listing/${data.id}`,
         message: "تم إنشاء مسودة الإعلان بنجاح",
         next_steps: ["ارفع صور للتحليل التلقائي", "أكمل بيانات الإفصاح", "انشر الإعلان"] };
     }
@@ -1148,7 +1153,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
         resource_type: "deal", resource_id: args.deal_id,
         details: { agreement_id: agreement.id, agreement_number: agreementNumber } });
 
-      const agreementUrl = `https://soqtaqbeel.com/agreement/${agreementNumber}`;
+      const agreementUrl = `${BASE_URL}/agreement/${agreementNumber}`;
       return { success: true, agreement_id: agreement.id, agreement_number: agreementNumber,
         version, created_at: agreement.created_at,
         agreement_url: agreementUrl,
@@ -1204,7 +1209,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
         return { error: "ليس لديك صلاحية" };
 
       const commissionAmount = Math.round((agr.financial_terms as any)?.agreedPrice * 0.01 || 0);
-      const agreementUrl = `https://soqtaqbeel.com/agreement/${agr.agreement_number}`;
+      const agreementUrl = `${BASE_URL}/agreement/${agr.agreement_number}`;
 
       return {
         agreement: { ...agr, commission_amount: commissionAmount, commission_rate: 0.01 },
@@ -1229,7 +1234,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
           ...a,
           agreed_price: (a.financial_terms as any)?.agreedPrice,
           both_approved: a.buyer_approved && a.seller_approved,
-          agreement_url: `https://soqtaqbeel.com/agreement/${a.agreement_number}`,
+          agreement_url: `${BASE_URL}/agreement/${a.agreement_number}`,
         })),
         total: agreements?.length || 0,
       };
@@ -1320,7 +1325,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
       }
 
       const agrNumber = agreementResult.agreement_number;
-      const agrUrl = `https://soqtaqbeel.com/agreement/${agrNumber}`;
+      const agrUrl = `${BASE_URL}/agreement/${agrNumber}`;
 
       return { success: true, steps, partial: false,
         agreement_number: agrNumber, agreement_url: agrUrl,
@@ -1512,7 +1517,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
         body: `تم نشر إعلانك بنجاح${args.notes ? ` — ${args.notes}` : ""}`, type: "listing", reference_id: args.listing_id, reference_type: "listing" });
       await sb.from("audit_logs").insert({ user_id: userId, action: "listing_approved", resource_type: "listing",
         resource_id: args.listing_id, details: { notes: args.notes } });
-      return { success: true, listing_id: args.listing_id, message: "تم اعتماد ونشر الإعلان" };
+      return { success: true, listing_id: args.listing_id, listing_url: `${BASE_URL}/listing/${args.listing_id}`, message: "تم اعتماد ونشر الإعلان" };
     }
 
     case "reject_draft_listing": {
@@ -2281,7 +2286,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
         listing.area_sqm ? `📐 ${listing.area_sqm} م²` : null,
         `📋 ${dealTypeLabels[listing.deal_type] || listing.deal_type}`,
         trustScore ? `⭐ درجة الثقة: ${trustScore}/10` : null,
-        "", `🔗 https://soqtaqbeelcom.lovable.app/listing/${listing.id}`,
+        "", `🔗 ${BASE_URL}/listing/${listing.id}`,
         "", "عبر سوق تقبيل — منصة تقبيل الأعمال الذكية",
       ].filter(Boolean).join("\n");
 
@@ -2289,7 +2294,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
         card: { title: listing.title, activity: listing.business_activity, location: `${listing.city}${listing.district ? ` — ${listing.district}` : ""}`,
           price: listing.price ? `${Number(listing.price).toLocaleString("en-US")} ر.س` : "اتصل للسعر",
           deal_type: dealTypeLabels[listing.deal_type] || listing.deal_type, photo_url: firstPhoto,
-          listing_url: `https://soqtaqbeelcom.lovable.app/listing/${listing.id}` },
+          listing_url: `${BASE_URL}/listing/${listing.id}` },
         share_text: shareText,
         whatsapp_url: `https://wa.me/?text=${encodeURIComponent(shareText)}`,
         twitter_url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`,
