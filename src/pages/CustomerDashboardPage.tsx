@@ -14,7 +14,7 @@ import {
   CheckCircle, Loader2, Activity, Clock,
   DollarSign, Camera, Pencil,
   Check, X as XIcon, Phone, UserCheck, Shield, Bell,
-  Store, Briefcase, ChevronLeft, Wallet, TrendingUp,
+  Store, Briefcase, ChevronLeft, Wallet, TrendingUp, Trash2,
   ArrowUpRight, Mail, Search, ShoppingCart, Heart, User, Settings, Bot, Brain
 } from "lucide-react";
 import { toast } from "sonner";
@@ -50,7 +50,7 @@ const fmtCurrency = (n: number) =>
 const CustomerDashboardPage = () => {
   useSEO({ title: "لوحة العميل", description: "لوحة تحكم العميل — تابع إعلاناتك وصفقاتك على سوق تقبيل", canonical: "/dashboard" });
   const { profile, user } = useAuthContext();
-  const { getMyListings } = useListings();
+  const { getMyListings, softDeleteListing } = useListings();
   const { getMyDeals } = useDeals();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
