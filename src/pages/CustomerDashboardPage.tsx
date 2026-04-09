@@ -14,7 +14,7 @@ import {
   CheckCircle, Loader2, Activity, Clock,
   DollarSign, Camera, Pencil,
   Check, X as XIcon, Phone, UserCheck, Shield, Bell,
-  Store, Briefcase, ChevronLeft, Wallet, TrendingUp,
+  Store, Briefcase, ChevronLeft, Wallet, TrendingUp, Trash2,
   ArrowUpRight, Mail, Search, ShoppingCart, Heart, User, Settings, Bot, Brain
 } from "lucide-react";
 import { toast } from "sonner";
@@ -50,7 +50,7 @@ const fmtCurrency = (n: number) =>
 const CustomerDashboardPage = () => {
   useSEO({ title: "لوحة العميل", description: "لوحة تحكم العميل — تابع إعلاناتك وصفقاتك على سوق تقبيل", canonical: "/dashboard" });
   const { profile, user } = useAuthContext();
-  const { getMyListings } = useListings();
+  const { getMyListings, softDeleteListing } = useListings();
   const { getMyDeals } = useDeals();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
@@ -218,14 +218,24 @@ const CustomerDashboardPage = () => {
     return s.slice(0, 4);
   }, [profileCompleteness, deals, listings, stats.completed]);
 
+  const handleDeleteListing = useCallback(async (e: React.MouseEvent, id: string, title: string | null) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm(`هل تريد حذف "${title || "بدون عنوان"}"؟`)) return;
+    const { error } = await softDeleteListing(id);
+    if (error) { toast.error("فشل حذف الإعلان"); return; }
+    toast.success("تم حذف الإعلان");
+    setListings(prev => prev.filter(l => l.id !== id));
+  }, [softDeleteListing]);
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={22} className="animate-spin text-primary" /></div>;
   }
 
+
   return (
     <div className="min-h-[80vh] bg-background py-6">
       <div className="container max-w-6xl">
-
 
         {loadError && (
           <div className="p-3 rounded-xl bg-destructive/10 flex items-center justify-between mb-4">
@@ -260,6 +270,13 @@ const CustomerDashboardPage = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => handleDeleteListing(e, draft.id, draft.business_activity || draft.title || null)}
+                      className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                      title="حذف الإعلان"
+                    >
+                      <Trash2 size={14} strokeWidth={1.5} />
+                    </button>
                     <span className="text-xs text-warning font-medium group-hover:underline">أكمل الإعلان</span>
                     <ChevronLeft size={14} className="text-warning/50" />
                   </div>
@@ -741,6 +758,15 @@ const CustomerDashboardPage = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
+                          {(isDraft || listing.status === "suspended") && (
+                            <button
+                              onClick={(e) => handleDeleteListing(e, listing.id, listing.title || listing.business_activity || null)}
+                              className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                              title="حذف الإعلان"
+                            >
+                              <Trash2 size={14} strokeWidth={1.5} />
+                            </button>
+                          )}
                           {isDraft ? (
                             <span className="text-[10px] px-2.5 py-1 rounded-lg font-medium bg-primary/10 text-primary">أكمل الإعلان</span>
                           ) : (
