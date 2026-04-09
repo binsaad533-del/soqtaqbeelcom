@@ -22,6 +22,7 @@ import QuickPriceEdit from "@/components/QuickPriceEdit";
 import ListingEditDialog from "@/components/ListingEditDialog";
 import ListingOfferForm from "@/components/ListingOfferForm";
 import SellerOffersPanel from "@/components/SellerOffersPanel";
+import MoqbilAgentPanel from "@/components/MoqbilAgentPanel";
 import { useState, useEffect } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useListingSocial } from "@/hooks/useListingSocial";
@@ -754,6 +755,13 @@ const ListingDetailsPage = () => {
               {/* Seller: offers panel */}
               {isOwner && (
                 <SellerOffersPanel listingId={listing.id} listingOwnerId={listing.owner_id} className="mb-4" />
+              )}
+
+              {/* Seller: agent panel */}
+              {isOwner && listing.status === "published" && (
+                <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 mb-4">
+                  <MoqbilAgentPanel listingId={listing.id} />
+                </div>
               )}
 
               {/* Buyer: offer form + negotiate button */}

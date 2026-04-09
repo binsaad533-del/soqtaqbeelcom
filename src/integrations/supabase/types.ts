@@ -1147,6 +1147,59 @@ export type Database = {
           },
         ]
       }
+      listing_agent_settings: {
+        Row: {
+          auto_evaluate_offers: boolean
+          auto_reject_below_min: boolean
+          auto_reply_inquiries: boolean
+          created_at: string
+          daily_summary: boolean
+          id: string
+          is_active: boolean
+          listing_id: string
+          min_acceptable_price: number | null
+          owner_id: string
+          preferred_response_tone: string | null
+          updated_at: string
+        }
+        Insert: {
+          auto_evaluate_offers?: boolean
+          auto_reject_below_min?: boolean
+          auto_reply_inquiries?: boolean
+          created_at?: string
+          daily_summary?: boolean
+          id?: string
+          is_active?: boolean
+          listing_id: string
+          min_acceptable_price?: number | null
+          owner_id: string
+          preferred_response_tone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          auto_evaluate_offers?: boolean
+          auto_reject_below_min?: boolean
+          auto_reply_inquiries?: boolean
+          created_at?: string
+          daily_summary?: boolean
+          id?: string
+          is_active?: boolean
+          listing_id?: string
+          min_acceptable_price?: number | null
+          owner_id?: string
+          preferred_response_tone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_agent_settings_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: true
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_likes: {
         Row: {
           created_at: string
