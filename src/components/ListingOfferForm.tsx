@@ -146,6 +146,30 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
             </span>
           </div>
 
+          {listingPrice && listingPrice > 0 && (
+            <div className="flex gap-1.5">
+              {[
+                { label: "سعر الإعلان", value: listingPrice },
+                { label: "-5%", value: Math.round(listingPrice * 0.95) },
+                { label: "-10%", value: Math.round(listingPrice * 0.90) },
+              ].map((opt) => (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => setPrice(String(opt.value))}
+                  className={cn(
+                    "flex-1 py-1.5 rounded-lg text-[10px] font-medium border transition-all",
+                    price === String(opt.value)
+                      ? "bg-primary/10 border-primary/30 text-primary"
+                      : "bg-muted/30 border-border/30 text-muted-foreground hover:bg-muted/50"
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="relative">
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none"><SarSymbol size={12} /></span>
             <input
