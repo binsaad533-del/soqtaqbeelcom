@@ -49,15 +49,23 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Send transactional email
-    const { error } = await supabase.functions.invoke('send-transactional-email', {
-      body: {
+    // Send transactional email via direct fetch to avoid JWT issues
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
+    const emailRes = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${anonKey}`,
+        'apikey': anonKey,
+      },
+      body: JSON.stringify({
         templateName,
         recipientEmail: userData.user.email,
         idempotencyKey,
         templateData,
-      },
+      }),
     })
+    const error = emailRes.ok ? null : await emailRes.text()
 
     if (error) {
       console.error('Failed to send notification email', error)
