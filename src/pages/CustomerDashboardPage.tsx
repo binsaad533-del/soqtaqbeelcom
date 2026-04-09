@@ -783,7 +783,28 @@ const CustomerDashboardPage = () => {
             {activeTab === "offers" && <BuyerOffersTab />}
             {activeTab === "saved" && <SavedListingsTab />}
             {activeTab === "notifications" && <NotificationPreferencesPanel />}
-            {activeTab === "agent" && <MoqbilAgentPanel />}
+            {activeTab === "agent" && (
+              <div className="space-y-4">
+                {listings.filter(l => l.status === "published").length === 0 ? (
+                  <div className="bg-card rounded-2xl p-12 shadow-soft border border-border/30 text-center">
+                    <Bot size={32} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
+                    <p className="text-sm text-muted-foreground mb-1">لا توجد إعلانات منشورة</p>
+                    <p className="text-[11px] text-muted-foreground">وكيل مقبل يعمل على كل إعلان منشور بشكل مستقل</p>
+                  </div>
+                ) : (
+                  listings.filter(l => l.status === "published").map(listing => (
+                    <div key={listing.id} className="bg-card rounded-2xl p-4 shadow-soft border border-border/30">
+                      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/20">
+                        <Store size={14} className="text-primary" strokeWidth={1.3} />
+                        <span className="text-xs font-medium">{listing.title || listing.business_activity || "بدون عنوان"}</span>
+                        {listing.city && <span className="text-[10px] text-muted-foreground">· {listing.city}</span>}
+                      </div>
+                      <MoqbilAgentPanel listingId={listing.id} />
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
             {activeTab === "intelligence" && <MoqbilDashboard />}
             {activeTab === "security" && <SecuritySettingsPanel />}
             {activeTab === "account" && <AccountSettingsPanel />}
