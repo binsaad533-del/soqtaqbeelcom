@@ -139,10 +139,21 @@ const CustomerDashboardPage = () => {
     return { active, waiting, completed, totalVal, commission: totalVal * 0.01 };
   }, [deals]);
 
+  const profileMissing = useMemo(() => {
+    if (!profile) return [];
+    const missing: string[] = [];
+    if (!profile.full_name) missing.push("الاسم");
+    if (!profile.phone) missing.push("رقم الجوال");
+    if (!profile.avatar_url) missing.push("صورة شخصية");
+    if (!hasRealEmail) missing.push("بريد إلكتروني");
+    if (!isPhoneVerified) missing.push("توثيق الجوال");
+    return missing;
+  }, [profile, hasRealEmail, isPhoneVerified]);
+
   const profileCompleteness = useMemo(() => {
     if (!profile) return 0;
-    return Math.round(([profile.full_name, profile.phone, profile.avatar_url, hasRealEmail, isPhoneVerified].filter(Boolean).length / 5) * 100);
-  }, [profile, hasRealEmail, isPhoneVerified]);
+    return Math.round(((5 - profileMissing.length) / 5) * 100);
+  }, [profile, profileMissing]);
 
   const dealLink = (d: Deal) => ["completed", "finalized"].includes(d.status) ? `/agreement/${d.id}` : `/negotiate/${d.id}`;
 
