@@ -398,6 +398,8 @@ const ROLE_TOOLS: Record<string, string[]> = {
     // Advanced Moqbil tools
     "valuate_business", "check_seller_background", "generate_deal_checklist", "mediate_dispute",
     "post_deal_followup", "quick_feasibility", "generate_user_report", "analyze_location",
+    // Optional smart services
+    "schedule_meeting", "generate_handover_checklist", "generate_listing_card",
     // Supervisor write
     "change_listing_status", "change_deal_status", "submit_review_status",
     "report_listing_issue", "approve_listing_publish", "reject_draft_listing",
@@ -420,6 +422,8 @@ const ROLE_TOOLS: Record<string, string[]> = {
     // Advanced Moqbil tools
     "valuate_business", "check_seller_background", "generate_deal_checklist", "mediate_dispute",
     "post_deal_followup", "quick_feasibility", "generate_user_report", "analyze_location",
+    // Optional smart services
+    "schedule_meeting", "generate_handover_checklist", "generate_listing_card",
   ],
 };
 
