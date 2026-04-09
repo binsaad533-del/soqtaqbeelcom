@@ -237,22 +237,22 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1.5">
       <button
         onClick={() => submit("positive")}
         disabled={submitting}
-        className="text-muted-foreground/40 hover:text-green-500 transition-colors p-0.5"
+        className="text-muted-foreground/60 hover:text-green-500 transition-colors p-1 rounded-md hover:bg-green-500/10"
         title="رد مفيد"
       >
-        <ThumbsUp size={12} />
+        <ThumbsUp size={14} />
       </button>
       <button
         onClick={() => setShowComment(true)}
         disabled={submitting}
-        className="text-muted-foreground/40 hover:text-red-500 transition-colors p-0.5"
+        className="text-muted-foreground/60 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-red-500/10"
         title="رد غير مفيد"
       >
-        <ThumbsDown size={12} />
+        <ThumbsDown size={14} />
       </button>
       {showComment && (
         <div className="flex items-center gap-1 mr-1">
