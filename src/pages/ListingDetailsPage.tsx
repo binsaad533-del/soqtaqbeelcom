@@ -195,10 +195,13 @@ const ListingDetailsPage = () => {
   const handleStartNegotiation = async () => {
     if (!user) { setShowAuthDialog(true); return; }
     if (!listing) return;
+    if (user.id === listing.owner_id) {
+      toast.error("لا يمكنك إبداء الاهتمام بإعلانك الخاص");
+      return;
+    }
     const myDeals = await getMyDeals();
     const existing = myDeals.find(d => d.listing_id === listing.id);
     if (existing) { navigate(`/negotiate/${existing.id}`); return; }
-    // Show interest form instead of creating deal directly
     setShowInterestForm(true);
   };
 
