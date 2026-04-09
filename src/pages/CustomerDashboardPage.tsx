@@ -606,6 +606,7 @@ const CustomerDashboardPage = () => {
                   { id: "offers" as const, label: "عروضي", icon: ShoppingCart, count: undefined },
                   { id: "saved" as const, label: "المحفوظة", icon: Heart, count: undefined },
                   { id: "notifications" as const, label: "الإشعارات", icon: Bell, count: undefined },
+                  { id: "agent" as const, label: "وكيل مقبل", icon: Bot, count: undefined },
                   { id: "security" as const, label: "الأمان", icon: Shield, count: undefined },
                   { id: "account" as const, label: "حسابي", icon: User, count: undefined },
                 ].map(tab => (
