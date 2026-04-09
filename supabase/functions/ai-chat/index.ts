@@ -2162,6 +2162,133 @@ async function executeTool(name: string, args: any, userId: string, role: string
       };
     }
 
+    // ═══════════════════════════════════════════════
+    // OPTIONAL SMART SERVICES
+    // ═══════════════════════════════════════════════
+
+    case "schedule_meeting": {
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id, status, listing_id, agreed_price")
+        .eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.buyer_id !== userId && deal.seller_id !== userId)
+        return { error: "ليس لديك صلاحية على هذه الصفقة" };
+
+      const [listing, buyerProfile, sellerProfile] = await Promise.all([
+        sb.from("listings").select("title, business_activity, city, district").eq("id", deal.listing_id).single(),
+        sb.from("profiles").select("full_name, phone").eq("user_id", deal.buyer_id).single(),
+        sb.from("profiles").select("full_name, phone").eq("user_id", deal.seller_id).single(),
+      ]);
+
+      const proposedDate = args.proposed_date || new Date(Date.now() + 2 * 86400000).toISOString().split("T")[0];
+      const proposedTime = args.proposed_time || "16:00";
+
+      const agendaItems: string[] = [];
+      if (deal.status === "negotiating") {
+        agendaItems.push("مناقشة السعر النهائي", "استعراض الأصول المشمولة", "الاتفاق على شروط التسليم");
+      } else if (deal.status === "finalized") {
+        agendaItems.push("تأكيد خطوات نقل الملكية", "مراجعة المستندات المطلوبة", "تحديد موعد التسليم");
+      } else {
+        agendaItems.push("مراجعة حالة الصفقة", "مناقشة الخطوات التالية");
+      }
+      if (args.agenda_notes) agendaItems.push(args.agenda_notes);
+
+      const otherPartyId = deal.buyer_id === userId ? deal.seller_id : deal.buyer_id;
+      const myName = deal.buyer_id === userId ? buyerProfile.data?.full_name : sellerProfile.data?.full_name;
+
+      await sb.from("notifications").insert({
+        user_id: otherPartyId, title: "اقتراح اجتماع",
+        body: `${myName || "الطرف الآخر"} يقترح اجتماع يوم ${proposedDate} الساعة ${proposedTime} لمناقشة صفقة "${listing.data?.title}"`,
+        type: "deal", reference_id: deal.id, reference_type: "deal",
+      });
+
+      return {
+        meeting: { date: proposedDate, time: proposedTime, deal_title: listing.data?.title,
+          buyer: buyerProfile.data?.full_name || "المشتري", seller: sellerProfile.data?.full_name || "البائع", agenda: agendaItems },
+        notification_sent: true,
+        message: `تم اقتراح اجتماع يوم ${proposedDate} الساعة ${proposedTime} وأُرسل إشعار للطرف الآخر`,
+      };
+    }
+
+    case "generate_handover_checklist": {
+      const { data: deal } = await sb.from("deals")
+        .select("id, buyer_id, seller_id, status, listing_id, deal_type, agreed_price")
+        .eq("id", args.deal_id).single();
+      if (!deal) return { error: "الصفقة غير موجودة" };
+      if (deal.buyer_id !== userId && deal.seller_id !== userId) return { error: "ليس لديك صلاحية" };
+
+      const { data: listing } = await sb.from("listings")
+        .select("title, business_activity, deal_type").eq("id", deal.listing_id).single();
+
+      const dealType = deal.deal_type || listing?.deal_type || "full_takeover";
+      const iAmBuyer = deal.buyer_id === userId;
+
+      const sellerTasks: any[] = [
+        { task: "تسليم المفاتيح والأكواد", priority: "high" },
+        { task: "تسليم قائمة الموردين", priority: "medium" },
+        { task: "إخطار الموظفين بالتغيير", priority: "high" },
+      ];
+      const buyerTasks: any[] = [
+        { task: "فحص الأصول المستلمة", priority: "high" },
+        { task: "تحديث بيانات الاتصال", priority: "medium" },
+      ];
+
+      if (dealType === "full_takeover") {
+        sellerTasks.push({ task: "نقل السجل التجاري", priority: "high" }, { task: "نقل التراخيص", priority: "high" },
+          { task: "تسوية الالتزامات المالية", priority: "high" }, { task: "نقل عقد الإيجار", priority: "high" });
+        buyerTasks.push({ task: "التحقق من نقل السجل", priority: "high" }, { task: "تحديث بيانات الزكاة", priority: "high" },
+          { task: "مراجعة عقود العمالة", priority: "medium" });
+      } else if (dealType === "transfer_no_liabilities") {
+        sellerTasks.push({ task: "تسليم وثائق التشغيل", priority: "high" }, { task: "نقل عقد الإيجار", priority: "high" });
+        buyerTasks.push({ task: "فتح/نقل السجل التجاري", priority: "high" }, { task: "التأكد من عدم وجود التزامات", priority: "high" });
+      } else {
+        sellerTasks.push({ task: "إعداد قائمة جرد نهائية", priority: "high" }, { task: "تجهيز الأصول للتسليم", priority: "medium" });
+        buyerTasks.push({ task: "مطابقة الأصول مع القائمة", priority: "high" }, { task: "توثيق حالة الأصول بالصور", priority: "medium" });
+      }
+
+      return {
+        deal_title: listing?.title, deal_type: dealType, your_role: iAmBuyer ? "مشتري" : "بائع",
+        your_tasks: iAmBuyer ? buyerTasks : sellerTasks,
+        other_party_tasks: iAmBuyer ? sellerTasks : buyerTasks,
+        total_tasks: sellerTasks.length + buyerTasks.length,
+        message: `قائمة تسليم "${listing?.title}" — ${iAmBuyer ? buyerTasks.length : sellerTasks.length} مهمة لك`,
+      };
+    }
+
+    case "generate_listing_card": {
+      const { data: listing } = await sb.from("listings")
+        .select("id, title, business_activity, city, district, price, deal_type, photos, ai_rating, ai_trust_score, area_sqm")
+        .eq("id", args.listing_id).single();
+      if (!listing) return { error: "الإعلان غير موجود" };
+
+      const photos = listing.photos as any[];
+      const firstPhoto = photos?.[0]?.url || photos?.[0] || null;
+      const trustScore = (listing.ai_trust_score as any)?.overall_score;
+      const dealTypeLabels: Record<string, string> = { full_takeover: "تقبيل كامل", transfer_no_liabilities: "نقل بدون التزامات", assets_setup: "أصول + تجهيزات", assets_only: "أصول فقط" };
+
+      const shareText = [
+        `🏪 ${listing.title || listing.business_activity || "فرصة تجارية"}`,
+        `📍 ${listing.city}${listing.district ? ` — ${listing.district}` : ""}`,
+        `💰 ${listing.price ? `${Number(listing.price).toLocaleString("en-US")} ر.س` : "اتصل للسعر"}`,
+        listing.area_sqm ? `📐 ${listing.area_sqm} م²` : null,
+        `📋 ${dealTypeLabels[listing.deal_type] || listing.deal_type}`,
+        trustScore ? `⭐ درجة الثقة: ${trustScore}/10` : null,
+        "", `🔗 https://soqtaqbeelcom.lovable.app/listing/${listing.id}`,
+        "", "عبر سوق تقبيل — منصة تقبيل الأعمال الذكية",
+      ].filter(Boolean).join("\n");
+
+      return {
+        card: { title: listing.title, activity: listing.business_activity, location: `${listing.city}${listing.district ? ` — ${listing.district}` : ""}`,
+          price: listing.price ? `${Number(listing.price).toLocaleString("en-US")} ر.س` : "اتصل للسعر",
+          deal_type: dealTypeLabels[listing.deal_type] || listing.deal_type, photo_url: firstPhoto,
+          listing_url: `https://soqtaqbeelcom.lovable.app/listing/${listing.id}` },
+        share_text: shareText,
+        whatsapp_url: `https://wa.me/?text=${encodeURIComponent(shareText)}`,
+        twitter_url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`,
+        message: "تم تجهيز بطاقة الإعلان — شاركها مباشرة عبر الروابط أدناه",
+      };
+    }
+
     default:
       return { error: `أداة غير معروفة: ${name}` };
   }
