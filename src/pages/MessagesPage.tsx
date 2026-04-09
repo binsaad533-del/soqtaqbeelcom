@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { MessageSquare, Search, Clock } from "lucide-react";
+import { MessageSquare, Search, Clock, Sparkles, AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -248,6 +248,12 @@ const MessagesPage = () => {
                     {conv.lastMessage || tx("لا رسائل بعد", "No messages yet")}
                   </p>
                   <div className="flex items-center gap-1.5">
+                    {/* AI in-chat hint */}
+                    {conv.dealStatus === "negotiating" && (
+                      <span className="text-[9px] text-primary flex items-center gap-0.5" title="مقبل يراقب هذه المحادثة">
+                        <Sparkles size={9} />
+                      </span>
+                    )}
                     <Badge
                       variant="secondary"
                       className={cn("text-[10px] px-1.5 py-0", statusColor(conv.dealStatus))}

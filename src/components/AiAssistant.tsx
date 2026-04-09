@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Sparkles, ChevronLeft, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, FileText, Copy, Check, Mic, MicOff, TrendingUp, Shield, BarChart3, ImagePlus, Paperclip, FileImage, Radar, Bot } from "lucide-react";
+import { X, Send, Sparkles, ChevronLeft, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, FileText, Copy, Check, Mic, MicOff, TrendingUp, Shield, BarChart3, ImagePlus, Paperclip, FileImage, Radar, Bot, Volume2, VolumeX, Target } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import AiStar from "@/components/AiStar";
 import AiRecommendations from "@/components/AiRecommendations";
 import { toast } from "sonner";
+import SmartMatchPanel from "@/components/SmartMatchPanel";
 
 interface ChatMsg {
   id: string;
@@ -96,6 +97,38 @@ const CopyButton = ({ text }: { text: string }) => {
   return (
     <button onClick={handleCopy} className="text-muted-foreground/50 hover:text-foreground transition-colors" title="نسخ">
       {copied ? <Check size={10} className="text-success" /> : <Copy size={10} />}
+    </button>
+  );
+};
+
+/** TTS button for AI messages */
+const TTSButton = ({ text }: { text: string }) => {
+  const [speaking, setSpeaking] = useState(false);
+  const supported = typeof window !== "undefined" && "speechSynthesis" in window;
+  if (!supported) return null;
+
+  const toggle = () => {
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+    } else {
+      const clean = text.replace(/#{1,6}\s/g, "").replace(/\*{1,2}([^*]+)\*{1,2}/g, "$1").replace(/[`~>|]/g, "").replace(/\n{2,}/g, ". ").trim();
+      if (!clean) return;
+      const u = new SpeechSynthesisUtterance(clean);
+      u.lang = "ar-SA";
+      const voices = window.speechSynthesis.getVoices();
+      const arV = voices.find(v => v.lang.startsWith("ar"));
+      if (arV) u.voice = arV;
+      u.onstart = () => setSpeaking(true);
+      u.onend = () => setSpeaking(false);
+      u.onerror = () => setSpeaking(false);
+      window.speechSynthesis.speak(u);
+    }
+  };
+
+  return (
+    <button onClick={toggle} className="text-muted-foreground/50 hover:text-foreground transition-colors" title={speaking ? "إيقاف" : "استمع"}>
+      {speaking ? <VolumeX size={10} /> : <Volume2 size={10} />}
     </button>
   );
 };
@@ -532,6 +565,9 @@ const AiAssistant = () => {
               {/* Personalized Recommendations */}
               {showRecommendations && <AiRecommendations />}
 
+              {/* Smart Matching */}
+              {showRecommendations && <SmartMatchPanel />}
+
               {/* Image Analysis Quick Action */}
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -597,7 +633,10 @@ const AiAssistant = () => {
                             <AiStar size={14} />
                             <span className="text-[10px] text-accent-foreground font-medium">مقبل</span>
                           </div>
-                          <CopyButton text={msg.content} />
+                          <div className="flex items-center gap-1.5">
+                            <CopyButton text={msg.content} />
+                            <TTSButton text={msg.content} />
+                          </div>
                         </div>
                       )}
                       {/* Show uploaded images */}
