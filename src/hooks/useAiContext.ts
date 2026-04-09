@@ -30,7 +30,7 @@ interface ProactiveInsight {
 const pageContextMap: Record<string, { greeting: string; role: string; suggestions: AiSuggestion[] }> = {
   "/": {
     greeting: "هلا وغلا 👋 أنا مقبل، مساعدك الذكي. وش تبغى نسوي اليوم؟",
-    role: "مرشدك الذكي",
+    role: "مرشدك الذكي طحطوح الصفقات",
     suggestions: [
       { id: "browse", icon: "🔍", label: "وريني الفرص", description: "أدوّرلك على أفضل الفرص اللي تناسبك", priority: "high" },
       { id: "create", icon: "📝", label: "أبغى أضيف فرصة", description: "أساعدك تسوي إعلان احترافي بدقايق", priority: "high" },
