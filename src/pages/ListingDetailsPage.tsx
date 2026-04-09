@@ -757,6 +757,13 @@ const ListingDetailsPage = () => {
                 <SellerOffersPanel listingId={listing.id} listingOwnerId={listing.owner_id} className="mb-4" />
               )}
 
+              {/* Seller: agent panel */}
+              {isOwner && listing.status === "published" && (
+                <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 mb-4">
+                  <MoqbilAgentPanel listingId={listing.id} />
+                </div>
+              )}
+
               {/* Buyer: offer form + negotiate button */}
               {!isOwner && !isSimulation && (
                 <>
