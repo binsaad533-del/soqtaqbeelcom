@@ -6,6 +6,7 @@ import { usePageData } from "@/hooks/usePageData";
 import { useAiMemory } from "@/hooks/useAiMemory";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { useMarketAlerts } from "@/hooks/useMarketAlerts";
+import { useAuthContext } from "@/contexts/AuthContext";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -37,12 +38,16 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 async function streamChat({
   messages,
   context,
+  role,
+  user_id,
   onDelta,
   onDone,
   onError,
 }: {
   messages: { role: string; content: string | any[] }[];
   context?: string;
+  role?: string;
+  user_id?: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (msg: string) => void;
@@ -54,7 +59,7 @@ async function streamChat({
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ messages, context }),
+      body: JSON.stringify({ messages, context, role, user_id }),
     });
 
     if (!resp.ok) {
@@ -190,6 +195,7 @@ const AiChatPage = () => {
   const [showSidebar, setShowSidebar] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, role: authRole } = useAuthContext();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -338,6 +344,8 @@ const AiChatPage = () => {
     streamChat({
       messages: allMessages,
       context: buildContext(),
+      role: authRole || "customer",
+      user_id: user?.id,
       onDelta: (chunk) => {
         assistantText += chunk;
         setMessages(prev => {
