@@ -630,7 +630,10 @@ const AiAssistant = () => {
                             <AiStar size={14} />
                             <span className="text-[10px] text-accent-foreground font-medium">مقبل</span>
                           </div>
-                          <CopyButton text={msg.content} />
+                          <div className="flex items-center gap-1.5">
+                            <CopyButton text={msg.content} />
+                            <TTSButton text={msg.content} />
+                          </div>
                         </div>
                       )}
                       {/* Show uploaded images */}
