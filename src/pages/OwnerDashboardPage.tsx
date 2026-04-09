@@ -854,6 +854,7 @@ const OwnerDashboardPage = () => {
           </div>
         )}
 
+        {activeTab === "ai-analytics" && <AiAnalyticsDashboard />}
         {activeTab === "crm" && <CrmDashboard />}
         {activeTab === "security" && <SecurityIncidentPanel />}
         {activeTab === "account" && <AccountSettingsPanel />}
