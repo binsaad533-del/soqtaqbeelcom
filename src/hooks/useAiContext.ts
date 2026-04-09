@@ -35,6 +35,7 @@ const pageContextMap: Record<string, { greeting: string; role: string; suggestio
       { id: "browse", icon: "🔍", label: "وريني الفرص", description: "أدوّرلك على أفضل الفرص اللي تناسبك", priority: "high" },
       { id: "create", icon: "📝", label: "أبغى أضيف فرصة", description: "أساعدك تسوي إعلان احترافي بدقايق", priority: "high" },
       { id: "analyze", icon: "📊", label: "حلل لي السوق", description: "نظرة ذكية على السوق حسب المدينة والنشاط", priority: "medium" },
+      { id: "trends", icon: "📈", label: "اتجاهات السوق", description: "وش أكثر الأنشطة طلباً والمدن النشطة؟", priority: "medium" },
       { id: "howworks", icon: "💡", label: "كيف تتم الصفقة؟", description: "أشرح لك الخطوات من البداية للنهاية", priority: "low" },
     ],
   },
@@ -44,6 +45,7 @@ const pageContextMap: Record<string, { greeting: string; role: string; suggestio
     suggestions: [
       { id: "filter", icon: "🎯", label: "ضيّق البحث", description: "قولي ميزانيتك واهتمامك وأنا أرتب لك", priority: "high" },
       { id: "compare", icon: "⚖️", label: "قارن بينهم", description: "أقارن لك بين كذا فرصة مع بعض", priority: "medium" },
+      { id: "fraud-check", icon: "🛡️", label: "فحص الأمان", description: "أفحصلك الإعلانات المشبوهة", priority: "medium" },
       { id: "alert", icon: "🔔", label: "نبّهني لو فيه جديد", description: "أخليك أول واحد يعرف لو نزلت فرصة", priority: "low" },
       { id: "cheap", icon: "💰", label: "أرخص الفرص", description: "أعرضلك الفرص الأقل سعراً المتاحة الحين", priority: "medium" },
     ],
@@ -55,7 +57,7 @@ const pageContextMap: Record<string, { greeting: string; role: string; suggestio
       { id: "autofill", icon: "✨", label: "عبّي تلقائي", description: "ارفع المستندات وأنا أطلع البيانات لك", priority: "high" },
       { id: "photos", icon: "📷", label: "حلل الصور", description: "ارفع صور المشروع وأنا أحدد الأصول", priority: "high" },
       { id: "describe", icon: "✍️", label: "اكتب لي وصف", description: "أكتب وصف احترافي من البيانات المدخلة", priority: "medium" },
-      { id: "price-suggest", icon: "💰", label: "اقترح سعر", description: "أقترح سعر مناسب بناءً على السوق", priority: "medium" },
+      { id: "price-suggest", icon: "💰", label: "اقترح سعر", description: "أقترح نطاق سعري بناءً على السوق", priority: "medium" },
     ],
   },
   "/dashboard": {
@@ -64,8 +66,8 @@ const pageContextMap: Record<string, { greeting: string; role: string; suggestio
     suggestions: [
       { id: "summary", icon: "📈", label: "ملخصي اليوم", description: "نظرة سريعة على كل شي يخصك", priority: "high" },
       { id: "pending", icon: "⏳", label: "وش المعلّق؟", description: "العروض والصفقات اللي تنتظر ردّك", priority: "high" },
+      { id: "deal-predict", icon: "🔮", label: "احتمال نجاح الصفقات", description: "تنبؤ بنسبة نجاح صفقاتك النشطة", priority: "medium" },
       { id: "improve", icon: "💡", label: "حسّن إعلاناتك", description: "اقتراحات تخلي إعلاناتك أقوى", priority: "medium" },
-      { id: "missing", icon: "⚠️", label: "وش الناقص؟", description: "المعلومات اللي لازم تكمّلها", priority: "medium" },
     ],
   },
   "/messages": {
@@ -129,10 +131,12 @@ const pageContextMap: Record<string, { greeting: string; role: string; suggestio
   },
   "/seller-dashboard": {
     greeting: "لوحة البائع 📊 خلني ألخصلك الموقف",
-    role: "مدير مبيعاتك",
+    role: "مقبل البائع",
     suggestions: [
       { id: "sales-summary", icon: "📈", label: "ملخص المبيعات", description: "نظرة على أداء إعلاناتك والعروض", priority: "high" },
       { id: "boost", icon: "🚀", label: "ارفع التفاعل", description: "نصائح لزيادة مشاهدات إعلاناتك", priority: "medium" },
+      { id: "improve-all", icon: "✨", label: "حسّن كل إعلاناتي", description: "أراجع إعلاناتك وأقترح تحسينات", priority: "high" },
+      { id: "pricing-help", icon: "💰", label: "سعّر إعلاناتي", description: "أقترح أسعار مناسبة لكل إعلان", priority: "medium" },
     ],
   },
   "/about": {
@@ -148,8 +152,9 @@ const getNegotiationContext = () => ({
   greeting: "أنا معاك بالتفاوض 🤝 خلنا نوصل لأفضل اتفاق",
   role: "مفاوضك الذكي",
   suggestions: [
-    { id: "negotiate", icon: "🤝", label: "فاوض عني", description: "أوصلك لأفضل نتيجة 💪", priority: "high" as const },
+    { id: "mediate", icon: "🤝", label: "وسّط بيننا", description: "أقترح حل وسط عادل للطرفين", priority: "high" as const },
     { id: "analyze-offer", icon: "📊", label: "شيّك على العرض", description: "أحلل العرض وأقترح رد مناسب", priority: "high" as const },
+    { id: "predict", icon: "🔮", label: "احتمال نجاح الصفقة", description: "أحسب لك نسبة نجاح هالصفقة", priority: "medium" as const },
     { id: "risks", icon: "⚡", label: "فيه مخاطر؟", description: "أكشف نقاط الضعف والمخاطر بالصفقة", priority: "medium" as const },
     { id: "draft", icon: "✍️", label: "اكتب لي رد", description: "أصيغ لك رد احترافي ومقنع", priority: "medium" as const },
   ],
@@ -160,22 +165,28 @@ const getListingContext = () => ({
   role: "محلل صفقات",
   suggestions: [
     { id: "deal-intel", icon: "🧠", label: "حلل لي الصفقة", description: "تحليل شامل مع المخاطر والفرص", priority: "high" as const },
-    { id: "price-check", icon: "💰", label: "السعر عادل؟", description: "أشيّك إذا السعر معقول مقارنة بالسوق", priority: "high" as const },
+    { id: "price-check", icon: "💰", label: "السعر عادل؟", description: "تسعير ذكي مقارنة بالسوق", priority: "high" as const },
+    { id: "fraud-detect", icon: "🛡️", label: "فحص أمان", description: "أفحص الإعلان عن علامات الاحتيال", priority: "high" as const },
     { id: "start-negotiate", icon: "🤝", label: "أبغى أفاوض", description: "أساعدك تبدأ مفاوضة ذكية", priority: "medium" as const },
-    { id: "verify", icon: "✅", label: "البيانات كاملة؟", description: "أراجع مدى اكتمال المعلومات والمستندات", priority: "medium" as const },
+    { id: "similar", icon: "🔄", label: "فرص مشابهة", description: "أوريك فرص مشابهة قد تعجبك", priority: "medium" as const },
+    { id: "verify", icon: "✅", label: "البيانات كاملة؟", description: "أراجع مدى اكتمال المعلومات والمستندات", priority: "low" as const },
   ],
 });
 
 // ─── Quick Commands ───────────────────────────────
 export const QUICK_COMMANDS: QuickCommand[] = [
-  { id: "my-listings", label: "وريني إعلاناتي", icon: "📋", action: "وريني إعلاناتي" },
-  { id: "my-offers", label: "كم عرض جاني؟", icon: "📩", action: "كم عرض جاني اليوم؟" },
-  { id: "analyze-listing", label: "حلل لي هالإعلان", icon: "🧠", action: "حلل لي هالإعلان" },
-  { id: "feasibility", label: "سوّ لي دراسة جدوى", icon: "📊", action: "سوّ لي دراسة جدوى" },
-  { id: "calc-commission", label: "احسب العمولة", icon: "🧮", action: "احسب لي العمولة" },
-  { id: "improve-ad", label: "حسّن إعلاني", icon: "💡", action: "حسّن إعلاني" },
   { id: "daily-summary", label: "ملخص اليوم", icon: "📈", action: "أعطيني ملخص اليوم" },
-  { id: "market-analysis", label: "تحليل السوق", icon: "🔍", action: "حلل لي السوق" },
+  { id: "analyze-listing", label: "حلل لي هالإعلان", icon: "🧠", action: "حلل لي هالإعلان" },
+  { id: "smart-price", label: "سعّر ذكي", icon: "💰", action: "اقترح سعر عادل لهالإعلان" },
+  { id: "fraud-check", label: "فحص أمان", icon: "🛡️", action: "افحص هالإعلان من ناحية الأمان والاحتيال" },
+  { id: "calc-commission", label: "احسب العمولة", icon: "🧮", action: "احسب لي العمولة" },
+  { id: "deal-predict", label: "احتمال نجاح الصفقة", icon: "🔮", action: "كم احتمال نجاح هالصفقة؟" },
+  { id: "mediate", label: "وساطة ذكية", icon: "🤝", action: "التفاوض متعثر، وسّط بيننا واقترح حل" },
+  { id: "market-trends", label: "اتجاهات السوق", icon: "📊", action: "وش اتجاهات السوق؟ أكثر الأنشطة والمدن؟" },
+  { id: "improve-ad", label: "حسّن إعلاني", icon: "✨", action: "حسّن إعلاني واقترح تعديلات" },
+  { id: "write-desc", label: "اكتب وصف", icon: "✍️", action: "اكتب لي وصف احترافي" },
+  { id: "feasibility", label: "دراسة جدوى", icon: "📋", action: "سوّ لي دراسة جدوى" },
+  { id: "compare", label: "قارن الفرص", icon: "⚖️", action: "قارن لي بين الفرص المتاحة" },
 ];
 
 export function useAiContext() {
@@ -195,7 +206,8 @@ export function useAiContext() {
         role: "مراجع اتفاقيات",
         suggestions: [
           { id: "review", icon: "📋", label: "راجع لي الاتفاق", description: "أشيّك على البنود وأبرز النقاط المهمة", priority: "high" as const },
-          { id: "risks", icon: "⚠️", label: "فيه شي أنتبه له؟", description: "أحدد النقاط اللي تحتاج انتباه قانوني", priority: "high" as const },
+          { id: "doc-analyze", icon: "📄", label: "حلل المستندات", description: "أحلل البنود وأحدد المخاطر القانونية", priority: "high" as const },
+          { id: "risks", icon: "⚠️", label: "فيه شي أنتبه له؟", description: "أحدد النقاط اللي تحتاج انتباه قانوني", priority: "medium" as const },
         ],
       };
     }
@@ -228,12 +240,11 @@ export function useAiContext() {
       };
     }
 
-    // Match exact paths
     const base = pathname.split("?")[0];
     return pageContextMap[base] || pageContextMap["/"];
   }, [pathname]);
 
-  // Fetch proactive insights (dashboard data for logged-in users)
+  // Fetch proactive insights with preference matching
   useEffect(() => {
     if (insightsFetched.current) return;
 
@@ -246,13 +257,6 @@ export function useAiContext() {
 
       try {
         // Pending offers count
-        const { count: pendingOffers } = await supabase
-          .from("listing_offers")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "pending")
-          .or(`buyer_id.eq.${user.id}`);
-
-        // Get user listings to check for offers on them
         const { data: myListings } = await supabase
           .from("listings")
           .select("id")
@@ -313,6 +317,71 @@ export function useAiContext() {
             actionPath: "/dashboard",
           });
         }
+
+        // Proactive: Check for new listings matching user preferences
+        const { data: memoryData } = await supabase
+          .from("ai_user_memory")
+          .select("preferred_cities, preferred_activities, budget_min, budget_max")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (memoryData) {
+          const cities = memoryData.preferred_cities || [];
+          const activities = memoryData.preferred_activities || [];
+
+          if (cities.length > 0 || activities.length > 0) {
+            // Check for new matching listings in last 3 days
+            const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+            let query = supabase
+              .from("listings")
+              .select("id, title, city, business_activity, price", { count: "exact", head: false })
+              .eq("status", "published")
+              .is("deleted_at", null)
+              .gte("published_at", threeDaysAgo)
+              .neq("owner_id", user.id)
+              .limit(3);
+
+            if (cities.length > 0) {
+              query = query.in("city", cities);
+            }
+
+            const { data: matchingListings, count: matchCount } = await query;
+
+            if (matchCount && matchCount > 0 && matchingListings) {
+              const first = matchingListings[0];
+              insights.push({
+                id: "matching-opportunity",
+                message: `نزلت ${matchCount} فرصة جديدة تطابق اهتماماتك${first?.city ? ` في ${first.city}` : ""}`,
+                type: "action",
+                actionLabel: "شوف الفرص",
+                actionPath: "/marketplace",
+              });
+            }
+          }
+        }
+
+        // Stalled negotiations alert
+        const { data: activeDeals } = await supabase
+          .from("deals")
+          .select("id, status, updated_at")
+          .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+          .eq("status", "negotiating")
+          .limit(5);
+
+        if (activeDeals) {
+          const twoDaysAgo = Date.now() - 2 * 24 * 60 * 60 * 1000;
+          const stalledDeals = activeDeals.filter(d => new Date(d.updated_at).getTime() < twoDaysAgo);
+          
+          if (stalledDeals.length > 0) {
+            insights.push({
+              id: "stalled-deals",
+              message: `عندك ${stalledDeals.length} صفقة بدون تحديث من يومين — تبغى مقبل يوسّط؟`,
+              type: "warning",
+              actionLabel: "شوف الصفقات",
+              actionPath: `/negotiate/${stalledDeals[0].id}`,
+            });
+          }
+        }
       } catch (e) {
         console.error("Proactive insights error:", e);
       }
@@ -323,7 +392,6 @@ export function useAiContext() {
     fetchInsights();
   }, []);
 
-  // Reset insights ref on unmount
   useEffect(() => {
     return () => { insightsFetched.current = false; };
   }, []);

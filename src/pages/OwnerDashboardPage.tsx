@@ -29,13 +29,15 @@ import AccountSettingsPanel from "@/components/AccountSettingsPanel";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import CrmDashboard from "@/components/crm/CrmDashboard";
+import AiAnalyticsDashboard from "@/components/AiAnalyticsDashboard";
 import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
 import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 
-type Tab = "overview" | "crm" | "deals" | "users" | "listings" | "security" | "account" | "settings";
+type Tab = "overview" | "ai-analytics" | "crm" | "deals" | "users" | "listings" | "security" | "account" | "settings";
 
 const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: "overview", label: "نظرة عامة", icon: BarChart3 },
+  { id: "ai-analytics", label: "ذكاء السوق", icon: TrendingUp },
   { id: "crm", label: "العملاء المحتملين", icon: Users },
   { id: "deals", label: "الصفقات والعمولات", icon: Handshake },
   { id: "users", label: "المستخدمون", icon: Users },
@@ -852,6 +854,7 @@ const OwnerDashboardPage = () => {
           </div>
         )}
 
+        {activeTab === "ai-analytics" && <AiAnalyticsDashboard />}
         {activeTab === "crm" && <CrmDashboard />}
         {activeTab === "security" && <SecurityIncidentPanel />}
         {activeTab === "account" && <AccountSettingsPanel />}
