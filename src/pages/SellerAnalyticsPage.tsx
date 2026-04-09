@@ -6,7 +6,7 @@ import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Eye, Heart, TrendingUp, BarChart3, Target, Lightbulb } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import AiStar from "@/components/AiStar";
 import SarSymbol from "@/components/SarSymbol";
 
