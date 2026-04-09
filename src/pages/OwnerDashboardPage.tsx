@@ -857,6 +857,7 @@ const OwnerDashboardPage = () => {
         )}
 
         {activeTab === "ai-analytics" && <AiAnalyticsDashboard />}
+        {activeTab === "moqbil-audit" && <MoqbilAuditPanel />}
         {activeTab === "crm" && <CrmDashboard />}
         {activeTab === "security" && <SecurityIncidentPanel />}
         {activeTab === "account" && <AccountSettingsPanel />}
