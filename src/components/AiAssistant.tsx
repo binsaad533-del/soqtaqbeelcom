@@ -281,7 +281,7 @@ const AiAssistant = () => {
     }
   };
 
-  const hasInsights = proactiveInsights.length > 0;
+  const hasInsights = proactiveInsights.length > 0 || marketAlerts.length > 0;
   const showRecommendations = pathname === "/" || pathname === "/marketplace";
 
   return (
