@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Sparkles, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Shield, ImagePlus, Mic, MicOff, Volume2, VolumeX, Copy, Check, ChevronRight, Bot } from "lucide-react";
+import { Send, Sparkles, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Shield, Paperclip, Mic, MicOff, Volume2, VolumeX, Copy, Check, ChevronRight, Bot, FileText, File, X, Loader2 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
@@ -14,12 +14,22 @@ import AiRecommendations from "@/components/AiRecommendations";
 import SmartMatchPanel from "@/components/SmartMatchPanel";
 import { toast } from "sonner";
 
+interface PendingFile {
+  name: string;
+  type: string;
+  size: number;
+  dataUrl: string;       // base64 data URI
+  isImage: boolean;
+  textContent?: string;  // extracted text for text-based files
+}
+
 interface ChatMsg {
   id: string;
   role: "user" | "assistant";
   content: string;
   time: string;
   images?: string[];
+  files?: { name: string; type: string; size: number; isImage: boolean }[];
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
@@ -139,14 +149,44 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
-const MAX_IMAGE_SIZE = 4 * 1024 * 1024;
-const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+function fileToText(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+}
+
+const TEXT_EXTENSIONS = new Set([
+  "txt", "md", "csv", "json", "xml", "html", "css", "js", "ts", "tsx", "jsx",
+  "yaml", "yml", "toml", "ini", "cfg", "log", "sql", "py", "rb", "java", "c",
+  "cpp", "h", "swift", "kt", "go", "rs", "php", "env", "sh", "bash",
+]);
+
+function isTextFile(file: File): boolean {
+  if (file.type.startsWith("text/")) return true;
+  if (file.type === "application/json" || file.type === "application/xml") return true;
+  const ext = file.name.split(".").pop()?.toLowerCase() || "";
+  return TEXT_EXTENSIONS.has(ext);
+}
+
+function isImageFile(file: File): boolean {
+  return file.type.startsWith("image/");
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 const AiChatPage = () => {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
-  const [pendingImages, setPendingImages] = useState<string[]>([]);
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
+  const [loadingFiles, setLoadingFiles] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
@@ -176,27 +216,108 @@ const AiChatPage = () => {
     return ctx;
   }, [pathname, role, pageData, getMemoryContext]);
 
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files) return;
-    const newImages: string[] = [];
+    if (!files || files.length === 0) return;
+
+    setLoadingFiles(true);
+    const newFiles: PendingFile[] = [];
+
     for (const file of Array.from(files)) {
-      if (!ALLOWED_IMAGE_TYPES.includes(file.type)) { toast.error(`نوع الملف غير مدعوم: ${file.name}`); continue; }
-      if (file.size > MAX_IMAGE_SIZE) { toast.error(`حجم الملف كبير جداً: ${file.name}`); continue; }
-      try { newImages.push(await fileToBase64(file)); } catch { toast.error(`فشل قراءة الملف: ${file.name}`); }
+      try {
+        const dataUrl = await fileToBase64(file);
+        const image = isImageFile(file);
+        let textContent: string | undefined;
+
+        // For text-based files, also extract text content
+        if (isTextFile(file)) {
+          try {
+            textContent = await fileToText(file);
+            // Limit text to ~50k chars to avoid payload issues
+            if (textContent.length > 50000) {
+              textContent = textContent.slice(0, 50000) + "\n\n... [تم اختصار الملف - الحجم الأصلي: " + formatFileSize(file.size) + "]";
+            }
+          } catch { /* fallback to base64 only */ }
+        }
+
+        newFiles.push({
+          name: file.name,
+          type: file.type || "application/octet-stream",
+          size: file.size,
+          dataUrl,
+          isImage: image,
+          textContent,
+        });
+      } catch {
+        toast.error(`فشل قراءة الملف: ${file.name}`);
+      }
     }
-    if (newImages.length > 0) setPendingImages(prev => [...prev, ...newImages].slice(0, 5));
+
+    if (newFiles.length > 0) {
+      setPendingFiles(prev => [...prev, ...newFiles].slice(0, 10));
+    }
+    setLoadingFiles(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
 
-  const removePendingImage = (index: number) => setPendingImages(prev => prev.filter((_, i) => i !== index));
+  const removePendingFile = (index: number) => setPendingFiles(prev => prev.filter((_, i) => i !== index));
 
-  const sendMessage = useCallback((text: string, images?: string[]) => {
-    const userMsg: ChatMsg = { id: String(Date.now()), role: "user", content: text, time: now(), images };
+  const sendMessage = useCallback((text: string, files?: PendingFile[]) => {
+    const imageUrls = files?.filter(f => f.isImage).map(f => f.dataUrl);
+    const fileMeta = files?.map(f => ({ name: f.name, type: f.type, size: f.size, isImage: f.isImage }));
+
+    const userMsg: ChatMsg = {
+      id: String(Date.now()),
+      role: "user",
+      content: text,
+      time: now(),
+      images: imageUrls && imageUrls.length > 0 ? imageUrls : undefined,
+      files: fileMeta && fileMeta.length > 0 ? fileMeta : undefined,
+    };
     setMessages(prev => [...prev, userMsg]);
     setStreaming(true);
 
-    const buildContent = (msg: ChatMsg): string | any[] => {
+    // Build multimodal content for the current message
+    const buildContent = (msg: ChatMsg, msgFiles?: PendingFile[]): string | any[] => {
+      // For the new message being sent, use the files data
+      if (msgFiles && msgFiles.length > 0) {
+        const parts: any[] = [];
+
+        // Add text content
+        let combinedText = msg.content || "";
+
+        // Add text file contents
+        const textFiles = msgFiles.filter(f => f.textContent);
+        if (textFiles.length > 0) {
+          combinedText += "\n\n";
+          for (const tf of textFiles) {
+            combinedText += `\n📄 محتوى ملف "${tf.name}":\n\`\`\`\n${tf.textContent}\n\`\`\`\n`;
+          }
+        }
+
+        // Add non-image, non-text file descriptions
+        const otherFiles = msgFiles.filter(f => !f.isImage && !f.textContent);
+        if (otherFiles.length > 0) {
+          combinedText += "\n\n";
+          for (const of_ of otherFiles) {
+            combinedText += `\n📎 ملف مرفق: "${of_.name}" (${of_.type}, ${formatFileSize(of_.size)})`;
+          }
+        }
+
+        if (combinedText.trim()) {
+          parts.push({ type: "text", text: combinedText.trim() });
+        }
+
+        // Add images as image_url
+        const imageFiles = msgFiles.filter(f => f.isImage);
+        for (const img of imageFiles) {
+          parts.push({ type: "image_url", image_url: { url: img.dataUrl } });
+        }
+
+        return parts.length > 0 ? parts : msg.content;
+      }
+
+      // For historical messages with images
       if (msg.images && msg.images.length > 0) {
         const parts: any[] = [];
         if (msg.content) parts.push({ type: "text", text: msg.content });
@@ -206,9 +327,9 @@ const AiChatPage = () => {
       return msg.content;
     };
 
-    const allMessages = [...messages, userMsg].map(m => ({
+    const allMessages = [...messages, userMsg].map((m, i, arr) => ({
       role: m.role === "assistant" ? "assistant" as const : "user" as const,
-      content: buildContent(m),
+      content: i === arr.length - 1 && m.role === "user" ? buildContent(m, files) : buildContent(m),
     }));
 
     let assistantText = "";
@@ -240,21 +361,31 @@ const AiChatPage = () => {
 
   const handleSend = () => {
     const hasText = input.trim().length > 0;
-    const hasImages = pendingImages.length > 0;
-    if ((!hasText && !hasImages) || streaming) return;
-    const text = hasText ? input : (hasImages ? "حلل هذه الصور" : "");
-    const images = hasImages ? [...pendingImages] : undefined;
+    const hasFiles = pendingFiles.length > 0;
+    if ((!hasText && !hasFiles) || streaming) return;
+
+    const hasImages = pendingFiles.some(f => f.isImage);
+    const hasDocuments = pendingFiles.some(f => !f.isImage);
+
+    let text = hasText ? input : "";
+    if (!hasText && hasFiles) {
+      if (hasImages && hasDocuments) text = "حلل هذه الملفات والصور";
+      else if (hasImages) text = "حلل هذه الصور";
+      else text = "حلل هذه الملفات";
+    }
+
+    const files = hasFiles ? [...pendingFiles] : undefined;
     setInput("");
-    setPendingImages([]);
-    sendMessage(text, images);
+    setPendingFiles([]);
+    sendMessage(text, files);
   };
 
   const hasInsights = proactiveInsights.length > 0 || marketAlerts.length > 0;
 
   return (
     <div className="flex h-[calc(100vh-60px)] overflow-hidden">
-      {/* Hidden file input */}
-      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple className="hidden" onChange={handleImageUpload} />
+      {/* Hidden file input - accept all */}
+      <input ref={fileInputRef} type="file" accept="*/*" multiple className="hidden" onChange={handleFileUpload} />
 
       {/* Sidebar */}
       <div className={cn(
@@ -379,10 +510,10 @@ const AiChatPage = () => {
               </div>
             </div>
 
-            {/* Image upload */}
+            {/* File upload */}
             <button onClick={() => fileInputRef.current?.click()} className="w-full py-2.5 rounded-xl border border-dashed border-primary/25 text-xs text-primary hover:bg-primary/[0.03] transition-colors flex items-center justify-center gap-2">
-              <ImagePlus size={14} strokeWidth={1.5} />
-              ارفع صورة وأحللها لك
+              <Paperclip size={14} strokeWidth={1.5} />
+              ارفع ملفات أو صور وأحللها لك
             </button>
           </div>
         )}
@@ -419,7 +550,7 @@ const AiChatPage = () => {
               </div>
               <div>
                 <h3 className="text-sm font-medium text-foreground/70">مرحباً، أنا مقبل</h3>
-                <p className="text-xs text-muted-foreground mt-1 max-w-sm">مساعدك الذكي في سوق تقبيل. اسألني أي سؤال عن الصفقات أو الفرص أو تحليل السوق.</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-sm">مساعدك الذكي في سوق تقبيل. اسألني أي سؤال عن الصفقات أو الفرص أو تحليل السوق، أو ارفع صور وملفات وأحللها لك.</p>
               </div>
             </div>
           )}
@@ -444,10 +575,23 @@ const AiChatPage = () => {
                     </div>
                   </div>
                 )}
+                {/* Show images */}
                 {msg.images && msg.images.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-2">
                     {msg.images.map((img, i) => (
                       <img key={i} src={img} alt={`صورة ${i + 1}`} className="w-20 h-20 object-cover rounded-lg border border-border/30" />
+                    ))}
+                  </div>
+                )}
+                {/* Show non-image files */}
+                {msg.files && msg.files.filter(f => !f.isImage).length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {msg.files.filter(f => !f.isImage).map((f, i) => (
+                      <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-muted/40 border border-border/30">
+                        <FileText size={13} className="text-primary shrink-0" />
+                        <span className="text-[10px] text-foreground/80 max-w-[120px] truncate">{f.name}</span>
+                        <span className="text-[9px] text-muted-foreground">{formatFileSize(f.size)}</span>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -482,15 +626,32 @@ const AiChatPage = () => {
 
         {/* Input area */}
         <div className="p-4 border-t border-border/30 shrink-0 bg-card/30">
-          {pendingImages.length > 0 && (
+          {/* Pending files preview */}
+          {pendingFiles.length > 0 && (
             <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
-              {pendingImages.map((img, i) => (
+              {pendingFiles.map((pf, i) => (
                 <div key={i} className="relative shrink-0">
-                  <img src={img} alt="" className="w-14 h-14 object-cover rounded-lg border border-primary/20" />
-                  <button onClick={() => removePendingImage(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-[8px]">✕</button>
+                  {pf.isImage ? (
+                    <img src={pf.dataUrl} alt="" className="w-14 h-14 object-cover rounded-lg border border-primary/20" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-lg border border-primary/20 bg-muted/30 flex flex-col items-center justify-center gap-0.5 p-1">
+                      <FileText size={16} className="text-primary/60" />
+                      <span className="text-[7px] text-muted-foreground text-center leading-tight truncate w-full">{pf.name.split(".").pop()?.toUpperCase()}</span>
+                    </div>
+                  )}
+                  <button onClick={() => removePendingFile(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-[8px]">✕</button>
                 </div>
               ))}
-              <span className="text-[10px] text-muted-foreground whitespace-nowrap">{pendingImages.length} صورة جاهزة</span>
+              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                {pendingFiles.length} {pendingFiles.every(f => f.isImage) ? "صورة" : pendingFiles.every(f => !f.isImage) ? "ملف" : "ملف/صورة"} جاهزة
+              </span>
+            </div>
+          )}
+
+          {loadingFiles && (
+            <div className="flex items-center justify-center gap-2 mb-3 py-2 rounded-lg bg-primary/5 border border-primary/15">
+              <Loader2 size={14} className="animate-spin text-primary" />
+              <span className="text-xs text-primary font-medium">جاري تجهيز الملفات...</span>
             </div>
           )}
 
@@ -502,8 +663,8 @@ const AiChatPage = () => {
           )}
 
           <div className="flex items-center gap-3 max-w-3xl mx-auto">
-            <button onClick={() => fileInputRef.current?.click()} disabled={streaming} className="rounded-xl h-10 w-10 flex items-center justify-center transition-all shrink-0 text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30" title="ارفع صورة">
-              <ImagePlus size={16} strokeWidth={1.5} />
+            <button onClick={() => fileInputRef.current?.click()} disabled={streaming || loadingFiles} className="rounded-xl h-10 w-10 flex items-center justify-center transition-all shrink-0 text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30" title="ارفع ملف أو صورة">
+              <Paperclip size={16} strokeWidth={1.5} />
             </button>
             {voiceSupported && (
               <button onClick={isListening ? stopListening : startListening} disabled={streaming} className={cn(
@@ -519,11 +680,11 @@ const AiChatPage = () => {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleSend()}
-              placeholder={pendingImages.length > 0 ? "أضف وصف أو أرسل مباشرة..." : "اسأل مقبل أي شي..."}
+              placeholder={pendingFiles.length > 0 ? "أضف وصف أو أرسل مباشرة..." : "اسأل مقبل أي شي أو ارفع ملف..."}
               className="flex-1 px-4 py-2.5 rounded-xl border border-border/50 bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
               disabled={streaming}
             />
-            <Button onClick={handleSend} size="icon" disabled={streaming && pendingImages.length === 0} className="gradient-primary text-primary-foreground rounded-xl h-10 w-10 active:scale-[0.95]">
+            <Button onClick={handleSend} size="icon" disabled={(streaming && pendingFiles.length === 0) || loadingFiles} className="gradient-primary text-primary-foreground rounded-xl h-10 w-10 active:scale-[0.95]">
               <Send size={16} strokeWidth={1.5} />
             </Button>
           </div>
