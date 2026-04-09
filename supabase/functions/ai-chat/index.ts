@@ -875,15 +875,14 @@ async function executeTool(name: string, args: any, userId: string, role: string
       await sb.from("audit_logs").insert({ user_id: userId, action: "listing_created_via_moqbil", resource_type: "listing",
         resource_id: data.id, details: { title: listing.title, city: args.city } });
       return { success: true, listing_id: data.id, title: data.title, status: "draft",
-        editor_url: `${BASE_URL}/create-listing?draft=${data.id}`,
-        message: "تم إنشاء مسودة الإعلان بنجاح — الإعلان غير منشور حالياً ويحتاج استكمال",
+        message: "تم إنشاء مسودة الإعلان بنجاح ✅",
         remaining_steps: [
-          "1. ارفع صور المحل (داخلية + خارجية + معدات)",
-          "2. حدد الموقع الجغرافي الدقيق على الخريطة",
-          "3. أكمل بيانات الإفصاح (الإيجار، الالتزامات، التراخيص)",
-          "4. اضغط نشر لإظهار الإعلان للجميع"
-        ],
-        important: "يجب على المستخدم الدخول على الرابط أعلاه لإكمال الخطوات المتبقية والنشر — لا يمكن النشر من هنا مباشرة" };
+          !args.price ? "السعر المطلوب" : null,
+          "الموقع الجغرافي (رابط قوقل ماب)",
+          "الصور (اختياري حسب نوع الصفقة)",
+        ].filter(Boolean),
+        next_action: !args.price ? "كم السعر المطلوب؟" : "أرسل لي رابط الموقع من قوقل ماب",
+        note: "أكمل المعلومات الناقصة وأنا أنشره لك مباشرة من هنا" };
     }
 
     case "submit_offer": {
