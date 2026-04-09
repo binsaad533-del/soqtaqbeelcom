@@ -586,7 +586,7 @@ const CustomerDashboardPage = () => {
         {suggestions.length > 0 && (
           <div className="flex gap-2 mb-6 overflow-x-auto pb-1 animate-reveal" style={{ animationDelay: '350ms' }}>
             {suggestions.map((s, i) => (
-              <Link key={i} to={s.link} className={cn(
+              <Link key={i} to={s.link} onClick={() => { const tab = hashToTab[s.link]; if (tab) setActiveTab(tab); }} className={cn(
                 "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all shrink-0",
                 s.priority === "high" ? "bg-primary/5 text-primary border border-primary/20 hover:bg-primary/10" : "bg-muted/50 text-muted-foreground hover:bg-muted"
               )}>
