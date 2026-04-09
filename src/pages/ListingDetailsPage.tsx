@@ -10,6 +10,8 @@ import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
 import FeasibilityStudyPanel from "@/components/FeasibilityStudyPanel";
+import FinancialAnalysisPanel from "@/components/FinancialAnalysisPanel";
+import DealSimulationPanel from "@/components/DealSimulationPanel";
 import { useAnalysisCache } from "@/hooks/useAnalysisCache";
 import TransparencyIndicator from "@/components/TransparencyIndicator";
 
@@ -583,6 +585,17 @@ const ListingDetailsPage = () => {
 
             {/* دراسة الجدوى الاقتصادية وتحليل المنافسين */}
             <FeasibilityStudyPanel listing={listing} analysisCache={analysisCache} />
+
+            {/* التحليل المالي ومحاكاة الصفقة */}
+            {!isOwner && listing.price && (
+              <div className="space-y-3">
+                <FinancialAnalysisPanel
+                  price={listing.price}
+                  annualRent={listing.annual_rent || undefined}
+                />
+                <DealSimulationPanel listingId={listing.id} />
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}

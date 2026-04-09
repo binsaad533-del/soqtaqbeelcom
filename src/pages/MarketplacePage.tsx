@@ -19,6 +19,7 @@ import ComparePanel, { type CompareItem } from "@/components/marketplace/Compare
 import { MapPin, Eye, ShieldCheck, GitCompareArrows, Check, Lightbulb, Heart, Share2 } from "lucide-react";
 import VerifiedSellerBadge from "@/components/VerifiedSellerBadge";
 import MarketplaceTicker from "@/components/marketplace/MarketplaceTicker";
+import OpportunityHeatmap from "@/components/OpportunityHeatmap";
 import { toast } from "sonner";
 import PriceDisplay from "@/components/PriceDisplay";
 import { getArabicDealType } from "@/lib/translations";
@@ -245,6 +246,7 @@ const MarketplacePage = () => {
         </div>
 
         <MarketplaceTicker />
+        <OpportunityHeatmap />
 
         {isMobile && <SmartSearchBar onApplyFilters={handleSmartSearch} resultCount={filtered.length} />}
 
