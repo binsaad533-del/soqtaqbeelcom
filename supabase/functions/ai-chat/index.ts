@@ -734,7 +734,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
       return {
         listing,
         listing_url: listing.status === "published" ? `${BASE_URL}/listing/${listing.id}` : null,
-        editor_url: listing.status !== "published" ? `${BASE_URL}/create-listing` : null,
+        editor_url: listing.status !== "published" ? `${BASE_URL}/create-listing?draft=${listing.id}` : null,
         deals: deals.data || [],
         offers: offers.data || [],
         timeline,
@@ -819,12 +819,15 @@ async function executeTool(name: string, args: any, userId: string, role: string
     // ═══════════════════════════════════════════════
 
     case "create_listing": {
+      const resolvedDealType = args.deal_type || "full_takeover";
       const listing: any = {
         owner_id: userId,
         business_activity: args.business_activity,
         city: args.city,
         status: "draft",
-        deal_type: args.deal_type || "full_takeover",
+        deal_type: resolvedDealType,
+        primary_deal_type: resolvedDealType,
+        deal_options: [{ type_id: resolvedDealType, priority: 0, is_primary: true }],
       };
       if (args.title) listing.title = args.title;
       else listing.title = `${args.business_activity} في ${args.city}`;
@@ -839,7 +842,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
       await sb.from("audit_logs").insert({ user_id: userId, action: "listing_created_via_moqbil", resource_type: "listing",
         resource_id: data.id, details: { title: listing.title, city: args.city } });
       return { success: true, listing_id: data.id, title: data.title, status: "draft",
-        editor_url: `${BASE_URL}/create-listing`,
+        editor_url: `${BASE_URL}/create-listing?draft=${data.id}`,
         message: "تم إنشاء مسودة الإعلان بنجاح — الإعلان غير منشور حالياً",
         next_steps: ["ارفع صور للتحليل التلقائي", "أكمل بيانات الإفصاح", "بعد النشر أرسل لك رابط الإعلان"] };
     }
@@ -2291,7 +2294,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
         return {
           error: "لا يمكن مشاركة الإعلان قبل نشره فعلياً",
           status: listing.status,
-          editor_url: `${BASE_URL}/create-listing`,
+          editor_url: `${BASE_URL}/create-listing?draft=${listing.id}`,
         };
       }
 
