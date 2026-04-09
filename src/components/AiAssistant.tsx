@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Sparkles, ChevronLeft, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, FileText, Copy, Check, Mic, MicOff, TrendingUp, Shield, BarChart3, ImagePlus, Paperclip, FileImage, Radar, Bot, Volume2, VolumeX, Target } from "lucide-react";
+import { X, Send, Sparkles, ChevronLeft, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, FileText, Copy, Check, TrendingUp, Shield, BarChart3, ImagePlus, Paperclip, FileImage, Radar, Bot, Target } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
 import { useAiMemory } from "@/hooks/useAiMemory";
-import { useVoiceInput } from "@/hooks/useVoiceInput";
+
 import { useMarketAlerts } from "@/hooks/useMarketAlerts";
 import ReactMarkdown from "react-markdown";
 
@@ -101,37 +101,6 @@ const CopyButton = ({ text }: { text: string }) => {
   );
 };
 
-/** TTS button for AI messages */
-const TTSButton = ({ text }: { text: string }) => {
-  const [speaking, setSpeaking] = useState(false);
-  const supported = typeof window !== "undefined" && "speechSynthesis" in window;
-  if (!supported) return null;
-
-  const toggle = () => {
-    if (speaking) {
-      window.speechSynthesis.cancel();
-      setSpeaking(false);
-    } else {
-      const clean = text.replace(/#{1,6}\s/g, "").replace(/\*{1,2}([^*]+)\*{1,2}/g, "$1").replace(/[`~>|]/g, "").replace(/\n{2,}/g, ". ").trim();
-      if (!clean) return;
-      const u = new SpeechSynthesisUtterance(clean);
-      u.lang = "ar-SA";
-      const voices = window.speechSynthesis.getVoices();
-      const arV = voices.find(v => v.lang.startsWith("ar"));
-      if (arV) u.voice = arV;
-      u.onstart = () => setSpeaking(true);
-      u.onend = () => setSpeaking(false);
-      u.onerror = () => setSpeaking(false);
-      window.speechSynthesis.speak(u);
-    }
-  };
-
-  return (
-    <button onClick={toggle} className="text-muted-foreground/50 hover:text-foreground transition-colors" title={speaking ? "إيقاف" : "استمع"}>
-      {speaking ? <VolumeX size={10} /> : <Volume2 size={10} />}
-    </button>
-  );
-};
 
 /** Convert file to base64 data URL */
 function fileToBase64(file: File): Promise<string> {
@@ -165,11 +134,6 @@ const AiAssistant = () => {
   const { getMemoryContext, addAiNote, memory, loaded: memoryLoaded } = useAiMemory();
   const { alerts: marketAlerts, markRead: markAlertRead, dismissAlert } = useMarketAlerts();
 
-  // Voice input
-  const handleVoiceResult = useCallback((text: string) => {
-    setInput(text);
-  }, []);
-  const { isListening, startListening, stopListening, supported: voiceSupported } = useVoiceInput(handleVoiceResult);
 
   useEffect(() => { setView("home"); setMessages([]); setPendingImages([]); }, [pathname]);
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
@@ -635,7 +599,6 @@ const AiAssistant = () => {
                           </div>
                           <div className="flex items-center gap-1.5">
                             <CopyButton text={msg.content} />
-                            <TTSButton text={msg.content} />
                           </div>
                         </div>
                       )}
@@ -702,15 +665,7 @@ const AiAssistant = () => {
                   </div>
                 )}
 
-                {/* Voice listening indicator */}
-                {isListening && (
-                  <div className="flex items-center justify-center gap-2 mb-2 py-1.5 rounded-lg bg-destructive/5 border border-destructive/15">
-                    <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-                    <span className="text-[10px] text-destructive font-medium">جاري الاستماع...</span>
-                  </div>
-                )}
                 <div className="flex items-center gap-2">
-                  {/* Image upload button */}
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={streaming}
@@ -719,22 +674,6 @@ const AiAssistant = () => {
                   >
                     <ImagePlus size={13} strokeWidth={1.5} />
                   </button>
-                  {/* Voice button */}
-                  {voiceSupported && (
-                    <button
-                      onClick={isListening ? stopListening : startListening}
-                      disabled={streaming}
-                      className={cn(
-                        "rounded-xl h-8 w-8 flex items-center justify-center transition-all shrink-0",
-                        isListening
-                          ? "bg-destructive/10 text-destructive border border-destructive/20"
-                          : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30"
-                      )}
-                      title={isListening ? "إيقاف الاستماع" : "تحدث مع مقبل"}
-                    >
-                      {isListening ? <MicOff size={13} strokeWidth={1.5} /> : <Mic size={13} strokeWidth={1.5} />}
-                    </button>
-                  )}
                   <input
                     ref={inputRef}
                     type="text"
