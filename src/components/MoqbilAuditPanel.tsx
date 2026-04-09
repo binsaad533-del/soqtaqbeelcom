@@ -51,9 +51,24 @@ export default function MoqbilAuditPanel() {
     },
   });
 
+  const { data: allFeedback = [] } = useQuery({
+    queryKey: ["admin-moqbil-feedback"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("ai_chat_feedback" as any)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      return (data || []) as any[];
+    },
+  });
+
   const failedActions = allActions.filter((a: any) => a.status === "failed");
   const successActions = allActions.filter((a: any) => a.status === "success");
   const uniqueUsers = new Set(allMessages.map((m: any) => m.user_id)).size;
+  const positiveFeedback = allFeedback.filter((f: any) => f.rating === "positive");
+  const negativeFeedback = allFeedback.filter((f: any) => f.rating === "negative");
+  const satisfactionRate = allFeedback.length > 0 ? Math.round((positiveFeedback.length / allFeedback.length) * 100) : 0;
 
   const filtered = allMessages.filter((m: any) => {
     if (search && !m.user_message?.includes(search) && !m.ai_response?.includes(search) && !m.user_id?.includes(search)) return false;
