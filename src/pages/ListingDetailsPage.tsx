@@ -120,8 +120,8 @@ const ListingDetailsPage = () => {
   const ogDesc = listing
     ? `${listing.business_activity || ""} — ${listing.city || ""} ${listing.price ? `| ${Number(listing.price).toLocaleString("en-US")} ر.س` : ""}`
     : "عرض تفاصيل فرصة تقبيل على سوق تقبيل";
-  const photos = listing?.photos as Record<string, string[]> | null;
-  const ogImage = photos ? (Object.values(photos).flat()[0] as string | undefined) : undefined;
+  const ogPhotos = listing?.photos as Record<string, string[]> | null;
+  const ogImage = ogPhotos ? (Object.values(ogPhotos).flat()[0] as string | undefined) : undefined;
   useSEO({
     title: ogTitle,
     description: ogDesc,
