@@ -980,6 +980,7 @@ serve(async (req) => {
       if (!choice) throw new Error("No response from AI");
 
       const message = choice.message;
+      console.log(`[moqbil] AI response - finish_reason: ${choice.finish_reason}, has_tool_calls: ${!!message.tool_calls}, tool_calls_count: ${message.tool_calls?.length || 0}`);
 
       // Check if AI wants to call tools
       if (message.tool_calls && message.tool_calls.length > 0) {
