@@ -58,7 +58,10 @@ const CustomerDashboardPage = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"deals" | "listings" | "offers" | "saved" | "notifications" | "security" | "account" | "agent" | "intelligence">("deals");
+  type TabId = "deals" | "listings" | "offers" | "saved" | "notifications" | "security" | "account" | "agent" | "intelligence";
+  const hashToTab: Record<string, TabId> = { "#profile": "account", "#account": "account", "#deals": "deals", "#listings": "listings", "#offers": "offers", "#saved": "saved", "#notifications": "notifications", "#security": "security", "#agent": "agent", "#intelligence": "intelligence" };
+  const initialTab = hashToTab[location.hash] || "deals";
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dealStatusFilter, setDealStatusFilter] = useState<string>("all");
@@ -207,7 +210,7 @@ const CustomerDashboardPage = () => {
   /* ── Smart suggestions ── */
   const suggestions = useMemo(() => {
     const s: { text: string; link: string; icon: any; priority: "high" | "medium" }[] = [];
-    if (profileCompleteness < 100) s.push({ text: "أكمل ملفك الشخصي لزيادة الثقة", link: "#profile", icon: UserCheck, priority: "high" });
+    if (profileCompleteness < 100) s.push({ text: "أكمل ملفك الشخصي لزيادة الثقة", link: "#account", icon: UserCheck, priority: "high" });
     if (deals.some(d => d.status === "negotiating")) s.push({ text: "لديك صفقات بانتظار ردك", link: "#", icon: MessageSquare, priority: "high" });
     if (listings.length === 0) s.push({ text: "أنشئ أول إعلان لك", link: "/create-listing", icon: Plus, priority: "medium" });
     if (listings.some(l => l.status === "draft")) s.push({ text: "لديك إعلانات مسودة - انشرها", link: "#", icon: FileText, priority: "medium" });
@@ -583,7 +586,7 @@ const CustomerDashboardPage = () => {
         {suggestions.length > 0 && (
           <div className="flex gap-2 mb-6 overflow-x-auto pb-1 animate-reveal" style={{ animationDelay: '350ms' }}>
             {suggestions.map((s, i) => (
-              <Link key={i} to={s.link} className={cn(
+              <Link key={i} to={s.link} onClick={() => { const tab = hashToTab[s.link]; if (tab) setActiveTab(tab); }} className={cn(
                 "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all shrink-0",
                 s.priority === "high" ? "bg-primary/5 text-primary border border-primary/20 hover:bg-primary/10" : "bg-muted/50 text-muted-foreground hover:bg-muted"
               )}>
