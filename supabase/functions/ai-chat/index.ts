@@ -2703,13 +2703,35 @@ serve(async (req) => {
 
     const formattedMessages = Array.isArray(messages) ? messages.map(sanitizeHistoryMessage) : [];
 
+    // Detect listing creation intent from the last user message
+    const lastUserMsg = formattedMessages.filter((m: any) => m.role === "user").pop();
+    const lastUserText = typeof lastUserMsg?.content === "string" ? lastUserMsg.content : "";
+    const isCreateListingIntent = /أبي أبيع|ابي ابيع|أبغى أبيع|ابغا ابيع|أنزل إعلان|انزل اعلان|أضيف إعلان|اضيف اعلان|سوّ لي إعلان|سو لي اعلان|أنشئ إعلان|انشئ اعلان|بيع محل|بيع مطعم|بيع مقهى|بيع كافيه|بيع بقالة|عندي محل|عندي مطعم|أبي أعرض|ابي اعرض|حاب أبيع|حاب ابيع/i.test(lastUserText);
+    
+    // If user wants to create listing but isn't authenticated, tell them to login
+    if (isCreateListingIntent && !userId) {
+      const loginMsg = "عشان أقدر أنشئ لك إعلان، لازم تسجّل دخولك أول. سجّل دخول وبعدها ارجع كلمني وأنا أسوي لك كل شي 👍";
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: loginMsg } }] })}\n\n`));
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        },
+      });
+      return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
+    }
+
     let currentMessages: any[] = [{ role: "system", content: systemMessage }, ...formattedMessages];
     let iterations = 0;
     const MAX_ITERATIONS = 5;
     let toolsUsed: string[] = [];
 
+    // Determine tool_choice: force "required" for first iteration when intent is to create a listing
+    const initialToolChoice = isCreateListingIntent && iterations === 0 ? "required" : "auto";
+
     while (iterations < MAX_ITERATIONS) {
-      console.log(`[moqbil] Tool loop iteration ${iterations}, tools: ${tools.length}`);
+      console.log(`[moqbil] Tool loop iteration ${iterations}, tools: ${tools.length}, toolChoice: ${iterations === 0 ? initialToolChoice : "auto"}`);
 
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -2718,7 +2740,7 @@ serve(async (req) => {
           model: "google/gemini-2.5-flash",
           messages: currentMessages,
           tools: tools.length > 0 ? tools : undefined,
-          tool_choice: tools.length > 0 ? "auto" : undefined,
+          tool_choice: tools.length > 0 ? (iterations === 0 ? initialToolChoice : "auto") : undefined,
           stream: false,
         }),
       });
