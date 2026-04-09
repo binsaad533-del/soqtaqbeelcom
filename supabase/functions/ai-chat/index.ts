@@ -247,6 +247,46 @@ const TOOL_DEFS: Record<string, any> = {
     ["deal_id"]),
 
   // ═══════════════════════════════════════════════
+  // ADVANCED MOQBIL TOOLS (8 new)
+  // ═══════════════════════════════════════════════
+
+  valuate_business: def("valuate_business", "تقييم تلقائي لقيمة نشاط تجاري بناءً على الإيرادات والأصول والموقع — يعطي نطاق سعري مقترح",
+    { listing_id: { type: "string", description: "معرف الإعلان للتقييم" },
+      monthly_revenue: { type: "number", description: "الإيراد الشهري التقريبي" },
+      monthly_expenses: { type: "number", description: "المصاريف الشهرية التقريبية" },
+      years_operating: { type: "number", description: "سنوات التشغيل" } },
+    ["listing_id"]),
+
+  check_seller_background: def("check_seller_background", "فحص شامل لخلفية البائع: صفقاته، تقييماته، سرعة رده، نسبة إلغاءاته",
+    { seller_id: { type: "string", description: "معرف البائع" },
+      listing_id: { type: "string", description: "معرف الإعلان (اختياري لمعرفة البائع)" } }),
+
+  generate_deal_checklist: def("generate_deal_checklist", "إنشاء قائمة مهام مخصصة لإتمام الصفقة لكل طرف (بائع/مشتري)",
+    { deal_id: { type: "string" } },
+    ["deal_id"]),
+
+  mediate_dispute: def("mediate_dispute", "تحليل مواقف الطرفين واقتراح حل وسط عادل عند توقف التفاوض",
+    { deal_id: { type: "string" } },
+    ["deal_id"]),
+
+  post_deal_followup: def("post_deal_followup", "متابعة ما بعد الصفقة: سؤال المشتري عن سير العمل ونصائح تحسين وطلب تقييم",
+    { deal_id: { type: "string" } },
+    ["deal_id"]),
+
+  quick_feasibility: def("quick_feasibility", "حساب سريع: فترة استرداد رأس المال، العائد المتوقع، نقطة التعادل",
+    { listing_id: { type: "string", description: "معرف الإعلان" },
+      monthly_revenue: { type: "number", description: "الإيراد الشهري المتوقع" },
+      monthly_expenses: { type: "number", description: "المصاريف الشهرية المتوقعة" },
+      investment_amount: { type: "number", description: "مبلغ الاستثمار (السعر)" } },
+    ["listing_id"]),
+
+  generate_user_report: def("generate_user_report", "تقرير مخصص للمستخدم: مشاهدات إعلاناته، عروض جديدة، فرص مطابقة، حركة السوق"),
+
+  analyze_location: def("analyze_location", "تحليل جغرافي للموقع: كثافة المنافسين، طبيعة الحي، مدى ملاءمة النشاط",
+    { listing_id: { type: "string" } },
+    ["listing_id"]),
+
+  // ═══════════════════════════════════════════════
   // SUPERVISOR READ (4)
   // ═══════════════════════════════════════════════
   get_my_tasks: def("get_my_tasks", "المهام المسندة: إعلانات تحتاج مراجعة، صفقات تحتاج متابعة"),
