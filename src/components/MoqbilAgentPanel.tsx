@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Bot, Power, PowerOff, Settings, History, Zap, Shield } from "lucide-react";
+import { Bot, Settings, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -12,10 +12,9 @@ interface AgentSettings {
   auto_reply_inquiries: boolean;
   auto_evaluate_offers: boolean;
   min_acceptable_price: number | null;
-  max_budget: number | null;
-  preferred_response_tone: string;
   auto_reject_below_min: boolean;
   daily_summary: boolean;
+  preferred_response_tone: string;
 }
 
 interface AgentAction {
@@ -31,13 +30,17 @@ const defaultSettings: AgentSettings = {
   auto_reply_inquiries: false,
   auto_evaluate_offers: false,
   min_acceptable_price: null,
-  max_budget: null,
-  preferred_response_tone: "professional",
   auto_reject_below_min: false,
   daily_summary: true,
+  preferred_response_tone: "professional",
 };
 
-const MoqbilAgentPanel = () => {
+interface Props {
+  listingId: string;
+  className?: string;
+}
+
+const MoqbilAgentPanel = ({ listingId, className }: Props) => {
   const { user } = useAuthContext();
   const [settings, setSettings] = useState<AgentSettings>(defaultSettings);
   const [actions, setActions] = useState<AgentAction[]>([]);
@@ -45,15 +48,15 @@ const MoqbilAgentPanel = () => {
   const [saving, setSaving] = useState(false);
 
   const loadSettings = useCallback(async () => {
-    if (!user) return;
+    if (!user || !listingId) return;
     const { data } = await supabase
-      .from("agent_settings" as any)
+      .from("listing_agent_settings" as any)
       .select("*")
-      .eq("user_id", user.id)
+      .eq("listing_id", listingId)
       .maybeSingle();
 
     if (data) setSettings(data as any);
-  }, [user]);
+  }, [user, listingId]);
 
   const loadActions = useCallback(async () => {
     if (!user) return;
@@ -61,23 +64,28 @@ const MoqbilAgentPanel = () => {
       .from("agent_actions_log" as any)
       .select("*")
       .eq("user_id", user.id)
+      .eq("reference_id", listingId)
       .order("created_at", { ascending: false })
       .limit(20);
 
     if (data) setActions(data as any);
-  }, [user]);
+  }, [user, listingId]);
 
   useEffect(() => { loadSettings(); loadActions(); }, [loadSettings, loadActions]);
 
   const saveSettings = async (updates: Partial<AgentSettings>) => {
-    if (!user) return;
+    if (!user || !listingId) return;
     setSaving(true);
     const newSettings = { ...settings, ...updates };
     setSettings(newSettings);
 
     const { error } = await supabase
-      .from("agent_settings" as any)
-      .upsert({ user_id: user.id, ...newSettings } as any, { onConflict: "user_id" });
+      .from("listing_agent_settings" as any)
+      .upsert({
+        listing_id: listingId,
+        owner_id: user.id,
+        ...newSettings,
+      } as any, { onConflict: "listing_id" });
 
     if (error) {
       toast.error("فشل حفظ الإعدادات");
@@ -94,7 +102,7 @@ const MoqbilAgentPanel = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className={cn("space-y-4", className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -107,7 +115,7 @@ const MoqbilAgentPanel = () => {
           <div>
             <h3 className="text-sm font-medium">وكيل مقبل</h3>
             <p className="text-[10px] text-muted-foreground">
-              {settings.is_active ? "نشط — يعمل بالنيابة عنك" : "غير مفعّل"}
+              {settings.is_active ? "نشط — يعمل على هذا الإعلان" : "غير مفعّل لهذا الإعلان"}
             </p>
           </div>
         </div>
