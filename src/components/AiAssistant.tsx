@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import AiStar from "@/components/AiStar";
 import AiRecommendations from "@/components/AiRecommendations";
 import { toast } from "sonner";
+import SmartMatchPanel from "@/components/SmartMatchPanel";
 
 interface ChatMsg {
   id: string;
