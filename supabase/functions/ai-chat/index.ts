@@ -2313,6 +2313,81 @@ async function executeTool(name: string, args: any, userId: string, role: string
 }
 
 // ═══════════════════════════════════════════════
+// RESPONSE SANITIZERS
+// ═══════════════════════════════════════════════
+
+const INTERNAL_TOOL_HINTS = [
+  /<tool_code>/i,
+  /tool_code/i,
+  /call_as_tool/i,
+  /tools?\.[a-z0-9_.]+/i,
+  /\b(?:create_listing|edit_my_listing|cancel_my_listing|submit_offer|respond_to_offer|get_listing_status|approve_listing_publish|valuate_business|analyze_location|generate_[a-z_]+|check_[a-z_]+|quick_feasibility|post_deal_followup|mediate_dispute|schedule_meeting|generate_handover_checklist|generate_listing_card)\b/i,
+  /[a-z_]+\s*=\s*['"{\[]/i,
+];
+
+function containsInternalToolLeak(text: string) {
+  return INTERNAL_TOOL_HINTS.some((pattern) => pattern.test(text));
+}
+
+function cleanAssistantText(text: string) {
+  if (!text) return "";
+
+  const cleanedLines = text
+    .replace(/<tool_code>[\s\S]*?<\/tool_code>/gi, " ")
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .filter((line) => {
+      if (!line.trim()) return true;
+      if (/tool_code|call_as_tool|tools?\.[a-z0-9_.]+/i.test(line)) return false;
+
+      const suspiciousScore = [
+        /\b(?:create_listing|edit_my_listing|cancel_my_listing|submit_offer|respond_to_offer|get_listing_status|approve_listing_publish|valuate_business|analyze_location|generate_[a-z_]+|check_[a-z_]+|quick_feasibility|post_deal_followup|mediate_dispute|schedule_meeting|generate_handover_checklist|generate_listing_card)\b/i,
+        /[a-z_]+\s*=\s*['"{\[]/i,
+        /(?:^|[\s,(])(?:description|parameters|category|listing_name|phone_number|assets|price|city|type)\s*=/i,
+      ].filter((pattern) => pattern.test(line)).length;
+
+      return suspiciousScore === 0;
+    });
+
+  const cleaned = cleanedLines
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+
+  if (!cleaned && containsInternalToolLeak(text)) {
+    return "تم تنفيذ الطلب، وتمت إزالة جزء تقني غير مهم من الرد.";
+  }
+
+  return cleaned || text.trim();
+}
+
+function extractMessageText(content: any): string {
+  if (typeof content === "string") return content;
+
+  if (Array.isArray(content)) {
+    return content
+      .filter((part) => part?.type === "text" && typeof part.text === "string")
+      .map((part) => part.text)
+      .join("\n\n");
+  }
+
+  return "";
+}
+
+function sanitizeHistoryMessage(msg: any) {
+  if (msg.role === "assistant") {
+    const cleaned = cleanAssistantText(extractMessageText(msg.content));
+    return {
+      role: msg.role,
+      content: cleaned || "تم تنظيف رد تقني سابق من السياق.",
+    };
+  }
+
+  return { role: msg.role, content: msg.content };
+}
+
+// ═══════════════════════════════════════════════
 // MAIN HANDLER
 // ═══════════════════════════════════════════════
 
@@ -2329,7 +2404,6 @@ serve(async (req) => {
     let userId = clientUserId || "";
     let role = userRole || "customer";
 
-    // Try JWT auth
     const authHeader = req.headers.get("authorization") || "";
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
     const token = authHeader.replace("Bearer ", "").trim();
@@ -2352,9 +2426,8 @@ serve(async (req) => {
     const allowedToolNames = ROLE_TOOLS[role] || ROLE_TOOLS.customer;
     const tools = allowedToolNames.filter((n) => TOOL_DEFS[n]).map((n) => TOOL_DEFS[n]);
 
-    const formattedMessages = messages.map((msg: any) => ({ role: msg.role, content: msg.content }));
+    const formattedMessages = Array.isArray(messages) ? messages.map(sanitizeHistoryMessage) : [];
 
-    // ═══ Tool Calling Loop ═══
     let currentMessages: any[] = [{ role: "system", content: systemMessage }, ...formattedMessages];
     let iterations = 0;
     const MAX_ITERATIONS = 5;
@@ -2367,8 +2440,11 @@ serve(async (req) => {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash", messages: currentMessages,
-          tools: tools.length > 0 ? tools : undefined, tool_choice: tools.length > 0 ? "auto" : undefined, stream: false,
+          model: "google/gemini-2.5-flash",
+          messages: currentMessages,
+          tools: tools.length > 0 ? tools : undefined,
+          tool_choice: tools.length > 0 ? "auto" : undefined,
+          stream: false,
         }),
       });
 
@@ -2415,23 +2491,44 @@ serve(async (req) => {
       break;
     }
 
-    // ═══ Final Streaming Response ═══
     const finalResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: currentMessages, stream: true }),
+      body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: currentMessages, stream: false }),
     });
 
-    if (!finalResponse.ok) { const t = await finalResponse.text(); console.error("Final stream error:", finalResponse.status, t); throw new Error("Final stream failed"); }
+    if (!finalResponse.ok) {
+      const t = await finalResponse.text();
+      console.error("Final response error:", finalResponse.status, t);
+      throw new Error("Final response failed");
+    }
+
+    const finalData = await finalResponse.json();
+    const finalChoice = finalData.choices?.[0];
+    if (!finalChoice) throw new Error("No final response from AI");
+
+    let finalText = cleanAssistantText(extractMessageText(finalChoice.message?.content));
+    if (!finalText) finalText = "تم.";
 
     if (toolsUsed.length > 0 && userId) {
       supabaseAdmin.from("agent_actions_log").insert({
-        user_id: userId, action_type: "tool_execution",
-        action_details: { tools: toolsUsed, iteration_count: iterations }, result: "success",
+        user_id: userId,
+        action_type: "tool_execution",
+        action_details: { tools: toolsUsed, iteration_count: iterations },
+        result: "success",
       }).then(() => {}).catch(() => {});
     }
 
-    return new Response(finalResponse.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: finalText } }] })}\n\n`));
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        controller.close();
+      },
+    });
+
+    return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
   } catch (e) {
     console.error("chat error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {

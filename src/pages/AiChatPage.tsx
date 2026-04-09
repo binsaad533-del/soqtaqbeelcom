@@ -32,12 +32,40 @@ interface ChatMsg {
   id: string;
   role: "user" | "assistant";
   content: string;
+  rawContent?: string;
   time: string;
   images?: string[];
   files?: { name: string; type: string; size: number; isImage: boolean }[];
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
+
+const INTERNAL_RESPONSE_PATTERNS = [
+  /<tool_code>[\s\S]*?<\/tool_code>/gi,
+  /tool_code/gi,
+  /call_as_tool/gi,
+  /tools?\.[a-z0-9_.]+/gi,
+  /\b(?:create_listing|edit_my_listing|cancel_my_listing|submit_offer|respond_to_offer|get_listing_status|approve_listing_publish|valuate_business|analyze_location|generate_[a-z_]+|check_[a-z_]+|quick_feasibility|post_deal_followup|mediate_dispute|schedule_meeting|generate_handover_checklist|generate_listing_card)\b/gi,
+];
+
+function sanitizeAssistantContent(text: string): string {
+  if (!text) return "";
+
+  let cleaned = text;
+  for (const pattern of INTERNAL_RESPONSE_PATTERNS) {
+    cleaned = cleaned.replace(pattern, " ");
+  }
+
+  cleaned = cleaned
+    .split("\n")
+    .filter((line) => !/(?:^|\s)(description|parameters|category|listing_name|phone_number|assets|price|city|type)\s*=/.test(line))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+
+  return cleaned || "تم.";
+}
 
 async function streamChat({
   messages,
@@ -57,11 +85,14 @@ async function streamChat({
   onError: (msg: string) => void;
 }) {
   try {
+    const session = await supabase.auth.getSession();
+    const accessToken = session.data.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
     const resp = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ messages, context, role, user_id }),
     });
@@ -94,7 +125,7 @@ async function streamChat({
         try {
           const parsed = JSON.parse(json);
           const c = parsed.choices?.[0]?.delta?.content;
-          if (c) onDelta(c);
+          if (c) onDelta(sanitizeAssistantContent(c));
         } catch { /* partial */ }
       }
     }
@@ -393,12 +424,13 @@ const AiChatPage = () => {
       user_id: user?.id,
       onDelta: (chunk) => {
         assistantText += chunk;
+        const visibleText = sanitizeAssistantContent(assistantText);
         setMessages(prev => {
           const last = prev[prev.length - 1];
           if (last?.role === "assistant" && last.id === assistantId) {
-            return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantText } : m);
+            return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: visibleText, rawContent: assistantText } : m);
           }
-          return [...prev, { id: assistantId, role: "assistant", content: assistantText, time: now() }];
+          return [...prev, { id: assistantId, role: "assistant", content: visibleText, rawContent: assistantText, time: now() }];
         });
       },
       onDone: () => {
