@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Sparkles, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Shield, Paperclip, Mic, MicOff, Volume2, VolumeX, Copy, Check, ChevronRight, Bot, FileText, File, X, Loader2, Upload } from "lucide-react";
+import { Send, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Paperclip, Mic, MicOff, Volume2, VolumeX, Copy, Check, ChevronRight, FileText, Loader2 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
