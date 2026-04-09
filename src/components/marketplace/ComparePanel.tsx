@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { X, GitCompareArrows, MapPin, Eye, ShieldCheck, ChevronUp, ChevronDown, Trash2, Sparkles } from "lucide-react";
+import { X, GitCompareArrows, MapPin, Eye, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
 import AiStar from "@/components/AiStar";
 
@@ -40,6 +40,33 @@ const dealTypeLabel = (dt: string | null) => {
 
 const ComparePanel = ({ items, onRemove, onClear }: Props) => {
   const [expanded, setExpanded] = useState(false);
+
+  // AI recommendation
+  const aiRecommendation = useMemo(() => {
+    if (items.length < 2) return null;
+    let best = items[0];
+    let bestScore = 0;
+    for (const item of items) {
+      let score = 0;
+      // Lower price is better (normalize)
+      const prices = items.filter(i => i.price && i.price > 0).map(i => i.price!);
+      if (item.price && prices.length > 1) {
+        const maxP = Math.max(...prices);
+        const minP = Math.min(...prices);
+        score += maxP > minP ? ((maxP - item.price) / (maxP - minP)) * 30 : 15;
+      }
+      // Higher disclosure
+      score += (item.disclosure_score || 0) * 0.3;
+      // Higher trust
+      score += (item.trust_score || 0) * 0.2;
+      // AI rating
+      if (item.ai_rating === "A") score += 20;
+      else if (item.ai_rating === "B") score += 12;
+      else if (item.ai_rating === "C") score += 5;
+      if (score > bestScore) { bestScore = score; best = item; }
+    }
+    return best;
+  }, [items]);
 
   if (items.length === 0) return null;
 
