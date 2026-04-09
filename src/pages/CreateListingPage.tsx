@@ -781,6 +781,7 @@ const CreateListingPage = () => {
           ...(extracted.district && !prev.district ? { district: extracted.district } : {}),
           ...(extracted.annual_rent && !prev.annual_rent ? { annual_rent: extracted.annual_rent } : {}),
           ...(extracted.lease_duration && !prev.lease_duration ? { lease_duration: extracted.lease_duration } : {}),
+          ...(extracted.asking_price && !prev.price ? { price: String(extracted.asking_price).replace(/[^\d]/g, "") } : {}),
         }));
         // Auto-fill area from documents
         if (extracted.area_sqm && !areaSqm) {
