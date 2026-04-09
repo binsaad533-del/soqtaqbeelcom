@@ -852,8 +852,14 @@ async function executeTool(name: string, args: any, userId: string, role: string
         resource_id: data.id, details: { title: listing.title, city: args.city } });
       return { success: true, listing_id: data.id, title: data.title, status: "draft",
         editor_url: `${BASE_URL}/create-listing?draft=${data.id}`,
-        message: "تم إنشاء مسودة الإعلان بنجاح — الإعلان غير منشور حالياً",
-        next_steps: ["ارفع صور للتحليل التلقائي", "أكمل بيانات الإفصاح", "بعد النشر أرسل لك رابط الإعلان"] };
+        message: "تم إنشاء مسودة الإعلان بنجاح — الإعلان غير منشور حالياً ويحتاج استكمال",
+        remaining_steps: [
+          "1. ارفع صور المحل (داخلية + خارجية + معدات)",
+          "2. حدد الموقع الجغرافي الدقيق على الخريطة",
+          "3. أكمل بيانات الإفصاح (الإيجار، الالتزامات، التراخيص)",
+          "4. اضغط نشر لإظهار الإعلان للجميع"
+        ],
+        important: "يجب على المستخدم الدخول على الرابط أعلاه لإكمال الخطوات المتبقية والنشر — لا يمكن النشر من هنا مباشرة" };
     }
 
     case "submit_offer": {
