@@ -2,7 +2,6 @@ import { useState } from "react";
 import { TrendingUp, BarChart3, Users, ArrowUp, ArrowDown, Minus, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import PriceDisplay from "@/components/PriceDisplay";
 
