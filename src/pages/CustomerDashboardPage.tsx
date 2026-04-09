@@ -26,6 +26,7 @@ import BuyerOffersTab from "@/components/dashboard/BuyerOffersTab";
 import SavedListingsTab from "@/components/dashboard/SavedListingsTab";
 import AccountSettingsPanel from "@/components/AccountSettingsPanel";
 import MoqbilAgentPanel from "@/components/MoqbilAgentPanel";
+import MoqbilDashboard from "@/components/MoqbilDashboard";
 
 /* ── Status helpers ── */
 const statusBadge = (s: string) => {
