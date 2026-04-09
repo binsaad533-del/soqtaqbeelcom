@@ -203,9 +203,10 @@ const MoqbilAgentPanel = () => {
           <div className="p-2.5 rounded-xl border border-border/30 space-y-1.5">
             <span className="text-xs font-medium">أسلوب الرد</span>
             <select
+              dir="rtl"
               value={settings.preferred_response_tone}
               onChange={(e) => saveSettings({ preferred_response_tone: e.target.value })}
-              className="w-full px-2.5 py-1.5 rounded-lg border border-border/50 bg-background text-xs"
+              className="w-full px-2.5 py-1.5 rounded-lg border border-border/50 bg-background text-xs text-right appearance-none"
             >
               <option value="professional">مهني واحترافي</option>
               <option value="friendly">ودود وبسيط</option>
