@@ -2940,9 +2940,39 @@ serve(async (req) => {
           try {
             const result = await executeTool(toolName, toolArgs, userId, role, supabaseAdmin);
             currentMessages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
+            // Log action to ai_chat_actions
+            if (userId) {
+              supabaseAdmin.from("ai_chat_actions").insert({
+                user_id: userId,
+                action_type: toolName,
+                triggered_by: "ai",
+                source: "ai_chat",
+                before_data: toolArgs,
+                after_data: result,
+                confirmed: true,
+                reference_type: toolArgs.listing_id ? "listing" : toolArgs.deal_id ? "deal" : null,
+                reference_id: toolArgs.listing_id || toolArgs.deal_id || null,
+                status: "success",
+              }).then(() => {}).catch(() => {});
+            }
           } catch (err) {
             console.error(`[moqbil] Tool error (${toolName}):`, err);
-            currentMessages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify({ error: `فشل: ${err instanceof Error ? err.message : "خطأ"}` }) });
+            const errMsg = err instanceof Error ? err.message : "خطأ";
+            currentMessages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify({ error: `فشل: ${errMsg}` }) });
+            // Log failed action
+            if (userId) {
+              supabaseAdmin.from("ai_chat_actions").insert({
+                user_id: userId,
+                action_type: toolName,
+                triggered_by: "ai",
+                source: "ai_chat",
+                before_data: toolArgs,
+                after_data: {},
+                confirmed: false,
+                status: "failed",
+                error_message: errMsg,
+              }).then(() => {}).catch(() => {});
+            }
           }
         }
         iterations++;
@@ -2978,6 +3008,22 @@ serve(async (req) => {
     finalText = stripResourceLinksFromText(finalText, officialUrlsByPath);
     finalText = enforceVerifiedListingState(finalText, verifiedListingState);
     if (!finalText) finalText = "تم.";
+
+    // Log the full chat interaction to ai_chat_messages
+    if (userId) {
+      const sessionId = `${userId}-${new Date().toISOString().slice(0,10)}-${Date.now()}`;
+      const detectedIntent = isCreateListingIntent ? "create_listing" : isPublishIntent ? "publish" : isLocationIntent ? "set_location" : toolsUsed.length > 0 ? toolsUsed[0] : null;
+      supabaseAdmin.from("ai_chat_messages").insert({
+        user_id: userId,
+        session_id: sessionId,
+        user_message: lastUserText || "(مرفق)",
+        ai_response: finalText,
+        detected_intent: detectedIntent,
+        executed_action: toolsUsed.length > 0 ? toolsUsed.join(", ") : null,
+        status: "success",
+        metadata: { tools_used: toolsUsed, iterations, role },
+      }).then(() => {}).catch(() => {});
+    }
 
     if (toolsUsed.length > 0 && userId) {
       supabaseAdmin.from("agent_actions_log").insert({

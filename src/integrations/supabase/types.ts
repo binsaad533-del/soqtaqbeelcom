@@ -95,6 +95,104 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_chat_actions: {
+        Row: {
+          action_type: string
+          after_data: Json | null
+          before_data: Json | null
+          chat_message_id: string | null
+          confirmed: boolean | null
+          error_message: string | null
+          executed_at: string
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          source: string
+          status: string
+          triggered_by: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          after_data?: Json | null
+          before_data?: Json | null
+          chat_message_id?: string | null
+          confirmed?: boolean | null
+          error_message?: string | null
+          executed_at?: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          source?: string
+          status?: string
+          triggered_by?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          after_data?: Json | null
+          before_data?: Json | null
+          chat_message_id?: string | null
+          confirmed?: boolean | null
+          error_message?: string | null
+          executed_at?: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          source?: string
+          status?: string
+          triggered_by?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_chat_actions_chat_message_id_fkey"
+            columns: ["chat_message_id"]
+            isOneToOne: false
+            referencedRelation: "ai_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_chat_messages: {
+        Row: {
+          ai_response: string | null
+          created_at: string
+          detected_intent: string | null
+          executed_action: string | null
+          id: string
+          metadata: Json | null
+          session_id: string
+          status: string
+          user_id: string
+          user_message: string
+        }
+        Insert: {
+          ai_response?: string | null
+          created_at?: string
+          detected_intent?: string | null
+          executed_action?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id?: string
+          status?: string
+          user_id: string
+          user_message: string
+        }
+        Update: {
+          ai_response?: string | null
+          created_at?: string
+          detected_intent?: string | null
+          executed_action?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id?: string
+          status?: string
+          user_id?: string
+          user_message?: string
+        }
+        Relationships: []
+      }
       ai_user_memory: {
         Row: {
           budget_max: number | null
