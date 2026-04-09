@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Sparkles, ChevronLeft, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, FileText, Copy, Check } from "lucide-react";
+import { X, Send, Sparkles, ChevronLeft, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, FileText, Copy, Check, Mic, MicOff, TrendingUp, Shield, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
 import { useAiMemory } from "@/hooks/useAiMemory";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
 import ReactMarkdown from "react-markdown";
 
 import { cn } from "@/lib/utils";
@@ -112,6 +113,12 @@ const AiAssistant = () => {
   const { pageData } = usePageData();
   const { getMemoryContext, addAiNote, memory, loaded: memoryLoaded } = useAiMemory();
 
+  // Voice input
+  const handleVoiceResult = useCallback((text: string) => {
+    setInput(text);
+  }, []);
+  const { isListening, startListening, stopListening, supported: voiceSupported } = useVoiceInput(handleVoiceResult);
+
   useEffect(() => { setView("home"); setMessages([]); }, [pathname]);
   useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
   useEffect(() => { view === "chat" && inputRef.current?.focus(); }, [view]);
@@ -120,9 +127,7 @@ const AiAssistant = () => {
 
   const buildContext = useCallback(() => {
     let ctx = `الصفحة الحالية: ${pathname}\nدور المستخدم: ${role}`;
-    // Add page data
     if (pageData) ctx += `\n\n${pageData}`;
-    // Add persistent memory
     const memCtx = getMemoryContext();
     if (memCtx) ctx += `\n\n${memCtx}`;
     return ctx;
@@ -156,7 +161,6 @@ const AiAssistant = () => {
       },
       onDone: () => {
         setStreaming(false);
-        // Save a note about this interaction for memory
         if (assistantText.length > 20) {
           addAiNote(`المستخدم سأل: "${text.slice(0, 50)}" في صفحة ${pathname}`);
         }
@@ -415,7 +419,30 @@ const AiAssistant = () => {
               </div>
 
               <div className="p-3 border-t border-border/30 shrink-0">
+                {/* Voice listening indicator */}
+                {isListening && (
+                  <div className="flex items-center justify-center gap-2 mb-2 py-1.5 rounded-lg bg-destructive/5 border border-destructive/15">
+                    <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                    <span className="text-[10px] text-destructive font-medium">جاري الاستماع...</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
+                  {/* Voice button */}
+                  {voiceSupported && (
+                    <button
+                      onClick={isListening ? stopListening : startListening}
+                      disabled={streaming}
+                      className={cn(
+                        "rounded-xl h-8 w-8 flex items-center justify-center transition-all shrink-0",
+                        isListening
+                          ? "bg-destructive/10 text-destructive border border-destructive/20"
+                          : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30"
+                      )}
+                      title={isListening ? "إيقاف الاستماع" : "تحدث مع مقبل"}
+                    >
+                      {isListening ? <MicOff size={13} strokeWidth={1.5} /> : <Mic size={13} strokeWidth={1.5} />}
+                    </button>
+                  )}
                   <input
                     ref={inputRef}
                     type="text"
