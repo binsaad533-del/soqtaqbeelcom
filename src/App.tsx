@@ -241,6 +241,14 @@ const App = () => (
                   }
                 />
                 <Route path="/ai-chat" element={<AiChatPage />} />
+                <Route
+                  path="/moqbil-log"
+                  element={
+                    <ProtectedRoute>
+                      <MoqbilLogPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/install" element={<InstallPage />} />
                 <Route
                   path="/notification-settings"
