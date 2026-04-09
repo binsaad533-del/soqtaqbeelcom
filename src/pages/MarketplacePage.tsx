@@ -246,6 +246,7 @@ const MarketplacePage = () => {
         </div>
 
         <MarketplaceTicker />
+        <OpportunityHeatmap />
 
         {isMobile && <SmartSearchBar onApplyFilters={handleSmartSearch} resultCount={filtered.length} />}
 
