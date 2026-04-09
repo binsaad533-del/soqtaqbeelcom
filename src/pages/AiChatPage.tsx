@@ -468,7 +468,17 @@ const AiChatPage = () => {
   const hasInsights = proactiveInsights.length > 0 || marketAlerts.length > 0;
 
   return (
-    <div className="flex h-[calc(100vh-60px)] overflow-hidden">
+    <div className="flex h-[calc(100vh-60px)] overflow-hidden" onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}>
+      {/* Drag overlay */}
+      {isDragging && (
+        <div className="absolute inset-0 z-50 bg-primary/10 border-2 border-dashed border-primary/40 rounded-xl flex items-center justify-center pointer-events-none">
+          <div className="bg-card/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-lg text-center">
+            <Paperclip size={32} className="text-primary mx-auto mb-2" />
+            <p className="text-sm font-medium text-foreground">أفلت الملفات هنا</p>
+            <p className="text-xs text-muted-foreground">أي نوع وأي حجم</p>
+          </div>
+        </div>
+      )}
       {/* Hidden file input - accept all */}
       <input ref={fileInputRef} type="file" accept="*/*" multiple className="hidden" onChange={handleFileUpload} />
 
