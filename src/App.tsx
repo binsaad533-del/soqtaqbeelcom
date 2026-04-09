@@ -63,6 +63,7 @@ const AdminVerificationsPage = lazy(() => import("./pages/AdminVerificationsPage
 const SellerDashboardPage = lazy(() => import("./pages/SellerDashboardPage"));
 const NotificationSettingsPage = lazy(() => import("./pages/NotificationSettingsPage"));
 const AiChatPage = lazy(() => import("./pages/AiChatPage"));
+const MoqbilLogPage = lazy(() => import("./pages/MoqbilLogPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
