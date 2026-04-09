@@ -449,6 +449,11 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
           <ShieldCheck size={10} /> بائع موثوق
         </div>
       )}
+      {listing.featured && (
+        <div className="absolute top-2 left-2 z-10 bg-amber-500/90 text-white text-[9px] px-2 py-0.5 rounded-md flex items-center gap-1">
+          ★ مميز
+        </div>
+      )}
 
       <Link to={`/listing/${listing.id}`}>
         <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center relative">
