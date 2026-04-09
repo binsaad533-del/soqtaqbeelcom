@@ -565,6 +565,9 @@ const AiAssistant = () => {
               {/* Personalized Recommendations */}
               {showRecommendations && <AiRecommendations />}
 
+              {/* Smart Matching */}
+              {showRecommendations && <SmartMatchPanel />}
+
               {/* Image Analysis Quick Action */}
               <button
                 onClick={() => fileInputRef.current?.click()}
