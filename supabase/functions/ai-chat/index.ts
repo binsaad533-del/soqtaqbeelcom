@@ -2836,9 +2836,12 @@ serve(async (req) => {
     const lastUserMsg = formattedMessages.filter((m: any) => m.role === "user").pop();
     const lastUserText = typeof lastUserMsg?.content === "string" ? lastUserMsg.content : "";
     const isCreateListingIntent = /أبي أبيع|ابي ابيع|أبغى أبيع|ابغا ابيع|أنزل إعلان|انزل اعلان|أضيف إعلان|اضيف اعلان|سوّ لي إعلان|سو لي اعلان|أنشئ إعلان|انشئ اعلان|بيع محل|بيع مطعم|بيع مقهى|بيع كافيه|بيع بقالة|عندي محل|عندي مطعم|أبي أعرض|ابي اعرض|حاب أبيع|حاب ابيع/i.test(lastUserText);
+    const isPublishIntent = /انشر|انشره|نشّره|نشره|انزله|نزله|اطلقه|خلاص انشر|publish/i.test(lastUserText);
+    const isLocationIntent = /maps\.app\.goo\.gl|goo\.gl\/maps|google\.com\/maps|maps\.google|الموقع|الإحداثيات|خريطة/i.test(lastUserText);
+    const isToolForcedIntent = isCreateListingIntent || isPublishIntent || isLocationIntent;
     
     // If user wants to create listing but isn't authenticated, tell them to login
-    if (isCreateListingIntent && !userId) {
+    if ((isCreateListingIntent || isPublishIntent) && !userId) {
       const loginMsg = "عشان أقدر أنشئ لك إعلان، لازم تسجّل دخولك أول. سجّل دخول وبعدها ارجع كلمني وأنا أسوي لك كل شي 👍";
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
@@ -2856,8 +2859,8 @@ serve(async (req) => {
     const MAX_ITERATIONS = 5;
     let toolsUsed: string[] = [];
 
-    // Determine tool_choice: force "required" for first iteration when intent is to create a listing
-    const initialToolChoice = isCreateListingIntent && iterations === 0 ? "required" : "auto";
+    // Determine tool_choice: force "required" for first iteration when intent requires tool execution
+    const initialToolChoice = isToolForcedIntent ? "required" : "auto";
 
     while (iterations < MAX_ITERATIONS) {
       console.log(`[moqbil] Tool loop iteration ${iterations}, tools: ${tools.length}, toolChoice: ${iterations === 0 ? initialToolChoice : "auto"}`);
