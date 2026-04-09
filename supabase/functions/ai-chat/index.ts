@@ -760,10 +760,12 @@ serve(async (req) => {
     let userId = clientUserId || "";
     let role = userRole || "customer";
 
+    // Try JWT auth - skip anon key
     const authHeader = req.headers.get("authorization") || "";
-    if (authHeader.startsWith("Bearer ") && authHeader.length > 50) {
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+    const token = authHeader.replace("Bearer ", "").trim();
+    if (token && token !== anonKey && token.length > 50) {
       try {
-        const token = authHeader.replace("Bearer ", "");
         const { data: { user } } = await supabaseAdmin.auth.getUser(token);
         if (user) {
           userId = user.id;
@@ -772,6 +774,7 @@ serve(async (req) => {
         }
       } catch { /* use client-provided */ }
     }
+    console.log(`[moqbil] User: ${userId?.slice(0,8)}, Role: ${role}`);
 
     let systemMessage = context ? `${SYSTEM_PROMPT}\n${context}` : SYSTEM_PROMPT;
     systemMessage += `\nدور المستخدم: ${role}`;
