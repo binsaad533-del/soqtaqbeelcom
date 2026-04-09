@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Download, Bot, AlertTriangle, CheckCircle, XCircle, MessageSquare, Zap } from "lucide-react";
+import { Search, Download, Bot, AlertTriangle, CheckCircle, XCircle, MessageSquare, Zap, ThumbsUp, ThumbsDown } from "lucide-react";
 import { format } from "date-fns";
 
 const ACTION_LABELS: Record<string, string> = {
@@ -51,9 +51,24 @@ export default function MoqbilAuditPanel() {
     },
   });
 
+  const { data: allFeedback = [] } = useQuery({
+    queryKey: ["admin-moqbil-feedback"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("ai_chat_feedback" as any)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      return (data || []) as any[];
+    },
+  });
+
   const failedActions = allActions.filter((a: any) => a.status === "failed");
   const successActions = allActions.filter((a: any) => a.status === "success");
   const uniqueUsers = new Set(allMessages.map((m: any) => m.user_id)).size;
+  const positiveFeedback = allFeedback.filter((f: any) => f.rating === "positive");
+  const negativeFeedback = allFeedback.filter((f: any) => f.rating === "negative");
+  const satisfactionRate = allFeedback.length > 0 ? Math.round((positiveFeedback.length / allFeedback.length) * 100) : 0;
 
   const filtered = allMessages.filter((m: any) => {
     if (search && !m.user_message?.includes(search) && !m.ai_response?.includes(search) && !m.user_id?.includes(search)) return false;
@@ -88,7 +103,7 @@ export default function MoqbilAuditPanel() {
   return (
     <div className="space-y-4">
       {/* KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         <Card>
           <CardContent className="pt-3 text-center">
             <MessageSquare className="w-4 h-4 mx-auto mb-1 text-primary" />
@@ -124,7 +139,69 @@ export default function MoqbilAuditPanel() {
             <p className="text-xs text-muted-foreground">مستخدم</p>
           </CardContent>
         </Card>
+        <Card>
+          <CardContent className="pt-3 text-center">
+            <ThumbsUp className="w-4 h-4 mx-auto mb-1 text-green-500" />
+            <p className="text-xl font-bold">{positiveFeedback.length}</p>
+            <p className="text-xs text-muted-foreground">👍 إيجابي</p>
+          </CardContent>
+        </Card>
+        <Card className={negativeFeedback.length > 5 ? "border-destructive/30" : ""}>
+          <CardContent className="pt-3 text-center">
+            <ThumbsDown className="w-4 h-4 mx-auto mb-1 text-red-500" />
+            <p className="text-xl font-bold">{negativeFeedback.length}</p>
+            <p className="text-xs text-muted-foreground">👎 سلبي</p>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Satisfaction Rate */}
+      {allFeedback.length > 0 && (
+        <Card>
+          <CardContent className="pt-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">نسبة الرضا عن مقبل</span>
+              <span className={`text-lg font-bold ${satisfactionRate >= 70 ? "text-green-600" : satisfactionRate >= 40 ? "text-amber-600" : "text-red-600"}`}>
+                {satisfactionRate}%
+              </span>
+            </div>
+            <div className="w-full h-2 bg-muted rounded-full mt-2 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${satisfactionRate >= 70 ? "bg-green-500" : satisfactionRate >= 40 ? "bg-amber-500" : "bg-red-500"}`}
+                style={{ width: `${satisfactionRate}%` }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Negative Feedback Details */}
+      {negativeFeedback.length > 0 && (
+        <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2 text-amber-700">
+              <ThumbsDown className="w-4 h-4" />
+              تقييمات سلبية تحتاج تحسين ({negativeFeedback.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {negativeFeedback.slice(0, 8).map((f: any) => (
+                <div key={f.id} className="text-xs p-2 rounded-lg bg-background/50 border border-border/30">
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium truncate max-w-[60%]">{f.user_message_snapshot?.slice(0, 60)}</span>
+                    <span className="text-muted-foreground shrink-0">{format(new Date(f.created_at), "MM/dd HH:mm")}</span>
+                  </div>
+                  {f.comment && <p className="text-destructive/80">💬 {f.comment}</p>}
+                  {f.error_category && (
+                    <Badge variant="outline" className="text-[9px] mt-1">{f.error_category}</Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Failed Actions Alert */}
       {failedActions.length > 0 && (

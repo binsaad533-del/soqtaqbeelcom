@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Paperclip, Copy, Check, ChevronRight, FileText, Loader2 } from "lucide-react";
+import { Send, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Paperclip, Copy, Check, ChevronRight, FileText, Loader2, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
@@ -36,6 +36,7 @@ interface ChatMsg {
   time: string;
   images?: string[];
   files?: { name: string; type: string; size: number; isImage: boolean }[];
+  feedback?: "positive" | "negative" | null;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
@@ -190,6 +191,91 @@ function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
+
+const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, onFeedback }: {
+  messageId: string;
+  currentFeedback: "positive" | "negative" | null;
+  userMessage: string;
+  aiResponse: string;
+  onFeedback: (rating: "positive" | "negative") => void;
+}) => {
+  const { user } = useAuthContext();
+  const [showComment, setShowComment] = useState(false);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const submit = async (rating: "positive" | "negative", commentText?: string) => {
+    if (!user) return;
+    setSubmitting(true);
+    try {
+      // First try to save to ai_chat_messages to get a real DB ID, then save feedback
+      // Since messageId is a client-side timestamp, we save snapshots instead
+      await supabase.from("ai_chat_feedback" as any).insert({
+        user_id: user.id,
+        rating,
+        comment: commentText || null,
+        user_message_snapshot: userMessage.slice(0, 500),
+        ai_response_snapshot: aiResponse.slice(0, 1000),
+        error_category: rating === "negative" ? (commentText ? "user_reported" : "thumbs_down") : null,
+      });
+      onFeedback(rating);
+      setShowComment(false);
+      toast.success(rating === "positive" ? "شكراً على تقييمك!" : "شكراً، سنتحسن!");
+    } catch {
+      toast.error("فشل حفظ التقييم");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (currentFeedback) {
+    return (
+      <span className="text-[10px] text-muted-foreground">
+        {currentFeedback === "positive" ? "👍" : "👎"}
+      </span>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        onClick={() => submit("positive")}
+        disabled={submitting}
+        className="text-muted-foreground/40 hover:text-green-500 transition-colors p-0.5"
+        title="رد مفيد"
+      >
+        <ThumbsUp size={12} />
+      </button>
+      <button
+        onClick={() => setShowComment(true)}
+        disabled={submitting}
+        className="text-muted-foreground/40 hover:text-red-500 transition-colors p-0.5"
+        title="رد غير مفيد"
+      >
+        <ThumbsDown size={12} />
+      </button>
+      {showComment && (
+        <div className="flex items-center gap-1 mr-1">
+          <input
+            type="text"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="وش المشكلة؟"
+            className="text-[10px] px-2 py-0.5 rounded border border-border/50 bg-background w-32"
+            onKeyDown={(e) => e.key === "Enter" && submit("negative", comment)}
+          />
+          <button
+            onClick={() => submit("negative", comment)}
+            disabled={submitting}
+            className="text-[10px] text-destructive hover:underline"
+          >
+            إرسال
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const AiChatPage = () => {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -697,7 +783,20 @@ const AiChatPage = () => {
                   <span>{msg.content}</span>
                 )}
               </div>
-              <span className="text-[10px] text-muted-foreground mt-1 px-1 block">{msg.time}</span>
+              <div className="flex items-center gap-2 mt-1 px-1">
+                <span className="text-[10px] text-muted-foreground">{msg.time}</span>
+                {msg.role === "assistant" && !streaming && (
+                  <FeedbackButtons
+                    messageId={msg.id}
+                    currentFeedback={msg.feedback || null}
+                    userMessage={messages[messages.indexOf(msg) - 1]?.content || ""}
+                    aiResponse={msg.content}
+                    onFeedback={(rating) => {
+                      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, feedback: rating } : m));
+                    }}
+                  />
+                )}
+              </div>
             </div>
           ))}
 

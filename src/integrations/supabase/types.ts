@@ -154,6 +154,56 @@ export type Database = {
           },
         ]
       }
+      ai_chat_feedback: {
+        Row: {
+          action_type: string | null
+          ai_response_snapshot: string | null
+          chat_message_id: string | null
+          comment: string | null
+          created_at: string
+          detected_intent: string | null
+          error_category: string | null
+          id: string
+          rating: string
+          user_id: string
+          user_message_snapshot: string | null
+        }
+        Insert: {
+          action_type?: string | null
+          ai_response_snapshot?: string | null
+          chat_message_id?: string | null
+          comment?: string | null
+          created_at?: string
+          detected_intent?: string | null
+          error_category?: string | null
+          id?: string
+          rating: string
+          user_id: string
+          user_message_snapshot?: string | null
+        }
+        Update: {
+          action_type?: string | null
+          ai_response_snapshot?: string | null
+          chat_message_id?: string | null
+          comment?: string | null
+          created_at?: string
+          detected_intent?: string | null
+          error_category?: string | null
+          id?: string
+          rating?: string
+          user_id?: string
+          user_message_snapshot?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_chat_feedback_chat_message_id_fkey"
+            columns: ["chat_message_id"]
+            isOneToOne: false
+            referencedRelation: "ai_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_chat_messages: {
         Row: {
           ai_response: string | null
