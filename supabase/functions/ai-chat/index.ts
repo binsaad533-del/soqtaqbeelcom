@@ -315,6 +315,10 @@ const ROLE_TOOLS: Record<string, string[]> = {
     "create_listing", "edit_my_listing", "cancel_my_listing", "update_listing_pricing",
     "submit_offer", "withdraw_offer", "respond_to_offer", "express_interest",
     "confirm_receipt", "save_listing", "unsave_listing", "create_search_alert", "send_message",
+    // Deal lifecycle
+    "send_negotiation_message", "update_agreed_price", "submit_legal_confirmation",
+    "start_ownership_transfer", "generate_agreement", "get_deal_full_details",
+    "get_agreement_details", "get_my_agreements", "get_deal_negotiation_history", "complete_deal_via_moqbil",
     // Supervisor write
     "change_listing_status", "change_deal_status", "submit_review_status",
     "report_listing_issue", "approve_listing_publish", "reject_draft_listing",
@@ -330,6 +334,10 @@ const ROLE_TOOLS: Record<string, string[]> = {
     "submit_offer", "withdraw_offer", "respond_to_offer", "express_interest",
     "confirm_receipt", "save_listing", "unsave_listing", "create_search_alert",
     "send_message", "report_listing_issue",
+    // Deal lifecycle
+    "send_negotiation_message", "update_agreed_price", "submit_legal_confirmation",
+    "start_ownership_transfer", "generate_agreement", "get_deal_full_details",
+    "get_agreement_details", "get_my_agreements", "get_deal_negotiation_history", "complete_deal_via_moqbil",
   ],
 };
 
