@@ -691,6 +691,12 @@ const ListingDetailsPage = () => {
               {/* AI Credibility Badge */}
               <CredibilityBadge data={(listing as any).ai_trust_score as any} />
 
+              {/* Competitive Intelligence */}
+              <CompetitiveIntelPanel listingId={listing.id} />
+
+              {/* Listing Health Report - for owner */}
+              {isOwner && <ListingHealthReport listingId={listing.id} />}
+
               {/* Deal-type-aware Transparency Indicator */}
               <TransparencyIndicator listing={listing} className="mb-4" />
 
