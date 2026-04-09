@@ -703,12 +703,15 @@ const AiChatPage = () => {
               {pendingFiles.map((pf, i) => (
                 <div key={i} className="relative shrink-0">
                   {pf.isImage ? (
-                    <img src={pf.dataUrl} alt="" className="w-14 h-14 object-cover rounded-lg border border-primary/20" />
+                    <img src={pf.dataUrl || pf.storageUrl} alt="" className="w-14 h-14 object-cover rounded-lg border border-primary/20" />
                   ) : (
                     <div className="w-14 h-14 rounded-lg border border-primary/20 bg-muted/30 flex flex-col items-center justify-center gap-0.5 p-1">
                       <FileText size={16} className="text-primary/60" />
                       <span className="text-[7px] text-muted-foreground text-center leading-tight truncate w-full">{pf.name.split(".").pop()?.toUpperCase()}</span>
                     </div>
+                  )}
+                  {pf.uploaded && (
+                    <span className="absolute -bottom-1 -left-1 w-4 h-4 rounded-full bg-success text-success-foreground flex items-center justify-center text-[8px]">✓</span>
                   )}
                   <button onClick={() => removePendingFile(i)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-[8px]">✕</button>
                 </div>
