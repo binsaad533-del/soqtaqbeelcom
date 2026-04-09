@@ -245,6 +245,27 @@ const CustomerDashboardPage = () => {
         )}
 
 
+        {/* ═══ PROFILE COMPLETION BANNER ═══ */}
+        {profileCompleteness < 100 && (
+          <Link
+            to="/dashboard#account"
+            onClick={() => { setActiveTab("account"); setSearchQuery(""); }}
+            className="flex items-center gap-3 p-3.5 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-all mb-5 animate-reveal"
+          >
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <UserCheck size={15} className="text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-primary">أكمل ملفك الشخصي لزيادة الثقة</p>
+              <p className="text-[10px] text-muted-foreground">اكتمال الملف: {profileCompleteness}%</p>
+            </div>
+            <div className="w-16 h-1.5 rounded-full bg-primary/10 shrink-0 overflow-hidden">
+              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${profileCompleteness}%` }} />
+            </div>
+            <ArrowUpRight size={13} className="text-primary/50 shrink-0" />
+          </Link>
+        )}
+
         {/* ═══ PROFILE & QUICK INFO BAR ═══ */}
         <h1 className="sr-only">لوحة تحكم العميل</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6 animate-reveal" style={{ animationDelay: '80ms' }}>
