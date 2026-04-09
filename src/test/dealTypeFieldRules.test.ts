@@ -105,8 +105,8 @@ describe("dealTypeFieldRules", () => {
       expect(isGibberish("qwerty")).toBe(true);
     });
 
-    it("detects no-letter content", () => {
-      expect(isGibberish("123456")).toBe(true);
+    it("detects no-letter content (symbols only, not pure numbers)", () => {
+      expect(isGibberish("123456")).toBe(false); // pure numbers are valid (e.g. rent amounts)
       expect(isGibberish("!!!???")).toBe(true);
     });
 
