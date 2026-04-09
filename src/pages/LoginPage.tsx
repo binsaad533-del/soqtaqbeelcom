@@ -185,7 +185,21 @@ const LoginPage = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <div className="flex flex-col items-center mb-3">
-            <img src={logoIconGold} alt="سوق تقبيل" className="h-14 md:h-16 w-auto" />
+            <div className="relative h-14 md:h-16 w-14 md:w-16">
+              {/* Orbiting dots */}
+              <div className="absolute inset-[-8px] animate-[spin_6s_linear_infinite]">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary/60" />
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary/30" />
+              </div>
+              <div className="absolute inset-[-12px] animate-[spin_8s_linear_infinite_reverse]">
+                <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1 h-1 rounded-full bg-primary/40" />
+                <div className="absolute top-1/2 left-0 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary/20" />
+              </div>
+              {/* Orbital ring */}
+              <div className="absolute inset-[-6px] rounded-full border border-primary/10 animate-[spin_10s_linear_infinite]" />
+              {/* Logo */}
+              <img src={logoIconGold} alt="سوق تقبيل" className="h-full w-full object-contain relative z-10" />
+            </div>
             <span className="text-xs md:text-sm font-semibold tracking-[0.25em] text-foreground/70 mt-1.5 uppercase">SOQ TAQBEEL</span>
           </div>
           <h1 className="text-sm text-muted-foreground mt-1">
