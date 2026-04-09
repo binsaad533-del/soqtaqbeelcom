@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { Sparkles, Target, Loader2, RefreshCw, ExternalLink } from "lucide-react";
+import { Target, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import PriceDisplay from "@/components/PriceDisplay";
