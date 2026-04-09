@@ -226,6 +226,22 @@ const AiChatPage = () => {
     return ctx;
   }, [pathname, role, pageData, getMemoryContext]);
 
+  const MAX_BASE64_SIZE = 4 * 1024 * 1024; // 4MB — keep base64 for small images only
+
+  const uploadToStorage = async (file: File): Promise<string> => {
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `ai-chat/${user?.id || "anon"}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("chat-attachments")
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (error) throw error;
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from("chat-attachments")
+      .createSignedUrl(path, 60 * 60 * 24 * 365);
+    if (signedError) throw signedError;
+    return signedData.signedUrl;
+  };
+
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -235,19 +251,51 @@ const AiChatPage = () => {
 
     for (const file of Array.from(files)) {
       try {
-        const dataUrl = await fileToBase64(file);
         const image = isImageFile(file);
+        let dataUrl: string | undefined;
+        let storageUrl: string | undefined;
         let textContent: string | undefined;
+        let uploaded = false;
 
-        // For text-based files, also extract text content
+        // Text-based files: extract text content directly
         if (isTextFile(file)) {
           try {
             textContent = await fileToText(file);
-            // Limit text to ~50k chars to avoid payload issues
             if (textContent.length > 50000) {
               textContent = textContent.slice(0, 50000) + "\n\n... [تم اختصار الملف - الحجم الأصلي: " + formatFileSize(file.size) + "]";
             }
-          } catch { /* fallback to base64 only */ }
+          } catch { /* fallback */ }
+          // Small text files don't need storage upload
+          uploaded = false;
+        }
+
+        // Small images: base64 for direct vision AI
+        if (image && file.size <= MAX_BASE64_SIZE) {
+          dataUrl = await fileToBase64(file);
+        }
+        // Large images: upload to storage, send URL
+        else if (image && file.size > MAX_BASE64_SIZE) {
+          try {
+            storageUrl = await uploadToStorage(file);
+            uploaded = true;
+            toast.success(`تم رفع ${file.name}`);
+          } catch (err) {
+            console.error("Upload failed:", err);
+            toast.error(`فشل رفع ${file.name}`);
+            continue;
+          }
+        }
+        // Binary documents (PDF, DOCX, XLSX, etc): upload to storage
+        else if (!isTextFile(file) && !image) {
+          try {
+            storageUrl = await uploadToStorage(file);
+            uploaded = true;
+            toast.success(`تم رفع ${file.name}`);
+          } catch (err) {
+            console.error("Upload failed:", err);
+            toast.error(`فشل رفع ${file.name}`);
+            continue;
+          }
         }
 
         newFiles.push({
@@ -255,8 +303,10 @@ const AiChatPage = () => {
           type: file.type || "application/octet-stream",
           size: file.size,
           dataUrl,
+          storageUrl,
           isImage: image,
           textContent,
+          uploaded,
         });
       } catch {
         toast.error(`فشل قراءة الملف: ${file.name}`);
@@ -264,11 +314,11 @@ const AiChatPage = () => {
     }
 
     if (newFiles.length > 0) {
-      setPendingFiles(prev => [...prev, ...newFiles].slice(0, 10));
+      setPendingFiles(prev => [...prev, ...newFiles]);
     }
     setLoadingFiles(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, []);
+  }, [user?.id]);
 
   const removePendingFile = (index: number) => setPendingFiles(prev => prev.filter((_, i) => i !== index));
 
