@@ -102,11 +102,15 @@ const CustomerDashboardPage = () => {
     if (file.size > 5 * 1024 * 1024) { toast.error("الحد الأقصى 5 ميغا"); return; }
     setSaving(true);
     try {
-      const path = `avatars/${profile.user_id}.${file.name.split(".").pop()}`;
-      await supabase.storage.from("listings").upload(path, file, { upsert: true });
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `avatars/${profile.user_id}_${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("listings").upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
       const { data: { publicUrl } } = supabase.storage.from("listings").getPublicUrl(path);
-      await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", profile.user_id);
+      const { error: updateErr } = await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", profile.user_id);
+      if (updateErr) throw updateErr;
       toast.success("تم تحديث الصورة");
+      window.location.reload();
     } catch (err: any) { toast.error(err?.message || "فشل الرفع"); }
     finally { setSaving(false); }
   }, [profile?.user_id]);
@@ -139,10 +143,21 @@ const CustomerDashboardPage = () => {
     return { active, waiting, completed, totalVal, commission: totalVal * 0.01 };
   }, [deals]);
 
+  const profileMissing = useMemo(() => {
+    if (!profile) return [];
+    const missing: string[] = [];
+    if (!profile.full_name) missing.push("الاسم");
+    if (!profile.phone) missing.push("رقم الجوال");
+    if (!profile.avatar_url) missing.push("صورة شخصية");
+    if (!hasRealEmail) missing.push("بريد إلكتروني");
+    if (!isPhoneVerified) missing.push("توثيق الجوال");
+    return missing;
+  }, [profile, hasRealEmail, isPhoneVerified]);
+
   const profileCompleteness = useMemo(() => {
     if (!profile) return 0;
-    return Math.round(([profile.full_name, profile.phone, profile.avatar_url, hasRealEmail, isPhoneVerified].filter(Boolean).length / 5) * 100);
-  }, [profile, hasRealEmail, isPhoneVerified]);
+    return Math.round(((5 - profileMissing.length) / 5) * 100);
+  }, [profile, profileMissing]);
 
   const dealLink = (d: Deal) => ["completed", "finalized"].includes(d.status) ? `/agreement/${d.id}` : `/negotiate/${d.id}`;
 
@@ -257,7 +272,9 @@ const CustomerDashboardPage = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-primary">أكمل ملفك الشخصي لزيادة الثقة</p>
-              <p className="text-[10px] text-muted-foreground">اكتمال الملف: {profileCompleteness}%</p>
+              <p className="text-[10px] text-muted-foreground">
+                ينقصك: {profileMissing.join(" · ")}
+              </p>
             </div>
             <div className="w-16 h-1.5 rounded-full bg-primary/10 shrink-0 overflow-hidden">
               <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${profileCompleteness}%` }} />
