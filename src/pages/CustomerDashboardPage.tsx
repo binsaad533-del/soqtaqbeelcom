@@ -15,7 +15,7 @@ import {
   DollarSign, Camera, Pencil,
   Check, X as XIcon, Phone, UserCheck, Shield, Bell,
   Store, Briefcase, ChevronLeft, Wallet, TrendingUp,
-  ArrowUpRight, Mail, Search, ShoppingCart, Heart, User, Settings
+  ArrowUpRight, Mail, Search, ShoppingCart, Heart, User, Settings, Bot
 } from "lucide-react";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
