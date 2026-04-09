@@ -323,7 +323,7 @@ const AiChatPage = () => {
   const removePendingFile = (index: number) => setPendingFiles(prev => prev.filter((_, i) => i !== index));
 
   const sendMessage = useCallback((text: string, files?: PendingFile[]) => {
-    const imageUrls = files?.filter(f => f.isImage).map(f => f.dataUrl);
+    const imageUrls = files?.filter(f => f.isImage).map(f => f.dataUrl || f.storageUrl).filter(Boolean) as string[];
     const fileMeta = files?.map(f => ({ name: f.name, type: f.type, size: f.size, isImage: f.isImage }));
 
     const userMsg: ChatMsg = {
@@ -339,11 +339,8 @@ const AiChatPage = () => {
 
     // Build multimodal content for the current message
     const buildContent = (msg: ChatMsg, msgFiles?: PendingFile[]): string | any[] => {
-      // For the new message being sent, use the files data
       if (msgFiles && msgFiles.length > 0) {
         const parts: any[] = [];
-
-        // Add text content
         let combinedText = msg.content || "";
 
         // Add text file contents
@@ -355,8 +352,17 @@ const AiChatPage = () => {
           }
         }
 
-        // Add non-image, non-text file descriptions
-        const otherFiles = msgFiles.filter(f => !f.isImage && !f.textContent);
+        // Add uploaded binary doc descriptions with URLs
+        const uploadedDocs = msgFiles.filter(f => !f.isImage && !f.textContent && f.storageUrl);
+        if (uploadedDocs.length > 0) {
+          combinedText += "\n\n";
+          for (const doc of uploadedDocs) {
+            combinedText += `\n📎 ملف مرفق: "${doc.name}" (${doc.type}, ${formatFileSize(doc.size)}) — رابط: ${doc.storageUrl}`;
+          }
+        }
+
+        // Add non-uploaded non-image files
+        const otherFiles = msgFiles.filter(f => !f.isImage && !f.textContent && !f.storageUrl);
         if (otherFiles.length > 0) {
           combinedText += "\n\n";
           for (const of_ of otherFiles) {
@@ -368,10 +374,13 @@ const AiChatPage = () => {
           parts.push({ type: "text", text: combinedText.trim() });
         }
 
-        // Add images as image_url
+        // Add images — use dataUrl (base64) or storageUrl
         const imageFiles = msgFiles.filter(f => f.isImage);
         for (const img of imageFiles) {
-          parts.push({ type: "image_url", image_url: { url: img.dataUrl } });
+          const url = img.dataUrl || img.storageUrl;
+          if (url) {
+            parts.push({ type: "image_url", image_url: { url } });
+          }
         }
 
         return parts.length > 0 ? parts : msg.content;
