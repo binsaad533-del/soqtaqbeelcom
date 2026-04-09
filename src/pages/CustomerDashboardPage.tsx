@@ -102,10 +102,14 @@ const CustomerDashboardPage = () => {
     if (file.size > 5 * 1024 * 1024) { toast.error("الحد الأقصى 5 ميغا"); return; }
     setSaving(true);
     try {
-      const path = `avatars/${profile.user_id}.${file.name.split(".").pop()}`;
-      await supabase.storage.from("listings").upload(path, file, { upsert: true });
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `avatars/${profile.user_id}_${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("listings").upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
       const { data: { publicUrl } } = supabase.storage.from("listings").getPublicUrl(path);
-      await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", profile.user_id);
+      const { error: updateErr } = await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", profile.user_id);
+      if (updateErr) throw updateErr;
+      setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : prev);
       toast.success("تم تحديث الصورة");
     } catch (err: any) { toast.error(err?.message || "فشل الرفع"); }
     finally { setSaving(false); }
