@@ -197,6 +197,7 @@ const AiChatPage = () => {
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, role: authRole } = useAuthContext();
