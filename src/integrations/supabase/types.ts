@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_actions_log: {
+        Row: {
+          action_details: Json
+          action_type: string
+          created_at: string
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          result: string | null
+          user_id: string
+        }
+        Insert: {
+          action_details?: Json
+          action_type: string
+          created_at?: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          result?: string | null
+          user_id: string
+        }
+        Update: {
+          action_details?: Json
+          action_type?: string
+          created_at?: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          result?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      agent_settings: {
+        Row: {
+          agent_rules: Json | null
+          auto_evaluate_offers: boolean
+          auto_reject_below_min: boolean
+          auto_reply_inquiries: boolean
+          created_at: string
+          daily_summary: boolean
+          id: string
+          is_active: boolean
+          max_budget: number | null
+          min_acceptable_price: number | null
+          preferred_response_tone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent_rules?: Json | null
+          auto_evaluate_offers?: boolean
+          auto_reject_below_min?: boolean
+          auto_reply_inquiries?: boolean
+          created_at?: string
+          daily_summary?: boolean
+          id?: string
+          is_active?: boolean
+          max_budget?: number | null
+          min_acceptable_price?: number | null
+          preferred_response_tone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent_rules?: Json | null
+          auto_evaluate_offers?: boolean
+          auto_reject_below_min?: boolean
+          auto_reply_inquiries?: boolean
+          created_at?: string
+          daily_summary?: boolean
+          id?: string
+          is_active?: boolean
+          max_budget?: number | null
+          min_acceptable_price?: number | null
+          preferred_response_tone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_user_memory: {
         Row: {
           budget_max: number | null
@@ -1212,6 +1293,54 @@ export type Database = {
           surveillance_cameras?: string | null
           title?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      market_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_dismissed: boolean
+          is_read: boolean
+          message: string
+          metadata: Json | null
+          priority: string
+          reference_id: string | null
+          reference_type: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          alert_type?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_dismissed?: boolean
+          is_read?: boolean
+          message: string
+          metadata?: Json | null
+          priority?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_dismissed?: boolean
+          is_read?: boolean
+          message?: string
+          metadata?: Json | null
+          priority?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }
