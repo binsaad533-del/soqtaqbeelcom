@@ -722,7 +722,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
         { stage: "استقبال عروض", date: offers.data?.[0]?.created_at, done: (offers.data?.length || 0) > 0 },
         { stage: "بدء صفقة", date: deals.data?.[0]?.created_at, done: (deals.data?.length || 0) > 0 },
       ];
-      return { listing, deals: deals.data || [], offers: offers.data || [], timeline };
+      return { listing, listing_url: `${BASE_URL}/listing/${listing.id}`, deals: deals.data || [], offers: offers.data || [], timeline };
     }
 
     case "get_delivery_timeline": {
@@ -823,6 +823,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
       await sb.from("audit_logs").insert({ user_id: userId, action: "listing_created_via_moqbil", resource_type: "listing",
         resource_id: data.id, details: { title: listing.title, city: args.city } });
       return { success: true, listing_id: data.id, title: data.title, status: "draft",
+        listing_url: `${BASE_URL}/listing/${data.id}`,
         message: "تم إنشاء مسودة الإعلان بنجاح",
         next_steps: ["ارفع صور للتحليل التلقائي", "أكمل بيانات الإفصاح", "انشر الإعلان"] };
     }
@@ -1514,7 +1515,7 @@ async function executeTool(name: string, args: any, userId: string, role: string
         body: `تم نشر إعلانك بنجاح${args.notes ? ` — ${args.notes}` : ""}`, type: "listing", reference_id: args.listing_id, reference_type: "listing" });
       await sb.from("audit_logs").insert({ user_id: userId, action: "listing_approved", resource_type: "listing",
         resource_id: args.listing_id, details: { notes: args.notes } });
-      return { success: true, listing_id: args.listing_id, message: "تم اعتماد ونشر الإعلان" };
+      return { success: true, listing_id: args.listing_id, listing_url: `${BASE_URL}/listing/${args.listing_id}`, message: "تم اعتماد ونشر الإعلان" };
     }
 
     case "reject_draft_listing": {
