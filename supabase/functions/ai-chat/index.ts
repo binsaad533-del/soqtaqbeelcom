@@ -1547,7 +1547,114 @@ async function executeTool(name: string, args: any, userId: string, role: string
       return { success: true, listing_id: args.listing_id, updated_fields: Object.keys(upd).filter(k => k !== "updated_at") };
     }
 
-    case "assign_reviewer": {
+    case "publish_my_listing": {
+      const { data: listing } = await sb.from("listings")
+        .select("id, owner_id, status, title, price, city, business_activity, location_lat, location_lng, photos, deal_type, primary_deal_type")
+        .eq("id", args.listing_id).is("deleted_at", null).single();
+      if (!listing) return { error: "الإعلان غير موجود" };
+      if (role === "customer" && listing.owner_id !== userId) return { error: "ليس لديك صلاحية" };
+      if (listing.status === "published") return { success: true, already_published: true, listing_url: `${BASE_URL}/listing/${listing.id}`, message: "الإعلان منشور بالفعل" };
+      if (listing.status !== "draft") return { error: `لا يمكن نشر إعلان بحالة "${listing.status}"` };
+
+      // Check phone verification
+      const { data: profile } = await sb.from("profiles").select("phone_verified").eq("user_id", userId).single();
+      if (!profile?.phone_verified) return { error: "يجب توثيق رقم الجوال أولاً قبل النشر — وثّق رقمك من إعدادات الحساب", missing: ["توثيق الجوال"] };
+
+      // Validate readiness
+      const missing: string[] = [];
+      if (!listing.price || listing.price <= 0) missing.push("السعر");
+      if (!listing.business_activity?.trim()) missing.push("النشاط التجاري");
+      if (!listing.city?.trim()) missing.push("المدينة");
+      if (listing.location_lat == null || listing.location_lng == null) missing.push("الموقع الجغرافي (أرسل رابط قوقل ماب)");
+
+      // Photos required for asset deal types
+      const dealType = listing.primary_deal_type || listing.deal_type;
+      if (["assets_only", "assets_setup"].includes(dealType)) {
+        const photos = listing.photos;
+        const hasPhotos = photos && typeof photos === "object" && photos !== null && JSON.stringify(photos) !== "{}" && JSON.stringify(photos) !== "null";
+        if (!hasPhotos) missing.push("صور (مطلوبة لهذا النوع من الصفقات)");
+      }
+
+      if (missing.length > 0) {
+        return { error: "الإعلان غير جاهز للنشر", missing, listing_id: listing.id,
+          message: `ينقص الإعلان: ${missing.join("، ")}. أرسل لي المعلومات الناقصة وأكملها لك.` };
+      }
+
+      // Publish
+      const { error } = await sb.from("listings").update({
+        status: "published", published_at: new Date().toISOString(), updated_at: new Date().toISOString()
+      }).eq("id", args.listing_id);
+      if (error) return { error: error.message };
+
+      await sb.from("audit_logs").insert({ user_id: userId, action: "listing_published_via_moqbil", resource_type: "listing",
+        resource_id: args.listing_id, details: { title: listing.title } });
+
+      const listingUrl = `${BASE_URL}/listing/${listing.id}`;
+      return { success: true, listing_id: listing.id, status: "published", listing_url: listingUrl,
+        message: `تم نشر إعلانك "${listing.title}" بنجاح 🎉`,
+        share_text: `🏪 ${listing.title}\n📍 ${listing.city}\n💰 ${listing.price?.toLocaleString("en-US")} ر.س\n🔗 ${listingUrl}` };
+    }
+
+    case "set_listing_location": {
+      const { data: listing } = await sb.from("listings").select("id, owner_id").eq("id", args.listing_id).is("deleted_at", null).single();
+      if (!listing) return { error: "الإعلان غير موجود" };
+      if (role === "customer" && listing.owner_id !== userId) return { error: "ليس لديك صلاحية" };
+
+      let lat = args.lat;
+      let lng = args.lng;
+
+      // Try to extract from maps URL
+      if ((!lat || !lng) && args.maps_url) {
+        let resolvedUrl = args.maps_url;
+        
+        // Handle short URLs via edge function
+        if (/maps\.app\.goo\.gl|goo\.gl/i.test(args.maps_url)) {
+          try {
+            const resolveRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/resolve-maps-url`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}` },
+              body: JSON.stringify({ url: args.maps_url }),
+            });
+            if (resolveRes.ok) {
+              const resolved = await resolveRes.json();
+              if (resolved.resolvedUrl) resolvedUrl = resolved.resolvedUrl;
+            }
+          } catch { /* continue with original */ }
+        }
+
+        // Extract coordinates from URL patterns
+        const patterns = [
+          /@(-?\d+\.\d+),(-?\d+\.\d+)/,
+          /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,
+          /ll=(-?\d+\.\d+),(-?\d+\.\d+)/,
+          /q=(-?\d+\.\d+),(-?\d+\.\d+)/,
+          /center=(-?\d+\.\d+),(-?\d+\.\d+)/,
+        ];
+        for (const p of patterns) {
+          const m = resolvedUrl.match(p);
+          if (m) { lat = parseFloat(m[1]); lng = parseFloat(m[2]); break; }
+        }
+      }
+
+      if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+        return { error: "لم أقدر أستخرج الإحداثيات — أرسل رابط قوقل ماب كامل أو الإحداثيات مباشرة (مثل: 24.7136, 46.6753)" };
+      }
+
+      // Validate Saudi Arabia approximate bounds
+      if (lat < 15 || lat > 33 || lng < 34 || lng > 56) {
+        return { error: "الإحداثيات خارج نطاق المملكة العربية السعودية — تأكد من الرابط" };
+      }
+
+      const { error } = await sb.from("listings").update({
+        location_lat: lat, location_lng: lng, updated_at: new Date().toISOString()
+      }).eq("id", args.listing_id);
+      if (error) return { error: error.message };
+
+      return { success: true, listing_id: args.listing_id, location: { lat, lng },
+        message: `تم تحديد الموقع بنجاح ✅ (${lat.toFixed(4)}, ${lng.toFixed(4)})` };
+    }
+
+
       if (role === "customer") return { error: "ليس لديك صلاحية" };
       const { data: sv } = await sb.from("user_roles").select("user_id").eq("user_id", args.supervisor_id).eq("role", "supervisor").single();
       if (!sv) return { error: "المشرف غير موجود" };
