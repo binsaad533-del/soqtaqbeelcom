@@ -2579,7 +2579,26 @@ function buildVerifiedListingStatusInstruction(state: VerifiedListingState | nul
   ].filter(Boolean).join("\n");
 }
 
+function stripHallucinatedUrls(text: string): string {
+  // Remove any URLs that are NOT from BASE_URL domain
+  const baseHost = new URL(BASE_URL).host;
+  return text.replace(/https?:\/\/[^\s<>")'\]،؛!?؟]+/gi, (url) => {
+    try {
+      const host = new URL(url).host;
+      if (host === baseHost) return url; // keep legitimate URLs
+      // Remove URLs from fake/hallucinated domains
+      if (/taqbeel|souq|listing|editor/i.test(host)) return ""; // hallucinated platform URL
+      return url; // keep external URLs (google maps, etc.)
+    } catch {
+      return url;
+    }
+  });
+}
+
 function enforceVerifiedListingState(finalText: string, state: VerifiedListingState | null) {
+  // Always strip hallucinated URLs first
+  finalText = stripHallucinatedUrls(finalText);
+  
   if (!state?.status) return finalText;
 
   if (state.status === "published") {
@@ -2602,7 +2621,7 @@ function enforceVerifiedListingState(finalText: string, state: VerifiedListingSt
   }
 
   return [
-    "تم إنشاء الإعلان كمسودة فقط — ولسه ما اننشر.",
+    "تم إنشاء الإعلان كمسودة فقط — ولسه ما انّشر.",
     state.editorUrl ? `هذا رابط استكمال المسودة: ${state.editorUrl}` : "أكمل بيانات المسودة من صفحة إضافة الإعلان.",
     "بعد اكتمال البيانات ونشره فعلياً أرسل لك الرابط العام مباشرة.",
   ].filter(Boolean).join("\n\n");
