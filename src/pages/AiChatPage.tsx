@@ -344,6 +344,8 @@ const AiChatPage = () => {
     streamChat({
       messages: allMessages,
       context: buildContext(),
+      role: authRole || "customer",
+      user_id: user?.id,
       onDelta: (chunk) => {
         assistantText += chunk;
         setMessages(prev => {
