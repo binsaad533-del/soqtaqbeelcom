@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Activity, Eye, Heart, FileText, CheckCircle, AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { Activity, Eye, Heart, FileText, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";

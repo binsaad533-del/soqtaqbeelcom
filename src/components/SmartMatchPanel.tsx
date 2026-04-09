@@ -107,7 +107,7 @@ const SmartMatchPanel = () => {
               </Badge>
               {match.price > 0 && (
                 <div className="mt-1">
-                  <PriceDisplay price={match.price} size="xs" />
+                  <PriceDisplay amount={match.price} />
                 </div>
               )}
             </div>

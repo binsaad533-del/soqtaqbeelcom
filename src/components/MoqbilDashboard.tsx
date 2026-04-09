@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Brain, TrendingUp, Shield, BarChart3, Target, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+import { Brain, TrendingUp, Shield, Target, CheckCircle } from "lucide-react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";

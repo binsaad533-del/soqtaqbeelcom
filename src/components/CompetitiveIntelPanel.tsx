@@ -116,9 +116,9 @@ const CompetitiveIntelPanel = ({ listingId }: CompetitiveIntelProps) => {
         <div className="rounded-lg border border-border/30 p-2.5">
           <p className="text-[10px] text-muted-foreground mb-1.5">نطاق أسعار المنافسين</p>
           <div className="flex items-center justify-between text-xs">
-            <span className="text-success"><PriceDisplay price={data.min_price || 0} size="xs" /></span>
-            <span className="font-medium"><PriceDisplay price={data.avg_price} size="xs" /></span>
-            <span className="text-destructive"><PriceDisplay price={data.max_price || 0} size="xs" /></span>
+            <span className="text-success"><PriceDisplay amount={data.min_price || 0} /></span>
+            <span className="font-medium"><PriceDisplay amount={data.avg_price} /></span>
+            <span className="text-destructive"><PriceDisplay amount={data.max_price || 0} /></span>
           </div>
           <div className="flex items-center justify-between text-[9px] text-muted-foreground mt-0.5">
             <span>أقل</span>
