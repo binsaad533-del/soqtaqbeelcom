@@ -557,7 +557,7 @@ const AiChatPage = () => {
                 <MoqbilAvatar size={64} />
               </div>
               <div>
-                <h3 className="text-sm font-medium text-foreground/70">مرحباً، أنا مقبل</h3>
+                <h3 className="text-sm font-medium text-foreground/70">مرحباً، أنا مقبل مرشدك الذكي طحطوح الصفقات</h3>
                 <p className="text-xs text-muted-foreground mt-1 max-w-sm">مساعدك الذكي في سوق تقبيل. اسألني أي سؤال عن الصفقات أو الفرص أو تحليل السوق، أو ارفع صور وملفات وأحللها لك.</p>
               </div>
             </div>
