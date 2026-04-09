@@ -203,6 +203,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         )}
       </header>
 
+      <AiAutoAnalysis />
       <main className="flex-1">{children}</main>
       <AiAssistant />
       <CookieConsent />
