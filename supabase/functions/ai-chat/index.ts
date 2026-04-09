@@ -1616,7 +1616,9 @@ async function executeTool(name: string, args: any, userId: string, role: string
             });
             if (resolveRes.ok) {
               const resolved = await resolveRes.json();
-              if (resolved.resolvedUrl) resolvedUrl = resolved.resolvedUrl;
+              if (resolved.resolvedUrl || resolved.finalUrl) {
+                resolvedUrl = resolved.resolvedUrl || resolved.finalUrl;
+              }
             }
           } catch { /* continue with original */ }
         }
