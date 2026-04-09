@@ -713,6 +713,9 @@ const AiChatPage = () => {
       <div className="flex-1 flex flex-col bg-background min-w-0">
         {/* Chat header */}
         <div className="px-6 py-3 border-b border-border/30 bg-gradient-to-l from-primary/5 to-transparent flex items-center gap-3 shrink-0">
+          <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground">
+            <ArrowRight size={16} strokeWidth={1.5} />
+          </button>
           <div className="w-9 h-9 rounded-full overflow-hidden">
             <MoqbilAvatar size={36} />
           </div>
