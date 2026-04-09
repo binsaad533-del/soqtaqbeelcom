@@ -29,6 +29,7 @@ import AccountSettingsPanel from "@/components/AccountSettingsPanel";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import CrmDashboard from "@/components/crm/CrmDashboard";
+import AiAnalyticsDashboard from "@/components/AiAnalyticsDashboard";
 import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
 import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 
