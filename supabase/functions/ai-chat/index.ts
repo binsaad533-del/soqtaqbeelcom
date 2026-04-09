@@ -3109,7 +3109,7 @@ serve(async (req) => {
     // Log the full chat interaction to ai_chat_messages
     if (userId) {
       const sessionId = `${userId}-${new Date().toISOString().slice(0,10)}-${Date.now()}`;
-      const detectedIntent = isCreateListingIntent ? "create_listing" : isPublishIntent ? "publish" : isLocationIntent ? "set_location" : toolsUsed.length > 0 ? toolsUsed[0] : null;
+      const detectedIntent = isCreateListingIntent ? "create_listing" : isPublishIntent ? "publish" : toolsUsed.length > 0 ? toolsUsed[0] : null;
       supabaseAdmin.from("ai_chat_messages").insert({
         user_id: userId,
         session_id: sessionId,
