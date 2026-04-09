@@ -32,6 +32,7 @@ import CrmDashboard from "@/components/crm/CrmDashboard";
 import AiAnalyticsDashboard from "@/components/AiAnalyticsDashboard";
 import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
 import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
+import MoqbilAuditPanel from "@/components/MoqbilAuditPanel";
 
 type Tab = "overview" | "ai-analytics" | "crm" | "deals" | "users" | "listings" | "security" | "account" | "settings";
 
