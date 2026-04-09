@@ -585,6 +585,17 @@ const ListingDetailsPage = () => {
 
             {/* دراسة الجدوى الاقتصادية وتحليل المنافسين */}
             <FeasibilityStudyPanel listing={listing} analysisCache={analysisCache} />
+
+            {/* التحليل المالي ومحاكاة الصفقة */}
+            {!isOwner && listing.price && (
+              <div className="space-y-3">
+                <FinancialAnalysisPanel
+                  price={listing.price}
+                  annualRent={listing.annual_rent || undefined}
+                />
+                <DealSimulationPanel listingId={listing.id} />
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
