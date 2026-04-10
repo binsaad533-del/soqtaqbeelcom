@@ -292,7 +292,7 @@ const AiAssistant = () => {
           <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-300 ai-fab-pulse">
             <MoqbilAvatar size={56} />
             {hasInsights && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive flex items-center justify-center text-[10px] font-bold text-destructive-foreground shadow-sm">
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground shadow-sm border-2 border-card">
                 {proactiveInsights.length + marketAlerts.length}
               </span>
             )}
