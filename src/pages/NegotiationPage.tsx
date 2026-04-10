@@ -860,6 +860,15 @@ const NegotiationPage = () => {
               )}
             </div>
 
+            {/* Moqbil Smart Banner */}
+            <MoqbilNegotiationBar
+              callAI={callAI}
+              isBuyer={isBuyer}
+              dealStatus={deal.status}
+              messagesCount={messages.length}
+              onInsertMessage={setInput}
+            />
+
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
               {messages.length === 0 && (
