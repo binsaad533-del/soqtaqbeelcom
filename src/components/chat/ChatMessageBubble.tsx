@@ -94,15 +94,15 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
         isMe ? "mr-auto" : isAi ? "mx-auto max-w-[90%]" : "ml-auto"
       )}>
         <div className={cn(
-          "rounded-2xl px-4 py-3 text-sm leading-relaxed relative",
+          "rounded-xl px-3 py-2 text-xs leading-relaxed relative",
           isMe ? "bg-primary/8 border border-primary/10" :
           isAi ? "bg-gradient-to-br from-accent/60 to-accent/30 border border-accent-foreground/10" :
           "bg-muted/60"
         )}>
           {isAi && (
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <AiStar size={14} />
-              <span className="text-xs text-accent-foreground font-medium">AI — وسيط الصفقة</span>
+            <div className="flex items-center gap-1 mb-1">
+              <AiStar size={12} />
+              <span className="text-[10px] text-accent-foreground font-medium">AI — وسيط الصفقة</span>
             </div>
           )}
 
@@ -123,7 +123,7 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
                 </div>
               </button>
               {meta.file_name && (
-                <p className="text-[10px] text-muted-foreground">{meta.file_name}</p>
+                <p className="text-[9px] text-muted-foreground">{meta.file_name}</p>
               )}
             </div>
           ) : isDoc && meta.file_url ? (
@@ -137,8 +137,8 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
                 {openingDoc ? <Loader2 size={18} className="text-primary animate-spin" /> : <FileText size={18} className="text-primary" />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate">{meta.file_name || "مستند"}</p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-[11px] font-medium truncate">{meta.file_name || "مستند"}</p>
+                <p className="text-[9px] text-muted-foreground">
                   {openingDoc
                     ? "جاري فتح الملف..."
                     : meta.file_size
@@ -146,20 +146,19 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
                       : "مستند مرفق"}
                 </p>
               </div>
-              <Download size={14} className="text-muted-foreground shrink-0" />
+              <Download size={13} className="text-muted-foreground shrink-0" />
             </button>
           ) : (
             <span className="whitespace-pre-line">{msg.message}</span>
           )}
         </div>
 
-        <div className="flex items-center gap-2 mt-1 px-1">
-          <span className="text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-1.5 mt-1 px-1">
+          <span className="text-[9px] text-muted-foreground">
             {new Date(msg.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}
           </span>
-          {isMe && <span className="text-[10px] text-primary/60">أنت</span>}
+          {isMe && <span className="text-[9px] text-primary/60">أنت</span>}
 
-          {/* Report button — only on other's messages, not AI */}
           {!isMe && !isAi && !reported && (
             <button
               onClick={() => setShowReport(true)}
@@ -170,7 +169,7 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
             </button>
           )}
           {reported && (
-            <span className="text-[9px] text-destructive/60">تم الإبلاغ</span>
+            <span className="text-[8px] text-destructive/60">تم الإبلاغ</span>
           )}
         </div>
       </div>

@@ -74,46 +74,44 @@ const MoqbilAutoNegotiate = ({ callAI, isBuyer, askingPrice, dealId, onAutoMessa
   };
 
   return (
-    <div className="mx-3 mb-2">
-      {/* Toggle Button */}
+    <div className="mt-1">
       {!showSettings && (
         <button
           onClick={toggleActive}
           className={cn(
-            "w-full flex items-center gap-2 px-3 py-2 rounded-xl border transition-all",
+            "w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all",
             isActive
               ? "bg-gradient-to-l from-primary/15 to-primary/8 border-primary/30 shadow-sm"
               : "bg-muted/30 border-border/30 hover:bg-muted/50"
           )}
         >
-          <Bot size={13} className={cn(isActive ? "text-primary" : "text-muted-foreground")} />
-          <span className={cn("text-[10px] font-medium flex-1 text-right", isActive ? "text-primary" : "text-muted-foreground")}>
+          <Bot size={12} className={cn(isActive ? "text-primary" : "text-muted-foreground")} />
+          <span className={cn("text-[9px] font-medium flex-1 text-right", isActive ? "text-primary" : "text-muted-foreground")}>
             {isActive ? `مقبل يتفاوض نيابةً عنك (جولة ${roundCount})` : "تفعيل التفاوض التلقائي"}
           </span>
           {isActive ? (
-            <Pause size={11} className="text-primary" />
+            <Pause size={10} className="text-primary" />
           ) : (
-            <Play size={11} className="text-muted-foreground" />
+            <Play size={10} className="text-muted-foreground" />
           )}
         </button>
       )}
 
-      {/* Active Controls */}
       {isActive && !showSettings && (
-        <div className="flex gap-1.5 mt-1.5">
+        <div className="flex gap-1 mt-1">
           <button
             onClick={executeAutoNegotiation}
             disabled={negotiating}
-            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-primary/10 text-primary text-[9px] font-medium hover:bg-primary/15 transition-all disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-primary/10 text-primary text-[8px] font-medium hover:bg-primary/15 transition-all disabled:opacity-50"
           >
-            {negotiating ? <Loader2 size={9} className="animate-spin" /> : <AiStar size={9} />}
+            {negotiating ? <Loader2 size={8} className="animate-spin" /> : <AiStar size={8} />}
             أرسل رد تفاوضي
           </button>
           <button
             onClick={() => setShowSettings(true)}
-            className="px-2.5 py-1.5 rounded-lg bg-muted/50 text-muted-foreground text-[9px] hover:bg-muted transition-all"
+            className="px-2 py-1.5 rounded-lg bg-muted/50 text-muted-foreground text-[8px] hover:bg-muted transition-all"
           >
-            <Settings2 size={9} />
+            <Settings2 size={8} />
           </button>
         </div>
       )}
