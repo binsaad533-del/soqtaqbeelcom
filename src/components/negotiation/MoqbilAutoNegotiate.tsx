@@ -138,9 +138,14 @@ const MoqbilAutoNegotiate = ({ callAI, isBuyer, askingPrice, dealId, onAutoMessa
               </label>
               <div className="flex items-center gap-1.5">
                 <input
-                  type="number"
-                  value={isBuyer ? maxPrice : minPrice}
-                  onChange={e => isBuyer ? setMaxPrice(Number(e.target.value)) : setMinPrice(Number(e.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={isBuyer ? (maxPrice || "") : (minPrice || "")}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    const num = val ? parseInt(val, 10) : 0;
+                    isBuyer ? setMaxPrice(num) : setMinPrice(num);
+                  }}
                   className="flex-1 px-2.5 py-1.5 rounded-lg border border-border/40 bg-background text-xs text-left"
                   dir="ltr"
                 />
@@ -153,9 +158,13 @@ const MoqbilAutoNegotiate = ({ callAI, isBuyer, askingPrice, dealId, onAutoMessa
                 <label className="text-[9px] text-muted-foreground block mb-1">أبدأ التفاوض من (اختياري)</label>
                 <div className="flex items-center gap-1.5">
                   <input
-                    type="number"
-                    value={minPrice}
-                    onChange={e => setMinPrice(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={minPrice || ""}
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, "");
+                      setMinPrice(val ? parseInt(val, 10) : 0);
+                    }}
                     placeholder="سعر البداية"
                     className="flex-1 px-2.5 py-1.5 rounded-lg border border-border/40 bg-background text-xs text-left"
                     dir="ltr"
@@ -170,9 +179,13 @@ const MoqbilAutoNegotiate = ({ callAI, isBuyer, askingPrice, dealId, onAutoMessa
                 <label className="text-[9px] text-muted-foreground block mb-1">السعر اللي أبيع فيه (مثالي)</label>
                 <div className="flex items-center gap-1.5">
                   <input
-                    type="number"
-                    value={maxPrice}
-                    onChange={e => setMaxPrice(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={maxPrice || ""}
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, "");
+                      setMaxPrice(val ? parseInt(val, 10) : 0);
+                    }}
                     className="flex-1 px-2.5 py-1.5 rounded-lg border border-border/40 bg-background text-xs text-left"
                     dir="ltr"
                   />
