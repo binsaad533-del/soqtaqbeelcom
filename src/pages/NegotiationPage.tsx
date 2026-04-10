@@ -890,7 +890,7 @@ const NegotiationPage = () => {
 
             {/* AI Analysis inline */}
             {showAiPanel && aiAnalysis && (
-              <div className="mx-3 mb-1.5 p-2.5 rounded-xl bg-accent/20 border border-accent/30">
+              <div className="mx-3 mb-1 p-2 rounded-xl bg-accent/20 border border-accent/30">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-1.5">
                     <Sparkles size={10} className="text-primary" />
@@ -898,85 +898,66 @@ const NegotiationPage = () => {
                   </div>
                   <button onClick={() => setShowAiPanel(false)} className="text-[9px] text-muted-foreground hover:text-foreground">✕</button>
                 </div>
-                <p className="text-[10px] text-muted-foreground leading-relaxed whitespace-pre-line max-h-24 overflow-y-auto">{aiAnalysis}</p>
+                <p className="text-[10px] text-muted-foreground leading-relaxed whitespace-pre-line max-h-20 overflow-y-auto">{aiAnalysis}</p>
               </div>
             )}
 
             {/* AI Suggestions */}
             {aiSuggestions.length > 0 && (
-              <div className="px-3 pb-1 flex gap-1 flex-wrap">
-                <span className="text-[8px] text-muted-foreground/60 self-center">💡</span>
-                {aiSuggestions.map((s, i) => (
-                  <button key={i} onClick={() => handleSuggestionClick(s)}
-                    className="text-[9px] px-2 py-0.5 rounded-lg bg-accent/30 text-accent-foreground hover:bg-accent/50 transition-all truncate max-w-[140px]">
-                    {s}
-                  </button>
-                ))}
+              <div className="px-2 pb-1 overflow-x-auto">
+                <div className="flex min-w-max items-center gap-1">
+                  <span className="px-1 text-[7px] text-muted-foreground/60">اقتراحات</span>
+                  {aiSuggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSuggestionClick(s)}
+                      className="max-w-[150px] truncate whitespace-nowrap rounded-md bg-accent/25 px-1.5 py-0.5 text-[8px] text-accent-foreground hover:bg-accent/40 transition-all"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
             {/* AI Toolbar */}
             {showAiToolbar && (
-              <div className="px-3 pb-1.5 space-y-1.5 animate-in slide-in-from-bottom-2 duration-200">
-                {/* AI Quick Actions */}
+              <div className="px-2 pb-1 space-y-1 animate-in slide-in-from-bottom-2 duration-200">
                 <div className="flex gap-1 flex-wrap">
                   <button onClick={() => { handleAnalyze(); setShowAiToolbar(false); }} disabled={aiLoading}
-                    className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                    <Zap size={9} /> تحليل
+                    className="flex items-center gap-1 text-[8px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                    <Zap size={8} /> تحليل
                   </button>
                   <button onClick={() => { handleAiIntervene(); setShowAiToolbar(false); }} disabled={aiLoading}
-                    className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                    <MessageSquare size={9} /> وساطة
+                    className="flex items-center gap-1 text-[8px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                    <MessageSquare size={8} /> وساطة
                   </button>
                   <button onClick={() => { handlePushClose(); setShowAiToolbar(false); }} disabled={aiLoading}
-                    className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all disabled:opacity-50">
-                    <Target size={9} /> إغلاق
+                    className="flex items-center gap-1 text-[8px] px-2 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all disabled:opacity-50">
+                    <Target size={8} /> إغلاق
                   </button>
                   <button onClick={() => { handleStallIntervention(); setShowAiToolbar(false); }} disabled={aiLoading}
-                    className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                    <RefreshCw size={9} /> تحريك
+                    className="flex items-center gap-1 text-[8px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                    <RefreshCw size={8} /> تحريك
                   </button>
                   <button onClick={() => { handleMarketAnalysis(); setShowAiToolbar(false); }} disabled={aiLoading}
-                    className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                    <TrendingUp size={9} /> السوق
+                    className="flex items-center gap-1 text-[8px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                    <TrendingUp size={8} /> السوق
                   </button>
                 </div>
 
-                {/* Offer Evaluator */}
                 <MoqbilOfferEvaluator callAI={callAI} askingPrice={listing?.price || 0} />
               </div>
             )}
 
-            {/* Auto-Negotiate */}
-            {deal.status === "negotiating" && (
-              <MoqbilAutoNegotiate
-                callAI={callAI}
-                isBuyer={isBuyer}
-                askingPrice={listing?.price || 0}
-                dealId={deal.id}
-                buildContext={buildContext}
-                onAutoMessage={async (text) => {
-                  if (!dealId || !user) return;
-                  const aiMsg = await sendMessage(dealId, `🤖 [مقبل نيابةً عن ${isBuyer ? "المشتري" : "البائع"}]\n${text}`, "ai_mediation");
-                  if (aiMsg) setMessages(prev => prev.some(m => m.id === aiMsg.id) ? prev : [...prev, aiMsg]);
-                }}
-              />
-            )}
-
             {/* Input area */}
-            <div className="p-2.5 border-t border-border/20">
-              {/* Platform safety disclaimer */}
-              <div className="flex items-center gap-1.5 mb-2 px-2 py-1.5 rounded-lg bg-primary/5 border border-primary/10">
-                <Shield size={11} className="text-primary shrink-0" />
-                <p className="text-[9px] text-muted-foreground leading-relaxed">
-                  لحماية حقوقك وضمان سلامة الصفقة، يُرجى إتمام جميع المحادثات والاتفاقيات داخل المنصة. التواصل الخارجي قد يُفقدك حق المتابعة والحماية.
-                </p>
-              </div>
+            <div className="p-2 border-t border-border/20">
               {aiLoading && (
-                <div className="flex items-center gap-1.5 mb-1.5 px-1 text-[9px] text-primary">
-                  <Loader2 size={9} className="animate-spin" /> المساعد يعمل...
+                <div className="flex items-center gap-1 mb-1 px-1 text-[8px] text-primary">
+                  <Loader2 size={8} className="animate-spin" /> المساعد يعمل...
                 </div>
               )}
+
               <div className="flex items-center gap-1.5 relative">
                 <ChatAttachmentButton
                   dealId={dealId!}
@@ -997,11 +978,31 @@ const NegotiationPage = () => {
                   type="text" value={input} onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSend()}
                   placeholder="اكتب رسالتك..."
-                  className="flex-1 px-3 py-1.5 rounded-xl border border-border/40 bg-background text-xs placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
+                  className="flex-1 px-3 py-1.5 rounded-xl border border-border/40 bg-background text-[11px] placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
                 />
                 <Button onClick={handleSend} disabled={sending} size="icon" className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.95] h-8 w-8">
                   {sending ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} strokeWidth={1.5} />}
                 </Button>
+              </div>
+
+              {deal.status === "negotiating" && (
+                <MoqbilAutoNegotiate
+                  callAI={callAI}
+                  isBuyer={isBuyer}
+                  askingPrice={listing?.price || 0}
+                  dealId={deal.id}
+                  buildContext={buildContext}
+                  onAutoMessage={async (text) => {
+                    if (!dealId || !user) return;
+                    const aiMsg = await sendMessage(dealId, `🤖 [مقبل نيابةً عن ${isBuyer ? "المشتري" : "البائع"}]\n${text}`, "ai_mediation");
+                    if (aiMsg) setMessages(prev => prev.some(m => m.id === aiMsg.id) ? prev : [...prev, aiMsg]);
+                  }}
+                />
+              )}
+
+              <div className="mt-1.5 flex items-center gap-1 rounded-lg bg-primary/5 px-2 py-1 text-[8px] text-muted-foreground">
+                <Shield size={10} className="text-primary shrink-0" />
+                <p className="truncate">لحماية حقوقك، يُفضّل إبقاء التفاوض والاتفاق داخل المنصة.</p>
               </div>
             </div>
           </div>
