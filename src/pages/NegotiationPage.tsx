@@ -917,28 +917,50 @@ const NegotiationPage = () => {
 
             {/* AI Toolbar */}
             {showAiToolbar && (
-              <div className="px-3 pb-1.5 flex gap-1 flex-wrap animate-in slide-in-from-bottom-2 duration-200">
-                <button onClick={() => { handleAnalyze(); setShowAiToolbar(false); }} disabled={aiLoading}
-                  className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                  <Zap size={9} /> تحليل
-                </button>
-                <button onClick={() => { handleAiIntervene(); setShowAiToolbar(false); }} disabled={aiLoading}
-                  className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                  <MessageSquare size={9} /> وساطة
-                </button>
-                <button onClick={() => { handlePushClose(); setShowAiToolbar(false); }} disabled={aiLoading}
-                  className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all disabled:opacity-50">
-                  <Target size={9} /> إغلاق
-                </button>
-                <button onClick={() => { handleStallIntervention(); setShowAiToolbar(false); }} disabled={aiLoading}
-                  className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                  <RefreshCw size={9} /> تحريك
-                </button>
-                <button onClick={() => { handleMarketAnalysis(); setShowAiToolbar(false); }} disabled={aiLoading}
-                  className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
-                  <TrendingUp size={9} /> السوق
-                </button>
+              <div className="px-3 pb-1.5 space-y-1.5 animate-in slide-in-from-bottom-2 duration-200">
+                {/* AI Quick Actions */}
+                <div className="flex gap-1 flex-wrap">
+                  <button onClick={() => { handleAnalyze(); setShowAiToolbar(false); }} disabled={aiLoading}
+                    className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                    <Zap size={9} /> تحليل
+                  </button>
+                  <button onClick={() => { handleAiIntervene(); setShowAiToolbar(false); }} disabled={aiLoading}
+                    className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                    <MessageSquare size={9} /> وساطة
+                  </button>
+                  <button onClick={() => { handlePushClose(); setShowAiToolbar(false); }} disabled={aiLoading}
+                    className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all disabled:opacity-50">
+                    <Target size={9} /> إغلاق
+                  </button>
+                  <button onClick={() => { handleStallIntervention(); setShowAiToolbar(false); }} disabled={aiLoading}
+                    className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                    <RefreshCw size={9} /> تحريك
+                  </button>
+                  <button onClick={() => { handleMarketAnalysis(); setShowAiToolbar(false); }} disabled={aiLoading}
+                    className="flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                    <TrendingUp size={9} /> السوق
+                  </button>
+                </div>
+
+                {/* Offer Evaluator */}
+                <MoqbilOfferEvaluator callAI={callAI} askingPrice={listing?.price || 0} />
               </div>
+            )}
+
+            {/* Auto-Negotiate */}
+            {deal.status === "negotiating" && (
+              <MoqbilAutoNegotiate
+                callAI={callAI}
+                isBuyer={isBuyer}
+                askingPrice={listing?.price || 0}
+                dealId={deal.id}
+                buildContext={buildContext}
+                onAutoMessage={async (text) => {
+                  if (!dealId || !user) return;
+                  const aiMsg = await sendMessage(dealId, `🤖 [مقبل نيابةً عن ${isBuyer ? "المشتري" : "البائع"}]\n${text}`, "ai_mediation");
+                  if (aiMsg) setMessages(prev => prev.some(m => m.id === aiMsg.id) ? prev : [...prev, aiMsg]);
+                }}
+              />
             )}
 
             {/* Input area */}
