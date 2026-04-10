@@ -833,8 +833,12 @@ const NegotiationPage = () => {
 
               {/* Commission — compact footer */}
               {listing?.price && (
-                <div className="pt-2 mt-auto">
+                <div className="pt-2 mt-auto space-y-1.5">
                   <CommissionBanner dealAmount={deal.agreed_price || listing.price} className="!p-2 !rounded-lg text-[9px] opacity-70" />
+                  <div className="flex items-center gap-1 rounded-lg bg-primary/5 px-2 py-1 text-[8px] text-muted-foreground">
+                    <Shield size={10} className="text-primary shrink-0" />
+                    <p>لحماية حقوقك، يُفضّل إبقاء التفاوض والاتفاق داخل المنصة. التواصل الخارجي قد يُفقدك حق المتابعة والحماية.</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -1000,10 +1004,6 @@ const NegotiationPage = () => {
                 />
               )}
 
-              <div className="mt-1.5 flex items-center gap-1 rounded-lg bg-primary/5 px-2 py-1 text-[8px] text-muted-foreground">
-                <Shield size={10} className="text-primary shrink-0" />
-                <p className="truncate">لحماية حقوقك، يُفضّل إبقاء التفاوض والاتفاق داخل المنصة.</p>
-              </div>
             </div>
           </div>
         </div>
