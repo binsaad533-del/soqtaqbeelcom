@@ -831,13 +831,13 @@ const NegotiationPage = () => {
                 <AdminDealActions deal={deal} onUpdate={loadData} />
               )}
 
-              {/* Commission — compact footer */}
+              {/* Commission & Safety notice */}
               {listing?.price && (
-                <div className="pt-2 mt-auto space-y-2">
-                  <CommissionBanner dealAmount={deal.agreed_price || listing.price} className="!p-3 !rounded-xl text-[9px]" />
-                  <div className="flex items-start gap-2 rounded-xl bg-primary/5 border border-primary/10 p-3">
-                    <Shield size={12} className="text-primary shrink-0 mt-0.5" />
-                    <p className="text-[9px] text-muted-foreground leading-relaxed">
+                <div className="space-y-3">
+                  <CommissionBanner dealAmount={deal.agreed_price || listing.price} />
+                  <div className="flex items-start gap-2 rounded-xl bg-muted/30 border border-border/20 p-3">
+                    <Shield size={13} className="text-muted-foreground shrink-0 mt-0.5" strokeWidth={1.5} />
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">
                       لحماية حقوقك، يُفضّل إبقاء التفاوض والاتفاق داخل المنصة. التواصل الخارجي قد يُفقدك حق المتابعة والحماية.
                     </p>
                   </div>
