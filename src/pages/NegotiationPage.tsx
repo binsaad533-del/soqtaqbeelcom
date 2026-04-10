@@ -517,7 +517,7 @@ const NegotiationPage = () => {
 
         <div className="grid lg:grid-cols-7 gap-4 items-stretch">
           {/* ═══════════ DEAL SUMMARY (2 cols, RIGHT in RTL) ═══════════ */}
-          <div className="lg:col-span-2 order-2 lg:order-1 h-[65vh] overflow-y-auto">
+          <div className="lg:col-span-2 order-2 lg:order-1 h-[85vh] overflow-y-auto">
             <div className="h-full flex flex-col justify-between gap-4">
               {/* Deal Summary Card - Simple */}
               <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20 flex-1">
@@ -841,7 +841,7 @@ const NegotiationPage = () => {
           </div>
 
           {/* ═══════════ CHAT (3 cols, LEFT in RTL) ═══════════ */}
-          <div className="lg:col-span-5 order-1 lg:order-2 bg-card rounded-2xl shadow-soft flex flex-col" style={{ height: "65vh" }}>
+          <div className="lg:col-span-5 order-1 lg:order-2 bg-card rounded-2xl shadow-soft flex flex-col" style={{ height: "85vh" }}>
             {/* Chat Header */}
             <div className="px-4 py-2.5 border-b border-border/20 flex items-center justify-between">
               <div className="flex items-center gap-2">
