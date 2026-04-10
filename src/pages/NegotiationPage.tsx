@@ -27,6 +27,9 @@ import SarSymbol from "@/components/SarSymbol";
 import VerificationGate from "@/components/VerificationGate";
 import DealProgressBar, { getDealStage, getStageTimestamps } from "@/components/DealProgressBar";
 import AdminDealActions from "@/components/AdminDealActions";
+import MoqbilNegotiationBar from "@/components/negotiation/MoqbilNegotiationBar";
+import MoqbilAutoNegotiate from "@/components/negotiation/MoqbilAutoNegotiate";
+import MoqbilOfferEvaluator from "@/components/negotiation/MoqbilOfferEvaluator";
 
 // Parse SSE stream and extract text
 async function parseSSEStream(response: Response): Promise<string> {
