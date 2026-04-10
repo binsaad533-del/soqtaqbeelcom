@@ -135,15 +135,7 @@
   }
 }
 
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-
+@layer utilities {
   .gradient-primary {
     background: linear-gradient(135deg, hsl(210 100% 52%), hsl(200 90% 58%));
   }
