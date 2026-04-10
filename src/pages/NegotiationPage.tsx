@@ -515,7 +515,7 @@ const NegotiationPage = () => {
 
         <DealProgressBar currentStage={getDealStage(deal, isPostAgreement)} timestamps={getStageTimestamps(deal)} className="mb-5" />
 
-        <div className="grid lg:grid-cols-5 gap-5 items-stretch">
+        <div className="grid lg:grid-cols-7 gap-4 items-stretch">
           {/* ═══════════ DEAL SUMMARY (2 cols, RIGHT in RTL) ═══════════ */}
           <div className="lg:col-span-2 order-2 lg:order-1 h-[65vh] overflow-y-auto">
             <div className="h-full flex flex-col justify-between gap-4">
