@@ -517,10 +517,10 @@ const NegotiationPage = () => {
 
         <div className="grid lg:grid-cols-7 gap-4 items-stretch">
           {/* ═══════════ DEAL SUMMARY (2 cols, RIGHT in RTL) ═══════════ */}
-          <div className="lg:col-span-2 order-2 lg:order-1 h-[calc(100vh-120px)] overflow-hidden">
-            <div className="h-full flex flex-col justify-between gap-4">
-              {/* Deal Summary Card - Simple */}
-              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20 flex-1">
+          <div className="lg:col-span-2 order-2 lg:order-1 h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide">
+            <div className="h-full flex flex-col gap-3">
+              {/* Deal Summary Card */}
+              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
                 <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
                   <FileCheck size={14} className="text-primary" strokeWidth={1.5} />
                   ملخص الصفقة
