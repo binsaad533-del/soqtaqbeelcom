@@ -517,10 +517,10 @@ const NegotiationPage = () => {
 
         <div className="grid lg:grid-cols-7 gap-4 items-stretch">
           {/* ═══════════ DEAL SUMMARY (2 cols, RIGHT in RTL) ═══════════ */}
-          <div className="lg:col-span-2 order-2 lg:order-1 h-[calc(100vh-120px)] overflow-hidden">
-            <div className="h-full flex flex-col justify-between gap-4">
-              {/* Deal Summary Card - Simple */}
-              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20 flex-1">
+          <div className="lg:col-span-2 order-2 lg:order-1 h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide">
+            <div className="h-full flex flex-col gap-3">
+              {/* Deal Summary Card */}
+              <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/20">
                 <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
                   <FileCheck size={14} className="text-primary" strokeWidth={1.5} />
                   ملخص الصفقة
@@ -831,13 +831,13 @@ const NegotiationPage = () => {
                 <AdminDealActions deal={deal} onUpdate={loadData} />
               )}
 
-              {/* Commission — compact footer */}
+              {/* Commission & Safety notice */}
               {listing?.price && (
-                <div className="pt-2 mt-auto space-y-2">
-                  <CommissionBanner dealAmount={deal.agreed_price || listing.price} className="!p-3 !rounded-xl text-[9px]" />
-                  <div className="flex items-start gap-2 rounded-xl bg-primary/5 border border-primary/10 p-3">
-                    <Shield size={12} className="text-primary shrink-0 mt-0.5" />
-                    <p className="text-[9px] text-muted-foreground leading-relaxed">
+                <div className="space-y-3">
+                  <CommissionBanner dealAmount={deal.agreed_price || listing.price} />
+                  <div className="flex items-start gap-2 rounded-xl bg-muted/30 border border-border/20 p-3">
+                    <Shield size={13} className="text-muted-foreground shrink-0 mt-0.5" strokeWidth={1.5} />
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">
                       لحماية حقوقك، يُفضّل إبقاء التفاوض والاتفاق داخل المنصة. التواصل الخارجي قد يُفقدك حق المتابعة والحماية.
                     </p>
                   </div>
