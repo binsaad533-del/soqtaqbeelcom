@@ -3013,7 +3013,7 @@ serve(async (req) => {
             continue;
           }
 
-          // Phone verification gate: block write tools for unverified customers
+          // Phone verification gate: allow drafting/setup, block only actions that must require a verified phone
           const READ_ONLY_TOOLS = [
             "search_listings", "get_listing_details", "track_my_listings", "get_my_invoices",
             "get_my_documents", "view_my_updates", "get_listing_status", "get_delivery_timeline",
@@ -3026,9 +3026,26 @@ serve(async (req) => {
             "get_deal_negotiation_history",
           ];
           const isReadOnly = READ_ONLY_TOOLS.includes(toolName);
-          if (!isReadOnly && role === "customer" && !isPhoneVerified) {
+          const PHONE_VERIFICATION_REQUIRED_TOOLS = [
+            "publish_my_listing",
+            "submit_offer",
+            "respond_to_offer",
+            "express_interest",
+            "send_message",
+            "send_negotiation_message",
+            "update_agreed_price",
+            "submit_legal_confirmation",
+            "start_ownership_transfer",
+            "complete_deal_via_moqbil",
+            "confirm_receipt",
+          ];
+          const requiresPhoneVerification = PHONE_VERIFICATION_REQUIRED_TOOLS.includes(toolName);
+
+          if (!isReadOnly && requiresPhoneVerification && role === "customer" && !isPhoneVerified) {
             currentMessages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify({
-              error: "يجب توثيق رقم الجوال أولاً قبل تنفيذ أي عملية على المنصة. وثّق رقمك من إعدادات الحساب ثم ارجع كلمني.",
+              error: toolName === "publish_my_listing"
+                ? "أقدر أجهز الإعلان كامل لك، لكن النشر يحتاج توثيق رقم الجوال أولاً من إعدادات الحساب."
+                : "هذه العملية تحتاج توثيق رقم الجوال أولاً من إعدادات الحساب.",
               requires_phone_verification: true,
             }) });
             continue;
