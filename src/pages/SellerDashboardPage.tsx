@@ -125,12 +125,18 @@ const SellerDashboardPage = () => {
 
   const handleDelete = useCallback(async (id: string, title: string | null) => {
     if (!confirm(`هل تريد حذف "${title || "بدون عنوان"}"؟`)) return;
-    const { error } = await softDeleteListing(id);
-    if (error) {
-      toast.error("فشل حذف الإعلان");
-    } else {
-      toast.success("تم حذف الإعلان");
-      setListings(prev => prev.filter(l => l.id !== id));
+    try {
+      const { error } = await softDeleteListing(id);
+      if (error) {
+        console.error("[SellerDashboard] Delete failed:", error);
+        toast.error(`فشل حذف الإعلان: ${error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى"}`);
+      } else {
+        toast.success("تم حذف الإعلان بنجاح");
+        setListings(prev => prev.filter(l => l.id !== id));
+      }
+    } catch (err) {
+      console.error("[SellerDashboard] Delete unexpected error:", err);
+      toast.error("حدث خطأ غير متوقع أثناء الحذف — يرجى تحديث الصفحة والمحاولة مرة أخرى");
     }
   }, [softDeleteListing]);
 
