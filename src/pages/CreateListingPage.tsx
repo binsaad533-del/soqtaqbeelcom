@@ -2174,7 +2174,7 @@ const CreateListingPage = () => {
                     </div>
                   ) : (
                     <FormField
-                      label="الحي"
+                      label={disclosure.district ? "الحي ✓ من الخريطة" : "الحي"}
                       placeholder="حي النسيم"
                       value={disclosure.district}
                       onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))}
