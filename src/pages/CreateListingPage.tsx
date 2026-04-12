@@ -2188,15 +2188,6 @@ const CreateListingPage = () => {
                       />
                     )
                   )}
-                  {disclosure.district ? (
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium">الحي</label>
-                      <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-success/5 border border-success/20">
-                        <Check size={14} className="text-success" />
-                        <span className="text-sm">{disclosure.district}</span>
-                        <span className="text-[10px] text-success mr-auto">من الخريطة</span>
-                      </div>
-                    </div>
                   <FormField
                     label={disclosure.price ? "السعر المطلوب * ✓ محدد مسبقاً" : "السعر المطلوب *"}
                     placeholder="180000"
