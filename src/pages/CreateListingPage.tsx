@@ -2136,7 +2136,7 @@ const CreateListingPage = () => {
                   {/* Editable fields — always visible */}
                   {isFieldVisible(dealTypeForTransparency, "business_activity") && (
                     <FormField
-                      label={`نوع النشاط${activeRules.requiredFields.includes("business_activity") ? " *" : ""}`}
+                      label={disclosure.business_activity ? "نوع النشاط * ✓ مستخرج تلقائياً" : "نوع النشاط *"}
                       placeholder="مثال: مطعم وجبات سريعة"
                       value={disclosure.business_activity}
                       onChange={(v) => setDisclosure((prev) => ({ ...prev, business_activity: v }))}
