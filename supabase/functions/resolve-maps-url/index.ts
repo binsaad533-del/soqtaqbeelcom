@@ -16,15 +16,11 @@ serve(async (req) => {
       return jsonResponse({ error: "Missing url" }, 400);
     }
 
-    const debug: string[] = [];
-    debug.push(`input: ${url}`);
-
     let resolvedUrl: string | null = null;
     let currentUrl = url;
 
-    // Step 1: Follow redirects manually
+    // Follow up to 10 redirects manually
     for (let i = 0; i < 10; i++) {
-      debug.push(`step ${i}: fetching ${currentUrl}`);
       const res = await fetch(currentUrl, {
         redirect: "manual",
         headers: {
@@ -35,9 +31,7 @@ serve(async (req) => {
         },
       });
 
-      debug.push(`status: ${res.status}`);
       const location = res.headers.get("location");
-      debug.push(`location: ${location || "none"}`);
 
       if (location) {
         currentUrl = location.startsWith("http")
@@ -45,26 +39,25 @@ serve(async (req) => {
           : new URL(location, currentUrl).href;
         resolvedUrl = currentUrl;
 
+        // Check if coordinates are already in the redirect URL
         const coords = extractCoords(resolvedUrl);
         if (coords) {
           const result = `https://www.google.com/maps/@${coords.lat},${coords.lng},15z`;
-          return jsonResponse({ finalUrl: result, resolvedUrl: result, debug });
+          return jsonResponse({ finalUrl: result, resolvedUrl: result });
         }
         continue;
       }
 
-      // Read body for coordinates
+      // No redirect header — read body for coordinates or meta-refresh
       const body = await res.text();
-      debug.push(`body length: ${body.length}`);
-      debug.push(`body preview: ${body.substring(0, 500)}`);
 
       const coords = extractCoordsFromBody(body);
       if (coords) {
         const result = `https://www.google.com/maps/@${coords.lat},${coords.lng},15z`;
-        return jsonResponse({ finalUrl: result, resolvedUrl: result, debug });
+        return jsonResponse({ finalUrl: result, resolvedUrl: result });
       }
 
-      // meta-refresh
+      // meta-refresh redirect
       const metaMatch = body.match(/content=["']\d+;\s*url=([^"']+)["']/i);
       if (metaMatch) {
         currentUrl = metaMatch[1].startsWith("http")
@@ -77,46 +70,43 @@ serve(async (req) => {
       break;
     }
 
-    // Step 2: Try redirect:follow
-    debug.push("trying redirect:follow");
-    const res2 = await fetch(url, {
-      redirect: "follow",
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
-        Accept: "text/html,application/xhtml+xml,*/*",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-    });
+    // Fallback: try redirect:follow
+    if (!resolvedUrl || resolvedUrl === url) {
+      const res2 = await fetch(url, {
+        redirect: "follow",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+          Accept: "text/html,application/xhtml+xml,*/*",
+          "Accept-Language": "en-US,en;q=0.9",
+        },
+      });
 
-    const followedUrl = res2.url;
-    debug.push(`followed to: ${followedUrl}`);
-
-    if (followedUrl !== url) {
-      const coords = extractCoords(followedUrl);
-      if (coords) {
-        const result = `https://www.google.com/maps/@${coords.lat},${coords.lng},15z`;
-        return jsonResponse({ finalUrl: result, resolvedUrl: result, debug });
+      const followedUrl = res2.url;
+      if (followedUrl !== url) {
+        const coords = extractCoords(followedUrl);
+        if (coords) {
+          const result = `https://www.google.com/maps/@${coords.lat},${coords.lng},15z`;
+          return jsonResponse({ finalUrl: result, resolvedUrl: result });
+        }
       }
+
+      const body2 = await res2.text();
+      const coords2 = extractCoordsFromBody(body2);
+      if (coords2) {
+        const result = `https://www.google.com/maps/@${coords2.lat},${coords2.lng},15z`;
+        return jsonResponse({ finalUrl: result, resolvedUrl: result });
+      }
+
+      resolvedUrl = followedUrl !== url ? followedUrl : resolvedUrl;
     }
 
-    const body2 = await res2.text();
-    debug.push(`follow body length: ${body2.length}`);
-    debug.push(`follow body preview: ${body2.substring(0, 500)}`);
-
-    const coords2 = extractCoordsFromBody(body2);
-    if (coords2) {
-      const result = `https://www.google.com/maps/@${coords2.lat},${coords2.lng},15z`;
-      return jsonResponse({ finalUrl: result, resolvedUrl: result, debug });
-    }
-
-    resolvedUrl = followedUrl !== url ? followedUrl : resolvedUrl;
     return jsonResponse({
       finalUrl: resolvedUrl || url,
       resolvedUrl: resolvedUrl || url,
-      debug,
     });
   } catch (err) {
+    console.error("[resolve-maps-url] Error:", err);
     return jsonResponse({ error: String(err) }, 500);
   }
 });
