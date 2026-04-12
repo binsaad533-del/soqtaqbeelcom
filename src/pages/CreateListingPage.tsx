@@ -790,7 +790,7 @@ const CreateListingPage = () => {
       // Auto-fill the AI-generated description
       const generatedDesc = (data as { generated_description?: string }).generated_description;
       if (generatedDesc && !sellerNote) {
-        setSellerNote(generatedDesc.replace(/#{1,6}\s?/g, "").replace(/\*{1,2}/g, "").slice(0, 2000));
+        setSellerNote(generatedDesc.replace(/#{1,6}\s?/g, "").replace(/\*{1,2}/g, "").trim().slice(0, 2000));
       }
 
       // Auto-fill disclosure from extracted document info
@@ -2567,7 +2567,7 @@ const CreateListingPage = () => {
                         if (e.target.value.length <= SELLER_NOTE_MAX) setSellerNote(e.target.value);
                       }}
                       placeholder={`إذا في خاطرك شي ودّك تقوله عن المشروع يا ${sellerName || "صاحب الإعلان"}... ✍️`}
-                      rows={3}
+                      rows={8}
                       maxLength={SELLER_NOTE_MAX}
                       className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 placeholder:text-muted-foreground/50"
                     />
