@@ -185,7 +185,7 @@ export async function logAudit(
 }
 
 // ─── Session Timeout ───────────────────────────────────────
-const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+const SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 hours
 let timeoutTimer: ReturnType<typeof setTimeout> | null = null;
 let warningTimer: ReturnType<typeof setTimeout> | null = null;
 let onTimeoutCallback: (() => void) | null = null;
