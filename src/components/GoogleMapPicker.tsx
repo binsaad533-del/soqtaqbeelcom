@@ -272,7 +272,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   };
 
   const isShortLink = (input: string) =>
-    /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps)\//i.test(input.trim());
+    /\b(maps\.app\.goo\.gl|goo\.gl\/maps)\b/i.test(input.trim());
 
   const handlePasteLocation = async () => {
     const trimmed = pasteInput.trim();
@@ -288,24 +288,25 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     // If it's a short link, resolve it server-side
     if (isShortLink(trimmed)) {
       setSearching(true);
-      setSelectedAddress("جارٍ تحليل الرابط...");
+      setSelectedAddress("جاري تحويل الرابط...");
       try {
         const { data, error: fnErr } = await supabase.functions.invoke("resolve-maps-url", {
           body: { url: trimmed },
         });
-        if (fnErr || !data?.finalUrl) {
-          setSelectedAddress("فشل تحليل الرابط — جرب لصق الإحداثيات مباشرة");
+        const resolvedUrl = data?.resolvedUrl || data?.finalUrl;
+        if (fnErr || !resolvedUrl) {
+          setSelectedAddress("تعذر تحويل الرابط — جرب نسخ الرابط الكامل من متصفح الخرائط");
           setSearching(false);
           return;
         }
-        const resolved = parseLocationInput(data.finalUrl);
+        const resolved = parseLocationInput(resolvedUrl);
         if (resolved) {
           applyParsedLocation(resolved.lat, resolved.lng);
         } else {
-          setSelectedAddress("لم يتم العثور على إحداثيات في الرابط — جرب نسخ الإحداثيات من خرائط قوقل");
+          setSelectedAddress("تعذر تحويل الرابط — جرب نسخ الرابط الكامل من متصفح الخرائط");
         }
       } catch {
-        setSelectedAddress("فشل تحليل الرابط — جرب لصق الإحداثيات مباشرة");
+        setSelectedAddress("تعذر تحويل الرابط — جرب نسخ الرابط الكامل من متصفح الخرائط");
       }
       setSearching(false);
       return;

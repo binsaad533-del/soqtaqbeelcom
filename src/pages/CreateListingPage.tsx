@@ -790,7 +790,7 @@ const CreateListingPage = () => {
       // Auto-fill the AI-generated description
       const generatedDesc = (data as { generated_description?: string }).generated_description;
       if (generatedDesc && !sellerNote) {
-        setSellerNote(generatedDesc.slice(0, 2000));
+        setSellerNote(generatedDesc.replace(/#{1,6}\s?/g, "").replace(/\*{1,2}/g, "").slice(0, 2000));
       }
 
       // Auto-fill disclosure from extracted document info
