@@ -1418,8 +1418,8 @@ const CreateListingPage = () => {
                         <Upload size={24} strokeWidth={1.5} className="text-primary" />
                       </div>
                     </div>
-                    <h3 className="text-sm font-semibold mb-1">ارفع كل الصور والمستندات دفعة واحدة</h3>
-                    <p className="text-xs text-muted-foreground mb-1">حتى 200 صورة و 100 مستند — اسحب وأفلت أو اضغط هنا</p>
+                    <h3 className="text-sm font-semibold mb-1">الطريقة السريعة — ارفع كل شيء دفعة واحدة</h3>
+                    <p className="text-xs text-muted-foreground mb-1">صور + مستندات + Excel — حتى 200 ملف دفعة واحدة</p>
                     <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground mb-1">
                       <span className="flex items-center gap-1"><Camera size={11} /> JPG, PNG, WEBP, HEIC</span>
                       <span className="flex items-center gap-1"><FileText size={11} /> PDF, DOC, DOCX, XLS, XLSX</span>
@@ -1428,6 +1428,13 @@ const CreateListingPage = () => {
                     <p className="text-xs font-medium text-primary mt-3 animate-fade-in">✦ الـAI يحلل كل شيء تلقائياً — بدون إدخال يدوي ✦</p>
                   </>
                 )}
+              </div>
+
+              {/* Separator between upload methods */}
+              <div className="flex items-center gap-3 my-2">
+                <div className="flex-1 h-px bg-border/50" />
+                <span className="text-[11px] text-muted-foreground font-medium px-2">أو</span>
+                <div className="flex-1 h-px bg-border/50" />
               </div>
 
               {/* Per-file status list */}
@@ -1560,8 +1567,8 @@ const CreateListingPage = () => {
               <details className="group">
                 <summary className="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors">
                   <Camera size={14} strokeWidth={1.5} />
-                  <span>رفع يدوي حسب التصنيف (اختياري)</span>
-                  <span className="text-[10px]">— إذا تفضل ترتيب الصور بنفسك</span>
+                  <span>الطريقة التفصيلية — رفع كل نوع على حدة</span>
+                  <span className="text-[10px]">صور داخلية، واجهة، معدات... كل فئة منفصلة</span>
                 </summary>
                 <div className="mt-3 space-y-4">
               <div className="flex items-center gap-2">
@@ -1662,7 +1669,7 @@ const CreateListingPage = () => {
                 <div className="flex items-center gap-2">
                   <FileText size={16} strokeWidth={1.5} className="text-primary" />
                   <h3 className="font-medium text-sm">المستندات</h3>
-                  <span className="text-[10px] text-muted-foreground">(اختياري — يعزز ثقة المشتري)</span>
+                  <span className="text-[10px] text-muted-foreground">(اختياري — تظهر للمشتري كمستندات موثقة)</span>
                 </div>
                 <div className="space-y-2">
                   {dynamicDocTypes.map((doc) => (
