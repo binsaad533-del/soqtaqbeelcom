@@ -2155,7 +2155,7 @@ const CreateListingPage = () => {
                       </div>
                     ) : (
                       <FormField
-                        label={`المدينة${activeRules.requiredFields.includes("city") ? " *" : ""}`}
+                        label={disclosure.city ? "المدينة ✓ من الخريطة" : "المدينة *"}
                         placeholder="الرياض"
                         value={disclosure.city}
                         onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))}
