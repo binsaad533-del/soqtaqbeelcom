@@ -1425,7 +1425,7 @@ const CreateListingPage = () => {
                       <span className="flex items-center gap-1"><FileText size={11} /> PDF, DOC, DOCX, XLS, XLSX</span>
                     </div>
                     <p className="text-[10px] text-muted-foreground">الحد الأقصى: 15 MB للصور — 25 MB للمستندات</p>
-                    <p className="text-xs font-medium text-primary mt-3 animate-fade-in">✦ الـAI يحلل كل شيء تلقائياً — بدون إدخال يدوي ✦</p>
+                    <p className="text-xs font-medium text-primary mt-3 animate-fade-in">✦ الـAI يحلل كل شيء تلقائياً ✦</p>
                   </>
                 )}
               </div>
