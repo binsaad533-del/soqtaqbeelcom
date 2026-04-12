@@ -2125,6 +2125,12 @@ const CreateListingPage = () => {
                       return !!disclosure.business_activity;
                     if (lower.includes("موردين") || lower.includes("عقود") || lower.includes("نزاعات") || lower.includes("ضرائب") || lower.includes("زكاة"))
                       return !!disclosure.liabilities;
+                    // Quantity: complete if inventory exists and all items have qty > 0 (AI auto-detected)
+                    if (lower.includes("كمية") || lower.includes("الكمية"))
+                      return inventory.length > 0 && inventory.every(item => item.qty > 0);
+                    // Business transfer exclusion: complete if deal structure itself clarifies (assets_only or assets_setup)
+                    if (lower.includes("عدم شمول") || lower.includes("نقل النشاط"))
+                      return dealStructure.primaryType === "assets_only" || dealStructure.primaryType === "assets_setup";
                     return false;
                   };
                   return (
