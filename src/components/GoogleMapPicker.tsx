@@ -321,15 +321,9 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         <div className="rounded-xl border border-border/50 bg-muted/30 p-5 space-y-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin size={16} className="text-primary" />
-            <span>حدد الموقع بالبحث أو لصق الإحداثيات</span>
+            <span>الصق رابط الموقع من خرائط قوقل</span>
           </div>
           <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} loading={searching} />
-          <FallbackSearchBar
-            manualSearch={manualSearch}
-            setManualSearch={setManualSearch}
-            searching={searching}
-            onSearch={handleFallbackSearch}
-          />
           <AddressDisplay address={selectedAddress} onClear={clearLocation} />
         </div>
       </div>
@@ -342,10 +336,10 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
       <div className="rounded-xl border-2 border-primary/50 bg-primary/10 p-4 space-y-2">
         <div className="flex items-center gap-2 text-sm font-medium text-primary">
           <ClipboardPaste size={16} />
-          <span>📍 الصق رابط خرائط قوقل أو إحداثيات GPS لتحديد الموقع بدقة</span>
+          <span>📍 الصق رابط الموقع من خرائط قوقل</span>
         </div>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          افتح خرائط قوقل → اضغط على الموقع → انسخ الرابط أو الإحداثيات والصقها هنا
+          افتح خرائط قوقل → اضغط على الموقع → انسخ الرابط والصقه هنا
         </p>
         <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} loading={searching} />
       </div>
@@ -360,20 +354,6 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
           </div>
         )}
         <div ref={mapRef} className="w-full h-[280px]" />
-      </div>
-
-      {/* Fallback search below the map */}
-      <div className="rounded-xl border border-border/40 bg-muted/20 p-3 space-y-2">
-        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <Search size={11} />
-          <span>أو ابحث بالاسم:</span>
-        </div>
-        <FallbackSearchBar
-          manualSearch={manualSearch}
-          setManualSearch={setManualSearch}
-          searching={searching}
-          onSearch={handleFallbackSearch}
-        />
       </div>
     </div>
   );
@@ -489,7 +469,7 @@ const PasteLocationBar = ({
 }) => (
   <div className="flex gap-2" dir="ltr">
     <Input
-      placeholder="مثال: 24.7136, 46.6753 أو رابط خرائط قوقل"
+      placeholder="الصق رابط قوقل ماب هنا"
       value={pasteInput}
       onChange={(e) => setPasteInput(e.target.value)}
       onKeyDown={(e) => e.key === "Enter" && onPaste()}

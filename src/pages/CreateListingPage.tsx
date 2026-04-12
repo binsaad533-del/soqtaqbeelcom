@@ -1716,16 +1716,6 @@ const CreateListingPage = () => {
                     }
                   }}
                 />
-                {isFieldVisible(dealTypeForTransparency, "district") && (
-                  <div className="mt-3">
-                    <FormField
-                      label="اسم الحي"
-                      placeholder="مثال: حي النسيم"
-                      value={disclosure.district}
-                      onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))}
-                    />
-                  </div>
-                )}
 
                 {/* Area field — conditionally shown based on deal type */}
                 {getRules(dealStructure.primaryType || "full_takeover").areaRequired && (
