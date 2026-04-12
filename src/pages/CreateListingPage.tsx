@@ -2144,20 +2144,42 @@ const CreateListingPage = () => {
                     />
                   )}
                   {isFieldVisible(dealTypeForTransparency, "city") && (
+                    disclosure.city ? (
+                      <div className="space-y-1">
+                        <label className="text-sm font-medium">المدينة</label>
+                        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-success/5 border border-success/20">
+                          <Check size={14} className="text-success" />
+                          <span className="text-sm">{disclosure.city}</span>
+                          <span className="text-[10px] text-success mr-auto">من الخريطة</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <FormField
+                        label={`المدينة${activeRules.requiredFields.includes("city") ? " *" : ""}`}
+                        placeholder="الرياض"
+                        value={disclosure.city}
+                        onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))}
+                        error={publishAttempted && disclosureErrors["city"]}
+                      />
+                    )
+                  )}
+                  {disclosure.district ? (
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium">الحي</label>
+                      <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-success/5 border border-success/20">
+                        <Check size={14} className="text-success" />
+                        <span className="text-sm">{disclosure.district}</span>
+                        <span className="text-[10px] text-success mr-auto">من الخريطة</span>
+                      </div>
+                    </div>
+                  ) : (
                     <FormField
-                      label={`المدينة${activeRules.requiredFields.includes("city") ? " *" : ""}`}
-                      placeholder="الرياض"
-                      value={disclosure.city}
-                      onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))}
-                      error={publishAttempted && disclosureErrors["city"]}
+                      label="الحي"
+                      placeholder="حي النسيم"
+                      value={disclosure.district}
+                      onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))}
                     />
                   )}
-                  <FormField
-                    label="الحي"
-                    placeholder="حي النسيم"
-                    value={disclosure.district}
-                    onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))}
-                  />
                   <FormField
                     label="السعر المطلوب *"
                     placeholder="180000"
