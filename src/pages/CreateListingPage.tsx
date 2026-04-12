@@ -2197,14 +2197,6 @@ const CreateListingPage = () => {
                         <span className="text-[10px] text-success mr-auto">من الخريطة</span>
                       </div>
                     </div>
-                  ) : (
-                    <FormField
-                      label={disclosure.district ? "الحي ✓ من الخريطة" : "الحي"}
-                      placeholder="حي النسيم"
-                      value={disclosure.district}
-                      onChange={(v) => setDisclosure((prev) => ({ ...prev, district: v }))}
-                    />
-                  )}
                   <FormField
                     label={disclosure.price ? "السعر المطلوب * ✓ محدد مسبقاً" : "السعر المطلوب *"}
                     placeholder="180000"
@@ -2499,8 +2491,22 @@ const CreateListingPage = () => {
                     {" "}عدد الأصول المؤكّدة: {inventory.filter((item) => item.included).length} عنصر ({inventory.filter((item) => item.included).reduce((sum, item) => sum + item.qty, 0)} قطعة).
                     {disclosure.annual_rent && ` الإيجار السنوي ${disclosure.annual_rent} ريال.`}
                     {disclosure.lease_remaining && ` متبقي من العقد ${disclosure.lease_remaining}.`}
-                    {disclosure.price && ` السعر المطلوب ${Number(disclosure.price).toLocaleString()} ريال.`}
+                  {disclosure.price && ` السعر المطلوب ${Number(disclosure.price).toLocaleString()} ريال.`}
                   </p>
+                  
+                  {/* Google Maps link when location is set */}
+                  {locationLat && locationLng && (
+                    <a
+                      href={`https://www.google.com/maps?q=${locationLat},${locationLng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-success/5 border border-success/20 hover:bg-success/10 transition-colors mt-3"
+                    >
+                      <MapPin size={14} className="text-success" />
+                      <span className="text-sm text-success">الموقع محدد على الخريطة</span>
+                      <span className="text-[10px] text-success/70 mr-auto">اضغط للفتح في خرائط قوقل ←</span>
+                    </a>
+                  )}
                 </div>
 
 
