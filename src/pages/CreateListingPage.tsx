@@ -856,6 +856,12 @@ const CreateListingPage = () => {
     }
     saveDraft();
     setStepDirection("next");
+
+    // Auto-fill price from bulk inventory analysis if missing
+    if (currentStep === 2 && !disclosure.price && bulkInventoryPrice) {
+      setDisclosure(prev => ({ ...prev, price: bulkInventoryPrice }));
+    }
+
     // For CR-only, skip AI analysis step (step 2) entirely
     if (isCrOnly && currentStep === 1) {
       setCurrentStep(3); // Jump directly to disclosure
