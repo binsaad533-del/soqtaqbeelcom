@@ -755,7 +755,7 @@ const CustomerDashboardPage = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          {(isDraft || listing.status === "suspended") && (
+                          {(isDraft || listing.status === "suspended" || listing.status === "published") && (
                             <button
                               onClick={(e) => handleDeleteListing(e, listing.id, listing.title || listing.business_activity || null)}
                               className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"

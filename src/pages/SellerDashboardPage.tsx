@@ -251,7 +251,7 @@ const SellerDashboardPage = () => {
                                 <Sparkles size={13} />
                               </button>
                             )}
-                            {(listing.status === "draft" || listing.status === "suspended") && (
+                            {(listing.status === "draft" || listing.status === "suspended" || listing.status === "published") && (
                               <button
                                 onClick={() => handleDelete(listing.id, listing.title)}
                                 className="text-muted-foreground hover:text-destructive transition-colors"
