@@ -2181,7 +2181,7 @@ const CreateListingPage = () => {
                     />
                   )}
                   <FormField
-                    label="السعر المطلوب *"
+                    label={disclosure.price ? "السعر المطلوب * ✓ محدد مسبقاً" : "السعر المطلوب *"}
                     placeholder="180000"
                     suffix={<SarSymbol size={11} />}
                     value={disclosure.price}
