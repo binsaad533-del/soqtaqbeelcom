@@ -23,7 +23,7 @@ import ListingEditDialog from "@/components/ListingEditDialog";
 import ListingOfferForm from "@/components/ListingOfferForm";
 import SellerOffersPanel from "@/components/SellerOffersPanel";
 import MoqbilAgentPanel from "@/components/MoqbilAgentPanel";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useListingSocial } from "@/hooks/useListingSocial";
 import { cn } from "@/lib/utils";
@@ -148,6 +148,8 @@ const ListingDetailsPage = () => {
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [interestCount, setInterestCount] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const loadListing = async () => {
     if (!id) return;
