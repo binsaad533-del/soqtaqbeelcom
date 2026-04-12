@@ -12,6 +12,7 @@ export interface DealTypeFieldRules {
   hiddenFields: string[];
   imageRequired: boolean;
   docsRequired: boolean;
+  areaRequired: boolean;
 }
 
 /**
@@ -50,6 +51,7 @@ export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
     hiddenFields: [],
     imageRequired: false, // optional but recommended
     docsRequired: false,
+    areaRequired: true,
   },
 
   // ── Transfer without liabilities ──
@@ -59,6 +61,7 @@ export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
     hiddenFields: [...LIABILITY_FIELDS],
     imageRequired: false,
     docsRequired: false,
+    areaRequired: true,
   },
 
   // ── Assets + Operating Setup ──
@@ -68,6 +71,7 @@ export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
     hiddenFields: [...LEASE_FIELDS, ...LIABILITY_FIELDS, ...LICENSE_FIELDS],
     imageRequired: true,
     docsRequired: false,
+    areaRequired: false,
   },
 
   // ── Assets Only ──
@@ -77,6 +81,7 @@ export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
     hiddenFields: [...LEASE_FIELDS, ...LIABILITY_FIELDS, ...LICENSE_FIELDS],
     imageRequired: true,
     docsRequired: false,
+    areaRequired: false,
   },
 
 };

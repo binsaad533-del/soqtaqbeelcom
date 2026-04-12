@@ -1720,21 +1720,23 @@ const CreateListingPage = () => {
                   </div>
                 )}
 
-                {/* Area field */}
-                <div className="mt-3">
-                  <FormField
-                    label="مساحة الموقع (م²)"
-                    placeholder="مثال: 120"
-                    value={areaSqm}
-                    onChange={(v) => setAreaSqm(toEnglishNumerals(v))}
-                  />
-                  {areaSqm && (
-                    <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                      {Number(areaSqm) > 0 && <AiInlineStar />}
-                      {Number(areaSqm) > 0 ? "تم استخراج المساحة تلقائياً — يمكنك تعديلها" : ""}
-                    </p>
-                  )}
-                </div>
+                {/* Area field — conditionally shown based on deal type */}
+                {getRules(dealStructure.primaryType || "full_takeover").areaRequired && (
+                  <div className="mt-3">
+                    <FormField
+                      label="مساحة الموقع (م²)"
+                      placeholder="مثال: 120"
+                      value={areaSqm}
+                      onChange={(v) => setAreaSqm(toEnglishNumerals(v))}
+                    />
+                    {areaSqm && (
+                      <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                        {Number(areaSqm) > 0 && <AiInlineStar />}
+                        {Number(areaSqm) > 0 ? "تم استخراج المساحة تلقائياً — يمكنك تعديلها" : ""}
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {/* Location required warning */}
                 {publishAttempted && !locationOk && (
