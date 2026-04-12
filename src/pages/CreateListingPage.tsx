@@ -857,9 +857,17 @@ const CreateListingPage = () => {
     saveDraft();
     setStepDirection("next");
 
-    // Auto-fill price from bulk inventory analysis if missing
-    if (currentStep === 2 && !disclosure.price && bulkInventoryPrice) {
-      setDisclosure(prev => ({ ...prev, price: bulkInventoryPrice }));
+    // Auto-fill from AI analysis if missing when moving to Step 3
+    if (currentStep === 2) {
+      if (!disclosure.price && bulkInventoryPrice) {
+        setDisclosure(prev => ({ ...prev, price: bulkInventoryPrice }));
+      }
+      if (!disclosure.business_activity && analysisSummary) {
+        const activityMatch = analysisSummary.match(/نشاط[:\s]*([^\n.،]+)/);
+        if (activityMatch) {
+          setDisclosure(prev => ({ ...prev, business_activity: activityMatch[1].trim() }));
+        }
+      }
     }
 
     // For CR-only, skip AI analysis step (step 2) entirely
