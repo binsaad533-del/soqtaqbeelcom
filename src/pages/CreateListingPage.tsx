@@ -2103,18 +2103,43 @@ const CreateListingPage = () => {
                   </div>
                 )}
 
-                {dealStructure.requiredDisclosures.length > 0 && (
-                  <div className="bg-warning/5 border border-warning/20 rounded-xl p-3">
-                    <div className="text-xs font-medium text-warning mb-1.5 flex items-center gap-1">
-                      <Shield size={12} /> الإفصاحات المطلوبة
+                {dealStructure.requiredDisclosures.length > 0 && (() => {
+                  const isDisclosureComplete = (item: string): boolean => {
+                    const lower = item;
+                    if (lower.includes("أصول") || lower.includes("قائمة") || lower.includes("حالة كل"))
+                      return analyzed && inventory.length > 0;
+                    if (lower.includes("ملكية")) return analyzed;
+                    if (lower.includes("إيجار") || lower.includes("الإيجار"))
+                      return !!(disclosure.annual_rent && disclosure.lease_duration);
+                    if (lower.includes("رواتب") || lower.includes("عمالة"))
+                      return !!disclosure.overdue_salaries;
+                    if (lower.includes("ديون") || lower.includes("التزامات") || lower.includes("مالية"))
+                      return !!disclosure.liabilities;
+                    if (lower.includes("نشاط") || lower.includes("تجاري"))
+                      return !!disclosure.business_activity;
+                    if (lower.includes("موردين") || lower.includes("عقود") || lower.includes("نزاعات") || lower.includes("ضرائب") || lower.includes("زكاة"))
+                      return !!disclosure.liabilities;
+                    return false;
+                  };
+                  return (
+                    <div className="bg-muted/30 border border-border/40 rounded-xl p-3">
+                      <div className="text-xs font-medium text-foreground/70 mb-2 flex items-center gap-1">
+                        <Shield size={12} /> إفصاحات الصفقة
+                      </div>
+                      <div className="space-y-1.5">
+                        {dealStructure.requiredDisclosures.map((item) => {
+                          const complete = isDisclosureComplete(item);
+                          return (
+                            <div key={item} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] ${complete ? "bg-success/5 border border-success/20 text-success" : "bg-muted/30 text-muted-foreground"}`}>
+                              {complete ? <Check size={12} className="shrink-0" /> : <span className="w-3 h-3 rounded-full border border-muted-foreground/30 shrink-0" />}
+                              <span>{item}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {dealStructure.requiredDisclosures.map((item) => (
-                        <span key={item} className="text-[10px] px-2 py-0.5 rounded-md bg-warning/10 text-warning">{item}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Validation error banner */}
                 {publishAttempted && !canPublish && (
