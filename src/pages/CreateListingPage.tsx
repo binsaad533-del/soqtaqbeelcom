@@ -2201,6 +2201,56 @@ const CreateListingPage = () => {
               </div>
 
 
+              {/* ── مستندات تعزّز الصفقة ── */}
+              <div className="border-t border-border/50 pt-6 space-y-4">
+                <div>
+                  <h2 className="font-medium text-sm">مستندات تعزّز الصفقة</h2>
+                  <p className="text-[10px] text-muted-foreground">(اختياري — كل مستند يرفع نقاط الشفافية ويزيد ثقة المشتري)</p>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    ...[
+                      { key: "purchase_invoices", label: "فواتير شراء المعدات", hint: "تثبت قيمة الأصول الحقيقية" },
+                      { key: "extra_equipment_photos", label: "صور إضافية للمعدات", hint: "تزيد ثقة المشتري" },
+                    ],
+                    ...(["full_takeover", "transfer_no_liabilities"].includes(dealStructure.primaryType || "")
+                      ? [
+                          { key: "maintenance_contracts", label: "عقود الصيانة السارية", hint: "تطمئن المشتري على حالة المعدات" },
+                          { key: "bank_statement", label: "كشف حساب بنكي", hint: "يثبت أداء المشروع المالي" },
+                          { key: "supplier_contracts", label: "عقود الموردين", hint: "توضح سلسلة التوريد" },
+                        ]
+                      : []),
+                    ...(dealStructure.primaryType === "assets_setup"
+                      ? [
+                          { key: "maintenance_contracts_setup", label: "عقود الصيانة", hint: "تطمئن المشتري على حالة المعدات" },
+                          { key: "site_plans", label: "مخططات الموقع", hint: "تسهّل تخطيط التشغيل" },
+                        ]
+                      : []),
+                  ].map((doc) => (
+                    <div key={doc.key} className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/20 px-3 py-2.5">
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-medium">{doc.label}</span>
+                        <span className="text-[10px] text-muted-foreground mr-2">— {doc.hint}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {uploadedDocs[doc.key]?.length > 0 && (
+                          <span className="text-[10px] text-primary flex items-center gap-0.5">
+                            ✓ {uploadedDocs[doc.key].length}
+                          </span>
+                        )}
+                        <button
+                          onClick={() => { setActiveDocType(doc.key); setTimeout(() => docInputRef.current?.click(), 50); }}
+                          className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]"
+                        >
+                          <Upload size={12} strokeWidth={1.3} /> رفع
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+
               {/* ── Inline Deal Check / Market Analysis ── */}
               <div className="border-t border-border/50 pt-6 space-y-5">
                 <div className="flex items-center gap-3">
