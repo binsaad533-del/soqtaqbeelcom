@@ -208,14 +208,32 @@ export function useListings() {
   const softDeleteListing = useCallback(async (id: string) => {
     if (!user) return { error: new Error("Not authenticated"), data: null };
     setLoading(true);
-    const { data: listing, error } = await supabase
-      .from("listings")
-      .update({ deleted_at: new Date().toISOString(), deleted_by: user.id, status: "archived" } as any)
-      .eq("id", id)
-      .select()
-      .single();
-    setLoading(false);
-    return { data: listing, error };
+    try {
+      const { data: listing, error } = await supabase
+        .from("listings")
+        .update({ deleted_at: new Date().toISOString(), deleted_by: user.id, status: "archived" } as any)
+        .eq("id", id)
+        .eq("owner_id", user.id)
+        .select()
+        .single();
+
+      setLoading(false);
+
+      if (error) {
+        console.error("[softDeleteListing] Supabase error:", error);
+        return { data: null, error };
+      }
+
+      if (!listing) {
+        return { data: null, error: new Error("لم يتم العثور على الإعلان أو لا تملك صلاحية حذفه") };
+      }
+
+      return { data: listing, error: null };
+    } catch (err) {
+      setLoading(false);
+      console.error("[softDeleteListing] Unexpected error:", err);
+      return { data: null, error: err instanceof Error ? err : new Error("حدث خطأ غير متوقع") };
+    }
   }, [user]);
 
   return { createListing, updateListing, softDeleteListing, getMyDraft, getMyListings, getPublishedListings, getAllListings, getListing, uploadFile, loading };
