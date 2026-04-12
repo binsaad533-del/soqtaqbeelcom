@@ -1433,7 +1433,7 @@ const CreateListingPage = () => {
               {/* Separator between upload methods */}
               <div className="flex items-center gap-3 my-2">
                 <div className="flex-1 h-px bg-border/50" />
-                <span className="text-[11px] text-muted-foreground font-medium px-2">أو</span>
+                <span className="text-[11px] font-medium px-2 text-destructive">أو</span>
                 <div className="flex-1 h-px bg-border/50" />
               </div>
 
