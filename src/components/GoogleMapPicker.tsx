@@ -256,10 +256,9 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   };
 
   const applyParsedLocation = (pLat: number, pLng: number) => {
-    const nearest = findNearestCity(pLat, pLng);
-    const addr = `${nearest.name} (${pLat.toFixed(5)}, ${pLng.toFixed(5)})`;
+    const addr = `${pLat.toFixed(5)}, ${pLng.toFixed(5)}`;
     setSelectedAddress(addr);
-    onLocationChange(pLat, pLng, addr, { city: nearest.name, address: addr });
+    onLocationChange(pLat, pLng, addr);
     setPasteInput("");
 
     if (mapInstanceRef.current && markerRef.current) {
@@ -268,6 +267,10 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
       mapInstanceRef.current.setZoom(15);
       markerRef.current.setPosition(pos);
       markerRef.current.setVisible(true);
+    }
+
+    if (typeof google !== "undefined" && google.maps) {
+      reverseGeocode(new google.maps.LatLng(pLat, pLng));
     }
   };
 
