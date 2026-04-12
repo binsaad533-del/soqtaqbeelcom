@@ -271,43 +271,45 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     }
   };
 
-  const isShortLink = (input: string) =>
-    /\b(maps\.app\.goo\.gl|goo\.gl\/maps)\b/i.test(input.trim());
+  const isShortLink = (input: string) => /\b(goo\.gl|maps\.app)\b/i.test(input.trim());
 
   const handlePasteLocation = async () => {
     const trimmed = pasteInput.trim();
     if (!trimmed) return;
 
-    // Try direct parse first
-    const parsed = parseLocationInput(trimmed);
-    if (parsed) {
-      applyParsedLocation(parsed.lat, parsed.lng);
-      return;
-    }
+    let inputToParse = trimmed;
 
-    // If it's a short link, resolve it server-side
     if (isShortLink(trimmed)) {
       setSearching(true);
       setSelectedAddress("جاري تحويل الرابط...");
       try {
-        const { data, error: fnErr } = await supabase.functions.invoke("resolve-maps-url", {
+        const { data } = await supabase.functions.invoke("resolve-maps-url", {
           body: { url: trimmed },
         });
-        const resolvedUrl = data?.resolvedUrl || data?.finalUrl;
-        if (fnErr || !resolvedUrl) {
-          setSelectedAddress("تعذر تحويل الرابط — جرب نسخ الرابط الكامل من متصفح الخرائط");
+
+        if (data?.resolvedUrl) {
+          inputToParse = data.resolvedUrl;
+        } else {
+          setSelectedAddress("جرب نسخ الرابط الكامل من متصفح الخرائط بدل التطبيق");
           setSearching(false);
           return;
         }
-        const resolved = parseLocationInput(resolvedUrl);
-        if (resolved) {
-          applyParsedLocation(resolved.lat, resolved.lng);
-        } else {
-          setSelectedAddress("تعذر تحويل الرابط — جرب نسخ الرابط الكامل من متصفح الخرائط");
-        }
       } catch {
-        setSelectedAddress("تعذر تحويل الرابط — جرب نسخ الرابط الكامل من متصفح الخرائط");
+        setSelectedAddress("جرب نسخ الرابط الكامل من متصفح الخرائط بدل التطبيق");
+        setSearching(false);
+        return;
       }
+    }
+
+    const parsed = parseLocationInput(inputToParse);
+    if (parsed) {
+      applyParsedLocation(parsed.lat, parsed.lng);
+      setSearching(false);
+      return;
+    }
+
+    if (isShortLink(trimmed)) {
+      setSelectedAddress("جرب نسخ الرابط الكامل من متصفح الخرائط بدل التطبيق");
       setSearching(false);
       return;
     }
