@@ -427,9 +427,44 @@ const ListingDetailsPage = () => {
               ))}
             </div>
 
-            {/* Photo Lightbox */}
+            {/* Photo Lightbox — with keyboard + touch/swipe */}
             {lightboxIndex !== null && photos.length > 0 && (
-              <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setLightboxIndex(null)}>
+              <div
+                className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center select-none"
+                onClick={() => setLightboxIndex(null)}
+                tabIndex={0}
+                ref={(el) => { el?.focus(); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setLightboxIndex(null);
+                  if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                    e.preventDefault();
+                    setLightboxIndex((prev) => {
+                      if (prev === null) return null;
+                      return e.key === "ArrowRight"
+                        ? (prev - 1 + photos.length) % photos.length
+                        : (prev + 1) % photos.length;
+                    });
+                  }
+                }}
+                onTouchStart={(e) => {
+                  const touch = e.touches[0];
+                  touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+                }}
+                onTouchEnd={(e) => {
+                  if (!touchStartRef.current) return;
+                  const touch = e.changedTouches[0];
+                  const dx = touch.clientX - touchStartRef.current.x;
+                  const dy = touch.clientY - touchStartRef.current.y;
+                  touchStartRef.current = null;
+                  if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+                  setLightboxIndex((prev) => {
+                    if (prev === null) return null;
+                    return dx > 0
+                      ? (prev - 1 + photos.length) % photos.length
+                      : (prev + 1) % photos.length;
+                  });
+                }}
+              >
                 <button
                   className="absolute top-4 right-4 text-white/80 hover:text-white z-10 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
                   onClick={() => setLightboxIndex(null)}
@@ -438,11 +473,17 @@ const ListingDetailsPage = () => {
                   <>
                     <button
                       className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white z-10 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
-                      onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex - 1 + photos.length) % photos.length); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex((prev) => (prev === null ? null : (prev - 1 + photos.length) % photos.length));
+                      }}
                     >‹</button>
                     <button
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white z-10 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
-                      onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex + 1) % photos.length); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex((prev) => (prev === null ? null : (prev + 1) % photos.length));
+                      }}
                     >›</button>
                   </>
                 )}
