@@ -2503,14 +2503,6 @@ const CreateListingPage = () => {
                   </p>
                 </div>
 
-                <TransparencyIndicator listing={{
-                  ...disclosure,
-                  price: disclosure.price ? Number(disclosure.price) : null,
-                  annual_rent: disclosure.annual_rent ? Number(disclosure.annual_rent) : null,
-                  primary_deal_type: dealTypeForTransparency,
-                  inventory,
-                  photos,
-                }} />
 
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div className="p-3 rounded-xl bg-muted/50">
