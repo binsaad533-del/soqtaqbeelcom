@@ -1709,7 +1709,7 @@ const CreateListingPage = () => {
                           {uploadedDocs[doc]?.length > 0 && <span className="text-[10px] text-success mr-2">✓ {uploadedDocs[doc].length} ملف</span>}
                         </div>
                       </div>
-                      <button onClick={() => { setActiveDocType(doc); docInputRef.current?.click(); }} className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]">
+                      <button onClick={() => { setActiveDocType(doc); setTimeout(() => docInputRef.current?.click(), 50); }} className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]">
                         <Upload size={12} strokeWidth={1.3} /> رفع
                       </button>
                     </div>
