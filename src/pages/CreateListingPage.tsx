@@ -862,10 +862,24 @@ const CreateListingPage = () => {
       if (!disclosure.price && bulkInventoryPrice) {
         setDisclosure(prev => ({ ...prev, price: bulkInventoryPrice }));
       }
-      if (!disclosure.business_activity && analysisSummary) {
-        const activityMatch = analysisSummary.match(/نشاط[:\s]*([^\n.،]+)/);
-        if (activityMatch) {
-          setDisclosure(prev => ({ ...prev, business_activity: activityMatch[1].trim() }));
+      if (!disclosure.business_activity) {
+        // Try from analysis summary first
+        if (analysisSummary) {
+          const activityMatch = analysisSummary.match(/نشاط[:\s]*([^\n.،]+)/);
+          if (activityMatch) {
+            setDisclosure(prev => ({ ...prev, business_activity: activityMatch[1].trim() }));
+          }
+        }
+        // Fallback: generate from inventory items
+        if (!disclosure.business_activity && inventory.length > 0) {
+          const categories = [...new Set(inventory.filter(i => i.included).map(i => i.category).filter(Boolean))];
+          const topItems = inventory.filter(i => i.included).slice(0, 3).map(i => i.name);
+          const autoName = categories.length > 0
+            ? `${categories.join(" و ")} — ${topItems.join("، ")}`
+            : topItems.join("، ");
+          if (autoName) {
+            setDisclosure(prev => ({ ...prev, business_activity: autoName.slice(0, 100) }));
+          }
         }
       }
     }
