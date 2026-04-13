@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { X, ArrowLeft, ArrowRight, Search, PlusCircle, MessageSquare, FileCheck, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -57,17 +57,30 @@ const OnboardingTour = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Only show on homepage for first-time visitors
     if (location.pathname === "/" && !localStorage.getItem(ONBOARDING_KEY)) {
       const timer = setTimeout(() => setVisible(true), 1500);
       return () => clearTimeout(timer);
     }
   }, [location.pathname]);
 
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     setVisible(false);
     localStorage.setItem(ONBOARDING_KEY, "true");
-  };
+  }, []);
+
+  // Escape key handler
+  useEffect(() => {
+    if (!visible) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        dismiss();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
+  }, [visible, dismiss]);
 
   const next = () => {
     if (step < steps.length - 1) setStep(step + 1);
@@ -92,12 +105,25 @@ const OnboardingTour = () => {
 
   return (
     <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm" onClick={dismiss} />
+      {/* Backdrop — clicking dismisses */}
+      <div
+        className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dismiss();
+        }}
+        role="presentation"
+      />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-[101] flex items-center justify-center p-4">
-        <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+      <div
+        className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
+      >
+        <div
+          className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-300 pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Progress bar */}
           <div className="h-1 bg-muted">
             <div
@@ -111,7 +137,16 @@ const OnboardingTour = () => {
             <span className="text-[10px] text-muted-foreground tabular-nums">
               {step + 1} / {steps.length}
             </span>
-            <button onClick={dismiss} className="text-muted-foreground hover:text-foreground transition-colors">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dismiss();
+              }}
+              className="text-muted-foreground hover:text-foreground transition-colors p-1 -m-1 rounded-full hover:bg-muted"
+              aria-label="إغلاق الجولة"
+            >
               <X size={16} />
             </button>
           </div>
@@ -150,6 +185,7 @@ const OnboardingTour = () => {
             {steps.map((_, i) => (
               <button
                 key={i}
+                type="button"
                 onClick={() => setStep(i)}
                 className={cn(
                   "w-1.5 h-1.5 rounded-full transition-all",
