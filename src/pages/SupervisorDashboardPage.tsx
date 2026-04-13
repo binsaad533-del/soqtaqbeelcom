@@ -12,7 +12,7 @@ import {
   FileText, AlertTriangle, CheckCircle,
   ChevronLeft, Loader2, Eye, Users, Handshake, TrendingUp,
   Search, Bell, Activity, RefreshCw, Shield, ShieldAlert, UserCheck, User,
-  ClipboardList, Download, BarChart3, LifeBuoy
+  ClipboardList, Download, BarChart3, LifeBuoy, MessageCircle, Volume2, VolumeX, Send
 } from "lucide-react";
 import FraudMonitorPanel from "@/components/FraudMonitorPanel";
 import SupportTicketsPanel from "@/components/SupportTicketsPanel";
@@ -22,8 +22,16 @@ import SarSymbol from "@/components/SarSymbol";
 import AccountSettingsPanel from "@/components/AccountSettingsPanel";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import * as XLSX from "xlsx";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
-type Tab = "overview" | "listings" | "deals" | "users" | "reports" | "monitoring" | "support" | "account";
+import SupervisorDailyTasks from "@/components/supervisor/SupervisorDailyTasks";
+import SupervisorPerformance from "@/components/supervisor/SupervisorPerformance";
+import SupervisorMessaging, { startConversationWithUser } from "@/components/supervisor/SupervisorMessaging";
+import UserNotesPanel from "@/components/supervisor/UserNotesPanel";
+import { useSupervisorAlerts } from "@/hooks/useSupervisorAlerts";
+
+type Tab = "overview" | "listings" | "deals" | "users" | "reports" | "monitoring" | "support" | "messages" | "account";
 
 const ALL_TABS: { id: Tab; label: string; icon: any; perm?: string }[] = [
   { id: "overview", label: "نظرة عامة", icon: Eye },
@@ -33,6 +41,7 @@ const ALL_TABS: { id: Tab; label: string; icon: any; perm?: string }[] = [
   { id: "reports", label: "البلاغات", icon: AlertTriangle, perm: "manage_reports" },
   { id: "monitoring", label: "المراقبة والتدقيق", icon: ClipboardList },
   { id: "support", label: "الدعم الفني", icon: LifeBuoy },
+  { id: "messages", label: "المراسلات", icon: MessageCircle },
   { id: "account", label: "حسابي", icon: User },
 ];
 
@@ -95,25 +104,15 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
           supabase.from("agent_actions_log").select("*").order("created_at", { ascending: false }).limit(100),
           supabase.from("otp_attempts").select("*").eq("success", false).order("created_at", { ascending: false }).limit(20),
           supabase.from("listing_reports").select("*").order("created_at", { ascending: false }).limit(10),
-          // Stalled deals > 7 days
           supabase.from("deals").select("id, status, updated_at, listing_id").eq("status", "negotiating").lt("updated_at", sevenDaysAgo),
-          // Overdue commissions > 30 days
           supabase.from("deal_commissions").select("id", { count: "exact", head: true }).eq("payment_status", "pending").lt("created_at", thirtyDaysAgo),
-          // Pending reports > 48h
           supabase.from("listing_reports").select("*").eq("status", "pending").lt("created_at", fortyEightHoursAgo),
-          // Pending verifications > 72h (profiles awaiting verification)
           supabase.from("profiles").select("id", { count: "exact", head: true }).eq("verification_level", "pending").lt("created_at", seventyTwoHoursAgo),
-          // OTP abuse today
           Promise.resolve({ data: null as any }),
-          // Zero view listings > 7 days
           supabase.from("listings").select("id", { count: "exact", head: true }).eq("status", "published").lt("published_at", sevenDaysAgo),
-          // Weekly: new listings
           supabase.from("listings").select("id", { count: "exact", head: true }).gte("created_at", weekStart),
-          // Weekly: completed deals
           supabase.from("deals").select("id", { count: "exact", head: true }).in("status", ["completed", "finalized"]).gte("updated_at", weekStart),
-          // Weekly: collected commissions
           supabase.from("deal_commissions").select("id", { count: "exact", head: true }).eq("payment_status", "verified").gte("updated_at", weekStart),
-          // Weekly: reports
           supabase.from("listing_reports").select("id", { count: "exact", head: true }).gte("created_at", weekStart),
         ]);
 
@@ -133,9 +132,7 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
           reportsCount: weekReportsRes.count || 0,
         });
 
-        // OTP abuse: group by phone where fail >= 10 today
         if (!otpAbuseRes.data) {
-          // Fallback: check from otp_attempts directly
           const { data: otpToday } = await supabase
             .from("otp_attempts")
             .select("phone")
@@ -150,7 +147,6 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
           setOtpAbuse(otpAbuseRes.data || []);
         }
 
-        // Activity chart: last 30 days
         const days: any[] = [];
         for (let i = 29; i >= 0; i--) {
           const d = new Date(now.getTime() - i * 86400000);
@@ -233,12 +229,12 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {[
-            { label: "صفقات متوقفة > 7 أيام", value: stalledDeals.length, color: "bg-destructive/10 text-destructive", icon: "🔴" },
-            { label: "عمولات متأخرة > 30 يوم", value: overdueCommissions, color: "bg-destructive/10 text-destructive", icon: "🔴" },
-            { label: "بلاغات بدون رد > 48 ساعة", value: pendingReports.length, color: "bg-warning/10 text-warning", icon: "🟠" },
-            { label: "توثيقات بانتظار > 72 ساعة", value: pendingVerifications, color: "bg-warning/10 text-warning", icon: "🟠" },
-            { label: "محاولات OTP مشبوهة اليوم", value: otpAbuse.length, color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400", icon: "🟡" },
-            { label: "إعلانات بدون مشاهدات > 7 أيام", value: zeroViewListings, color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400", icon: "🟡" },
+            { label: "صفقات متوقفة > 7 أيام", value: stalledDeals.length, color: "bg-destructive/10 text-destructive" },
+            { label: "عمولات متأخرة > 30 يوم", value: overdueCommissions, color: "bg-destructive/10 text-destructive" },
+            { label: "بلاغات بدون رد > 48 ساعة", value: pendingReports.length, color: "bg-warning/10 text-warning" },
+            { label: "توثيقات بانتظار > 72 ساعة", value: pendingVerifications, color: "bg-warning/10 text-warning" },
+            { label: "محاولات OTP مشبوهة اليوم", value: otpAbuse.length, color: "bg-warning/10 text-warning" },
+            { label: "إعلانات بدون مشاهدات > 7 أيام", value: zeroViewListings, color: "bg-warning/10 text-warning" },
           ].map((alert, i) => (
             <div key={i} className={cn("rounded-xl p-3 flex items-center justify-between", alert.color)}>
               <span className="text-xs font-medium">{alert.label}</span>
@@ -246,7 +242,6 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
             </div>
           ))}
         </div>
-        {/* Stalled deals list */}
         {stalledDeals.length > 0 && (
           <div className="mt-3 space-y-1">
             <p className="text-[11px] text-muted-foreground font-medium">صفقات متوقفة:</p>
@@ -370,7 +365,6 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
 
       {/* Section 4: Security Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* OTP attempts */}
         <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <Shield size={15} className="text-warning" /> محاولات OTP الفاشلة
@@ -392,7 +386,6 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
           </div>
         </div>
 
-        {/* Recent reports */}
         <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <AlertTriangle size={15} className="text-destructive" /> آخر البلاغات
@@ -437,7 +430,6 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
           </button>
         </div>
 
-        {/* Weekly summary cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           {[
             { label: "إعلانات جديدة", value: weeklySummary.newListings, cls: "text-primary" },
@@ -452,7 +444,6 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
           ))}
         </div>
 
-        {/* Activity chart */}
         <div className="h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={activityData}>
@@ -474,7 +465,7 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
 /* ── Main Page ── */
 const SupervisorDashboardPage = () => {
   useSEO({ title: "لوحة مشرف التشغيل", description: "لوحة تحكم مشرف التشغيل — متابعة الإعلانات والصفقات والمراقبة على سوق تقبيل", canonical: "/supervisor-dashboard" });
-  const { profile, signOut } = useAuthContext();
+  const { user, profile, signOut } = useAuthContext();
   const { getAllListings } = useListings();
   const { getAllDeals } = useDeals();
   const { getAllProfiles } = useProfiles();
@@ -487,6 +478,9 @@ const SupervisorDashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [myPerms, setMyPerms] = useState<SupervisorPermissions | null>(null);
+  const [selectedUserForNotes, setSelectedUserForNotes] = useState<string | null>(null);
+
+  const { soundEnabled, toggleSound } = useSupervisorAlerts(true);
 
   const TABS = useMemo(() => {
     if (!myPerms) return ALL_TABS;
@@ -518,7 +512,7 @@ const SupervisorDashboardPage = () => {
   useEffect(() => {
     const ch = supabase.channel("supervisor-dash-critical")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "security_incidents" }, () => {
-        setFeed(prev => [{ id: crypto.randomUUID(), text: "⚠️ حادثة أمنية جديدة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "incident" }, ...prev].slice(0, 8));
+        setFeed(prev => [{ id: crypto.randomUUID(), text: "حادثة أمنية جديدة", time: new Date().toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }), type: "incident" }, ...prev].slice(0, 8));
         toast.warning("تنبيه: حادثة أمنية جديدة");
       })
       .subscribe();
@@ -557,6 +551,22 @@ const SupervisorDashboardPage = () => {
     return profiles.filter(p => p.full_name?.toLowerCase().includes(q) || p.phone?.includes(searchQuery));
   }, [profiles, searchQuery]);
 
+  const handleMessageUser = async (targetUserId: string) => {
+    if (!user) return;
+    const conv = await startConversationWithUser(user.id, targetUserId);
+    if (conv) {
+      setActiveTab("messages");
+      toast.success("تم فتح المحادثة");
+    }
+  };
+
+  // Staff profiles map for notes
+  const staffProfilesMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    profiles.forEach(p => { map[p.user_id] = p.full_name || "—"; });
+    return map;
+  }, [profiles]);
+
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={24} className="animate-spin text-primary" /></div>;
 
   return (
@@ -570,12 +580,20 @@ const SupervisorDashboardPage = () => {
             <p className="text-sm text-muted-foreground">مرحباً {profile?.full_name}</p>
           </div>
           <div className="flex items-center gap-2">
+            {/* Sound toggle */}
+            <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-muted/40">
+              {soundEnabled ? <Volume2 size={13} className="text-primary" /> : <VolumeX size={13} className="text-muted-foreground" />}
+              <Switch checked={soundEnabled} onCheckedChange={toggleSound} className="scale-75" />
+            </div>
             <button onClick={loadData} className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors">
               <RefreshCw size={13} className="text-muted-foreground" />
             </button>
             <button onClick={signOut} className="text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-muted/50">خروج</button>
           </div>
         </div>
+
+        {/* Daily Tasks */}
+        <SupervisorDailyTasks onNavigate={(tab) => setActiveTab(tab as Tab)} />
 
         {/* KPI Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -616,6 +634,8 @@ const SupervisorDashboardPage = () => {
           <MonitoringTab profiles={profiles} />
         ) : activeTab === "support" ? (
           <SupportTicketsPanel />
+        ) : activeTab === "messages" ? (
+          <SupervisorMessaging profiles={profiles} />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2 space-y-4">
@@ -765,12 +785,23 @@ const SupervisorDashboardPage = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="text-[10px] text-muted-foreground">
-                        ثقة: {p.trust_score}%
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="ghost" className="text-[10px] gap-1 h-7 px-2" onClick={() => handleMessageUser(p.user_id)}>
+                          <Send size={10} /> مراسلة
+                        </Button>
+                        <Button size="sm" variant="ghost" className="text-[10px] gap-1 h-7 px-2" onClick={() => setSelectedUserForNotes(selectedUserForNotes === p.user_id ? null : p.user_id)}>
+                          <FileText size={10} /> ملاحظات
+                        </Button>
+                        <span className="text-[10px] text-muted-foreground">ثقة: {p.trust_score}%</span>
                       </div>
                     </div>
                   ))}
                   {filteredProfiles.length === 0 && <p className="text-center text-sm text-muted-foreground py-12">لا يوجد مستخدمون</p>}
+
+                  {/* User Notes Panel */}
+                  {selectedUserForNotes && (
+                    <UserNotesPanel userId={selectedUserForNotes} staffProfiles={staffProfilesMap} />
+                  )}
                 </div>
               )}
 
@@ -787,6 +818,9 @@ const SupervisorDashboardPage = () => {
 
             {/* Sidebar */}
             <div className="space-y-4">
+              {/* Performance Card */}
+              <SupervisorPerformance />
+
               <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-semibold flex items-center gap-1.5">
@@ -844,6 +878,9 @@ const SupervisorDashboardPage = () => {
                   </button>
                   <button onClick={() => setActiveTab("monitoring")} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-muted/40 transition-colors text-xs text-muted-foreground text-right">
                     <ClipboardList size={13} /> المراقبة والتدقيق
+                  </button>
+                  <button onClick={() => setActiveTab("messages")} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-muted/40 transition-colors text-xs text-muted-foreground text-right">
+                    <MessageCircle size={13} /> المراسلات
                   </button>
                 </div>
               </div>
