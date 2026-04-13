@@ -11,6 +11,7 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SessionGuard from "./components/SessionGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
+import PageErrorBoundary from "./components/PageErrorBoundary";
 import OnboardingTour from "./components/OnboardingTour";
 
 // Lazy-loaded pages for code splitting
@@ -70,10 +71,11 @@ const ReferralPage = lazy(() => import("./pages/ReferralPage"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 2 * 60 * 1000,      // 2 min — avoid refetches on tab focus
-      gcTime: 10 * 60 * 1000,         // 10 min garbage collection
-      refetchOnWindowFocus: false,     // prevent unnecessary refetches
-      retry: 1,                        // single retry on failure
+      staleTime: 2 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     },
   },
 });
@@ -119,14 +121,14 @@ const App = () => (
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:slug" element={<BlogPostPage />} />
                 <Route path="/commission" element={<CommissionPage />} />
-                {/* Escrow page disabled for launch — will re-enable with payment integration */}
-                {/* <Route path="/escrow" element={<EscrowPage />} /> */}
                 <Route path="/listing/:id" element={<ListingDetailsPage />} />
                 <Route
                   path="/create-listing"
                   element={
                     <ProtectedRoute>
-                      <CreateListingPageKeyed />
+                      <PageErrorBoundary label="إنشاء الإعلان">
+                        <CreateListingPageKeyed />
+                      </PageErrorBoundary>
                     </ProtectedRoute>
                   }
                 />
@@ -134,7 +136,9 @@ const App = () => (
                   path="/negotiate/:id"
                   element={
                     <ProtectedRoute>
-                      <NegotiationPage />
+                      <PageErrorBoundary label="التفاوض">
+                        <NegotiationPage />
+                      </PageErrorBoundary>
                     </ProtectedRoute>
                   }
                 />
@@ -142,7 +146,9 @@ const App = () => (
                   path="/agreement/:id"
                   element={
                     <ProtectedRoute>
-                      <AgreementPage />
+                      <PageErrorBoundary label="الاتفاقية">
+                        <AgreementPage />
+                      </PageErrorBoundary>
                     </ProtectedRoute>
                   }
                 />
@@ -166,7 +172,9 @@ const App = () => (
                   path="/dashboard"
                   element={
                     <ProtectedRoute>
-                      <DashboardRouter />
+                      <PageErrorBoundary label="لوحة التحكم">
+                        <DashboardRouter />
+                      </PageErrorBoundary>
                     </ProtectedRoute>
                   }
                 />
@@ -182,7 +190,9 @@ const App = () => (
                   path="/deal-pipeline"
                   element={
                     <ProtectedRoute allowedRoles={["platform_owner", "supervisor"]}>
-                      <DealPipelinePage />
+                      <PageErrorBoundary label="مسار الصفقات">
+                        <DealPipelinePage />
+                      </PageErrorBoundary>
                     </ProtectedRoute>
                   }
                 />
@@ -214,7 +224,9 @@ const App = () => (
                   path="/messages"
                   element={
                     <ProtectedRoute>
-                      <MessagesPage />
+                      <PageErrorBoundary label="الرسائل">
+                        <MessagesPage />
+                      </PageErrorBoundary>
                     </ProtectedRoute>
                   }
                 />
@@ -238,11 +250,20 @@ const App = () => (
                   path="/seller-dashboard"
                   element={
                     <ProtectedRoute>
-                      <SellerDashboardPage />
+                      <PageErrorBoundary label="لوحة البائع">
+                        <SellerDashboardPage />
+                      </PageErrorBoundary>
                     </ProtectedRoute>
                   }
                 />
-                <Route path="/ai-chat" element={<AiChatPage />} />
+                <Route
+                  path="/ai-chat"
+                  element={
+                    <PageErrorBoundary label="المحادثة الذكية">
+                      <AiChatPage />
+                    </PageErrorBoundary>
+                  }
+                />
                 <Route
                   path="/moqbil-log"
                   element={
