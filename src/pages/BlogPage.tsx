@@ -32,7 +32,10 @@ const BlogPage = () => {
         .select("*")
         .eq("status", "published")
         .order("published_at", { ascending: false });
-      if (error) throw error;
+      if (error) {
+        console.error("[BlogPage] Failed to load posts:", error);
+        return [];
+      }
       return data;
     },
   });
