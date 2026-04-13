@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, memo } from "react";
+import { safeJsonLd } from "@/lib/security";
 import { useSEO } from "@/hooks/useSEO";
 import { calculateTransparency } from "@/lib/transparencyScore";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
@@ -229,7 +230,24 @@ const MarketplacePage = () => {
     return pages;
   };
 
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "سوق الفرص — فرص تقبيل مشاريع تجارية",
+    description: "قائمة بفرص تقبيل المشاريع التجارية المتاحة في السعودية",
+    url: "https://soqtaqbeel.com/marketplace",
+    numberOfItems: filtered.length,
+    itemListElement: pagination.currentItems.slice(0, 10).map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://soqtaqbeel.com/listing/${item.id}`,
+      name: item.title || item.business_activity || "فرصة تقبيل",
+    })),
+  };
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(itemListJsonLd) }} />
     <div className={cn("py-8", compareItems.length > 0 && "pb-24")}>
       <div className="container max-w-5xl">
         {/* Header */}
