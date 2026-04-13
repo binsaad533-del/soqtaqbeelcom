@@ -230,6 +230,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <AiAssistant />
       <CookieConsent />
       <SmartInstallPrompt />
+      <PushNotificationPrompt />
       <Footer />
     </div>
   );
