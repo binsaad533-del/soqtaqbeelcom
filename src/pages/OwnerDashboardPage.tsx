@@ -186,6 +186,9 @@ const OwnerDashboardPage = () => {
             <button onClick={load} className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors">
               <RefreshCw size={13} className="text-muted-foreground" />
             </button>
+            <Link to="/admin/roles" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors bg-muted/50 px-3 py-2 rounded-xl">
+              <ShieldCheck size={13} strokeWidth={1.5} /> إدارة الأدوار
+            </Link>
             <Link to="/monitoring" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors bg-muted/50 px-3 py-2 rounded-xl">
               <Eye size={13} strokeWidth={1.5} /> المراقبة المباشرة
             </Link>
