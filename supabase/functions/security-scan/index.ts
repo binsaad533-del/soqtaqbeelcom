@@ -38,7 +38,7 @@ serve(async (req) => {
             details: { email, attempt_count: count },
             recommended_actions: ["تعليق الحساب مؤقتاً", "مراجعة IP"],
           });
-          results.push(`brute_force: ${email} (${count})`);
+          results.push(`محاولات اختراق: ${email} (${count})`);
         }
       }
     }
@@ -66,7 +66,7 @@ serve(async (req) => {
             details: { active_listings: count },
             recommended_actions: ["إخفاء إعلانات المستخدم الموقوف"],
           });
-          results.push(`suspended_active: ${p.user_id}`);
+          results.push(`حساب موقوف نشط: ${p.full_name || p.user_id}`);
         }
       }
     }
