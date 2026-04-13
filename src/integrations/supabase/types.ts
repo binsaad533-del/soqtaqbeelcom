@@ -2261,6 +2261,33 @@ export type Database = {
         }
         Relationships: []
       }
+      reply_templates: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          created_by: string
+          id: string
+          title: string
+        }
+        Insert: {
+          body: string
+          category?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          title: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       search_alerts: {
         Row: {
           business_activity: string | null
@@ -2624,6 +2651,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_notes: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          note: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          note: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          note?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

@@ -12,6 +12,7 @@ import { Search, UserPlus, CheckCircle, Loader2, Send } from "lucide-react";
 import type { TicketMessage } from "@/hooks/useTickets";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import ReplyTemplatesButton from "@/components/supervisor/ReplyTemplatesButton";
 
 const statusLabels: Record<string, { ar: string; cls: string }> = {
   open: { ar: "مفتوحة", cls: "bg-primary/10 text-primary" },
@@ -174,13 +175,16 @@ export default function SupportTicketsPanel() {
             ))}
           </div>
           {selectedTicket && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
-            <div className="flex gap-2">
-              <Textarea value={reply} onChange={e => setReply(e.target.value)} rows={2}
-                placeholder="اكتب الرد..." className="flex-1 min-h-[50px]"
-                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }} />
-              <Button size="icon" onClick={handleSend} disabled={sending || !reply.trim()}>
-                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send size={14} />}
-              </Button>
+            <div className="space-y-2">
+              <ReplyTemplatesButton onSelect={text => setReply(text)} />
+              <div className="flex gap-2">
+                <Textarea value={reply} onChange={e => setReply(e.target.value)} rows={2}
+                  placeholder="اكتب الرد..." className="flex-1 min-h-[50px]"
+                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }} />
+                <Button size="icon" onClick={handleSend} disabled={sending || !reply.trim()}>
+                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send size={14} />}
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
