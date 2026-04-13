@@ -96,16 +96,32 @@ serve(async (req) => {
       results.push(`overdue_commissions: ${overdueComms.length} (${totalOverdue} SAR)`);
     }
 
-    // ─── 5. Notify platform owner with summary ───
+    // ─── 5. Notify platform owner with summary (once per day) ───
     const { data: ownerRoles } = await admin.from("user_roles").select("user_id").eq("role", "platform_owner");
     if (ownerRoles && results.length > 0) {
-      const notifications = ownerRoles.map((r: any) => ({
-        user_id: r.user_id,
-        title: "🔒 تقرير الفحص الأمني الدوري",
-        body: `تم اكتشاف ${results.length} ملاحظة: ${results.join(" | ")}`,
-        type: "security",
-      }));
-      await admin.from("notifications").insert(notifications);
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      for (const r of ownerRoles) {
+        // Check if same notification type was already sent today
+        const { count } = await admin
+          .from("notifications")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", r.user_id)
+          .eq("type", "security")
+          .like("title", "%تقرير الفحص الأمني%")
+          .gte("created_at", twentyFourHoursAgo);
+
+        if ((count || 0) > 0) {
+          console.log(`Skipping security scan notification for ${r.user_id} — already sent today`);
+          continue;
+        }
+
+        await admin.from("notifications").insert({
+          user_id: r.user_id,
+          title: "تقرير الفحص الأمني الدوري",
+          body: `تم اكتشاف ${results.length} ملاحظة: ${results.join(" | ")}`,
+          type: "security",
+        });
+      }
     }
 
     return new Response(
