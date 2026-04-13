@@ -18,7 +18,8 @@ export function usePublishedListingsQuery() {
       }
       return (data || []) as unknown as Listing[];
     },
-    staleTime: 2 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -41,7 +42,8 @@ export function useMyListingsQuery() {
       return (data || []) as unknown as Listing[];
     },
     enabled: !!user,
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -59,7 +61,8 @@ export function useAllListingsQuery() {
       }
       return (data || []) as unknown as Listing[];
     },
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -80,6 +83,7 @@ export function useListingQuery(id: string | undefined) {
       return data as unknown as Listing | null;
     },
     enabled: !!id,
-    staleTime: 30 * 1000,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }
