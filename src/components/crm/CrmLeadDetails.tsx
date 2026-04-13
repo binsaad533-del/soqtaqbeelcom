@@ -93,11 +93,11 @@ const CrmLeadDetails = ({ lead, onBack, getProfileName, profiles, updateLead, ge
   const fetchAiSuggestion = async () => {
     setAiLoading(true);
     try {
-      const { data } = await supabase.functions.invoke("ai-chat", {
-        body: {
-          messages: [{
-            role: "user",
-            content: `أنت مساعد CRM ذكي. حلل هذا العميل المحتمل واقترح الخطوة التالية بإيجاز (جملة أو اثنتين فقط):
+      const { invokeWithRetry } = await import("@/lib/invokeWithRetry");
+      const { data } = await invokeWithRetry("ai-chat", {
+        messages: [{
+          role: "user",
+          content: `أنت مساعد CRM ذكي. حلل هذا العميل المحتمل واقترح الخطوة التالية بإيجاز (جملة أو اثنتين فقط):
 
 الاسم: ${currentLead.full_name}
 الموضوع: ${currentLead.subject}
@@ -106,8 +106,7 @@ const CrmLeadDetails = ({ lead, onBack, getProfileName, profiles, updateLead, ge
 المصدر: ${currentLead.source}
 
 اقترح خطوة عملية واحدة واضحة.`
-          }],
-        },
+        }],
       });
 
       if (data) {
