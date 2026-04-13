@@ -760,7 +760,7 @@ const ListingDetailsPage = () => {
               {isOwner && <ListingHealthReport listingId={listing.id} />}
 
               {/* Deal-type-aware Transparency Indicator */}
-              <TransparencyIndicator listing={listing} className="mb-4" />
+              <TransparencyIndicator listing={listing} className="mb-4" onListingUpdated={(updated) => setListing(updated as unknown as Listing)} />
 
 
               {/* Seller Info Card */}
