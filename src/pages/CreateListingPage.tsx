@@ -23,13 +23,12 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
-import DealStructureEngine, { type DealStructureSelection } from "@/components/DealStructureEngine";
+import { type DealStructureSelection } from "@/components/DealStructureEngine";
 import { DEAL_TYPE_MAP, detectConflicts, getRequiredDisclosures, getRequiredDocuments } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { calculateTransparency } from "@/lib/transparencyScore";
-import { getRules, isFieldVisible, validateDisclosure, validateImages } from "@/lib/dealTypeFieldRules";
+import { getRules, validateDisclosure } from "@/lib/dealTypeFieldRules";
 import VerificationGate from "@/components/VerificationGate";
-import { toEnglishNumerals } from "@/lib/arabicNumerals";
 import { useSEO } from "@/hooks/useSEO";
 
 import type { InventoryItem, InventoryPricingMode, DedupAction, CrExtractionResult } from "./create-listing/types";
