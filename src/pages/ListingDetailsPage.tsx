@@ -117,9 +117,10 @@ const ListingDetailsPage = () => {
   const [listing, setListing] = useState<Listing | null>(null);
 
   // Dynamic SEO with OG tags for smart social sharing
-  const ogTitle = listing ? (listing.title || listing.business_activity || "فرصة تقبيل") : "تفاصيل الإعلان";
+  const listingTitle = listing ? (listing.title || listing.business_activity || "فرصة تقبيل") : "تفاصيل الإعلان";
+  const ogTitle = listing ? `${listingTitle} — ${listing.city || "السعودية"}` : "تفاصيل الإعلان";
   const ogDesc = listing
-    ? `${listing.business_activity || ""} — ${listing.city || ""} ${listing.price ? `| ${Number(listing.price).toLocaleString("en-US")} ر.س` : ""}`
+    ? `${listing.business_activity || "فرصة تقبيل"} في ${listing.city || "السعودية"}${listing.price ? ` بسعر ${Number(listing.price).toLocaleString("en-US")} ر.س` : ""} — تصفح التفاصيل وقدّم عرضك على سوق تقبيل`
     : "عرض تفاصيل فرصة تقبيل على سوق تقبيل";
   const ogPhotos = listing?.photos as Record<string, string[]> | null;
   const ogImage = ogPhotos ? (Object.values(ogPhotos).flat()[0] as string | undefined) : undefined;
