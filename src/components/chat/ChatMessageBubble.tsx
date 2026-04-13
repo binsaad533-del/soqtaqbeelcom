@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import MoqbilAvatar from "@/components/MoqbilAvatar";
 
 const REPORT_REASONS = [
   "محتوى مسيء أو غير لائق",
