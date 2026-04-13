@@ -117,6 +117,29 @@ Deno.serve(async (req) => {
         },
       });
 
+      // Send Email
+      const { data: sellerProfile } = await supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("user_id", comm.seller_id)
+        .maybeSingle();
+
+      if (sellerProfile?.email) {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "commission-reminder",
+            recipientEmail: sellerProfile.email,
+            idempotencyKey: `commission-reminder-auto-${comm.id}-${comm.reminder_count + 1}`,
+            templateData: {
+              recipientName: sellerProfile.full_name || undefined,
+              listingTitle: title,
+              amount: String(amount),
+              reminderLevel,
+            },
+          },
+        });
+      }
+
       // Audit log
       await supabase.from("audit_logs").insert({
         action: "commission_reminder_sent",
