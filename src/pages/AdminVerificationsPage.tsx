@@ -187,7 +187,7 @@ const AdminVerificationsPage = () => {
                     <td className="px-4 py-3">{item.business_name || "—"}</td>
                     <td className="px-4 py-3 font-mono text-xs">{item.commercial_register_number || "—"}</td>
                     <td className="px-4 py-3">{ID_TYPE_MAP[item.id_type] || item.id_type}</td>
-                    <td className="px-4 py-3 font-mono text-xs">{item.id_number}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{hasRole('platform_owner') ? item.id_number : `****${item.id_number.slice(-4)}`}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(item.submitted_at)}</td>
                     <td className="px-4 py-3">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${st.cls}`}>{st.label}</span>

@@ -140,7 +140,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </Link>
                 <NotificationBell />
                 <button
-                  onClick={() => { console.log("Dashboard click"); navigate("/dashboard"); }}
+                  onClick={() => navigate("/dashboard")}
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors text-[12px]"
                   title={tx("لوحة التحكم", "Dashboard")}
                 >

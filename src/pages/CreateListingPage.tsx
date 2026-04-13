@@ -830,11 +830,7 @@ const CreateListingPage = () => {
         }
       }
 
-      // Log files processed
-      const filesProcessed = (data as { files_processed?: any[] }).files_processed;
-      if (filesProcessed && filesProcessed.length > 0) {
-        console.log("[AI] Files processed:", filesProcessed);
-      }
+      // Files processed - no logging in production
 
       toast.success("تم تحليل جميع الملفات والصور واستخراج البيانات بنجاح ✦");
     } catch (err) {
