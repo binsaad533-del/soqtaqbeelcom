@@ -54,6 +54,7 @@ const EscrowPage = lazy(() => import("./pages/EscrowPage"));
 const ViewCustomerPage = lazy(() => import("./pages/ViewCustomerPage"));
 const DealPipelinePage = lazy(() => import("./pages/DealPipelinePage"));
 const AdminRevenuePage = lazy(() => import("./pages/AdminRevenuePage"));
+const FinanceDashboardPage = lazy(() => import("./pages/FinanceDashboardPage"));
 const AdminDealsPage = lazy(() => import("./pages/AdminDealsPage"));
 const MessagesPage = lazy(() => import("./pages/MessagesPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
@@ -201,6 +202,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={["platform_owner"]}>
                       <AdminRevenuePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/finance"
+                  element={
+                    <ProtectedRoute allowedRoles={["platform_owner", "financial_manager"]}>
+                      <FinanceDashboardPage />
                     </ProtectedRoute>
                   }
                 />
