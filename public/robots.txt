@@ -43,4 +43,4 @@ Disallow: /moqbil-log
 Disallow: /pdf-preview
 Disallow: /referral
 
-Sitemap: https://soqtaqbeel.com/sitemap.xml
+Sitemap: https://sxvfjtmntdmrlzdetnyg.supabase.co/functions/v1/generate-sitemap
