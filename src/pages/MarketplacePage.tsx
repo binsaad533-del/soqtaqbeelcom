@@ -409,6 +409,7 @@ const MarketplacePage = () => {
 
       <ComparePanel items={compareItems} onRemove={removeCompare} onClear={clearCompare} />
     </div>
+    </>
   );
 };
 
