@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Printer, Download, ArrowRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SarSymbol from "@/components/SarSymbol";
+import { BANK_DETAILS } from "@/hooks/useCommissions";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { useSEO } from "@/hooks/useSEO";
 import {
