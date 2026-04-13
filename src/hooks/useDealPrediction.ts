@@ -36,7 +36,7 @@ export function useDealPrediction() {
         : { data: null };
 
       const { data: sellerProfile } = deal.seller_id
-        ? await supabase.from("public_profiles" as any).select("*").eq("user_id", deal.seller_id).maybeSingle()
+        ? await (supabase.from("public_profiles" as any).select("*").eq("user_id", deal.seller_id).maybeSingle() as Promise<{ data: any }>)
         : { data: null };
 
       const factors: DealPrediction["factors"] = [];
