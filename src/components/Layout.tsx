@@ -16,11 +16,12 @@ import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut } = useAuthContext();
+  const { user, signOut, role } = useAuthContext();
   const { tx } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -45,14 +46,21 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  const navLinks = [
-    { label: tx("الرئيسية", "Home"), path: "/" },
-    { label: tx("سوق الفرص", "Marketplace"), path: "/marketplace" },
-    { label: tx("كيف تتم الصفقة", "How It Works"), path: "/how-it-works" },
-    { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing?new=1" },
-    { label: tx("لوحة التحكم", "Dashboard"), path: "/dashboard" },
-    { label: tx("نماذج PDF", "PDF Templates"), path: "/pdf-preview" },
-  ];
+  const isFinancialManager = role === "financial_manager";
+
+  const navLinks = isFinancialManager
+    ? [
+        { label: tx("الرئيسية", "Home"), path: "/" },
+        { label: tx("الإدارة المالية", "Finance"), path: "/admin/finance" },
+      ]
+    : [
+        { label: tx("الرئيسية", "Home"), path: "/" },
+        { label: tx("سوق الفرص", "Marketplace"), path: "/marketplace" },
+        { label: tx("كيف تتم الصفقة", "How It Works"), path: "/how-it-works" },
+        { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing?new=1" },
+        { label: tx("لوحة التحكم", "Dashboard"), path: "/dashboard" },
+        { label: tx("نماذج PDF", "PDF Templates"), path: "/pdf-preview" },
+      ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
