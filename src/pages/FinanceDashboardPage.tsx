@@ -73,7 +73,6 @@ const COMMISSION_STATUS: Record<string, { label: string; color: string }> = {
   unpaid: { label: "غير مسدد", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
   reminder_sent: { label: "تم التذكير", color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
   paid_proof_uploaded: { label: "إثبات مرفوع", color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
-  paid_unverified: { label: "قيد التحقق", color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
   verified: { label: "مسدد ✓", color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
   waived: { label: "معفى", color: "bg-gray-100 text-gray-600 dark:bg-gray-800/50 dark:text-gray-400" },
 };
@@ -166,7 +165,7 @@ const FinanceDashboardPage = () => {
     const pending = commissions.filter(c => ["unpaid", "reminder_sent"].includes(c.payment_status));
     const pendingTotal = pending.reduce((s, c) => s + (c.total_with_vat || c.commission_amount || 0), 0);
 
-    const verifying = commissions.filter(c => ["paid_unverified", "paid_proof_uploaded"].includes(c.payment_status));
+    const verifying = commissions.filter(c => c.payment_status === "paid_proof_uploaded");
     const verifyingTotal = verifying.reduce((s, c) => s + (c.total_with_vat || c.commission_amount || 0), 0);
 
     return {
@@ -258,7 +257,7 @@ const FinanceDashboardPage = () => {
     if (overdue30.length > 0) result.push({ type: "red", message: `${overdue30.length} عمولات متأخرة أكثر من 30 يوم` });
 
     const pendingVerify7 = commissions.filter(c =>
-      ["paid_proof_uploaded", "paid_unverified"].includes(c.payment_status) &&
+      c.payment_status === "paid_proof_uploaded" &&
       (now - new Date(c.updated_at).getTime()) > 7 * 86400000
     );
     if (pendingVerify7.length > 0) result.push({ type: "yellow", message: `${pendingVerify7.length} عمولات بانتظار التحقق أكثر من 7 أيام` });
@@ -460,7 +459,7 @@ const FinanceDashboardPage = () => {
                           </td>
                           <td className="py-3 pl-4">
                             <div className="flex items-center justify-center gap-1">
-                              {["unpaid", "reminder_sent", "paid_proof_uploaded", "paid_unverified"].includes(comm.payment_status) && (
+                              {["unpaid", "reminder_sent", "paid_proof_uploaded"].includes(comm.payment_status) && (
                                 <Button size="sm" variant="ghost" className="h-7 px-2 text-[10px]" onClick={() => handleVerify(comm.id)}>
                                   <BadgeCheck size={12} className="mr-1" />تأكيد
                                 </Button>

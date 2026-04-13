@@ -202,17 +202,21 @@ export function useCommissions() {
     return { error };
   }, [user]);
 
-  const sendReminder = useCallback(async (commission: Commission) => {
+  const sendReminder = useCallback(async (commission: Commission, listingTitle?: string) => {
     if (!user) return;
+    const amount = commission.commission_amount.toLocaleString("en-US");
+    const title = listingTitle || "صفقتك";
+
     // Insert notification for seller
     await supabase.from("notifications").insert({
       user_id: commission.seller_id,
       title: "تذكير ودي بسداد العمولة 🤍",
-      body: `نأمل التكرم بسداد عمولة المنصة (1%) الخاصة بهذه الصفقة. مبلغ العمولة: ${commission.commission_amount.toLocaleString("en-US")} ﷼. ثقتكم وأمانتكم محل تقديرنا 🙏`,
+      body: `نأمل التكرم بسداد عمولة المنصة (1%) الخاصة بهذه الصفقة. مبلغ العمولة: ${amount} ﷼. ثقتكم وأمانتكم محل تقديرنا 🙏`,
       type: "commission_reminder",
       reference_type: "deal",
       reference_id: commission.deal_id,
     });
+
     // Update reminder count
     await supabase
       .from("deal_commissions")
@@ -222,6 +226,24 @@ export function useCommissions() {
         payment_status: commission.payment_status === "unpaid" ? "reminder_sent" : commission.payment_status,
       } as any)
       .eq("id", commission.id);
+
+    // Audit log
+    await supabase.from("audit_logs").insert({
+      user_id: user.id,
+      action: "commission_reminder_sent",
+      resource_type: "commission",
+      resource_id: commission.id,
+      details: { reminder_count: commission.reminder_count + 1, deal_id: commission.deal_id },
+    });
+
+    // SMS notification
+    await supabase.functions.invoke("notify-sms", {
+      body: {
+        user_id: commission.seller_id,
+        event_type: "commission_reminder",
+        data: { title, price: amount },
+      },
+    });
   }, [user]);
 
   const uploadReceipt = useCallback(async (commissionId: string, file: File): Promise<string | null> => {
