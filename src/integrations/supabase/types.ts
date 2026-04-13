@@ -2693,6 +2693,7 @@ export type Database = {
           is_verified: boolean
           trust_score: number
           user_id: string
+          verification_level: string
         }[]
       }
       get_seller_rating_summary: { Args: { _seller_id: string }; Returns: Json }
