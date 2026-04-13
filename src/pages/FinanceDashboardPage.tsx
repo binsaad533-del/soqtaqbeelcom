@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, TrendingUp, Clock, CheckCircle2, FileText, AlertTriangle, Download,
-  Search, Filter, Send, BadgeCheck, Receipt, ChevronDown, Calendar
+  Search, Send, BadgeCheck, Receipt
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip,
@@ -302,14 +302,16 @@ const FinanceDashboardPage = () => {
     const deal = deals[comm.deal_id];
     const listingTitle = deal ? (listings[deal.listing_id]?.title || "بدون عنوان") : "بدون عنوان";
     const seller = profiles[comm.seller_id];
+    const commAmount = comm.commission_amount || comm.deal_amount * comm.commission_rate;
     await generateCommissionReceiptPdf({
-      receiptId: comm.id,
+      receiptNumber: `RCT-${new Date().getFullYear()}-${comm.id.slice(0, 6).toUpperCase()}`,
       paidAt: comm.marked_paid_at || comm.updated_at,
       dealTitle: listingTitle,
       agreementNumber: `AGR-${comm.deal_id.slice(0, 8).toUpperCase()}`,
       dealAmount: comm.deal_amount,
-      commissionAmount: comm.commission_amount || comm.deal_amount * comm.commission_rate,
-      vatAmount: comm.vat_amount || (comm.commission_amount || 0) * 0.15,
+      commissionRate: comm.commission_rate,
+      commissionAmount: commAmount,
+      vatAmount: comm.vat_amount || commAmount * 0.15,
       totalWithVat: comm.total_with_vat || 0,
       sellerName: seller?.full_name || "—",
       sellerPhone: seller?.phone || "—",
