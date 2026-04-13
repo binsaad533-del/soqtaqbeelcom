@@ -56,7 +56,7 @@ export const SENDER_TYPE_LABELS: Record<string, string> = {
 /** User role → Arabic */
 export const ROLE_LABELS: Record<string, string> = {
   platform_owner: "مالك المنصة",
-  supervisor: "مشرف",
+  supervisor: "مشرف التشغيل",
   customer: "عميل",
   admin: "مدير",
   financial_manager: "مدير مالي",
