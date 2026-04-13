@@ -171,9 +171,7 @@ const ListingDetailsPage = () => {
     setLoading(true);
     setLoadError(null);
     try {
-      console.log("[ListingDetails] Loading listing:", id);
       const data = await getListing(id);
-      console.log("[ListingDetails] Listing loaded:", { id, found: !!data, status: data?.status });
       setListing(data);
       loadedIdRef.current = id;
       loadedAtRef.current = Date.now();

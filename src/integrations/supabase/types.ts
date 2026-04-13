@@ -2528,6 +2528,19 @@ export type Database = {
         Returns: Json
       }
       get_profile_name_by_email: { Args: { _email: string }; Returns: string }
+      get_public_profile: {
+        Args: { target_user_id: string }
+        Returns: {
+          avatar_url: string
+          cancelled_deals: number
+          city: string
+          completed_deals: number
+          full_name: string
+          is_verified: boolean
+          trust_score: number
+          user_id: string
+        }[]
+      }
       get_seller_visibility_tier: {
         Args: { _seller_id: string }
         Returns: number
@@ -2542,6 +2555,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      mask_id_number: {
+        Args: { full_id: string; viewer_id: string }
+        Returns: string
       }
       move_to_dlq: {
         Args: {
