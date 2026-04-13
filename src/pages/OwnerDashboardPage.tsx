@@ -175,8 +175,20 @@ const OwnerDashboardPage = () => {
 
   const handleRoleChange = async (targetUserId: string, newRole: string) => {
     if (targetUserId === profile?.user_id) { toast.error("لا يمكنك تغيير دورك"); return; }
-    const { error } = await supabase.from("user_roles").upsert({ user_id: targetUserId, role: newRole } as any, { onConflict: "user_id" });
-    if (error) { toast.error("حدث خطأ في تعيين الدور"); return; }
+    // Try update first
+    const { data: updated, error: updateErr } = await supabase
+      .from("user_roles")
+      .update({ role: newRole } as any)
+      .eq("user_id", targetUserId)
+      .select();
+    if (updateErr) { toast.error("حدث خطأ في تعيين الدور"); console.error("role update error:", updateErr); return; }
+    // If no row existed, insert
+    if (!updated || updated.length === 0) {
+      const { error: insertErr } = await supabase
+        .from("user_roles")
+        .insert({ user_id: targetUserId, role: newRole } as any);
+      if (insertErr) { toast.error("حدث خطأ في تعيين الدور"); console.error("role insert error:", insertErr); return; }
+    }
     await supabase.from("audit_logs").insert({ user_id: profile?.user_id, action: "role_changed", resource_type: "user_role", resource_id: targetUserId, details: { new_role: newRole } } as any);
     toast.success("تم تعيين الدور بنجاح");
     setRoles(prev => {
