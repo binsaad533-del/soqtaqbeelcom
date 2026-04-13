@@ -6,7 +6,8 @@ import {
   type Commission,
   type CommissionStatus,
 } from "@/hooks/useCommissions";
-import { Landmark, CheckCircle2, AlertTriangle, Eye, Send, ShieldCheck } from "lucide-react";
+import { Landmark, CheckCircle2, AlertTriangle, Eye, Send, ShieldCheck, Download } from "lucide-react";
+import { generateCommissionReceiptPdf } from "@/lib/commissionReceiptPdf";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -145,6 +146,26 @@ const CommissionAdminPanel = () => {
                     {s !== "verified" && (
                       <Button size="sm" variant="outline" onClick={() => handleSendReminder(c)} className="gap-1.5 rounded-lg text-xs flex-1">
                         <Send size={13} /> إرسال تذكير
+                      </Button>
+                    )}
+                    {s === "verified" && (
+                      <Button size="sm" variant="outline" onClick={async () => {
+                        const year = new Date(c.paid_at || c.created_at).getFullYear();
+                        await generateCommissionReceiptPdf({
+                          receiptNumber: `RCT-${year}-${c.id.slice(0, 6).toUpperCase()}`,
+                          paidAt: c.paid_at || c.marked_paid_at || c.created_at,
+                          dealTitle: `صفقة #${c.deal_id.slice(0, 8)}`,
+                          agreementNumber: `AGR-${year}-${c.deal_id.slice(0, 6).toUpperCase()}`,
+                          dealAmount: c.deal_amount,
+                          commissionRate: c.commission_rate,
+                          commissionAmount: c.commission_amount,
+                          vatAmount: c.vat_amount ?? c.commission_amount * 0.15,
+                          totalWithVat: c.total_with_vat ?? c.commission_amount * 1.15,
+                          sellerName: "—",
+                          sellerPhone: "—",
+                        });
+                      }} className="gap-1.5 rounded-lg text-xs flex-1">
+                        <Download size={13} /> تحميل الإيصال
                       </Button>
                     )}
                   </div>

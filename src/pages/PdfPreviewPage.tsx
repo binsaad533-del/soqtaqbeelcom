@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Loader2, BarChart3, Scale } from "lucide-react";
+import { FileText, Download, Loader2, BarChart3, Scale, Award, Package, Receipt } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
 import { useSEO } from "@/hooks/useSEO";
@@ -14,6 +14,9 @@ import {
 import { BANK_DETAILS, COMMISSION_RATE, calculateCommission } from "@/hooks/useCommissions";
 import { buildAgreementPdfPages } from "@/lib/agreementPdf/template";
 import type { AgreementPdfData } from "@/lib/agreementPdf/types";
+import { generateCommissionReceiptPdf } from "@/lib/commissionReceiptPdf";
+import { generateDealCertificatePdf } from "@/lib/dealCertificatePdf";
+import { generateDealSummaryPackagePdf } from "@/lib/dealSummaryPackagePdf";
 
 const SAMPLE_AGREEMENT: AgreementPdfData = {
   agreementNumber: "AGR-2026-001234",
@@ -55,13 +58,16 @@ const SAMPLE_AGREEMENT: AgreementPdfData = {
   assetPhotos: [],
 };
 
-type TemplateKey = "invoice" | "agreement" | "feasibility" | "legal";
+type TemplateKey = "invoice" | "agreement" | "feasibility" | "legal" | "receipt" | "certificate" | "summary";
 
 const TEMPLATES: { key: TemplateKey; label: string; icon: LucideIcon | "sar" }[] = [
   { key: "invoice", label: "الفاتورة", icon: "sar" },
   { key: "agreement", label: "الاتفاقية", icon: FileText },
   { key: "feasibility", label: "دراسة الجدوى", icon: BarChart3 },
   { key: "legal", label: "التأكيد القانوني", icon: Scale },
+  { key: "receipt", label: "إيصال العمولة", icon: Receipt },
+  { key: "certificate", label: "شهادة الإتمام", icon: Award },
+  { key: "summary", label: "ملف الصفقة الكامل", icon: Package },
 ];
 
 const PdfPreviewPage = () => {
@@ -263,6 +269,59 @@ const PdfPreviewPage = () => {
     document.body.removeChild(mount);
   };
 
+  const generateReceipt = async () => {
+    await generateCommissionReceiptPdf({
+      receiptNumber: "RCT-2026-A1B2C3",
+      paidAt: "2026-04-05T10:00:00Z",
+      dealTitle: "مطعم شاورما — جبره الطائف",
+      agreementNumber: "AGR-2026-001234",
+      dealAmount: 350000,
+      commissionRate: 0.01,
+      commissionAmount: 3500,
+      vatAmount: 525,
+      totalWithVat: 4025,
+      sellerName: "أحمد بن محمد المالكي",
+      sellerPhone: "0500668089",
+    });
+  };
+
+  const generateCertificate = async () => {
+    await generateDealCertificatePdf({
+      certificateNumber: "CERT-2026-D4E5F6",
+      issuedAt: "2026-04-06T10:00:00Z",
+      dealTitle: "مطعم شاورما — جبره الطائف",
+      businessActivity: "مطاعم ومأكولات",
+      location: "الطائف — حي جبره",
+      dealType: "تقبيل نشاط تجاري",
+      agreedPrice: 350000,
+      sellerName: "أحمد بن محمد المالكي",
+      sellerPhoneLast4: "8089",
+      buyerName: "خالد بن عبدالله العمري",
+      buyerPhoneLast4: "4567",
+      negotiationStartDate: "2026-03-20T10:00:00Z",
+      completionDate: "2026-04-03T10:00:00Z",
+      commissionPaidDate: "2026-04-05T10:00:00Z",
+    });
+  };
+
+  const generateSummary = async () => {
+    await generateDealSummaryPackagePdf({
+      dealTitle: "مطعم شاورما — جبره الطائف",
+      dealDate: "2026-04-03T10:00:00Z",
+      sellerName: "أحمد بن محمد المالكي",
+      buyerName: "خالد بن عبدالله العمري",
+      agreedPrice: 350000,
+      dealType: "تقبيل نشاط تجاري",
+      location: "الطائف — حي جبره",
+      hasCertificate: true,
+      hasAgreement: true,
+      hasLegalConfirmation: true,
+      hasFeasibility: true,
+      hasInvoice: true,
+      hasReceipt: true,
+    });
+  };
+
   const handleGenerate = async (key: TemplateKey) => {
     setLoading(key);
     try {
@@ -271,6 +330,9 @@ const PdfPreviewPage = () => {
         case "agreement": await generateAgreement(); break;
         case "feasibility": await generateFeasibility(); break;
         case "legal": await generateLegal(); break;
+        case "receipt": await generateReceipt(); break;
+        case "certificate": await generateCertificate(); break;
+        case "summary": await generateSummary(); break;
       }
     } catch (e) {
       console.error(e);
