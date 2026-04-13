@@ -12,10 +12,13 @@ export function usePublishedListingsQuery() {
         .select("*")
         .eq("status", "published")
         .order("created_at", { ascending: false });
-      if (error) throw new Error(`فشل تحميل الإعلانات: ${error.message}`);
+      if (error) {
+        console.error("[usePublishedListingsQuery]", error);
+        return [];
+      }
       return (data || []) as unknown as Listing[];
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000,
   });
 }
 
@@ -31,7 +34,10 @@ export function useMyListingsQuery() {
         .eq("owner_id", user.id)
         .is("deleted_at", null)
         .order("created_at", { ascending: false });
-      if (error) throw new Error(`فشل تحميل الإعلانات: ${error.message}`);
+      if (error) {
+        console.error("[useMyListingsQuery]", error);
+        return [];
+      }
       return (data || []) as unknown as Listing[];
     },
     enabled: !!user,
@@ -47,7 +53,10 @@ export function useAllListingsQuery() {
         .from("listings")
         .select("*")
         .order("created_at", { ascending: false });
-      if (error) throw new Error(`فشل تحميل الإعلانات: ${error.message}`);
+      if (error) {
+        console.error("[useAllListingsQuery]", error);
+        return [];
+      }
       return (data || []) as unknown as Listing[];
     },
     staleTime: 60 * 1000,
@@ -64,7 +73,10 @@ export function useListingQuery(id: string | undefined) {
         .select("*")
         .eq("id", id)
         .maybeSingle();
-      if (error) throw error;
+      if (error) {
+        console.error("[useListingQuery]", error);
+        return null;
+      }
       return data as unknown as Listing | null;
     },
     enabled: !!id,

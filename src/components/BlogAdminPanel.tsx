@@ -17,7 +17,10 @@ const BlogAdminPanel = () => {
         .from("blog_posts")
         .select("*")
         .order("created_at", { ascending: false });
-      if (error) throw error;
+      if (error) {
+        console.error("[BlogAdmin] Load failed:", error);
+        return [];
+      }
       return data;
     },
   });
@@ -27,22 +30,34 @@ const BlogAdminPanel = () => {
       const updates: any = { status: newStatus };
       if (newStatus === "published") updates.published_at = new Date().toISOString();
       const { error } = await supabase.from("blog_posts").update(updates).eq("id", id);
-      if (error) throw error;
+      if (error) {
+        console.error("[BlogAdmin] Toggle status failed:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
       toast.success("تم تحديث حالة المقال");
+    },
+    onError: () => {
+      toast.error("تعذّر تحديث حالة المقال");
     },
   });
 
   const deletePost = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("blog_posts").delete().eq("id", id);
-      if (error) throw error;
+      if (error) {
+        console.error("[BlogAdmin] Delete failed:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
       toast.success("تم حذف المقال");
+    },
+    onError: () => {
+      toast.error("تعذّر حذف المقال");
     },
   });
 

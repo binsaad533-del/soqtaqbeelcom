@@ -9,7 +9,10 @@ export function useAllProfilesQuery() {
       const { data, error } = await supabase
         .from("profiles")
         .select("*");
-      if (error) throw new Error(`فشل تحميل الملفات الشخصية: ${error.message}`);
+      if (error) {
+        console.error("[useAllProfilesQuery]", error);
+        return [];
+      }
       return (data || []) as unknown as Profile[];
     },
     staleTime: 2 * 60 * 1000,
@@ -26,7 +29,10 @@ export function useProfileQuery(userId: string | undefined) {
         .select("*")
         .eq("user_id", userId)
         .maybeSingle();
-      if (error) throw error;
+      if (error) {
+        console.error("[useProfileQuery]", error);
+        return null;
+      }
       return data as unknown as Profile | null;
     },
     enabled: !!userId,

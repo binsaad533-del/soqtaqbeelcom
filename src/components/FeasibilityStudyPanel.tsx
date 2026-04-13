@@ -169,9 +169,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     setLoading(true);
     setError(null);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("feasibility-study", {
-        body: { listing },
-      });
+      const { invokeWithRetry } = await import("@/lib/invokeWithRetry");
+      const { data, error: fnError } = await invokeWithRetry("feasibility-study", { listing });
       if (fnError) {
         const response = (fnError as any)?.context;
         let message = "تعذّر إعداد الدراسة حالياً، يرجى المحاولة بعد قليل";

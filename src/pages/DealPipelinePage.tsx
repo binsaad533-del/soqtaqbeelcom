@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { DEAL_TYPE_LABELS } from "@/lib/translations";
@@ -143,7 +144,12 @@ const DealPipelinePage = () => {
         .from("deals")
         .select("*")
         .order("created_at", { ascending: false });
-      if (error) throw error;
+      if (error) {
+        console.error("[DealPipeline] Failed to load deals:", error);
+        toast.error("تعذّر تحميل الصفقات — حاول مرة أخرى");
+        setLoading(false);
+        return;
+      }
 
       const dealIds = (dealsData || []).map((d) => d.id);
       const buyerIds = [...new Set((dealsData || []).map((d) => d.buyer_id).filter(Boolean))] as string[];

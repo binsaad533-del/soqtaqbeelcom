@@ -192,8 +192,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
         ai_detected_assets_images: detectedAssetsImages,
         ai_detected_assets_files: detectedAssetsFiles,
       };
-      const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: { listing: listingWithAssets, perspective: "buyer" },
+      const { invokeWithRetry } = await import("@/lib/invokeWithRetry");
+      const { data, error: fnError } = await invokeWithRetry("deal-check", {
+        listing: listingWithAssets, perspective: "buyer",
       });
 
       if (fnError) throw new Error(fnError.message);

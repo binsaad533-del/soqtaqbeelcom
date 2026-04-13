@@ -21,7 +21,10 @@ const BlogPostPage = () => {
         .eq("slug", slug!)
         .eq("status", "published")
         .single();
-      if (error) throw error;
+      if (error) {
+        console.error("[BlogPostPage] Failed to load post:", error);
+        return null;
+      }
       return data;
     },
     enabled: !!slug,
