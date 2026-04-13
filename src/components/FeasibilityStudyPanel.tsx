@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import SarSymbol from "@/components/SarSymbol";
+import { hasSimulationPhotos } from "@/components/SimulationOverlay";
 import {
   ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
   buildPdfPageShell, buildPdfSection, buildPdfInfoGrid, buildPdfQrSection, buildPdfDisclaimer,
@@ -102,6 +103,112 @@ function formatNum(n: number): string {
   return n.toLocaleString("en-US");
 }
 
+const normalizeScenario = (
+  raw: Partial<Scenario> | undefined,
+  fallbackRevenue: number,
+  fallbackProfit: number,
+  fallbackRoiMonths: number,
+  fallbackAnnualRoi: number,
+  fallbackAssumptions: string,
+): Scenario => ({
+  monthlyRevenue: typeof raw?.monthlyRevenue === "number" ? raw.monthlyRevenue : fallbackRevenue,
+  monthlyProfit: typeof raw?.monthlyProfit === "number" ? raw.monthlyProfit : fallbackProfit,
+  roiMonths: typeof raw?.roiMonths === "number" ? raw.roiMonths : fallbackRoiMonths,
+  annualROI: typeof raw?.annualROI === "number" ? raw.annualROI : fallbackAnnualRoi,
+  assumptions: typeof raw?.assumptions === "string" && raw.assumptions.trim() ? raw.assumptions : fallbackAssumptions,
+});
+
+const getVerdictColor = (verdict: string): string => {
+  if (verdict.includes("ممتاز") || verdict.includes("جيد")) return "green";
+  if (verdict.includes("متوسط")) return "yellow";
+  if (verdict.includes("حذر") || verdict.includes("مخاطر")) return "orange";
+  return "blue";
+};
+
+const normalizeFeasibilityStudy = (raw: any, listing: any): FeasibilityStudy | null => {
+  if (!raw || typeof raw !== "object") return null;
+
+  const listingPrice = typeof listing?.price === "number" ? listing.price : 0;
+  const baseRevenue = typeof raw.monthly_revenue === "number" ? raw.monthly_revenue : 0;
+  const baseProfit = typeof raw.monthly_profit === "number" ? raw.monthly_profit : 0;
+  const baseExpenses = typeof raw.monthly_expenses === "number" ? raw.monthly_expenses : 0;
+  const basePayback = typeof raw.payback_months === "number" ? raw.payback_months : 24;
+  const annualRoi = typeof raw.roi_percentage === "number" ? raw.roi_percentage : 0;
+  const totalInvestment = raw.investmentOverview?.totalInvestment
+    ?? raw.total_investment
+    ?? Math.round(listingPrice * 1.1);
+  const verdict = typeof raw.verdict === "string" && raw.verdict.trim()
+    ? raw.verdict
+    : typeof raw.recommendation === "string" && raw.recommendation.trim()
+      ? raw.recommendation
+      : "استثمار متوسط";
+  const recommendations = Array.isArray(raw.recommendations) && raw.recommendations.length > 0
+    ? raw.recommendations.filter((item: unknown): item is string => typeof item === "string" && item.trim().length > 0)
+    : [
+        typeof raw.recommendation === "string" ? raw.recommendation : "مراجعة العقود والالتزامات قبل الإتمام",
+        "التحقق الميداني من الأصول والجاهزية التشغيلية",
+      ].filter(Boolean) as string[];
+
+  return {
+    executiveSummary:
+      raw.executiveSummary ||
+      raw.summary ||
+      "هذه دراسة جدوى محفوظة مسبقاً وتعتمد على بيانات الإعلان الحالية.",
+    investmentOverview: {
+      totalInvestment,
+      breakdownItems: Array.isArray(raw.investmentOverview?.breakdownItems) && raw.investmentOverview.breakdownItems.length > 0
+        ? raw.investmentOverview.breakdownItems
+        : [
+            { label: "سعر الشراء", amount: listingPrice, note: "قيمة الأصل المعروض" },
+            { label: "تكاليف نقل وتشغيل أولية", amount: Math.round(totalInvestment * 0.05), note: "رسوم وتجهيزات" },
+            { label: "رأس مال عامل", amount: Math.max(5000, Math.round(totalInvestment * 0.05)), note: "سيولة الأشهر الأولى" },
+          ],
+    },
+    operationalCosts: {
+      monthlyTotal: raw.operationalCosts?.monthlyTotal ?? baseExpenses,
+      items: Array.isArray(raw.operationalCosts?.items) && raw.operationalCosts.items.length > 0
+        ? raw.operationalCosts.items
+        : [
+            { label: "إيجار ورواتب وتشغيل", monthlyCost: baseExpenses || Math.round((listing?.annual_rent || 0) / 12), note: "تقدير شهري" },
+          ],
+    },
+    revenueProjections: {
+      optimistic: normalizeScenario(raw.revenueProjections?.optimistic, Math.round(baseRevenue * 1.15), Math.round(baseProfit * 1.2), Math.max(12, basePayback - 4), Math.round(annualRoi * 1.1), "يفترض تحسن التشغيل وزيادة الطلب."),
+      realistic: normalizeScenario(raw.revenueProjections?.realistic, baseRevenue, baseProfit, basePayback, annualRoi, "يفترض استمرار الأداء الحالي دون توسع كبير."),
+      conservative: normalizeScenario(raw.revenueProjections?.conservative, Math.round(baseRevenue * 0.85), Math.max(0, Math.round(baseProfit * 0.7)), basePayback + 6, Math.max(0, Math.round(annualRoi * 0.75)), "يفترض تباطؤ الطلب وارتفاع بعض التكاليف."),
+    },
+    competitorAnalysis: {
+      summary: raw.competitorAnalysis?.summary || raw.summary || "المنافسة تعتمد على الحي والنشاط وتحتاج زيارة ميدانية لتأكيد الكثافة.",
+      competitiveDensity: raw.competitorAnalysis?.competitiveDensity || raw.competition_level || "متوسطة",
+      nearbyCount: raw.competitorAnalysis?.nearbyCount ?? 0,
+      neighborhoodCount: raw.competitorAnalysis?.neighborhoodCount ?? 0,
+      areaCount: raw.competitorAnalysis?.areaCount ?? 0,
+      avgRating: raw.competitorAnalysis?.avgRating,
+      topCompetitors: Array.isArray(raw.competitorAnalysis?.topCompetitors) ? raw.competitorAnalysis.topCompetitors : [],
+      opportunities: Array.isArray(raw.competitorAnalysis?.opportunities) ? raw.competitorAnalysis.opportunities : (Array.isArray(raw.opportunities) ? raw.opportunities : []),
+      threats: Array.isArray(raw.competitorAnalysis?.threats) ? raw.competitorAnalysis.threats : (Array.isArray(raw.risks) ? raw.risks : []),
+    },
+    riskAssessment: {
+      overallRisk: raw.riskAssessment?.overallRisk || (raw.competition_level === "عالي" ? "متوسط" : "منخفض"),
+      financialRisks: Array.isArray(raw.riskAssessment?.financialRisks) ? raw.riskAssessment.financialRisks : (Array.isArray(raw.risks) ? raw.risks.slice(0, 2) : []),
+      operationalRisks: Array.isArray(raw.riskAssessment?.operationalRisks) ? raw.riskAssessment.operationalRisks : [],
+      marketRisks: Array.isArray(raw.riskAssessment?.marketRisks) ? raw.riskAssessment.marketRisks : (Array.isArray(raw.risks) ? raw.risks.slice(2) : []),
+      regulatoryRisks: Array.isArray(raw.riskAssessment?.regulatoryRisks) ? raw.riskAssessment.regulatoryRisks : [],
+      mitigationStrategies: Array.isArray(raw.riskAssessment?.mitigationStrategies) ? raw.riskAssessment.mitigationStrategies : ["مراجعة العقود والتراخيص", "اختبار الأداء المالي الفعلي قبل الإتمام"],
+    },
+    recommendations,
+    verdict,
+    verdictColor: raw.verdictColor || getVerdictColor(verdict),
+    confidenceLevel: raw.confidenceLevel || "متوسط",
+    disclaimer: raw.disclaimer || "هذه الدراسة تقديرية ومعدة لأغراض استرشادية ولا تغني عن الفحص المالي والقانوني والميداني.",
+    _meta: {
+      activityType: raw._meta?.activityType || listing?.business_activity || listing?.category || "نشاط تجاري",
+      hasRealCompetitorData: Boolean(raw._meta?.hasRealCompetitorData),
+      generatedAt: raw._meta?.generatedAt || new Date().toISOString(),
+    },
+  };
+};
+
 const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityStudyPanelProps) => {
   const [study, setStudy] = useState<FeasibilityStudy | null>(null);
   const [loading, setLoading] = useState(false);
@@ -122,6 +229,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   const [pdfLoading, setPdfLoading] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const isSimulation = hasSimulationPhotos(listing?.photos as Record<string, unknown> | null | undefined);
 
   // Auto-scroll to panel if URL has #feasibility hash
   useEffect(() => {
@@ -151,7 +259,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           .eq("listing_id", listing.id)
           .maybeSingle();
         if (data?.study_data) {
-          setStudy(data.study_data as unknown as FeasibilityStudy);
+          setStudy(normalizeFeasibilityStudy(data.study_data, listing));
           setCachedAt(data.created_at);
           setLastUpdatedAt((data as any).last_updated_at || data.created_at);
           setExpandedSections({ summary: true, investment: true, costs: true, revenue: true, competitors: true, risks: true, recommendations: true });
@@ -162,6 +270,11 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   }, [listing?.id]);
 
   const runStudy = async () => {
+    if (isSimulation) {
+      toast("هذا إعلان محاكاة ويعرض دراسة جدوى محفوظة مسبقاً.");
+      return;
+    }
+
     if (!canRefresh) {
       toast.error("يمكن التحديث مرة كل 24 ساعة فقط");
       return;
@@ -187,7 +300,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
         throw new Error(message);
       }
       if (!data?.success) throw new Error(data?.error || "فشل في إنشاء الدراسة");
-      setStudy(data.study);
+      setStudy(normalizeFeasibilityStudy(data.study, listing));
       const now = new Date().toISOString();
       setCachedAt(now);
       setLastUpdatedAt(now);
@@ -206,7 +319,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       }
       toast.success("تم تحديث دراسة الجدوى بنجاح");
     } catch (err: any) {
-      setError(err.message || "حدث خطأ");
+      toast.error("تعذّر إعادة التحليل حالياً");
+      setError(err.message || "تعذّر إعادة التحليل حالياً");
     } finally {
       setLoading(false);
     }
@@ -398,9 +512,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             </p>
             {error && <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{error}</p>}
             {isOwner && (
-              <Button onClick={runStudy} variant="outline" className="w-full gap-2" size="sm" disabled={!canRefresh}>
+              <Button onClick={runStudy} variant="outline" className="w-full gap-2" size="sm" disabled={isSimulation || !canRefresh}>
                 <BarChart3 size={14} />
-                إعداد الدراسة الآن
+                {isSimulation ? "دراسة محفوظة" : "إعداد الدراسة الآن"}
                 <AiStar size={12} />
               </Button>
             )}
@@ -443,9 +557,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             PDF
           </Button>
           {isOwner && (
-            <Button variant="ghost" size="sm" onClick={runStudy} disabled={loading || !canRefresh} className="gap-1.5 text-xs" title={!canRefresh ? "يمكن التحديث مرة كل 24 ساعة" : ""}>
+            <Button variant="ghost" size="sm" onClick={runStudy} disabled={isSimulation || loading || !canRefresh} className="gap-1.5 text-xs" title={isSimulation ? "هذه دراسة محاكاة محفوظة" : !canRefresh ? "يمكن التحديث مرة كل 24 ساعة" : ""}>
               {loading ? <Loader2 size={12} className="animate-spin" /> : <FileText size={12} />}
-              تحديث
+              {isSimulation ? "محفوظة" : "تحديث"}
             </Button>
           )}
         </div>

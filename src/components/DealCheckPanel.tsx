@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import type { UseAnalysisCacheReturn } from "@/hooks/useAnalysisCache";
+import { hasSimulationPhotos } from "@/components/SimulationOverlay";
+import { toast } from "sonner";
 
 interface AssetBreakdownItem {
   assetName: string;
@@ -239,6 +241,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const [analysis, setAnalysis] = useState<DealCheckAnalysis | null>(() => normalizeDealCheckAnalysis(cachedDealCheck, listing));
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
+  const isSimulation = hasSimulationPhotos(listing?.photos as Record<string, unknown> | null | undefined);
 
   useEffect(() => {
     const normalized = normalizeDealCheckAnalysis(cachedDealCheck, listing);
@@ -307,6 +310,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   };
 
   const runDealCheck = async (background = false) => {
+    if (isSimulation) {
+      toast("هذا إعلان محاكاة ويعرض تحليلاً محفوظاً مسبقاً.");
+      return;
+    }
+
     if (!background) {
       setLoading(true);
       setOpen(true);
@@ -334,7 +342,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
         listing: listingWithAssets, perspective: "buyer",
       });
 
-      if (fnError) throw new Error(fnError.message);
+      if (fnError) throw new Error(fnError.message || "تعذّر إعادة التحليل حالياً");
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
 
       setAnalysis(normalizeDealCheckAnalysis(data.analysis, listing));
@@ -347,8 +355,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           .eq("id", listing.id);
       }
     } catch (e: any) {
+      toast.error("تعذّر إعادة التحليل حالياً");
       if (!background) {
-        setError(e.message || "حدث خطأ أثناء التحليل");
+        setError(e.message || "تعذّر إعادة التحليل حالياً");
       }
     } finally {
       if (!background) setLoading(false);
@@ -761,9 +770,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               </div>
 
               <div className="flex justify-center pt-1">
-                <Button variant="ghost" size="sm" onClick={() => runDealCheck()} className="text-xs text-muted-foreground hover:text-foreground rounded-xl">
+                <Button variant="ghost" size="sm" onClick={() => runDealCheck()} disabled={isSimulation || loading || isRefreshing} className="text-xs text-muted-foreground hover:text-foreground rounded-xl">
                   <Loader2 size={12} strokeWidth={1.5} className="ml-1" />
-                  إعادة التحليل
+                  {isSimulation ? "تحليل محفوظ" : "إعادة التحليل"}
                 </Button>
               </div>
             </div>
