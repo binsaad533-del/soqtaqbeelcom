@@ -134,8 +134,8 @@ self.addEventListener("push", (event) => {
       lang: "ar",
       tag: data.tag || "default",
       data: { url: data.url || "/", ...data.data },
-      vibrate: [100, 50, 100],
       requireInteraction: true,
+    } as any;
     };
 
     event.waitUntil(
