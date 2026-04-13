@@ -53,6 +53,142 @@ interface DealCheckPanelProps {
   analysisCache: UseAnalysisCacheReturn;
 }
 
+const normalizeText = (...values: unknown[]): string => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
+};
+
+const normalizeStringArray = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+};
+
+const getRatingColor = (raw: any): DealCheckAnalysis["ratingColor"] => {
+  if (typeof raw?.ratingColor === "string" && raw.ratingColor in RATING_CONFIG) {
+    return raw.ratingColor;
+  }
+
+  const rating = normalizeText(raw?.rating, raw?.overall_rating);
+  if (["ممتاز", "جيد جداً"].includes(rating)) return "green";
+  if (["جيد", "معقول"].includes(rating)) return "blue";
+  if (["متوسط", "مقبول"].includes(rating)) return "yellow";
+  if (["ضعيف", "سيئ"].includes(rating)) return "red";
+  return "gray";
+};
+
+const getFairnessVerdict = (raw: any): DealCheckAnalysis["fairnessVerdict"] => {
+  const direct = normalizeText(raw?.fairnessVerdict);
+  if (direct && direct in FAIRNESS_ICONS) return direct;
+
+  const priceAssessment = normalizeText(raw?.price_assessment, raw?.priceAssessment).toLowerCase();
+  if (priceAssessment.includes("مبالغ") || priceAssessment.includes("مرتفع")) return "مبالغ فيه";
+  if (priceAssessment.includes("أقل") || priceAssessment.includes("فرصة") || priceAssessment.includes("جذاب")) return "جذاب";
+  if (priceAssessment.includes("مناسب") || priceAssessment.includes("عادل") || priceAssessment.includes("معقول")) return "معقول";
+  return "غير واضح";
+};
+
+const getConfidenceLevel = (raw: any): DealCheckAnalysis["confidenceLevel"] => {
+  const direct = normalizeText(raw?.confidenceLevel);
+  if (direct) return direct;
+
+  const successProbability = raw?.deal_prediction?.success_probability;
+  if (typeof successProbability === "number") {
+    if (successProbability >= 70) return "عالي";
+    if (successProbability >= 45) return "متوسط";
+    return "منخفض";
+  }
+
+  return "متوسط";
+};
+
+const normalizeMarketComparison = (value: unknown): MarketComparison | undefined => {
+  if (!value || typeof value !== "object") return undefined;
+
+  const raw = value as Record<string, unknown>;
+  return {
+    comparablesReviewed: typeof raw.comparablesReviewed === "number" ? raw.comparablesReviewed : 0,
+    matchQuality: normalizeText(raw.matchQuality, "غير محدد"),
+    observedPriceRange: normalizeText(raw.observedPriceRange, "غير متاح"),
+    marketPosition: normalizeText(raw.marketPosition, "غير محدد"),
+    confidence: normalizeText(raw.confidence, "متوسط"),
+    details: normalizeText(raw.details, "لا تتوفر حالياً تفاصيل سوق إضافية."),
+    assetBreakdown: Array.isArray(raw.assetBreakdown)
+      ? raw.assetBreakdown.map((item) => {
+          const entry = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+          return {
+            assetName: normalizeText(entry.assetName, "أصل غير مسمى"),
+            marketRange: normalizeText(entry.marketRange, "غير متاح"),
+            sellerPrice: normalizeText(entry.sellerPrice),
+            verdict: normalizeText(entry.verdict, "غير واضح"),
+            source: normalizeText(entry.source, "بيانات الإعلان"),
+          };
+        })
+      : [],
+  };
+};
+
+const normalizeDealCheckAnalysis = (raw: any, listing: any): DealCheckAnalysis | null => {
+  if (!raw || typeof raw !== "object") return null;
+
+  const strengths = normalizeStringArray(raw.strengths);
+  const risks = normalizeStringArray(raw.risks);
+  const recommendations = normalizeStringArray(raw.recommendations);
+  const missingInfo = normalizeStringArray(raw.missingInfo);
+  const negotiationGuidance = normalizeStringArray(raw.negotiationGuidance);
+  const locationLabel = [listing?.district, listing?.city].filter(Boolean).join("، ");
+
+  return {
+    dealOverview: normalizeText(
+      raw.dealOverview,
+      raw.summary,
+      raw.executiveSummary,
+      listing?.description,
+      "تحليل محفوظ لهذه الصفقة بناءً على البيانات الحالية."
+    ),
+    businessActivity: normalizeText(
+      raw.businessActivity,
+      listing?.business_activity,
+      listing?.category,
+      "النشاط التجاري متوافق مع طبيعة الفرصة المعروضة."
+    ),
+    assetAssessment: normalizeText(
+      raw.assetAssessment,
+      strengths.find((item) => item.includes("معدات") || item.includes("أصول") || item.includes("مطبخ") || item.includes("أثاث")),
+      "تمت مراجعة الأصول المذكورة ويُنصح بالتحقق الميداني من حالتها."
+    ),
+    locationAssessment: normalizeText(
+      raw.locationAssessment,
+      locationLabel ? `الموقع في ${locationLabel} ويحتاج تقييمه ميدانياً حسب كثافة الحركة والفئة المستهدفة.` : "الموقع يحتاج مراجعة ميدانية إضافية."
+    ),
+    competitionSnapshot: normalizeText(
+      raw.competitionSnapshot,
+      risks[0],
+      "المنافسة تختلف حسب الحي والنشاط ويُنصح بمراجعة السوق المحلي قبل القرار النهائي."
+    ),
+    operationalReadiness: normalizeText(
+      raw.operationalReadiness,
+      strengths[0],
+      "الجاهزية التشغيلية تحتاج مراجعة للعقود والموارد والأصول قبل الإتمام."
+    ),
+    marketComparison: normalizeMarketComparison(raw.marketComparison),
+    risks,
+    strengths,
+    missingInfo,
+    rating: normalizeText(raw.rating, raw.overall_rating, "قيد المراجعة"),
+    ratingColor: getRatingColor(raw),
+    recommendation: normalizeText(
+      raw.recommendation,
+      recommendations[0],
+      "يوصى بمراجعة التفاصيل الميدانية والمالية قبل اتخاذ القرار."
+    ),
+    negotiationGuidance: negotiationGuidance.length > 0 ? negotiationGuidance : recommendations,
+    fairnessVerdict: getFairnessVerdict(raw),
+    confidenceLevel: getConfidenceLevel(raw),
+  };
+};
+
 const RATING_CONFIG: Record<string, { bg: string; text: string; border: string }> = {
   green: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" },
   blue: { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
@@ -100,16 +236,17 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
 
   const [open, setOpen] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<DealCheckAnalysis | null>(cachedDealCheck || null);
+  const [analysis, setAnalysis] = useState<DealCheckAnalysis | null>(() => normalizeDealCheckAnalysis(cachedDealCheck, listing));
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    if (cachedDealCheck && !analysis) {
-      setAnalysis(cachedDealCheck);
+    const normalized = normalizeDealCheckAnalysis(cachedDealCheck, listing);
+    if (normalized) {
+      setAnalysis(normalized);
       setOpen(true);
     }
-  }, [cachedDealCheck]);
+  }, [cachedDealCheck, listing]);
 
   const getAllPhotoUrls = (): string[] => {
     if (!listing?.photos) return [];
@@ -200,7 +337,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
       if (fnError) throw new Error(fnError.message);
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
 
-      setAnalysis(data.analysis);
+      setAnalysis(normalizeDealCheckAnalysis(data.analysis, listing));
       await saveDealCheck(data.analysis);
 
       if (listing?.id) {
@@ -222,7 +359,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const ratingStyle = analysis ? RATING_CONFIG[analysis.ratingColor] || RATING_CONFIG.gray : RATING_CONFIG.gray;
 
   // Combine assets for display from all sources
-  const displayAssets = assetsCombined?.assets || listing?.ai_detected_assets?.assets || [];
+  const displayAssets = Array.isArray(assetsCombined?.assets)
+    ? assetsCombined.assets
+    : Array.isArray(listing?.ai_detected_assets?.assets)
+      ? listing.ai_detected_assets.assets
+      : [];
   const displayConfidence = assetsCombined?.confidence || listing?.ai_detected_assets?.confidence;
   const displaySummary = assetsCombined?.summary || listing?.ai_detected_assets?.summary;
 
