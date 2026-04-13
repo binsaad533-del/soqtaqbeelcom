@@ -9,6 +9,7 @@ import TrustBadge from "@/components/TrustBadge";
 
 import LegalConfirmationPanel from "@/components/LegalConfirmationPanel";
 import SellerReviewForm from "@/components/SellerReviewForm";
+import DealRatingBanner from "@/components/DealRatingBanner";
 import CommissionPaymentPanel from "@/components/CommissionPaymentPanel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
