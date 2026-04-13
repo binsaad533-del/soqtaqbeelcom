@@ -7,6 +7,7 @@ import { useListingSocial } from "@/hooks/useListingSocial";
 import { useAuthContext } from "@/contexts/AuthContext";
 import TrustBadge, { getSellerBadges, getVerificationLabel } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
+import SellerRatingDisplay from "@/components/SellerRatingDisplay";
 import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
 import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 import { useSEO } from "@/hooks/useSEO";
@@ -185,6 +186,9 @@ const SellerProfilePage = () => {
               showBadges
               badges={badges}
             />
+
+            {/* Deal ratings average */}
+            <SellerRatingDisplay sellerId={id!} />
           </div>
 
           {/* Stats cards */}
