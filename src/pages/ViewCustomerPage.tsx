@@ -282,7 +282,7 @@ const ViewCustomerPage = () => {
     return Object.values(months).slice(-6);
   }, [deals]);
 
-  if (role !== "platform_owner") {
+  if (role !== "platform_owner" && role !== "supervisor") {
     navigate("/unauthorized");
     return null;
   }
