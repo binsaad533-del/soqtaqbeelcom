@@ -254,8 +254,14 @@ const HomePage = () => {
               <img src={logoIconGold} alt={tx("سوق تقبيل", "Soq Taqbeel")} loading="lazy" className="h-28 md:h-36 w-auto" />
               <span className="text-lg md:text-xl font-semibold tracking-[0.3em] text-foreground/70 mt-3 uppercase">SOQ TAQBEEL</span>
             </div>
-            <p className="text-sm font-medium text-primary mb-3 tracking-wide">
+            <p className="text-sm font-medium text-primary mb-1 tracking-wide">
               {tx("أول منصة سعودية بالذكاء الاصطناعي", "The first Saudi AI-powered platform")} <AiInlineStar size={13} /> {tx("لتقبيل المشاريع", "for business transfers")}
+            </p>
+            <p className="text-xs text-muted-foreground mb-3 max-w-md mx-auto leading-relaxed">
+              {tx(
+                "التقبيل هو نقل ملكية النشاط التجاري من بائع لمشتري — وسوق تقبيل هو المكان الأمثل لذلك",
+                "Taqbeel is the transfer of business ownership from seller to buyer — Soq Taqbeel is the best place for that"
+              )}
             </p>
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
               {tx("ارفع صور مشروعك…", "Upload your business photos…")}{" "}
