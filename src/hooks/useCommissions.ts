@@ -57,7 +57,7 @@ export const BANK_DETAILS = {
   accountNumber: "611000010006086026222",
   iban: "SA4180000611608016026222",
   nationalId: "7017628152",
-  taxNumber: "000000000000003",
+  taxNumber: "310661528400003",
   email: "a.almalki@soqtaqbeel.com",
   phone: "0500668089",
 } as const;
