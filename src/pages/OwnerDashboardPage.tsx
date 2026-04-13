@@ -12,6 +12,7 @@ import { registerChannel, unregisterChannel } from "@/lib/performanceConfig";
 import TrustBadge from "@/components/TrustBadge";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -163,6 +164,26 @@ const OwnerDashboardPage = () => {
   const toggleSuspend = async (p: Profile) => {
     await updateProfile(p.user_id, { is_suspended: !p.is_suspended });
     setProfiles(prev => prev.map(pr => pr.user_id === p.user_id ? { ...pr, is_suspended: !pr.is_suspended } : pr));
+  };
+
+  const roleLabels: Record<string, string> = {
+    customer: "عميل",
+    supervisor: "مشرف التشغيل",
+    financial_manager: "مدير مالي",
+    platform_owner: "مالك المنصة",
+  };
+
+  const handleRoleChange = async (targetUserId: string, newRole: string) => {
+    if (targetUserId === profile?.user_id) { toast.error("لا يمكنك تغيير دورك"); return; }
+    const { error } = await supabase.from("user_roles").upsert({ user_id: targetUserId, role: newRole } as any, { onConflict: "user_id" });
+    if (error) { toast.error("حدث خطأ في تعيين الدور"); return; }
+    await supabase.from("audit_logs").insert({ user_id: profile?.user_id, action: "role_changed", resource_type: "user_role", resource_id: targetUserId, details: { new_role: newRole } } as any);
+    toast.success("تم تعيين الدور بنجاح");
+    setRoles(prev => {
+      const existing = prev.find((r: any) => r.user_id === targetUserId);
+      if (existing) return prev.map((r: any) => r.user_id === targetUserId ? { ...r, role: newRole } : r);
+      return [...prev, { user_id: targetUserId, role: newRole }];
+    });
   };
 
   const filteredProfiles = useMemo(() => {
