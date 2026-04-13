@@ -407,7 +407,8 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       <div className="border border-border/50 rounded-xl overflow-hidden">
                         <div className="divide-y divide-border/30">
                           {displayAssets.map((asset: any, i: number) => {
-                            const sourceInfo = SOURCE_LABELS[asset.source] || SOURCE_LABELS.images;
+                            const sourceKey = typeof asset?.source === "string" ? asset.source : "image";
+                            const sourceInfo = SOURCE_LABELS[sourceKey] || SOURCE_LABELS.image;
                             return (
                               <div key={i} className="px-3 py-2 flex items-center justify-between gap-2">
                                 <div className="flex-1 min-w-0">
