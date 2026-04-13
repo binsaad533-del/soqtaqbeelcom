@@ -21,7 +21,7 @@ import {
   Users, FileText, Handshake, Settings, BarChart3, Search,
   Loader2, ChevronLeft, ShieldCheck,
   ArrowUpDown, Shield, TrendingUp, Eye,
-  Activity, RefreshCw, UserCheck, User, KeyRound
+  Activity, RefreshCw, UserCheck, User
 } from "lucide-react";
 import OwnerSettingsPanel from "@/components/OwnerSettingsPanel";
 import SecurityIncidentPanel from "@/components/SecurityIncidentPanel";
