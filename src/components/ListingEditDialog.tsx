@@ -1,16 +1,18 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Check, Edit3, Camera, MapPin, Package, FileText, Plus, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useListings, type Listing } from "@/hooks/useListings";
+import { useResilientUpdate } from "@/hooks/useResilientUpdate";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import { isFieldRelevant } from "@/lib/transparencyScore";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import GoogleMapPicker, { type PlaceDetails } from "@/components/GoogleMapPicker";
+import ListingEditErrorBoundary from "@/components/ListingEditErrorBoundary";
 
 interface ListingEditDialogProps {
   listing: Listing;
@@ -23,7 +25,7 @@ interface ListingEditDialogProps {
 const shouldShow = (dealType: string, field: string) =>
   isFieldRelevant(dealType, field) || ["business_activity", "city", "district", "price"].includes(field);
 
-const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }: ListingEditDialogProps) => {
+const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDeleted }: ListingEditDialogProps) => {
   const dealType = listing.primary_deal_type || listing.deal_type || "full_takeover";
   const { updateListing, uploadFile, softDeleteListing } = useListings();
   const queryClient = useQueryClient();
@@ -32,6 +34,13 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activePhotoGroup, setActivePhotoGroup] = useState<string | null>(null);
+
+  // Resilient update with debounce + rate limit + retry
+  const updateFn = useCallback(
+    (payload: { id: string; data: Partial<Listing> }) => updateListing(payload.id, payload.data),
+    [updateListing],
+  );
+  const { immediateMutate } = useResilientUpdate(updateFn);
 
   // ── Basic fields ──
   const [fields, setFields] = useState({
@@ -149,7 +158,6 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
       return;
     }
 
-    setSaving(true);
     const updateData: any = {
       business_activity: fields.business_activity,
       city: fields.city,
@@ -171,17 +179,30 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
       location_lng: locationLng,
     };
 
-    const { error } = await updateListing(listing.id, updateData as never);
+    // ── Optimistic update: update cache immediately ──
+    const previousData = queryClient.getQueryData<Listing>(["listing", listing.id]);
+    queryClient.setQueryData(["listing", listing.id], (old: any) =>
+      old ? { ...old, ...updateData } : old,
+    );
+    onUpdated?.(updateData);
+
+    setSaving(true);
+
+    // ── Rate-limited + auto-retry mutation ──
+    const { error } = await immediateMutate({ id: listing.id, data: updateData as never });
+
     setSaving(false);
 
     if (error) {
-      toast.error("فشل حفظ التعديلات");
+      // Revert optimistic update
+      if (previousData) {
+        queryClient.setQueryData(["listing", listing.id], previousData);
+      }
+      // Toast already shown by useResilientUpdate
     } else {
-      // Invalidate all listing-related caches to ensure consistency
       await queryClient.invalidateQueries({ queryKey: ["listing", listing.id] });
       await queryClient.invalidateQueries({ queryKey: ["listings"] });
       toast.success("تم حفظ التعديلات بنجاح");
-      onUpdated?.(updateData);
       onOpenChange(false);
     }
   };
@@ -472,5 +493,11 @@ const ListingEditDialog = ({ listing, open, onOpenChange, onUpdated, onDeleted }
     </Dialog>
   );
 };
+
+const ListingEditDialog = (props: ListingEditDialogProps) => (
+  <ListingEditErrorBoundary>
+    <ListingEditDialogInner {...props} />
+  </ListingEditErrorBoundary>
+);
 
 export default ListingEditDialog;
