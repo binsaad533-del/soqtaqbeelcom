@@ -2559,7 +2559,11 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "platform_owner" | "supervisor" | "customer"
+      app_role:
+        | "platform_owner"
+        | "supervisor"
+        | "customer"
+        | "financial_manager"
       otp_attempt_type: "request" | "verify"
     }
     CompositeTypes: {
@@ -2688,7 +2692,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["platform_owner", "supervisor", "customer"],
+      app_role: [
+        "platform_owner",
+        "supervisor",
+        "customer",
+        "financial_manager",
+      ],
       otp_attempt_type: ["request", "verify"],
     },
   },
