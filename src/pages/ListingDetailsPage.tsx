@@ -157,7 +157,7 @@ const ListingDetailsPage = () => {
 
   const STALE_TIME_MS = 5 * 60 * 1000; // 5 minutes
 
-  const loadListing = async (forceRefresh = false) => {
+  const loadListing = useCallback(async (forceRefresh = false, signal?: AbortSignal) => {
     if (!id) return;
 
     // Skip if data is already loaded and fresh
@@ -174,6 +174,7 @@ const ListingDetailsPage = () => {
     setLoadError(null);
     try {
       const data = await getListing(id);
+      if (signal?.aborted) return;
       setListing(data);
       loadedIdRef.current = id;
       loadedAtRef.current = Date.now();
@@ -183,7 +184,9 @@ const ListingDetailsPage = () => {
           getSellerReviews(data.owner_id),
           getLikesAndViews([data.id]),
         ]);
+        if (signal?.aborted) return;
         const { count: dealCount } = await supabase.from("deals").select("id", { count: "exact", head: true }).eq("listing_id", data.id);
+        if (signal?.aborted) return;
         setInterestCount(dealCount || 0);
         setSellerProfile(profile);
         setSellerReviews(reviews);
@@ -192,24 +195,36 @@ const ListingDetailsPage = () => {
         setIsLiked(social.userLikes.has(data.id));
       }
     } catch (err: any) {
+      if (signal?.aborted) return;
       console.error("[ListingDetails] Load failed:", { id, error: err?.message });
       setLoadError("فشل تحميل الإعلان — يرجى المحاولة مرة أخرى");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   useEffect(() => {
-    loadListing();
+    const controller = new AbortController();
+
+    loadListing(false, controller.signal);
+
     if (id && loadedIdRef.current !== id) {
       recordView(id).catch(() => {});
     }
     if (user && id) {
       getMyDeals().then(deals => {
+        if (controller.signal.aborted) return;
         const active = deals.find(d => d.listing_id === id && !["cancelled", "completed"].includes(d.status));
         setMyActiveDeal(active || null);
       });
     }
+
+    return () => {
+      controller.abort();
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user]);
 
