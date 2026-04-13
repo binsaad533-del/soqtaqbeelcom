@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { usePhoneVerification } from "@/hooks/usePhoneVerification";
 import { toDigitsOnly } from "@/lib/arabicNumerals";
@@ -16,6 +16,8 @@ const COUNTRY_CODES = [
   { code: "+20", flag: "🇪🇬", name: "مصر" },
   { code: "+962", flag: "🇯🇴", name: "الأردن" },
 ];
+
+const OTP_COOLDOWN_SECONDS = 60;
 
 interface PhoneVerificationProps {
   onVerified?: () => void;
@@ -40,9 +42,12 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
   const [otpCode, setOtpCode] = useState("");
   const [error, setError] = useState("");
   const [attempts, setAttempts] = useState(0);
+  const [cooldown, setCooldown] = useState(0);
   const [resendTimer, setResendTimer] = useState(0);
   const [deliveryChannel, setDeliveryChannel] = useState<"sms" | "call">("sms");
   const [aiMessage, setAiMessage] = useState("يالله حيّه، دخل رقمك عشان نتحقق 📱");
+  const [locked, setLocked] = useState(false);
+  const lastSendRef = useRef(0);
 
   // If already verified
   useEffect(() => {
@@ -52,6 +57,12 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
     }
   }, [profile]);
 
+  // Cooldown timer (60s between OTP requests)
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((v) => v - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
   // Resend timer
   useEffect(() => {
@@ -67,14 +78,27 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
       setError("رقم الجوال يجب أن يبدأ بـ 5 ويتكون من 9 أرقام");
       return;
     }
+
+    // Frontend cooldown enforcement
+    const now = Date.now();
+    const elapsed = (now - lastSendRef.current) / 1000;
+    if (elapsed < OTP_COOLDOWN_SECONDS && lastSendRef.current > 0) {
+      const remaining = Math.ceil(OTP_COOLDOWN_SECONDS - elapsed);
+      setError(`انتظر ${remaining} ثانية قبل طلب رمز جديد`);
+      setCooldown(remaining);
+      return;
+    }
+
     setError("");
 
     const result = await sendOtp(fullPhone);
     if (result.success) {
+      lastSendRef.current = Date.now();
       const channel = result.channel || "sms";
       setDeliveryChannel(channel);
       setStep("otp");
-      setResendTimer(30);
+      setCooldown(OTP_COOLDOWN_SECONDS);
+      setResendTimer(OTP_COOLDOWN_SECONDS);
       setAiMessage(channel === "call" ? "اتصلنا عليك بالكود، انتبه للمكالمة 📞" : "أرسلنا لك كود، شيّك جوالك 📲");
     } else {
       setError(result.error || "فشل الإرسال");
@@ -91,7 +115,7 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
   }, [skipPhoneStep]);
 
   const handleVerifyOtp = useCallback(async () => {
-    if (otpCode.length !== 6) return;
+    if (otpCode.length !== 6 || locked) return;
     setError("");
     setAiMessage("نتحقق من الكود... ⏳");
 
@@ -102,13 +126,21 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
       onVerified?.();
     } else {
       setAttempts((a) => a + 1);
-      if (attempts >= 2) {
+
+      // Check if backend locked the phone
+      if ((result as any).locked) {
+        setLocked(true);
+        setError(result.error || "تم إدخال رمز خاطئ عدة مرات. حاول بعد 30 دقيقة.");
+        setAiMessage("تم قفل التحقق مؤقتاً 🔒");
+        return;
+      }
+
+      if (attempts >= 4) {
         setError("تجاوزت عدد المحاولات، أعد إرسال الكود");
         setAiMessage("خلصت المحاولات، أرسل كود جديد 🔄");
         setAttempts(0);
         setOtpCode("");
         if (skipPhoneStep) {
-          // Re-send OTP automatically instead of going to phone step
           handleSendOtp();
         } else {
           setStep("phone");
@@ -118,24 +150,26 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
         setAiMessage("الكود غلط، جرّب مرة ثانية 🤔");
       }
     }
-  }, [otpCode, fullPhone, verifyOtp, attempts, onVerified]);
+  }, [otpCode, fullPhone, verifyOtp, attempts, onVerified, locked]);
 
   const handleResend = useCallback(async () => {
-    if (resendTimer > 0) return;
+    if (resendTimer > 0 || cooldown > 0 || locked) return;
     setOtpCode("");
     setError("");
     setAiMessage("نعيد إرسال الكود... ⏳");
     const result = await sendOtp(fullPhone);
     if (result.success) {
+      lastSendRef.current = Date.now();
       const channel = result.channel || "sms";
       setDeliveryChannel(channel);
-      setResendTimer(30);
+      setCooldown(OTP_COOLDOWN_SECONDS);
+      setResendTimer(OTP_COOLDOWN_SECONDS);
       setAttempts(0);
       setAiMessage(channel === "call" ? "أعدنا الاتصال بالكود 📞" : "تم إعادة الإرسال، شيّك جوالك 📲");
     } else {
       setError(result.error || "فشل إعادة الإرسال");
     }
-  }, [resendTimer, fullPhone, sendOtp]);
+  }, [resendTimer, cooldown, fullPhone, sendOtp, locked]);
 
   const handlePhoneChange = (value: string) => {
     const digits = toDigitsOnly(value);
@@ -215,7 +249,7 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
           {/* Send button */}
           <button
             onClick={handleSendOtp}
-            disabled={sending || phone.length < 9}
+            disabled={sending || phone.length < 9 || cooldown > 0}
             className="h-9 px-4 rounded-lg text-xs font-medium text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-50 whitespace-nowrap shrink-0"
             style={{ background: "var(--gradient-primary)" }}
           >
@@ -224,6 +258,8 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
                 <AiStar size={14} animate />
                 إرسال...
               </span>
+            ) : cooldown > 0 ? (
+              <span className="font-mono">{cooldown}ث</span>
             ) : "أرسل الكود"}
           </button>
         </div>
@@ -243,11 +279,12 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
               dir="ltr"
               lang="en"
               autoFocus
+              disabled={locked}
             />
 
             <button
               onClick={handleVerifyOtp}
-              disabled={verifying || otpCode.length !== 6}
+              disabled={verifying || otpCode.length !== 6 || locked}
               className="h-8 px-4 rounded-lg text-xs font-medium text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-50 whitespace-nowrap shrink-0"
               style={{ background: "var(--gradient-primary)" }}
             >
@@ -265,10 +302,12 @@ const PhoneVerificationFlow = ({ onVerified, initialPhone, mode = "inline", skip
             <span className="text-border/50">|</span>
             {resendTimer > 0 ? (
               <span>إعادة بعد <span className="font-mono">{resendTimer}</span>ث</span>
+            ) : locked ? (
+              <span className="text-destructive">التحقق مقفل مؤقتاً</span>
             ) : (
               <button onClick={handleResend} disabled={sending} className="text-primary hover:underline">إعادة الإرسال</button>
             )}
-            {!skipPhoneStep && (
+            {!skipPhoneStep && !locked && (
               <>
                 <span className="text-border/50">|</span>
                 <button

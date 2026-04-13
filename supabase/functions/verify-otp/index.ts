@@ -42,40 +42,64 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Rate limiting: max 5 verify attempts per 10 minutes
-    const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-    const { count } = await supabaseAnon
-      .from("audit_logs")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("action", "otp_verify_attempt")
-      .gte("created_at", tenMinAgo);
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("cf-connecting-ip") || "unknown";
 
-    if ((count ?? 0) >= 5) {
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // Check if phone is locked (5 failed verify attempts → 30 min lock)
+    const { data: lockRecord } = await supabaseAdmin
+      .from("otp_attempts")
+      .select("locked_until")
+      .eq("phone", phone)
+      .eq("attempt_type", "verify")
+      .not("locked_until", "is", null)
+      .gte("locked_until", new Date().toISOString())
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lockRecord?.locked_until) {
+      const remainingMs = new Date(lockRecord.locked_until).getTime() - Date.now();
+      const remainingMin = Math.ceil(remainingMs / 60000);
       return new Response(
-        JSON.stringify({ error: "تجاوزت عدد المحاولات المسموح بها" }),
+        JSON.stringify({ error: `تم إدخال رمز خاطئ عدة مرات. حاول بعد ${remainingMin} دقيقة.`, verified: false, locked: true }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Log attempt
-    await supabaseAnon.from("audit_logs").insert({
-      user_id: user.id,
-      action: "otp_verify_attempt",
-      resource_type: "phone_verification",
-      details: { phone: phone.slice(-4) },
-    });
+    // Count failed verify attempts for this phone in last 30 min
+    const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    const { count: failCount } = await supabaseAdmin
+      .from("otp_attempts")
+      .select("*", { count: "exact", head: true })
+      .eq("phone", phone)
+      .eq("attempt_type", "verify")
+      .eq("success", false)
+      .gte("created_at", thirtyMinAgo);
+
+    if ((failCount ?? 0) >= 5) {
+      // Lock the phone for 30 minutes
+      const lockedUntil = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+      await supabaseAdmin.from("otp_attempts").insert({
+        phone, ip_address: clientIp, user_id: user.id, attempt_type: "verify", success: false, locked_until: lockedUntil,
+      });
+      return new Response(
+        JSON.stringify({ error: "تم إدخال رمز خاطئ عدة مرات. حاول بعد 30 دقيقة.", verified: false, locked: true }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
     if (!TWILIO_ACCOUNT_SID) throw new Error("TWILIO_ACCOUNT_SID is not configured");
-
     const TWILIO_VERIFY_SERVICE_SID = Deno.env.get("TWILIO_VERIFY_SERVICE_SID");
     if (!TWILIO_VERIFY_SERVICE_SID) throw new Error("TWILIO_VERIFY_SERVICE_SID is not configured");
-
     const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
     if (!TWILIO_AUTH_TOKEN) throw new Error("TWILIO_AUTH_TOKEN is not configured");
 
-    // Call Twilio Verify Check API directly
+    // Call Twilio Verify Check API
     const checkUrl = `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/VerificationCheck`;
 
     const response = await fetch(checkUrl, {
@@ -84,28 +108,38 @@ Deno.serve(async (req) => {
         "Authorization": `Basic ${btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`)}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({
-        To: phone,
-        Code: code,
-      }),
+      body: new URLSearchParams({ To: phone, Code: code }),
     });
 
     const data = await response.json();
 
     if (!response.ok || data.status !== "approved") {
-      console.error("Twilio verify check error:", JSON.stringify(data));
+      // Log failed attempt
+      const newFailCount = (failCount ?? 0) + 1;
+      const lockedUntil = newFailCount >= 5 ? new Date(Date.now() + 30 * 60 * 1000).toISOString() : null;
+
+      await supabaseAdmin.from("otp_attempts").insert({
+        phone, ip_address: clientIp, user_id: user.id, attempt_type: "verify", success: false,
+        locked_until: lockedUntil,
+      });
+
+      const remaining = 5 - newFailCount;
+      const errorMsg = remaining <= 0
+        ? "تم إدخال رمز خاطئ عدة مرات. حاول بعد 30 دقيقة."
+        : `الكود غير صحيح. متبقي ${remaining} محاولات.`;
+
       return new Response(
-        JSON.stringify({ error: "الكود غير صحيح، جرّب مرة ثانية", verified: false }),
+        JSON.stringify({ error: errorMsg, verified: false, locked: remaining <= 0 }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Update profile with verification status using service role
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    // Success - log it
+    await supabaseAdmin.from("otp_attempts").insert({
+      phone, ip_address: clientIp, user_id: user.id, attempt_type: "verify", success: true,
+    });
 
+    // Update profile
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
       .update({
@@ -125,8 +159,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Log success
-    await supabaseAnon.from("audit_logs").insert({
+    // Log success in audit
+    await supabaseAdmin.from("audit_logs").insert({
       user_id: user.id,
       action: "phone_verified",
       resource_type: "phone_verification",

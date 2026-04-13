@@ -20,12 +20,55 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Verify a user with this phone exists
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("cf-connecting-ip") || "unknown";
+
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+
+    // Rate limit: Max 3 requests per phone per 15 min
+    const { count: phoneCount } = await supabaseAdmin
+      .from("otp_attempts")
+      .select("*", { count: "exact", head: true })
+      .eq("phone", phone)
+      .eq("attempt_type", "request")
+      .gte("created_at", fifteenMinAgo);
+
+    if ((phoneCount ?? 0) >= 3) {
+      await supabaseAdmin.from("otp_attempts").insert({
+        phone, ip_address: clientIp, attempt_type: "request", success: false,
+      });
+      // Anti-enumeration: always return success
+      return new Response(
+        JSON.stringify({ success: true, status: "pending" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Rate limit: Max 5 requests per IP per 15 min
+    if (clientIp !== "unknown") {
+      const { count: ipCount } = await supabaseAdmin
+        .from("otp_attempts")
+        .select("*", { count: "exact", head: true })
+        .eq("ip_address", clientIp)
+        .eq("attempt_type", "request")
+        .gte("created_at", fifteenMinAgo);
+
+      if ((ipCount ?? 0) >= 5) {
+        await supabaseAdmin.from("otp_attempts").insert({
+          phone, ip_address: clientIp, attempt_type: "request", success: false,
+        });
+        return new Response(
+          JSON.stringify({ success: true, status: "pending" }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Check if user exists (don't reveal to caller)
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("user_id, phone")
@@ -34,27 +77,13 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (!profile) {
-      // Don't reveal if user exists or not - still return success
+      // Log attempt but return success (anti-enumeration)
+      await supabaseAdmin.from("otp_attempts").insert({
+        phone, ip_address: clientIp, attempt_type: "request", success: false,
+      });
       return new Response(
         JSON.stringify({ success: true, status: "pending" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Rate limiting: max 3 requests per 5 minutes based on phone
-    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-    const { count } = await supabaseAdmin
-      .from("audit_logs")
-      .select("*", { count: "exact", head: true })
-      .eq("action", "reset_otp_sent")
-      .eq("resource_type", "password_reset")
-      .gte("created_at", fiveMinAgo)
-      .eq("resource_id", phone.slice(-4));
-
-    if ((count ?? 0) >= 3) {
-      return new Response(
-        JSON.stringify({ error: "تجاوزت الحد المسموح، حاول بعد 5 دقائق" }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -92,18 +121,19 @@ Deno.serve(async (req) => {
 
     if (!attempt.response.ok) {
       console.error("Twilio Verify error:", JSON.stringify(attempt.data));
+      await supabaseAdmin.from("otp_attempts").insert({
+        phone, ip_address: clientIp, user_id: profile.user_id, attempt_type: "request", success: false,
+      });
+      // Anti-enumeration: still return success
       return new Response(
-        JSON.stringify({ error: attempt.data.message || "فشل إرسال رمز التحقق" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ success: true, status: "pending" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Log the OTP send
-    await supabaseAdmin.from("audit_logs").insert({
-      action: "reset_otp_sent",
-      resource_type: "password_reset",
-      resource_id: phone.slice(-4),
-      details: { channel: attempt.channel },
+    // Log success
+    await supabaseAdmin.from("otp_attempts").insert({
+      phone, ip_address: clientIp, user_id: profile.user_id, attempt_type: "request", success: true,
     });
 
     return new Response(
