@@ -40,7 +40,7 @@ export default defineConfig(({ mode }) => ({
           short_name: "سوق تقبيل",
           description: "منصة ذكية لعرض وتحليل وتفاوض فرص تقبيل المحلات والمشاريع التجارية في السعودية",
           theme_color: "#0f172a",
-          background_color: "#0f172a",
+          background_color: "#ffffff",
           display: "standalone",
           orientation: "portrait-primary",
           scope: "/",
