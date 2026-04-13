@@ -186,7 +186,8 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
             >
               تم سداد العمولة
             </Button>
-            <p className="text-[10px] text-muted-foreground text-center">يرجى رفع إثبات التحويل لتأكيد الدفع</p>
+          </div>
+        )}
 
       {isPaidOrProof && (
           <div className="space-y-2">
