@@ -28,14 +28,12 @@ export interface Commission {
 export type CommissionStatus =
   | "unpaid"
   | "reminder_sent"
-  | "paid_unverified"
   | "paid_proof_uploaded"
   | "verified";
 
 export const COMMISSION_STATUS_LABELS: Record<CommissionStatus, string> = {
   unpaid: "غير مدفوعة",
   reminder_sent: "تم التذكير",
-  paid_unverified: "تم الدفع (بدون إثبات)",
   paid_proof_uploaded: "تم الدفع (مع إثبات)",
   verified: "تم التحقق ✓",
 };
@@ -43,7 +41,6 @@ export const COMMISSION_STATUS_LABELS: Record<CommissionStatus, string> = {
 export const COMMISSION_STATUS_COLORS: Record<CommissionStatus, string> = {
   unpaid: "text-amber-600",
   reminder_sent: "text-amber-500",
-  paid_unverified: "text-blue-600",
   paid_proof_uploaded: "text-indigo-600",
   verified: "text-emerald-600",
 };
@@ -110,19 +107,30 @@ export function useCommissions() {
     return (data || []) as unknown as Commission[];
   }, []);
 
-  const markAsPaid = useCallback(async (commissionId: string, receiptPath?: string) => {
+  const markAsPaid = useCallback(async (commissionId: string, receiptPath: string) => {
     const now = new Date().toISOString();
-    const status: CommissionStatus = receiptPath ? "paid_proof_uploaded" : "paid_unverified";
     const { error } = await supabase
       .from("deal_commissions")
       .update({
-        payment_status: status,
+        payment_status: "paid_proof_uploaded" as any,
         marked_paid_at: now,
-        ...(receiptPath ? { receipt_path: receiptPath } : {}),
+        receipt_path: receiptPath,
       } as any)
       .eq("id", commissionId);
+
+    // Audit log
+    if (user) {
+      await supabase.from("audit_logs").insert({
+        user_id: user.id,
+        action: "commission_proof_uploaded",
+        resource_type: "commission",
+        resource_id: commissionId,
+        details: { receipt_path: receiptPath },
+      });
+    }
+
     return { error };
-  }, []);
+  }, [user]);
 
   const verifyCommission = useCallback(async (commissionId: string) => {
     const now = new Date().toISOString();
@@ -133,20 +141,82 @@ export function useCommissions() {
         paid_at: now,
       } as any)
       .eq("id", commissionId);
-    return { error };
-  }, []);
 
-  const sendReminder = useCallback(async (commission: Commission) => {
+    // Audit log
+    if (user) {
+      await supabase.from("audit_logs").insert({
+        user_id: user.id,
+        action: "commission_verified",
+        resource_type: "commission",
+        resource_id: commissionId,
+        details: { verified_by: user.id },
+      });
+    }
+
+    // Send notification to seller
+    if (!error) {
+      const { data: comm } = await supabase
+        .from("deal_commissions")
+        .select("seller_id, deal_id, commission_amount")
+        .eq("id", commissionId)
+        .maybeSingle();
+      if (comm) {
+        // Internal notification
+        await supabase.from("notifications").insert({
+          user_id: comm.seller_id,
+          title: "تم تأكيد سداد عمولتك ✓",
+          body: `تم تأكيد سداد عمولتك. شكراً لالتزامك.`,
+          type: "commission_verified",
+          reference_type: "deal",
+          reference_id: comm.deal_id,
+        });
+
+        // SMS notification
+        const { data: deal } = await supabase
+          .from("deals")
+          .select("listing_id")
+          .eq("id", comm.deal_id)
+          .maybeSingle();
+        const { data: listing } = deal?.listing_id
+          ? await supabase.from("listings").select("title").eq("id", deal.listing_id).maybeSingle()
+          : { data: null };
+        const title = listing?.title || "صفقتك";
+
+        await supabase.functions.invoke("notify-sms", {
+          body: {
+            user_id: comm.seller_id,
+            event_type: "commission_verified",
+            data: { title, price: comm.commission_amount },
+          },
+        });
+
+        // Auto-unsuspend seller if they were suspended
+        await supabase
+          .from("profiles")
+          .update({ is_commission_suspended: false } as any)
+          .eq("user_id", comm.seller_id)
+          .eq("is_commission_suspended", true);
+      }
+    }
+
+    return { error };
+  }, [user]);
+
+  const sendReminder = useCallback(async (commission: Commission, listingTitle?: string) => {
     if (!user) return;
+    const amount = commission.commission_amount.toLocaleString("en-US");
+    const title = listingTitle || "صفقتك";
+
     // Insert notification for seller
     await supabase.from("notifications").insert({
       user_id: commission.seller_id,
       title: "تذكير ودي بسداد العمولة 🤍",
-      body: `نأمل التكرم بسداد عمولة المنصة (1%) الخاصة بهذه الصفقة. مبلغ العمولة: ${commission.commission_amount.toLocaleString("en-US")} ﷼. ثقتكم وأمانتكم محل تقديرنا 🙏`,
+      body: `نأمل التكرم بسداد عمولة المنصة (1%) الخاصة بهذه الصفقة. مبلغ العمولة: ${amount} ﷼. ثقتكم وأمانتكم محل تقديرنا 🙏`,
       type: "commission_reminder",
       reference_type: "deal",
       reference_id: commission.deal_id,
     });
+
     // Update reminder count
     await supabase
       .from("deal_commissions")
@@ -156,6 +226,24 @@ export function useCommissions() {
         payment_status: commission.payment_status === "unpaid" ? "reminder_sent" : commission.payment_status,
       } as any)
       .eq("id", commission.id);
+
+    // Audit log
+    await supabase.from("audit_logs").insert({
+      user_id: user.id,
+      action: "commission_reminder_sent",
+      resource_type: "commission",
+      resource_id: commission.id,
+      details: { reminder_count: commission.reminder_count + 1, deal_id: commission.deal_id },
+    });
+
+    // SMS notification
+    await supabase.functions.invoke("notify-sms", {
+      body: {
+        user_id: commission.seller_id,
+        event_type: "commission_reminder",
+        data: { title, price: amount },
+      },
+    });
   }, [user]);
 
   const uploadReceipt = useCallback(async (commissionId: string, file: File): Promise<string | null> => {

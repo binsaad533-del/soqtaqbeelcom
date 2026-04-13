@@ -1037,6 +1037,13 @@ const CreateListingPage = () => {
 
   const handlePublish = async () => {
     if (!listingId) return;
+
+    // Check if seller is suspended due to unpaid commission
+    if (profile && (profile as any).is_commission_suspended) {
+      toast.error("تم تعليق حسابك مؤقتاً بسبب عمولة متأخرة. يرجى سداد العمولة المستحقة لإعادة التفعيل.");
+      return;
+    }
+
     setShowPublishConfirm(false);
 
     setSaving(true);

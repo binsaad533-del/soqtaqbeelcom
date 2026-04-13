@@ -182,6 +182,12 @@ function buildSmsBody(eventType: string, data: any): string | null {
     case "search_alert_match":
       return `فرصة جديدة تطابق بحثك: "${title}" بسعر ${price} ر.س. شوفها الآن.\n${SITE}`;
 
+    case "commission_reminder":
+      return `تذكير: عمولة بقيمة ${price} ر.س مستحقة على صفقة "${title}". سدد عبر التحويل البنكي ثم أرفق الإثبات من المنصة.\n${SITE}`;
+
+    case "commission_verified":
+      return `تم تأكيد سداد عمولتك على "${title}". شكراً لك.\n${SITE}`;
+
     default:
       return null;
   }
