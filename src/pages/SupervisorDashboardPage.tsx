@@ -11,9 +11,10 @@ import { cn } from "@/lib/utils";
 import {
   FileText, AlertTriangle, CheckCircle,
   ChevronLeft, Loader2, Eye, Users, Handshake, TrendingUp,
-  Search, Bell, Activity, RefreshCw, Shield, UserCheck, User,
+  Search, Bell, Activity, RefreshCw, Shield, ShieldAlert, UserCheck, User,
   ClipboardList, Download, BarChart3
 } from "lucide-react";
+import FraudMonitorPanel from "@/components/FraudMonitorPanel";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
@@ -415,7 +416,15 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
         </div>
       </div>
 
-      {/* Section 5: Weekly Activity Report */}
+      {/* Section 5: Fraud Detection */}
+      <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
+        <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+          <ShieldAlert size={15} className="text-destructive" /> كشف الاحتيال
+        </h3>
+        <FraudMonitorPanel profiles={profiles} />
+      </div>
+
+      {/* Section 6: Weekly Activity Report */}
       <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold flex items-center gap-2">

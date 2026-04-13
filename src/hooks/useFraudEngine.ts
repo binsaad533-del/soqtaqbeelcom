@@ -9,6 +9,13 @@ export function useFraudEngine() {
     return data;
   }, []);
 
+  const checkListingFraud = useCallback(async (listingId: string) => {
+    const { data } = await supabase.functions.invoke("check-listing-fraud", {
+      body: { listing_id: listingId },
+    });
+    return data;
+  }, []);
+
   const checkDuplicates = useCallback(async (listingId: string) => {
     const { data } = await supabase.functions.invoke("detect-incidents", {
       body: { event_type: "duplicate_check", payload: { listing_id: listingId } },
@@ -37,5 +44,5 @@ export function useFraudEngine() {
     return data;
   }, []);
 
-  return { checkListing, checkDuplicates, calculateDealRisk, monitorChat, checkRapidListings };
+  return { checkListing, checkListingFraud, checkDuplicates, calculateDealRisk, monitorChat, checkRapidListings };
 }

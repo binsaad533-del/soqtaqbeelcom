@@ -1094,6 +1094,53 @@ export type Database = {
           },
         ]
       }
+      fraud_flags: {
+        Row: {
+          created_at: string
+          details: Json | null
+          flag_type: Database["public"]["Enums"]["fraud_flag_type"]
+          id: string
+          listing_id: string | null
+          reviewed_by: string | null
+          severity: Database["public"]["Enums"]["fraud_severity"]
+          status: Database["public"]["Enums"]["fraud_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          flag_type: Database["public"]["Enums"]["fraud_flag_type"]
+          id?: string
+          listing_id?: string | null
+          reviewed_by?: string | null
+          severity?: Database["public"]["Enums"]["fraud_severity"]
+          status?: Database["public"]["Enums"]["fraud_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          flag_type?: Database["public"]["Enums"]["fraud_flag_type"]
+          id?: string
+          listing_id?: string | null
+          reviewed_by?: string | null
+          severity?: Database["public"]["Enums"]["fraud_severity"]
+          status?: Database["public"]["Enums"]["fraud_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fraud_flags_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           buyer_id: string
@@ -2008,6 +2055,7 @@ export type Database = {
           created_at: string
           disputes_count: number
           email: string | null
+          fraud_score: number
           full_name: string | null
           id: string
           is_active: boolean
@@ -2032,6 +2080,7 @@ export type Database = {
           created_at?: string
           disputes_count?: number
           email?: string | null
+          fraud_score?: number
           full_name?: string | null
           id?: string
           is_active?: boolean
@@ -2056,6 +2105,7 @@ export type Database = {
           created_at?: string
           disputes_count?: number
           email?: string | null
+          fraud_score?: number
           full_name?: string | null
           id?: string
           is_active?: boolean
@@ -2612,6 +2662,17 @@ export type Database = {
         | "supervisor"
         | "customer"
         | "financial_manager"
+      fraud_flag_type:
+        | "duplicate_images"
+        | "duplicate_text"
+        | "spam_listing"
+        | "suspicious_account"
+        | "abnormal_pricing"
+        | "rapid_messaging"
+        | "new_account_publish"
+        | "multi_account_ip"
+      fraud_severity: "low" | "medium" | "high" | "critical"
+      fraud_status: "pending" | "reviewed" | "dismissed" | "confirmed"
       otp_attempt_type: "request" | "verify"
     }
     CompositeTypes: {
@@ -2746,6 +2807,18 @@ export const Constants = {
         "customer",
         "financial_manager",
       ],
+      fraud_flag_type: [
+        "duplicate_images",
+        "duplicate_text",
+        "spam_listing",
+        "suspicious_account",
+        "abnormal_pricing",
+        "rapid_messaging",
+        "new_account_publish",
+        "multi_account_ip",
+      ],
+      fraud_severity: ["low", "medium", "high", "critical"],
+      fraud_status: ["pending", "reviewed", "dismissed", "confirmed"],
       otp_attempt_type: ["request", "verify"],
     },
   },
