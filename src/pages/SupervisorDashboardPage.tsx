@@ -786,6 +786,11 @@ const SupervisorDashboardPage = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        <Link to={`/view-customer/${p.user_id}`}>
+                          <Button size="sm" variant="ghost" className="text-[10px] gap-1 h-7 px-2">
+                            <Eye size={10} /> الملف
+                          </Button>
+                        </Link>
                         <Button size="sm" variant="ghost" className="text-[10px] gap-1 h-7 px-2" onClick={() => handleMessageUser(p.user_id)}>
                           <Send size={10} /> مراسلة
                         </Button>
