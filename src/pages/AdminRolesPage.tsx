@@ -63,11 +63,20 @@ const AdminRolesPage = () => {
       return;
     }
     setUpdating(targetUserId);
-    // Upsert role
-    const { error } = await supabase
+    // Delete existing roles then insert new one (unique constraint is user_id+role)
+    const { error: delErr } = await supabase
       .from("user_roles")
-      .upsert({ user_id: targetUserId, role: newRole } as any, { onConflict: "user_id" });
-    if (error) {
+      .delete()
+      .eq("user_id", targetUserId);
+    if (delErr) {
+      toast.error(tx("حدث خطأ", "Error"));
+      setUpdating(null);
+      return;
+    }
+    const { error: insertErr } = await supabase
+      .from("user_roles")
+      .insert({ user_id: targetUserId, role: newRole, assigned_by: user?.id } as any);
+    if (insertErr) {
       toast.error(tx("حدث خطأ", "Error"));
       setUpdating(null);
       return;
