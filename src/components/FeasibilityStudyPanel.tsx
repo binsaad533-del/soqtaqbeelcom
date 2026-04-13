@@ -73,6 +73,7 @@ interface FeasibilityStudy {
 interface FeasibilityStudyPanelProps {
   listing: any;
   analysisCache: import("@/hooks/useAnalysisCache").UseAnalysisCacheReturn;
+  isOwner?: boolean;
 }
 
 const VERDICT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
