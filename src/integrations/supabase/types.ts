@@ -841,6 +841,44 @@ export type Database = {
           },
         ]
       }
+      deal_ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          deal_id: string
+          id: string
+          rated_id: string
+          rater_id: string
+          rating: number
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          deal_id: string
+          id?: string
+          rated_id: string
+          rater_id: string
+          rating: number
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          deal_id?: string
+          id?: string
+          rated_id?: string
+          rater_id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_ratings_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deals: {
         Row: {
           agreed_price: number | null
@@ -852,6 +890,7 @@ export type Database = {
           escrow_status: string
           fraud_flags: Json | null
           id: string
+          last_activity_alert: string | null
           listing_id: string
           locked: boolean
           risk_factors: Json | null
@@ -870,6 +909,7 @@ export type Database = {
           escrow_status?: string
           fraud_flags?: Json | null
           id?: string
+          last_activity_alert?: string | null
           listing_id: string
           locked?: boolean
           risk_factors?: Json | null
@@ -888,6 +928,7 @@ export type Database = {
           escrow_status?: string
           fraud_flags?: Json | null
           id?: string
+          last_activity_alert?: string | null
           listing_id?: string
           locked?: boolean
           risk_factors?: Json | null
@@ -1154,6 +1195,8 @@ export type Database = {
         Row: {
           auto_evaluate_offers: boolean
           auto_reject_below_min: boolean
+          auto_reject_very_low: boolean
+          auto_renew_enabled: boolean
           auto_reply_inquiries: boolean
           created_at: string
           daily_summary: boolean
@@ -1161,13 +1204,21 @@ export type Database = {
           is_active: boolean
           listing_id: string
           min_acceptable_price: number | null
+          notify_low_views: boolean
+          notify_market_price: boolean
+          notify_missing_data: boolean
+          notify_pending_offers: boolean
+          notify_stale_deals: boolean
           owner_id: string
           preferred_response_tone: string | null
           updated_at: string
+          weekly_report_enabled: boolean
         }
         Insert: {
           auto_evaluate_offers?: boolean
           auto_reject_below_min?: boolean
+          auto_reject_very_low?: boolean
+          auto_renew_enabled?: boolean
           auto_reply_inquiries?: boolean
           created_at?: string
           daily_summary?: boolean
@@ -1175,13 +1226,21 @@ export type Database = {
           is_active?: boolean
           listing_id: string
           min_acceptable_price?: number | null
+          notify_low_views?: boolean
+          notify_market_price?: boolean
+          notify_missing_data?: boolean
+          notify_pending_offers?: boolean
+          notify_stale_deals?: boolean
           owner_id: string
           preferred_response_tone?: string | null
           updated_at?: string
+          weekly_report_enabled?: boolean
         }
         Update: {
           auto_evaluate_offers?: boolean
           auto_reject_below_min?: boolean
+          auto_reject_very_low?: boolean
+          auto_renew_enabled?: boolean
           auto_reply_inquiries?: boolean
           created_at?: string
           daily_summary?: boolean
@@ -1189,9 +1248,15 @@ export type Database = {
           is_active?: boolean
           listing_id?: string
           min_acceptable_price?: number | null
+          notify_low_views?: boolean
+          notify_market_price?: boolean
+          notify_missing_data?: boolean
+          notify_pending_offers?: boolean
+          notify_stale_deals?: boolean
           owner_id?: string
           preferred_response_tone?: string | null
           updated_at?: string
+          weekly_report_enabled?: boolean
         }
         Relationships: [
           {
@@ -1233,6 +1298,7 @@ export type Database = {
           listing_id: string
           message: string | null
           offered_price: number
+          reminder_count: number
           seller_response: string | null
           status: string
           updated_at: string
@@ -1245,6 +1311,7 @@ export type Database = {
           listing_id: string
           message?: string | null
           offered_price: number
+          reminder_count?: number
           seller_response?: string | null
           status?: string
           updated_at?: string
@@ -1257,6 +1324,7 @@ export type Database = {
           listing_id?: string
           message?: string | null
           offered_price?: number
+          reminder_count?: number
           seller_response?: string | null
           status?: string
           updated_at?: string
@@ -1353,6 +1421,7 @@ export type Database = {
           ai_trust_score: Json | null
           annual_rent: number | null
           area_sqm: number | null
+          auto_renew: boolean
           business_activity: string | null
           category: string | null
           city: string | null
@@ -1372,6 +1441,7 @@ export type Database = {
           fraud_score: number | null
           id: string
           inventory: Json | null
+          last_reminder_sent: string | null
           lease_duration: string | null
           lease_paid_period: string | null
           lease_remaining: string | null
@@ -1386,6 +1456,7 @@ export type Database = {
           price: number | null
           primary_deal_type: string | null
           published_at: string | null
+          renew_count: number
           required_documents: Json | null
           status: string
           surveillance_cameras: string | null
@@ -1406,6 +1477,7 @@ export type Database = {
           ai_trust_score?: Json | null
           annual_rent?: number | null
           area_sqm?: number | null
+          auto_renew?: boolean
           business_activity?: string | null
           category?: string | null
           city?: string | null
@@ -1425,6 +1497,7 @@ export type Database = {
           fraud_score?: number | null
           id?: string
           inventory?: Json | null
+          last_reminder_sent?: string | null
           lease_duration?: string | null
           lease_paid_period?: string | null
           lease_remaining?: string | null
@@ -1439,6 +1512,7 @@ export type Database = {
           price?: number | null
           primary_deal_type?: string | null
           published_at?: string | null
+          renew_count?: number
           required_documents?: Json | null
           status?: string
           surveillance_cameras?: string | null
@@ -1459,6 +1533,7 @@ export type Database = {
           ai_trust_score?: Json | null
           annual_rent?: number | null
           area_sqm?: number | null
+          auto_renew?: boolean
           business_activity?: string | null
           category?: string | null
           city?: string | null
@@ -1478,6 +1553,7 @@ export type Database = {
           fraud_score?: number | null
           id?: string
           inventory?: Json | null
+          last_reminder_sent?: string | null
           lease_duration?: string | null
           lease_paid_period?: string | null
           lease_remaining?: string | null
@@ -1492,6 +1568,7 @@ export type Database = {
           price?: number | null
           primary_deal_type?: string | null
           published_at?: string | null
+          renew_count?: number
           required_documents?: Json | null
           status?: string
           surveillance_cameras?: string | null
@@ -1547,6 +1624,45 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      match_notifications: {
+        Row: {
+          alert_id: string
+          id: string
+          listing_id: string
+          notified_at: string
+          user_id: string
+        }
+        Insert: {
+          alert_id: string
+          id?: string
+          listing_id: string
+          notified_at?: string
+          user_id: string
+        }
+        Update: {
+          alert_id?: string
+          id?: string
+          listing_id?: string
+          notified_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_notifications_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "search_alerts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_notifications_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       message_reports: {
         Row: {
@@ -1753,6 +1869,82 @@ export type Database = {
         }
         Relationships: []
       }
+      post_deal_followups: {
+        Row: {
+          buyer_notified: boolean
+          created_at: string
+          deal_id: string
+          followup_date: string
+          id: string
+          notified_at: string | null
+          seller_notified: boolean
+        }
+        Insert: {
+          buyer_notified?: boolean
+          created_at?: string
+          deal_id: string
+          followup_date: string
+          id?: string
+          notified_at?: string | null
+          seller_notified?: boolean
+        }
+        Update: {
+          buyer_notified?: boolean
+          created_at?: string
+          deal_id?: string
+          followup_date?: string
+          id?: string
+          notified_at?: string | null
+          seller_notified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_deal_followups_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: true
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      price_alerts: {
+        Row: {
+          alert_date: string
+          created_at: string
+          current_price: number
+          difference_pct: number | null
+          id: string
+          listing_id: string
+          market_avg: number
+        }
+        Insert: {
+          alert_date?: string
+          created_at?: string
+          current_price: number
+          difference_pct?: number | null
+          id?: string
+          listing_id: string
+          market_avg: number
+        }
+        Update: {
+          alert_date?: string
+          created_at?: string
+          current_price?: number
+          difference_pct?: number | null
+          id?: string
+          listing_id?: string
+          market_avg?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_alerts_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1904,10 +2096,14 @@ export type Database = {
       }
       search_alerts: {
         Row: {
+          business_activity: string | null
+          city: string | null
           created_at: string
           filters: Json | null
           id: string
           is_active: boolean
+          max_price: number | null
+          min_price: number | null
           notified_at: string | null
           notify_email: string | null
           notify_phone: string | null
@@ -1915,10 +2111,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          business_activity?: string | null
+          city?: string | null
           created_at?: string
           filters?: Json | null
           id?: string
           is_active?: boolean
+          max_price?: number | null
+          min_price?: number | null
           notified_at?: string | null
           notify_email?: string | null
           notify_phone?: string | null
@@ -1926,10 +2126,14 @@ export type Database = {
           user_id: string
         }
         Update: {
+          business_activity?: string | null
+          city?: string | null
           created_at?: string
           filters?: Json | null
           id?: string
           is_active?: boolean
+          max_price?: number | null
+          min_price?: number | null
           notified_at?: string | null
           notify_email?: string | null
           notify_phone?: string | null
@@ -2200,6 +2404,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      weekly_reports: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string | null
+          report_data: Json
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          report_data?: Json
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          report_data?: Json
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_reports_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
