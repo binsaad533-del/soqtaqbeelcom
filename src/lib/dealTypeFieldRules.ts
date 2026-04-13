@@ -47,7 +47,7 @@ export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
   // ── Full Takeover ──
   full_takeover: {
     requiredFields: ["business_activity", "city", "price"],
-    optionalFields: ["district", ...LEASE_FIELDS, ...LIABILITY_FIELDS, ...LICENSE_FIELDS],
+    optionalFields: [...LEASE_FIELDS, ...LIABILITY_FIELDS, ...LICENSE_FIELDS],
     hiddenFields: [],
     imageRequired: false, // optional but recommended
     docsRequired: false,
@@ -57,7 +57,7 @@ export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
   // ── Transfer without liabilities ──
   transfer_no_liabilities: {
     requiredFields: ["business_activity", "city", "price"],
-    optionalFields: ["district", ...LEASE_FIELDS, ...LICENSE_FIELDS],
+    optionalFields: [...LEASE_FIELDS, ...LICENSE_FIELDS],
     hiddenFields: [...LIABILITY_FIELDS],
     imageRequired: false,
     docsRequired: false,
@@ -67,7 +67,7 @@ export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
   // ── Assets + Operating Setup ──
   assets_setup: {
     requiredFields: ["business_activity", "city", "price"],
-    optionalFields: ["district"],
+    optionalFields: [],
     hiddenFields: [...LEASE_FIELDS, ...LIABILITY_FIELDS, ...LICENSE_FIELDS],
     imageRequired: true,
     docsRequired: false,
@@ -77,7 +77,7 @@ export const DEAL_TYPE_FIELD_RULES: Record<string, DealTypeFieldRules> = {
   // ── Assets Only ──
   assets_only: {
     requiredFields: ["business_activity", "city", "price"],
-    optionalFields: ["district"],
+    optionalFields: [],
     hiddenFields: [...LEASE_FIELDS, ...LIABILITY_FIELDS, ...LICENSE_FIELDS],
     imageRequired: true,
     docsRequired: false,
