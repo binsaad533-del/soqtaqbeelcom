@@ -204,6 +204,19 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </header>
 
       <AiAutoAnalysis />
+
+      {location.pathname !== "/" && (
+        <div className="container pt-3 pb-0">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowRight size={15} strokeWidth={1.5} />
+            {tx("رجوع", "Back")}
+          </button>
+        </div>
+      )}
+
       <main className="flex-1">{children}</main>
       <AiAssistant />
       <CookieConsent />
