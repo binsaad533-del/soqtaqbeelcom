@@ -150,9 +150,24 @@ const ListingDetailsPage = () => {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const loadedAtRef = useRef<number>(0);
+  const loadedIdRef = useRef<string | null>(null);
 
-  const loadListing = async () => {
+  const STALE_TIME_MS = 5 * 60 * 1000; // 5 minutes
+
+  const loadListing = async (forceRefresh = false) => {
     if (!id) return;
+
+    // Skip if data is already loaded and fresh
+    if (
+      !forceRefresh &&
+      loadedIdRef.current === id &&
+      listing &&
+      Date.now() - loadedAtRef.current < STALE_TIME_MS
+    ) {
+      return;
+    }
+
     setLoading(true);
     setLoadError(null);
     try {
@@ -160,6 +175,8 @@ const ListingDetailsPage = () => {
       const data = await getListing(id);
       console.log("[ListingDetails] Listing loaded:", { id, found: !!data, status: data?.status });
       setListing(data);
+      loadedIdRef.current = id;
+      loadedAtRef.current = Date.now();
       if (data) {
         const [profile, reviews, social] = await Promise.all([
           getProfile(data.owner_id),
@@ -184,15 +201,17 @@ const ListingDetailsPage = () => {
 
   useEffect(() => {
     loadListing();
-    if (id) recordView(id).catch(() => {});
-    // Check if the current user has an active deal on this listing
+    if (id && loadedIdRef.current !== id) {
+      recordView(id).catch(() => {});
+    }
     if (user && id) {
       getMyDeals().then(deals => {
         const active = deals.find(d => d.listing_id === id && !["cancelled", "completed"].includes(d.status));
         setMyActiveDeal(active || null);
       });
     }
-  }, [id, getListing, user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user]);
 
   const handleStartNegotiation = async () => {
     if (!user) { setShowAuthDialog(true); return; }
@@ -280,7 +299,7 @@ const ListingDetailsPage = () => {
       <div className="py-20 text-center">
         <AlertTriangle size={32} className="mx-auto mb-4 text-destructive" />
         <p className="text-sm text-destructive mb-3">{loadError}</p>
-        <Button onClick={loadListing} variant="outline" className="rounded-xl">إعادة المحاولة</Button>
+        <Button onClick={() => loadListing(true)} variant="outline" className="rounded-xl">إعادة المحاولة</Button>
       </div>
     );
   }
