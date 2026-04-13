@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { FileText, Download, Maximize2, Loader2, Flag, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { cn } from "@/lib/utils";
 import type { NegotiationMessage } from "@/hooks/useDeals";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
