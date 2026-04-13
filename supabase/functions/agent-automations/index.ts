@@ -547,6 +547,226 @@ serve(async (req) => {
       results.post_deal_followup = { sent };
     }
 
+    // =======================================
+    // Automation: Buyer follow-up in negotiations (every 12h)
+    // =======================================
+    if (automation === "buyer_negotiation_followup" || automation === "all_12h" || automation === "all_daily") {
+      const hours24Ago = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+      const hours48Ago = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
+      const hours72Ago = new Date(Date.now() - 72 * 3600 * 1000).toISOString();
+
+      // Find active negotiations where AI (seller side) sent last message and buyer hasn't replied
+      const { data: deals } = await supabase
+        .from("deals")
+        .select("id, listing_id, buyer_id, seller_id, status, updated_at")
+        .eq("status", "negotiating");
+
+      let followups = 0;
+      for (const deal of deals || []) {
+        if (!deal.buyer_id) continue;
+
+        // Get last message
+        const { data: lastMsgs } = await supabase
+          .from("negotiation_messages")
+          .select("sender_id, sender_type, created_at, message_type")
+          .eq("deal_id", deal.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        if (!lastMsgs || lastMsgs.length === 0) continue;
+        const lastMsg = lastMsgs[0];
+
+        // Only follow up if last message was from seller/AI (not buyer)
+        if (lastMsg.sender_id === deal.buyer_id) continue;
+
+        const lastMsgTime = new Date(lastMsg.created_at).getTime();
+        const hoursSinceLast = (Date.now() - lastMsgTime) / 3600000;
+
+        // Check if we already sent a followup recently
+        const { data: recentFollowup } = await supabase
+          .from("agent_actions_log")
+          .select("id, action_details")
+          .eq("action_type", "buyer_negotiation_followup")
+          .eq("reference_id", deal.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        const lastFollowupStage = recentFollowup?.[0]?.action_details?.stage || 0;
+
+        const { data: listing } = await supabase
+          .from("listings")
+          .select("title")
+          .eq("id", deal.listing_id)
+          .single();
+
+        const { data: buyerProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", deal.buyer_id)
+          .single();
+
+        const buyerName = buyerProfile?.full_name?.split(" ")[0] || "المشتري";
+        const listingTitle = listing?.title || "الإعلان";
+
+        if (hoursSinceLast >= 72 && lastFollowupStage < 3) {
+          // Stage 3: Update negotiation status + notify seller
+          await supabase.from("notifications").insert([
+            {
+              user_id: deal.buyer_id,
+              title: "تم إيقاف التفاوض مؤقتاً",
+              body: `يا ${buyerName}، تم إيقاف التفاوض على "${listingTitle}" لعدم الرد. يمكنك العودة في أي وقت.`,
+              type: "deal", reference_type: "deal", reference_id: deal.id,
+            },
+            {
+              user_id: deal.seller_id,
+              title: "المشتري لم يرد",
+              body: `المشتري ${buyerName} لم يرد على التفاوض حول "${listingTitle}" منذ 72 ساعة.`,
+              type: "deal", reference_type: "deal", reference_id: deal.id,
+            },
+          ]);
+          await supabase.from("agent_actions_log").insert({
+            user_id: deal.buyer_id, action_type: "buyer_negotiation_followup",
+            action_details: { stage: 3, hours_since: Math.round(hoursSinceLast) },
+            result: "timeout", reference_type: "deal", reference_id: deal.id,
+          });
+          followups++;
+        } else if (hoursSinceLast >= 48 && lastFollowupStage < 2) {
+          // Stage 2: Final followup
+          await supabase.from("notifications").insert({
+            user_id: deal.buyer_id,
+            title: "آخر تذكير — العرض راح ينتهي",
+            body: `يا ${buyerName}، العرض على "${listingTitle}" راح ينتهي خلال 24 ساعة. لو تبي نكمل، رد علينا.`,
+            type: "deal", reference_type: "deal", reference_id: deal.id,
+          });
+          await supabase.from("agent_actions_log").insert({
+            user_id: deal.buyer_id, action_type: "buyer_negotiation_followup",
+            action_details: { stage: 2, hours_since: Math.round(hoursSinceLast) },
+            result: "success", reference_type: "deal", reference_id: deal.id,
+          });
+          followups++;
+        } else if (hoursSinceLast >= 24 && lastFollowupStage < 1) {
+          // Stage 1: Friendly reminder
+          await supabase.from("notifications").insert({
+            user_id: deal.buyer_id,
+            title: "لسه مهتم بالصفقة؟",
+            body: `يا ${buyerName}، لسه مهتم بالصفقة على "${listingTitle}"؟ العرض متاح لك ونقدر نتفاهم.`,
+            type: "deal", reference_type: "deal", reference_id: deal.id,
+          });
+          await supabase.from("agent_actions_log").insert({
+            user_id: deal.buyer_id, action_type: "buyer_negotiation_followup",
+            action_details: { stage: 1, hours_since: Math.round(hoursSinceLast) },
+            result: "success", reference_type: "deal", reference_id: deal.id,
+          });
+          followups++;
+        }
+      }
+      results.buyer_negotiation_followup = { sent: followups };
+    }
+
+    // =======================================
+    // Automation: Seller offer analysis + delayed auto-reply
+    // =======================================
+    if (automation === "seller_offer_analysis" || automation === "all_12h") {
+      // Find pending offers that need seller analysis notification
+      const { data: offers } = await supabase
+        .from("listing_offers")
+        .select("id, listing_id, buyer_id, offered_price, created_at, status")
+        .eq("status", "pending")
+        .gt("created_at", new Date(Date.now() - 2 * 3600 * 1000).toISOString()); // only recent
+
+      let analyzed = 0;
+      for (const offer of offers || []) {
+        // Check if already analyzed
+        const { data: existingAnalysis } = await supabase
+          .from("agent_actions_log")
+          .select("id")
+          .eq("action_type", "seller_offer_analysis")
+          .eq("reference_id", offer.id)
+          .limit(1);
+
+        if (existingAnalysis && existingAnalysis.length > 0) continue;
+
+        const { data: listing } = await supabase
+          .from("listings")
+          .select("title, owner_id, price, business_activity, city, ai_summary")
+          .eq("id", offer.listing_id)
+          .single();
+
+        if (!listing) continue;
+
+        // Get settings (for delay and auto-reply config)
+        const { data: settings } = await supabase
+          .from("listing_agent_settings")
+          .select("auto_evaluate_offers, is_active, auto_reply_delay_minutes, min_acceptable_price")
+          .eq("listing_id", offer.listing_id)
+          .maybeSingle();
+
+        if (settings && !settings.is_active) continue;
+
+        const { data: buyerProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", offer.buyer_id)
+          .single();
+
+        const { data: sellerProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", listing.owner_id)
+          .single();
+
+        const buyerName = buyerProfile?.full_name?.split(" ")[0] || "المشتري";
+        const sellerName = sellerProfile?.full_name?.split(" ")[0] || "البائع";
+        const askingPrice = listing.price || 0;
+        const pct = askingPrice > 0 ? Math.round((offer.offered_price / askingPrice) * 100) : 0;
+        const delayMinutes = settings?.auto_reply_delay_minutes || 30;
+
+        // Determine recommendation
+        let recommendation: string;
+        let suggestedPrice: number | null = null;
+        if (pct >= 95) {
+          recommendation = "قبول ✅";
+        } else if (pct >= 85) {
+          suggestedPrice = Math.round(askingPrice * 0.95);
+          recommendation = `عرض مضاد بـ ${suggestedPrice.toLocaleString()} ر.س 🔄`;
+        } else if (pct >= 70) {
+          suggestedPrice = Math.round(askingPrice * 0.90);
+          recommendation = `عرض مضاد بـ ${suggestedPrice.toLocaleString()} ر.س 🔄`;
+        } else {
+          recommendation = "رفض ❌";
+        }
+
+        // Send analysis notification to seller
+        await supabase.from("notifications").insert({
+          user_id: listing.owner_id,
+          title: "تحليل عرض وارد",
+          body: `يا ${sellerName}، وصلك عرض من ${buyerName} بقيمة ${offer.offered_price.toLocaleString()} ر.س (${pct}% من السعر المطلوب).\nالتوصية: ${recommendation}\nمقبل سيرد تلقائياً خلال ${delayMinutes} دقيقة إذا ما تدخلت.`,
+          type: "offer",
+          reference_type: "listing",
+          reference_id: offer.listing_id,
+        });
+
+        await supabase.from("agent_actions_log").insert({
+          user_id: listing.owner_id,
+          action_type: "seller_offer_analysis",
+          action_details: {
+            offer_id: offer.id,
+            offered_price: offer.offered_price,
+            asking_price: askingPrice,
+            percentage: pct,
+            recommendation,
+            suggested_price: suggestedPrice,
+            auto_reply_delay_minutes: delayMinutes,
+          },
+          result: "success",
+          reference_type: "offer",
+          reference_id: offer.id,
+        });
+        analyzed++;
+      }
+      results.seller_offer_analysis = { analyzed };
+    }
+
     return new Response(JSON.stringify({ ok: true, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
