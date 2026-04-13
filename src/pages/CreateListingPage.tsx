@@ -2190,24 +2190,32 @@ const CreateListingPage = () => {
                     />
                   )}
                   {isFieldVisible(dealTypeForTransparency, "city") && (
-                    disclosure.city ? (
-                      <div className="space-y-1">
-                        <label className="text-sm font-medium">المدينة</label>
-                        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-success/5 border border-success/20">
-                          <Check size={14} className="text-success" />
-                          <span className="text-sm">{disclosure.city}</span>
-                          <span className="text-[10px] text-success mr-auto">من الخريطة</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <FormField
-                        label={disclosure.city ? "المدينة ✓ من الخريطة" : "المدينة *"}
-                        placeholder="الرياض"
-                        value={disclosure.city}
-                        onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))}
-                        error={publishAttempted && disclosureErrors["city"]}
-                      />
-                    )
+                    <FormField
+                      label={disclosure.city ? "المدينة ✓ من الخريطة" : "المدينة *"}
+                      placeholder="الرياض"
+                      value={disclosure.city}
+                      onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))}
+                      error={publishAttempted && disclosureErrors["city"]}
+                    />
+                  )}
+                  {/* Location link */}
+                  {locationLat && locationLng && (
+                    <a
+                      href={`https://www.google.com/maps?q=${locationLat},${locationLng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-success/5 border border-success/20 hover:bg-success/10 transition-colors"
+                    >
+                      <MapPin size={14} className="text-success" />
+                      <span className="text-sm text-success">الموقع محدد على الخريطة</span>
+                      <span className="text-[10px] text-success/70 mr-auto">اضغط للفتح في خرائط قوقل ←</span>
+                    </a>
+                  )}
+                  {publishAttempted && !locationOk && (
+                    <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-center gap-2">
+                      <AlertTriangle size={14} className="text-destructive shrink-0" />
+                      <p className="text-xs text-destructive">يجب تحديد الموقع على الخريطة (الخطوة الثانية) قبل النشر</p>
+                    </div>
                   )}
                   <FormField
                     label={disclosure.price ? "السعر المطلوب * ✓ محدد مسبقاً" : "السعر المطلوب *"}
