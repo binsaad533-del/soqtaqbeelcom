@@ -101,7 +101,7 @@ const MonitoringTab = ({ profiles }: { profiles: Profile[] }) => {
           // Pending verifications > 72h (profiles awaiting verification)
           supabase.from("profiles").select("id", { count: "exact", head: true }).eq("verification_level", "pending").lt("created_at", seventyTwoHoursAgo),
           // OTP abuse today
-          supabase.rpc("get_otp_abuse_today" as any).then(r => r).catch(() => ({ data: null })),
+          Promise.resolve({ data: null as any }),
           // Zero view listings > 7 days
           supabase.from("listings").select("id", { count: "exact", head: true }).eq("status", "published").lt("published_at", sevenDaysAgo),
           // Weekly: new listings
