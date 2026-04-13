@@ -11,6 +11,7 @@ import LanguageToggle from "./LanguageToggle";
 import CurrencyToggle from "./CurrencyToggle";
 import CookieConsent from "./CookieConsent";
 import SmartInstallPrompt from "./SmartInstallPrompt";
+import PushNotificationPrompt from "./PushNotificationPrompt";
 import LaunchBanner from "./LaunchBanner";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -229,6 +230,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <AiAssistant />
       <CookieConsent />
       <SmartInstallPrompt />
+      <PushNotificationPrompt />
       <Footer />
     </div>
   );

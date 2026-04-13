@@ -120,6 +120,56 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
+// ── Push Notifications ──
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  try {
+    const data = event.data.json();
+    const options: NotificationOptions = {
+      body: data.body || "",
+      icon: data.icon || "/pwa-icon-192.png",
+      badge: data.badge || "/pwa-icon-192.png",
+      dir: "rtl" as NotificationDirection,
+      lang: "ar",
+      tag: data.tag || "default",
+      data: { url: data.url || "/", ...data.data },
+      requireInteraction: true,
+    } as any;
+
+
+
+    event.waitUntil(
+      self.registration.showNotification(data.title || "سوق تقبيل", options)
+    );
+  } catch (err) {
+    console.error("Push event error:", err);
+  }
+});
+
+// ── Notification click handler ──
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const url = event.notification.data?.url || "/";
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        // Focus existing window if available
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && "focus" in client) {
+            client.navigate(url);
+            return client.focus();
+          }
+        }
+        // Open new window
+        return self.clients.openWindow(url);
+      })
+  );
+});
+
 // ── SPA fallback: return cached /index.html first, then offline.html ──
 navigationHandler.plugins.push({
   handlerDidError: async () => {
