@@ -21,6 +21,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/hooks/useSEO";
 import CommissionBanner from "@/components/CommissionBanner";
+import { generateDealCertificatePdf } from "@/lib/dealCertificatePdf";
+import { generateDealSummaryPackagePdf } from "@/lib/dealSummaryPackagePdf";
 import DealFilesPanel from "@/components/DealFilesPanel";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
@@ -833,6 +835,64 @@ const NegotiationPage = () => {
               {/* Deal Files */}
               <DealFilesPanel dealId={deal.id} />
 
+              {/* Certificate + Summary downloads for completed deals */}
+              {deal.status === "completed" && commission?.payment_status === "verified" && (
+                <div className="bg-card rounded-2xl shadow-soft border border-border/30 p-4 space-y-2">
+                  <h3 className="font-medium text-sm flex items-center gap-2">
+                    <FileCheck size={14} className="text-primary" />
+                    وثائق الصفقة
+                  </h3>
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl text-xs gap-1.5"
+                    onClick={async () => {
+                      const sellerProfile = otherProfile && !isBuyer ? profile : otherProfile;
+                      const buyerProfile = isBuyer ? profile : otherProfile;
+                      await generateDealCertificatePdf({
+                        certificateNumber: `CERT-${new Date().getFullYear()}-${deal.id.slice(0, 6).toUpperCase()}`,
+                        issuedAt: new Date().toISOString(),
+                        dealTitle: listingTitle,
+                        businessActivity: listing?.business_activity || "—",
+                        location: listing?.city ? `${listing.city}${listing.district ? ` — ${listing.district}` : ""}` : "—",
+                        dealType: listing?.deal_type || "—",
+                        agreedPrice: deal.agreed_price || 0,
+                        sellerName: sellerProfile?.full_name || "—",
+                        sellerPhoneLast4: (sellerProfile?.phone || "").slice(-4),
+                        buyerName: buyerProfile?.full_name || "—",
+                        buyerPhoneLast4: (buyerProfile?.phone || "").slice(-4),
+                        negotiationStartDate: deal.created_at,
+                        completionDate: deal.completed_at || deal.updated_at,
+                        commissionPaidDate: commission.paid_at || commission.marked_paid_at || "—",
+                      });
+                    }}
+                  >
+                    <Download size={13} /> تحميل شهادة الإتمام
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl text-xs gap-1.5"
+                    onClick={async () => {
+                      await generateDealSummaryPackagePdf({
+                        dealTitle: listingTitle,
+                        dealDate: deal.completed_at || deal.updated_at,
+                        sellerName: (!isBuyer ? profile?.full_name : otherProfile?.full_name) || "—",
+                        buyerName: (isBuyer ? profile?.full_name : otherProfile?.full_name) || "—",
+                        agreedPrice: deal.agreed_price || 0,
+                        dealType: listing?.deal_type || "—",
+                        location: listing?.city ? `${listing.city}${listing.district ? ` — ${listing.district}` : ""}` : "—",
+                        hasCertificate: true,
+                        hasAgreement: true,
+                        hasLegalConfirmation: true,
+                        hasFeasibility: !!listing?.id,
+                        hasInvoice: true,
+                        hasReceipt: commission.payment_status === "verified",
+                      });
+                    }}
+                  >
+                    <Download size={13} /> تحميل ملف الصفقة الكامل
+                  </Button>
+                </div>
+              )}
 
               {commission && isPostAgreement && (
                 <CommissionPaymentPanel commission={commission} isSeller={user?.id === deal.seller_id} onUpdate={loadData} />
