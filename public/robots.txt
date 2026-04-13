@@ -1,21 +1,23 @@
 User-agent: *
 Allow: /
 Allow: /marketplace
+Allow: /listing/
 Allow: /blog
-Allow: /deal-pipeline
+Allow: /blog/
 Allow: /how-it-works
-Allow: /commission
-Allow: /escrow
 Allow: /about
 Allow: /contact
 Allow: /help
-Allow: /login
-Allow: /install
 Allow: /terms
 Allow: /privacy
+Allow: /install
+Allow: /login
 
 Disallow: /dashboard
-Disallow: /admin-*
+Disallow: /admin-dashboard
+Disallow: /admin-deals
+Disallow: /admin-revenue
+Disallow: /admin-verifications
 Disallow: /owner-dashboard
 Disallow: /supervisor-dashboard
 Disallow: /monitoring
@@ -31,5 +33,14 @@ Disallow: /unsubscribe
 Disallow: /messages
 Disallow: /verify-seller
 Disallow: /view-customer/
+Disallow: /seller-dashboard
+Disallow: /seller-analytics
+Disallow: /finance-dashboard
+Disallow: /notification-settings
+Disallow: /create-listing
+Disallow: /ai-chat
+Disallow: /moqbil-log
+Disallow: /pdf-preview
+Disallow: /referral
 
-Sitemap: https://soqtaqbeel.com/sitemap.xml
+Sitemap: https://sxvfjtmntdmrlzdetnyg.supabase.co/functions/v1/generate-sitemap

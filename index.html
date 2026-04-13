@@ -3,22 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+
+    <!-- Preconnect: critical third-party origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://sxvfjtmntdmrlzdetnyg.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://sxvfjtmntdmrlzdetnyg.supabase.co" />
+
+    <!-- Preload: critical resources -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap&text=" as="style" />
     <link rel="preload" href="/pwa-icon-192.png" as="image" type="image/png" />
     <link rel="preload" href="/favicon.png" as="image" type="image/png" />
-    <link rel="preconnect" href="https://sxvfjtmntdmrlzdetnyg.supabase.co" />
-    <link rel="preconnect" href="https://sxvfjtmntdmrlzdetnyg.supabase.co" />
-    <link rel="dns-prefetch" href="https://sxvfjtmntdmrlzdetnyg.supabase.co" />
+
+    <!-- Security headers -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
-    <title>سوق تقبيل — منصة تقبيل المشاريع التجارية</title>
-    <meta name="description" content="منصة ذكية لعرض وتحليل وتفاوض فرص تقبيل المحلات والمشاريع التجارية في السعودية" />
-    <meta name="author" content="سوق تقبيل" />
+
+    <!-- Primary SEO -->
+    <title>سوق تقبيل — تقبيل المشاريع والفرص التجارية بالذكاء الاصطناعي</title>
+    <meta name="description" content="أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع التجارية — جرد وتقييم وتفاوض تلقائي. تصفح فرص المطاعم والمحلات والورش والمزيد." />
+    <meta name="author" content="سوق تقبيل — شركة عين جساس للمقاولات" />
     <meta name="robots" content="index, follow" />
+    <meta name="keywords" content="تقبيل, سوق تقبيل, تقبيل محل, بيع مشروع, شراء مشروع, فرص تجارية, السعودية, ذكاء اصطناعي" />
     <link rel="canonical" href="https://soqtaqbeel.com/" />
 
     <!-- PWA -->
@@ -35,16 +43,17 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="سوق تقبيل" />
     <meta property="og:locale" content="ar_SA" />
-    <meta property="og:title" content="سوق تقبيل — منصة تقبيل المشاريع التجارية" />
-    <meta property="og:description" content="منصة ذكية لعرض وتحليل وتفاوض فرص تقبيل المحلات والمشاريع التجارية في السعودية" />
+    <meta property="og:title" content="سوق تقبيل — تقبيل المشاريع والفرص التجارية بالذكاء الاصطناعي" />
+    <meta property="og:description" content="أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع التجارية — جرد وتقييم وتفاوض تلقائي" />
     <meta property="og:image" content="https://soqtaqbeel.com/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://soqtaqbeel.com/" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="سوق تقبيل — منصة تقبيل المشاريع التجارية" />
-    <meta name="twitter:description" content="منصة ذكية لعرض وتحليل وتفاوض فرص تقبيل المحلات والمشاريع التجارية في السعودية" />
+    <meta name="twitter:title" content="سوق تقبيل — تقبيل المشاريع والفرص التجارية بالذكاء الاصطناعي" />
+    <meta name="twitter:description" content="أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع التجارية — جرد وتقييم وتفاوض تلقائي" />
     <meta name="twitter:image" content="https://soqtaqbeel.com/og-image.jpg" />
 
     <!-- JSON-LD -->
@@ -53,11 +62,12 @@
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "سوق تقبيل",
-      "alternateName": "Taqbeel Marketplace",
+      "alternateName": "Soq Taqbeel",
       "url": "https://soqtaqbeel.com",
-      "description": "منصة ذكية لعرض وتحليل وتفاوض فرص تقبيل المحلات والمشاريع التجارية في السعودية",
+      "description": "أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع التجارية — جرد وتقييم وتفاوض تلقائي",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
+      "inLanguage": "ar",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -65,7 +75,9 @@
       },
       "author": {
         "@type": "Organization",
-        "name": "سوق تقبيل"
+        "name": "شركة عين جساس للمقاولات",
+        "alternateName": "سوق تقبيل",
+        "url": "https://soqtaqbeel.com"
       }
     }
     </script>

@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, memo } from "react";
+import { safeJsonLd } from "@/lib/security";
 import { useSEO } from "@/hooks/useSEO";
 import { calculateTransparency } from "@/lib/transparencyScore";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
@@ -42,7 +43,7 @@ interface EnrichedListing extends Listing {
 }
 
 const MarketplacePage = () => {
-  useSEO({ title: "سوق الفرص", description: "استعرض فرص تقبيل المشاريع التجارية المتاحة", canonical: "/marketplace" });
+  useSEO({ title: "سوق الفرص — تصفح مشاريع وفرص تجارية للبيع في السعودية", description: "تصفح فرص تقبيل المشاريع التجارية المتاحة في السعودية — مطاعم، محلات، ورش، مراكز تجميل والمزيد", canonical: "/marketplace" });
   const { data: listings = [], isLoading: listingsLoading } = usePublishedListingsQuery();
   const { data: profiles = [], isLoading: profilesLoading } = useAllProfilesQuery();
   const { getLikesAndViews, toggleLike } = useListingSocial();
@@ -229,7 +230,24 @@ const MarketplacePage = () => {
     return pages;
   };
 
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "سوق الفرص — فرص تقبيل مشاريع تجارية",
+    description: "قائمة بفرص تقبيل المشاريع التجارية المتاحة في السعودية",
+    url: "https://soqtaqbeel.com/marketplace",
+    numberOfItems: filtered.length,
+    itemListElement: pagination.paginatedItems.slice(0, 10).map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://soqtaqbeel.com/listing/${item.id}`,
+      name: item.title || item.business_activity || "فرصة تقبيل",
+    })),
+  };
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(itemListJsonLd) }} />
     <div className={cn("py-8", compareItems.length > 0 && "pb-24")}>
       <div className="container max-w-5xl">
         {/* Header */}
@@ -391,6 +409,7 @@ const MarketplacePage = () => {
 
       <ComparePanel items={compareItems} onRemove={removeCompare} onClear={clearCompare} />
     </div>
+    </>
   );
 };
 
