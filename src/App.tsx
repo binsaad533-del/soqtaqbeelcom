@@ -68,6 +68,9 @@ const AiChatPage = lazy(() => import("./pages/AiChatPage"));
 const MoqbilLogPage = lazy(() => import("./pages/MoqbilLogPage"));
 const SellerAnalyticsPage = lazy(() => import("./pages/SellerAnalyticsPage"));
 const ReferralPage = lazy(() => import("./pages/ReferralPage"));
+const SupportPage = lazy(() => import("./pages/SupportPage"));
+const NewTicketPage = lazy(() => import("./pages/NewTicketPage"));
+const TicketDetailPage = lazy(() => import("./pages/TicketDetailPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -298,6 +301,9 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/support" element={<ProtectedRoute><SupportPage /></ProtectedRoute>} />
+                <Route path="/support/new" element={<ProtectedRoute><NewTicketPage /></ProtectedRoute>} />
+                <Route path="/support/ticket/:id" element={<ProtectedRoute><TicketDetailPage /></ProtectedRoute>} />
                 <Route path="/install" element={<InstallPage />} />
                 <Route
                   path="/notification-settings"
