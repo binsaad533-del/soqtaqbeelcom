@@ -12,6 +12,7 @@ import { registerChannel, unregisterChannel } from "@/lib/performanceConfig";
 import TrustBadge from "@/components/TrustBadge";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -163,6 +164,26 @@ const OwnerDashboardPage = () => {
   const toggleSuspend = async (p: Profile) => {
     await updateProfile(p.user_id, { is_suspended: !p.is_suspended });
     setProfiles(prev => prev.map(pr => pr.user_id === p.user_id ? { ...pr, is_suspended: !pr.is_suspended } : pr));
+  };
+
+  const roleLabels: Record<string, string> = {
+    customer: "عميل",
+    supervisor: "مشرف التشغيل",
+    financial_manager: "مدير مالي",
+    platform_owner: "مالك المنصة",
+  };
+
+  const handleRoleChange = async (targetUserId: string, newRole: string) => {
+    if (targetUserId === profile?.user_id) { toast.error("لا يمكنك تغيير دورك"); return; }
+    const { error } = await supabase.from("user_roles").upsert({ user_id: targetUserId, role: newRole } as any, { onConflict: "user_id" });
+    if (error) { toast.error("حدث خطأ في تعيين الدور"); return; }
+    await supabase.from("audit_logs").insert({ user_id: profile?.user_id, action: "role_changed", resource_type: "user_role", resource_id: targetUserId, details: { new_role: newRole } } as any);
+    toast.success("تم تعيين الدور بنجاح");
+    setRoles(prev => {
+      const existing = prev.find((r: any) => r.user_id === targetUserId);
+      if (existing) return prev.map((r: any) => r.user_id === targetUserId ? { ...r, role: newRole } : r);
+      return [...prev, { user_id: targetUserId, role: newRole }];
+    });
   };
 
   const filteredProfiles = useMemo(() => {
@@ -318,6 +339,7 @@ const OwnerDashboardPage = () => {
                 const role = getUserRole(p.user_id);
                 const isOwner = role === "platform_owner";
                 const isSupervisor = role === "supervisor";
+                const isFinancial = role === "financial_manager";
                 return (
                 <div key={p.id} className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card hover:shadow-soft transition-all cursor-pointer" onClick={() => !isOwner && navigate(`/dashboard/view-customer/${p.user_id}`)}>
                   <div className="flex items-center gap-3">
@@ -327,6 +349,7 @@ const OwnerDashboardPage = () => {
                         <span className="text-sm font-medium">{p.full_name || "—"}</span>
                         <TrustBadge score={p.trust_score} verificationLevel={p.verification_level} size="sm" />
                         {isSupervisor && <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">مشرف</span>}
+                        {isFinancial && <span className="text-[9px] bg-accent/80 text-accent-foreground px-1.5 py-0.5 rounded font-medium">مدير مالي</span>}
                         {isOwner && <span className="text-[9px] bg-success/10 text-success px-1.5 py-0.5 rounded font-medium">مالك</span>}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
@@ -345,39 +368,24 @@ const OwnerDashboardPage = () => {
                       </Link>
                     )}
                     {!isOwner && (
+                      <Select value={role} onValueChange={v => handleRoleChange(p.user_id, v)}>
+                        <SelectTrigger className="h-7 w-36 text-[10px] rounded-lg">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="customer">عميل</SelectItem>
+                          <SelectItem value="supervisor">مشرف التشغيل</SelectItem>
+                          <SelectItem value="financial_manager">مدير مالي</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {!isOwner && isSupervisor && (
                       <button
                         onClick={() => setPermDialogUser(p)}
-                        className={cn(
-                          "text-[10px] px-2.5 py-1 rounded-lg transition-colors gap-1 flex items-center",
-                          isSupervisor ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                        )}
+                        className="text-[10px] px-2.5 py-1 rounded-lg transition-colors gap-1 flex items-center bg-primary/10 text-primary hover:bg-primary/20"
                       >
                         <Shield size={11} />
-                        {isSupervisor ? "صلاحيات" : "ترقية لمشرف"}
-                      </button>
-                    )}
-                    {!isOwner && supervisorPerms.find(sp => sp.user_id === p.user_id) && (
-                      <button
-                        onClick={async () => {
-                          if (isSupervisor) {
-                            const { error } = await suspendSupervisor(p.user_id);
-                            if (error) toast.error("فشل في تعليق صلاحيات المشرف");
-                            else { toast.success("تم تعليق صلاحيات المشرف — الحساب كعميل لا يزال نشطاً"); load(); }
-                          } else {
-                            const { error } = await enableSupervisor(p.user_id);
-                            if (error) toast.error("فشل في تمكين صلاحيات المشرف");
-                            else { toast.success("تم تمكين صلاحيات المشرف مجدداً"); load(); }
-                          }
-                        }}
-                        className={cn(
-                          "text-[10px] px-2.5 py-1 rounded-lg transition-colors gap-1 flex items-center",
-                          isSupervisor
-                            ? "text-amber-600 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/30 dark:text-amber-400"
-                            : "text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 dark:text-emerald-400"
-                        )}
-                      >
-                        <UserCheck size={11} />
-                        {isSupervisor ? "تعليق المشرف" : "تمكين المشرف"}
+                        صلاحيات
                       </button>
                     )}
                     {!isOwner && (
