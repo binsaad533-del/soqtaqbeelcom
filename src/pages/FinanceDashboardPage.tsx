@@ -37,6 +37,7 @@ interface CommissionRow {
   receipt_path: string | null;
   reminder_count: number;
   marked_paid_at: string | null;
+  last_reminder_at: string | null;
   notes: string | null;
 }
 
@@ -430,6 +431,7 @@ const FinanceDashboardPage = () => {
                       <th className="text-right py-3">الضريبة</th>
                       <th className="text-right py-3">الإجمالي</th>
                       <th className="text-right py-3">الحالة</th>
+                      <th className="text-right py-3">آخر تذكير</th>
                       <th className="text-right py-3">التاريخ</th>
                       <th className="text-center py-3 pl-4">إجراءات</th>
                     </tr>
@@ -455,6 +457,11 @@ const FinanceDashboardPage = () => {
                             <span className={cn("text-[10px] px-2 py-0.5 rounded-lg font-medium whitespace-nowrap", st.color)}>{st.label}</span>
                           </td>
                           <td className="py-3 text-[11px] text-muted-foreground whitespace-nowrap">
+                            {comm.last_reminder_at
+                              ? new Date(comm.last_reminder_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+                              : "—"}
+                          </td>
+                          <td className="py-3 text-[11px] text-muted-foreground whitespace-nowrap">
                             {new Date(comm.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                           </td>
                           <td className="py-3 pl-4">
@@ -464,7 +471,7 @@ const FinanceDashboardPage = () => {
                                   <BadgeCheck size={12} className="mr-1" />تأكيد
                                 </Button>
                               )}
-                              {["unpaid"].includes(comm.payment_status) && (
+                              {["unpaid", "reminder_sent"].includes(comm.payment_status) && (
                                 <Button size="sm" variant="ghost" className="h-7 px-2 text-[10px]" onClick={() => handleSendReminder(comm)}>
                                   <Send size={12} className="mr-1" />تذكير
                                 </Button>
@@ -481,7 +488,7 @@ const FinanceDashboardPage = () => {
                     })}
                     {filteredCommissions.length === 0 && (
                       <tr>
-                        <td colSpan={9} className="text-center py-10 text-sm text-muted-foreground">لا توجد عمولات</td>
+                        <td colSpan={10} className="text-center py-10 text-sm text-muted-foreground">لا توجد عمولات</td>
                       </tr>
                     )}
                   </tbody>
@@ -631,7 +638,7 @@ const KpiCard = ({ icon: Icon, label, value, isCurrency, sub, subColor }: {
     <Icon size={18} className="mx-auto mb-2 text-primary" strokeWidth={1.3} />
     <div className="text-lg font-semibold flex items-center justify-center gap-1">
       {isCurrency ? (
-        <>{Number(value).toLocaleString("en-US")}<SarSymbol size={12} /></>
+        <>{Number(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<SarSymbol size={12} /></>
       ) : value}
     </div>
     <div className="text-[10px] text-muted-foreground mt-1">{label}</div>
@@ -641,7 +648,7 @@ const KpiCard = ({ icon: Icon, label, value, isCurrency, sub, subColor }: {
 
 const CurrencyCell = ({ value, bold }: { value: number; bold?: boolean }) => (
   <span className={cn("flex items-center gap-1 text-xs", bold && "font-medium text-primary")}>
-    {Number(value).toLocaleString("en-US")}
+    {Number(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
     <SarSymbol size={8} />
   </span>
 );

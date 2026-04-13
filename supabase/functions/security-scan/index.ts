@@ -80,7 +80,7 @@ serve(async (req) => {
       .lt("updated_at", thirtyDaysAgo);
 
     if (staleDeals && staleDeals.length > 0) {
-      results.push(`stale_deals: ${staleDeals.length}`);
+      results.push(`صفقات متوقفة: ${staleDeals.length}`);
     }
 
     // ─── 4. Unpaid commissions > 14 days ───
@@ -93,7 +93,7 @@ serve(async (req) => {
 
     if (overdueComms && overdueComms.length > 0) {
       const totalOverdue = overdueComms.reduce((s: number, c: any) => s + (c.commission_amount || 0), 0);
-      results.push(`overdue_commissions: ${overdueComms.length} (${totalOverdue} SAR)`);
+      results.push(`عمولات متأخرة: ${overdueComms.length} (${totalOverdue.toFixed(2)} ر.س)`);
     }
 
     // ─── 5. Notify platform owner with summary (once per day) ───
