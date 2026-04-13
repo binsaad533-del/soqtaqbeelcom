@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Bot, Loader2, Play, Pause, Settings2 } from "lucide-react";
+import { Loader2, Play, Pause, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import AiStar from "@/components/AiStar";
@@ -85,7 +85,7 @@ const MoqbilAutoNegotiate = ({ callAI, isBuyer, askingPrice, dealId, onAutoMessa
               : "bg-muted/30 border-border/30 hover:bg-muted/50"
           )}
         >
-          <Bot size={12} className={cn(isActive ? "text-primary" : "text-muted-foreground")} />
+          <div className="w-4 h-4 rounded-full bg-[#00AEEF] flex items-center justify-center text-white text-[7px] font-bold shrink-0">م</div>
           <span className={cn("text-[9px] font-medium flex-1 text-right", isActive ? "text-primary" : "text-muted-foreground")}>
             {isActive ? `مقبل يتفاوض نيابةً عنك (جولة ${roundCount})` : "تفعيل التفاوض التلقائي"}
           </span>
@@ -120,7 +120,7 @@ const MoqbilAutoNegotiate = ({ callAI, isBuyer, askingPrice, dealId, onAutoMessa
       {showSettings && (
         <div className="border border-primary/20 rounded-xl bg-card p-3 space-y-3 animate-in slide-in-from-top-1 duration-200">
           <div className="flex items-center gap-2 mb-1">
-            <Bot size={13} className="text-primary" />
+            <div className="w-5 h-5 rounded-full bg-[#00AEEF] flex items-center justify-center text-white text-[9px] font-bold shrink-0">م</div>
             <span className="text-[11px] font-semibold">إعدادات التفاوض التلقائي</span>
           </div>
 
@@ -222,7 +222,7 @@ const MoqbilAutoNegotiate = ({ callAI, isBuyer, askingPrice, dealId, onAutoMessa
               size="sm"
               className="flex-1 rounded-xl text-xs gradient-primary text-primary-foreground"
             >
-              <Bot size={12} className="ml-1.5" />
+              <div className="w-4 h-4 rounded-full bg-[#00AEEF] flex items-center justify-center text-white text-[7px] font-bold shrink-0 ml-1.5">م</div>
               ابدأ التفاوض
             </Button>
             <Button

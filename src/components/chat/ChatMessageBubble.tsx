@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { FileText, Download, Maximize2, Loader2, Flag, X } from "lucide-react";
-import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
 import type { NegotiationMessage } from "@/hooks/useDeals";
 import { toast } from "sonner";
@@ -100,8 +99,8 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
           "bg-muted/60"
         )}>
           {isAi && (
-            <div className="flex items-center gap-1 mb-1">
-              <AiStar size={12} />
+            <div className="flex items-center gap-1.5 mb-1">
+              <div className="w-5 h-5 rounded-full bg-[#00AEEF] flex items-center justify-center text-white text-[10px] font-bold shrink-0">م</div>
               <span className="text-[10px] text-accent-foreground font-medium">AI — وسيط الصفقة</span>
             </div>
           )}

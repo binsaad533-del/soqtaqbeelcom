@@ -112,9 +112,16 @@ const NegotiationPage = () => {
     parts.push(`حالة الصفقة: ${deal.status}`);
     parts.push(`عدد الرسائل: ${messages.length}`);
     
-    const isBuyer = user?.id === deal.buyer_id;
-    parts.push(`المستخدم الحالي: ${isBuyer ? "المشتري" : "البائع"}`);
-    if (profile?.full_name) parts.push(`اسم المستخدم: ${profile.full_name}`);
+    const isBuyerCtx = user?.id === deal.buyer_id;
+    parts.push(`المستخدم الحالي: ${isBuyerCtx ? "المشتري" : "البائع"}`);
+    if (profile?.full_name) parts.push(`اسم المستخدم الحالي: ${profile.full_name}`);
+    if (otherProfile?.full_name) parts.push(`اسم الطرف الآخر: ${otherProfile.full_name}`);
+    
+    // Include buyer/seller names explicitly for AI addressing
+    const buyerName = isBuyerCtx ? profile?.full_name : otherProfile?.full_name;
+    const sellerName = isBuyerCtx ? otherProfile?.full_name : profile?.full_name;
+    if (buyerName) parts.push(`اسم المشتري: ${buyerName}`);
+    if (sellerName) parts.push(`اسم البائع: ${sellerName}`);
 
     // ── Market analysis data ──
     if (listing.ai_summary) parts.push(`\nتحليل الذكاء الاصطناعي للإعلان:\n${listing.ai_summary}`);
@@ -158,7 +165,7 @@ const NegotiationPage = () => {
     }
     
     return parts.join("\n");
-  }, [deal, listing, messages, user, profile]);
+  }, [deal, listing, messages, user, profile, otherProfile]);
 
   const callAI = useCallback(async (mode: string, extraMessages?: { role: string; content: string }[]) => {
     const context = buildContext();
@@ -992,7 +999,7 @@ const NegotiationPage = () => {
                   buildContext={buildContext}
                   onAutoMessage={async (text) => {
                     if (!dealId || !user) return;
-                    const aiMsg = await sendMessage(dealId, `🤖 [مقبل نيابةً عن ${isBuyer ? "المشتري" : "البائع"}]\n${text}`, "ai_mediation");
+                    const aiMsg = await sendMessage(dealId, `✦ [مقبل نيابةً عن ${isBuyer ? "المشتري" : "البائع"}]\n${text}`, "ai_mediation");
                     if (aiMsg) setMessages(prev => prev.some(m => m.id === aiMsg.id) ? prev : [...prev, aiMsg]);
                   }}
                 />

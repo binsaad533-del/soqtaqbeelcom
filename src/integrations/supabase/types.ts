@@ -1197,6 +1197,7 @@ export type Database = {
           auto_reject_below_min: boolean
           auto_reject_very_low: boolean
           auto_renew_enabled: boolean
+          auto_reply_delay_minutes: number
           auto_reply_inquiries: boolean
           created_at: string
           daily_summary: boolean
@@ -1219,6 +1220,7 @@ export type Database = {
           auto_reject_below_min?: boolean
           auto_reject_very_low?: boolean
           auto_renew_enabled?: boolean
+          auto_reply_delay_minutes?: number
           auto_reply_inquiries?: boolean
           created_at?: string
           daily_summary?: boolean
@@ -1241,6 +1243,7 @@ export type Database = {
           auto_reject_below_min?: boolean
           auto_reject_very_low?: boolean
           auto_renew_enabled?: boolean
+          auto_reply_delay_minutes?: number
           auto_reply_inquiries?: boolean
           created_at?: string
           daily_summary?: boolean
