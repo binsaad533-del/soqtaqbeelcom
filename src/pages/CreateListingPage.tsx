@@ -430,9 +430,10 @@ const CreateListingPage = () => {
           [group]: [...(prev[group] || []), ...uploadedUrls],
         };
         // Save to DB inside callback to guarantee latest state
-        updateListing(id, { photos: updatedPhotos } as never).catch((err) =>
-          console.error("Photo DB sync failed", err)
-        );
+        updateListing(id, { photos: updatedPhotos } as never).catch((err) => {
+          console.error("Photo DB sync failed", err);
+          toast.error("تعذّر حفظ الصور. حاول مرة أخرى.");
+        });
         return updatedPhotos;
       });
 
@@ -579,7 +580,10 @@ const CreateListingPage = () => {
       if (imageUrls.length > 0) {
         setPhotos(prev => {
           const updated = { ...prev, all: [...(prev.all || []), ...imageUrls] };
-          updateListing(id, { photos: updated } as never).catch(console.error);
+          updateListing(id, { photos: updated } as never).catch((err) => {
+            console.error("Photo sync failed", err);
+            toast.error("تعذّر حفظ الصور. حاول مرة أخرى.");
+          });
           return updated;
         });
       }
@@ -612,7 +616,10 @@ const CreateListingPage = () => {
       if (docUrls.length > 0) {
         setUploadedDocs(prev => {
           const updated = { ...prev, general: [...(prev.general || []), ...docUrls] };
-          updateListing(id, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch(console.error);
+          updateListing(id, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch((err) => {
+            console.error("Doc sync failed", err);
+            toast.error("تعذّر حفظ المستندات. حاول مرة أخرى.");
+          });
           return updated;
         });
 
@@ -780,7 +787,10 @@ const CreateListingPage = () => {
             updated.document_photos = [...(prev.document_photos || []), ...Array.from(docPhotoUrls)];
             // Save to DB
             if (listingId) {
-              updateListing(listingId, { photos: updated } as never).catch(console.error);
+              updateListing(listingId, { photos: updated } as never).catch((err) => {
+                console.error("Photo DB sync failed", err);
+                toast.error("تعذّر حفظ الصور. حاول مرة أخرى.");
+              });
             }
             return updated;
           });
@@ -1508,7 +1518,10 @@ const CreateListingPage = () => {
                                   for (const group in updated) {
                                     updated[group] = updated[group].filter(u => u !== file.url);
                                   }
-                                  if (listingId) updateListing(listingId, { photos: updated } as never).catch(console.error);
+                                  if (listingId) updateListing(listingId, { photos: updated } as never).catch((err) => {
+                                    console.error("Photo delete sync failed", err);
+                                    toast.error("تعذّر تحديث الصور.");
+                                  });
                                   return updated;
                                 });
                                 if (file.previewUrl) {
@@ -1527,7 +1540,10 @@ const CreateListingPage = () => {
                                   for (const group in updated) {
                                     updated[group] = updated[group].filter(u => u !== file.url);
                                   }
-                                  if (listingId) updateListing(listingId, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch(console.error);
+                                  if (listingId) updateListing(listingId, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch((err) => {
+                                    console.error("Doc delete sync failed", err);
+                                    toast.error("تعذّر تحديث المستندات.");
+                                  });
                                   return updated;
                                 });
                               }
@@ -1563,7 +1579,10 @@ const CreateListingPage = () => {
                             if (targetUrl) {
                               setPhotos(prev => {
                                 const updated = { ...prev, all: (prev.all || []).filter((_, idx) => idx !== i) };
-                                if (listingId) updateListing(listingId, { photos: updated } as never).catch(console.error);
+                                if (listingId) updateListing(listingId, { photos: updated } as never).catch((err) => {
+                                  console.error("Photo remove sync failed", err);
+                                  toast.error("تعذّر تحديث الصور.");
+                                });
                                 return updated;
                               });
                             }
