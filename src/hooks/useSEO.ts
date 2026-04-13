@@ -6,14 +6,16 @@ interface SEOOptions {
   ogImage?: string;
   canonical?: string;
   type?: string;
+  twitterCard?: "summary" | "summary_large_image";
 }
 
 const BASE_TITLE = "سوق تقبيل";
 const BASE_URL = "https://soqtaqbeel.com";
+const DEFAULT_OG_IMAGE = "https://soqtaqbeel.com/og-image.jpg";
 
-export const useSEO = ({ title, description, ogImage, canonical, type = "website" }: SEOOptions) => {
+export const useSEO = ({ title, description, ogImage, canonical, type = "website", twitterCard = "summary_large_image" }: SEOOptions) => {
   useEffect(() => {
-    const fullTitle = title ? `${title} | ${BASE_TITLE}` : `${BASE_TITLE} — منصة تقبيل المشاريع التجارية`;
+    const fullTitle = title ? `${title} | ${BASE_TITLE}` : `${BASE_TITLE} — تقبيل المشاريع والفرص التجارية بالذكاء الاصطناعي`;
     document.title = fullTitle;
 
     const setMeta = (attr: string, key: string, value: string) => {
@@ -26,21 +28,30 @@ export const useSEO = ({ title, description, ogImage, canonical, type = "website
       el.setAttribute("content", value);
     };
 
-    if (description) {
-      setMeta("name", "description", description);
-      setMeta("property", "og:description", description);
-      setMeta("name", "twitter:description", description);
-    }
+    // Description
+    const desc = description || "منصة ذكية لعرض وتحليل وتفاوض فرص تقبيل المحلات والمشاريع التجارية في السعودية";
+    setMeta("name", "description", desc);
+    setMeta("property", "og:description", desc);
+    setMeta("name", "twitter:description", desc);
 
+    // Title
     setMeta("property", "og:title", fullTitle);
     setMeta("name", "twitter:title", fullTitle);
     setMeta("property", "og:type", type);
+    setMeta("property", "og:site_name", "سوق تقبيل");
+    setMeta("property", "og:locale", "ar_SA");
 
-    if (ogImage) {
-      setMeta("property", "og:image", ogImage);
-      setMeta("name", "twitter:image", ogImage);
-    }
+    // Twitter
+    setMeta("name", "twitter:card", twitterCard);
 
+    // Image
+    const image = ogImage || DEFAULT_OG_IMAGE;
+    setMeta("property", "og:image", image);
+    setMeta("name", "twitter:image", image);
+    setMeta("property", "og:image:width", "1200");
+    setMeta("property", "og:image:height", "630");
+
+    // Canonical + og:url
     if (canonical) {
       let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
       if (!link) {
@@ -53,7 +64,7 @@ export const useSEO = ({ title, description, ogImage, canonical, type = "website
     }
 
     return () => {
-      document.title = `${BASE_TITLE} — منصة تقبيل المشاريع التجارية`;
+      document.title = `${BASE_TITLE} — تقبيل المشاريع والفرص التجارية بالذكاء الاصطناعي`;
     };
-  }, [title, description, ogImage, canonical, type]);
+  }, [title, description, ogImage, canonical, type, twitterCard]);
 };
