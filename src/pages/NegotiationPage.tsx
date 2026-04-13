@@ -903,6 +903,15 @@ const NegotiationPage = () => {
                 <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
               )}
 
+              {/* Deal Rating — both parties can rate after completion */}
+              {isPostAgreement && deal.buyer_id && deal.seller_id && (
+                <DealRatingBanner
+                  dealId={deal.id}
+                  otherPartyId={isBuyer ? deal.seller_id : deal.buyer_id!}
+                  otherPartyName={otherProfile?.full_name}
+                />
+              )}
+
               {/* Admin Deal Actions */}
               {(role === "platform_owner" || role === "supervisor") && (
                 <AdminDealActions deal={deal} onUpdate={loadData} />
