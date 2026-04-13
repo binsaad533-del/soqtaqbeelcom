@@ -17,12 +17,12 @@ const corsHeaders = {
 }
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'أهلاً بك في سوق تقبيل — أكّد بريدك الإلكتروني',
+  signup: 'أهلاً بك في سوق تقبيل — أكّد بريدك',
   invite: 'دعوة للانضمام إلى سوق تقبيل',
-  magiclink: 'رابط تسجيل الدخول — سوق تقبيل',
+  magiclink: 'رابط الدخول — سوق تقبيل',
   recovery: 'إعادة تعيين كلمة المرور — سوق تقبيل',
-  email_change: 'تأكيد تغيير البريد الإلكتروني — سوق تقبيل',
-  reauthentication: 'رمز التحقق — سوق تقبيل',
+  email_change: 'تأكيد تغيير البريد — سوق تقبيل',
+  reauthentication: 'تأكيد هويتك — سوق تقبيل',
 }
 
 // Template mapping
