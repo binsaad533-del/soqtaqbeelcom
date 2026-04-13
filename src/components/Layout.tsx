@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, Menu, X, LogIn, LogOut, Plus, MessageSquare } from "lucide-react";
+import { User, Menu, X, LogIn, LogOut, Plus, MessageSquare, ArrowRight } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { useState, useEffect } from "react";
 import AiAssistant from "./AiAssistant";
@@ -204,6 +204,19 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </header>
 
       <AiAutoAnalysis />
+
+      {location.pathname !== "/" && (
+        <div className="container pt-3 pb-0">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowRight size={15} strokeWidth={1.5} />
+            {tx("رجوع", "Back")}
+          </button>
+        </div>
+      )}
+
       <main className="flex-1">{children}</main>
       <AiAssistant />
       <CookieConsent />
