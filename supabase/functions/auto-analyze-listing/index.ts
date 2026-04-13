@@ -136,6 +136,7 @@ Deno.serve(async (req) => {
           listing_id: listingId,
           requested_by: listing.owner_id,
           study_data: feasResult.study,
+          last_updated_at: new Date().toISOString(),
         }, { onConflict: "listing_id" });
 
         // Update cache
