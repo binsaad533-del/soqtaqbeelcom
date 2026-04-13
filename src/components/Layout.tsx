@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, Menu, X, LogIn, LogOut, Plus, MessageSquare, ArrowRight } from "lucide-react";
+import { User, Menu, X, LogIn, LogOut, Plus, MessageSquare, ArrowRight, LifeBuoy } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { useState, useEffect } from "react";
 import AiAssistant from "./AiAssistant";
@@ -138,6 +138,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                       {unreadMessages > 9 ? "9+" : unreadMessages}
                     </span>
                   )}
+                </Link>
+                <Link
+                  to="/support"
+                  className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                  title={tx("الدعم الفني", "Support")}
+                >
+                  <LifeBuoy size={17} strokeWidth={1.5} />
                 </Link>
                 <NotificationBell />
                 <button

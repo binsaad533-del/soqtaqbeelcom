@@ -12,9 +12,10 @@ import {
   FileText, AlertTriangle, CheckCircle,
   ChevronLeft, Loader2, Eye, Users, Handshake, TrendingUp,
   Search, Bell, Activity, RefreshCw, Shield, ShieldAlert, UserCheck, User,
-  ClipboardList, Download, BarChart3
+  ClipboardList, Download, BarChart3, LifeBuoy
 } from "lucide-react";
 import FraudMonitorPanel from "@/components/FraudMonitorPanel";
+import SupportTicketsPanel from "@/components/SupportTicketsPanel";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
@@ -22,7 +23,7 @@ import AccountSettingsPanel from "@/components/AccountSettingsPanel";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import * as XLSX from "xlsx";
 
-type Tab = "overview" | "listings" | "deals" | "users" | "reports" | "monitoring" | "account";
+type Tab = "overview" | "listings" | "deals" | "users" | "reports" | "monitoring" | "support" | "account";
 
 const ALL_TABS: { id: Tab; label: string; icon: any; perm?: string }[] = [
   { id: "overview", label: "نظرة عامة", icon: Eye },
@@ -31,6 +32,7 @@ const ALL_TABS: { id: Tab; label: string; icon: any; perm?: string }[] = [
   { id: "users", label: "المستخدمون", icon: Users, perm: "manage_users" },
   { id: "reports", label: "البلاغات", icon: AlertTriangle, perm: "manage_reports" },
   { id: "monitoring", label: "المراقبة والتدقيق", icon: ClipboardList },
+  { id: "support", label: "الدعم الفني", icon: LifeBuoy },
   { id: "account", label: "حسابي", icon: User },
 ];
 
@@ -612,6 +614,8 @@ const SupervisorDashboardPage = () => {
         {/* ═══ CONTENT ═══ */}
         {activeTab === "monitoring" ? (
           <MonitoringTab profiles={profiles} />
+        ) : activeTab === "support" ? (
+          <SupportTicketsPanel />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2 space-y-4">
