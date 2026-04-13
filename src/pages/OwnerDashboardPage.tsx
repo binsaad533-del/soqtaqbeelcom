@@ -175,20 +175,17 @@ const OwnerDashboardPage = () => {
 
   const handleRoleChange = async (targetUserId: string, newRole: string) => {
     if (targetUserId === profile?.user_id) { toast.error("لا يمكنك تغيير دورك"); return; }
-    // Try update first
-    const { data: updated, error: updateErr } = await supabase
+    // Delete existing roles for the user, then insert the new one
+    // (unique constraint is on user_id + role, so update won't work across roles)
+    const { error: delErr } = await supabase
       .from("user_roles")
-      .update({ role: newRole } as any)
-      .eq("user_id", targetUserId)
-      .select();
-    if (updateErr) { toast.error("حدث خطأ في تعيين الدور"); console.error("role update error:", updateErr); return; }
-    // If no row existed, insert
-    if (!updated || updated.length === 0) {
-      const { error: insertErr } = await supabase
-        .from("user_roles")
-        .insert({ user_id: targetUserId, role: newRole } as any);
-      if (insertErr) { toast.error("حدث خطأ في تعيين الدور"); console.error("role insert error:", insertErr); return; }
-    }
+      .delete()
+      .eq("user_id", targetUserId);
+    if (delErr) { toast.error("حدث خطأ في تعيين الدور"); console.error("role delete error:", delErr); return; }
+    const { error: insertErr } = await supabase
+      .from("user_roles")
+      .insert({ user_id: targetUserId, role: newRole, assigned_by: profile?.user_id } as any);
+    if (insertErr) { toast.error("حدث خطأ في تعيين الدور"); console.error("role insert error:", insertErr); return; }
     await supabase.from("audit_logs").insert({ user_id: profile?.user_id, action: "role_changed", resource_type: "user_role", resource_id: targetUserId, details: { new_role: newRole } } as any);
     toast.success("تم تعيين الدور بنجاح");
     setRoles(prev => {
