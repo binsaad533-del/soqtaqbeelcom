@@ -72,7 +72,7 @@ const MarketplaceTicker = () => {
         supabase.from("deals").select("*", { count: "exact", head: true }).gte("created_at", twoWeeksAgo.toISOString()).lt("created_at", weekAgo.toISOString()),
         supabase.from("deals").select("*", { count: "exact", head: true }).in("status", ["completed", "finalized"]),
         supabase.from("listings").select("*", { count: "exact", head: true }).eq("status", "published").is("deleted_at", null).gte("created_at", todayStart.toISOString()),
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("public_profiles" as any).select("*", { count: "exact", head: true }),
         supabase.from("listings").select("price").eq("status", "published").is("deleted_at", null).not("price", "is", null).gte("created_at", weekAgo.toISOString()),
         supabase.from("listings").select("price").eq("status", "published").is("deleted_at", null).not("price", "is", null).gte("created_at", twoWeeksAgo.toISOString()).lt("created_at", weekAgo.toISOString()),
         supabase.from("listings").select("price").eq("status", "published").is("deleted_at", null).not("price", "is", null).order("price", { ascending: false }).limit(1),
