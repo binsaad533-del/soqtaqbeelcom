@@ -282,6 +282,18 @@ const AgreementPage = () => {
           const otherName = currentRole === "buyer" ? sellerName : buyerName;
           await sendDealCompletionEmail(user.email, currentRole === "buyer" ? buyerName : sellerName, currentRole, otherName);
         }
+
+        // SMS to both parties on deal completion
+        const dealTitle = agreement?.deal_title || "";
+        for (const uid of [deal.buyer_id, deal.seller_id].filter(Boolean)) {
+          supabase.functions.invoke("notify-sms", {
+            body: {
+              user_id: uid,
+              event_type: "deal_completed",
+              data: { title: dealTitle },
+            },
+          }).catch(() => {});
+        }
       }
 
       toast.success(side === "buyer" ? "تم اعتماد المشتري" : "تم اعتماد البائع");

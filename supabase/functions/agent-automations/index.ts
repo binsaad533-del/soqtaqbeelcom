@@ -193,6 +193,33 @@ serve(async (req) => {
             reference_type: "listing",
             reference_id: offer.listing_id,
           });
+
+          // Email reminder to seller
+          const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+          const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+          fetch(`${supabaseUrl}/functions/v1/notify-user`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${anonKey}`, apikey: anonKey },
+            body: JSON.stringify({
+              userId: listing.owner_id,
+              category: "offers",
+              templateName: "pending-offer-reminder",
+              idempotencyKey: `pending-offer-${offer.id}-r${offer.reminder_count}`,
+              templateData: { offeredPrice: offer.offered_price.toLocaleString(), listingTitle: listing.title || "", hoursSince },
+            }),
+          }).catch(() => {});
+
+          // SMS reminder to seller
+          fetch(`${supabaseUrl}/functions/v1/notify-sms`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${anonKey}`, apikey: anonKey },
+            body: JSON.stringify({
+              user_id: listing.owner_id,
+              event_type: "pending_offer_reminder",
+              data: { price: offer.offered_price, title: listing.title || "" },
+            }),
+          }).catch(() => {});
+
           await supabase.from("listing_offers")
             .update({ reminder_count: (offer.reminder_count || 0) + 1 })
             .eq("id", offer.id);
@@ -384,6 +411,29 @@ serve(async (req) => {
           type: "report",
           reference_type: "report",
         });
+
+        // Email weekly report
+        const anonKeyW = Deno.env.get("SUPABASE_ANON_KEY")!;
+        const supabaseUrlW = Deno.env.get("SUPABASE_URL")!;
+        fetch(`${supabaseUrlW}/functions/v1/notify-user`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${anonKeyW}`, apikey: anonKeyW },
+          body: JSON.stringify({
+            userId: sellerId,
+            category: "marketing",
+            templateName: "weekly-report",
+            idempotencyKey: `weekly-report-${sellerId}-${weekStart}`,
+            templateData: {
+              viewsThisWeek: vThisWeek,
+              viewsLastWeek: vLastWeek,
+              viewTrend,
+              newOffers: newOffers || 0,
+              newMessages: newMessages || 0,
+              recommendation,
+              listingsCount: listings.length,
+            },
+          }),
+        }).catch(() => {});
 
         await supabase.from("agent_actions_log").insert({
           user_id: sellerId,

@@ -397,7 +397,7 @@ const NegotiationPage = () => {
     if (msg) setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
     if (user) monitorChat(dealId, trimmed, user.id).catch(() => {});
 
-    // Send email notification to the other party
+    // Send email + SMS notification to the other party
     if (deal && user) {
       const otherUserId = user.id === deal.buyer_id ? deal.seller_id : deal.buyer_id;
       if (otherUserId) {
@@ -411,6 +411,15 @@ const NegotiationPage = () => {
             senderName: profile?.full_name || "",
             dealTitle: listing?.title || "",
             messagePreview: trimmed.slice(0, 100),
+          },
+        }).catch(() => {});
+
+        // SMS notification (throttled server-side: max 1/hour per deal)
+        supabase.functions.invoke("notify-sms", {
+          body: {
+            user_id: otherUserId,
+            event_type: "negotiation_message",
+            data: { title: listing?.title || "", deal_id: dealId },
           },
         }).catch(() => {});
       }
