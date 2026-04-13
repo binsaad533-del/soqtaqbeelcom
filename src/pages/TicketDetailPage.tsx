@@ -45,7 +45,7 @@ const TicketDetailPage = () => {
     // Fetch profile names
     const ids = new Set(m.map(msg => msg.sender_id));
     if (t) ids.add(t.user_id);
-    const { data: profs } = await supabase.from("profiles").select("user_id, full_name").in("user_id", Array.from(ids));
+    const { data: profs } = await supabase.from("public_profiles" as any).select("user_id, full_name").in("user_id", Array.from(ids));
     const map: Record<string, string> = {};
     profs?.forEach((p: any) => { map[p.user_id] = p.full_name || "مستخدم"; });
     setProfiles(map);

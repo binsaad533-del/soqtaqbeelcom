@@ -26,7 +26,7 @@ export function useSellerReputation() {
     setLoading(true);
     try {
       const [profileRes, reviewsRes, dealsRes, verificationsRes] = await Promise.all([
-        supabase.from("profiles").select("*").eq("user_id", sellerId).maybeSingle(),
+        supabase.from("public_profiles" as any).select("*").eq("user_id", sellerId).maybeSingle(),
         supabase.from("seller_reviews").select("*").eq("seller_id", sellerId),
         supabase.from("deals").select("status").or(`seller_id.eq.${sellerId}`),
         supabase.from("seller_verifications").select("verification_status").eq("user_id", sellerId).maybeSingle(),
