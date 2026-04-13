@@ -719,7 +719,10 @@ export type Database = {
           receipt_path: string | null
           reminder_count: number
           seller_id: string
+          total_with_vat: number | null
           updated_at: string
+          vat_amount: number | null
+          vat_rate: number
         }
         Insert: {
           commission_amount?: number | null
@@ -736,7 +739,10 @@ export type Database = {
           receipt_path?: string | null
           reminder_count?: number
           seller_id: string
+          total_with_vat?: number | null
           updated_at?: string
+          vat_amount?: number | null
+          vat_rate?: number
         }
         Update: {
           commission_amount?: number | null
@@ -753,7 +759,10 @@ export type Database = {
           receipt_path?: string | null
           reminder_count?: number
           seller_id?: string
+          total_with_vat?: number | null
           updated_at?: string
+          vat_amount?: number | null
+          vat_rate?: number
         }
         Relationships: [
           {
@@ -1099,6 +1108,9 @@ export type Database = {
           seller_id: string
           status: string
           total_amount: number
+          total_with_vat: number | null
+          vat_amount: number | null
+          vat_rate: number
         }
         Insert: {
           buyer_id: string
@@ -1113,6 +1125,9 @@ export type Database = {
           seller_id: string
           status?: string
           total_amount?: number
+          total_with_vat?: number | null
+          vat_amount?: number | null
+          vat_rate?: number
         }
         Update: {
           buyer_id?: string
@@ -1127,6 +1142,9 @@ export type Database = {
           seller_id?: string
           status?: string
           total_amount?: number
+          total_with_vat?: number | null
+          vat_amount?: number | null
+          vat_rate?: number
         }
         Relationships: [
           {

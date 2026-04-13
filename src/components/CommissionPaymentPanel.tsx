@@ -6,6 +6,7 @@ import {
   BANK_DETAILS,
   COMMISSION_STATUS_LABELS,
   COMMISSION_STATUS_COLORS,
+  VAT_RATE,
   type Commission,
   type CommissionStatus,
 } from "@/hooks/useCommissions";
@@ -101,14 +102,24 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
       </div>
 
       <div className="p-5 space-y-4">
-        {/* Amount */}
-        <div className="bg-primary/5 rounded-xl p-4 border border-primary/10 text-center">
-          <p className="text-[11px] text-muted-foreground mb-1">المبلغ المستحق</p>
-          <p className="text-xl font-semibold text-primary">
-            {commission.commission_amount.toLocaleString("en-US")} <SarSymbol size={16} />
-          </p>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            ({(commission.commission_rate * 100)}% من {commission.deal_amount.toLocaleString("en-US")} <SarSymbol size={9} />)
+        {/* Amount breakdown */}
+        <div className="bg-primary/5 rounded-xl p-4 border border-primary/10 space-y-2.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">عمولة المنصة ({(commission.commission_rate * 100)}%)</span>
+            <span className="font-medium">{commission.commission_amount.toLocaleString("en-US")} <SarSymbol size={10} /></span>
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">ضريبة القيمة المضافة ({VAT_RATE * 100}%)</span>
+            <span className="font-medium">{(commission.vat_amount ?? commission.commission_amount * VAT_RATE).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <SarSymbol size={10} /></span>
+          </div>
+          <div className="flex items-center justify-between text-sm pt-2 border-t border-primary/10">
+            <span className="font-semibold text-primary">الإجمالي المستحق</span>
+            <span className="font-bold text-primary text-base">
+              {(commission.total_with_vat ?? commission.commission_amount * (1 + VAT_RATE)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <SarSymbol size={14} />
+            </span>
+          </div>
+          <p className="text-[10px] text-muted-foreground text-center">
+            ({(commission.commission_rate * 100)}% من {commission.deal_amount.toLocaleString("en-US")} <SarSymbol size={9} /> + ضريبة {VAT_RATE * 100}%)
           </p>
         </div>
 

@@ -2,6 +2,8 @@ import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 
+export const VAT_RATE = 0.15;
+
 export interface Commission {
   id: string;
   deal_id: string;
@@ -9,6 +11,9 @@ export interface Commission {
   deal_amount: number;
   commission_rate: number;
   commission_amount: number;
+  vat_rate: number;
+  vat_amount: number;
+  total_with_vat: number;
   payment_status: CommissionStatus;
   receipt_path: string | null;
   paid_at: string | null;
@@ -65,6 +70,14 @@ export function getCommissionRate(_amount?: number): number {
 
 export function calculateCommission(amount: number): number {
   return Math.round(amount * COMMISSION_RATE * 100) / 100;
+}
+
+export function calculateVat(commissionAmount: number): number {
+  return Math.round(commissionAmount * VAT_RATE * 100) / 100;
+}
+
+export function calculateTotalWithVat(commissionAmount: number): number {
+  return Math.round(commissionAmount * (1 + VAT_RATE) * 100) / 100;
 }
 
 export function useCommissions() {
