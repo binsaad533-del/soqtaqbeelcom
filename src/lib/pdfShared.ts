@@ -157,7 +157,7 @@ export async function loadImageBase64(url: string): Promise<string> {
 /* ── QR Code ── */
 export async function generatePdfQR(url: string): Promise<string> {
   try {
-    return await QRCode.toDataURL(url, { width: 120, margin: 1, color: { dark: "#2563a0", light: "#ffffff" } });
+    return await QRCode.toDataURL(url, { width: 120, margin: 1, color: { dark: "#00AEEF", light: "#ffffff" } });
   } catch {
     return "";
   }
@@ -230,7 +230,7 @@ export function buildPdfBankSection(bankDetails: {
 
   const commissionHtml = commissionInfo ? `
     <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-bottom:8px;">
-      <div style="border-radius:18px;padding:16px;background:linear-gradient(135deg, ${PDF_COLORS.primary}, hsl(196 85% 45%));color:white;display:grid;gap:6px;">
+      <div style="border-radius:18px;padding:16px;background:${PDF_COLORS.primaryGradient};color:white;display:grid;gap:6px;">
         <div style="font-size:10px;opacity:0.86;">المبلغ المستحق للمنصة</div>
         <div style="font-size:20px;font-weight:700;line-height:1.3;">${formatPdfPrice(commissionInfo.amount)} ﷼</div>
         <div style="font-size:10px;opacity:0.9;">${commissionInfo.rate * 100}% من قيمة الصفقة ${formatPdfPrice(commissionInfo.dealAmount)} ${escapeHtml(commissionInfo.currency || "﷼")}</div>
@@ -313,7 +313,8 @@ export function buildPdfPageShell(options: {
   if (pageNumber === 1) {
     const metaHtml = (documentMeta || []).map((m) => `<span>${escapeHtml(m)}</span>`).join("");
     const headerHtml = `
-      <header style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:12px;border-bottom:2px solid ${PDF_COLORS.gold};">
+      <header style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:12px;border-bottom:3px solid transparent;background-image:none;position:relative;">
+        <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:${PDF_COLORS.primaryGradient};border-radius:2px;"></div>
         ${logoBase64 ? `<div style="flex-shrink:0;display:grid;justify-items:center;gap:2px;"><img src="${logoBase64}" alt="سوق تقبيل" style="width:180px;max-height:64px;object-fit:contain;display:block;" /><div style="font-size:9px;font-weight:600;color:${PDF_COLORS.textMuted};letter-spacing:2px;">SOQ TAQBEEL</div></div>` : ""}
         <div style="display:grid;gap:4px;flex:1;text-align:left;">
           <div style="font-size:16px;font-weight:700;color:${PDF_COLORS.primary};">${escapeHtml(documentTitle)}</div>
