@@ -33,6 +33,7 @@ import AiAnalyticsDashboard from "@/components/AiAnalyticsDashboard";
 import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
 import { useSupervisorPermissions, type SupervisorPermissions } from "@/hooks/useSupervisorPermissions";
 import MoqbilAuditPanel from "@/components/MoqbilAuditPanel";
+import OwnerOverviewTab from "@/components/owner/OwnerOverviewTab";
 
 type Tab = "overview" | "ai-analytics" | "moqbil-audit" | "crm" | "deals" | "users" | "listings" | "security" | "account" | "settings";
 
