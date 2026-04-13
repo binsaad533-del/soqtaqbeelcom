@@ -102,12 +102,13 @@ function formatNum(n: number): string {
   return n.toLocaleString("en-US");
 }
 
-const FeasibilityStudyPanel = ({ listing, analysisCache }: FeasibilityStudyPanelProps) => {
+const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityStudyPanelProps) => {
   const [study, setStudy] = useState<FeasibilityStudy | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingCache, setLoadingCache] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cachedAt, setCachedAt] = useState<string | null>(null);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     summary: true,
@@ -132,19 +133,27 @@ const FeasibilityStudyPanel = ({ listing, analysisCache }: FeasibilityStudyPanel
   const toggleSection = (key: string) =>
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  // Load cached study on mount
+  // Check if refresh is allowed (24h cooldown)
+  const canRefresh = (() => {
+    if (!lastUpdatedAt) return true;
+    const age = Date.now() - new Date(lastUpdatedAt).getTime();
+    return age >= 24 * 60 * 60 * 1000;
+  })();
+
+  // Load cached study on mount - NO edge function call
   useEffect(() => {
     if (!listing?.id) { setLoadingCache(false); return; }
     (async () => {
       try {
         const { data } = await supabase
           .from("feasibility_studies")
-          .select("study_data, created_at")
+          .select("study_data, created_at, last_updated_at")
           .eq("listing_id", listing.id)
           .maybeSingle();
         if (data?.study_data) {
           setStudy(data.study_data as unknown as FeasibilityStudy);
           setCachedAt(data.created_at);
+          setLastUpdatedAt((data as any).last_updated_at || data.created_at);
           setExpandedSections({ summary: true, investment: true, costs: true, revenue: true, competitors: true, risks: true, recommendations: true });
         }
       } catch { /* ignore */ }
@@ -153,6 +162,10 @@ const FeasibilityStudyPanel = ({ listing, analysisCache }: FeasibilityStudyPanel
   }, [listing?.id]);
 
   const runStudy = async () => {
+    if (!canRefresh) {
+      toast.error("يمكن التحديث مرة كل 24 ساعة فقط");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -176,7 +189,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache }: FeasibilityStudyPanel
       }
       if (!data?.success) throw new Error(data?.error || "فشل في إنشاء الدراسة");
       setStudy(data.study);
-      setCachedAt(new Date().toISOString());
+      const now = new Date().toISOString();
+      setCachedAt(now);
+      setLastUpdatedAt(now);
       setExpandedSections({ summary: true, investment: true, costs: true, revenue: true, competitors: true, risks: true, recommendations: true });
 
       // Save to unified cache + database
@@ -187,8 +202,10 @@ const FeasibilityStudyPanel = ({ listing, analysisCache }: FeasibilityStudyPanel
           listing_id: listing.id,
           requested_by: userData.user.id,
           study_data: data.study,
-        }, { onConflict: "listing_id" });
+          last_updated_at: now,
+        } as any, { onConflict: "listing_id" });
       }
+      toast.success("تم تحديث دراسة الجدوى بنجاح");
     } catch (err: any) {
       setError(err.message || "حدث خطأ");
     } finally {
