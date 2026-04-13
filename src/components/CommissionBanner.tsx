@@ -12,12 +12,12 @@ const CommissionBanner = ({ dealAmount, showDetails = false, className = "" }: P
   const amount = dealAmount ? calculateCommission(dealAmount) : null;
 
   return (
-    <div className={`bg-muted/20 rounded-xl p-3 border border-border/20 ${className}`}>
+    <div className={`bg-muted/20 rounded-xl p-4 pb-5 border border-border/20 mb-4 ${className}`}>
       <div className="flex items-start gap-2.5">
         <Info size={14} className="text-muted-foreground mt-0.5 shrink-0" />
-        <div className="flex-1">
-          <p className="text-xs font-medium mb-1">عمولة المنصة: {COMMISSION_RATE * 100}% من قيمة الصفقة</p>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium mb-1.5">عمولة المنصة: {COMMISSION_RATE * 100}% من قيمة الصفقة</p>
+          <p className="text-[11px] text-muted-foreground leading-relaxed break-words">
             تُدفع من قبل البائع بعد إتمام الصفقة عبر التحويل البنكي لحساب شركة عين جساس
           </p>
           {showDetails && amount !== null && dealAmount && (
