@@ -19,3 +19,5 @@ project_id = "sxvfjtmntdmrlzdetnyg"
     verify_jwt = false
   [functions.reset-password-verify]
     verify_jwt = false
+  [functions.supervisor-weekly-report]
+    verify_jwt = false
