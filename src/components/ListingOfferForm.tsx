@@ -79,6 +79,17 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
       supabase.functions.invoke("notify-offer-sms", {
         body: { listing_id: listingId, offered_price: numPrice },
       }).catch(() => {});
+
+      // Send Email notification to seller (offer-received)
+      supabase.functions.invoke("notify-user", {
+        body: {
+          userId: ownerId,
+          category: "offers",
+          templateName: "offer-received",
+          idempotencyKey: `offer-received-${listingId}-${Date.now()}`,
+          templateData: { offeredPrice: numPrice.toLocaleString("en-US") },
+        },
+      }).catch(() => {});
     }
   };
 

@@ -105,6 +105,15 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
           status: "rejected",
         },
       }).catch(() => {});
+
+      // Send SMS to buyer about rejection
+      supabase.functions.invoke("notify-sms", {
+        body: {
+          user_id: offer.buyer_id,
+          event_type: "offer_rejected",
+          data: { title: "" },
+        },
+      }).catch(() => {});
     }
     setRespondingId(null);
   };
