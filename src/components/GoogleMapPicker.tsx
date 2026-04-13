@@ -257,8 +257,10 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
 
   const applyParsedLocation = (pLat: number, pLng: number) => {
     const addr = `${pLat.toFixed(5)}, ${pLng.toFixed(5)}`;
-    setSelectedAddress(addr);
-    onLocationChange(pLat, pLng, addr);
+    const nearest = findNearestCity(pLat, pLng);
+    setSelectedAddress(nearest.name ? `بالقرب من ${nearest.name}` : addr);
+    // Always pass city from nearest city lookup so disclosure gets filled
+    onLocationChange(pLat, pLng, addr, { city: nearest.name, address: addr });
     setPasteInput("");
 
     if (mapInstanceRef.current && markerRef.current) {
@@ -269,6 +271,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
       markerRef.current.setVisible(true);
     }
 
+    // If Google Maps loaded, do a proper reverse geocode to get accurate city/district
     if (typeof google !== "undefined" && google.maps) {
       reverseGeocode(new google.maps.LatLng(pLat, pLng));
     }
