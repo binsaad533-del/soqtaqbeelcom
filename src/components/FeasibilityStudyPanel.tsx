@@ -398,11 +398,13 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
               الدراسة قيد الإعداد التلقائي وستكون جاهزة قريباً
             </p>
             {error && <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{error}</p>}
-            <Button onClick={runStudy} variant="outline" className="w-full gap-2" size="sm">
-              <BarChart3 size={14} />
-              إعداد الدراسة الآن
-              <AiStar size={12} />
-            </Button>
+            {isOwner && (
+              <Button onClick={runStudy} variant="outline" className="w-full gap-2" size="sm" disabled={!canRefresh}>
+                <BarChart3 size={14} />
+                إعداد الدراسة الآن
+                <AiStar size={12} />
+              </Button>
+            )}
           </>
         )}
       </div>
@@ -424,17 +426,12 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           )}
         </div>
         <div className="flex gap-1.5 items-center flex-wrap">
-          {cachedAt && (() => {
-            const ageMs = Date.now() - new Date(cachedAt).getTime();
-            const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
-            const isRecent = ageDays < 1;
-            const isOld = ageDays >= 7;
+          {(lastUpdatedAt || cachedAt) && (() => {
+            const dateStr = lastUpdatedAt || cachedAt;
             return (
               <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                آخر تحديث: {new Date(cachedAt).toLocaleDateString("ar-SA")}
-                {isRecent && <span className="text-emerald-600 dark:text-emerald-400 font-medium">• محدّث</span>}
-                {isOld && <span className="text-amber-500 font-medium">• يتم التحديث تلقائياً</span>}
-                {!isRecent && !isOld && <span className="text-muted-foreground/50">• يُحدّث كل أسبوع</span>}
+                محدّث: {new Date(dateStr!).toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" })}
+                <span className="text-muted-foreground/50">• يُحدّث تلقائياً كل أسبوع</span>
               </span>
             );
           })()}
@@ -446,10 +443,12 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             {pdfLoading ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
             PDF
           </Button>
-          <Button variant="ghost" size="sm" onClick={runStudy} disabled={loading} className="gap-1.5 text-xs">
-            {loading ? <Loader2 size={12} className="animate-spin" /> : <FileText size={12} />}
-            تحديث
-          </Button>
+          {isOwner && (
+            <Button variant="ghost" size="sm" onClick={runStudy} disabled={loading || !canRefresh} className="gap-1.5 text-xs" title={!canRefresh ? "يمكن التحديث مرة كل 24 ساعة" : ""}>
+              {loading ? <Loader2 size={12} className="animate-spin" /> : <FileText size={12} />}
+              تحديث
+            </Button>
+          )}
         </div>
       </div>
 
