@@ -125,6 +125,350 @@ const getVerdictColor = (verdict: string): string => {
   return "blue";
 };
 
+const toPositiveNumber = (value: unknown, fallback = 0): number => {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const hasText = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+const hasRiskyDisclosure = (value: unknown): boolean => {
+  if (!hasText(value)) return false;
+  const normalized = value.trim().toLowerCase();
+  return !["لا يوجد", "لايوجد", "none", "n/a", "0", "false"].includes(normalized);
+};
+
+interface ActivityProfile {
+  label: string;
+  revenueMultiplier: number;
+  revenuePerSqm: number;
+  payrollBase: number;
+  payrollPerSqm: number;
+  utilitiesBase: number;
+  utilitiesPerSqm: number;
+  marketingRate: number;
+  density: string;
+  opportunity: string;
+  marketRisk: string;
+}
+
+const DEFAULT_ACTIVITY_PROFILE: ActivityProfile = {
+  label: "نشاط تجاري",
+  revenueMultiplier: 0.1,
+  revenuePerSqm: 280,
+  payrollBase: 9000,
+  payrollPerSqm: 28,
+  utilitiesBase: 1800,
+  utilitiesPerSqm: 8,
+  marketingRate: 0.035,
+  density: "متوسطة",
+  opportunity: "رفع الكفاءة التشغيلية وتحسين عرض القيمة قد يزيد المبيعات خلال الأشهر الأولى.",
+  marketRisk: "حساسية الطلب المحلي للموقع والسعر تتطلب متابعة شهرية للمبيعات وهوامش الربح.",
+};
+
+const ACTIVITY_PROFILES: Array<{ keywords: string[]; profile: ActivityProfile }> = [
+  {
+    keywords: ["مطعم", "شاورما", "كافيه", "كوفي", "مقهى", "بوفيه"],
+    profile: {
+      label: "نشاط ضيافة",
+      revenueMultiplier: 0.14,
+      revenuePerSqm: 420,
+      payrollBase: 14000,
+      payrollPerSqm: 45,
+      utilitiesBase: 3200,
+      utilitiesPerSqm: 16,
+      marketingRate: 0.045,
+      density: "عالية",
+      opportunity: "الطلب المتكرر وبرامج الولاء والتوصيل ترفع معدل دوران المبيعات إذا كان التشغيل منظمًا.",
+      marketRisk: "المنافسة عالية في أنشطة الأغذية والمشروبات وتتطلب جودة ثابتة وسرعة خدمة.",
+    },
+  },
+  {
+    keywords: ["بقالة", "سوبر", "تموينات", "ميني ماركت"],
+    profile: {
+      label: "تجزئة غذائية",
+      revenueMultiplier: 0.12,
+      revenuePerSqm: 360,
+      payrollBase: 11000,
+      payrollPerSqm: 30,
+      utilitiesBase: 2200,
+      utilitiesPerSqm: 10,
+      marketingRate: 0.02,
+      density: "متوسطة",
+      opportunity: "تنويع الأصناف ورفع متوسط السلة الشرائية يدعم نمو الإيراد بسرعة.",
+      marketRisk: "ضغط الهوامش في قطاع التجزئة يتطلب إدارة دقيقة للمخزون والهدر.",
+    },
+  },
+  {
+    keywords: ["مغسلة", "غسيل", "laundry"],
+    profile: {
+      label: "خدمات تشغيلية",
+      revenueMultiplier: 0.09,
+      revenuePerSqm: 250,
+      payrollBase: 8000,
+      payrollPerSqm: 22,
+      utilitiesBase: 2800,
+      utilitiesPerSqm: 14,
+      marketingRate: 0.02,
+      density: "متوسطة",
+      opportunity: "العقود المتكررة مع المجمعات السكنية أو الشركات تزيد استقرار التدفقات النقدية.",
+      marketRisk: "تكاليف المياه والكهرباء والصيانة قد تؤثر مباشرة على الربحية إذا لم تُضبط جيدًا.",
+    },
+  },
+  {
+    keywords: ["ورشة", "سيارات", "صيانة", "mechanic"],
+    profile: {
+      label: "خدمات فنية",
+      revenueMultiplier: 0.11,
+      revenuePerSqm: 300,
+      payrollBase: 12000,
+      payrollPerSqm: 26,
+      utilitiesBase: 2400,
+      utilitiesPerSqm: 10,
+      marketingRate: 0.018,
+      density: "متوسطة",
+      opportunity: "الخدمات المتخصصة ورفع متوسط الفاتورة يحسنان العائد لكل عميل.",
+      marketRisk: "الاعتماد على الفنيين المهرة وتوفر قطع الغيار قد يسبب تذبذبًا في التشغيل.",
+    },
+  },
+  {
+    keywords: ["صالون", "حلاقة", "تجميل", "barber"],
+    profile: {
+      label: "خدمات شخصية",
+      revenueMultiplier: 0.12,
+      revenuePerSqm: 340,
+      payrollBase: 10000,
+      payrollPerSqm: 32,
+      utilitiesBase: 1600,
+      utilitiesPerSqm: 7,
+      marketingRate: 0.03,
+      density: "متوسطة",
+      opportunity: "الاشتراكات والحجوزات المتكررة ترفع الإشغال وتقلل تقلب الإيرادات.",
+      marketRisk: "جودة الخدمة واعتماد النشاط على الكوادر عنصران حاسمان لاستمرارية الطلب.",
+    },
+  },
+  {
+    keywords: ["مصنع", "أثاث", "معمل", "تصنيع"],
+    profile: {
+      label: "تصنيع خفيف",
+      revenueMultiplier: 0.08,
+      revenuePerSqm: 220,
+      payrollBase: 18000,
+      payrollPerSqm: 20,
+      utilitiesBase: 4200,
+      utilitiesPerSqm: 18,
+      marketingRate: 0.015,
+      density: "منخفضة",
+      opportunity: "التشغيل بعقود توريد ثابتة يرفع وضوح التدفقات النقدية ويقلل المخاطر السوقية.",
+      marketRisk: "تكاليف المواد الخام والطاقة قد تؤثر على هامش الربح بشكل مباشر.",
+    },
+  },
+  {
+    keywords: ["جوال", "إلكترون", "تقنية", "هواتف"],
+    profile: {
+      label: "تجزئة إلكترونيات",
+      revenueMultiplier: 0.1,
+      revenuePerSqm: 310,
+      payrollBase: 9500,
+      payrollPerSqm: 18,
+      utilitiesBase: 1400,
+      utilitiesPerSqm: 6,
+      marketingRate: 0.028,
+      density: "عالية",
+      opportunity: "الملحقات والخدمات الإضافية ترفع هامش الربح أكثر من بيع الأجهزة وحده.",
+      marketRisk: "تغير الأسعار السريع في سوق الإلكترونيات قد يضغط على تقييم المخزون.",
+    },
+  },
+  {
+    keywords: ["تدريب", "تعليم", "أكاديمية", "دورات"],
+    profile: {
+      label: "خدمات تعليمية",
+      revenueMultiplier: 0.09,
+      revenuePerSqm: 240,
+      payrollBase: 11000,
+      payrollPerSqm: 24,
+      utilitiesBase: 1500,
+      utilitiesPerSqm: 6,
+      marketingRate: 0.04,
+      density: "متوسطة",
+      opportunity: "العقود المؤسسية والبرامج المتخصصة تعزز الإيراد وتدعم الاستمرارية.",
+      marketRisk: "الطلب يرتبط بسمعة المركز وجودة المحتوى وقد يتأثر بالموسمية.",
+    },
+  },
+  {
+    keywords: ["توصيل", "تطبيق", "app", "منصة"],
+    profile: {
+      label: "خدمة رقمية",
+      revenueMultiplier: 0.07,
+      revenuePerSqm: 120,
+      payrollBase: 13000,
+      payrollPerSqm: 8,
+      utilitiesBase: 1200,
+      utilitiesPerSqm: 4,
+      marketingRate: 0.06,
+      density: "عالية",
+      opportunity: "توسيع قاعدة المستخدمين وتحسين الاحتفاظ ينعكسان سريعًا على قيمة الأصل الرقمي.",
+      marketRisk: "اكتساب العملاء مكلف والمنافسة الرقمية تتطلب إنفاقًا تسويقيًا مستمرًا.",
+    },
+  },
+];
+
+const getActivityProfile = (listing: any): ActivityProfile => {
+  const content = [listing?.business_activity, listing?.title, listing?.category]
+    .filter(hasText)
+    .join(" ")
+    .toLowerCase();
+
+  return ACTIVITY_PROFILES.find(({ keywords }) =>
+    keywords.some((keyword) => content.includes(keyword.toLowerCase())),
+  )?.profile || DEFAULT_ACTIVITY_PROFILE;
+};
+
+const buildEstimatedFeasibilityStudy = (listing: any): FeasibilityStudy | null => {
+  if (!listing || typeof listing !== "object") return null;
+
+  const profile = getActivityProfile(listing);
+  const price = toPositiveNumber(listing.price, 120000);
+  const area = toPositiveNumber(listing.area_sqm, 90);
+  const monthlyRent = Math.round(
+    toPositiveNumber(listing.annual_rent) > 0
+      ? toPositiveNumber(listing.annual_rent) / 12
+      : Math.max(3500, price * 0.007),
+  );
+
+  const payroll = Math.round(profile.payrollBase + area * profile.payrollPerSqm);
+  const utilities = Math.round(profile.utilitiesBase + area * profile.utilitiesPerSqm);
+  const marketing = Math.round(Math.max(1200, price * profile.marketingRate * 0.1));
+  const misc = Math.round(Math.max(1500, monthlyRent * 0.12));
+  const monthlyCosts = monthlyRent + payroll + utilities + marketing + misc;
+
+  let monthlyRevenue = Math.round(
+    Math.max(price * profile.revenueMultiplier, area * profile.revenuePerSqm, monthlyRent * 3.4),
+  );
+  if (monthlyRevenue <= monthlyCosts) {
+    monthlyRevenue = Math.round(monthlyCosts * 1.22);
+  }
+
+  const monthlyProfit = Math.max(2500, monthlyRevenue - monthlyCosts);
+  const transferCosts = Math.round(Math.max(6000, price * 0.04));
+  const setupCosts = Math.round(Math.max(5000, price * 0.03));
+  const workingCapital = Math.round(Math.max(monthlyCosts * 1.5, 15000));
+  const totalInvestment = price + transferCosts + setupCosts + workingCapital;
+  const roiMonths = Math.max(12, Math.min(36, Math.ceil(totalInvestment / monthlyProfit)));
+  const annualROI = Math.max(8, Math.round((monthlyProfit * 12 / totalInvestment) * 100));
+
+  const realistic = normalizeScenario(undefined, monthlyRevenue, monthlyProfit, roiMonths, annualROI, "يعكس أداءً متوازنًا وفق السعر المعروض وتكاليف التشغيل التقديرية.");
+  const optimistic = normalizeScenario(undefined, Math.round(monthlyRevenue * 1.18), Math.round(monthlyProfit * 1.22), Math.max(12, roiMonths - 4), Math.round(annualROI * 1.15), "يفترض تحسين التشغيل ورفع التحويل أو متوسط الفاتورة.");
+  const conservative = normalizeScenario(undefined, Math.round(monthlyRevenue * 0.88), Math.round(monthlyProfit * 0.72), Math.min(36, roiMonths + 6), Math.max(6, Math.round(annualROI * 0.78)), "يفترض تباطؤ الطلب وارتفاعًا محدودًا في التكاليف.");
+
+  const financialRisks = [
+    !hasText(listing?.lease_remaining) ? "مدة الإيجار المتبقية غير واضحة وتحتاج تحقق قبل الإتمام." : null,
+    hasRiskyDisclosure(listing?.liabilities) ? `وجود التزامات مذكورة يتطلب تدقيقًا ماليًا تفصيليًا (${listing.liabilities}).` : null,
+    hasRiskyDisclosure(listing?.overdue_rent) ? "وجود متأخرات إيجار محتملة قد يؤثر على رأس المال العامل بعد الاستحواذ." : null,
+    hasRiskyDisclosure(listing?.overdue_salaries) ? "وجود متأخرات رواتب محتملة يستلزم حصر الالتزامات بدقة قبل التوقيع." : null,
+  ].filter(Boolean) as string[];
+
+  const regulatoryRisks = [
+    !hasText(listing?.municipality_license) ? "حالة رخصة البلدية غير موثقة في الإعلان الحالي." : null,
+    !hasText(listing?.civil_defense_license) ? "بيانات السلامة والدفاع المدني غير مكتملة وتحتاج مراجعة." : null,
+  ].filter(Boolean) as string[];
+
+  const operationalRisks = [
+    !hasText(listing?.surveillance_cameras) ? "جاهزية أنظمة المراقبة والحماية غير موضحة بالكامل." : null,
+    area < 60 ? "المساحة المحدودة قد تقيد التوسع أو تحسين تجربة التشغيل." : null,
+    profile.marketRisk,
+  ].filter(Boolean) as string[];
+
+  const marketRisks = [
+    `${profile.label} في ${listing?.district || listing?.city || "المنطقة المحددة"} يحتاج مراجعة ميدانية للتأكد من كثافة المنافسين وحجم الطلب الفعلي.`,
+    listing?.city ? `القوة الشرائية في ${listing.city} عامل مؤثر على سرعة الاسترداد ويجب التحقق منها ميدانيًا.` : null,
+  ].filter(Boolean) as string[];
+
+  const recommendations = [
+    `التحقق من الأداء الفعلي لآخر 3-6 أشهر قبل الإتمام النهائي لأن فترة الاسترداد المقدرة تبلغ ${roiMonths} شهرًا.`,
+    !hasText(listing?.municipality_license) || !hasText(listing?.civil_defense_license)
+      ? "استكمال التراخيص النظامية قبل الإغلاق لتقليل مخاطر التعطل بعد الاستحواذ."
+      : "مراجعة سريان التراخيص ومطابقتها للنشاط قبل نقل التشغيل.",
+    hasRiskyDisclosure(listing?.liabilities) || hasRiskyDisclosure(listing?.overdue_rent) || hasRiskyDisclosure(listing?.overdue_salaries)
+      ? "إعداد كشف التزامات نهائي وتضمينه ضمن شروط الصفقة قبل السداد."
+      : "تأكيد خلو النشاط من الالتزامات غير المدرجة ضمن مستندات التسليم.",
+    profile.opportunity,
+  ];
+
+  const verdict = roiMonths <= 18 ? "استثمار جيد" : roiMonths <= 28 ? "استثمار متوسط" : "مقبولة مع حذر";
+  const competitiveDensity = profile.density;
+  const nearbyCount = competitiveDensity === "عالية" ? 6 : competitiveDensity === "متوسطة" ? 4 : 2;
+  const neighborhoodCount = nearbyCount + 4;
+  const areaCount = neighborhoodCount + 6;
+  const activity = listing?.business_activity || listing?.category || profile.label;
+  const district = listing?.district ? ` في ${listing.district}` : "";
+  const city = listing?.city ? `، ${listing.city}` : "";
+
+  return {
+    executiveSummary: `تعكس المؤشرات الأولية أن ${activity}${district}${city} يمكنه تحقيق ربح تشغيلي شهري تقديري بنحو ${formatNum(monthlyProfit)} مع فترة استرداد تقارب ${roiMonths} شهرًا، اعتمادًا على سعر الطلب الحالي ${formatNum(price)} وهيكل تشغيل تقديري مستمد من بيانات الإعلان المتاحة.`,
+    investmentOverview: {
+      totalInvestment,
+      breakdownItems: [
+        { label: "سعر الشراء", amount: price, note: "القيمة المعروضة في الإعلان" },
+        { label: "تكاليف نقل وتجهيز", amount: transferCosts + setupCosts, note: "إجراءات وتشغيل أولي" },
+        { label: "رأس مال عامل", amount: workingCapital, note: "لتغطية الأشهر الأولى" },
+      ],
+    },
+    operationalCosts: {
+      monthlyTotal: monthlyCosts,
+      items: [
+        { label: "الإيجار الشهري التقديري", monthlyCost: monthlyRent, note: hasText(listing?.annual_rent) ? "مستند إلى الإيجار السنوي" : "تقدير من سعر الصفقة" },
+        { label: "رواتب وتشغيل", monthlyCost: payroll, note: `تقدير حسب المساحة (${formatNum(area)} م²)` },
+        { label: "خدمات وطاقة", monthlyCost: utilities },
+        { label: "تسويق ومصاريف متغيرة", monthlyCost: marketing + misc },
+      ],
+    },
+    revenueProjections: {
+      optimistic,
+      realistic,
+      conservative,
+    },
+    competitorAnalysis: {
+      summary: `تم توليد هذا التقدير تلقائيًا من موقع الإعلان ونوع النشاط، ويشير إلى منافسة ${competitiveDensity.toLowerCase()} نسبيًا لقطاع ${activity} مع حاجة لزيارة ميدانية للتحقق من جودة المنافسين وحركة العملاء الفعلية.`,
+      competitiveDensity,
+      nearbyCount,
+      neighborhoodCount,
+      areaCount,
+      opportunities: [
+        profile.opportunity,
+        listing?.district ? `الموقع داخل ${listing.district} قد يدعم الوصول السريع للعملاء المستهدفين إذا كان الظهور التجاري جيدًا.` : "تحسين تجربة العميل والهوية التشغيلية يمكن أن يرفع معدل التحويل في الموقع الحالي.",
+      ],
+      threats: [
+        profile.marketRisk,
+        competitiveDensity === "عالية" ? "الضغط السعري من المنافسين القريبين قد يبطئ الوصول إلى نقطة التعادل." : "نجاح النشاط يعتمد على تسويق مستمر للحفاظ على زخم الطلب.",
+      ],
+    },
+    riskAssessment: {
+      overallRisk: roiMonths <= 18 ? "منخفض" : roiMonths <= 28 ? "متوسط" : "مرتفع",
+      financialRisks,
+      operationalRisks,
+      marketRisks,
+      regulatoryRisks,
+      mitigationStrategies: [
+        "مراجعة العقود والتراخيص والمستندات التشغيلية قبل الإغلاق النهائي.",
+        "مطابقة الإيرادات الفعلية مع نقاط البيع أو الكشوف المحاسبية لآخر عدة أشهر.",
+        "تخصيص رأس مال عامل يكفي لتغطية الأشهر الأولى بعد الاستحواذ.",
+      ],
+    },
+    recommendations,
+    verdict,
+    verdictColor: getVerdictColor(verdict),
+    confidenceLevel: "متوسط",
+    disclaimer: "هذه الدراسة تقديرية مولدة تلقائيًا من بيانات الإعلان الحالية وتهدف لدعم التقييم الأولي فقط، ولا تغني عن الفحص المالي والقانوني والميداني قبل اتخاذ القرار النهائي.",
+    _meta: {
+      activityType: activity,
+      hasRealCompetitorData: false,
+      generatedAt: new Date().toISOString(),
+    },
+  };
+};
+
 const normalizeFeasibilityStudy = (raw: any, listing: any): FeasibilityStudy | null => {
   if (!raw || typeof raw !== "object") return null;
 
@@ -209,13 +553,18 @@ const normalizeFeasibilityStudy = (raw: any, listing: any): FeasibilityStudy | n
   };
 };
 
+const resolveFeasibilityStudy = (listing: any, raw?: any): FeasibilityStudy | null =>
+  normalizeFeasibilityStudy(raw, listing) || buildEstimatedFeasibilityStudy(listing);
+
 const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityStudyPanelProps) => {
-  const [study, setStudy] = useState<FeasibilityStudy | null>(null);
+  const [study, setStudy] = useState<FeasibilityStudy | null>(() =>
+    resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility),
+  );
   const [loading, setLoading] = useState(false);
   const [loadingCache, setLoadingCache] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [cachedAt, setCachedAt] = useState<string | null>(null);
-  const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
+  const [cachedAt, setCachedAt] = useState<string | null>(analysisCache.cacheAge || null);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(analysisCache.analysisUpdatedAt || analysisCache.cacheAge || null);
   const [copied, setCopied] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     summary: true,
@@ -238,6 +587,13 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     }
   }, [study]);
 
+  useEffect(() => {
+    const immediateStudy = resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility);
+    setStudy(immediateStudy);
+    setCachedAt(analysisCache.cacheAge || immediateStudy?._meta?.generatedAt || null);
+    setLastUpdatedAt(analysisCache.analysisUpdatedAt || analysisCache.cacheAge || immediateStudy?._meta?.generatedAt || null);
+  }, [listing?.id]);
+
   const toggleSection = (key: string) =>
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
@@ -259,7 +615,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           .eq("listing_id", listing.id)
           .maybeSingle();
         if (data?.study_data) {
-          setStudy(normalizeFeasibilityStudy(data.study_data, listing));
+          setStudy(resolveFeasibilityStudy(listing, data.study_data));
           setCachedAt(data.created_at);
           setLastUpdatedAt((data as any).last_updated_at || data.created_at);
           setExpandedSections({ summary: true, investment: true, costs: true, revenue: true, competitors: true, risks: true, recommendations: true });
@@ -300,7 +656,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
         throw new Error(message);
       }
       if (!data?.success) throw new Error(data?.error || "فشل في إنشاء الدراسة");
-      setStudy(normalizeFeasibilityStudy(data.study, listing));
+      setStudy(resolveFeasibilityStudy(listing, data.study));
       const now = new Date().toISOString();
       setCachedAt(now);
       setLastUpdatedAt(now);
@@ -484,7 +840,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     }
   };
 
-  if (loadingCache) {
+  if (loadingCache && !study) {
     return (
       <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 flex items-center justify-center gap-2">
         <Loader2 size={16} className="animate-spin text-primary" />
