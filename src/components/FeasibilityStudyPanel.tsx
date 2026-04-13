@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import SarSymbol from "@/components/SarSymbol";
+import { hasSimulationPhotos } from "@/components/SimulationOverlay";
 import {
   ensurePdfFontLoaded, loadPdfLogo, loadPdfLogoIcon, generatePdfQR,
   buildPdfPageShell, buildPdfSection, buildPdfInfoGrid, buildPdfQrSection, buildPdfDisclaimer,
@@ -122,6 +123,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   const [pdfLoading, setPdfLoading] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const isSimulation = hasSimulationPhotos(listing?.photos as Record<string, unknown> | null | undefined);
 
   // Auto-scroll to panel if URL has #feasibility hash
   useEffect(() => {
@@ -162,6 +164,11 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   }, [listing?.id]);
 
   const runStudy = async () => {
+    if (isSimulation) {
+      toast("هذا إعلان محاكاة ويعرض دراسة جدوى محفوظة مسبقاً.");
+      return;
+    }
+
     if (!canRefresh) {
       toast.error("يمكن التحديث مرة كل 24 ساعة فقط");
       return;
@@ -206,7 +213,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       }
       toast.success("تم تحديث دراسة الجدوى بنجاح");
     } catch (err: any) {
-      setError(err.message || "حدث خطأ");
+      toast.error("تعذّر إعادة التحليل حالياً");
+      setError(err.message || "تعذّر إعادة التحليل حالياً");
     } finally {
       setLoading(false);
     }
@@ -398,9 +406,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             </p>
             {error && <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{error}</p>}
             {isOwner && (
-              <Button onClick={runStudy} variant="outline" className="w-full gap-2" size="sm" disabled={!canRefresh}>
+              <Button onClick={runStudy} variant="outline" className="w-full gap-2" size="sm" disabled={isSimulation || !canRefresh}>
                 <BarChart3 size={14} />
-                إعداد الدراسة الآن
+                {isSimulation ? "دراسة محفوظة" : "إعداد الدراسة الآن"}
                 <AiStar size={12} />
               </Button>
             )}
@@ -443,9 +451,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             PDF
           </Button>
           {isOwner && (
-            <Button variant="ghost" size="sm" onClick={runStudy} disabled={loading || !canRefresh} className="gap-1.5 text-xs" title={!canRefresh ? "يمكن التحديث مرة كل 24 ساعة" : ""}>
+            <Button variant="ghost" size="sm" onClick={runStudy} disabled={isSimulation || loading || !canRefresh} className="gap-1.5 text-xs" title={isSimulation ? "هذه دراسة محاكاة محفوظة" : !canRefresh ? "يمكن التحديث مرة كل 24 ساعة" : ""}>
               {loading ? <Loader2 size={12} className="animate-spin" /> : <FileText size={12} />}
-              تحديث
+              {isSimulation ? "محفوظة" : "تحديث"}
             </Button>
           )}
         </div>
