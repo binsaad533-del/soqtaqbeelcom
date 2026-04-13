@@ -23,7 +23,7 @@ const sections = [
 ];
 
 const PrivacyPage = () => {
-  useSEO({ title: "سياسة الخصوصية", description: "سياسة الخصوصية وحماية البيانات في منصة سوق تقبيل — متوافقة مع نظام حماية البيانات الشخصية (PDPL)", canonical: "/privacy" });
+  useSEO({ title: "سياسة الخصوصية — سوق تقبيل", description: "سياسة الخصوصية وحماية البيانات الشخصية في سوق تقبيل — متوافقة مع نظام PDPL السعودي", canonical: "/privacy" });
   return (
     <div className="min-h-screen py-12 px-4" dir="rtl">
       <div className="max-w-3xl mx-auto">

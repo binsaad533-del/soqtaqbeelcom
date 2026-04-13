@@ -98,7 +98,7 @@ const categories: FaqCategory[] = [
 ];
 
 const HelpCenterPage = () => {
-  useSEO({ title: "مركز المساعدة", description: "إجابات على الأسئلة الشائعة حول منصة سوق تقبيل", canonical: "/help" });
+  useSEO({ title: "مركز المساعدة — الأسئلة الشائعة", description: "إجابات شاملة على الأسئلة الشائعة حول التسجيل والإعلانات والصفقات والعمولات في سوق تقبيل", canonical: "/help" });
 
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("general");

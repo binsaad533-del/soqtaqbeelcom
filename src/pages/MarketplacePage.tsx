@@ -42,7 +42,7 @@ interface EnrichedListing extends Listing {
 }
 
 const MarketplacePage = () => {
-  useSEO({ title: "سوق الفرص", description: "استعرض فرص تقبيل المشاريع التجارية المتاحة", canonical: "/marketplace" });
+  useSEO({ title: "سوق الفرص — تصفح مشاريع وفرص تجارية للبيع في السعودية", description: "تصفح فرص تقبيل المشاريع التجارية المتاحة في السعودية — مطاعم، محلات، ورش، مراكز تجميل والمزيد", canonical: "/marketplace" });
   const { data: listings = [], isLoading: listingsLoading } = usePublishedListingsQuery();
   const { data: profiles = [], isLoading: profilesLoading } = useAllProfilesQuery();
   const { getLikesAndViews, toggleLike } = useListingSocial();

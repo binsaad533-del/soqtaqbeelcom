@@ -11,7 +11,7 @@ import { useSEO } from "@/hooks/useSEO";
 import { sanitizeInput, isRateLimited } from "@/lib/security";
 
 const ContactPage = () => {
-  useSEO({ title: "تواصل معنا", description: "تواصل مع فريق سوق تقبيل للاستفسارات والدعم", canonical: "/contact" });
+  useSEO({ title: "تواصل معنا — سوق تقبيل", description: "تواصل مع فريق سوق تقبيل للاستفسارات والدعم الفني — نسعد بخدمتك في أي وقت", canonical: "/contact" });
   const { user, profile } = useAuthContext();
   const [name, setName] = useState(profile?.full_name || "");
   const [phone, setPhone] = useState(profile?.phone || "");

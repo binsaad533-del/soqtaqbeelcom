@@ -133,7 +133,11 @@ function RotatingWord({ words }: { words: string[] }) {
 }
 
 const HomePage = () => {
-  useSEO({ canonical: "/" });
+  useSEO({
+    title: "سوق تقبيل — تقبيل المشاريع والفرص التجارية بالذكاء الاصطناعي",
+    description: "أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع التجارية — جرد وتقييم وتفاوض تلقائي بدون تعقيد",
+    canonical: "/",
+  });
   const { tx } = useLanguage();
   const stats = useHomeStats(tx);
   const featured = useFeaturedListings();

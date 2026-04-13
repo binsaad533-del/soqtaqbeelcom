@@ -22,7 +22,7 @@ const sections = [
 ];
 
 const TermsPage = () => {
-  useSEO({ title: "الشروط والأحكام", description: "شروط وأحكام استخدام منصة سوق تقبيل — متوافقة مع الأنظمة السعودية", canonical: "/terms" });
+  useSEO({ title: "الشروط والأحكام — سوق تقبيل", description: "شروط وأحكام استخدام منصة سوق تقبيل — متوافقة مع أنظمة المملكة العربية السعودية ونظام التجارة الإلكترونية", canonical: "/terms" });
   return (
     <div className="min-h-screen py-12 px-4" dir="rtl">
       <div className="max-w-3xl mx-auto">
