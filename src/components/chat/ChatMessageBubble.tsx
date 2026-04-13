@@ -102,7 +102,7 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
           {isAi && (
             <div className="flex items-center gap-1.5 mb-1">
               <MoqbilAvatar size={20} className="shrink-0" />
-              <span className="text-[10px] text-accent-foreground font-medium">AI — وسيط الصفقة</span>
+              <span className="text-[10px] text-accent-foreground font-medium">مقبل ٠٠ طحطوح الصفقات</span>
             </div>
           )}
 
