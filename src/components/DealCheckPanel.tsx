@@ -111,17 +111,6 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     }
   }, [cachedDealCheck]);
 
-  // Auto-run if stale or if no analysis exists yet
-  useEffect(() => {
-    if (!loading && !isRefreshing) {
-      if (analysis && isStale) {
-        runDealCheck(true);
-      } else if (!analysis && !cachedDealCheck && listing?.status === "published") {
-        runDealCheck(true);
-      }
-    }
-  }, [isStale, analysis, cachedDealCheck, listing?.status]);
-
   const getAllPhotoUrls = (): string[] => {
     if (!listing?.photos) return [];
     const photos = listing.photos as Record<string, string[]>;
@@ -250,7 +239,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           <div className="text-start">
             <h3 className="font-medium text-sm">فحص الصفقة والجدوى المبدئية</h3>
             <p className="text-[11px] text-muted-foreground">
-              {analysis ? "تم إنشاء التحليل" : loading ? "جاري التحليل..." : "تحليل ذكي شامل للصفقة"}
+              {analysis
+                ? `محدّث: ${cacheAge ? new Date(cacheAge).toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" }) : ""}`
+                : "تحليل ذكي شامل للصفقة"}
             </p>
           </div>
         </div>
@@ -319,9 +310,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       {isStale && <span className="text-amber-500 font-medium">• يتم التحديث تلقائياً</span>}
                     </div>
                     <div className="flex items-center gap-2">
-                      {!isStale && !isRecent && (
-                        <span className="text-[10px] text-muted-foreground/60">يُحدّث تلقائياً كل أسبوع</span>
-                      )}
+                      <span className="text-[10px] text-muted-foreground/60">يُحدّث تلقائياً عند تعديل البيانات</span>
                       {analysis.confidenceLevel && (
                         <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium",
                           CONFIDENCE_BADGE[analysis.confidenceLevel]?.bg || "bg-muted",

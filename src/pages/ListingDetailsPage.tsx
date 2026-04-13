@@ -649,7 +649,7 @@ const ListingDetailsPage = () => {
             <DealCheckPanel listing={listing} analysisCache={analysisCache} />
 
             {/* دراسة الجدوى الاقتصادية وتحليل المنافسين */}
-            <FeasibilityStudyPanel listing={listing} analysisCache={analysisCache} />
+            <FeasibilityStudyPanel listing={listing} analysisCache={analysisCache} isOwner={isOwner} />
 
             {/* التحليل المالي ومحاكاة الصفقة */}
             {!isOwner && listing.price && (
