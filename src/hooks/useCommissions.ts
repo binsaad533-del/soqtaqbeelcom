@@ -28,7 +28,6 @@ export interface Commission {
 export type CommissionStatus =
   | "unpaid"
   | "reminder_sent"
-  | "paid_unverified"
   | "paid_proof_uploaded"
   | "verified";
 
