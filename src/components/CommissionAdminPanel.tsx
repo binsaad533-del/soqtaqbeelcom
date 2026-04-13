@@ -40,7 +40,7 @@ const CommissionAdminPanel = () => {
   const filtered = commissions.filter(c => {
     const s = c.payment_status as CommissionStatus;
     if (filter === "unpaid") return s === "unpaid" || s === "reminder_sent";
-    if (filter === "paid") return s === "paid_unverified" || s === "paid_proof_uploaded";
+    if (filter === "paid") return s === "paid_proof_uploaded";
     if (filter === "overdue") return isOverdue(c);
     if (filter === "verified") return s === "verified";
     return true;
@@ -54,7 +54,7 @@ const CommissionAdminPanel = () => {
     .reduce((sum, c) => sum + c.commission_amount, 0);
   const overdueCount = commissions.filter(isOverdue).length;
   const pendingReview = commissions.filter(c =>
-    c.payment_status === "paid_unverified" || c.payment_status === "paid_proof_uploaded"
+    c.payment_status === "paid_proof_uploaded"
   ).length;
 
   const handleVerify = async (c: Commission) => {
@@ -138,7 +138,7 @@ const CommissionAdminPanel = () => {
                     <div><span className="text-muted-foreground">تأكيد الدفع: </span><div><span className="text-muted-foreground">تأكيد الدفع: </span>{c.marked_paid_at ? new Date(c.marked_paid_at).toLocaleDateString("en-US") : "—"}</div></div>
                   </div>
                   <div className="flex gap-2">
-                    {s !== "verified" && (s === "paid_unverified" || s === "paid_proof_uploaded") && (
+                    {s !== "verified" && s === "paid_proof_uploaded" && (
                       <Button size="sm" onClick={() => handleVerify(c)} className="gap-1.5 rounded-lg text-xs flex-1">
                         <ShieldCheck size={13} /> تحقق
                       </Button>

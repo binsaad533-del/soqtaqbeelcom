@@ -63,17 +63,13 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
     setUploading(false);
   };
 
-  const handleMarkPaid = async () => {
-    const { error } = await markAsPaid(commission.id);
-    if (!error) {
-      toast.success("تم تحديث حالة الدفع — يرجى رفع إيصال التحويل لاحقاً");
-      onUpdate();
-    }
+  const handleMarkPaid = () => {
+    toast.error("يرجى رفع إثبات التحويل أولاً");
   };
 
   const status = commission.payment_status as CommissionStatus;
   const isCompleted = status === "verified";
-  const isPaidOrProof = status === "paid_unverified" || status === "paid_proof_uploaded" || status === "verified";
+  const isPaidOrProof = status === "paid_proof_uploaded" || status === "verified";
 
   return (
     <div className="bg-card rounded-2xl shadow-soft border border-border/30 overflow-hidden">
