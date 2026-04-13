@@ -16,7 +16,9 @@ const FONT_URL = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:
 
 /* ── Colors (HSL matching platform design system) ── */
 export const PDF_COLORS = {
-  primary: "hsl(212 84% 42%)",
+  primary: "#00AEEF",
+  primaryDark: "#0077CC",
+  primaryGradient: "linear-gradient(135deg, #00AEEF, #0077CC)",
   primaryLight: "hsl(210 100% 98%)",
   text: "hsl(215 25% 18%)",
   textMuted: "hsl(215 16% 45%)",

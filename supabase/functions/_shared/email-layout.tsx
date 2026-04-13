@@ -40,7 +40,7 @@ export const styles = {
   logoImg: { margin: '0 auto 12px' } as React.CSSProperties,
   brandName: { fontSize: '20px', fontWeight: '700' as const, color: TEXT_PRIMARY, margin: '0', fontFamily: FONT } as React.CSSProperties,
   brandNameEn: { fontSize: '10px', fontWeight: '500' as const, color: TEXT_MUTED, margin: '4px 0 0', letterSpacing: '3px', textTransform: 'uppercase' as const, fontFamily: FONT } as React.CSSProperties,
-  headerDivider: { borderColor: BRAND_BLUE, borderWidth: '2px', borderStyle: 'solid', margin: '20px 28px 0' } as React.CSSProperties,
+  headerDivider: { border: 'none', height: '3px', background: 'linear-gradient(135deg, #00AEEF, #0077CC)', margin: '20px 28px 0', borderRadius: '2px' } as React.CSSProperties,
 
   // Content
   greeting: { fontSize: '16px', fontWeight: '600' as const, color: TEXT_PRIMARY, margin: '0 0 16px', fontFamily: FONT } as React.CSSProperties,
@@ -54,8 +54,8 @@ export const styles = {
 
   // Buttons
   buttonSection: { textAlign: 'center' as const, margin: '8px 0 24px' } as React.CSSProperties,
-  button: { backgroundColor: BRAND_BLUE, color: '#ffffff', fontSize: '15px', fontWeight: '600' as const, padding: '13px 36px', borderRadius: '10px', textDecoration: 'none', display: 'inline-block', fontFamily: FONT } as React.CSSProperties,
-  secondaryButton: { backgroundColor: TEXT_PRIMARY, color: '#ffffff', fontSize: '14px', fontWeight: '500' as const, padding: '11px 28px', borderRadius: '10px', textDecoration: 'none', display: 'inline-block', fontFamily: FONT } as React.CSSProperties,
+  button: { background: 'linear-gradient(135deg, #00AEEF, #0077CC)', backgroundColor: '#00AEEF', color: '#ffffff', fontSize: '15px', fontWeight: '600' as const, padding: '13px 36px', borderRadius: '10px', textDecoration: 'none', display: 'inline-block', fontFamily: FONT } as React.CSSProperties,
+  secondaryButton: { background: 'linear-gradient(135deg, #333333, #1a1a1a)', backgroundColor: TEXT_PRIMARY, color: '#ffffff', fontSize: '14px', fontWeight: '500' as const, padding: '11px 28px', borderRadius: '10px', textDecoration: 'none', display: 'inline-block', fontFamily: FONT } as React.CSSProperties,
 
   // Icon
   iconSection: { textAlign: 'center' as const, marginBottom: '16px' } as React.CSSProperties,
