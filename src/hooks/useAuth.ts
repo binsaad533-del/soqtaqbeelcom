@@ -109,6 +109,7 @@ export function useAuth() {
   const isOwner = () => hasRole("platform_owner");
   const isSupervisor = () => hasRole("supervisor");
   const isCustomer = () => hasRole("customer");
+  const isFinancialManager = () => hasRole("financial_manager");
 
   return {
     ...state,
@@ -119,5 +120,5 @@ export function useAuth() {
     isOwner,
     isSupervisor,
     isCustomer,
-  };
+    isFinancialManager,
 }
