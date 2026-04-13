@@ -14,7 +14,7 @@ import AiStar from "@/components/AiStar";
 import AiInlineStar from "@/components/AiInlineStar";
 import SarSymbol from "@/components/SarSymbol";
 import { FormField, SelectField } from "./FormFields";
-import { isFieldVisible, validateDisclosure, getRules } from "@/lib/dealTypeFieldRules";
+import { isFieldVisible } from "@/lib/dealTypeFieldRules";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
 import type { CreateListingSharedState } from "./sharedState";
