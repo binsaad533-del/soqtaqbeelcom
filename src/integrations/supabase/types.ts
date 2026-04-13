@@ -2011,6 +2011,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean
+          is_commission_suspended: boolean
           is_suspended: boolean
           is_verified: boolean
           kyc_data: Json | null
@@ -2034,6 +2035,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
+          is_commission_suspended?: boolean
           is_suspended?: boolean
           is_verified?: boolean
           kyc_data?: Json | null
@@ -2057,6 +2059,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
+          is_commission_suspended?: boolean
           is_suspended?: boolean
           is_verified?: boolean
           kyc_data?: Json | null
