@@ -237,7 +237,7 @@ const MarketplacePage = () => {
     description: "قائمة بفرص تقبيل المشاريع التجارية المتاحة في السعودية",
     url: "https://soqtaqbeel.com/marketplace",
     numberOfItems: filtered.length,
-    itemListElement: pagination.currentItems.slice(0, 10).map((item, i) => ({
+    itemListElement: pagination.paginatedItems.slice(0, 10).map((item, i) => ({
       "@type": "ListItem",
       position: i + 1,
       url: `https://soqtaqbeel.com/listing/${item.id}`,
