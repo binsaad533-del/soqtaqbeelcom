@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, Menu, X, LogIn, LogOut, Plus, MessageSquare } from "lucide-react";
+import { User, Menu, X, LogIn, LogOut, Plus, MessageSquare, ArrowRight } from "lucide-react";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { useState, useEffect } from "react";
 import AiAssistant from "./AiAssistant";
