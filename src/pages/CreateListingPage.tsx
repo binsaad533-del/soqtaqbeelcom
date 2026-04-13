@@ -963,14 +963,13 @@ const CreateListingPage = () => {
     setDealCheckError("");
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: {
-          listing: nextListingPayload,
-          perspective: "seller",
-          sellerName,
-          mode: dealCheckResult ? "update" : "create",
-          previousAnalysis: dealCheckResult || null,
-        },
+      const { invokeWithRetry } = await import("@/lib/invokeWithRetry");
+      const { data, error: fnError } = await invokeWithRetry("deal-check", {
+        listing: nextListingPayload,
+        perspective: "seller",
+        sellerName,
+        mode: dealCheckResult ? "update" : "create",
+        previousAnalysis: dealCheckResult || null,
       });
       if (fnError) throw new Error(fnError.message);
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
@@ -1014,14 +1013,13 @@ const CreateListingPage = () => {
     setDealCheckError("");
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("deal-check", {
-        body: {
-          listing: nextListingPayload,
-          perspective: "seller",
-          sellerName,
-          mode: dealCheckResult ? "update" : "create",
-          previousAnalysis: dealCheckResult || null,
-        },
+      const { invokeWithRetry } = await import("@/lib/invokeWithRetry");
+      const { data, error: fnError } = await invokeWithRetry("deal-check", {
+        listing: nextListingPayload,
+        perspective: "seller",
+        sellerName,
+        mode: dealCheckResult ? "update" : "create",
+        previousAnalysis: dealCheckResult || null,
       });
       if (fnError) throw new Error(fnError.message);
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
@@ -1081,9 +1079,9 @@ const CreateListingPage = () => {
       await logAudit("listing_published", "listing", listingId, { title: disclosure.business_activity }).catch(() => {});
       
       // Auto-trigger AI analysis in the background (don't await - fire and forget)
-      supabase.functions.invoke("auto-analyze-listing", {
-        body: { listingId },
-      }).catch(() => {});
+      import("@/lib/invokeWithRetry").then(({ invokeWithRetry }) => {
+        invokeWithRetry("auto-analyze-listing", { listingId }).catch(() => {});
+      });
 
       // Stop auto-save timer before navigating away
       if (autoSaveTimerRef.current) {
