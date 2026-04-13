@@ -190,6 +190,28 @@ export function useCommissions() {
           },
         });
 
+        // Email notification
+        const { data: sellerProfile } = await supabase
+          .from("profiles")
+          .select("full_name, email")
+          .eq("user_id", comm.seller_id)
+          .maybeSingle();
+
+        if (sellerProfile?.email) {
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "commission-verified",
+              recipientEmail: sellerProfile.email,
+              idempotencyKey: `commission-verified-${commissionId}`,
+              templateData: {
+                recipientName: sellerProfile.full_name || undefined,
+                listingTitle: title,
+                amount: comm.commission_amount?.toLocaleString("en-US"),
+              },
+            },
+          });
+        }
+
         // Auto-unsuspend seller if they were suspended
         await supabase
           .from("profiles")
@@ -244,6 +266,29 @@ export function useCommissions() {
         data: { title, price: amount },
       },
     });
+
+    // Email notification
+    const { data: sellerProfile } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("user_id", commission.seller_id)
+      .maybeSingle();
+
+    if (sellerProfile?.email) {
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "commission-reminder",
+          recipientEmail: sellerProfile.email,
+          idempotencyKey: `commission-reminder-${commission.id}-${commission.reminder_count + 1}`,
+          templateData: {
+            recipientName: sellerProfile.full_name || undefined,
+            listingTitle: title,
+            amount,
+            reminderLevel: "first",
+          },
+        },
+      });
+    }
   }, [user]);
 
   const uploadReceipt = useCallback(async (commissionId: string, file: File): Promise<string | null> => {
