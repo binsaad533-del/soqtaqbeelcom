@@ -193,7 +193,7 @@ export const QUICK_COMMANDS: QuickCommand[] = [
   { id: "compare", label: "قارن الفرص", icon: "⚖️", action: "قارن لي بين الفرص المتاحة" },
   { id: "simulate", label: "محاكاة ماذا لو؟", icon: "🧪", action: "سوّ لي محاكاة للصفقة بسيناريوهات مختلفة" },
   { id: "financial", label: "تحليل مالي", icon: "📊", action: "سوّ لي تحليل مالي شامل: ROI ونقطة التعادل وفترة الاسترداد" },
-  { id: "auto-negotiate", label: "فاوض بدالي", icon: "🤖", action: "فاوض بدالي — حدي الأدنى والأقصى واكتب لي 3 رسائل تفاوض متدرجة" },
+  { id: "auto-negotiate", label: "فاوض بدالي", icon: "✦", action: "فاوض بدالي — حدي الأدنى والأقصى واكتب لي 3 رسائل تفاوض متدرجة" },
   { id: "lawyer", label: "صيغ بنود", icon: "⚖️", action: "صيغ لي بنود عقد حماية للمشتري والبائع" },
   { id: "seller-rep", label: "شيّك على البائع", icon: "⭐", action: "حلل لي سمعة البائع وتقييماته" },
   { id: "full-report", label: "تقرير شامل", icon: "📄", action: "سوّ لي تقرير تحليلي شامل" },

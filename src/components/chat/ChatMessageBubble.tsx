@@ -149,7 +149,7 @@ export default function ChatMessageBubble({ msg, isMe, buyerId, sellerId }: Chat
               <Download size={13} className="text-muted-foreground shrink-0" />
             </button>
           ) : (
-            <span className="whitespace-pre-line">{msg.message}</span>
+            <span className="whitespace-pre-line">{msg.message.replace(/🤖/g, "✦")}</span>
           )}
         </div>
 
