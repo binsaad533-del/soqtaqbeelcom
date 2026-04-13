@@ -59,6 +59,15 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
       },
     }).catch(() => {});
 
+    // Send SMS to buyer about acceptance
+    supabase.functions.invoke("notify-sms", {
+      body: {
+        user_id: offer.buyer_id,
+        event_type: "offer_accepted",
+        data: { price: offer.offered_price, title: "" },
+      },
+    }).catch(() => {});
+
     // Create a deal with agreed price — other offers stay pending (on hold)
     // Deal stays at "negotiating" so both parties can go through legal confirmation
     const { data: dealData } = await createDeal(listingId, listingOwnerId, offer.buyer_id, offer.offered_price);
