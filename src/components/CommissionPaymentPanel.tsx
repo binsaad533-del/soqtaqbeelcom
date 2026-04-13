@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Copy, CheckCircle2, Upload, Loader2, Landmark, PartyPopper } from "lucide-react";
+import { Copy, CheckCircle2, Upload, Loader2, Landmark, PartyPopper, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -13,6 +13,7 @@ import {
 import { useCommissions } from "@/hooks/useCommissions";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
+import { generateCommissionReceiptPdf } from "@/lib/commissionReceiptPdf";
 
 interface Props {
   commission: Commission;
@@ -192,13 +193,41 @@ const CommissionPaymentPanel = ({ commission, isSeller, onUpdate }: Props) => {
           </div>
         )}
 
-        {isPaidOrProof && (
-          <div className="flex items-center gap-2 justify-center text-xs">
-            <CheckCircle2 size={14} className={COMMISSION_STATUS_COLORS[status]} />
-            <span className={COMMISSION_STATUS_COLORS[status]}>
-              {COMMISSION_STATUS_LABELS[status]}
-              {commission.marked_paid_at && ` — ${new Date(commission.marked_paid_at).toLocaleDateString("en-US")}`}
-            </span>
+      {isPaidOrProof && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 justify-center text-xs">
+              <CheckCircle2 size={14} className={COMMISSION_STATUS_COLORS[status]} />
+              <span className={COMMISSION_STATUS_COLORS[status]}>
+                {COMMISSION_STATUS_LABELS[status]}
+                {commission.marked_paid_at && ` — ${new Date(commission.marked_paid_at).toLocaleDateString("en-US")}`}
+              </span>
+            </div>
+            {isCompleted && isSeller && (
+              <Button
+                variant="outline"
+                className="w-full rounded-xl text-xs gap-1.5"
+                onClick={async () => {
+                  try {
+                    const year = new Date(commission.paid_at || commission.marked_paid_at || commission.created_at).getFullYear();
+                    await generateCommissionReceiptPdf({
+                      receiptNumber: `RCT-${year}-${commission.id.slice(0, 6).toUpperCase()}`,
+                      paidAt: commission.paid_at || commission.marked_paid_at || commission.created_at,
+                      dealTitle: `صفقة #${commission.deal_id.slice(0, 8)}`,
+                      agreementNumber: `AGR-${year}-${commission.deal_id.slice(0, 6).toUpperCase()}`,
+                      dealAmount: commission.deal_amount,
+                      commissionRate: commission.commission_rate,
+                      commissionAmount: commission.commission_amount,
+                      vatAmount: commission.vat_amount ?? commission.commission_amount * VAT_RATE,
+                      totalWithVat: commission.total_with_vat ?? commission.commission_amount * (1 + VAT_RATE),
+                      sellerName: "—",
+                      sellerPhone: "—",
+                    });
+                  } catch { toast.error("فشل تحميل الإيصال"); }
+                }}
+              >
+                <Download size={13} /> تحميل إيصال السداد
+              </Button>
+            )}
           </div>
         )}
       </div>
