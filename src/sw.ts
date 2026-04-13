@@ -136,7 +136,8 @@ self.addEventListener("push", (event) => {
       data: { url: data.url || "/", ...data.data },
       requireInteraction: true,
     } as any;
-    };
+
+
 
     event.waitUntil(
       self.registration.showNotification(data.title || "سوق تقبيل", options)
