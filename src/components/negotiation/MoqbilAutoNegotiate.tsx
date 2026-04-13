@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Bot, Loader2, Play, Pause, Settings2 } from "lucide-react";
+import { Loader2, Play, Pause, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import AiStar from "@/components/AiStar";

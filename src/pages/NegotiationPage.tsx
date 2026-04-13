@@ -992,7 +992,7 @@ const NegotiationPage = () => {
                   buildContext={buildContext}
                   onAutoMessage={async (text) => {
                     if (!dealId || !user) return;
-                    const aiMsg = await sendMessage(dealId, `🤖 [مقبل نيابةً عن ${isBuyer ? "المشتري" : "البائع"}]\n${text}`, "ai_mediation");
+                    const aiMsg = await sendMessage(dealId, `✦ [مقبل نيابةً عن ${isBuyer ? "المشتري" : "البائع"}]\n${text}`, "ai_mediation");
                     if (aiMsg) setMessages(prev => prev.some(m => m.id === aiMsg.id) ? prev : [...prev, aiMsg]);
                   }}
                 />
