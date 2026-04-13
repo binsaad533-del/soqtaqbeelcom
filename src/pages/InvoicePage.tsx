@@ -24,6 +24,9 @@ interface InvoiceData {
   deal_amount: number;
   commission_rate: number;
   commission_amount: number;
+  vat_rate: number;
+  vat_amount: number;
+  total_with_vat: number;
   total_amount: number;
   status: string;
   created_at: string;
@@ -217,6 +220,8 @@ const InvoicePage = () => {
 
   const status = STATUS_MAP[invoice.status] || STATUS_MAP.pending;
   const commissionAmount = invoice.commission_amount ?? invoice.deal_amount * invoice.commission_rate;
+  const vatAmount = invoice.vat_amount ?? commissionAmount * 0.15;
+  const totalWithVat = invoice.total_with_vat ?? commissionAmount * 1.15;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -290,17 +295,24 @@ const InvoicePage = () => {
                   <td className="px-4 py-3">عمولة المنصة ({(invoice.commission_rate * 100).toFixed(0)}%)</td>
                   <td className="px-4 py-3 text-left font-mono">{formatCurrency(commissionAmount)} <SarSymbol size="0.85em" /></td>
                 </tr>
+                <tr style={{ borderTop: "1px solid #e5e7eb" }}>
+                  <td className="px-4 py-3">ضريبة القيمة المضافة (15%)</td>
+                  <td className="px-4 py-3 text-left font-mono">{formatCurrency(vatAmount)} <SarSymbol size="0.85em" /></td>
+                </tr>
               </tbody>
               <tfoot>
                 <tr style={{ borderTop: "2px solid #1a73e8" }}>
-                  <td className="px-4 py-4 font-bold text-base" style={{ color: "#1a73e8" }}>الإجمالي</td>
+                  <td className="px-4 py-4 font-bold text-base" style={{ color: "#1a73e8" }}>الإجمالي المستحق</td>
                   <td className="px-4 py-4 text-left font-bold text-base font-mono" style={{ color: "#1a73e8" }}>
-                    {formatCurrency(invoice.total_amount)} <SarSymbol size="0.9em" />
+                    {formatCurrency(totalWithVat)} <SarSymbol size="0.9em" />
                   </td>
                 </tr>
               </tfoot>
             </table>
           </div>
+          <p className="text-xs mt-2 text-center" style={{ color: "#6b7280" }}>
+            الرقم الضريبي: {BANK_DETAILS.taxNumber}
+          </p>
         </div>
 
         {/* Footer */}
