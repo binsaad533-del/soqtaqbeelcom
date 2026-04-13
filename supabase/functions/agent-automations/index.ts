@@ -193,6 +193,33 @@ serve(async (req) => {
             reference_type: "listing",
             reference_id: offer.listing_id,
           });
+
+          // Email reminder to seller
+          const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+          const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+          fetch(`${supabaseUrl}/functions/v1/notify-user`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${anonKey}`, apikey: anonKey },
+            body: JSON.stringify({
+              userId: listing.owner_id,
+              category: "offers",
+              templateName: "pending-offer-reminder",
+              idempotencyKey: `pending-offer-${offer.id}-r${offer.reminder_count}`,
+              templateData: { offeredPrice: offer.offered_price.toLocaleString(), listingTitle: listing.title || "", hoursSince },
+            }),
+          }).catch(() => {});
+
+          // SMS reminder to seller
+          fetch(`${supabaseUrl}/functions/v1/notify-sms`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${anonKey}`, apikey: anonKey },
+            body: JSON.stringify({
+              user_id: listing.owner_id,
+              event_type: "pending_offer_reminder",
+              data: { price: offer.offered_price, title: listing.title || "" },
+            }),
+          }).catch(() => {});
+
           await supabase.from("listing_offers")
             .update({ reminder_count: (offer.reminder_count || 0) + 1 })
             .eq("id", offer.id);
