@@ -1890,6 +1890,39 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_attempts: {
+        Row: {
+          attempt_type: Database["public"]["Enums"]["otp_attempt_type"]
+          created_at: string
+          id: string
+          ip_address: string | null
+          locked_until: string | null
+          phone: string
+          success: boolean
+          user_id: string | null
+        }
+        Insert: {
+          attempt_type: Database["public"]["Enums"]["otp_attempt_type"]
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          locked_until?: string | null
+          phone: string
+          success?: boolean
+          user_id?: string | null
+        }
+        Update: {
+          attempt_type?: Database["public"]["Enums"]["otp_attempt_type"]
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          locked_until?: string | null
+          phone?: string
+          success?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       post_deal_followups: {
         Row: {
           buyer_notified: boolean
@@ -2527,6 +2560,7 @@ export type Database = {
     }
     Enums: {
       app_role: "platform_owner" | "supervisor" | "customer"
+      otp_attempt_type: "request" | "verify"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2655,6 +2689,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["platform_owner", "supervisor", "customer"],
+      otp_attempt_type: ["request", "verify"],
     },
   },
 } as const
