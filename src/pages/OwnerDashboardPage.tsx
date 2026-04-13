@@ -137,6 +137,39 @@ const OwnerDashboardPage = () => {
     return profiles.find(p => p.user_id === userId)?.email || "—";
   };
 
+  const totalCommissionDue = useMemo(() => commissions.reduce((s, c) => s + c.commission_amount, 0), [commissions]);
+  const totalCollected = useMemo(() => commissions.filter(c => c.payment_status === "verified").reduce((s, c) => s + c.commission_amount, 0), [commissions]);
+
+  const dealTableData = useMemo(() => {
+    const listingMap = new Map(listings.map(l => [l.id, l]));
+    const commMap = new Map(commissions.map(c => [c.deal_id, c]));
+    let rows = deals.map(d => {
+      const listing = listingMap.get(d.listing_id);
+      const comm = commMap.get(d.id);
+      return { ...d, listingTitle: listing?.title || "بدون عنوان", sellerName: getProfileName(d.seller_id), buyerName: getProfileName(d.buyer_id), commission: comm, commissionAmount: comm?.commission_amount || (Number(d.agreed_price) || 0) * 0.01, commissionStatus: comm?.payment_status || "unpaid" };
+    });
+    if (dealFilter === "paid") rows = rows.filter(r => r.commissionStatus === "verified");
+    if (dealFilter === "unpaid") rows = rows.filter(r => r.commissionStatus !== "verified");
+    if (searchQuery) { const q = searchQuery.toLowerCase(); rows = rows.filter(r => r.listingTitle.toLowerCase().includes(q) || r.sellerName.toLowerCase().includes(q) || r.buyerName.toLowerCase().includes(q)); }
+    rows.sort((a, b) => dealSort === "value" ? (Number(b.agreed_price) || 0) - (Number(a.agreed_price) || 0) : new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return rows;
+  }, [deals, listings, commissions, profiles, dealFilter, dealSort, searchQuery]);
+
+  const handleVerify = async (commId: string) => {
+    const { error } = await verifyCommission(commId);
+    if (!error) { toast.success("تم التحقق من العمولة"); load(); } else toast.error("فشل التحقق");
+  };
+
+  const toggleSuspend = async (p: Profile) => {
+    await updateProfile(p.user_id, { is_suspended: !p.is_suspended });
+    setProfiles(prev => prev.map(pr => pr.user_id === p.user_id ? { ...pr, is_suspended: !pr.is_suspended } : pr));
+  };
+
+  const filteredProfiles = useMemo(() => {
+    if (!searchQuery) return profiles;
+    const q = searchQuery.toLowerCase();
+    return profiles.filter(p => p.full_name?.toLowerCase().includes(q) || p.phone?.includes(searchQuery));
+  }, [profiles, searchQuery]);
 
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 size={24} className="animate-spin text-primary" /></div>;
 
