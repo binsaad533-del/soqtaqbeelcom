@@ -30,7 +30,7 @@ const CreateListingStep4 = ({ state }: Props) => {
     disclosure,
     setDisclosure,
     inventory,
-    photos,
+    
     uploadedDocs,
     locationLat,
     locationLng,
