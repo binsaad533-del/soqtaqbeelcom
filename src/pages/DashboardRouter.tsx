@@ -1,4 +1,5 @@
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Navigate } from "react-router-dom";
 import OwnerDashboardPage from "./OwnerDashboardPage";
 import SupervisorDashboardPage from "./SupervisorDashboardPage";
 import CustomerDashboardPage from "./CustomerDashboardPage";
@@ -22,6 +23,8 @@ const DashboardRouter = () => {
       return <OwnerDashboardPage />;
     case "supervisor":
       return <SupervisorDashboardPage />;
+    case "financial_manager":
+      return <Navigate to="/admin/finance" replace />;
     case "customer":
     default:
       return <CustomerDashboardPage />;

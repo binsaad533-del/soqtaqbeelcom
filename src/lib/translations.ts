@@ -59,6 +59,7 @@ export const ROLE_LABELS: Record<string, string> = {
   supervisor: "مشرف",
   customer: "عميل",
   admin: "مدير",
+  financial_manager: "مدير مالي",
 };
 
 /**
