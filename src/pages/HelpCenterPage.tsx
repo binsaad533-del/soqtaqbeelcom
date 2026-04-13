@@ -206,6 +206,7 @@ const HelpCenterPage = () => {
         </a>
       </div>
     </div>
+    </>
   );
 };
 
