@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { safeJsonLd } from "@/lib/security";
 import { useSEO } from "@/hooks/useSEO";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { Search, HelpCircle, Store, Shield, FileText, MessageCircle, Settings } from "lucide-react";
@@ -117,7 +118,22 @@ const HelpCenterPage = () => {
     return results;
   }, [search, activeCategory]);
 
+  // FAQPage JSON-LD
+  const allFaqs: { q: string; a: string }[] = [];
+  categories.forEach(cat => cat.items.forEach(item => allFaqs.push(item)));
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: allFaqs.slice(0, 20).map(item => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }} />
     <div className="container max-w-4xl py-10 space-y-8" dir="rtl">
       {/* Header */}
       <div className="text-center space-y-3">
