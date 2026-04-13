@@ -51,6 +51,19 @@ type ListingDocumentItem = {
   type?: string;
 };
 
+type ListingDetailsSnapshot = {
+  listing: Listing | null;
+  sellerProfile: any;
+  sellerReviews: SellerReview[];
+  myActiveDeal: any;
+  isLiked: boolean;
+  likeCount: number;
+  viewCount: number;
+  interestCount: number;
+};
+
+const listingDetailsStateCache = new Map<string, ListingDetailsSnapshot>();
+
 const normalizeListingDocuments = (documents: unknown[]): ListingDocumentItem[] => {
   if (!Array.isArray(documents)) return [];
 
@@ -115,7 +128,8 @@ const ListingDetailsPage = () => {
   const { createDeal, getMyDeals } = useDeals();
   const { getProfile } = useProfiles();
   const { getSellerReviews } = useSellerReviews();
-  const [listing, setListing] = useState<Listing | null>(null);
+  const cachedSnapshot = id ? listingDetailsStateCache.get(id) : undefined;
+  const [listing, setListing] = useState<Listing | null>(() => cachedSnapshot?.listing ?? null);
 
   // Dynamic SEO with OG tags for smart social sharing
   const listingTitle = listing ? (listing.title || listing.business_activity || "فرصة تقبيل") : "تفاصيل الإعلان";
@@ -133,40 +147,47 @@ const ListingDetailsPage = () => {
     type: "article",
   });
 
-  const [sellerProfile, setSellerProfile] = useState<any>(null);
-  const [sellerReviews, setSellerReviews] = useState<SellerReview[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [sellerProfile, setSellerProfile] = useState<any>(() => cachedSnapshot?.sellerProfile ?? null);
+  const [sellerReviews, setSellerReviews] = useState<SellerReview[]>(() => cachedSnapshot?.sellerReviews ?? []);
+  const [loading, setLoading] = useState(() => !cachedSnapshot?.listing);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [startingDeal, setStartingDeal] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [myActiveDeal, setMyActiveDeal] = useState<any>(null);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [viewCount, setViewCount] = useState(0);
+  const [myActiveDeal, setMyActiveDeal] = useState<any>(() => cachedSnapshot?.myActiveDeal ?? null);
+  const [isLiked, setIsLiked] = useState(() => cachedSnapshot?.isLiked ?? false);
+  const [likeCount, setLikeCount] = useState(() => cachedSnapshot?.likeCount ?? 0);
+  const [viewCount, setViewCount] = useState(() => cachedSnapshot?.viewCount ?? 0);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showInterestForm, setShowInterestForm] = useState(false);
   const [interestMessage, setInterestMessage] = useState("");
   const [wantsMeeting, setWantsMeeting] = useState<boolean | null>(null);
   const [submittingInterest, setSubmittingInterest] = useState(false);
-  const [interestCount, setInterestCount] = useState(0);
+  const [interestCount, setInterestCount] = useState(() => cachedSnapshot?.interestCount ?? 0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-  const loadedAtRef = useRef<number>(0);
-  const loadedIdRef = useRef<string | null>(null);
+  const loadedIdRef = useRef<string | null>(cachedSnapshot?.listing?.id ?? null);
 
-  const STALE_TIME_MS = 5 * 60 * 1000; // 5 minutes
+  const applyCachedSnapshot = useCallback((snapshot: ListingDetailsSnapshot) => {
+    setListing(snapshot.listing);
+    setSellerProfile(snapshot.sellerProfile);
+    setSellerReviews(snapshot.sellerReviews);
+    setMyActiveDeal(snapshot.myActiveDeal);
+    setIsLiked(snapshot.isLiked);
+    setLikeCount(snapshot.likeCount);
+    setViewCount(snapshot.viewCount);
+    setInterestCount(snapshot.interestCount);
+    setLoadError(null);
+    setLoading(false);
+  }, []);
 
   const loadListing = useCallback(async (forceRefresh = false, signal?: AbortSignal) => {
     if (!id) return;
 
-    // Skip if data is already loaded and fresh
-    if (
-      !forceRefresh &&
-      loadedIdRef.current === id &&
-      listing &&
-      Date.now() - loadedAtRef.current < STALE_TIME_MS
-    ) {
+    const cachedState = !forceRefresh ? listingDetailsStateCache.get(id) : undefined;
+    if (cachedState?.listing) {
+      applyCachedSnapshot(cachedState);
+      loadedIdRef.current = id;
       return;
     }
 
@@ -177,7 +198,6 @@ const ListingDetailsPage = () => {
       if (signal?.aborted) return;
       setListing(data);
       loadedIdRef.current = id;
-      loadedAtRef.current = Date.now();
       if (data) {
         const [profile, reviews, social] = await Promise.all([
           getProfile(data.owner_id),
@@ -207,14 +227,30 @@ const ListingDetailsPage = () => {
   }, [id]);
 
   useEffect(() => {
+    if (!id || !listing) return;
+
+    listingDetailsStateCache.set(id, {
+      listing,
+      sellerProfile,
+      sellerReviews,
+      myActiveDeal,
+      isLiked,
+      likeCount,
+      viewCount,
+      interestCount,
+    });
+  }, [id, listing, sellerProfile, sellerReviews, myActiveDeal, isLiked, likeCount, viewCount, interestCount]);
+
+  useEffect(() => {
     const controller = new AbortController();
+    const hasCachedSnapshot = Boolean(id && listingDetailsStateCache.get(id)?.listing);
 
     loadListing(false, controller.signal);
 
-    if (id && loadedIdRef.current !== id) {
+    if (id && !hasCachedSnapshot && loadedIdRef.current !== id) {
       recordView(id).catch(() => {});
     }
-    if (user && id) {
+    if (user && id && !hasCachedSnapshot) {
       getMyDeals().then(deals => {
         if (controller.signal.aborted) return;
         const active = deals.find(d => d.listing_id === id && !["cancelled", "completed"].includes(d.status));
