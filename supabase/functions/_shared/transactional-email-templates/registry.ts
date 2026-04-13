@@ -18,6 +18,9 @@ import { template as offerReceived } from './offer-received.tsx'
 import { template as weeklyReport } from './weekly-report.tsx'
 import { template as pendingOfferReminder } from './pending-offer-reminder.tsx'
 import { template as searchAlertMatch } from './search-alert-match.tsx'
+import { template as commissionCreated } from './commission-created.tsx'
+import { template as commissionReminder } from './commission-reminder.tsx'
+import { template as commissionVerified } from './commission-verified.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'deal-completed': dealCompleted,
@@ -29,4 +32,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'weekly-report': weeklyReport,
   'pending-offer-reminder': pendingOfferReminder,
   'search-alert-match': searchAlertMatch,
+  'commission-created': commissionCreated,
+  'commission-reminder': commissionReminder,
+  'commission-verified': commissionVerified,
 }
