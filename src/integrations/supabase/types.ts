@@ -2568,6 +2568,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_seller_rating_summary: { Args: { _seller_id: string }; Returns: Json }
       get_seller_visibility_tier: {
         Args: { _seller_id: string }
         Returns: number

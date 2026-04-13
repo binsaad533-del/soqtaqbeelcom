@@ -10,6 +10,7 @@ import ListingHealthReport from "@/components/ListingHealthReport";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import VerifiedSellerBadge from "@/components/VerifiedSellerBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
+import SellerRatingDisplay from "@/components/SellerRatingDisplay";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
 import FeasibilityStudyPanel from "@/components/FeasibilityStudyPanel";
@@ -891,6 +892,11 @@ const ListingDetailsPage = () => {
                   <Users size={15} />
                   <span>{interestCount} مستخدمين أبدوا اهتمامهم</span>
                 </div>
+              )}
+
+              {/* Deal Ratings */}
+              {listing.owner_id && (
+                <SellerRatingDisplay sellerId={listing.owner_id} className="mt-4 justify-center" />
               )}
 
               {/* Seller Reviews */}

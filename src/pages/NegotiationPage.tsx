@@ -9,6 +9,7 @@ import TrustBadge from "@/components/TrustBadge";
 
 import LegalConfirmationPanel from "@/components/LegalConfirmationPanel";
 import SellerReviewForm from "@/components/SellerReviewForm";
+import DealRatingBanner from "@/components/DealRatingBanner";
 import CommissionPaymentPanel from "@/components/CommissionPaymentPanel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -900,6 +901,15 @@ const NegotiationPage = () => {
 
               {isBuyer && isPostAgreement && deal.seller_id && (
                 <SellerReviewForm dealId={deal.id} sellerId={deal.seller_id} />
+              )}
+
+              {/* Deal Rating — both parties can rate after completion */}
+              {isPostAgreement && deal.buyer_id && deal.seller_id && (
+                <DealRatingBanner
+                  dealId={deal.id}
+                  otherPartyId={isBuyer ? deal.seller_id : deal.buyer_id!}
+                  otherPartyName={otherProfile?.full_name}
+                />
               )}
 
               {/* Admin Deal Actions */}
