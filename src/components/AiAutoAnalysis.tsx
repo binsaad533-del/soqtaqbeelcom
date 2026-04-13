@@ -52,11 +52,10 @@ const AiAutoAnalysis = () => {
           data.deal_type && `نوع الصفقة: ${data.deal_type}`,
         ].filter(Boolean).join("\n");
 
-        const { data: aiData } = await supabase.functions.invoke("ai-chat", {
-          body: {
-            messages: [{ role: "user", content: "أعطيني تحليل سريع ومختصر (3-4 نقاط) لهالفرصة. ركّز على: السعر عادل؟ المخاطر؟ الفرص؟" }],
-            context: `الصفحة: تفاصيل إعلان\n${ctx}`,
-          },
+        const { invokeWithRetry } = await import("@/lib/invokeWithRetry");
+        const { data: aiData } = await invokeWithRetry("ai-chat", {
+          messages: [{ role: "user", content: "أعطيني تحليل سريع ومختصر (3-4 نقاط) لهالفرصة. ركّز على: السعر عادل؟ المخاطر؟ الفرص؟" }],
+          context: `الصفحة: تفاصيل إعلان\n${ctx}`,
         });
 
         if (aiData) {
