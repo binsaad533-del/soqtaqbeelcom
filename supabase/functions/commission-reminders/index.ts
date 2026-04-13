@@ -172,6 +172,17 @@ Deno.serve(async (req) => {
           .in("role", ["platform_owner", "financial_manager"]);
 
         for (const admin of admins || []) {
+          // Check if escalation already sent today
+          const { count: escCount } = await supabase
+            .from("notifications")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", admin.user_id)
+            .eq("type", "commission_escalation")
+            .eq("reference_id", comm.deal_id)
+            .gte("created_at", twentyFourHoursAgo);
+
+          if ((escCount || 0) > 0) continue;
+
           await supabase.from("notifications").insert({
             user_id: admin.user_id,
             title: shouldSuspend ? "تعليق بائع — عمولة متأخرة 45+ يوم" : "عمولة متأخرة 30+ يوم — تحتاج تصعيد",
