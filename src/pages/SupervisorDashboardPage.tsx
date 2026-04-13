@@ -9,10 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSEO } from "@/hooks/useSEO";
 import { cn } from "@/lib/utils";
 import {
-  FileText, MessageSquare, AlertTriangle, CheckCircle, Clock,
+  FileText, AlertTriangle, CheckCircle,
   ChevronLeft, Loader2, Eye, Users, Handshake, TrendingUp,
   Search, Bell, Activity, RefreshCw, Shield, UserCheck, User,
-  ClipboardList, Download, Filter, ChevronDown, BarChart3
+  ClipboardList, Download, BarChart3
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
