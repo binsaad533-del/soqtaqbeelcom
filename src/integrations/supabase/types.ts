@@ -1970,6 +1970,39 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_expenses: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at: string
+          created_by: string
+          date: string
+          description: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          created_by: string
+          date?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          created_by?: string
+          date?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       post_deal_followups: {
         Row: {
           buyer_notified: boolean
@@ -2740,6 +2773,7 @@ export type Database = {
         | "supervisor"
         | "customer"
         | "financial_manager"
+      expense_category: "hosting" | "ai" | "sms" | "email" | "other"
       fraud_flag_type:
         | "duplicate_images"
         | "duplicate_text"
@@ -2899,6 +2933,7 @@ export const Constants = {
         "customer",
         "financial_manager",
       ],
+      expense_category: ["hosting", "ai", "sms", "email", "other"],
       fraud_flag_type: [
         "duplicate_images",
         "duplicate_text",
