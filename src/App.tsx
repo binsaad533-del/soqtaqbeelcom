@@ -71,6 +71,7 @@ const ReferralPage = lazy(() => import("./pages/ReferralPage"));
 const SupportPage = lazy(() => import("./pages/SupportPage"));
 const NewTicketPage = lazy(() => import("./pages/NewTicketPage"));
 const TicketDetailPage = lazy(() => import("./pages/TicketDetailPage"));
+const AdminRolesPage = lazy(() => import("./pages/AdminRolesPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
