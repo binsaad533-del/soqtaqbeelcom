@@ -127,7 +127,7 @@ const App = () => (
                 <Route path="/blog/:slug" element={<BlogPostPage />} />
                 <Route path="/commission" element={<CommissionPage />} />
                 <Route path="/escrow" element={<EscrowPage />} />
-                <Route path="/listing/:id" element={<ListingDetailsPage />} />
+                <Route path="/listing/:id" element={<PageErrorBoundary label="تفاصيل الإعلان"><ListingDetailsPage /></PageErrorBoundary>} />
                 <Route
                   path="/create-listing"
                   element={
