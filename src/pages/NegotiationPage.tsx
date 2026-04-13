@@ -165,7 +165,7 @@ const NegotiationPage = () => {
     }
     
     return parts.join("\n");
-  }, [deal, listing, messages, user, profile]);
+  }, [deal, listing, messages, user, profile, otherProfile]);
 
   const callAI = useCallback(async (mode: string, extraMessages?: { role: string; content: string }[]) => {
     const context = buildContext();
