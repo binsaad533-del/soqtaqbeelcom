@@ -1013,6 +1013,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          last_updated_at: string
           listing_id: string
           requested_by: string
           study_data: Json
@@ -1020,6 +1021,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          last_updated_at?: string
           listing_id: string
           requested_by: string
           study_data?: Json
@@ -1027,6 +1029,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          last_updated_at?: string
           listing_id?: string
           requested_by?: string
           study_data?: Json
