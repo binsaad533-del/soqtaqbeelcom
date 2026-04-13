@@ -412,6 +412,29 @@ serve(async (req) => {
           reference_type: "report",
         });
 
+        // Email weekly report
+        const anonKeyW = Deno.env.get("SUPABASE_ANON_KEY")!;
+        const supabaseUrlW = Deno.env.get("SUPABASE_URL")!;
+        fetch(`${supabaseUrlW}/functions/v1/notify-user`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${anonKeyW}`, apikey: anonKeyW },
+          body: JSON.stringify({
+            userId: sellerId,
+            category: "marketing",
+            templateName: "weekly-report",
+            idempotencyKey: `weekly-report-${sellerId}-${weekStart}`,
+            templateData: {
+              viewsThisWeek: vThisWeek,
+              viewsLastWeek: vLastWeek,
+              viewTrend,
+              newOffers: newOffers || 0,
+              newMessages: newMessages || 0,
+              recommendation,
+              listingsCount: listings.length,
+            },
+          }),
+        }).catch(() => {});
+
         await supabase.from("agent_actions_log").insert({
           user_id: sellerId,
           action_type: "weekly_report",
