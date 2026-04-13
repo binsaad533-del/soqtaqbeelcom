@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { safeJsonLd } from "@/lib/security";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -110,7 +111,26 @@ const ContactPage = () => {
     );
   }
 
+  const localBusinessJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: "سوق تقبيل — شركة عين جساس للمقاولات",
+    url: "https://soqtaqbeel.com",
+    description: "منصة ذكية لتقبيل المشاريع التجارية في السعودية",
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "SA",
+    },
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      url: "https://soqtaqbeel.com/contact",
+    },
+  };
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(localBusinessJsonLd) }} />
     <div className="py-12 px-4">
       <div className="container max-w-4xl">
         <div className="text-center mb-10">
