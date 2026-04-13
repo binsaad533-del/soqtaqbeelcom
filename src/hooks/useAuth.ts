@@ -121,4 +121,5 @@ export function useAuth() {
     isSupervisor,
     isCustomer,
     isFinancialManager,
+  };
 }
