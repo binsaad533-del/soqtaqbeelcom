@@ -473,7 +473,7 @@ const CreateListingPage = () => {
               const filtered = urls.filter(u => !docPhotoUrls.has(u));
               if (filtered.length > 0) updated[group] = filtered;
             }
-            updated.document_photos = [...(prev.document_photos || []), ...Array.from(docPhotoUrls)];
+            updated.document_photos = [...(prev.document_photos || []), ...Array.from(docPhotoUrls) as string[]];
             if (listingId) updateListing(listingId, { photos: updated } as never).catch(() => {});
             return updated;
           });
