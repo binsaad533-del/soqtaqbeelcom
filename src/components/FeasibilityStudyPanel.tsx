@@ -850,7 +850,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     );
   }
 
-  if (!study) {
+  // If study is still null after all resolution attempts, force-build from listing data
+  const resolvedStudy = study || buildEstimatedFeasibilityStudy(listing);
+  if (!resolvedStudy) {
     return (
       <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
         <div className="flex items-center gap-2">
@@ -865,7 +867,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              الدراسة قيد الإعداد التلقائي وستكون جاهزة قريباً
+              لا تتوفر بيانات كافية لإعداد دراسة الجدوى حالياً
             </p>
             {error && <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{error}</p>}
             {isOwner && (
