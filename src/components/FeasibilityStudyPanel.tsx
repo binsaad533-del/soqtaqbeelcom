@@ -561,7 +561,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility),
   );
   const [loading, setLoading] = useState(false);
-  const [loadingCache, setLoadingCache] = useState(true);
+  // If we already have a study from initialization, skip loading state entirely
+  const [loadingCache, setLoadingCache] = useState(() => !resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility));
   const [error, setError] = useState<string | null>(null);
   const [cachedAt, setCachedAt] = useState<string | null>(analysisCache.cacheAge || null);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(analysisCache.analysisUpdatedAt || analysisCache.cacheAge || null);
