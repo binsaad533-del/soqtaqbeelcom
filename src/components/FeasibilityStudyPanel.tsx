@@ -561,7 +561,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility),
   );
   const [loading, setLoading] = useState(false);
-  const [loadingCache, setLoadingCache] = useState(true);
+  // If we already have a study from initialization, skip loading state entirely
+  const [loadingCache, setLoadingCache] = useState(() => !resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility));
   const [error, setError] = useState<string | null>(null);
   const [cachedAt, setCachedAt] = useState<string | null>(analysisCache.cacheAge || null);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(analysisCache.analysisUpdatedAt || analysisCache.cacheAge || null);
@@ -849,7 +850,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     );
   }
 
-  if (!study) {
+  // If study is still null after all resolution attempts, force-build from listing data
+  const resolvedStudy = study || buildEstimatedFeasibilityStudy(listing);
+  if (!resolvedStudy) {
     return (
       <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
         <div className="flex items-center gap-2">
@@ -864,7 +867,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              الدراسة قيد الإعداد التلقائي وستكون جاهزة قريباً
+              لا تتوفر بيانات كافية لإعداد دراسة الجدوى حالياً
             </p>
             {error && <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{error}</p>}
             {isOwner && (
@@ -880,8 +883,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     );
   }
 
-  const v = VERDICT_COLORS[study.verdictColor] || VERDICT_COLORS.blue;
-  const rs = study.revenueProjections.realistic;
+  const displayStudy = resolvedStudy;
+  const v = VERDICT_COLORS[displayStudy.verdictColor] || VERDICT_COLORS.blue;
+  const rs = displayStudy.revenueProjections.realistic;
 
   return (
     <div ref={panelRef} id="feasibility" className="space-y-3">
@@ -890,7 +894,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
         <div className="flex items-center gap-2">
           <AiStar size={18} />
           <h3 className="text-base font-semibold">دراسة الجدوى الاقتصادية</h3>
-          {study._meta?.hasRealCompetitorData && (
+          {displayStudy._meta?.hasRealCompetitorData && (
             <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">بيانات Google Maps</span>
           )}
         </div>
@@ -924,8 +928,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       {/* Verdict Badge */}
       <div className={cn("rounded-xl border p-4 flex items-center justify-between", v.bg, v.border)}>
         <div>
-          <div className={cn("text-lg font-bold", v.text)}>{study.verdict}</div>
-          <div className="text-xs text-muted-foreground">مستوى الثقة: {study.confidenceLevel}</div>
+          <div className={cn("text-lg font-bold", v.text)}>{displayStudy.verdict}</div>
+          <div className="text-xs text-muted-foreground">مستوى الثقة: {displayStudy.confidenceLevel}</div>
         </div>
         <div className="text-left">
           <div className="text-xs text-muted-foreground">فترة الاسترداد (واقعي)</div>
@@ -942,7 +946,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           isOpen={expandedSections.summary}
           onToggle={() => toggleSection("summary")}
         >
-          <p className="text-sm leading-relaxed text-muted-foreground">{study.executiveSummary}</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">{displayStudy.executiveSummary}</p>
         </CollapsibleSection>
 
         {/* Investment Overview */}
@@ -951,10 +955,10 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           icon={<DollarSign size={14} />}
           isOpen={expandedSections.investment}
           onToggle={() => toggleSection("investment")}
-          badge={<span className="text-xs font-mono">{formatNum(study.investmentOverview.totalInvestment)} <SarSymbol className="inline w-2.5 h-2.5" /></span>}
+          badge={<span className="text-xs font-mono">{formatNum(displayStudy.investmentOverview.totalInvestment)} <SarSymbol className="inline w-2.5 h-2.5" /></span>}
         >
           <div className="space-y-1.5">
-            {study.investmentOverview.breakdownItems.map((item, i) => (
+            {displayStudy.investmentOverview.breakdownItems.map((item, i) => (
               <div key={i} className="flex items-center justify-between text-sm py-1 border-b border-border/30 last:border-0">
                 <span className="text-muted-foreground">{item.label}</span>
                 <div className="text-left">
@@ -973,10 +977,10 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           icon={<TrendingDown size={14} />}
           isOpen={expandedSections.costs}
           onToggle={() => toggleSection("costs")}
-          badge={<span className="text-xs font-mono">{formatNum(study.operationalCosts.monthlyTotal)} <SarSymbol className="inline w-2.5 h-2.5" />/شهر</span>}
+          badge={<span className="text-xs font-mono">{formatNum(displayStudy.operationalCosts.monthlyTotal)} <SarSymbol className="inline w-2.5 h-2.5" />/شهر</span>}
         >
           <div className="space-y-1.5">
-            {study.operationalCosts.items.map((item, i) => (
+            {displayStudy.operationalCosts.items.map((item, i) => (
               <div key={i} className="flex items-center justify-between text-sm py-1 border-b border-border/30 last:border-0">
                 <span className="text-muted-foreground">{item.label}</span>
                 <span className="font-mono">{formatNum(item.monthlyCost)} <SarSymbol className="inline w-2.5 h-2.5 opacity-50" /></span>
@@ -993,9 +997,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           onToggle={() => toggleSection("revenue")}
         >
           <div className="grid grid-cols-3 gap-2">
-            <ScenarioCard label="متفائل" scenario={study.revenueProjections.optimistic} color="emerald" icon={<ArrowUpRight size={12} />} />
-            <ScenarioCard label="واقعي" scenario={study.revenueProjections.realistic} color="blue" icon={<Minus size={12} />} />
-            <ScenarioCard label="متحفظ" scenario={study.revenueProjections.conservative} color="amber" icon={<ArrowDownRight size={12} />} />
+            <ScenarioCard label="متفائل" scenario={displayStudy.revenueProjections.optimistic} color="emerald" icon={<ArrowUpRight size={12} />} />
+            <ScenarioCard label="واقعي" scenario={displayStudy.revenueProjections.realistic} color="blue" icon={<Minus size={12} />} />
+            <ScenarioCard label="متحفظ" scenario={displayStudy.revenueProjections.conservative} color="amber" icon={<ArrowDownRight size={12} />} />
           </div>
         </CollapsibleSection>
 
@@ -1006,35 +1010,35 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           isOpen={expandedSections.competitors}
           onToggle={() => toggleSection("competitors")}
           badge={
-            <span className={cn("text-xs font-semibold", DENSITY_COLORS[study.competitorAnalysis.competitiveDensity] || "")}>
-              {study.competitorAnalysis.competitiveDensity}
+            <span className={cn("text-xs font-semibold", DENSITY_COLORS[displayStudy.competitorAnalysis.competitiveDensity] || "")}>
+              {displayStudy.competitorAnalysis.competitiveDensity}
             </span>
           }
         >
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">{study.competitorAnalysis.summary}</p>
+            <p className="text-sm text-muted-foreground">{displayStudy.competitorAnalysis.summary}</p>
 
             {/* Radius counts */}
             <div className="grid grid-cols-3 gap-2">
               <div className="rounded-lg bg-muted/30 p-2.5 text-center">
-                <div className="text-lg font-bold">{study.competitorAnalysis.nearbyCount}</div>
+                <div className="text-lg font-bold">{displayStudy.competitorAnalysis.nearbyCount}</div>
                 <div className="text-[10px] text-muted-foreground">500م (الشارع)</div>
               </div>
               <div className="rounded-lg bg-muted/30 p-2.5 text-center">
-                <div className="text-lg font-bold">{study.competitorAnalysis.neighborhoodCount}</div>
+                <div className="text-lg font-bold">{displayStudy.competitorAnalysis.neighborhoodCount}</div>
                 <div className="text-[10px] text-muted-foreground">2كم (الحي)</div>
               </div>
               <div className="rounded-lg bg-muted/30 p-2.5 text-center">
-                <div className="text-lg font-bold">{study.competitorAnalysis.areaCount}</div>
+                <div className="text-lg font-bold">{displayStudy.competitorAnalysis.areaCount}</div>
                 <div className="text-[10px] text-muted-foreground">10كم (المنطقة)</div>
               </div>
             </div>
 
             {/* Top competitors */}
-            {study.competitorAnalysis.topCompetitors && study.competitorAnalysis.topCompetitors.length > 0 && (
+            {displayStudy.competitorAnalysis.topCompetitors && displayStudy.competitorAnalysis.topCompetitors.length > 0 && (
               <div className="space-y-1">
                 <div className="text-xs font-medium text-muted-foreground">أبرز المنافسين:</div>
-                {study.competitorAnalysis.topCompetitors.slice(0, 5).map((c, i) => (
+                {displayStudy.competitorAnalysis.topCompetitors.slice(0, 5).map((c, i) => (
                   <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-border/20 last:border-0">
                     <div className="flex items-center gap-1.5">
                       <Building2 size={10} className="text-muted-foreground" />
@@ -1056,10 +1060,10 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             )}
 
             {/* Opportunities & Threats */}
-            {study.competitorAnalysis.opportunities && study.competitorAnalysis.opportunities.length > 0 && (
+            {displayStudy.competitorAnalysis.opportunities && displayStudy.competitorAnalysis.opportunities.length > 0 && (
               <div>
                 <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">فرص التميّز:</div>
-                {study.competitorAnalysis.opportunities.map((o, i) => (
+                {displayStudy.competitorAnalysis.opportunities.map((o, i) => (
                   <div key={i} className="flex gap-1.5 text-xs text-muted-foreground"><CheckCircle2 size={10} className="text-emerald-500 shrink-0 mt-0.5" />{o}</div>
                 ))}
               </div>
@@ -1073,19 +1077,19 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           icon={<Shield size={14} />}
           isOpen={expandedSections.risks}
           onToggle={() => toggleSection("risks")}
-          badge={<span className={cn("text-xs font-semibold", RISK_COLORS[study.riskAssessment.overallRisk] || "")}>{study.riskAssessment.overallRisk}</span>}
+          badge={<span className={cn("text-xs font-semibold", RISK_COLORS[displayStudy.riskAssessment.overallRisk] || "")}>{displayStudy.riskAssessment.overallRisk}</span>}
         >
           <div className="space-y-2">
-            <RiskGroup label="مخاطر مالية" items={study.riskAssessment.financialRisks} />
-            <RiskGroup label="مخاطر تشغيلية" items={study.riskAssessment.operationalRisks} />
-            <RiskGroup label="مخاطر سوقية" items={study.riskAssessment.marketRisks} />
-            {study.riskAssessment.regulatoryRisks && study.riskAssessment.regulatoryRisks.length > 0 && (
-              <RiskGroup label="مخاطر تنظيمية" items={study.riskAssessment.regulatoryRisks} />
+            <RiskGroup label="مخاطر مالية" items={displayStudy.riskAssessment.financialRisks} />
+            <RiskGroup label="مخاطر تشغيلية" items={displayStudy.riskAssessment.operationalRisks} />
+            <RiskGroup label="مخاطر سوقية" items={displayStudy.riskAssessment.marketRisks} />
+            {displayStudy.riskAssessment.regulatoryRisks && displayStudy.riskAssessment.regulatoryRisks.length > 0 && (
+              <RiskGroup label="مخاطر تنظيمية" items={displayStudy.riskAssessment.regulatoryRisks} />
             )}
-            {study.riskAssessment.mitigationStrategies && study.riskAssessment.mitigationStrategies.length > 0 && (
+            {displayStudy.riskAssessment.mitigationStrategies && displayStudy.riskAssessment.mitigationStrategies.length > 0 && (
               <div>
                 <div className="text-xs font-medium text-primary mb-1">استراتيجيات التخفيف:</div>
-                {study.riskAssessment.mitigationStrategies.map((s, i) => (
+                {displayStudy.riskAssessment.mitigationStrategies.map((s, i) => (
                   <div key={i} className="flex gap-1.5 text-xs text-muted-foreground"><Lightbulb size={10} className="text-primary shrink-0 mt-0.5" />{s}</div>
                 ))}
               </div>
@@ -1101,7 +1105,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           onToggle={() => toggleSection("recommendations")}
         >
           <div className="space-y-1.5">
-            {study.recommendations.map((r, i) => (
+            {displayStudy.recommendations.map((r, i) => (
               <div key={i} className="flex gap-2 text-sm">
                 <span className="text-primary font-bold shrink-0">{i + 1}.</span>
                 <span className="text-muted-foreground">{r}</span>
@@ -1113,7 +1117,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
         {/* Disclaimer */}
         <div className="rounded-lg bg-muted/20 border border-border/30 px-3 py-2 text-[10px] text-muted-foreground leading-relaxed">
           <AlertTriangle size={10} className="inline mr-1" />
-          {study.disclaimer}
+          {displayStudy.disclaimer}
         </div>
       </div>
     </div>
