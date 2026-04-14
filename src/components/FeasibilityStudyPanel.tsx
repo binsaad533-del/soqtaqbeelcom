@@ -883,8 +883,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     );
   }
 
-  const v = VERDICT_COLORS[study.verdictColor] || VERDICT_COLORS.blue;
-  const rs = study.revenueProjections.realistic;
+  const displayStudy = resolvedStudy;
+  const v = VERDICT_COLORS[displayStudy.verdictColor] || VERDICT_COLORS.blue;
+  const rs = displayStudy.revenueProjections.realistic;
 
   return (
     <div ref={panelRef} id="feasibility" className="space-y-3">
