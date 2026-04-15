@@ -125,11 +125,13 @@ serve(async (req) => {
       text: `${groupContext}\nحلّل الصور التالية واكتشف كل الأصول والمعدات. انتبه جيداً للتمييز بين صور متعددة لنفس الأصل وبين أصول متعددة متشابهة. عدد الصور الكلي: ${(photoUrls || []).length}`,
     });
 
-    // Add each photo URL as image_url (up to 50)
-    for (const url of (photoUrls || []).slice(0, 50)) {
+    // Add each photo URL as image_url (up to 30, use low detail for large batches)
+    const allPhotos = (photoUrls || []).slice(0, 30);
+    const detailLevel = allPhotos.length > 10 ? "low" : allPhotos.length > 5 ? "auto" : "high";
+    for (const url of allPhotos) {
       imageContent.push({
         type: "image_url",
-        image_url: { url, detail: "high" },
+        image_url: { url, detail: detailLevel },
       });
     }
 
@@ -205,7 +207,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: allPhotos.length > 10 ? "google/gemini-2.5-flash" : "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: imageContent },

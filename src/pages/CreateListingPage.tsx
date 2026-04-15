@@ -429,8 +429,8 @@ const CreateListingPage = () => {
     if (allPhotoUrlsForAnalysis.length === 0) { toast.error("يرجى رفع صور أولاً"); return; }
     const unsupportedUrls = allPhotoUrlsForAnalysis.filter((url) => /\.(heic|heif)(\?|$)/i.test(url));
     if (unsupportedUrls.length > 0) { toast.error("هناك صور قديمة بصيغة HEIC غير قابلة للتحليل"); return; }
-    const limitedUrls = allPhotoUrlsForAnalysis.slice(0, 200);
-    if (allPhotoUrlsForAnalysis.length > 200) toast.info(`لديك ${allPhotoUrlsForAnalysis.length} صورة — سيتم تحليل أول 200`);
+    const limitedUrls = allPhotoUrlsForAnalysis.slice(0, 30);
+    if (allPhotoUrlsForAnalysis.length > 30) toast.info(`لديك ${allPhotoUrlsForAnalysis.length} صورة — سيتم تحليل أول 30`);
     setAnalyzing(true);
     setAnalyzeProgress(10);
     const progressInterval = setInterval(() => setAnalyzeProgress((prev) => Math.min(prev + 8, 85)), 1500);
