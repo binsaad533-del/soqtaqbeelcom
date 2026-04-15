@@ -331,7 +331,7 @@ const CreateListingPage = () => {
     const existingKeys = new Set(fileStatuses.map(f => `${f.name}-${f.size}`));
     for (const f of allFiles) {
       const key = `${f.name}-${f.size}`;
-      if (existingKeys.has(key)) { toast.info(`الملف "${f.name}" مرفوع بالفعل — تم تخطيه`); continue; }
+      if (existingKeys.has(key)) continue;
       existingKeys.add(key);
       const ext = f.name.split(".").pop()?.toLowerCase() || "";
       const isImage = f.type.startsWith("image/") || imageExts.includes(ext);
@@ -341,6 +341,7 @@ const CreateListingPage = () => {
     if (imageFiles.length === 0 && docFiles.length === 0) return;
     setSaving(true);
     const totalFiles = imageFiles.length + docFiles.length;
+    let completedCount = 0;
     setUploadProgress({ current: 0, total: totalFiles });
     setUploadingGroup("bulk");
     const newStatuses: FileUploadStatus[] = [
@@ -348,22 +349,33 @@ const CreateListingPage = () => {
       ...docFiles.map((f, i) => ({ id: `doc-${Date.now()}-${i}`, name: f.name, size: f.size, type: "document" as const, status: "uploading" as const })),
     ];
     setFileStatuses(prev => [...prev, ...newStatuses]);
+
+    const BATCH_SIZE = 5;
+
+    // Helper: process a batch of items in parallel
+    const processBatch = async <T,>(items: T[], handler: (item: T, index: number) => Promise<void>) => {
+      for (let start = 0; start < items.length; start += BATCH_SIZE) {
+        const batch = items.slice(start, start + BATCH_SIZE);
+        await Promise.all(batch.map((item, bi) => handler(item, start + bi)));
+      }
+    };
+
     try {
       const imageUrls: string[] = [];
-      for (let i = 0; i < imageFiles.length; i++) {
+      await processBatch(imageFiles, async (file, i) => {
         const statusId = newStatuses[i].id;
-        setUploadProgress({ current: i + 1, total: totalFiles });
         try {
-          const validation = validateImageFile(imageFiles[i]);
-          if (!validation.valid) { toast.error(`${imageFiles[i].name}: ${validation.error}`); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: validation.error } : f)); continue; }
-          const prepared = await convertToJpeg(imageFiles[i]);
+          const validation = validateImageFile(file);
+          if (!validation.valid) { setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: validation.error } : f)); return; }
+          const prepared = await convertToJpeg(file);
           const previewUrl = URL.createObjectURL(prepared);
           setLocalPreviews(prev => ({ ...prev, all: [...(prev.all || []), previewUrl] }));
           const result = await uploadFile(id, prepared, "photos/all");
           if (result.url) { imageUrls.push(result.url); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url: result.url!, previewUrl } : f)); }
           else { setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || "فشل الرفع" } : f)); }
-        } catch (err) { console.error(`[BulkUpload] Image failed: ${imageFiles[i].name}`, err); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "تعذر تجهيز الملف" } : f)); }
-      }
+        } catch (err) { console.error(`[BulkUpload] Image failed: ${file.name}`, err); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "تعذر تجهيز الملف" } : f)); }
+        finally { completedCount++; setUploadProgress({ current: completedCount, total: totalFiles }); }
+      });
       if (imageUrls.length > 0) {
         setPhotos(prev => {
           const updated = { ...prev, all: [...(prev.all || []), ...imageUrls] };
@@ -372,17 +384,17 @@ const CreateListingPage = () => {
         });
       }
       const docUrls: string[] = [];
-      for (let i = 0; i < docFiles.length; i++) {
+      await processBatch(docFiles, async (file, i) => {
         const statusId = newStatuses[imageFiles.length + i].id;
-        setUploadProgress({ current: imageFiles.length + i + 1, total: totalFiles });
-        const validation = validateDocFile(docFiles[i]);
-        if (!validation.valid) { toast.error(`${docFiles[i].name}: ${validation.error}`); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: validation.error } : f)); continue; }
+        const validation = validateDocFile(file);
+        if (!validation.valid) { setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: validation.error } : f)); completedCount++; setUploadProgress({ current: completedCount, total: totalFiles }); return; }
         try {
-          const result = await uploadFile(id, docFiles[i], "docs/general");
+          const result = await uploadFile(id, file, "docs/general");
           if (result.url) { docUrls.push(result.url); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url: result.url! } : f)); }
           else { setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || "فشل الرفع" } : f)); }
-        } catch (err) { console.error(`[BulkUpload] Doc failed: ${docFiles[i].name}`, err); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "خطأ غير متوقع" } : f)); }
-      }
+        } catch (err) { console.error(`[BulkUpload] Doc failed: ${file.name}`, err); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "خطأ غير متوقع" } : f)); }
+        finally { completedCount++; setUploadProgress({ current: completedCount, total: totalFiles }); }
+      });
       if (docUrls.length > 0) {
         setUploadedDocs(prev => {
           const updated = { ...prev, general: [...(prev.general || []), ...docUrls] };
