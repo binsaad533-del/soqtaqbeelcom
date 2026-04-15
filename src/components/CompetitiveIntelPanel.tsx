@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingUp, BarChart3, Users, ArrowUp, ArrowDown, Minus, Loader2, RefreshCw, Globe, MapPin } from "lucide-react";
+import { TrendingUp, BarChart3, ArrowUp, ArrowDown, Minus, Loader2, RefreshCw, Globe, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import ReactMarkdown from "react-markdown";
