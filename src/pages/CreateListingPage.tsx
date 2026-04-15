@@ -672,18 +672,25 @@ const CreateListingPage = () => {
     return Math.round((filled / Math.max(total, 1)) * 100);
   })();
 
-  const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>, groupId: string) => {
+  const handleDropForGroup = useCallback(async (e: React.DragEvent<HTMLDivElement>, groupId: string) => {
     e.preventDefault();
     e.stopPropagation();
     setDraggingGroup(null);
     const files = e.dataTransfer?.files;
     if (!files || files.length === 0) return;
-    // Directly call the photo upload handler with a synthetic-like event
-    const fakeEvent = { target: { files, value: "" } } as unknown as React.ChangeEvent<HTMLInputElement>;
+    // Set group first, then programmatically assign files and trigger via native setter
     setActivePhotoGroup(groupId);
-    // Wait for state to settle before triggering upload
-    await new Promise(r => setTimeout(r, 0));
-    handlePhotoUploadRef.current?.(fakeEvent);
+    if (fileInputRef.current) {
+      const dt = new DataTransfer();
+      Array.from(files).forEach(f => dt.items.add(f));
+      // Use the native setter + React-compatible trigger
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'files')?.set;
+      if (nativeInputValueSetter) {
+        nativeInputValueSetter.call(fileInputRef.current, dt.files);
+        fileInputRef.current.dispatchEvent(new Event('input', { bubbles: true }));
+        fileInputRef.current.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
   }, []);
 
   // Shared state for step components
