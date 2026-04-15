@@ -261,12 +261,11 @@ const CreateListingPage = () => {
   }, [isHeicLikeFile]);
 
   // Upload handlers
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !activePhotoGroup) return;
+  const handlePhotoUploadForGroup = async (files: FileList, group: string) => {
+    if (!files || files.length === 0 || !group) return;
     const id = await ensureListing();
     if (!id) return;
-    const group = activePhotoGroup;
-    const rawFiles = Array.from(e.target.files);
+    const rawFiles = Array.from(files);
     const uploadedUrls: string[] = [];
     setUploadingGroup(group);
     setUploadProgress({ current: 0, total: rawFiles.length });
@@ -295,7 +294,13 @@ const CreateListingPage = () => {
         toast.success(`تم تجهيز ورفع ${uploadedUrls.length} ملف بنجاح`);
         if (isCrOnly && group === "cr_doc" && uploadedUrls.length > 0 && !crExtractionDone) handleCrExtraction(uploadedUrls[0]);
       }
-    } finally { setSaving(false); setUploadingGroup(null); e.target.value = ""; }
+    } finally { setSaving(false); setUploadingGroup(null); }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !activePhotoGroup) return;
+    await handlePhotoUploadForGroup(e.target.files, activePhotoGroup);
+    e.target.value = "";
   };
 
   const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
