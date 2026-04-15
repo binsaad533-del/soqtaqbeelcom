@@ -683,12 +683,8 @@ const CreateListingPage = () => {
     setDraggingGroup(null);
     const files = e.dataTransfer?.files;
     if (!files || files.length === 0) return;
-    setActivePhotoGroup(groupId);
-    // Build a synthetic event-like object and call the handler directly
-    const syntheticEvent = { target: { files, value: "" } } as unknown as React.ChangeEvent<HTMLInputElement>;
-    // Use setTimeout(0) so activePhotoGroup state is set before handler reads it
-    setTimeout(() => handlePhotoUpload(syntheticEvent), 0);
-  }, [handlePhotoUpload]);
+    handlePhotoUploadForGroup(files, groupId);
+  }, [handlePhotoUploadForGroup]);
 
   // Shared state for step components
   const sharedState: CreateListingSharedState = {
