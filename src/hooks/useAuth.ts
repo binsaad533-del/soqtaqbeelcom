@@ -29,11 +29,28 @@ export function useAuth() {
         supabase.from("profiles").select("*").eq("user_id", user.id).single(),
       ]);
 
+      let profile = profileRes.data;
+
+      // Auto-create profile if missing (safety net)
+      if (!profile && profileRes.error?.code === "PGRST116") {
+        const meta = user.user_metadata || {};
+        const { data: newProfile } = await supabase
+          .from("profiles")
+          .upsert({
+            user_id: user.id,
+            full_name: meta.full_name || "",
+            phone: meta.phone || "",
+          }, { onConflict: "user_id" })
+          .select("*")
+          .single();
+        if (newProfile) profile = newProfile;
+      }
+
       setState((prev) => ({
         ...prev,
         user,
         role: roleRes.data as AppRole | null,
-        profile: profileRes.data,
+        profile,
         loading: false,
       }));
     } catch {
