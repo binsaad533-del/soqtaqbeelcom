@@ -121,6 +121,20 @@ const CreateListingStep2 = ({ state }: Props) => {
       <div
         className="border-2 border-dashed border-primary/30 rounded-2xl p-8 text-center hover:border-primary/50 transition-all cursor-pointer bg-primary/[0.02] hover:bg-primary/[0.04]"
         onClick={() => bulkInputRef.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const files = e.dataTransfer?.files;
+          if (!files || files.length === 0 || !bulkInputRef.current) return;
+          const dt = new DataTransfer();
+          Array.from(files).forEach((file) => dt.items.add(file));
+          bulkInputRef.current.files = dt.files;
+          bulkInputRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+        }}
       >
         <Upload size={32} strokeWidth={1.5} className="text-primary mx-auto mb-3" />
         <h3 className="font-medium text-sm mb-1">اسحب أو اضغط لرفع الصور والمستندات دفعة واحدة</h3>
