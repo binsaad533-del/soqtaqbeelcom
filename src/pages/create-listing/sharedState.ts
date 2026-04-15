@@ -105,7 +105,7 @@ export interface CreateListingSharedState {
   photoGroups: Array<{ id: string; label: string; min: number; icon: string; dealTypes: readonly string[] }>;
   getGroupDisplayUrls: (groupId: string) => string[];
   handleDrop: (e: React.DragEvent<HTMLDivElement>, groupId: string) => void;
-  dynamicDocTypes: string[];
+  handleBulkDrop: (files: FileList) => void;
 }
 
 export interface FileUploadStatus {
