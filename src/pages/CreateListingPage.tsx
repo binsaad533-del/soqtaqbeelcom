@@ -678,10 +678,12 @@ const CreateListingPage = () => {
     setDraggingGroup(null);
     const files = e.dataTransfer?.files;
     if (!files || files.length === 0) return;
+    // Directly call the photo upload handler with a synthetic-like event
+    const fakeEvent = { target: { files, value: "" } } as unknown as React.ChangeEvent<HTMLInputElement>;
     setActivePhotoGroup(groupId);
-    const dt = new DataTransfer();
-    Array.from(files).forEach(f => dt.items.add(f));
-    if (fileInputRef.current) { fileInputRef.current.files = dt.files; fileInputRef.current.dispatchEvent(new Event("change", { bubbles: true })); }
+    // Wait for state to settle before triggering upload
+    await new Promise(r => setTimeout(r, 0));
+    handlePhotoUploadRef.current?.(fakeEvent);
   }, []);
 
   // Shared state for step components
