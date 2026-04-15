@@ -707,6 +707,7 @@ const CreateListingPage = () => {
     dealCheckLoading, dealCheckResult, dealCheckError, handleRunInlineDealCheck, handlePublishClick,
     stepDirection, totalPhotos, allPhotoUrls, imageReq, primaryDealLabel, disclosureScore,
     editingItemId, setEditingItemId, photoGroups, getGroupDisplayUrls, handleDrop, dynamicDocTypes,
+    handleBulkDrop: (files: FileList) => handleBulkUploadFiles(files),
   };
 
   if (draftLoading) {
