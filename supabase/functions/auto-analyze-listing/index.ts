@@ -31,12 +31,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Skip if already analyzed recently (within 24 hours)
-    if (listing.ai_analysis_cache) {
+    // Skip if already analyzed recently (within 1 hour) — unless force flag is set
+    const { force } = await req.json().catch(() => ({}));
+    if (!force && listing.ai_analysis_cache) {
       const cache = listing.ai_analysis_cache as any;
       if (cache.generated_at) {
         const age = Date.now() - new Date(cache.generated_at).getTime();
-        if (age < 24 * 60 * 60 * 1000) {
+        if (age < 60 * 60 * 1000) {
           return new Response(JSON.stringify({ success: true, skipped: true, reason: "recent_cache" }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
