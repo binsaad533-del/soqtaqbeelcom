@@ -325,16 +325,16 @@ const CreateListingPage = () => {
     e.target.value = "";
   };
 
-  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+  const handleBulkUploadFiles = async (files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
     const id = await ensureListing();
     if (!id) return;
-    const allFiles = Array.from(e.target.files);
     const imageExts = ["jpg", "jpeg", "png", "webp", "heic", "heif", "gif", "bmp", "avif"];
     const imageFiles: File[] = [];
     const docFiles: File[] = [];
     const existingKeys = new Set(fileStatuses.map(f => `${f.name}-${f.size}`));
-    for (const f of allFiles) {
+    for (const f of fileArray) {
       const key = `${f.name}-${f.size}`;
       if (existingKeys.has(key)) continue;
       existingKeys.add(key);
@@ -357,7 +357,6 @@ const CreateListingPage = () => {
 
     const BATCH_SIZE = 5;
 
-    // Helper: process a batch of items in parallel
     const processBatch = async <T,>(items: T[], handler: (item: T, index: number) => Promise<void>) => {
       for (let start = 0; start < items.length; start += BATCH_SIZE) {
         const batch = items.slice(start, start + BATCH_SIZE);
@@ -414,7 +413,13 @@ const CreateListingPage = () => {
       if (uploadedTotal > 0 && failedTotal === 0) toast.success(`تم رفع ${uploadedTotal} ملف بنجاح`);
       else if (uploadedTotal > 0 && failedTotal > 0) toast.warning(`تم رفع ${uploadedTotal} ملف — فشل ${failedTotal}`);
       else if (failedTotal > 0) toast.error(`فشل رفع جميع الملفات (${failedTotal})`);
-    } finally { setSaving(false); setUploadingGroup(null); e.target.value = ""; }
+    } finally { setSaving(false); setUploadingGroup(null); }
+  };
+
+  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    await handleBulkUploadFiles(e.target.files);
+    e.target.value = "";
   };
 
   const handleCrExtraction = useCallback(async (documentUrl: string) => {
