@@ -138,7 +138,7 @@ const CreateListingStep2 = ({ state }: Props) => {
       >
         <Upload size={32} strokeWidth={1.5} className="text-primary mx-auto mb-3" />
         <h3 className="font-medium text-sm mb-1">اسحب أو اضغط لرفع الصور والمستندات دفعة واحدة</h3>
-        <p className="text-xs text-muted-foreground mb-2">صور (JPG, PNG, HEIC) + مستندات (PDF, Excel, Word) — حتى 200 ملف</p>
+        <p className="text-xs text-muted-foreground mb-2">صور (JPG, PNG, HEIC) + مستندات (PDF, Excel, Word) — حتى 200 صورة و 100 مستند دفعة واحدة</p>
         <p className="text-[10px] text-primary font-medium">الـAI يصنّف كل ملف تلقائياً ✦</p>
       </div>
 
