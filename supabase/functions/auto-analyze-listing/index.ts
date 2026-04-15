@@ -7,7 +7,8 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { listingId } = await req.json();
+    const body = await req.json();
+    const { listingId, force } = body;
     if (!listingId) {
       return new Response(JSON.stringify({ error: "listingId required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -31,12 +32,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Skip if already analyzed recently (within 24 hours)
-    if (listing.ai_analysis_cache) {
+    // Skip if already analyzed recently (within 1 hour) — unless force flag is set
+    if (!force && listing.ai_analysis_cache) {
       const cache = listing.ai_analysis_cache as any;
       if (cache.generated_at) {
         const age = Date.now() - new Date(cache.generated_at).getTime();
-        if (age < 24 * 60 * 60 * 1000) {
+        if (age < 60 * 60 * 1000) {
           return new Response(JSON.stringify({ success: true, skipped: true, reason: "recent_cache" }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
@@ -47,7 +48,7 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || "";
 
     // Helper to invoke edge functions internally
-    const invokeFunction = async (name: string, body: any) => {
+    const invokeFunction = async (name: string, fnBody: any) => {
       const resp = await fetch(`${supabaseUrl}/functions/v1/${name}`, {
         method: "POST",
         headers: {
@@ -55,7 +56,7 @@ Deno.serve(async (req) => {
           "Authorization": `Bearer ${serviceKey}`,
           "apikey": anonKey,
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(fnBody),
       });
       return resp.json();
     };

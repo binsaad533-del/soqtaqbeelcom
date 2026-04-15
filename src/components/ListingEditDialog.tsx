@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Check, Edit3, Camera, MapPin, Package, FileText, Plus, X, Trash2 } from "lucide-react";
+import { Loader2, Check, Edit3, Camera, MapPin, Package, FileText, Plus, X, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import GoogleMapPicker, { type PlaceDetails } from "@/components/GoogleMapPicker";
 import ListingEditErrorBoundary from "@/components/ListingEditErrorBoundary";
+import { invokeWithRetry } from "@/lib/invokeWithRetry";
 
 interface ListingEditDialogProps {
   listing: Listing;
@@ -32,7 +33,9 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingDocs, setUploadingDocs] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
   const [activePhotoGroup, setActivePhotoGroup] = useState<string | null>(null);
 
   // Resilient update with debounce + rate limit + retry
@@ -44,6 +47,8 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
 
   // ── Basic fields ──
   const [fields, setFields] = useState({
+    title: listing.title || "",
+    description: listing.description || "",
     business_activity: listing.business_activity || "",
     city: listing.city || "",
     district: listing.district || "",
@@ -51,16 +56,21 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
     annual_rent: listing.annual_rent != null ? String(listing.annual_rent) : "",
     lease_duration: listing.lease_duration || "",
     lease_remaining: listing.lease_remaining || "",
+    lease_paid_period: listing.lease_paid_period || "",
     liabilities: listing.liabilities || "",
     overdue_salaries: listing.overdue_salaries || "",
     overdue_rent: listing.overdue_rent || "",
     municipality_license: listing.municipality_license || "",
     civil_defense_license: listing.civil_defense_license || "",
     surveillance_cameras: listing.surveillance_cameras || "",
+    area_sqm: listing.area_sqm != null ? String(listing.area_sqm) : "",
   });
 
   // ── Photos ──
   const [photos, setPhotos] = useState<Record<string, string[]>>(listing.photos || {});
+
+  // ── Documents ──
+  const [documents, setDocuments] = useState<any[]>(listing.documents || []);
 
   // ── Location ──
   const [locationLat, setLocationLat] = useState(listing.location_lat ?? null);
@@ -73,6 +83,8 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
   useEffect(() => {
     if (open) {
       setFields({
+        title: listing.title || "",
+        description: listing.description || "",
         business_activity: listing.business_activity || "",
         city: listing.city || "",
         district: listing.district || "",
@@ -80,14 +92,17 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
         annual_rent: listing.annual_rent != null ? String(listing.annual_rent) : "",
         lease_duration: listing.lease_duration || "",
         lease_remaining: listing.lease_remaining || "",
+        lease_paid_period: listing.lease_paid_period || "",
         liabilities: listing.liabilities || "",
         overdue_salaries: listing.overdue_salaries || "",
         overdue_rent: listing.overdue_rent || "",
         municipality_license: listing.municipality_license || "",
         civil_defense_license: listing.civil_defense_license || "",
         surveillance_cameras: listing.surveillance_cameras || "",
+        area_sqm: listing.area_sqm != null ? String(listing.area_sqm) : "",
       });
       setPhotos(listing.photos || {});
+      setDocuments(listing.documents || []);
       setLocationLat(listing.location_lat ?? null);
       setLocationLng(listing.location_lng ?? null);
       setInventory(listing.inventory || []);
@@ -105,13 +120,12 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
     { id: "other", label: "أخرى" },
   ];
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !activePhotoGroup) return;
+  // ── Photo upload (click + drag) ──
+  const handlePhotoFiles = async (files: File[], group: string) => {
     setUploading(true);
-    const group = activePhotoGroup;
     const uploadedUrls: string[] = [];
 
-    for (const file of Array.from(e.target.files)) {
+    for (const file of files) {
       try {
         const result = await uploadFile(listing.id, file, `photos/${group}`);
         if (result.url) uploadedUrls.push(result.url);
@@ -128,7 +142,20 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
       toast.success(`تم رفع ${uploadedUrls.length} صورة`);
     }
     setUploading(false);
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !activePhotoGroup) return;
+    await handlePhotoFiles(Array.from(e.target.files), activePhotoGroup);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handlePhotoDrop = async (e: React.DragEvent<HTMLDivElement>, groupId: string) => {
+    e.preventDefault();
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+    const imageFiles = Array.from(files).filter(f => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name));
+    if (imageFiles.length > 0) await handlePhotoFiles(imageFiles, groupId);
   };
 
   const removePhoto = (group: string, index: number) => {
@@ -138,6 +165,52 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
     }));
   };
 
+  // ── Document upload ──
+  const handleDocFiles = async (files: File[]) => {
+    setUploadingDocs(true);
+    const newDocs: any[] = [];
+
+    for (const file of files) {
+      try {
+        const result = await uploadFile(listing.id, file, "documents");
+        if (result.url) {
+          newDocs.push({
+            name: file.name,
+            type: file.name.split(".").pop()?.toUpperCase() || "FILE",
+            files: [result.url],
+            status: "uploaded",
+          });
+        }
+      } catch {
+        toast.error(`فشل رفع ${file.name}`);
+      }
+    }
+
+    if (newDocs.length > 0) {
+      setDocuments(prev => [...prev, ...newDocs]);
+      toast.success(`تم رفع ${newDocs.length} مستند`);
+    }
+    setUploadingDocs(false);
+  };
+
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    await handleDocFiles(Array.from(e.target.files));
+    if (docInputRef.current) docInputRef.current.value = "";
+  };
+
+  const handleDocDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+    await handleDocFiles(Array.from(files));
+  };
+
+  const removeDocument = (index: number) => {
+    setDocuments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // ── Inventory ──
   const updateInventoryItem = (index: number, field: string, value: string) => {
     setInventory(prev => prev.map((item, i) =>
       i === index ? { ...item, [field]: field === "quantity" || field === "unit_price" ? Number(value) || 0 : value } : item
@@ -152,13 +225,20 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
     setInventory(prev => prev.filter((_, i) => i !== index));
   };
 
+  // ── Save + auto re-analyze ──
   const handleSave = async () => {
     if (!fields.business_activity.trim() || !fields.city.trim() || !fields.price.trim() || Number(fields.price) <= 0) {
       toast.error("يرجى إكمال الحقول المطلوبة: النشاط، المدينة، والسعر");
       return;
     }
 
+    const generatedTitle = fields.title.trim()
+      ? fields.title
+      : `${fields.business_activity || "مشروع"} — ${fields.district || ""}, ${fields.city || ""}`;
+
     const updateData: any = {
+      title: generatedTitle,
+      description: fields.description || null,
       business_activity: fields.business_activity,
       city: fields.city,
       district: fields.district,
@@ -166,14 +246,16 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
       annual_rent: fields.annual_rent ? Number(fields.annual_rent) : null,
       lease_duration: fields.lease_duration || null,
       lease_remaining: fields.lease_remaining || null,
+      lease_paid_period: fields.lease_paid_period || null,
       liabilities: fields.liabilities || null,
       overdue_salaries: fields.overdue_salaries || null,
       overdue_rent: fields.overdue_rent || null,
       municipality_license: fields.municipality_license || null,
       civil_defense_license: fields.civil_defense_license || null,
       surveillance_cameras: fields.surveillance_cameras || null,
-      title: `${fields.business_activity || "مشروع"} — ${fields.district || ""}, ${fields.city || ""}`,
+      area_sqm: fields.area_sqm ? Number(fields.area_sqm) : null,
       photos,
+      documents,
       inventory,
       location_lat: locationLat,
       location_lng: locationLng,
@@ -194,16 +276,33 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
     setSaving(false);
 
     if (error) {
-      // Revert optimistic update
       if (previousData) {
         queryClient.setQueryData(["listing", listing.id], previousData);
       }
-      // Toast already shown by useResilientUpdate
     } else {
       await queryClient.invalidateQueries({ queryKey: ["listing", listing.id] });
       await queryClient.invalidateQueries({ queryKey: ["listings"] });
       toast.success("تم حفظ التعديلات بنجاح");
       onOpenChange(false);
+
+      // ── Auto re-analyze in background ──
+      if (listing.status === "published") {
+        triggerReAnalysis(listing.id);
+      }
+    }
+  };
+
+  const triggerReAnalysis = async (listingId: string) => {
+    try {
+      toast("جاري إعادة التحليل الذكي...", { duration: 4000 });
+      await invokeWithRetry("auto-analyze-listing", { listingId });
+      // Refresh listing data to pick up new analysis
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["listing", listingId] });
+      }, 5000);
+      toast.success("تم تحديث التحليل الذكي بنجاح");
+    } catch (e) {
+      console.error("Re-analysis failed:", e);
     }
   };
 
@@ -216,6 +315,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
   );
 
   const totalPhotos = Object.values(photos).reduce((sum, arr) => sum + (arr?.length || 0), 0);
+  const totalDocs = documents.length;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -226,12 +326,12 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
             تعديل الإعلان
           </DialogTitle>
           <DialogDescription className="text-xs">
-            عدّل البيانات واحفظ — يتم عرض الحقول المناسبة لنوع الصفقة
+            عدّل البيانات واحفظ — سيتم إعادة تحليل الصفقة تلقائياً بعد الحفظ
           </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="basic" dir="rtl" className="mt-2">
-          <TabsList className="grid grid-cols-4 w-full">
+          <TabsList className="grid grid-cols-5 w-full">
             <TabsTrigger value="basic" className="text-xs gap-1">
               <FileText size={14} />
               بيانات
@@ -240,6 +340,11 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
               <Camera size={14} />
               صور
               {totalPhotos > 0 && <span className="text-[10px] bg-primary/20 text-primary rounded-full px-1.5">{totalPhotos}</span>}
+            </TabsTrigger>
+            <TabsTrigger value="docs" className="text-xs gap-1">
+              <Upload size={14} />
+              مستندات
+              {totalDocs > 0 && <span className="text-[10px] bg-primary/20 text-primary rounded-full px-1.5">{totalDocs}</span>}
             </TabsTrigger>
             <TabsTrigger value="location" className="text-xs gap-1">
               <MapPin size={14} />
@@ -255,6 +360,22 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
           {/* ══════ TAB: بيانات أساسية ══════ */}
           <TabsContent value="basic" className="space-y-3 mt-3">
             <div>
+              <label className="text-xs text-muted-foreground mb-1 block">عنوان الإعلان</label>
+              <input type="text" value={fields.title} onChange={(e) => set("title", e.target.value)} placeholder="عنوان مخصص (اختياري)" className={inputCls} />
+            </div>
+
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">الوصف</label>
+              <textarea
+                value={fields.description}
+                onChange={(e) => set("description", e.target.value)}
+                placeholder="وصف تفصيلي عن المشروع..."
+                rows={3}
+                className={cn(inputCls, "resize-none")}
+              />
+            </div>
+
+            <div>
               <label className="text-xs text-muted-foreground mb-1 block">نوع النشاط *</label>
               <input type="text" value={fields.business_activity} onChange={(e) => set("business_activity", e.target.value)} placeholder="مطعم وجبات سريعة" className={inputCls} />
             </div>
@@ -265,8 +386,8 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
                 <input type="text" value={fields.city} onChange={(e) => set("city", e.target.value)} placeholder="الرياض" className={inputCls} />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">الحي</label>
-                <input type="text" value={fields.district} onChange={(e) => set("district", e.target.value)} placeholder="حي النسيم" className={inputCls} />
+                <label className="text-xs text-muted-foreground mb-1 block">المساحة (م²)</label>
+                <input type="number" value={fields.area_sqm} onChange={(e) => set("area_sqm", e.target.value)} placeholder="150" className={inputCls} dir="ltr" />
               </div>
             </div>
 
@@ -364,7 +485,12 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
             {photoGroups.map(group => {
               const groupPhotos = photos[group.id] || [];
               return (
-                <div key={group.id} className="space-y-2">
+                <div
+                  key={group.id}
+                  className="space-y-2"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => handlePhotoDrop(e, group.id)}
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-foreground">{group.label}</span>
                     <Button
@@ -397,13 +523,56 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
                       ))}
                     </div>
                   ) : (
-                    <div className="text-xs text-muted-foreground/60 py-2 text-center border border-dashed border-border/30 rounded-lg">
-                      لا توجد صور
+                    <div className="text-xs text-muted-foreground/60 py-4 text-center border border-dashed border-border/30 rounded-lg">
+                      اسحب الصور هنا أو اضغط "إضافة صور"
                     </div>
                   )}
                 </div>
               );
             })}
+          </TabsContent>
+
+          {/* ══════ TAB: المستندات ══════ */}
+          <TabsContent value="docs" className="space-y-4 mt-3">
+            <input ref={docInputRef} type="file" multiple className="hidden" onChange={handleDocUpload} />
+
+            <div
+              className="border-2 border-dashed border-border/40 rounded-xl p-6 text-center cursor-pointer hover:border-primary/40 transition-colors"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleDocDrop}
+              onClick={() => docInputRef.current?.click()}
+            >
+              {uploadingDocs ? (
+                <Loader2 size={24} className="animate-spin mx-auto text-primary" />
+              ) : (
+                <>
+                  <Upload size={24} className="mx-auto text-muted-foreground/50 mb-2" />
+                  <p className="text-xs text-muted-foreground">اسحب المستندات هنا أو اضغط للاختيار</p>
+                  <p className="text-[10px] text-muted-foreground/50 mt-1">PDF, Excel, صور، وغيرها</p>
+                </>
+              )}
+            </div>
+
+            {documents.length > 0 && (
+              <div className="space-y-2">
+                {documents.map((doc, i) => {
+                  const docName = doc?.name || doc?.label || doc?.type || `مستند ${i + 1}`;
+                  const docFiles = Array.isArray(doc?.files) ? doc.files : (doc?.url ? [doc.url] : []);
+                  return (
+                    <div key={i} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg border border-border/20">
+                      <FileText size={14} className="text-primary shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{docName}</p>
+                        <p className="text-[10px] text-muted-foreground">{docFiles.length} ملف</p>
+                      </div>
+                      <button onClick={() => removeDocument(i)} className="text-destructive/60 hover:text-destructive transition-colors">
+                        <X size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </TabsContent>
 
           {/* ══════ TAB: الموقع ══════ */}
@@ -484,7 +653,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
           <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl px-6">
             إلغاء
           </Button>
-          <Button onClick={handleSave} disabled={saving || uploading} className="gradient-primary text-primary-foreground rounded-xl px-6">
+          <Button onClick={handleSave} disabled={saving || uploading || uploadingDocs} className="gradient-primary text-primary-foreground rounded-xl px-6">
             {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
             حفظ التعديلات
           </Button>
