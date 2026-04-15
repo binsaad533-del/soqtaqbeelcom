@@ -261,12 +261,11 @@ const CreateListingPage = () => {
   }, [isHeicLikeFile]);
 
   // Upload handlers
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !activePhotoGroup) return;
+  const handlePhotoUploadForGroup = async (files: FileList, group: string) => {
+    if (!files || files.length === 0 || !group) return;
     const id = await ensureListing();
     if (!id) return;
-    const group = activePhotoGroup;
-    const rawFiles = Array.from(e.target.files);
+    const rawFiles = Array.from(files);
     const uploadedUrls: string[] = [];
     setUploadingGroup(group);
     setUploadProgress({ current: 0, total: rawFiles.length });
@@ -295,7 +294,13 @@ const CreateListingPage = () => {
         toast.success(`تم تجهيز ورفع ${uploadedUrls.length} ملف بنجاح`);
         if (isCrOnly && group === "cr_doc" && uploadedUrls.length > 0 && !crExtractionDone) handleCrExtraction(uploadedUrls[0]);
       }
-    } finally { setSaving(false); setUploadingGroup(null); e.target.value = ""; }
+    } finally { setSaving(false); setUploadingGroup(null); }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !activePhotoGroup) return;
+    await handlePhotoUploadForGroup(e.target.files, activePhotoGroup);
+    e.target.value = "";
   };
 
   const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -320,16 +325,16 @@ const CreateListingPage = () => {
     e.target.value = "";
   };
 
-  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+  const handleBulkUploadFiles = async (files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
     const id = await ensureListing();
     if (!id) return;
-    const allFiles = Array.from(e.target.files);
     const imageExts = ["jpg", "jpeg", "png", "webp", "heic", "heif", "gif", "bmp", "avif"];
     const imageFiles: File[] = [];
     const docFiles: File[] = [];
     const existingKeys = new Set(fileStatuses.map(f => `${f.name}-${f.size}`));
-    for (const f of allFiles) {
+    for (const f of fileArray) {
       const key = `${f.name}-${f.size}`;
       if (existingKeys.has(key)) continue;
       existingKeys.add(key);
@@ -352,7 +357,6 @@ const CreateListingPage = () => {
 
     const BATCH_SIZE = 5;
 
-    // Helper: process a batch of items in parallel
     const processBatch = async <T,>(items: T[], handler: (item: T, index: number) => Promise<void>) => {
       for (let start = 0; start < items.length; start += BATCH_SIZE) {
         const batch = items.slice(start, start + BATCH_SIZE);
@@ -409,7 +413,13 @@ const CreateListingPage = () => {
       if (uploadedTotal > 0 && failedTotal === 0) toast.success(`تم رفع ${uploadedTotal} ملف بنجاح`);
       else if (uploadedTotal > 0 && failedTotal > 0) toast.warning(`تم رفع ${uploadedTotal} ملف — فشل ${failedTotal}`);
       else if (failedTotal > 0) toast.error(`فشل رفع جميع الملفات (${failedTotal})`);
-    } finally { setSaving(false); setUploadingGroup(null); e.target.value = ""; }
+    } finally { setSaving(false); setUploadingGroup(null); }
+  };
+
+  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    await handleBulkUploadFiles(e.target.files);
+    e.target.value = "";
   };
 
   const handleCrExtraction = useCallback(async (documentUrl: string) => {
@@ -672,17 +682,14 @@ const CreateListingPage = () => {
     return Math.round((filled / Math.max(total, 1)) * 100);
   })();
 
-  const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>, groupId: string) => {
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>, groupId: string) => {
     e.preventDefault();
     e.stopPropagation();
     setDraggingGroup(null);
     const files = e.dataTransfer?.files;
     if (!files || files.length === 0) return;
-    setActivePhotoGroup(groupId);
-    const dt = new DataTransfer();
-    Array.from(files).forEach(f => dt.items.add(f));
-    if (fileInputRef.current) { fileInputRef.current.files = dt.files; fileInputRef.current.dispatchEvent(new Event("change", { bubbles: true })); }
-  }, []);
+    handlePhotoUploadForGroup(files, groupId);
+  }, [handlePhotoUploadForGroup]);
 
   // Shared state for step components
   const sharedState: CreateListingSharedState = {
@@ -700,6 +707,7 @@ const CreateListingPage = () => {
     dealCheckLoading, dealCheckResult, dealCheckError, handleRunInlineDealCheck, handlePublishClick,
     stepDirection, totalPhotos, allPhotoUrls, imageReq, primaryDealLabel, disclosureScore,
     editingItemId, setEditingItemId, photoGroups, getGroupDisplayUrls, handleDrop, dynamicDocTypes,
+    handleBulkDrop: (files: FileList) => handleBulkUploadFiles(files),
   };
 
   if (draftLoading) {

@@ -129,11 +129,8 @@ const CreateListingStep2 = ({ state }: Props) => {
           e.preventDefault();
           e.stopPropagation();
           const files = e.dataTransfer?.files;
-          if (!files || files.length === 0 || !bulkInputRef.current) return;
-          const dt = new DataTransfer();
-          Array.from(files).forEach((file) => dt.items.add(file));
-          bulkInputRef.current.files = dt.files;
-          bulkInputRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+          if (!files || files.length === 0) return;
+          state.handleBulkDrop(files);
         }}
       >
         <Upload size={32} strokeWidth={1.5} className="text-primary mx-auto mb-3" />
