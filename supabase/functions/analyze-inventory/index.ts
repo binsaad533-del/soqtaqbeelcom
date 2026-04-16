@@ -71,9 +71,7 @@ async function fetchFileAsText(url: string): Promise<string | null> {
 
     // For Excel/spreadsheet files, parse with SheetJS
     const ext = getFileExtension(url);
-    if (["xlsx", "xls", "xlsm", "xlsb"].includes(ext) ||
-        contentType.includes("spreadsheet") ||
-        contentType.includes("excel")) {
+    if (["xlsx", "xls", "xlsm", "xlsb"].includes(ext) || contentType.includes("spreadsheet") || contentType.includes("excel") || contentType.includes("officedocument.spreadsheetml")) {
       return await parseExcelToText(resp);
     }
 
@@ -100,13 +98,13 @@ async function parseExcelToText(resp: Response): Promise<string | null> {
       if (!sheet) continue;
 
       // Convert to array of arrays for better control
-      const rows: any[][] = utils.sheet_to_json(sheet, { header: 1, defval: "" });
+      const rows: unknown[][] = utils.sheet_to_json(sheet, { header: 1, defval: "", raw: false });
       if (rows.length === 0) continue;
 
       result += `\n=== ورقة: ${sheetName} (${rows.length} صف) ===\n`;
 
       // Take header + up to MAX_ROWS_PER_SHEET rows
-      const headerRow = rows[0];
+      const headerRow = rows[0].map((cell) => String(cell ?? "").trim());
       const dataRows = rows.slice(1, MAX_ROWS_PER_SHEET + 1);
 
       // Format as tab-separated for AI readability
@@ -116,9 +114,10 @@ async function parseExcelToText(resp: Response): Promise<string | null> {
       }
 
       for (const row of dataRows) {
-        const nonEmpty = row.some((cell: any) => cell !== "" && cell != null);
+        const normalizedRow = row.map((cell) => String(cell ?? "").trim());
+        const nonEmpty = normalizedRow.some((cell) => cell !== "");
         if (nonEmpty) {
-          result += row.join("\t") + "\n";
+          result += normalizedRow.join("\t") + "\n";
           totalRows++;
         }
       }
@@ -153,14 +152,18 @@ function getFileExtension(url: string): string {
   }
 }
 
+function getFileNameFromUrl(url: string): string {
+  try {
+    const path = new URL(url).pathname;
+    return decodeURIComponent(path.split("/").pop() || "file");
+  } catch {
+    return "file";
+  }
+}
+
 function isImageFile(url: string): boolean {
   const ext = getFileExtension(url);
   return ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "tiff", "tif"].includes(ext);
-}
-
-/** Formats the AI model can accept as image_url — only actual images, NOT PDF */
-function isAiVisuallySupported(url: string): boolean {
-  return isImageFile(url);
 }
 
 serve(async (req) => {
@@ -192,13 +195,15 @@ serve(async (req) => {
       }
     }
 
+    const allPhotos = (photoUrls || []).slice(0, 30);
     imageContent.push({
       type: "text",
-      text: `${groupContext}\nحلّل الصور التالية واكتشف كل الأصول والمعدات. انتبه جيداً للتمييز بين صور متعددة لنفس الأصل وبين أصول متعددة متشابهة. عدد الصور الكلي: ${(photoUrls || []).length}`,
+      text: allPhotos.length > 0
+        ? `${groupContext}\nحلّل الصور والملفات التالية واكتشف كل الأصول والمعدات. انتبه جيداً للتمييز بين صور متعددة لنفس الأصل وبين أصول متعددة متشابهة. عدد الصور الكلي: ${allPhotos.length}. عدد المستندات: ${(documentUrls || []).length}`
+        : `لا توجد صور مرفقة. ركّز على تحليل المستندات والملفات المرفوعة، خصوصاً ملفات Excel، واستخرج الأصول والمخزون والبيانات التشغيلية منها بدقة. عدد المستندات: ${(documentUrls || []).length}`,
     });
 
     // Add each photo URL as image_url (up to 30, use low detail for large batches)
-    const allPhotos = (photoUrls || []).slice(0, 30);
     const detailLevel = allPhotos.length > 10 ? "low" : allPhotos.length > 5 ? "auto" : "high";
     for (const url of allPhotos) {
       imageContent.push({
@@ -211,34 +216,39 @@ serve(async (req) => {
     if (documentUrls && documentUrls.length > 0) {
       const imageDocUrls: string[] = [];
       const textContents: { filename: string; content: string }[] = [];
-      const binaryFileUrls: { url: string; ext: string }[] = [];
+      const failedFiles: string[] = [];
 
       for (const url of documentUrls.slice(0, 30)) {
         const ext = getFileExtension(url);
+        const filename = getFileNameFromUrl(url);
 
         if (isImageFile(url)) {
           imageDocUrls.push(url);
         } else if (["csv", "txt", "json", "xml", "tsv"].includes(ext)) {
           const text = await fetchFileAsText(url);
           if (text) {
-            textContents.push({ filename: `file.${ext}`, content: text.slice(0, 15000) });
+            textContents.push({ filename, content: text.slice(0, 15000) });
+          } else {
+            failedFiles.push(filename);
           }
-        } else if (isAiVisuallySupported(url)) {
-          // PDF — can be sent as image_url for Gemini multimodal
-          binaryFileUrls.push({ url, ext });
         } else {
-          // XLSX, DOCX, ZIP, etc. — try text/data extraction
           const text = await fetchFileAsText(url);
           if (text && text.length > 50) {
-            // Allow larger content for spreadsheets (up to 30KB)
             const isSpreadsheet = ["xlsx", "xls", "xlsm", "xlsb"].includes(ext);
             const maxLen = isSpreadsheet ? 30000 : 15000;
-            textContents.push({ filename: `file.${ext}`, content: text.slice(0, maxLen) });
+            textContents.push({ filename, content: text.slice(0, maxLen) });
           } else {
-            console.warn(`Skipping unsupported file format for AI vision: .${ext} — ${url}`);
-            textContents.push({ filename: `file.${ext}`, content: `[ملف ${ext.toUpperCase()} مرفق — لا يمكن تحليله بصرياً، يُرجى رفعه كـ PDF أو صورة للتحليل الكامل]` });
+            console.warn(`Could not extract document text: .${ext || "unknown"} — ${url}`);
+            failedFiles.push(filename);
           }
         }
+      }
+
+      if (imageDocUrls.length === 0 && textContents.length === 0 && failedFiles.length > 0) {
+        return new Response(JSON.stringify({ error: `تعذّر قراءة الملفات المرفوعة للتحليل: ${failedFiles.join("، ")}` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       // Add document images for visual analysis
@@ -255,25 +265,14 @@ serve(async (req) => {
         }
       }
 
-      // Add binary documents (PDF, XLSX, etc.) for Gemini multimodal processing
-      if (binaryFileUrls.length > 0) {
-        imageContent.push({
-          type: "text",
-          text: `\n\n📁 ملفات مرفقة (${binaryFileUrls.length} ملف: ${binaryFileUrls.map((f) => f.ext.toUpperCase()).join(", ")}) — حلّل محتوياتها واستخرج كل البيانات:`,
-        });
-        for (const { url } of binaryFileUrls) {
-          imageContent.push({
-            type: "image_url",
-            image_url: { url, detail: "high" },
-          });
-        }
-      }
-
       // Add extracted text content
       if (textContents.length > 0) {
         let textBlock = `\n\n📊 بيانات نصية مستخرجة من الملفات المرفقة:\n`;
         for (const { filename, content } of textContents) {
           textBlock += `\n--- ملف: ${filename} ---\n${content}\n`;
+        }
+        if (failedFiles.length > 0) {
+          textBlock += `\n--- ملفات تعذّر استخراجها بالكامل ---\n${failedFiles.join("\n")}\n`;
         }
         imageContent.push({ type: "text", text: textBlock });
       }
