@@ -228,13 +228,14 @@ serve(async (req) => {
           // PDF — can be sent as image_url for Gemini multimodal
           binaryFileUrls.push({ url, ext });
         } else {
-          // XLSX, DOCX, ZIP, etc. — cannot be sent as image_url
-          // Try text extraction only
+          // XLSX, DOCX, ZIP, etc. — try text/data extraction
           const text = await fetchFileAsText(url);
           if (text && text.length > 50) {
-            textContents.push({ filename: `file.${ext}`, content: text.slice(0, 15000) });
+            // Allow larger content for spreadsheets (up to 30KB)
+            const isSpreadsheet = ["xlsx", "xls", "xlsm", "xlsb"].includes(ext);
+            const maxLen = isSpreadsheet ? 30000 : 15000;
+            textContents.push({ filename: `file.${ext}`, content: text.slice(0, maxLen) });
           } else {
-            // Log unsupported but don't fail the whole request
             console.warn(`Skipping unsupported file format for AI vision: .${ext} — ${url}`);
             textContents.push({ filename: `file.${ext}`, content: `[ملف ${ext.toUpperCase()} مرفق — لا يمكن تحليله بصرياً، يُرجى رفعه كـ PDF أو صورة للتحليل الكامل]` });
           }
