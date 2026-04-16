@@ -158,10 +158,9 @@ function isImageFile(url: string): boolean {
   return ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "tiff", "tif"].includes(ext);
 }
 
-/** Formats the AI model can accept as image_url (images + PDF) */
+/** Formats the AI model can accept as image_url — only actual images, NOT PDF */
 function isAiVisuallySupported(url: string): boolean {
-  const ext = getFileExtension(url);
-  return isImageFile(url) || ext === "pdf";
+  return isImageFile(url);
 }
 
 serve(async (req) => {
