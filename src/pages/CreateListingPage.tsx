@@ -448,7 +448,8 @@ const CreateListingPage = () => {
 
   const handleAnalyze = async () => {
     const allPhotoUrlsForAnalysis = Object.values(photos).flat();
-    if (allPhotoUrlsForAnalysis.length === 0) { toast.error("يرجى رفع صور أولاً"); return; }
+    const allDocUrls = Object.values(uploadedDocs).flat();
+    if (allPhotoUrlsForAnalysis.length === 0 && allDocUrls.length === 0) { toast.error("يرجى رفع صور أو ملف Excel/مستند أولاً"); return; }
     const unsupportedUrls = allPhotoUrlsForAnalysis.filter((url) => /\.(heic|heif)(\?|$)/i.test(url));
     if (unsupportedUrls.length > 0) { toast.error("هناك صور قديمة بصيغة HEIC غير قابلة للتحليل"); return; }
     const limitedUrls = allPhotoUrlsForAnalysis.slice(0, 30);
@@ -457,7 +458,6 @@ const CreateListingPage = () => {
     setAnalyzeProgress(10);
     const progressInterval = setInterval(() => setAnalyzeProgress((prev) => Math.min(prev + 8, 85)), 1500);
     try {
-      const allDocUrls = Object.values(uploadedDocs).flat();
       const { data, error } = await supabase.functions.invoke("analyze-inventory", { body: { photoUrls: limitedUrls, photoGroups: photos, documentUrls: allDocUrls } });
       clearInterval(progressInterval);
       setAnalyzeProgress(100);
@@ -519,8 +519,8 @@ const CreateListingPage = () => {
           setCrExtractionDone(true);
         }
       }
-      toast.success("تم تحليل جميع الملفات والصور واستخراج البيانات بنجاح ✦");
-    } catch (err) { clearInterval(progressInterval); toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء تحليل الصور"); }
+      toast.success("تم تحليل الملفات المرفوعة واستخراج البيانات بنجاح ✦");
+    } catch (err) { clearInterval(progressInterval); toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء تحليل الملفات"); }
     finally { setAnalyzing(false); }
   };
 

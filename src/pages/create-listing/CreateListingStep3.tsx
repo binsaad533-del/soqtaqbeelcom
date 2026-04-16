@@ -15,6 +15,14 @@ import SarSymbol from "@/components/SarSymbol";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
 import type { CreateListingSharedState } from "./sharedState";
 
+const getUrlExtension = (url: string) => {
+  try {
+    return new URL(url).pathname.split(".").pop()?.toLowerCase() || "";
+  } catch {
+    return url.split(".").pop()?.toLowerCase() || "";
+  }
+};
+
 interface Props {
   state: CreateListingSharedState;
 }
@@ -44,6 +52,7 @@ const CreateListingStep3 = ({ state }: Props) => {
     dedupActions,
     handleAnalyze,
     allPhotoUrls,
+    uploadedDocs,
     imageReq,
     inventoryPricingMode,
     setInventoryPricingMode,
@@ -53,6 +62,50 @@ const CreateListingStep3 = ({ state }: Props) => {
     setEditingItemId,
   } = state;
 
+  const allDocumentUrls = Object.values(uploadedDocs).flat();
+  const excelDocumentCount = allDocumentUrls.filter((url) => ["xls", "xlsx", "xlsm", "xlsb"].includes(getUrlExtension(url))).length;
+  const hasDocuments = allDocumentUrls.length > 0;
+  const hasPhotos = allPhotoUrls.length > 0;
+  const hasInputs = hasPhotos || hasDocuments;
+
+  const analyzingTitle = excelDocumentCount > 0
+    ? hasPhotos
+      ? "جاري تحليل ملف Excel والصور..."
+      : "جاري تحليل ملف Excel..."
+    : hasDocuments && !hasPhotos
+      ? "جاري تحليل المستندات..."
+      : "الذكاء الاصطناعي يحلّل الصور...";
+
+  const analyzingHint = excelDocumentCount > 0
+    ? `جاري قراءة ${excelDocumentCount} ملف Excel واستخراج أول 500 صف من كل ملف`
+    : hasDocuments && !hasPhotos
+      ? "جاري استخراج البيانات من المستندات المرفوعة"
+      : "جاري اكتشاف الأصول وتمييز زوايا التصوير";
+
+  const introTitle = excelDocumentCount > 0
+    ? hasPhotos
+      ? "تحليل الصور وExcel بالذكاء الاصطناعي"
+      : "تحليل Excel بالذكاء الاصطناعي"
+    : hasDocuments && !hasPhotos
+      ? "تحليل المستندات بالذكاء الاصطناعي"
+      : "تحليل الصور بالذكاء الاصطناعي";
+
+  const introHint = excelDocumentCount > 0
+    ? hasPhotos
+      ? "سيقوم الـAI بقراءة ملفات Excel وتحليل الصور لاستخراج الأصول تلقائياً"
+      : "سيقوم الـAI بقراءة ملف Excel واستخراج الأصول والمخزون تلقائياً"
+    : hasDocuments && !hasPhotos
+      ? "سيقوم الـAI بتحليل المستندات المرفوعة واستخراج البيانات تلقائياً"
+      : "سيقوم الـAI بتحليل صورك واكتشاف الأصول تلقائياً";
+
+  const analyzeButtonLabel = excelDocumentCount > 0
+    ? hasPhotos
+      ? `ابدأ التحليل الذكي (${Math.min(allPhotoUrls.length, 30)} صورة + ${excelDocumentCount} Excel)`
+      : `ابدأ تحليل Excel (${excelDocumentCount} ملف)`
+    : hasDocuments && !hasPhotos
+      ? `ابدأ تحليل المستندات (${allDocumentUrls.length} ملف)`
+      : `ابدأ التحليل الذكي (${Math.min(allPhotoUrls.length, 30)} من ${allPhotoUrls.length} صورة)`;
+
   return (
     <div key="step-2" className={`space-y-6 ${stepDirection === "next" ? "animate-step-slide-in-next" : "animate-step-slide-in-prev"}`}>
       {!analyzed ? (
@@ -60,8 +113,8 @@ const CreateListingStep3 = ({ state }: Props) => {
           {analyzing ? (
             <>
               <AiStar size={56} className="mb-6" />
-              <h2 className="font-medium mb-2">الذكاء الاصطناعي يحلّل الصور...</h2>
-              <p className="text-sm text-muted-foreground max-w-sm">جاري اكتشاف الأصول وتمييز زوايا التصوير</p>
+              <h2 className="font-medium mb-2">{analyzingTitle}</h2>
+              <p className="text-sm text-muted-foreground max-w-sm">{analyzingHint}</p>
               <p className="text-xs text-success mt-2 animate-fade-in">لا تحتاج تعمل شيء — الـAI يتكفّل</p>
               <div className="mt-6 w-56">
                 <div className="h-1.5 rounded-full bg-muted overflow-hidden">
@@ -73,21 +126,27 @@ const CreateListingStep3 = ({ state }: Props) => {
           ) : (
             <>
               <AiStar size={48} className="mb-6" />
-              <h2 className="font-medium mb-2">تحليل الصور بالذكاء الاصطناعي</h2>
-              <p className="text-sm text-muted-foreground max-w-sm mb-1">سيقوم الـAI بتحليل صورك واكتشاف الأصول تلقائياً</p>
+              <h2 className="font-medium mb-2">{introTitle}</h2>
+              <p className="text-sm text-muted-foreground max-w-sm mb-1">{introHint}</p>
               <p className="text-xs text-success mb-4 animate-fade-in">فقط اضغط الزر — والباقي علينا</p>
-              {allPhotoUrls.length === 0 && imageReq === "none" ? (
+              {!hasInputs && imageReq === "none" ? (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Check size={14} className="text-success" />
-                  هذا النوع من الصفقات لا يتطلب صوراً — يمكنك المتابعة للخطوة التالية
+                  هذا النوع من الصفقات لا يتطلب صوراً — يمكنك المتابعة أو رفع Excel/مستندات لتحسين التحليل
                 </div>
-              ) : allPhotoUrls.length === 0 ? (
+              ) : !hasInputs ? (
                 <div className="flex items-center gap-1.5 text-xs text-warning">
                   <AlertTriangle size={14} />
-                  {imageReq === "required" ? "يرجى رفع صور في الخطوة السابقة أولاً" : "لم يتم رفع صور — يمكنك المتابعة أو العودة لرفع صور"}
+                  {imageReq === "required" ? "يرجى رفع صور أو ملف Excel/مستند في الخطوة السابقة أولاً" : "لم يتم رفع صور أو مستندات — يمكنك المتابعة أو العودة لرفع الملفات"}
                 </div>
               ) : (
                 <>
+                  {excelDocumentCount > 0 && (
+                    <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 flex items-start gap-2 mb-4 max-w-sm text-right">
+                      <Check size={14} className="text-primary shrink-0 mt-0.5" />
+                      <p className="text-xs text-primary">تم اكتشاف {excelDocumentCount} ملف Excel — سيتم تحليل أول 500 صف من كل ملف تلقائياً.</p>
+                    </div>
+                  )}
                   {allPhotoUrls.length > 30 && (
                     <div className="bg-warning/10 border border-warning/30 rounded-xl px-4 py-2.5 flex items-start gap-2 mb-4 max-w-sm text-right">
                       <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
@@ -96,7 +155,7 @@ const CreateListingStep3 = ({ state }: Props) => {
                   )}
                   <Button onClick={handleAnalyze} className="gradient-primary text-primary-foreground rounded-xl">
                     <Eye size={16} strokeWidth={1.5} />
-                    ابدأ التحليل الذكي ({Math.min(allPhotoUrls.length, 30)} من {allPhotoUrls.length} صورة)
+                    {analyzeButtonLabel}
                   </Button>
                 </>
               )}
