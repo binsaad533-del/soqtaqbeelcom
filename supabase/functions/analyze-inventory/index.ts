@@ -91,6 +91,12 @@ function isImageFile(url: string): boolean {
   return ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "tiff", "tif"].includes(ext);
 }
 
+/** Formats the AI model can accept as image_url (images + PDF) */
+function isAiVisuallySupported(url: string): boolean {
+  const ext = getFileExtension(url);
+  return isImageFile(url) || ext === "pdf";
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -151,13 +157,19 @@ serve(async (req) => {
           if (text) {
             textContents.push({ filename: `file.${ext}`, content: text.slice(0, 15000) });
           }
-        } else {
-          // PDF, XLSX, DOCX, ZIP, etc. - send as image_url (Gemini can read PDFs)
-          // Also try text extraction as fallback
+        } else if (isAiVisuallySupported(url)) {
+          // PDF — can be sent as image_url for Gemini multimodal
           binaryFileUrls.push({ url, ext });
+        } else {
+          // XLSX, DOCX, ZIP, etc. — cannot be sent as image_url
+          // Try text extraction only
           const text = await fetchFileAsText(url);
           if (text && text.length > 50) {
             textContents.push({ filename: `file.${ext}`, content: text.slice(0, 15000) });
+          } else {
+            // Log unsupported but don't fail the whole request
+            console.warn(`Skipping unsupported file format for AI vision: .${ext} — ${url}`);
+            textContents.push({ filename: `file.${ext}`, content: `[ملف ${ext.toUpperCase()} مرفق — لا يمكن تحليله بصرياً، يُرجى رفعه كـ PDF أو صورة للتحليل الكامل]` });
           }
         }
       }
