@@ -90,7 +90,7 @@ async function parseExcelToText(resp: Response): Promise<string | null> {
   try {
     const arrayBuffer = await resp.arrayBuffer();
     const data = new Uint8Array(arrayBuffer);
-    const workbook = XLSX.read(data, { type: "array" });
+    const workbook = read(data, { type: "array" });
 
     let result = "";
     const MAX_ROWS_PER_SHEET = 500;
@@ -101,7 +101,7 @@ async function parseExcelToText(resp: Response): Promise<string | null> {
       if (!sheet) continue;
 
       // Convert to array of arrays for better control
-      const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+      const rows: any[][] = utils.sheet_to_json(sheet, { header: 1, defval: "" });
       if (rows.length === 0) continue;
 
       result += `\n=== ورقة: ${sheetName} (${rows.length} صف) ===\n`;
