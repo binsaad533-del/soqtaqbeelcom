@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-// @deno-types="https://cdn.sheetjs.com/xlsx-0.20.3/package/types/index.d.ts"
-import { read, utils } from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs";
+import { read, utils } from "npm:xlsx@0.18.5";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
