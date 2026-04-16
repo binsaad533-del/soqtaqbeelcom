@@ -5,7 +5,6 @@ import {
   Minus,
   Trash2,
   AlertTriangle,
-  Loader2,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
