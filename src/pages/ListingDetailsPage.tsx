@@ -152,7 +152,8 @@ const ListingDetailsPage = () => {
   const [loading, setLoading] = useState(() => !cachedSnapshot?.listing);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [startingDeal, setStartingDeal] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [editDialogOpen, setEditDialogOpen] = useState(() => searchParams.get("edit") === "1");
   const [myActiveDeal, setMyActiveDeal] = useState<any>(() => cachedSnapshot?.myActiveDeal ?? null);
   const [isLiked, setIsLiked] = useState(() => cachedSnapshot?.isLiked ?? false);
   const [likeCount, setLikeCount] = useState(() => cachedSnapshot?.likeCount ?? 0);
