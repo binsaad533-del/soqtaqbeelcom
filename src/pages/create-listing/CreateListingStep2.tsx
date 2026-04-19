@@ -347,7 +347,7 @@ const CreateListingStep2 = ({ state }: Props) => {
         <div className="flex items-center gap-2">
           <FileText size={16} strokeWidth={1.5} className="text-primary" />
           <h3 className="font-medium text-sm">المستندات</h3>
-          <span className="text-[10px] text-muted-foreground">(اختياري — تظهر للمشتري كمستندات موثقة)</span>
+          <span className="text-[10px] text-primary/80 bg-primary/5 px-2 py-0.5 rounded-md border border-primary/15">اختياري — تظهر للمشتري كمستندات موثقة</span>
         </div>
         <div className="space-y-2">
           {dynamicDocTypes.map((doc) => (
