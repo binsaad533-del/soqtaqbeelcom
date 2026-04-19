@@ -26,6 +26,7 @@ import ListingOfferForm from "@/components/ListingOfferForm";
 import SellerOffersPanel from "@/components/SellerOffersPanel";
 import MoqbilAgentPanel from "@/components/MoqbilAgentPanel";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useListingSocial } from "@/hooks/useListingSocial";
 import { cn } from "@/lib/utils";
@@ -129,6 +130,7 @@ const ListingDetailsPage = () => {
   const { createDeal, getMyDeals } = useDeals();
   const { getProfile } = useProfiles();
   const { getSellerReviews } = useSellerReviews();
+  const queryClient = useQueryClient();
   const cachedSnapshot = id ? listingDetailsStateCache.get(id) : undefined;
   const [listing, setListing] = useState<Listing | null>(() => cachedSnapshot?.listing ?? null);
 
@@ -1081,6 +1083,12 @@ const ListingDetailsPage = () => {
           onOpenChange={setEditDialogOpen}
           onUpdated={(updated) => {
             setListing((prev) => prev ? { ...prev, ...updated } as Listing : prev);
+            // Invalidate caches so dashboard + marketplace reflect the change immediately
+            if (listing?.id) {
+              listingDetailsStateCache.delete(listing.id);
+            }
+            queryClient.invalidateQueries({ queryKey: ["listings"] });
+            queryClient.invalidateQueries({ queryKey: ["listing", listing?.id] });
           }}
         />
       )}
