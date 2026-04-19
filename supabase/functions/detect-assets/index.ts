@@ -695,11 +695,28 @@ function buildPriceAnalysis(
     else if (dealPrice <= totalHigh) decision = "سعر عادل";
     else if (dealPrice <= totalHigh * 1.20) decision = "أعلى قليلاً";
     else decision = "مبالغ فيه";
+  } else if (totalEstimatedValue > 0) {
+    // FIX 4: when listing has no price, label as suggestion mode
+    decision = "اقتراح سعر";
+  }
+
+  // FIX 4: produce a "suggested asking price" range for sellers — slightly above mid-range
+  // for negotiation room, but bounded by the upper estimate.
+  let suggestedPriceRange: { low: number; high: number; recommended: number } | null = null;
+  if (totalEstimatedValue > 0 && totalLow > 0 && totalHigh > 0) {
+    const mid = Math.round((totalLow + totalHigh) / 2);
+    const recommended = Math.round(mid * 1.05); // +5% negotiation buffer
+    suggestedPriceRange = {
+      low: Math.round(totalLow * 0.95),
+      high: Math.round(totalHigh * 1.10),
+      recommended: Math.min(recommended, Math.round(totalHigh * 1.08)),
+    };
   }
 
   return {
     estimated_value: totalEstimatedValue,
     estimated_range: { low: totalLow, high: totalHigh },
+    suggested_price_range: suggestedPriceRange,
     valuation_confidence: effectiveConfidence,
     deal_price: dealPrice || 0,
     difference,
