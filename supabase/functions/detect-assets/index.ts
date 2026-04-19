@@ -517,28 +517,36 @@ async function valuateAssets(
 function buildPriceAnalysis(
   assets: any[],
   valuationResult: any,
-  dealPrice: number | null
+  dealPrice: number | null,
+  confidence: string = "متوسط"
 ): any {
   if (!valuationResult?.valuations) return null;
 
   const valuationMap = new Map<string, any>();
   for (const v of valuationResult.valuations) {
-    valuationMap.set(v.name?.trim()?.toLowerCase(), v);
+    valuationMap.set(normalizeKey(v.name || ""), v);
   }
 
   const itemizedValues: any[] = [];
   let totalEstimatedValue = 0;
+  let totalLow = 0;
+  let totalHigh = 0;
 
   for (const asset of assets) {
-    const key = asset.name?.trim()?.toLowerCase();
+    const key = normalizeKey(asset.name || "");
     const valuation = valuationMap.get(key);
     const basePrice = valuation?.base_price_sar || 0;
-    const conditionMult = CONDITION_MULTIPLIER[asset.condition] || 0.50;
+    const conditionMult = CONDITION_MULTIPLIER[asset.condition] || 0.75;
+    const range = CONDITION_RANGE[asset.condition] || { low: 0.55, high: 0.95 };
     const qty = asset.quantity || 1;
     const adjustedPrice = Math.round(basePrice * conditionMult);
     const totalValue = adjustedPrice * qty;
+    const lowValue = Math.round(basePrice * range.low) * qty;
+    const highValue = Math.round(basePrice * range.high) * qty;
 
     totalEstimatedValue += totalValue;
+    totalLow += lowValue;
+    totalHigh += highValue;
 
     itemizedValues.push({
       name: asset.name,
@@ -549,12 +557,14 @@ function buildPriceAnalysis(
       condition_multiplier: conditionMult,
       adjusted_price: adjustedPrice,
       total_value: totalValue,
+      value_low: lowValue,
+      value_high: highValue,
       reasoning: valuation?.reasoning || "",
       source: asset.source || "image",
     });
   }
 
-  // Decision logic
+  // Decision logic — uses RANGE not single point (Option C)
   let decision = "غير محدد";
   let overpricedPercentage = 0;
   let difference = 0;
@@ -563,21 +573,25 @@ function buildPriceAnalysis(
     difference = dealPrice - totalEstimatedValue;
     overpricedPercentage = Math.round((difference / totalEstimatedValue) * 100);
 
-    if (overpricedPercentage <= -25) decision = "فرصة ممتازة";
-    else if (overpricedPercentage <= -10) decision = "صفقة جيدة";
-    else if (overpricedPercentage <= 10) decision = "سعر عادل";
-    else if (overpricedPercentage <= 25) decision = "أعلى قليلاً";
+    // Use range bounds for fairer decision: only flag overpriced if above HIGH bound
+    if (dealPrice <= totalLow * 0.85) decision = "فرصة ممتازة";
+    else if (dealPrice <= totalLow) decision = "صفقة جيدة";
+    else if (dealPrice <= totalHigh) decision = "سعر عادل";
+    else if (dealPrice <= totalHigh * 1.20) decision = "أعلى قليلاً";
     else decision = "مبالغ فيه";
   }
 
   return {
     estimated_value: totalEstimatedValue,
+    estimated_range: { low: totalLow, high: totalHigh },
+    valuation_confidence: confidence,
     deal_price: dealPrice || 0,
     difference,
     overpriced_percentage: overpricedPercentage,
     decision,
     items: itemizedValues,
     market_notes: valuationResult.market_notes || "",
+    disclaimer: "القيمة تقديرية بناءً على الأصول المرئية والمستندات. النطاق يعكس عدم اليقين في الحالة والسوق.",
     generated_at: new Date().toISOString(),
   };
 }
