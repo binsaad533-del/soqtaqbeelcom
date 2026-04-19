@@ -509,7 +509,7 @@ const VALUATION_TOOL = {
   type: "function" as const,
   function: {
     name: "report_valuations",
-    description: "Report estimated market value for each asset",
+    description: "Report estimated market value for each asset, distinguishing new vs used pricing",
     parameters: {
       type: "object",
       properties: {
@@ -519,13 +519,16 @@ const VALUATION_TOOL = {
             type: "object",
             properties: {
               name: { type: "string" },
-              base_price_sar: { type: "number", description: "السعر التقديري للوحدة بحالة جديدة بالريال السعودي" },
-              reasoning: { type: "string", description: "مبرر التقدير" },
+              base_price_sar: { type: "number", description: "السعر التقديري للوحدة بحالة جديدة بالريال السعودي (سعر الوكيل)" },
+              used_market_price_sar: { type: "number", description: "السعر السوقي الفعلي للوحدة المستعملة في السوق السعودي (السوق الثانوي). للمعدات الثقيلة والمركبات هذا قد يكون 25-55% من سعر الجديد بحسب العمر والحالة وساعات التشغيل" },
+              estimated_age_factor: { type: "string", enum: ["unknown", "recent", "mid_age", "old"], description: "تقدير عمر المعدة من الصورة (recent: <3 سنوات، mid_age: 3-8، old: >8). استخدم unknown إذا لا يمكن التحديد" },
+              missing_critical_info: { type: "array", items: { type: "string" }, description: "معلومات حرجة مفقودة لتقدير دقيق (مثلاً: سنة الصنع، ساعات التشغيل، حالة المحرك)" },
+              reasoning: { type: "string", description: "مبرر التقدير مع شرح الفرق بين سعر الجديد والمستعمل" },
             },
-            required: ["name", "base_price_sar", "reasoning"],
+            required: ["name", "base_price_sar", "used_market_price_sar", "estimated_age_factor", "reasoning"],
           },
         },
-        market_notes: { type: "string", description: "ملاحظات عامة عن السوق" },
+        market_notes: { type: "string", description: "ملاحظات عامة عن السوق ومستوى الثقة في التقدير" },
       },
       required: ["valuations", "market_notes"],
     },
