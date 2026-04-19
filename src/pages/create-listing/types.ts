@@ -21,6 +21,9 @@ export interface DedupAction {
 }
 
 export interface CrExtractionResult {
+  is_valid_cr?: boolean;
+  document_type_detected?: string;
+  rejection_reason?: string;
   cr_number?: string;
   entity_name?: string;
   business_activity?: string;

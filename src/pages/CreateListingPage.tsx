@@ -422,12 +422,37 @@ const CreateListingPage = () => {
     e.target.value = "";
   };
 
+  const removeRejectedDoc = useCallback((documentUrl: string) => {
+    setUploadedDocs((prev) => {
+      const updated: Record<string, string[]> = {};
+      for (const [k, v] of Object.entries(prev)) updated[k] = (v as string[]).filter((u) => u !== documentUrl);
+      if (listingId) {
+        updateListing(listingId, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch(() => {});
+      }
+      return updated;
+    });
+    setFileStatuses((prev) => prev.filter((f) => f.url !== documentUrl));
+  }, [listingId, updateListing]);
+
   const handleCrExtraction = useCallback(async (documentUrl: string) => {
     setCrExtracting(true);
     try {
       const { data, error } = await supabase.functions.invoke("extract-cr-data", { body: { documentUrl } });
-      if (error || !data || (data as { error?: string }).error) throw new Error((data as { error?: string })?.error || error?.message || "فشل استخراج البيانات");
-      const result = data as CrExtractionResult;
+      // Detect explicit validation rejection from edge function (data carries is_valid_cr=false)
+      const payload = (data || {}) as CrExtractionResult & { error?: string };
+      if (payload.is_valid_cr === false) {
+        const detected = payload.document_type_detected || "غير معروف";
+        const reason = payload.rejection_reason || "هذا الملف ليس سجلاً تجارياً سعودياً.";
+        toast.error(`❌ الملف مرفوض — ليس سجلاً تجارياً\nنوع المستند: ${detected}\n${reason}`, { duration: 9000 });
+        removeRejectedDoc(documentUrl);
+        setCrExtraction(null);
+        setCrExtractionDone(false);
+        return;
+      }
+      if (error || !data || payload.error) {
+        throw new Error(payload.error || error?.message || "فشل استخراج البيانات");
+      }
+      const result = payload as CrExtractionResult;
       setCrExtraction(result);
       setCrExtractionDone(true);
       setDisclosure((prev) => ({
@@ -436,15 +461,16 @@ const CreateListingPage = () => {
         ...(result.city && !prev.city ? { city: result.city } : {}),
         ...(result.district && !prev.district ? { district: result.district } : {}),
       }));
-      if (result.extraction_confidence === "high") toast.success("تم استخراج بيانات السجل التجاري بنجاح", { duration: 5000 });
-      else if (result.extraction_confidence === "medium") toast.info("تم استخراج بعض البيانات — يرجى المراجعة", { duration: 5000 });
-      else toast.warning("لم نتمكن من استخراج بيانات كافية", { duration: 6000 });
+      if (result.extraction_confidence === "high") toast.success("تم التحقق من السجل التجاري واستخراج البيانات بنجاح ✓", { duration: 5000 });
+      else if (result.extraction_confidence === "medium") toast.info("تم التحقق — استُخرجت بعض البيانات، يرجى المراجعة", { duration: 5000 });
+      else toast.warning("تم التحقق لكن جودة الصورة منخفضة — قد تحتاج لرفع صورة أوضح", { duration: 6000 });
     } catch (err) {
       console.error("CR extraction failed:", err);
-      toast.error("تعذّر استخراج البيانات من السجل التجاري");
+      const msg = err instanceof Error ? err.message : "تعذّر استخراج البيانات من السجل التجاري";
+      toast.error(msg, { duration: 7000 });
       setCrExtractionDone(true);
     } finally { setCrExtracting(false); }
-  }, []);
+  }, [removeRejectedDoc]);
 
   const handleAnalyze = async () => {
     const allPhotoUrlsForAnalysis = Object.values(photos).flat();
