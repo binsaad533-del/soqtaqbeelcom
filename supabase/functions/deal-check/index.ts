@@ -137,6 +137,7 @@ function normalizeListingForAnalysis(listing: any) {
     inventory_total_price: inventoryTotalPrice,
     documents,
     deal_options: dealOptions,
+    ai_document_classification: listing?.ai_document_classification || null,
   };
 }
 
