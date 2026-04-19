@@ -378,6 +378,8 @@ const ListingDetailsPage = () => {
   const inventory = (listing.inventory || []) as Array<{ name: string; qty: number; condition: string }>;
   const documents = normalizeListingDocuments(listing.documents || []);
   const isOwner = user?.id === listing.owner_id;
+  const isPlatformAdmin = role === "platform_owner" || role === "supervisor";
+  const canManageListing = isOwner || isPlatformAdmin;
   const isSimulation = hasSimulationPhotos(listing.photos as Record<string, unknown>);
 
   // Deal structure data
