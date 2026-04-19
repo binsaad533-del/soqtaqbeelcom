@@ -21,6 +21,9 @@ const AccountSettingsPanel = () => {
   const emailChanged = email.trim() !== (user?.email || "").trim() && email.trim().length > 0;
 
   /* ── Phone verification state ── */
+  // ⚠️ مؤقتاً: تم تعطيل اشتراط توثيق الجوال بسبب قيود مزود SMS (Twilio)
+  // لإعادة التفعيل لاحقاً: غيّر القيمة إلى false
+  const BYPASS_PHONE_VERIFICATION = true;
   const originalPhone = profile?.phone || "";
   const phoneChanged = phone.trim() !== originalPhone.trim() && phone.trim().length > 0;
   const [phoneVerified, setPhoneVerified] = useState(false);
