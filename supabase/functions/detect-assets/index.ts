@@ -738,7 +738,7 @@ serve(async (req) => {
   }
 
   try {
-    const { photoUrls, fileUrls, businessActivity, dealPrice, listingData } = await req.json();
+    const { photoUrls, fileUrls, businessActivity, dealPrice, listingData, manualInventory } = await req.json();
 
     const hasPhotos = Array.isArray(photoUrls) && photoUrls.length > 0;
     const hasFiles = Array.isArray(fileUrls) && fileUrls.length > 0;
