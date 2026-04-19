@@ -99,58 +99,92 @@ serve(async (req) => {
       }
     }
 
-    if (!isImage) {
-      if (expectedType === "equipment_photos") {
-        return new Response(
-          JSON.stringify({
-            is_valid: false,
-            document_type_detected: isPdf ? "ملف PDF" : isSpreadsheet ? "ملف Excel/CSV" : "ملف غير صورة",
-            rejection_reason: "حقل صور المعدات يقبل صوراً فقط (PNG/JPG/WebP/HEIC). يرفض رفع صورة فعلية للمعدة.",
-            confidence: "high",
-          }),
-          { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (expectedType === "asset_list" && (isSpreadsheet || isPdf)) {
-        return new Response(
-          JSON.stringify({
-            is_valid: true,
-            document_type_detected: isSpreadsheet ? "ملف Excel/CSV لقائمة الأصول" : "ملف PDF لقائمة الأصول",
-            confidence: "medium",
-            note: "تم قبول الملف بناءً على نوعه الهيكلي. سيتم تحليل المحتوى لاحقاً عند الجرد التلقائي.",
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (expectedType === "ownership_proof" && isPdf) {
-        return new Response(
-          JSON.stringify({
-            is_valid: true,
-            document_type_detected: "مستند PDF (فاتورة/عقد/سند مرجح)",
-            confidence: "medium",
-            note: "تم قبول الملف بناءً على كونه PDF — يفترض أن يكون فاتورة أو عقداً.",
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+    // equipment_photos must be a real photo
+    if (!isImage && expectedType === "equipment_photos") {
       return new Response(
         JSON.stringify({
           is_valid: false,
-          document_type_detected: "نوع ملف غير مدعوم للتحقق البصري",
-          rejection_reason: "يرجى رفع صورة (PNG/JPG/WebP) أو PDF حسب نوع الحقل.",
+          document_type_detected: isPdf ? "ملف PDF" : isSpreadsheet ? "ملف Excel/CSV" : "ملف غير صورة",
+          rejection_reason: "حقل صور المعدات يقبل صوراً فقط (PNG/JPG/WebP/HEIC). يجب رفع صورة فعلية للمعدة.",
           confidence: "high",
         }),
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const content = [
-      {
-        type: "text",
-        text: `تحقق بدقة: هل هذه الصورة فعلاً من نوع "${rule.label}"؟ إذا لم تكن كذلك، ارفضها مع ذكر السبب الواضح ونوع الملف الفعلي.`,
-      },
-      { type: "image_url", image_url: { url: documentUrl, detail: "high" } },
-    ];
+    // Unsupported (e.g., random binary, video, etc.)
+    if (!isImage && !isPdf && !isSpreadsheet) {
+      return new Response(
+        JSON.stringify({
+          is_valid: false,
+          document_type_detected: "نوع ملف غير مدعوم",
+          rejection_reason: "يرجى رفع صورة (PNG/JPG/WebP) أو PDF أو Excel/CSV حسب نوع الحقل.",
+          confidence: "high",
+        }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Build AI content payload — supports images, PDFs (as base64 data URL), and spreadsheets (parsed to text).
+    let content: Array<Record<string, unknown>>;
+
+    if (isImage) {
+      content = [
+        {
+          type: "text",
+          text: `تحقق بدقة: هل هذه الصورة فعلاً من نوع "${rule.label}"؟ إذا لم تكن كذلك، ارفضها مع ذكر السبب الواضح ونوع الملف الفعلي.`,
+        },
+        { type: "image_url", image_url: { url: documentUrl, detail: "high" } },
+      ];
+    } else if (isPdf) {
+      // Fetch the PDF and embed as base64 data URL — Gemini Vision can read PDF pages.
+      const pdfResp = await fetch(documentUrl);
+      if (!pdfResp.ok) throw new Error(`Failed to fetch PDF: ${pdfResp.status}`);
+      const buf = new Uint8Array(await pdfResp.arrayBuffer());
+      // Cap at 10MB to stay within model limits.
+      if (buf.byteLength > 10 * 1024 * 1024) {
+        return new Response(
+          JSON.stringify({
+            is_valid: false,
+            document_type_detected: "ملف PDF كبير جداً",
+            rejection_reason: "الملف يتجاوز 10MB، يرجى رفع نسخة مضغوطة أو لقطة من الصفحات الأهم.",
+            confidence: "high",
+          }),
+          { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      // Base64-encode in chunks (btoa cannot handle large strings via spread).
+      let bin = "";
+      const CHUNK = 0x8000;
+      for (let i = 0; i < buf.length; i += CHUNK) {
+        bin += String.fromCharCode(...buf.subarray(i, i + CHUNK));
+      }
+      const b64 = btoa(bin);
+      const dataUrl = `data:application/pdf;base64,${b64}`;
+      content = [
+        {
+          type: "text",
+          text: `تحقق بصرامة من محتوى ملف PDF التالي: هل يطابق فعلاً نوع "${rule.label}"؟ افحص النص والجداول والشعارات الرسمية. ارفض إذا كان كتاباً تعليمياً، روايةً، نشرة عامة، صفحة فارغة، أو أي محتوى لا يطابق المعايير.`,
+        },
+        { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
+      ];
+    } else {
+      // Spreadsheet/CSV — fetch and read first ~50KB as plain text snapshot for AI to evaluate.
+      const sheetResp = await fetch(documentUrl);
+      if (!sheetResp.ok) throw new Error(`Failed to fetch spreadsheet: ${sheetResp.status}`);
+      const buf = new Uint8Array(await sheetResp.arrayBuffer());
+      const slice = buf.slice(0, 50 * 1024);
+      // Try to decode as UTF-8; binary xlsx will be partially garbled but headers/strings often surface.
+      const text = new TextDecoder("utf-8", { fatal: false }).decode(slice);
+      const isLikelyBinaryXlsx = /^PK\x03\x04/.test(text); // ZIP signature
+      content = [
+        {
+          type: "text",
+          text: `تحقق من ملف ${isLikelyBinaryXlsx ? "Excel" : "CSV/نصي"} التالي: هل هو فعلاً "${rule.label}"؟ ${isLikelyBinaryXlsx ? "الملف ثنائي (xlsx)؛ اعتمد على أسماء الأعمدة والنصوص المرئية." : ""} ابحث عن: جدول أصول/معدات بأسماء وكميات. ارفض إذا كان: قائمة موظفين، فاتورة وحيدة، نص عشوائي، أو ملف فارغ.\n\nمحتوى الملف (مقتطف):\n\`\`\`\n${text.slice(0, 8000)}\n\`\`\``,
+        },
+      ];
+    }
+
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
