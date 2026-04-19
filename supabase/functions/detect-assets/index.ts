@@ -295,6 +295,42 @@ function normalizeKey(name: string): string {
     .replace(/\s+/g, " ");
 }
 
+// ---- Loose key for cross-source fuzzy matching (singular form, no qualifiers) ----
+// Used ONLY when comparing image-detected vs file/manual to avoid double-counting
+// the same physical asset described differently (e.g. "ثلاجة عرض" vs "ثلاجة عرض زجاجية").
+const STOPWORDS = new Set([
+  "كبير","كبيرة","صغير","صغيرة","متوسط","متوسطة",
+  "جديد","جديدة","قديم","قديمة","مستعمل","مستعملة",
+  "أبيض","ابيض","أسود","اسود","رمادي","فضي","ذهبي","ملون",
+  "زجاجي","زجاجية","معدني","معدنية","خشبي","خشبية","بلاستيك","بلاستيكي",
+  "صناعي","صناعية","تجاري","تجارية","كهربائي","كهربائية","يدوي","يدوية",
+  "double","single","large","small","medium","new","used","old","big","mini",
+]);
+function looseKey(name: string): string {
+  const base = normalizeKey(name);
+  if (!base) return "";
+  const tokens = base.split(/\s+/).filter((t) => t.length >= 2 && !STOPWORDS.has(t));
+  // Keep first 2 meaningful tokens — captures "ثلاجة عرض", "آلة منشار", etc.
+  return tokens.slice(0, 2).join(" ");
+}
+
+// ---- Levenshtein-lite similarity for catching minor wording differences ----
+function similarity(a: string, b: string): number {
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  const longer = a.length > b.length ? a : b;
+  const shorter = a.length > b.length ? b : a;
+  if (longer.length === 0) return 1;
+  if (longer.includes(shorter) && shorter.length >= 4) return 0.9;
+  // Token overlap (Jaccard)
+  const ta = new Set(a.split(/\s+/).filter((t) => t.length >= 2));
+  const tb = new Set(b.split(/\s+/).filter((t) => t.length >= 2));
+  if (ta.size === 0 || tb.size === 0) return 0;
+  let overlap = 0;
+  for (const t of ta) if (tb.has(t)) overlap++;
+  return overlap / Math.max(ta.size, tb.size);
+}
+
 // ---- Merge and deduplicate (within same source: SUM quantities, exact key only) ----
 function mergeAndDeduplicate(batches: any[]): any {
   const allAssets: any[] = [];
