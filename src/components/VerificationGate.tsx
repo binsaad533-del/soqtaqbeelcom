@@ -20,7 +20,11 @@ const VerificationGate = ({
   const { profile } = useAuthContext();
   const [verified, setVerified] = useState(false);
 
-  const isPhoneVerified = !!(profile as any)?.phone_verified || verified;
+  // ⚠️ مؤقتاً: تم تعطيل اشتراط توثيق الجوال بسبب قيود مزود SMS (Twilio)
+  // لإعادة التفعيل لاحقاً: غيّر القيمة إلى false
+  const BYPASS_PHONE_VERIFICATION = true;
+
+  const isPhoneVerified = BYPASS_PHONE_VERIFICATION || !!(profile as any)?.phone_verified || verified;
 
   if (isPhoneVerified) {
     return <>{children}</>;
