@@ -59,10 +59,26 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   const [loading, setLoading] = useState(true);
   const [mapReady, setMapReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  // Initialize address from existing coordinates so users see their saved location immediately on remount
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(() => {
+    if (lat && lng) {
+      const nearest = findNearestCity(lat, lng);
+      return nearest?.name ? `بالقرب من ${nearest.name}` : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }
+    return null;
+  });
   const [manualSearch, setManualSearch] = useState("");
   const [searching, setSearching] = useState(false);
   const [pasteInput, setPasteInput] = useState("");
+
+  // Keep address in sync if parent updates lat/lng externally (e.g., loaded from draft after mount)
+  useEffect(() => {
+    if (lat && lng && !selectedAddress) {
+      const nearest = findNearestCity(lat, lng);
+      setSelectedAddress(nearest?.name ? `بالقرب من ${nearest.name}` : `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lat, lng]);
 
   const extractPlaceDetails = useCallback((components: google.maps.GeocoderAddressComponent[]): PlaceDetails => {
     let city = "";
