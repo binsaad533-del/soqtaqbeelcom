@@ -399,40 +399,76 @@ function combineResults(
   const allAssets = [...imageAssets, ...fileAssets, ...manualAssets];
 
   const deduplicated: any[] = [];
-  const seen = new Map<string, number>();
+  const exactSeen = new Map<string, number>();
+  const looseIndex: Array<{ key: string; idx: number; source: string }> = [];
 
   for (const asset of allAssets) {
     const key = normalizeKey(asset.name || "");
     if (!key) continue;
+    const lkey = looseKey(asset.name || "");
 
-    // FIX 1 (cross-source): only EXACT key match
-    if (seen.has(key)) {
-      const idx = seen.get(key)!;
+    // 1) Exact match — definitive duplicate
+    if (exactSeen.has(key)) {
+      const idx = exactSeen.get(key)!;
       const existing = deduplicated[idx];
-      // Across sources (image vs file vs manual): same physical item — keep MAX qty
+      // Same physical item across sources: keep MAX qty (don't sum)
       existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
-      // Manual inventory takes precedence for condition/details (seller's truth)
       if (asset.source === "manual") {
         existing.condition = asset.condition || existing.condition;
         if (asset.details) existing.details = asset.details;
       }
       if (existing.source !== asset.source) {
-        existing.source = existing.source === "manual" || asset.source === "manual"
-          ? "verified"
-          : "both";
+        existing.source = (existing.source === "manual" || asset.source === "manual")
+          ? "verified" : "both";
       }
+      continue;
+    }
+
+    // 2) Cross-source fuzzy match — only between DIFFERENT sources, similarity ≥ 0.7
+    let mergedIdx = -1;
+    if (lkey) {
+      for (const entry of looseIndex) {
+        if (entry.source === asset.source) continue; // never fuzzy-merge within same source
+        if (entry.key !== lkey) {
+          const sim = similarity(entry.key, lkey);
+          if (sim < 0.7) continue;
+        }
+        // Additional safety: full-name similarity must also be ≥ 0.6
+        const fullSim = similarity(normalizeKey(deduplicated[entry.idx].name), key);
+        if (fullSim < 0.55) continue;
+        mergedIdx = entry.idx;
+        break;
+      }
+    }
+
+    if (mergedIdx >= 0) {
+      const existing = deduplicated[mergedIdx];
+      existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
+      // Manual is the seller's truth — overwrite name/condition
+      if (asset.source === "manual") {
+        existing.name = asset.name;
+        existing.condition = asset.condition || existing.condition;
+        if (asset.details) existing.details = asset.details;
+      }
+      existing.source = "verified";
     } else {
-      seen.set(key, deduplicated.length);
+      const idx = deduplicated.length;
+      exactSeen.set(key, idx);
+      if (lkey) looseIndex.push({ key: lkey, idx, source: asset.source });
       deduplicated.push({ ...asset });
     }
   }
 
-  // FIX 3: confidence boosted when manual inventory is provided
+  // FIX 3 (tightened): confidence requires REAL multi-source coverage, not just presence
   let confidence = "منخفض";
-  const sourceCount = (imageAssets.length > 0 ? 1 : 0) + (fileAssets.length > 0 ? 1 : 0) + (manualAssets.length > 0 ? 1 : 0);
-  if (sourceCount >= 2) confidence = "عالي";
-  else if (manualAssets.length > 0 || imageAssets.length > 5 || fileAssets.length > 3) confidence = "متوسط";
-  else if (allAssets.length > 0) confidence = "متوسط";
+  const hasImages = imageAssets.length >= 3;
+  const hasFiles = fileAssets.length >= 2;
+  const hasManual = manualAssets.length >= 3;
+  const sourceCount = (hasImages ? 1 : 0) + (hasFiles ? 1 : 0) + (hasManual ? 1 : 0);
+
+  if (sourceCount >= 2 && deduplicated.length >= 5) confidence = "عالي";
+  else if (sourceCount >= 2 || (hasManual && deduplicated.length >= 3) || (hasImages && deduplicated.length >= 5)) confidence = "متوسط";
+  else if (deduplicated.length > 0) confidence = "منخفض";
 
   return {
     combined: {
