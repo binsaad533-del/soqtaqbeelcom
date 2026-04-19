@@ -104,11 +104,27 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Step 1.5: Classify uploaded documents to verify slot/content match
+    let documentClassification = null;
+    if (Array.isArray(listing.documents) && listing.documents.length > 0) {
+      try {
+        const classifyResult = await invokeFunction("classify-documents", {
+          documents: listing.documents,
+        });
+        if (classifyResult?.success) {
+          documentClassification = classifyResult;
+        }
+      } catch (e) {
+        console.error("Document classification failed:", e);
+      }
+    }
+
     // Step 2: Run deal check
     try {
       const listingWithAssets = {
         ...listing,
         ai_detected_assets: combinedAssets,
+        ai_document_classification: documentClassification,
       };
       const dealCheckResult = await invokeFunction("deal-check", {
         listing: listingWithAssets,
@@ -117,6 +133,7 @@ Deno.serve(async (req) => {
       if (dealCheckResult?.success && dealCheckResult.analysis) {
         const cacheEntry = {
           dealCheck: dealCheckResult.analysis,
+          documentClassification,
           generated_at: new Date().toISOString(),
         };
         await supabase.from("listings").update({
