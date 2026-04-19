@@ -303,6 +303,14 @@ const CreateListingPage = () => {
     e.target.value = "";
   };
 
+  // Map field labels (Arabic) to AI verifier types
+  const getVerifierType = (docLabel: string): string | null => {
+    if (/قائمة\s*الأصول/.test(docLabel)) return "asset_list";
+    if (/صور\s*المعدات/.test(docLabel)) return "equipment_photos";
+    if (/إثبات\s*ملكية/.test(docLabel)) return "ownership_proof";
+    return null;
+  };
+
   const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !activeDocType) return;
     const id = await ensureListing();
@@ -310,14 +318,43 @@ const CreateListingPage = () => {
     setSaving(true);
     const files = Array.from(e.target.files);
     const urls: string[] = [];
+    const verifierType = getVerifierType(activeDocType);
     for (const file of files) {
       const validation = validateDocFile(file);
       if (!validation.valid) { toast.error(validation.error); continue; }
       const safeFolder = activeDocType.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "") || "general";
       const result = await uploadFile(id, file, `docs/${safeFolder}`);
-      if (result.url) urls.push(result.url);
-      else toast.error(`${file.name}: ${result.error || "فشل الرفع"}`);
+      if (!result.url) {
+        toast.error(`${file.name}: ${result.error || "فشل الرفع"}`);
+        continue;
+      }
+      // AI content verification for the three critical doc types
+      if (verifierType) {
+        const verifyToast = toast.loading(`🔍 جاري التحقق من "${file.name}" عبر الذكاء الاصطناعي...`);
+        try {
+          const { data, error } = await supabase.functions.invoke("verify-document", {
+            body: { documentUrl: result.url, expectedType: verifierType },
+          });
+          toast.dismiss(verifyToast);
+          const payload = (data || {}) as { is_valid?: boolean; document_type_detected?: string; rejection_reason?: string; error?: string };
+          if (error || payload.is_valid === false || payload.error) {
+            const detected = payload.document_type_detected || "غير معروف";
+            const reason = payload.rejection_reason || payload.error || "الملف لا يطابق نوع الحقل.";
+            toast.error(`❌ تم رفض "${file.name}" — لا يطابق "${activeDocType}"\nنوع الملف المكتشف: ${detected}\nالسبب: ${reason}`, { duration: 9000 });
+            // Do not add invalid file to the list
+            continue;
+          }
+          toast.success(`✓ تم التحقق من "${file.name}" — يطابق "${activeDocType}"`);
+        } catch (err) {
+          toast.dismiss(verifyToast);
+          console.error("verify-document failed", err);
+          toast.error(`تعذّر التحقق من "${file.name}". تم رفض الملف للأمان.`);
+          continue;
+        }
+      }
+      urls.push(result.url);
     }
+    if (urls.length === 0) { setSaving(false); e.target.value = ""; return; }
     setUploadedDocs((prev) => ({ ...prev, [activeDocType]: [...(prev[activeDocType] || []), ...urls] }));
     const allDocs = { ...uploadedDocs, [activeDocType]: [...(uploadedDocs[activeDocType] || []), ...urls] };
     await updateListing(id, { documents: Object.entries(allDocs).map(([type, filesForType]) => ({ type, files: filesForType })) } as never);
