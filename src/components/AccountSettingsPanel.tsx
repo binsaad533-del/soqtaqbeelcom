@@ -246,7 +246,7 @@ const AccountSettingsPanel = () => {
                   تم التحقق
                 </span>
               )}
-              {phoneChanged && !phoneVerified && (
+              {!BYPASS_PHONE_VERIFICATION && phoneChanged && !phoneVerified && (
                 <span className="text-[10px] text-warning">يتطلب التحقق</span>
               )}
             </Label>
@@ -258,7 +258,7 @@ const AccountSettingsPanel = () => {
                 dir="ltr"
                 placeholder="+966..."
               />
-              {phoneChanged && !phoneVerified && (
+              {!BYPASS_PHONE_VERIFICATION && phoneChanged && !phoneVerified && (
                 <Button
                   size="sm"
                   variant="outline"
@@ -272,8 +272,8 @@ const AccountSettingsPanel = () => {
             </div>
           </div>
 
-          {/* ── Inline phone verification ── */}
-          {showPhoneVerification && phoneChanged && !phoneVerified && (
+          {/* ── Inline phone verification (disabled while bypass is active) ── */}
+          {!BYPASS_PHONE_VERIFICATION && showPhoneVerification && phoneChanged && !phoneVerified && (
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
               <p className="text-xs text-muted-foreground mb-3">أدخل رقم الجوال الجديد وسنرسل لك رمز تحقق:</p>
               <PhoneVerificationFlow
@@ -284,11 +284,11 @@ const AccountSettingsPanel = () => {
             </div>
           )}
 
-          <Button size="sm" className="text-xs gap-1.5" onClick={handleSaveProfile} disabled={savingProfile || (phoneChanged && !phoneVerified)}>
+          <Button size="sm" className="text-xs gap-1.5" onClick={handleSaveProfile} disabled={savingProfile || (!BYPASS_PHONE_VERIFICATION && phoneChanged && !phoneVerified)}>
             {savingProfile ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
             حفظ التغييرات
           </Button>
-          {phoneChanged && !phoneVerified && (
+          {!BYPASS_PHONE_VERIFICATION && phoneChanged && !phoneVerified && (
             <p className="text-[10px] text-muted-foreground">⚠️ يجب التحقق من الرقم الجديد قبل الحفظ</p>
           )}
         </div>
