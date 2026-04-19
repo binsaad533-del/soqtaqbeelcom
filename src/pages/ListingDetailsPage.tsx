@@ -419,6 +419,108 @@ const ListingDetailsPage = () => {
       <div className="py-8">
       <div className="container">
 
+        {/* Owner action bar — top of page */}
+        {isOwner && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/15 bg-primary/[0.04] px-4 py-3" dir="rtl">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Shield size={14} className="text-primary" strokeWidth={1.5} />
+              <span className="font-medium text-foreground">إعلانك —</span>
+              <span>
+                الحالة: {listing.status === "published" ? "منشور" : listing.status === "suspended" ? "موقوف مؤقتاً" : listing.status === "draft" ? "مسودة" : listing.status}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {!(myActiveDeal && (myActiveDeal.status === "finalized" || myActiveDeal.status === "completed")) && (
+                <Button variant="outline" size="sm" className="rounded-xl text-xs h-8" onClick={() => setEditDialogOpen(true)}>
+                  <Edit3 size={13} strokeWidth={1.5} /> تعديل
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl text-xs h-8"
+                onClick={() => {
+                  const url = `${window.location.origin}/listing/${listing.id}`;
+                  if (navigator.share) {
+                    navigator.share({ title: listing.title || "فرصة تقبيل", url }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(url);
+                    toast.success("تم نسخ رابط الإعلان");
+                  }
+                }}
+              >
+                <Share2 size={13} strokeWidth={1.5} /> مشاركة
+              </Button>
+              {(listing.status === "published" || listing.status === "suspended") && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={statusToggling}
+                  className="rounded-xl text-xs h-8"
+                  onClick={async () => {
+                    if (!listing) return;
+                    const newStatus = listing.status === "published" ? "suspended" : "published";
+                    setStatusToggling(true);
+                    const { error } = await updateListing(listing.id, { status: newStatus });
+                    setStatusToggling(false);
+                    if (error) {
+                      toast.error("تعذّر تغيير حالة الإعلان");
+                      return;
+                    }
+                    setListing((prev) => prev ? { ...prev, status: newStatus } as Listing : prev);
+                    listingDetailsStateCache.delete(listing.id);
+                    toast.success(newStatus === "suspended" ? "تم إيقاف الإعلان مؤقتاً" : "تم إعادة تفعيل الإعلان");
+                  }}
+                >
+                  {statusToggling ? (
+                    <Loader2 size={13} className="animate-spin" />
+                  ) : listing.status === "published" ? (
+                    <><Pause size={13} strokeWidth={1.5} /> إيقاف مؤقت</>
+                  ) : (
+                    <><Play size={13} strokeWidth={1.5} /> إعادة تفعيل</>
+                  )}
+                </Button>
+              )}
+              {listing.status === "published" && !listing.featured && (
+                <Button
+                  size="sm"
+                  className="rounded-xl text-xs h-8 bg-gradient-to-l from-primary to-primary/70 text-primary-foreground"
+                  onClick={() => setPromoteDialogOpen(true)}
+                >
+                  <Sparkles size={13} strokeWidth={1.5} /> ترقية الإعلان
+                </Button>
+              )}
+              {listing.featured && (
+                <span className="inline-flex items-center gap-1 rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2.5 py-1 text-[11px] font-medium">
+                  <Sparkles size={12} strokeWidth={1.5} /> إعلان مميز
+                </span>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={deleting}
+                className="rounded-xl text-xs h-8 text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/30"
+                onClick={async () => {
+                  if (!listing) return;
+                  if (!confirm(`هل تريد حذف "${listing.title || "هذا الإعلان"}"؟ لن يمكن استرجاعه من هنا.`)) return;
+                  setDeleting(true);
+                  const { error } = await softDeleteListing(listing.id);
+                  setDeleting(false);
+                  if (error) {
+                    toast.error((error as Error).message || "تعذّر حذف الإعلان");
+                    return;
+                  }
+                  listingDetailsStateCache.delete(listing.id);
+                  toast.success("تم حذف الإعلان");
+                  navigate("/dashboard");
+                }}
+              >
+                {deleting ? <Loader2 size={13} className="animate-spin" /> : <><Trash2 size={13} strokeWidth={1.5} /> حذف</>}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {myActiveDeal && (
           <div className="mb-5 p-3 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-3" dir="rtl">
             <div className="flex items-center gap-2">
