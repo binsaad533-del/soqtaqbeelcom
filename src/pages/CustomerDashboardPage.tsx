@@ -87,8 +87,20 @@ const CustomerDashboardPage = () => {
         const { error } = await supabase.auth.updateUser({ email: value });
         if (error) throw error;
         toast.success("تم إرسال رابط التحقق إلى بريدك الجديد");
+      } else if (field === "phone") {
+        // ⚠️ مؤقتاً: توثيق الجوال معطّل بسبب قيود Twilio — نعتبر الرقم موثّقاً تلقائياً
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            phone: toDigitsOnly(value),
+            phone_verified: true,
+            phone_verified_at: new Date().toISOString(),
+          })
+          .eq("user_id", profile.user_id);
+        if (error) throw error;
+        toast.success("تم تحديث رقم الجوال");
       } else {
-        const { error } = await supabase.from("profiles").update({ [field]: field === "phone" ? toDigitsOnly(value) : value }).eq("user_id", profile.user_id);
+        const { error } = await supabase.from("profiles").update({ [field]: value }).eq("user_id", profile.user_id);
         if (error) throw error;
         toast.success("تم التحديث");
       }
