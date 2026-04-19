@@ -125,7 +125,7 @@ const ListingDetailsPage = () => {
   const { user, role } = useAuthContext();
   const analysisCache = useAnalysisCache(id);
   const { recordView, toggleLike, getLikesAndViews } = useListingSocial();
-  const { getListing } = useListings();
+  const { getListing, softDeleteListing, updateListing } = useListings();
   const { createDeal, getMyDeals } = useDeals();
   const { getProfile } = useProfiles();
   const { getSellerReviews } = useSellerReviews();
