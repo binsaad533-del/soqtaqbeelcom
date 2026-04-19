@@ -84,14 +84,14 @@ registerRoute(
   })
 );
 
-// ── Supabase API → Network First ──
+// ── Supabase API → Network ONLY (no caching to avoid stale AI analysis data) ──
 registerRoute(
   /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
   new NetworkFirst({
     cacheName: "supabase-api",
     networkTimeoutSeconds: 10,
     plugins: [
-      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 300 }),
+      new ExpirationPlugin({ maxEntries: 10, maxAgeSeconds: 30 }),
     ],
   })
 );
