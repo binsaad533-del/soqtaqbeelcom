@@ -295,6 +295,42 @@ function normalizeKey(name: string): string {
     .replace(/\s+/g, " ");
 }
 
+// ---- Loose key for cross-source fuzzy matching (singular form, no qualifiers) ----
+// Used ONLY when comparing image-detected vs file/manual to avoid double-counting
+// the same physical asset described differently (e.g. "ثلاجة عرض" vs "ثلاجة عرض زجاجية").
+const STOPWORDS = new Set([
+  "كبير","كبيرة","صغير","صغيرة","متوسط","متوسطة",
+  "جديد","جديدة","قديم","قديمة","مستعمل","مستعملة",
+  "أبيض","ابيض","أسود","اسود","رمادي","فضي","ذهبي","ملون",
+  "زجاجي","زجاجية","معدني","معدنية","خشبي","خشبية","بلاستيك","بلاستيكي",
+  "صناعي","صناعية","تجاري","تجارية","كهربائي","كهربائية","يدوي","يدوية",
+  "double","single","large","small","medium","new","used","old","big","mini",
+]);
+function looseKey(name: string): string {
+  const base = normalizeKey(name);
+  if (!base) return "";
+  const tokens = base.split(/\s+/).filter((t) => t.length >= 2 && !STOPWORDS.has(t));
+  // Keep first 2 meaningful tokens — captures "ثلاجة عرض", "آلة منشار", etc.
+  return tokens.slice(0, 2).join(" ");
+}
+
+// ---- Levenshtein-lite similarity for catching minor wording differences ----
+function similarity(a: string, b: string): number {
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  const longer = a.length > b.length ? a : b;
+  const shorter = a.length > b.length ? b : a;
+  if (longer.length === 0) return 1;
+  if (longer.includes(shorter) && shorter.length >= 4) return 0.9;
+  // Token overlap (Jaccard)
+  const ta = new Set(a.split(/\s+/).filter((t) => t.length >= 2));
+  const tb = new Set(b.split(/\s+/).filter((t) => t.length >= 2));
+  if (ta.size === 0 || tb.size === 0) return 0;
+  let overlap = 0;
+  for (const t of ta) if (tb.has(t)) overlap++;
+  return overlap / Math.max(ta.size, tb.size);
+}
+
 // ---- Merge and deduplicate (within same source: SUM quantities, exact key only) ----
 function mergeAndDeduplicate(batches: any[]): any {
   const allAssets: any[] = [];
@@ -363,40 +399,76 @@ function combineResults(
   const allAssets = [...imageAssets, ...fileAssets, ...manualAssets];
 
   const deduplicated: any[] = [];
-  const seen = new Map<string, number>();
+  const exactSeen = new Map<string, number>();
+  const looseIndex: Array<{ key: string; idx: number; source: string }> = [];
 
   for (const asset of allAssets) {
     const key = normalizeKey(asset.name || "");
     if (!key) continue;
+    const lkey = looseKey(asset.name || "");
 
-    // FIX 1 (cross-source): only EXACT key match
-    if (seen.has(key)) {
-      const idx = seen.get(key)!;
+    // 1) Exact match — definitive duplicate
+    if (exactSeen.has(key)) {
+      const idx = exactSeen.get(key)!;
       const existing = deduplicated[idx];
-      // Across sources (image vs file vs manual): same physical item — keep MAX qty
+      // Same physical item across sources: keep MAX qty (don't sum)
       existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
-      // Manual inventory takes precedence for condition/details (seller's truth)
       if (asset.source === "manual") {
         existing.condition = asset.condition || existing.condition;
         if (asset.details) existing.details = asset.details;
       }
       if (existing.source !== asset.source) {
-        existing.source = existing.source === "manual" || asset.source === "manual"
-          ? "verified"
-          : "both";
+        existing.source = (existing.source === "manual" || asset.source === "manual")
+          ? "verified" : "both";
       }
+      continue;
+    }
+
+    // 2) Cross-source fuzzy match — only between DIFFERENT sources, similarity ≥ 0.7
+    let mergedIdx = -1;
+    if (lkey) {
+      for (const entry of looseIndex) {
+        if (entry.source === asset.source) continue; // never fuzzy-merge within same source
+        if (entry.key !== lkey) {
+          const sim = similarity(entry.key, lkey);
+          if (sim < 0.7) continue;
+        }
+        // Additional safety: full-name similarity must also be ≥ 0.6
+        const fullSim = similarity(normalizeKey(deduplicated[entry.idx].name), key);
+        if (fullSim < 0.55) continue;
+        mergedIdx = entry.idx;
+        break;
+      }
+    }
+
+    if (mergedIdx >= 0) {
+      const existing = deduplicated[mergedIdx];
+      existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
+      // Manual is the seller's truth — overwrite name/condition
+      if (asset.source === "manual") {
+        existing.name = asset.name;
+        existing.condition = asset.condition || existing.condition;
+        if (asset.details) existing.details = asset.details;
+      }
+      existing.source = "verified";
     } else {
-      seen.set(key, deduplicated.length);
+      const idx = deduplicated.length;
+      exactSeen.set(key, idx);
+      if (lkey) looseIndex.push({ key: lkey, idx, source: asset.source });
       deduplicated.push({ ...asset });
     }
   }
 
-  // FIX 3: confidence boosted when manual inventory is provided
+  // FIX 3 (tightened): confidence requires REAL multi-source coverage, not just presence
   let confidence = "منخفض";
-  const sourceCount = (imageAssets.length > 0 ? 1 : 0) + (fileAssets.length > 0 ? 1 : 0) + (manualAssets.length > 0 ? 1 : 0);
-  if (sourceCount >= 2) confidence = "عالي";
-  else if (manualAssets.length > 0 || imageAssets.length > 5 || fileAssets.length > 3) confidence = "متوسط";
-  else if (allAssets.length > 0) confidence = "متوسط";
+  const hasImages = imageAssets.length >= 3;
+  const hasFiles = fileAssets.length >= 2;
+  const hasManual = manualAssets.length >= 3;
+  const sourceCount = (hasImages ? 1 : 0) + (hasFiles ? 1 : 0) + (hasManual ? 1 : 0);
+
+  if (sourceCount >= 2 && deduplicated.length >= 5) confidence = "عالي";
+  else if (sourceCount >= 2 || (hasManual && deduplicated.length >= 3) || (hasImages && deduplicated.length >= 5)) confidence = "متوسط";
+  else if (deduplicated.length > 0) confidence = "منخفض";
 
   return {
     combined: {
@@ -623,11 +695,28 @@ function buildPriceAnalysis(
     else if (dealPrice <= totalHigh) decision = "سعر عادل";
     else if (dealPrice <= totalHigh * 1.20) decision = "أعلى قليلاً";
     else decision = "مبالغ فيه";
+  } else if (totalEstimatedValue > 0) {
+    // FIX 4: when listing has no price, label as suggestion mode
+    decision = "اقتراح سعر";
+  }
+
+  // FIX 4: produce a "suggested asking price" range for sellers — slightly above mid-range
+  // for negotiation room, but bounded by the upper estimate.
+  let suggestedPriceRange: { low: number; high: number; recommended: number } | null = null;
+  if (totalEstimatedValue > 0 && totalLow > 0 && totalHigh > 0) {
+    const mid = Math.round((totalLow + totalHigh) / 2);
+    const recommended = Math.round(mid * 1.05); // +5% negotiation buffer
+    suggestedPriceRange = {
+      low: Math.round(totalLow * 0.95),
+      high: Math.round(totalHigh * 1.10),
+      recommended: Math.min(recommended, Math.round(totalHigh * 1.08)),
+    };
   }
 
   return {
     estimated_value: totalEstimatedValue,
     estimated_range: { low: totalLow, high: totalHigh },
+    suggested_price_range: suggestedPriceRange,
     valuation_confidence: effectiveConfidence,
     deal_price: dealPrice || 0,
     difference,
@@ -738,11 +827,11 @@ ${priceAnalysis ? `- تحليل السعر: القيمة التقديرية ${pr
             content: `أنت خبير تقييم صفقات تجارية. مهمتك حساب مؤشر موثوقية الصفقة من 0 إلى 10.
 
 ## معايير التقييم (بالأوزان):
-A) اكتمال البيانات (20%): نوع الصفقة، النشاط، الموقع، السعر، الوصف، المستندات، الصور
-B) التحقق من الأصول (25%): أصول مكتشفة من الصور، أصول من المستندات، تطابق بينهما
+A) اكتمال البيانات (20%): نوع الصفقة، النشاط، الموقع، الوصف، المستندات، الصور (السعر **اختياري** في إعلانات المسودة)
+B) التحقق من الأصول (25%): أصول مكتشفة من الصور، أصول من المستندات، تطابق بينهما، وجود جرد يدوي
 C) منطقية السعر (20%): مقارنة السعر المعروض بالقيمة التقديرية للأصول
 D) الوضوح القانوني والتشغيلي (20%): عقد الإيجار، الالتزامات، التراخيص
-E) جودة الوسائط (15%): عدد الصور وتغطيتها
+E) جودة الوسائط (15%): عدد الصور وتغطيتها (المستندات تعوّض جزئياً عن نقص الصور)
 
 ## مستويات الدرجة:
 - 9.0-10: ممتاز
@@ -751,12 +840,12 @@ E) جودة الوسائط (15%): عدد الصور وتغطيتها
 - 4.0-5.9: متوسط
 - 0-3.9: ضعيف
 
-## تعليمات:
-- كن دقيقاً وموضوعياً
-- كل درجة يجب أن تكون مبررة
-- اذكر نقاط القوة والضعف بوضوح
-- أضف تحذيرات إذا وجدت تناقضات أو مخاطر
-- لا تعطِ درجات عشوائية`,
+## قواعد عادلة (مهم جداً):
+- إذا كان السعر "غير محدد" (إعلان قيد الإعداد): امنح price_logic درجة محايدة **7/10** ولا تعتبره ضعفاً
+- إذا كان هناك جرد مفصّل أو مستندات قوية: ارفع asset_verification حتى لو الصور قليلة
+- إذا كانت المستندات الرسمية (CR, ترخيص، فواتير) موجودة: ارفع legal_clarity
+- لا تعاقب الإعلان مرتين على نفس النقص (مثلاً: غياب الصور لا يجب أن يخفّض media_quality و asset_verification معاً إذا كانت المستندات تغطي ذلك)
+- لا تعطِ درجات عشوائية — كل درجة يجب أن تكون مبررة بدليل ملموس من البيانات`,
           },
           { role: "user", content: `احسب مؤشر موثوقية الصفقة التالية:\n${listingInfo}` },
         ],
