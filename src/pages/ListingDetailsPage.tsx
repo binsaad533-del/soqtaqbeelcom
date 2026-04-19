@@ -1085,6 +1085,16 @@ const ListingDetailsPage = () => {
         />
       )}
 
+      {/* Promote dialog */}
+      {isOwner && listing && (
+        <PromoteListingDialog
+          open={promoteDialogOpen}
+          onOpenChange={setPromoteDialogOpen}
+          listingId={listing.id}
+          listingTitle={listing.title || "هذا الإعلان"}
+        />
+      )}
+
       {/* Auth required dialog */}
       <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
         <DialogContent className="max-w-sm text-center" dir="rtl">
