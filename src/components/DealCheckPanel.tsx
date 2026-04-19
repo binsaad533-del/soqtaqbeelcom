@@ -694,6 +694,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       {priceAnalysis.market_notes && (
                         <p className="text-[10px] text-muted-foreground/60 text-center mt-2">{priceAnalysis.market_notes}</p>
                       )}
+                      {priceAnalysis.disclaimer && (
+                        <p className="text-[10px] text-muted-foreground/50 text-center mt-1 italic">⚠️ {priceAnalysis.disclaimer}</p>
+                      )}
                     </div>
                   )}
 
