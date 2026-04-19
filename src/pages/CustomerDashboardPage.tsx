@@ -401,21 +401,14 @@ const CustomerDashboardPage = () => {
                         <Pencil size={9} className="text-muted-foreground opacity-0 group-hover/phone:opacity-60 transition-opacity shrink-0" />
                       </button>
                       {isPhoneVerified && <CheckCircle size={11} className="text-success shrink-0" />}
-                      {!isPhoneVerified && profile?.phone && (
-                        <button
-                          onClick={() => setShowPhoneVerify(v => !v)}
-                          className="text-[10px] text-primary hover:underline"
-                        >
-                          توثيق
-                        </button>
-                      )}
+                      {/* ⚠️ زر التوثيق معطّل مؤقتاً بسبب قيود Twilio */}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Phone verification (collapsible) */}
-              {!isPhoneVerified && profile?.phone && showPhoneVerify && (
+              {/* Phone verification (disabled while Twilio is unavailable) */}
+              {false && !isPhoneVerified && profile?.phone && showPhoneVerify && (
                 <div className="pr-10 pt-1">
                   <PhoneVerificationFlow initialPhone={profile.phone} onVerified={() => window.location.reload()} mode="inline" skipPhoneStep />
                 </div>
