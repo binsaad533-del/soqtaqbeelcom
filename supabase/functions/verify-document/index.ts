@@ -29,11 +29,11 @@ const FIELD_RULES: Record<string, { label: string; description: string; markers:
   ownership_proof: {
     label: "إثبات ملكية",
     description:
-      "مستند رسمي يثبت ملكية الأصول أو المعدات أو النشاط، مثل: فاتورة شراء رسمية، عقد بيع، سند ملكية، شهادة جمركية، فاتورة ضريبية باسم البائع، أو كشف موثق.",
+      "مستند رسمي يثبت ملكية الأصول أو المعدات أو النشاط، مثل: فاتورة شراء رسمية، عقد بيع، سند ملكية، شهادة جمركية، فاتورة ضريبية باسم البائع، أو كشف موثق من جهة رسمية.",
     markers:
-      "1) نص رسمي مكتوب (فاتورة/عقد/سند)\n2) يحتوي على اسم بائع/مورد، تاريخ، أرقام، مبالغ، أو ختم\n3) يربط الأصل بالمالك بشكل واضح",
+      "1) نص رسمي مكتوب (فاتورة/عقد/سند/شهادة)\n2) يحتوي على: اسم بائع/مورد + تاريخ + رقم مستند + مبلغ + ختم/توقيع\n3) يربط أصلاً معيناً بمالك معيّن بشكل صريح وقانوني\n4) لغة قانونية/مالية رسمية (مثل: 'يقر'، 'يثبت'، 'تم البيع'، 'اشترى'، 'فاتورة رقم'، 'ضريبة قيمة مضافة')",
     rejectExamples:
-      "صورة معدة فقط بدون مستند، صورة شخصية، صورة محل، صورة طعام، لقطة شاشة عشوائية، صورة هوية فقط (إلا إذا مرفقة كجزء من سند)، صورة فارغة",
+      "قائمة أصول/معدات بدون اسم بائع وتاريخ وتوقيع، جدول جرد مخزون، صورة معدة فقط، صورة شخصية، صورة محل، صورة طعام، لقطة شاشة عشوائية، صورة هوية فقط، ملف فارغ، ملاحظات شخصية، قائمة موظفين، أي ملف لا يحوي صياغة رسمية لإثبات ملكية",
   },
 };
 
@@ -49,12 +49,15 @@ ${rule.markers}
 أمثلة على ما يجب رفضه فوراً:
 ${rule.rejectExamples}
 
-قواعد صارمة:
-1. كن متشدداً — لا تقبل ملفاً إلا إذا كان واضحاً أنه يطابق النوع المتوقع.
-2. إذا كانت الصورة ضبابية جداً أو لا يمكن تحديد محتواها، ارفضها مع ذكر السبب.
-3. صف بدقة ما تراه فعلياً في حقل document_type_detected.
-4. لا تخمن. كن صريحاً في rejection_reason إذا رفضت.
-5. أجب باستخدام الأداة المتوفرة فقط.`;
+قواعد صارمة (إلزامية):
+1. كن متشدداً جداً — لا تقبل ملفاً إلا إذا تطابق فعلياً مع كل علامات القبول الجوهرية.
+2. **اختبار التطابق المعكوس**: إذا كان الملف يطابق نوعاً آخر من المستندات (مثلاً: قائمة أصول عند طلب إثبات ملكية)، ارفضه فوراً مع توضيح أن نوعه الفعلي مختلف.
+3. لا تقبل ملفاً لمجرد أنه "مرتبط بالموضوع" — يجب أن يكون من النوع المحدد بالضبط.
+4. إذا كانت الصورة ضبابية جداً أو لا يمكن تحديد محتواها، ارفضها مع ذكر السبب.
+5. صف بدقة ما تراه فعلياً في حقل document_type_detected.
+6. لا تخمن. كن صريحاً في rejection_reason إذا رفضت.
+7. أجب باستخدام الأداة المتوفرة فقط.
+8. عند الشك، ارفض. الرفض الخاطئ أفضل من القبول الخاطئ.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -169,18 +172,53 @@ serve(async (req) => {
         { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
       ];
     } else {
-      // Spreadsheet/CSV — fetch and read first ~50KB as plain text snapshot for AI to evaluate.
+      // Spreadsheet/CSV — fetch and intelligently extract readable content.
       const sheetResp = await fetch(documentUrl);
       if (!sheetResp.ok) throw new Error(`Failed to fetch spreadsheet: ${sheetResp.status}`);
       const buf = new Uint8Array(await sheetResp.arrayBuffer());
-      const slice = buf.slice(0, 50 * 1024);
-      // Try to decode as UTF-8; binary xlsx will be partially garbled but headers/strings often surface.
-      const text = new TextDecoder("utf-8", { fatal: false }).decode(slice);
-      const isLikelyBinaryXlsx = /^PK\x03\x04/.test(text); // ZIP signature
+      const isXlsx = buf.length >= 4 && buf[0] === 0x50 && buf[1] === 0x4b && buf[2] === 0x03 && buf[3] === 0x04;
+
+      let extracted = "";
+      let kind = "CSV/نصي";
+
+      if (isXlsx) {
+        kind = "Excel (xlsx)";
+        // Use jsr:@zip-js/zip-js to unzip the xlsx in-memory and read sharedStrings + first sheet.
+        try {
+          const zipMod = await import("https://deno.land/x/zipjs@v2.7.45/index.js");
+          const reader = new zipMod.ZipReader(new zipMod.Uint8ArrayReader(buf));
+          const entries = await reader.getEntries();
+          const wanted = ["xl/sharedStrings.xml", "xl/worksheets/sheet1.xml", "xl/worksheets/sheet2.xml"];
+          const parts: string[] = [];
+          for (const entry of entries) {
+            if (!wanted.includes(entry.filename)) continue;
+            const xml = await entry.getData!(new zipMod.TextWriter());
+            // Strip XML tags, keep readable strings.
+            const cleaned = String(xml)
+              .replace(/<[^>]+>/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+            parts.push(`[${entry.filename}]\n${cleaned.slice(0, 4000)}`);
+          }
+          await reader.close();
+          extracted = parts.join("\n\n");
+          if (!extracted) {
+            extracted = "(تعذّر استخراج أي نص من الملف — قد يكون فارغاً أو محمياً بكلمة سر)";
+          }
+        } catch (zipErr) {
+          console.error("xlsx unzip failed:", zipErr);
+          extracted = "(فشل فك ضغط ملف xlsx — قد يكون تالفاً)";
+        }
+      } else {
+        // CSV / plain text
+        const text = new TextDecoder("utf-8", { fatal: false }).decode(buf.slice(0, 50 * 1024));
+        extracted = text;
+      }
+
       content = [
         {
           type: "text",
-          text: `تحقق من ملف ${isLikelyBinaryXlsx ? "Excel" : "CSV/نصي"} التالي: هل هو فعلاً "${rule.label}"؟ ${isLikelyBinaryXlsx ? "الملف ثنائي (xlsx)؛ اعتمد على أسماء الأعمدة والنصوص المرئية." : ""} ابحث عن: جدول أصول/معدات بأسماء وكميات. ارفض إذا كان: قائمة موظفين، فاتورة وحيدة، نص عشوائي، أو ملف فارغ.\n\nمحتوى الملف (مقتطف):\n\`\`\`\n${text.slice(0, 8000)}\n\`\`\``,
+          text: `تحقق بصرامة من محتوى ملف ${kind} التالي: هل يطابق فعلاً نوع "${rule.label}"؟\n\nابحث عن: جدول/قائمة أصول أو معدات بأسماء وكميات و/أو حالات/أسعار (≥3 عناصر).\nارفض فوراً إذا كان: قائمة موظفين/رواتب، فاتورة وحيدة، ملاحظات عامة، نص عشوائي، ملف فارغ، أو أي محتوى لا يطابق الوصف.\n\nمحتوى الملف المستخرج:\n\`\`\`\n${extracted.slice(0, 8000)}\n\`\`\``,
         },
       ];
     }
