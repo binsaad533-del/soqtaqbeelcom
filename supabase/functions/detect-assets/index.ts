@@ -625,18 +625,39 @@ function buildPriceAnalysis(
   let totalHigh = 0;
   let valuedAssetCount = 0;
   let totalAssetCount = 0;
+  let itemsMissingCriticalInfo = 0;
+  let itemsWithUnknownAge = 0;
+  const missingInfoDetails: string[] = [];
 
   for (const asset of assets) {
     const key = normalizeKey(asset.name || "");
     const valuation = valuationMap.get(key);
-    const basePrice = valuation?.base_price_sar || 0;
+    const newPrice = valuation?.base_price_sar || 0;
+    // FIX: prefer the explicit used-market price; fall back to condition-multiplier on new price
+    const usedMarketPrice = valuation?.used_market_price_sar || 0;
     const conditionMult = CONDITION_MULTIPLIER[asset.condition] || 0.75;
     const range = CONDITION_RANGE[asset.condition] || { low: 0.55, high: 0.95 };
     const qty = asset.quantity || 1;
     totalAssetCount += qty;
 
+    // Track confidence-degrading factors
+    const missingInfo: string[] = Array.isArray(valuation?.missing_critical_info) ? valuation.missing_critical_info : [];
+    const ageFactor: string = valuation?.estimated_age_factor || "unknown";
+    if (missingInfo.length > 0) {
+      itemsMissingCriticalInfo += qty;
+      for (const m of missingInfo) {
+        if (!missingInfoDetails.includes(m)) missingInfoDetails.push(m);
+      }
+    }
+    if (ageFactor === "unknown") itemsWithUnknownAge += qty;
+
+    // Choose the effective base for valuation:
+    // - If AI gave us a used-market price, use it directly (no condition multiplier — already factored)
+    // - Otherwise, fall back to new-price * condition multiplier (legacy path)
+    const effectiveBase = usedMarketPrice > 0 ? usedMarketPrice : newPrice;
+
     // FIX: skip assets with zero base price — don't pollute totals with silent zeros
-    if (!basePrice || basePrice <= 0) {
+    if (!effectiveBase || effectiveBase <= 0) {
       unvaluedItems.push({
         name: asset.name,
         type: asset.type,
@@ -662,10 +683,21 @@ function buildPriceAnalysis(
       continue;
     }
 
-    const adjustedPrice = Math.round(basePrice * conditionMult);
+    // If we have an explicit used price, condition is already implicit — apply only a small range
+    // for market uncertainty (±15%). Otherwise fall back to condition multipliers.
+    let adjustedPrice: number;
+    let lowValue: number;
+    let highValue: number;
+    if (usedMarketPrice > 0) {
+      adjustedPrice = Math.round(usedMarketPrice);
+      lowValue = Math.round(usedMarketPrice * 0.80) * qty;
+      highValue = Math.round(usedMarketPrice * 1.15) * qty;
+    } else {
+      adjustedPrice = Math.round(newPrice * conditionMult);
+      lowValue = Math.round(newPrice * range.low) * qty;
+      highValue = Math.round(newPrice * range.high) * qty;
+    }
     const totalValue = adjustedPrice * qty;
-    const lowValue = Math.round(basePrice * range.low) * qty;
-    const highValue = Math.round(basePrice * range.high) * qty;
 
     totalEstimatedValue += totalValue;
     totalLow += lowValue;
@@ -677,8 +709,11 @@ function buildPriceAnalysis(
       type: asset.type,
       condition: asset.condition,
       quantity: qty,
-      base_price: basePrice,
-      condition_multiplier: conditionMult,
+      base_price: newPrice,
+      used_market_price: usedMarketPrice,
+      condition_multiplier: usedMarketPrice > 0 ? null : conditionMult,
+      estimated_age_factor: ageFactor,
+      missing_critical_info: missingInfo,
       adjusted_price: adjustedPrice,
       total_value: totalValue,
       value_low: lowValue,
@@ -688,11 +723,20 @@ function buildPriceAnalysis(
     });
   }
 
-  // FIX: degrade confidence if a large share of items were unvalued
+  // FIX: degrade confidence based on multiple signals
   const valuedRatio = totalAssetCount > 0 ? valuedAssetCount / totalAssetCount : 1;
+  const missingInfoRatio = totalAssetCount > 0 ? itemsMissingCriticalInfo / totalAssetCount : 0;
+  const unknownAgeRatio = totalAssetCount > 0 ? itemsWithUnknownAge / totalAssetCount : 0;
+
   let effectiveConfidence = confidence;
   if (valuedRatio < 0.4) effectiveConfidence = "منخفض";
   else if (valuedRatio < 0.7 && effectiveConfidence === "عالي") effectiveConfidence = "متوسط";
+  // Heavy machinery / vehicles without age info → low confidence
+  if (missingInfoRatio >= 0.5 || unknownAgeRatio >= 0.5) {
+    effectiveConfidence = "منخفض";
+  } else if (missingInfoRatio >= 0.3 && effectiveConfidence === "عالي") {
+    effectiveConfidence = "متوسط";
+  }
 
   // Decision logic — uses RANGE not single point (Option C)
   let decision = "غير محدد";
@@ -703,15 +747,20 @@ function buildPriceAnalysis(
     difference = dealPrice - totalEstimatedValue;
     overpricedPercentage = Math.round((difference / totalEstimatedValue) * 100);
 
-    // Use range bounds for fairer decision: only flag overpriced if above HIGH bound
-    if (dealPrice <= totalLow * 0.85) decision = "فرصة ممتازة";
-    else if (dealPrice <= totalLow) decision = "صفقة جيدة";
-    else if (dealPrice <= totalHigh) decision = "سعر عادل";
-    else if (dealPrice <= totalHigh * 1.20) decision = "أعلى قليلاً";
-    else decision = "مبالغ فيه";
+    // FIX: with low confidence, never claim a strong verdict — neutralize to "تقدير غير مؤكد"
+    if (effectiveConfidence === "منخفض") {
+      decision = "تقدير غير مؤكد";
+    } else {
+      // Use range bounds for fairer decision: only flag overpriced if above HIGH bound
+      if (dealPrice <= totalLow * 0.85) decision = "فرصة ممتازة";
+      else if (dealPrice <= totalLow) decision = "صفقة جيدة";
+      else if (dealPrice <= totalHigh) decision = "سعر عادل";
+      else if (dealPrice <= totalHigh * 1.20) decision = "أعلى قليلاً";
+      else decision = "مبالغ فيه";
+    }
   } else if (totalEstimatedValue > 0) {
     // FIX 4: when listing has no price, label as suggestion mode
-    decision = "اقتراح سعر";
+    decision = effectiveConfidence === "منخفض" ? "اقتراح أولي" : "اقتراح سعر";
   }
 
   // FIX 4: produce a "suggested asking price" range for sellers — slightly above mid-range
@@ -725,6 +774,19 @@ function buildPriceAnalysis(
       high: Math.round(totalHigh * 1.10),
       recommended: Math.min(recommended, Math.round(totalHigh * 1.08)),
     };
+  }
+
+  // Build a clear disclaimer — surface the missing-info reason if present
+  const disclaimerParts: string[] = [];
+  if (unvaluedItems.length > 0) {
+    disclaimerParts.push(`القيمة تقديرية للأصول التي تم تقييمها فقط (${valuedAssetCount} من ${totalAssetCount}). ${unvaluedItems.length} عنصر يتطلب مراجعة بشرية.`);
+  } else {
+    disclaimerParts.push("القيمة تقديرية بناءً على الأصول المرئية والمستندات.");
+  }
+  if (effectiveConfidence === "منخفض" && missingInfoDetails.length > 0) {
+    disclaimerParts.push(`مستوى الثقة منخفض بسبب نقص: ${missingInfoDetails.slice(0, 4).join("، ")}. التقدير الدقيق يتطلب معاينة ميدانية.`);
+  } else {
+    disclaimerParts.push("النطاق يعكس عدم اليقين في الحالة والسوق.");
   }
 
   return {
@@ -741,10 +803,9 @@ function buildPriceAnalysis(
     valued_ratio: Math.round(valuedRatio * 100),
     valued_count: valuedAssetCount,
     total_count: totalAssetCount,
+    missing_info_summary: missingInfoDetails,
     market_notes: valuationResult.market_notes || "",
-    disclaimer: unvaluedItems.length > 0
-      ? `القيمة تقديرية للأصول التي تم تقييمها فقط (${valuedAssetCount} من ${totalAssetCount}). ${unvaluedItems.length} عنصر يتطلب مراجعة بشرية.`
-      : "القيمة تقديرية بناءً على الأصول المرئية والمستندات. النطاق يعكس عدم اليقين في الحالة والسوق.",
+    disclaimer: disclaimerParts.join(" "),
     generated_at: new Date().toISOString(),
   };
 }
