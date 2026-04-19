@@ -408,13 +408,24 @@ function combineResults(
 }
 
 // ---- AI Asset Valuation ----
+// FIX 4: Less punishing condition multipliers (defaults bias was too aggressive)
 const CONDITION_MULTIPLIER: Record<string, number> = {
   "جديد": 1.0,
-  "ممتاز": 0.85,
-  "جيد": 0.70,
-  "مستعمل": 0.50,
-  "تالف": 0.30,
-  "غير واضح": 0.50,
+  "ممتاز": 0.92,
+  "جيد": 0.82,
+  "مستعمل": 0.70,    // was 0.50 — too punishing for normal used equipment
+  "تالف": 0.35,
+  "غير واضح": 0.75,  // was 0.50 — assume reasonable when not clearly damaged
+};
+
+// Range multipliers (low/high) to express valuation uncertainty
+const CONDITION_RANGE: Record<string, { low: number; high: number }> = {
+  "جديد": { low: 0.90, high: 1.05 },
+  "ممتاز": { low: 0.82, high: 1.00 },
+  "جيد": { low: 0.70, high: 0.92 },
+  "مستعمل": { low: 0.55, high: 0.82 },
+  "تالف": { low: 0.20, high: 0.50 },
+  "غير واضح": { low: 0.60, high: 0.90 },
 };
 
 const VALUATION_TOOL = {
