@@ -378,6 +378,8 @@ const ListingDetailsPage = () => {
   const inventory = (listing.inventory || []) as Array<{ name: string; qty: number; condition: string }>;
   const documents = normalizeListingDocuments(listing.documents || []);
   const isOwner = user?.id === listing.owner_id;
+  const isPlatformAdmin = role === "platform_owner" || role === "supervisor";
+  const canManageListing = isOwner || isPlatformAdmin;
   const isSimulation = hasSimulationPhotos(listing.photos as Record<string, unknown>);
 
   // Deal structure data
@@ -421,12 +423,14 @@ const ListingDetailsPage = () => {
       <div className="py-8">
       <div className="container">
 
-        {/* Owner action bar — top of page */}
-        {isOwner && (
+        {/* Owner / Admin action bar — top of page */}
+        {canManageListing && (
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/15 bg-primary/[0.04] px-4 py-3" dir="rtl">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Shield size={14} className="text-primary" strokeWidth={1.5} />
-              <span className="font-medium text-foreground">إعلانك —</span>
+              <span className="font-medium text-foreground">
+                {isOwner ? "إعلانك —" : isPlatformAdmin ? "إدارة الإعلان —" : "—"}
+              </span>
               <span>
                 الحالة: {listing.status === "published" ? "منشور" : listing.status === "suspended" ? "موقوف مؤقتاً" : listing.status === "draft" ? "مسودة" : listing.status}
               </span>
