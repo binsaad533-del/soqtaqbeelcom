@@ -43,8 +43,8 @@ const AccountSettingsPanel = () => {
   const handleSaveProfile = async () => {
     if (!user || !profile) return;
 
-    // If phone changed but not verified, prompt verification
-    if (phoneChanged && !phoneVerified) {
+    // If phone changed but not verified, prompt verification (skipped while bypass is active)
+    if (!BYPASS_PHONE_VERIFICATION && phoneChanged && !phoneVerified) {
       setShowPhoneVerification(true);
       toast.error("يجب التحقق من رقم الجوال الجديد قبل الحفظ");
       return;
@@ -54,11 +54,13 @@ const AccountSettingsPanel = () => {
     try {
       const updateData: Record<string, any> = { full_name: fullName.trim() };
 
-      // Only update phone if changed and verified
-      if (phoneChanged && phoneVerified) {
+      // Update phone if changed (auto-mark verified while bypass is active)
+      if (phoneChanged) {
         updateData.phone = phone.trim();
-        updateData.phone_verified = true;
-        updateData.phone_verified_at = new Date().toISOString();
+        if (BYPASS_PHONE_VERIFICATION || phoneVerified) {
+          updateData.phone_verified = true;
+          updateData.phone_verified_at = new Date().toISOString();
+        }
       }
 
       const { error: profileError } = await supabase
