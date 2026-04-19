@@ -816,8 +816,12 @@ serve(async (req) => {
       }
     }
 
-    // --- COMBINE ---
-    const { combined, confidence } = combineResults(imageResult, fileResult);
+    // --- COMBINE (FIX 5: include manual inventory from listing or request) ---
+    const inventoryFromListing = listingData?.inventory;
+    const effectiveInventory = Array.isArray(manualInventory) && manualInventory.length > 0
+      ? manualInventory
+      : (Array.isArray(inventoryFromListing) ? inventoryFromListing : []);
+    const { combined, confidence } = combineResults(imageResult, fileResult, effectiveInventory);
 
     // --- VALUATION ---
     let priceAnalysis: any = null;
@@ -833,7 +837,8 @@ serve(async (req) => {
         priceAnalysis = buildPriceAnalysis(
           combinedAssets,
           valuationResult,
-          typeof dealPrice === "number" ? dealPrice : null
+          typeof dealPrice === "number" ? dealPrice : null,
+          confidence
         );
       }
     }
