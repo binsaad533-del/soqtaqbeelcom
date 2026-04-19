@@ -474,7 +474,8 @@ async function valuateAssets(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      // FIX 3: Pro model has stronger pricing knowledge for SA market
+      model: "google/gemini-2.5-pro",
       temperature: 0.2,
       messages: [
         {
