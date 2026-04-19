@@ -612,8 +612,23 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       )}>
                         <div className="grid grid-cols-2 gap-3 mb-3">
                           <div>
-                            <div className="text-[10px] text-muted-foreground">💰 القيمة التقديرية</div>
-                            <div className="text-sm font-semibold">{priceAnalysis.estimated_value?.toLocaleString()} ر.س</div>
+                            <div className="text-[10px] text-muted-foreground">💰 النطاق التقديري</div>
+                            {priceAnalysis.estimated_range ? (
+                              <div className="text-sm font-semibold leading-tight">
+                                {priceAnalysis.estimated_range.low?.toLocaleString()} – {priceAnalysis.estimated_range.high?.toLocaleString()} ر.س
+                              </div>
+                            ) : (
+                              <div className="text-sm font-semibold">{priceAnalysis.estimated_value?.toLocaleString()} ر.س</div>
+                            )}
+                            {priceAnalysis.valuation_confidence && (
+                              <div className="text-[10px] text-muted-foreground mt-0.5">
+                                مستوى الثقة: <span className={cn("font-medium",
+                                  priceAnalysis.valuation_confidence === "عالي" ? "text-emerald-700" :
+                                  priceAnalysis.valuation_confidence === "متوسط" ? "text-amber-700" :
+                                  "text-muted-foreground"
+                                )}>{priceAnalysis.valuation_confidence}</span>
+                              </div>
+                            )}
                           </div>
                           <div>
                             <div className="text-[10px] text-muted-foreground">🏷️ السعر المعروض</div>
@@ -678,6 +693,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       )}
                       {priceAnalysis.market_notes && (
                         <p className="text-[10px] text-muted-foreground/60 text-center mt-2">{priceAnalysis.market_notes}</p>
+                      )}
+                      {priceAnalysis.disclaimer && (
+                        <p className="text-[10px] text-muted-foreground/50 text-center mt-1 italic">⚠️ {priceAnalysis.disclaimer}</p>
                       )}
                     </div>
                   )}

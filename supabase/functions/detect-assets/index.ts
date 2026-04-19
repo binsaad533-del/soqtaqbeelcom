@@ -281,7 +281,16 @@ async function analyzeFileBatch(
   }
 }
 
-// ---- Merge and deduplicate ----
+// ---- Strict normalization key (FIX: prevent over-merging of distinct items) ----
+function normalizeKey(name: string): string {
+  return (name || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\u064B-\u0652]/g, "") // remove Arabic diacritics
+    .replace(/\s+/g, " ");
+}
+
+// ---- Merge and deduplicate (within same source: SUM quantities, exact key only) ----
 function mergeAndDeduplicate(batches: any[]): any {
   const allAssets: any[] = [];
   let totalImages = 0;
@@ -300,24 +309,17 @@ function mergeAndDeduplicate(batches: any[]): any {
   const seen = new Map<string, number>();
 
   for (const asset of allAssets) {
-    const key = asset.name?.trim()?.toLowerCase();
+    const key = normalizeKey(asset.name || "");
     if (!key) continue;
 
-    let found = false;
-    for (const [existingKey, idx] of seen.entries()) {
-      if (existingKey === key || existingKey.includes(key) || key.includes(existingKey)) {
-        const existing = deduplicated[idx];
-        existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
-        if (asset.details && !existing.details) existing.details = asset.details;
-        if (asset.source && existing.source && asset.source !== existing.source) {
-          existing.source = "both";
-        }
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
+    // FIX 1: only EXACT key match — no .includes() to prevent merging distinct items
+    if (seen.has(key)) {
+      const idx = seen.get(key)!;
+      const existing = deduplicated[idx];
+      // FIX 2: SUM quantities across batches of same source (not Math.max)
+      existing.quantity = (existing.quantity || 1) + (asset.quantity || 1);
+      if (asset.details && !existing.details) existing.details = asset.details;
+    } else {
       seen.set(key, deduplicated.length);
       deduplicated.push({ ...asset });
     }
@@ -331,43 +333,65 @@ function mergeAndDeduplicate(batches: any[]): any {
   };
 }
 
+// ---- Combine image + file results: keep MAX (assume same items, different views) ----
 function combineResults(
   imageResult: any,
-  fileResult: any
+  fileResult: any,
+  manualInventory: any[] = []
 ): { combined: any; confidence: string } {
   const imageAssets = imageResult?.assets || [];
   const fileAssets = fileResult?.assets || [];
 
-  const allAssets = [...imageAssets, ...fileAssets];
+  // FIX 5: include seller's manual inventory as a trusted source
+  const manualAssets = (Array.isArray(manualInventory) ? manualInventory : [])
+    .filter((it: any) => it && (it.name || it.item))
+    .map((it: any) => ({
+      name: String(it.name || it.item || "").trim(),
+      type: String(it.type || it.category || "غير محدد"),
+      condition: String(it.condition || "جيد"),
+      quantity: Number(it.quantity || it.qty || 1) || 1,
+      details: it.details || it.notes || "",
+      source: "manual",
+    }))
+    .filter((a: any) => a.name);
+
+  const allAssets = [...imageAssets, ...fileAssets, ...manualAssets];
 
   const deduplicated: any[] = [];
   const seen = new Map<string, number>();
 
   for (const asset of allAssets) {
-    const key = asset.name?.trim()?.toLowerCase();
+    const key = normalizeKey(asset.name || "");
     if (!key) continue;
 
-    let found = false;
-    for (const [existingKey, idx] of seen.entries()) {
-      if (existingKey === key || existingKey.includes(key) || key.includes(existingKey)) {
-        const existing = deduplicated[idx];
-        existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
-        if (existing.source !== asset.source) existing.source = "both";
-        found = true;
-        break;
+    // FIX 1 (cross-source): only EXACT key match
+    if (seen.has(key)) {
+      const idx = seen.get(key)!;
+      const existing = deduplicated[idx];
+      // Across sources (image vs file vs manual): same physical item — keep MAX qty
+      existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
+      // Manual inventory takes precedence for condition/details (seller's truth)
+      if (asset.source === "manual") {
+        existing.condition = asset.condition || existing.condition;
+        if (asset.details) existing.details = asset.details;
       }
-    }
-
-    if (!found) {
+      if (existing.source !== asset.source) {
+        existing.source = existing.source === "manual" || asset.source === "manual"
+          ? "verified"
+          : "both";
+      }
+    } else {
       seen.set(key, deduplicated.length);
       deduplicated.push({ ...asset });
     }
   }
 
+  // FIX 3: confidence boosted when manual inventory is provided
   let confidence = "منخفض";
-  if (imageAssets.length > 0 && fileAssets.length > 0) confidence = "عالي";
-  else if (imageAssets.length > 5 || fileAssets.length > 3) confidence = "متوسط";
-  else if (imageAssets.length > 0 || fileAssets.length > 0) confidence = "متوسط";
+  const sourceCount = (imageAssets.length > 0 ? 1 : 0) + (fileAssets.length > 0 ? 1 : 0) + (manualAssets.length > 0 ? 1 : 0);
+  if (sourceCount >= 2) confidence = "عالي";
+  else if (manualAssets.length > 0 || imageAssets.length > 5 || fileAssets.length > 3) confidence = "متوسط";
+  else if (allAssets.length > 0) confidence = "متوسط";
 
   return {
     combined: {
@@ -375,6 +399,7 @@ function combineResults(
       totalItems: deduplicated.reduce((sum: number, a: any) => sum + (a.quantity || 1), 0),
       imageSources: imageAssets.length,
       fileSources: fileAssets.length,
+      manualSources: manualAssets.length,
       summary: [imageResult?.summary, fileResult?.summary].filter(Boolean).join(" | "),
       financialInfo: fileResult?.financialInfo || null,
     },
@@ -383,13 +408,24 @@ function combineResults(
 }
 
 // ---- AI Asset Valuation ----
+// FIX 4: Less punishing condition multipliers (defaults bias was too aggressive)
 const CONDITION_MULTIPLIER: Record<string, number> = {
   "جديد": 1.0,
-  "ممتاز": 0.85,
-  "جيد": 0.70,
-  "مستعمل": 0.50,
-  "تالف": 0.30,
-  "غير واضح": 0.50,
+  "ممتاز": 0.92,
+  "جيد": 0.82,
+  "مستعمل": 0.70,    // was 0.50 — too punishing for normal used equipment
+  "تالف": 0.35,
+  "غير واضح": 0.75,  // was 0.50 — assume reasonable when not clearly damaged
+};
+
+// Range multipliers (low/high) to express valuation uncertainty
+const CONDITION_RANGE: Record<string, { low: number; high: number }> = {
+  "جديد": { low: 0.90, high: 1.05 },
+  "ممتاز": { low: 0.82, high: 1.00 },
+  "جيد": { low: 0.70, high: 0.92 },
+  "مستعمل": { low: 0.55, high: 0.82 },
+  "تالف": { low: 0.20, high: 0.50 },
+  "غير واضح": { low: 0.60, high: 0.90 },
 };
 
 const VALUATION_TOOL = {
@@ -438,7 +474,8 @@ async function valuateAssets(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      // FIX 3: Pro model has stronger pricing knowledge for SA market
+      model: "google/gemini-2.5-pro",
       temperature: 0.2,
       messages: [
         {
@@ -480,28 +517,36 @@ async function valuateAssets(
 function buildPriceAnalysis(
   assets: any[],
   valuationResult: any,
-  dealPrice: number | null
+  dealPrice: number | null,
+  confidence: string = "متوسط"
 ): any {
   if (!valuationResult?.valuations) return null;
 
   const valuationMap = new Map<string, any>();
   for (const v of valuationResult.valuations) {
-    valuationMap.set(v.name?.trim()?.toLowerCase(), v);
+    valuationMap.set(normalizeKey(v.name || ""), v);
   }
 
   const itemizedValues: any[] = [];
   let totalEstimatedValue = 0;
+  let totalLow = 0;
+  let totalHigh = 0;
 
   for (const asset of assets) {
-    const key = asset.name?.trim()?.toLowerCase();
+    const key = normalizeKey(asset.name || "");
     const valuation = valuationMap.get(key);
     const basePrice = valuation?.base_price_sar || 0;
-    const conditionMult = CONDITION_MULTIPLIER[asset.condition] || 0.50;
+    const conditionMult = CONDITION_MULTIPLIER[asset.condition] || 0.75;
+    const range = CONDITION_RANGE[asset.condition] || { low: 0.55, high: 0.95 };
     const qty = asset.quantity || 1;
     const adjustedPrice = Math.round(basePrice * conditionMult);
     const totalValue = adjustedPrice * qty;
+    const lowValue = Math.round(basePrice * range.low) * qty;
+    const highValue = Math.round(basePrice * range.high) * qty;
 
     totalEstimatedValue += totalValue;
+    totalLow += lowValue;
+    totalHigh += highValue;
 
     itemizedValues.push({
       name: asset.name,
@@ -512,12 +557,14 @@ function buildPriceAnalysis(
       condition_multiplier: conditionMult,
       adjusted_price: adjustedPrice,
       total_value: totalValue,
+      value_low: lowValue,
+      value_high: highValue,
       reasoning: valuation?.reasoning || "",
       source: asset.source || "image",
     });
   }
 
-  // Decision logic
+  // Decision logic — uses RANGE not single point (Option C)
   let decision = "غير محدد";
   let overpricedPercentage = 0;
   let difference = 0;
@@ -526,21 +573,25 @@ function buildPriceAnalysis(
     difference = dealPrice - totalEstimatedValue;
     overpricedPercentage = Math.round((difference / totalEstimatedValue) * 100);
 
-    if (overpricedPercentage <= -25) decision = "فرصة ممتازة";
-    else if (overpricedPercentage <= -10) decision = "صفقة جيدة";
-    else if (overpricedPercentage <= 10) decision = "سعر عادل";
-    else if (overpricedPercentage <= 25) decision = "أعلى قليلاً";
+    // Use range bounds for fairer decision: only flag overpriced if above HIGH bound
+    if (dealPrice <= totalLow * 0.85) decision = "فرصة ممتازة";
+    else if (dealPrice <= totalLow) decision = "صفقة جيدة";
+    else if (dealPrice <= totalHigh) decision = "سعر عادل";
+    else if (dealPrice <= totalHigh * 1.20) decision = "أعلى قليلاً";
     else decision = "مبالغ فيه";
   }
 
   return {
     estimated_value: totalEstimatedValue,
+    estimated_range: { low: totalLow, high: totalHigh },
+    valuation_confidence: confidence,
     deal_price: dealPrice || 0,
     difference,
     overpriced_percentage: overpricedPercentage,
     decision,
     items: itemizedValues,
     market_notes: valuationResult.market_notes || "",
+    disclaimer: "القيمة تقديرية بناءً على الأصول المرئية والمستندات. النطاق يعكس عدم اليقين في الحالة والسوق.",
     generated_at: new Date().toISOString(),
   };
 }
@@ -687,7 +738,7 @@ serve(async (req) => {
   }
 
   try {
-    const { photoUrls, fileUrls, businessActivity, dealPrice, listingData } = await req.json();
+    const { photoUrls, fileUrls, businessActivity, dealPrice, listingData, manualInventory } = await req.json();
 
     const hasPhotos = Array.isArray(photoUrls) && photoUrls.length > 0;
     const hasFiles = Array.isArray(fileUrls) && fileUrls.length > 0;
@@ -765,8 +816,12 @@ serve(async (req) => {
       }
     }
 
-    // --- COMBINE ---
-    const { combined, confidence } = combineResults(imageResult, fileResult);
+    // --- COMBINE (FIX 5: include manual inventory from listing or request) ---
+    const inventoryFromListing = listingData?.inventory;
+    const effectiveInventory = Array.isArray(manualInventory) && manualInventory.length > 0
+      ? manualInventory
+      : (Array.isArray(inventoryFromListing) ? inventoryFromListing : []);
+    const { combined, confidence } = combineResults(imageResult, fileResult, effectiveInventory);
 
     // --- VALUATION ---
     let priceAnalysis: any = null;
@@ -782,7 +837,8 @@ serve(async (req) => {
         priceAnalysis = buildPriceAnalysis(
           combinedAssets,
           valuationResult,
-          typeof dealPrice === "number" ? dealPrice : null
+          typeof dealPrice === "number" ? dealPrice : null,
+          confidence
         );
       }
     }
