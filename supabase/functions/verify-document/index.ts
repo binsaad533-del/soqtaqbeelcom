@@ -81,9 +81,23 @@ serve(async (req) => {
 
     const urlLower = documentUrl.toLowerCase().split("?")[0];
     const imageExtensions = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".heic"];
-    const isImage = imageExtensions.some((ext) => urlLower.endsWith(ext));
-    const isPdf = urlLower.endsWith(".pdf");
-    const isSpreadsheet = /\.(xlsx?|csv)$/i.test(urlLower);
+    let isImage = imageExtensions.some((ext) => urlLower.endsWith(ext));
+    let isPdf = urlLower.endsWith(".pdf");
+    let isSpreadsheet = /\.(xlsx?|csv)$/i.test(urlLower);
+
+    // Fallback: when extension is unknown (e.g., signed URLs without extension),
+    // probe the Content-Type via HEAD so we don't reject valid uploads.
+    if (!isImage && !isPdf && !isSpreadsheet) {
+      try {
+        const head = await fetch(documentUrl, { method: "HEAD" });
+        const ct = (head.headers.get("content-type") || "").toLowerCase();
+        if (ct.startsWith("image/")) isImage = true;
+        else if (ct.includes("pdf")) isPdf = true;
+        else if (ct.includes("spreadsheet") || ct.includes("excel") || ct.includes("csv")) isSpreadsheet = true;
+      } catch (_) {
+        // ignore — fall through to existing checks
+      }
+    }
 
     if (!isImage) {
       if (expectedType === "equipment_photos") {
