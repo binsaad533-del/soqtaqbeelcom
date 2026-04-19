@@ -169,18 +169,53 @@ serve(async (req) => {
         { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
       ];
     } else {
-      // Spreadsheet/CSV — fetch and read first ~50KB as plain text snapshot for AI to evaluate.
+      // Spreadsheet/CSV — fetch and intelligently extract readable content.
       const sheetResp = await fetch(documentUrl);
       if (!sheetResp.ok) throw new Error(`Failed to fetch spreadsheet: ${sheetResp.status}`);
       const buf = new Uint8Array(await sheetResp.arrayBuffer());
-      const slice = buf.slice(0, 50 * 1024);
-      // Try to decode as UTF-8; binary xlsx will be partially garbled but headers/strings often surface.
-      const text = new TextDecoder("utf-8", { fatal: false }).decode(slice);
-      const isLikelyBinaryXlsx = /^PK\x03\x04/.test(text); // ZIP signature
+      const isXlsx = buf.length >= 4 && buf[0] === 0x50 && buf[1] === 0x4b && buf[2] === 0x03 && buf[3] === 0x04;
+
+      let extracted = "";
+      let kind = "CSV/نصي";
+
+      if (isXlsx) {
+        kind = "Excel (xlsx)";
+        // Use jsr:@zip-js/zip-js to unzip the xlsx in-memory and read sharedStrings + first sheet.
+        try {
+          const zipMod = await import("https://deno.land/x/zipjs@v2.7.45/index.js");
+          const reader = new zipMod.ZipReader(new zipMod.Uint8ArrayReader(buf));
+          const entries = await reader.getEntries();
+          const wanted = ["xl/sharedStrings.xml", "xl/worksheets/sheet1.xml", "xl/worksheets/sheet2.xml"];
+          const parts: string[] = [];
+          for (const entry of entries) {
+            if (!wanted.includes(entry.filename)) continue;
+            const xml = await entry.getData!(new zipMod.TextWriter());
+            // Strip XML tags, keep readable strings.
+            const cleaned = String(xml)
+              .replace(/<[^>]+>/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+            parts.push(`[${entry.filename}]\n${cleaned.slice(0, 4000)}`);
+          }
+          await reader.close();
+          extracted = parts.join("\n\n");
+          if (!extracted) {
+            extracted = "(تعذّر استخراج أي نص من الملف — قد يكون فارغاً أو محمياً بكلمة سر)";
+          }
+        } catch (zipErr) {
+          console.error("xlsx unzip failed:", zipErr);
+          extracted = "(فشل فك ضغط ملف xlsx — قد يكون تالفاً)";
+        }
+      } else {
+        // CSV / plain text
+        const text = new TextDecoder("utf-8", { fatal: false }).decode(buf.slice(0, 50 * 1024));
+        extracted = text;
+      }
+
       content = [
         {
           type: "text",
-          text: `تحقق من ملف ${isLikelyBinaryXlsx ? "Excel" : "CSV/نصي"} التالي: هل هو فعلاً "${rule.label}"؟ ${isLikelyBinaryXlsx ? "الملف ثنائي (xlsx)؛ اعتمد على أسماء الأعمدة والنصوص المرئية." : ""} ابحث عن: جدول أصول/معدات بأسماء وكميات. ارفض إذا كان: قائمة موظفين، فاتورة وحيدة، نص عشوائي، أو ملف فارغ.\n\nمحتوى الملف (مقتطف):\n\`\`\`\n${text.slice(0, 8000)}\n\`\`\``,
+          text: `تحقق بصرامة من محتوى ملف ${kind} التالي: هل يطابق فعلاً نوع "${rule.label}"؟\n\nابحث عن: جدول/قائمة أصول أو معدات بأسماء وكميات و/أو حالات/أسعار (≥3 عناصر).\nارفض فوراً إذا كان: قائمة موظفين/رواتب، فاتورة وحيدة، ملاحظات عامة، نص عشوائي، ملف فارغ، أو أي محتوى لا يطابق الوصف.\n\nمحتوى الملف المستخرج:\n\`\`\`\n${extracted.slice(0, 8000)}\n\`\`\``,
         },
       ];
     }
