@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useListings, type Listing } from "@/hooks/useListings";
@@ -14,7 +14,7 @@ import {
   CheckCircle, Loader2, Activity, Clock,
   DollarSign, Camera, Pencil,
   Check, X as XIcon, Phone, UserCheck, Shield, Bell,
-  Store, Briefcase, ChevronLeft, Wallet, TrendingUp, Trash2,
+  Store, Briefcase, ChevronLeft, Wallet, TrendingUp, Trash2, Edit3,
   ArrowUpRight, Mail, Search, ShoppingCart, Heart, User, Settings, Bot, Brain
 } from "lucide-react";
 import { toast } from "sonner";
@@ -50,6 +50,7 @@ const fmtCurrency = (n: number) =>
 const CustomerDashboardPage = () => {
   useSEO({ title: "لوحة العميل", description: "لوحة تحكم العميل — تابع إعلاناتك وصفقاتك على سوق تقبيل", canonical: "/dashboard" });
   const { profile, user } = useAuthContext();
+  const navigate = useNavigate();
   const { getMyListings, softDeleteListing } = useListings();
   const { getMyDeals } = useDeals();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
@@ -769,6 +770,19 @@ const CustomerDashboardPage = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
+                          {!isDraft && (listing.status === "suspended" || listing.status === "published") && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                navigate(`/listing/${listing.id}?edit=1`);
+                              }}
+                              className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                              title="تعديل الإعلان"
+                            >
+                              <Edit3 size={14} strokeWidth={1.5} />
+                            </button>
+                          )}
                           {(isDraft || listing.status === "suspended" || listing.status === "published") && (
                             <button
                               onClick={(e) => handleDeleteListing(e, listing.id, listing.title || listing.business_activity || null)}
