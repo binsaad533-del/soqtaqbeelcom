@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import {
   Store, ShoppingBag, Pause, Users, Handshake, CheckCircle2,
-  TrendingUp, ArrowLeft, Plus, MessageSquare, Percent, ExternalLink, Eye, Trash2, BarChart3, Sparkles, Link2,
+  TrendingUp, ArrowLeft, Plus, MessageSquare, Percent, ExternalLink, Eye, Trash2, BarChart3, Sparkles, Link2, Edit3,
 } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
 import { toast } from "sonner";
@@ -245,9 +245,18 @@ const SellerDashboardPage = () => {
                         </TableCell>
                         <TableCell className="text-center">
                           <div className="flex items-center justify-center gap-2">
-                            <Link to={`/listing/${listing.id}`} className="text-muted-foreground hover:text-foreground transition-colors">
+                            <Link to={`/listing/${listing.id}`} className="text-muted-foreground hover:text-foreground transition-colors" title="عرض الإعلان">
                               <Eye size={14} />
                             </Link>
+                            {(listing.status === "published" || listing.status === "suspended") && (
+                              <Link
+                                to={`/listing/${listing.id}?edit=1`}
+                                className="text-muted-foreground hover:text-primary transition-colors"
+                                title="تعديل الإعلان"
+                              >
+                                <Edit3 size={13} />
+                              </Link>
+                            )}
                             {listing.status === "published" && (
                               <button
                                 onClick={() => { setPromoteId(listing.id); setPromoteTitle(listing.title); }}
