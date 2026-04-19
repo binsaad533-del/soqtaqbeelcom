@@ -872,10 +872,9 @@ serve(async (req) => {
     }
 
     // --- COMBINE (FIX 5: include manual inventory from listing or request) ---
-    const inventoryFromListing = listingData?.inventory;
     const effectiveInventory = Array.isArray(manualInventory) && manualInventory.length > 0
       ? manualInventory
-      : (Array.isArray(inventoryFromListing) ? inventoryFromListing : []);
+      : inventoryFromListing;
     const { combined, confidence } = combineResults(imageResult, fileResult, effectiveInventory);
 
     // --- VALUATION ---
