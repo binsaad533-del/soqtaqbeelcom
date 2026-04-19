@@ -43,7 +43,7 @@ const CredibilityBadge = ({ data, compact = false }: Props) => {
     );
   }
 
-  const config = gradeConfig[data.grade];
+  const config = gradeConfig[data.grade] || gradeConfig.moderate;
   const Icon = config.icon;
 
   if (compact) {
