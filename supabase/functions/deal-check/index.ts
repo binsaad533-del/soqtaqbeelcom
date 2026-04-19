@@ -137,6 +137,7 @@ function normalizeListingForAnalysis(listing: any) {
     inventory_total_price: inventoryTotalPrice,
     documents,
     deal_options: dealOptions,
+    ai_document_classification: listing?.ai_document_classification || null,
   };
 }
 
@@ -513,6 +514,35 @@ function buildAnalysisPrompt(listing: any, mode: AnalysisMode, previousAnalysis:
       sections.push(`- ${label}${suffix}: ${doc.status || "مرفق"}`);
     });
   }
+
+  // Document content verification — flags wrong/irrelevant uploads
+  const docClass = listing.ai_document_classification;
+  if (docClass && (docClass.warnings?.length || docClass.files?.length)) {
+    sections.push("\n## ⚠️ تحقق محتوى المستندات (نتائج فحص آلي للمحتوى الفعلي للملفات):");
+    sections.push(`- إجمالي الملفات المفحوصة: ${docClass.classified || 0}`);
+    if (docClass.mismatches_count > 0) {
+      sections.push(`- ملفات لا تطابق خانتها: ${docClass.mismatches_count}`);
+    }
+    if (docClass.irrelevant_count > 0) {
+      sections.push(`- ملفات غير ذات صلة بالأعمال: ${docClass.irrelevant_count}`);
+    }
+    if (docClass.unreadable_count > 0) {
+      sections.push(`- ملفات غير قابلة للقراءة: ${docClass.unreadable_count}`);
+    }
+    if (Array.isArray(docClass.warnings) && docClass.warnings.length > 0) {
+      sections.push("\n### تحذيرات تفصيلية يجب إدراجها في التحليل:");
+      for (const w of docClass.warnings) {
+        sections.push(`- ${w}`);
+      }
+      sections.push("");
+      sections.push("⚠️ قواعد إلزامية بناءً على نتائج فحص المحتوى:");
+      sections.push("1. لا تعتبر المستندات المُصنّفة كـ 'غير ذات صلة' أو 'غير قابلة للقراءة' دليلاً على أي شيء.");
+      sections.push("2. إذا كانت خانة (مثل 'عقد الإيجار') مرفقة بملف لا يطابقها فعلياً، اعتبر هذا المستند غير مرفق وأضف ذلك إلى missingInfo.");
+      sections.push("3. أدرج التحذيرات أعلاه ضمن risks بصياغة واضحة (مثال: 'الملف المرفوع كعقد إيجار هو في الحقيقة صورة شاحنة — لا يوجد عقد إيجار مرفق فعلياً').");
+      sections.push("4. لا تفترض أن مجرد وجود ملف في خانة يعني توفر المعلومة المطلوبة.");
+    }
+  }
+
 
   if (listing.disclosure_score) sections.push(`\n## نسبة الإفصاح: ${listing.disclosure_score}%`);
   if (listing.ai_summary) sections.push(`\n## ملخص البائع:\n${listing.ai_summary}`);
