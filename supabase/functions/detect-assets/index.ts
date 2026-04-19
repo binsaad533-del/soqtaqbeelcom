@@ -281,7 +281,16 @@ async function analyzeFileBatch(
   }
 }
 
-// ---- Merge and deduplicate ----
+// ---- Strict normalization key (FIX: prevent over-merging of distinct items) ----
+function normalizeKey(name: string): string {
+  return (name || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\u064B-\u0652]/g, "") // remove Arabic diacritics
+    .replace(/\s+/g, " ");
+}
+
+// ---- Merge and deduplicate (within same source: SUM quantities, exact key only) ----
 function mergeAndDeduplicate(batches: any[]): any {
   const allAssets: any[] = [];
   let totalImages = 0;
@@ -300,24 +309,17 @@ function mergeAndDeduplicate(batches: any[]): any {
   const seen = new Map<string, number>();
 
   for (const asset of allAssets) {
-    const key = asset.name?.trim()?.toLowerCase();
+    const key = normalizeKey(asset.name || "");
     if (!key) continue;
 
-    let found = false;
-    for (const [existingKey, idx] of seen.entries()) {
-      if (existingKey === key || existingKey.includes(key) || key.includes(existingKey)) {
-        const existing = deduplicated[idx];
-        existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
-        if (asset.details && !existing.details) existing.details = asset.details;
-        if (asset.source && existing.source && asset.source !== existing.source) {
-          existing.source = "both";
-        }
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
+    // FIX 1: only EXACT key match — no .includes() to prevent merging distinct items
+    if (seen.has(key)) {
+      const idx = seen.get(key)!;
+      const existing = deduplicated[idx];
+      // FIX 2: SUM quantities across batches of same source (not Math.max)
+      existing.quantity = (existing.quantity || 1) + (asset.quantity || 1);
+      if (asset.details && !existing.details) existing.details = asset.details;
+    } else {
       seen.set(key, deduplicated.length);
       deduplicated.push({ ...asset });
     }
@@ -331,43 +333,65 @@ function mergeAndDeduplicate(batches: any[]): any {
   };
 }
 
+// ---- Combine image + file results: keep MAX (assume same items, different views) ----
 function combineResults(
   imageResult: any,
-  fileResult: any
+  fileResult: any,
+  manualInventory: any[] = []
 ): { combined: any; confidence: string } {
   const imageAssets = imageResult?.assets || [];
   const fileAssets = fileResult?.assets || [];
 
-  const allAssets = [...imageAssets, ...fileAssets];
+  // FIX 5: include seller's manual inventory as a trusted source
+  const manualAssets = (Array.isArray(manualInventory) ? manualInventory : [])
+    .filter((it: any) => it && (it.name || it.item))
+    .map((it: any) => ({
+      name: String(it.name || it.item || "").trim(),
+      type: String(it.type || it.category || "غير محدد"),
+      condition: String(it.condition || "جيد"),
+      quantity: Number(it.quantity || it.qty || 1) || 1,
+      details: it.details || it.notes || "",
+      source: "manual",
+    }))
+    .filter((a: any) => a.name);
+
+  const allAssets = [...imageAssets, ...fileAssets, ...manualAssets];
 
   const deduplicated: any[] = [];
   const seen = new Map<string, number>();
 
   for (const asset of allAssets) {
-    const key = asset.name?.trim()?.toLowerCase();
+    const key = normalizeKey(asset.name || "");
     if (!key) continue;
 
-    let found = false;
-    for (const [existingKey, idx] of seen.entries()) {
-      if (existingKey === key || existingKey.includes(key) || key.includes(existingKey)) {
-        const existing = deduplicated[idx];
-        existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
-        if (existing.source !== asset.source) existing.source = "both";
-        found = true;
-        break;
+    // FIX 1 (cross-source): only EXACT key match
+    if (seen.has(key)) {
+      const idx = seen.get(key)!;
+      const existing = deduplicated[idx];
+      // Across sources (image vs file vs manual): same physical item — keep MAX qty
+      existing.quantity = Math.max(existing.quantity || 1, asset.quantity || 1);
+      // Manual inventory takes precedence for condition/details (seller's truth)
+      if (asset.source === "manual") {
+        existing.condition = asset.condition || existing.condition;
+        if (asset.details) existing.details = asset.details;
       }
-    }
-
-    if (!found) {
+      if (existing.source !== asset.source) {
+        existing.source = existing.source === "manual" || asset.source === "manual"
+          ? "verified"
+          : "both";
+      }
+    } else {
       seen.set(key, deduplicated.length);
       deduplicated.push({ ...asset });
     }
   }
 
+  // FIX 3: confidence boosted when manual inventory is provided
   let confidence = "منخفض";
-  if (imageAssets.length > 0 && fileAssets.length > 0) confidence = "عالي";
-  else if (imageAssets.length > 5 || fileAssets.length > 3) confidence = "متوسط";
-  else if (imageAssets.length > 0 || fileAssets.length > 0) confidence = "متوسط";
+  const sourceCount = (imageAssets.length > 0 ? 1 : 0) + (fileAssets.length > 0 ? 1 : 0) + (manualAssets.length > 0 ? 1 : 0);
+  if (sourceCount >= 2) confidence = "عالي";
+  else if (manualAssets.length > 0 || imageAssets.length > 5 || fileAssets.length > 3) confidence = "متوسط";
+  else if (allAssets.length > 0) confidence = "متوسط";
 
   return {
     combined: {
@@ -375,6 +399,7 @@ function combineResults(
       totalItems: deduplicated.reduce((sum: number, a: any) => sum + (a.quantity || 1), 0),
       imageSources: imageAssets.length,
       fileSources: fileAssets.length,
+      manualSources: manualAssets.length,
       summary: [imageResult?.summary, fileResult?.summary].filter(Boolean).join(" | "),
       financialInfo: fileResult?.financialInfo || null,
     },
