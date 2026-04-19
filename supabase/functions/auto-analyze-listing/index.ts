@@ -86,8 +86,13 @@ Deno.serve(async (req) => {
     }
 
     // Step 1: Detect assets (includes price analysis + trust score)
+    // FIX: Pass manualInventory + listingData fully so engine can valuate even without photos
     let combinedAssets = null;
-    if (photoUrls.length > 0 || fileUrls.length > 0) {
+    let assetDetectionPayload: any = null;
+    const manualInventory = Array.isArray(listing.inventory) ? listing.inventory : [];
+    const hasAnyAssetSource = photoUrls.length > 0 || fileUrls.length > 0 || manualInventory.length > 0;
+
+    if (hasAnyAssetSource) {
       try {
         const assetResult = await invokeFunction("detect-assets", {
           photoUrls,
@@ -95,9 +100,21 @@ Deno.serve(async (req) => {
           businessActivity: listing.business_activity || listing.category,
           dealPrice: listing.price || null,
           listingData: listing,
+          manualInventory,
         });
         if (assetResult?.success && assetResult.detected) {
           combinedAssets = assetResult.detected.combined;
+          assetDetectionPayload = assetResult.detected;
+          // Persist full asset detection (incl. price range + trust score) to listing
+          await supabase.from("listings").update({
+            ai_detected_assets: combinedAssets,
+            ai_assets_combined: combinedAssets,
+            ai_price_analysis: assetResult.detected.priceAnalysis || null,
+            ai_trust_score: assetResult.detected.trustScore || null,
+            ai_analysis_updated_at: new Date().toISOString(),
+          }).eq("id", listingId);
+        } else if (assetResult?.error) {
+          console.error("detect-assets returned error:", assetResult.error);
         }
       } catch (e) {
         console.error("Asset detection failed:", e);

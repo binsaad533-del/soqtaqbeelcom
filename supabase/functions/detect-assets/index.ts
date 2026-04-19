@@ -9,16 +9,21 @@ const corsHeaders = {
 const IMAGE_BATCH_SIZE = 10;
 const FILE_BATCH_SIZE = 5;
 
-const IMAGE_SYSTEM_PROMPT = `أنت محلل أصول بصري خبير. مهمتك تحليل صور نشاط تجاري واستخراج قائمة منظمة بجميع الأصول والمعدات المرئية.
+const IMAGE_SYSTEM_PROMPT = `أنت محلل أصول بصري خبير متخصص في ورش الصناعات الثقيلة (نجارة، حدادة، ميكانيكا، ألمنيوم، CNC، خراطة) والمنشآت التجارية في السوق السعودي.
 
 ## التعليمات:
-1. افحص كل صورة بعناية وحدد جميع المعدات والأجهزة والأثاث والأدوات المرئية
-2. صنّف كل عنصر حسب النوع (آلة CNC، ضاغط هواء، طاولة عمل، كرسي مكتب، إلخ)
-3. قدّر حالة كل عنصر: جديد / جيد / مستعمل / تالف
-4. قدّر الكمية إذا تكرر العنصر في عدة صور
-5. لا تكرر نفس العنصر إذا ظهر في أكثر من صورة
-6. ركّز على المعدات ذات القيمة التجارية
-7. تجاهل العناصر العامة مثل الجدران والأرضيات والإضاءة العادية`;
+1. افحص كل صورة بعناية شديدة وحدد **جميع** الأصول الظاهرة دون استثناء، خاصة:
+   - **المعدات الثقيلة**: آلات CNC، مخارط، فرايز، مناشير، آلات لحام، مكابس، رافعات، ضواغط هواء، خلاطات إسمنت، آلات نجارة (مناشير قرصية، رواتر، كبسات)
+   - **المعدات المتوسطة**: ثلاجات صناعية، أفران، خلاطات عجين، مولدات كهرباء، مكاوي، أجهزة تكييف
+   - **الأدوات اليدوية والكهربائية**: مفكات، مثاقب، مطارق، مفاتيح، أدوات قياس
+   - **الأثاث والتجهيزات**: طاولات، كراسي، رفوف، خزائن، ديكورات
+2. صنّف كل عنصر حسب النوع بدقة (مثل: "آلة CNC مخرطة CK6140"، "ضاغط هواء 500 لتر"، "ثلاجة عرض 4 أبواب")
+3. قدّر حالة كل عنصر: جديد / ممتاز / جيد / مستعمل / تالف / غير واضح (استخدم "غير واضح" بدلاً من "تالف" إذا لم تكن متأكداً)
+4. **قاعدة الكمية**: عُدّ الوحدات المختلفة الظاهرة في نفس الصورة، ولا تجمع كميات الأصول التي تظهر في عدة زوايا لنفس الصورة
+5. لا تكرر نفس العنصر إذا ظهر في أكثر من صورة (نفس الزاوية المختلفة)
+6. **ركّز على المعدات الكبيرة والثقيلة أولاً** قبل العناصر الصغيرة — لا تتجاهلها أبداً مهما كانت الصورة غير واضحة
+7. تجاهل العناصر الإنشائية: الجدران، الأرضيات، الإضاءة العادية، النوافذ
+8. إذا ظهرت معدات على نطاق واسع (ورشة كاملة)، عُدّ كل وحدة بدقة وأذكر تفاصيل كل آلة`;
 
 const FILE_SYSTEM_PROMPT = `أنت محلل مستندات تجارية خبير. استخرج جميع المعدات والأصول المذكورة في النص التالي مع الكمية والنوع والحالة.
 
@@ -528,9 +533,12 @@ function buildPriceAnalysis(
   }
 
   const itemizedValues: any[] = [];
+  const unvaluedItems: any[] = []; // FIX: track items the AI couldn't price
   let totalEstimatedValue = 0;
   let totalLow = 0;
   let totalHigh = 0;
+  let valuedAssetCount = 0;
+  let totalAssetCount = 0;
 
   for (const asset of assets) {
     const key = normalizeKey(asset.name || "");
@@ -539,6 +547,35 @@ function buildPriceAnalysis(
     const conditionMult = CONDITION_MULTIPLIER[asset.condition] || 0.75;
     const range = CONDITION_RANGE[asset.condition] || { low: 0.55, high: 0.95 };
     const qty = asset.quantity || 1;
+    totalAssetCount += qty;
+
+    // FIX: skip assets with zero base price — don't pollute totals with silent zeros
+    if (!basePrice || basePrice <= 0) {
+      unvaluedItems.push({
+        name: asset.name,
+        type: asset.type,
+        quantity: qty,
+        condition: asset.condition,
+        reason: "لم يتمكن المحرك من تقدير السعر السوقي لهذا العنصر",
+      });
+      itemizedValues.push({
+        name: asset.name,
+        type: asset.type,
+        condition: asset.condition,
+        quantity: qty,
+        base_price: 0,
+        condition_multiplier: conditionMult,
+        adjusted_price: 0,
+        total_value: 0,
+        value_low: 0,
+        value_high: 0,
+        reasoning: "غير مُقيَّم — يتطلب مراجعة بشرية",
+        source: asset.source || "image",
+        unvalued: true,
+      });
+      continue;
+    }
+
     const adjustedPrice = Math.round(basePrice * conditionMult);
     const totalValue = adjustedPrice * qty;
     const lowValue = Math.round(basePrice * range.low) * qty;
@@ -547,6 +584,7 @@ function buildPriceAnalysis(
     totalEstimatedValue += totalValue;
     totalLow += lowValue;
     totalHigh += highValue;
+    valuedAssetCount += qty;
 
     itemizedValues.push({
       name: asset.name,
@@ -563,6 +601,12 @@ function buildPriceAnalysis(
       source: asset.source || "image",
     });
   }
+
+  // FIX: degrade confidence if a large share of items were unvalued
+  const valuedRatio = totalAssetCount > 0 ? valuedAssetCount / totalAssetCount : 1;
+  let effectiveConfidence = confidence;
+  if (valuedRatio < 0.4) effectiveConfidence = "منخفض";
+  else if (valuedRatio < 0.7 && effectiveConfidence === "عالي") effectiveConfidence = "متوسط";
 
   // Decision logic — uses RANGE not single point (Option C)
   let decision = "غير محدد";
@@ -584,14 +628,20 @@ function buildPriceAnalysis(
   return {
     estimated_value: totalEstimatedValue,
     estimated_range: { low: totalLow, high: totalHigh },
-    valuation_confidence: confidence,
+    valuation_confidence: effectiveConfidence,
     deal_price: dealPrice || 0,
     difference,
     overpriced_percentage: overpricedPercentage,
     decision,
     items: itemizedValues,
+    unvalued_items: unvaluedItems,
+    valued_ratio: Math.round(valuedRatio * 100),
+    valued_count: valuedAssetCount,
+    total_count: totalAssetCount,
     market_notes: valuationResult.market_notes || "",
-    disclaimer: "القيمة تقديرية بناءً على الأصول المرئية والمستندات. النطاق يعكس عدم اليقين في الحالة والسوق.",
+    disclaimer: unvaluedItems.length > 0
+      ? `القيمة تقديرية للأصول التي تم تقييمها فقط (${valuedAssetCount} من ${totalAssetCount}). ${unvaluedItems.length} عنصر يتطلب مراجعة بشرية.`
+      : "القيمة تقديرية بناءً على الأصول المرئية والمستندات. النطاق يعكس عدم اليقين في الحالة والسوق.",
     generated_at: new Date().toISOString(),
   };
 }
@@ -742,10 +792,15 @@ serve(async (req) => {
 
     const hasPhotos = Array.isArray(photoUrls) && photoUrls.length > 0;
     const hasFiles = Array.isArray(fileUrls) && fileUrls.length > 0;
+    // FIX: also accept manual inventory from listingData as a valid source
+    const inventoryFromListing = Array.isArray(listingData?.inventory) ? listingData.inventory : [];
+    const hasManual =
+      (Array.isArray(manualInventory) && manualInventory.length > 0) ||
+      inventoryFromListing.length > 0;
 
-    if (!hasPhotos && !hasFiles) {
+    if (!hasPhotos && !hasFiles && !hasManual) {
       return new Response(
-        JSON.stringify({ error: "لا توجد صور أو ملفات للتحليل" }),
+        JSON.stringify({ error: "لا توجد صور أو ملفات أو جرد يدوي للتحليل" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
