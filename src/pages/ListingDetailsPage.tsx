@@ -166,6 +166,9 @@ const ListingDetailsPage = () => {
   const [submittingInterest, setSubmittingInterest] = useState(false);
   const [interestCount, setInterestCount] = useState(() => cachedSnapshot?.interestCount ?? 0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
+  const [statusToggling, setStatusToggling] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const loadedIdRef = useRef<string | null>(cachedSnapshot?.listing?.id ?? null);
