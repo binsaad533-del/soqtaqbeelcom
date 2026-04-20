@@ -294,7 +294,7 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 /* ── Build AI prompt ── */
-function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors: any[], industrial: boolean): string {
+function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors: any[], industrial: boolean, hasFinancials: boolean): string {
   const sections: string[] = [];
 
   sections.push("# طلب دراسة جدوى اقتصادية شاملة لصفقة تقبيل");
