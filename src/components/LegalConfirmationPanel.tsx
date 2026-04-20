@@ -61,7 +61,7 @@ interface Props {
 const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
   const { user } = useAuthContext();
   const { getConfirmations, submitConfirmation, loading, REQUIRED_CONFIRMATIONS } = useLegalConfirmation();
-  const { getProfile } = useProfiles();
+  const { getProfile, getCounterpartySafe } = useProfiles();
 
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [buyerConfirmed, setBuyerConfirmed] = useState(false);
@@ -94,15 +94,37 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
 
   useEffect(() => {
     loadStatus();
-    // Load both profiles
-    if (deal.buyer_id) {
-      getProfile(deal.buyer_id).then(p => setBuyerProfile(p));
-      supabase.auth.admin?.getUserById?.(deal.buyer_id).catch(() => {});
-    }
-    if (deal.seller_id) {
-      getProfile(deal.seller_id).then(p => setSellerProfile(p));
-    }
-  }, [deal.buyer_id, deal.seller_id, getProfile, loadStatus]);
+    // Self profile = full data via RLS. Counterparty = safe RPC (masked phone, no email).
+    const loadProfileFor = async (uid: string): Promise<Profile | null> => {
+      if (uid === user?.id) return getProfile(uid);
+      const safe = await getCounterpartySafe(uid);
+      if (!safe) return null;
+      // Map safe RPC shape → Profile (use masked_phone in `phone` slot for UI rendering)
+      return {
+        id: safe.user_id,
+        user_id: safe.user_id,
+        full_name: safe.full_name,
+        phone: safe.masked_phone,
+        email: null,
+        city: safe.city,
+        avatar_url: safe.avatar_url,
+        is_verified: safe.is_verified,
+        is_active: true,
+        is_suspended: false,
+        last_activity: null,
+        created_at: safe.member_since,
+        updated_at: safe.member_since,
+        trust_score: safe.trust_score,
+        verification_level: safe.verification_level,
+        kyc_data: null,
+        completed_deals: safe.completed_deals,
+        cancelled_deals: 0,
+        disputes_count: 0,
+      } as Profile;
+    };
+    if (deal.buyer_id) loadProfileFor(deal.buyer_id).then(setBuyerProfile);
+    if (deal.seller_id) loadProfileFor(deal.seller_id).then(setSellerProfile);
+  }, [deal.buyer_id, deal.seller_id, user?.id, getProfile, getCounterpartySafe, loadStatus]);
 
   // Get emails from auth context for current user
   useEffect(() => {
@@ -156,6 +178,23 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
         ensurePdfFontLoaded(),
       ]);
 
+      // For the legal PDF, fetch full phone of the counterparty via the audited RPC.
+      // Server enforces: viewer is party, counterparty signed, deal active.
+      let buyerPhoneFull: string | null = (isBuyer ? buyerProfile?.phone : null) || null;
+      let sellerPhoneFull: string | null = (isSeller ? sellerProfile?.phone : null) || null;
+      const counterpartyId = isBuyer ? deal.seller_id : deal.buyer_id;
+      if (counterpartyId) {
+        const { data: legalArr } = await supabase.rpc("get_counterparty_profile_legal", {
+          target_user_id: counterpartyId,
+          target_deal_id: deal.id,
+        });
+        const legal = (legalArr as any[] | null)?.[0] ?? null;
+        if (legal?.phone) {
+          if (isBuyer) sellerPhoneFull = legal.phone;
+          else buyerPhoneFull = legal.phone;
+        }
+      }
+
       const mount = createPdfMount();
       const sections: HTMLElement[] = [];
 
@@ -169,18 +208,18 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
         { label: "الحالة", value: deal.status === "finalized" ? "مكتملة" : "قيد الاستكمال" },
       ]), true));
 
-      // Parties
-      const partyCard = (label: string, profile: Profile | null) => `
+      // Parties — use full phone (may be null if legal conditions not met yet)
+      const partyCard = (label: string, profile: Profile | null, phoneFull: string | null) => `
         <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:18px;padding:16px;background:${PDF_COLORS.cardBg};display:grid;gap:6px;">
           <div style="font-size:10px;color:${PDF_COLORS.primary};font-weight:600;">${escapeHtml(label)}</div>
           <div style="font-size:14px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(profile?.full_name || "—")}</div>
-          ${profile?.phone ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};direction:ltr;text-align:right;">${escapeHtml(profile.phone)}</div>` : ""}
+          ${phoneFull ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};direction:ltr;text-align:right;">${escapeHtml(phoneFull)}</div>` : ""}
           ${profile?.city ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};">${escapeHtml(profile.city)}</div>` : ""}
         </div>`;
       sections.push(buildPdfSection("أطراف الصفقة", `
         <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
-          ${partyCard("البائع", sellerProfile)}
-          ${partyCard("المشتري", buyerProfile)}
+          ${partyCard("البائع", sellerProfile, sellerPhoneFull)}
+          ${partyCard("المشتري", buyerProfile, buyerPhoneFull)}
         </div>
       `));
 

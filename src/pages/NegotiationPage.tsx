@@ -73,7 +73,7 @@ const NegotiationPage = () => {
   const { getListing } = useListings();
   const { monitorChat, calculateDealRisk } = useFraudEngine();
   const navigate = useNavigate();
-  const { getProfile } = useProfiles();
+  const { getProfile, getCounterpartySafe } = useProfiles();
   const { getCommission } = useCommissions();
 
   const [deal, setDeal] = useState<any>(null);
@@ -303,14 +303,18 @@ const NegotiationPage = () => {
     const msgs = await getMessages(dealId);
     setMessages(msgs);
     const otherId = user?.id === dealData.buyer_id ? dealData.seller_id : dealData.buyer_id;
-    if (otherId) { const p = await getProfile(otherId); setOtherProfile(p); }
+    if (otherId) {
+      // Counterparty info via secure RPC: name + masked phone only.
+      const safe = await getCounterpartySafe(otherId);
+      setOtherProfile(safe as any);
+    }
     calculateDealRisk(dealId).catch(() => {});
     if (dealData.status === "completed" || dealData.status === "finalized") {
       const comm = await getCommission(dealId);
       setCommission(comm);
     }
     setLoading(false);
-  }, [dealId, getListing, getMessages, user, getProfile, calculateDealRisk, getCommission]);
+  }, [dealId, getListing, getMessages, user, getProfile, getCounterpartySafe, calculateDealRisk, getCommission]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
