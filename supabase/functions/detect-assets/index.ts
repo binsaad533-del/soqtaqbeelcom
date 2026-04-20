@@ -789,6 +789,8 @@ function buildPriceAnalysis(
       value_high: highValue,
       reasoning: valuation?.reasoning || "",
       source: asset.source || "image",
+      price_confidence: valuation?.price_confidence || (usedMarketPrice > 0 ? "متوسط" : "منخفض"),
+      requires_inspection: false,
     });
   }
 
