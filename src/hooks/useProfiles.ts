@@ -125,5 +125,5 @@ export function useProfiles() {
     return data || [];
   }, []);
 
-  return { getAllProfiles, getProfile, updateProfile, getAllRoles };
+  return { getAllProfiles, getProfile, getCounterpartySafe, getCounterpartyLegal, updateProfile, getAllRoles };
 }
