@@ -404,6 +404,27 @@ serve(async (req) => {
       });
     }
 
+    // Guard #2: Skip feasibility for "assets_only" deals.
+    // Economic feasibility (ROI, monthly profit, competitor density) does not
+    // apply to pure asset sales — there is no ongoing business to project.
+    const primaryDealType = String(listing?.primary_deal_type || listing?.deal_type || "").trim();
+    if (primaryDealType === "assets_only") {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          skipped: true,
+          reason: "assets_only_not_applicable",
+          message:
+            "دراسة الجدوى الاقتصادية لا تنطبق على صفقات الأصول فقط — هذه الصفقة تتعلق ببيع معدات أو أصول دون نشاط تشغيلي مستمر.",
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Guard #3: For "assets_setup" deals (assets + operational setup, no CR/legal entity),
+    // we still produce a study but flag it as estimative + low confidence.
+    const isAssetsSetup = primaryDealType === "assets_setup";
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "AI service not configured" }), {
