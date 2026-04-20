@@ -679,6 +679,7 @@ function buildPriceAnalysis(
 
   const itemizedValues: any[] = [];
   const unvaluedItems: any[] = []; // FIX: track items the AI couldn't price
+  const inspectionItems: any[] = []; // items AI explicitly flagged as يتطلب_معاينة
   let totalEstimatedValue = 0;
   let totalLow = 0;
   let totalHigh = 0;
@@ -717,13 +718,20 @@ function buildPriceAnalysis(
 
     // FIX: skip assets with zero base price — don't pollute totals with silent zeros
     if (!effectiveBase || effectiveBase <= 0) {
-      unvaluedItems.push({
+      const requiresInspection = valuation?.requires_inspection === true || valuation?.price_confidence === "يتطلب_معاينة";
+      const reasonLabel = requiresInspection
+        ? "يتطلب معاينة ميدانية لتقدير دقيق"
+        : "لم يتمكن المحرك من تقدير السعر السوقي لهذا العنصر";
+      const itemEntry = {
         name: asset.name,
         type: asset.type,
         quantity: qty,
         condition: asset.condition,
-        reason: "لم يتمكن المحرك من تقدير السعر السوقي لهذا العنصر",
-      });
+        reason: reasonLabel,
+        requires_inspection: requiresInspection,
+      };
+      if (requiresInspection) inspectionItems.push(itemEntry);
+      else unvaluedItems.push(itemEntry);
       itemizedValues.push({
         name: asset.name,
         type: asset.type,
@@ -735,9 +743,11 @@ function buildPriceAnalysis(
         total_value: 0,
         value_low: 0,
         value_high: 0,
-        reasoning: "غير مُقيَّم — يتطلب مراجعة بشرية",
+        reasoning: requiresInspection ? "يتطلب معاينة — احصل على تقييم معتمد" : "غير مُقيَّم — يتطلب مراجعة بشرية",
         source: asset.source || "image",
+        price_confidence: requiresInspection ? "يتطلب_معاينة" : (valuation?.price_confidence || "منخفض"),
         unvalued: true,
+        requires_inspection: requiresInspection,
       });
       continue;
     }
