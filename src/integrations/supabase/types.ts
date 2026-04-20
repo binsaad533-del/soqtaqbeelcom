@@ -435,6 +435,39 @@ export type Database = {
         }
         Relationships: []
       }
+      cleanup_logs: {
+        Row: {
+          completed_at: string | null
+          deleted_counts: Json
+          duration_ms: number | null
+          errors: Json | null
+          id: string
+          started_at: string
+          status: string
+          triggered_by: string
+        }
+        Insert: {
+          completed_at?: string | null
+          deleted_counts?: Json
+          duration_ms?: number | null
+          errors?: Json | null
+          id?: string
+          started_at?: string
+          status?: string
+          triggered_by?: string
+        }
+        Update: {
+          completed_at?: string | null
+          deleted_counts?: Json
+          duration_ms?: number | null
+          errors?: Json | null
+          id?: string
+          started_at?: string
+          status?: string
+          triggered_by?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           buyer_id: string
@@ -2702,7 +2735,9 @@ export type Database = {
         Args: { _seller_id: string }
         Returns: number
       }
-      cleanup_old_logs: { Args: never; Returns: undefined }
+      cleanup_old_logs:
+        | { Args: never; Returns: undefined }
+        | { Args: { _triggered_by?: string }; Returns: Json }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
