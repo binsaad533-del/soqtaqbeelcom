@@ -163,7 +163,12 @@ Deno.serve(async (req) => {
     }
 
     // Step 3: Run feasibility study
-    try {
+    // Guard #1: Skip feasibility for "assets_only" deals — economic feasibility
+    // does not apply to pure asset sales (no operational business to project).
+    const primaryDealType = String(listing.primary_deal_type || listing.deal_type || "").trim();
+    if (primaryDealType === "assets_only") {
+      console.log(`Skipping feasibility-study: primary_deal_type="${primaryDealType}" (assets_only deals are not eligible).`);
+    } else try {
       const feasResult = await invokeFunction("feasibility-study", { listing });
       if (feasResult?.success && feasResult.study) {
         // Save to feasibility_studies table

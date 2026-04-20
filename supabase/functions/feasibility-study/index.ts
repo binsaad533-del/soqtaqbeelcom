@@ -404,6 +404,27 @@ serve(async (req) => {
       });
     }
 
+    // Guard #2: Skip feasibility for "assets_only" deals.
+    // Economic feasibility (ROI, monthly profit, competitor density) does not
+    // apply to pure asset sales — there is no ongoing business to project.
+    const primaryDealType = String(listing?.primary_deal_type || listing?.deal_type || "").trim();
+    if (primaryDealType === "assets_only") {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          skipped: true,
+          reason: "assets_only_not_applicable",
+          message:
+            "دراسة الجدوى الاقتصادية لا تنطبق على صفقات الأصول فقط — هذه الصفقة تتعلق ببيع معدات أو أصول دون نشاط تشغيلي مستمر.",
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Guard #3: For "assets_setup" deals (assets + operational setup, no CR/legal entity),
+    // we still produce a study but flag it as estimative + low confidence.
+    const isAssetsSetup = primaryDealType === "assets_setup";
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "AI service not configured" }), {
@@ -430,7 +451,28 @@ serve(async (req) => {
       );
     }
 
-    const userPrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors, industrial);
+    const basePrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors, industrial);
+
+    // For "assets_setup" deals (assets + operational setup, no commercial registration),
+    // force AI to prepend a strong warning to executiveSummary and lower confidence.
+    const assetsSetupWarningInstruction = isAssetsSetup
+      ? `\n\n## ⚠️ تعليمات إلزامية لصفقة "أصول + تجهيز تشغيلي":
+هذه الصفقة لا تشمل سجلاً تجارياً أو نشاطاً تشغيلياً قائماً — فقط أصول جاهزة للتشغيل.
+يجب أن تبدأ executiveSummary بالنص التالي حرفياً ودون تعديل:
+
+"⚠️ تحذير مهم: هذي دراسة جدوى تقديرية مبنية على افتراضات تشغيلية. المشتري مسؤول عن:
+- استخراج سجل تجاري جديد
+- ترخيص النشاط
+- توظيف الكوادر
+- تطوير قاعدة العملاء
+الأرقام المذكورة توضيحية ولا تمثل ضماناً للأداء الفعلي."
+
+ثم تابع الملخص التنفيذي بعد هذا النص.
+- اجعل confidenceLevel = "منخفض" إلزامياً.
+- اجعل verdictColor لا يتجاوز "yellow" (لا تستخدم green/blue للتفاؤل).`
+      : "";
+
+    const userPrompt = basePrompt + assetsSetupWarningInstruction;
     const documentUrls = extractDocumentUrls(listing);
     const userContent = buildMultimodalContent(userPrompt, documentUrls);
 
@@ -625,12 +667,35 @@ serve(async (req) => {
     }
 
     const result = JSON.parse(toolCall.function.arguments);
+
+    // Post-process for assets_setup: hard-guarantee the warning prefix and low confidence
+    // even if the model failed to follow the instruction.
+    if (isAssetsSetup) {
+      const ASSETS_SETUP_WARNING = `⚠️ تحذير مهم: هذي دراسة جدوى تقديرية مبنية على افتراضات تشغيلية. المشتري مسؤول عن:
+- استخراج سجل تجاري جديد
+- ترخيص النشاط
+- توظيف الكوادر
+- تطوير قاعدة العملاء
+الأرقام المذكورة توضيحية ولا تمثل ضماناً للأداء الفعلي.
+
+`;
+      const existingSummary = typeof result.executiveSummary === "string" ? result.executiveSummary : "";
+      if (!existingSummary.startsWith("⚠️ تحذير مهم")) {
+        result.executiveSummary = ASSETS_SETUP_WARNING + existingSummary;
+      }
+      result.confidenceLevel = "منخفض";
+      if (result.verdictColor === "green" || result.verdictColor === "blue") {
+        result.verdictColor = "yellow";
+      }
+    }
+
     const study = {
       ...result,
       _meta: {
         activityType: activityTemplate.label,
         hasRealCompetitorData: competitors.some(g => g.places.length > 0),
         generatedAt: new Date().toISOString(),
+        dealTypeFlag: isAssetsSetup ? "assets_setup_estimative" : null,
       },
     };
 
