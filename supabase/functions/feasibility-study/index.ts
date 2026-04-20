@@ -667,12 +667,35 @@ serve(async (req) => {
     }
 
     const result = JSON.parse(toolCall.function.arguments);
+
+    // Post-process for assets_setup: hard-guarantee the warning prefix and low confidence
+    // even if the model failed to follow the instruction.
+    if (isAssetsSetup) {
+      const ASSETS_SETUP_WARNING = `⚠️ تحذير مهم: هذي دراسة جدوى تقديرية مبنية على افتراضات تشغيلية. المشتري مسؤول عن:
+- استخراج سجل تجاري جديد
+- ترخيص النشاط
+- توظيف الكوادر
+- تطوير قاعدة العملاء
+الأرقام المذكورة توضيحية ولا تمثل ضماناً للأداء الفعلي.
+
+`;
+      const existingSummary = typeof result.executiveSummary === "string" ? result.executiveSummary : "";
+      if (!existingSummary.startsWith("⚠️ تحذير مهم")) {
+        result.executiveSummary = ASSETS_SETUP_WARNING + existingSummary;
+      }
+      result.confidenceLevel = "منخفض";
+      if (result.verdictColor === "green" || result.verdictColor === "blue") {
+        result.verdictColor = "yellow";
+      }
+    }
+
     const study = {
       ...result,
       _meta: {
         activityType: activityTemplate.label,
         hasRealCompetitorData: competitors.some(g => g.places.length > 0),
         generatedAt: new Date().toISOString(),
+        dealTypeFlag: isAssetsSetup ? "assets_setup_estimative" : null,
       },
     };
 
