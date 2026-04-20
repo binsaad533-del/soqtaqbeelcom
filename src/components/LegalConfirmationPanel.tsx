@@ -61,7 +61,7 @@ interface Props {
 const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
   const { user } = useAuthContext();
   const { getConfirmations, submitConfirmation, loading, REQUIRED_CONFIRMATIONS } = useLegalConfirmation();
-  const { getProfile } = useProfiles();
+  const { getProfile, getCounterpartySafe } = useProfiles();
 
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [buyerConfirmed, setBuyerConfirmed] = useState(false);
@@ -94,15 +94,37 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
 
   useEffect(() => {
     loadStatus();
-    // Load both profiles
-    if (deal.buyer_id) {
-      getProfile(deal.buyer_id).then(p => setBuyerProfile(p));
-      supabase.auth.admin?.getUserById?.(deal.buyer_id).catch(() => {});
-    }
-    if (deal.seller_id) {
-      getProfile(deal.seller_id).then(p => setSellerProfile(p));
-    }
-  }, [deal.buyer_id, deal.seller_id, getProfile, loadStatus]);
+    // Self profile = full data via RLS. Counterparty = safe RPC (masked phone, no email).
+    const loadProfileFor = async (uid: string): Promise<Profile | null> => {
+      if (uid === user?.id) return getProfile(uid);
+      const safe = await getCounterpartySafe(uid);
+      if (!safe) return null;
+      // Map safe RPC shape → Profile (use masked_phone in `phone` slot for UI rendering)
+      return {
+        id: safe.user_id,
+        user_id: safe.user_id,
+        full_name: safe.full_name,
+        phone: safe.masked_phone,
+        email: null,
+        city: safe.city,
+        avatar_url: safe.avatar_url,
+        is_verified: safe.is_verified,
+        is_active: true,
+        is_suspended: false,
+        last_activity: null,
+        created_at: safe.member_since,
+        updated_at: safe.member_since,
+        trust_score: safe.trust_score,
+        verification_level: safe.verification_level,
+        kyc_data: null,
+        completed_deals: safe.completed_deals,
+        cancelled_deals: 0,
+        disputes_count: 0,
+      } as Profile;
+    };
+    if (deal.buyer_id) loadProfileFor(deal.buyer_id).then(setBuyerProfile);
+    if (deal.seller_id) loadProfileFor(deal.seller_id).then(setSellerProfile);
+  }, [deal.buyer_id, deal.seller_id, user?.id, getProfile, getCounterpartySafe, loadStatus]);
 
   // Get emails from auth context for current user
   useEffect(() => {
