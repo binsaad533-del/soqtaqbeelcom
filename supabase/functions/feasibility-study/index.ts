@@ -480,7 +480,8 @@ serve(async (req) => {
       );
     }
 
-    const basePrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors, industrial);
+    const hasFinancials = hasFinancialDocs(listing);
+    const basePrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors, industrial, hasFinancials);
 
     // For "assets_setup" deals (assets + operational setup, no commercial registration),
     // force AI to prepend a strong warning to executiveSummary and lower confidence.
