@@ -2753,6 +2753,35 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_counterparty_profile_legal: {
+        Args: { target_deal_id: string; target_user_id: string }
+        Returns: {
+          avatar_url: string
+          city: string
+          full_name: string
+          is_verified: boolean
+          member_since: string
+          phone: string
+          trust_score: number
+          user_id: string
+          verification_level: string
+        }[]
+      }
+      get_counterparty_profile_safe: {
+        Args: { target_user_id: string }
+        Returns: {
+          avatar_url: string
+          city: string
+          completed_deals: number
+          full_name: string
+          is_verified: boolean
+          masked_phone: string
+          member_since: string
+          trust_score: number
+          user_id: string
+          verification_level: string
+        }[]
+      }
       get_deal_confirmation_status: {
         Args: { _deal_id: string }
         Returns: {
@@ -2775,6 +2804,21 @@ export type Database = {
           completed_deals: number
           full_name: string
           is_verified: boolean
+          trust_score: number
+          user_id: string
+          verification_level: string
+        }[]
+      }
+      get_public_profile_v2: {
+        Args: { target_user_id: string }
+        Returns: {
+          avatar_url: string
+          cancelled_deals: number
+          city: string
+          completed_deals: number
+          full_name: string
+          is_verified: boolean
+          member_since: string
           trust_score: number
           user_id: string
           verification_level: string
