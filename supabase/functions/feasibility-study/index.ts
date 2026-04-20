@@ -451,7 +451,28 @@ serve(async (req) => {
       );
     }
 
-    const userPrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors, industrial);
+    const basePrompt = buildFeasibilityPrompt(listing, activityTemplate, competitors, industrial);
+
+    // For "assets_setup" deals (assets + operational setup, no commercial registration),
+    // force AI to prepend a strong warning to executiveSummary and lower confidence.
+    const assetsSetupWarningInstruction = isAssetsSetup
+      ? `\n\n## ⚠️ تعليمات إلزامية لصفقة "أصول + تجهيز تشغيلي":
+هذه الصفقة لا تشمل سجلاً تجارياً أو نشاطاً تشغيلياً قائماً — فقط أصول جاهزة للتشغيل.
+يجب أن تبدأ executiveSummary بالنص التالي حرفياً ودون تعديل:
+
+"⚠️ تحذير مهم: هذي دراسة جدوى تقديرية مبنية على افتراضات تشغيلية. المشتري مسؤول عن:
+- استخراج سجل تجاري جديد
+- ترخيص النشاط
+- توظيف الكوادر
+- تطوير قاعدة العملاء
+الأرقام المذكورة توضيحية ولا تمثل ضماناً للأداء الفعلي."
+
+ثم تابع الملخص التنفيذي بعد هذا النص.
+- اجعل confidenceLevel = "منخفض" إلزامياً.
+- اجعل verdictColor لا يتجاوز "yellow" (لا تستخدم green/blue للتفاؤل).`
+      : "";
+
+    const userPrompt = basePrompt + assetsSetupWarningInstruction;
     const documentUrls = extractDocumentUrls(listing);
     const userContent = buildMultimodalContent(userPrompt, documentUrls);
 
