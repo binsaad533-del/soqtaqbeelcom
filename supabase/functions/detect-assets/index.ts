@@ -849,8 +849,15 @@ function buildPriceAnalysis(
 
   // Build a clear disclaimer — surface the missing-info reason if present
   const disclaimerParts: string[] = [];
-  if (unvaluedItems.length > 0) {
-    disclaimerParts.push(`القيمة تقديرية للأصول التي تم تقييمها فقط (${valuedAssetCount} من ${totalAssetCount}). ${unvaluedItems.length} عنصر يتطلب مراجعة بشرية.`);
+  if (unvaluedItems.length > 0 || inspectionItems.length > 0) {
+    const summaryBits: string[] = [`القيمة تقديرية للأصول التي تم تقييمها فقط (${valuedAssetCount} من ${totalAssetCount}).`];
+    if (inspectionItems.length > 0) {
+      summaryBits.push(`${inspectionItems.length} أصل يتطلب معاينة ميدانية لتقدير دقيق.`);
+    }
+    if (unvaluedItems.length > 0) {
+      summaryBits.push(`${unvaluedItems.length} عنصر يحتاج مراجعة بشرية.`);
+    }
+    disclaimerParts.push(summaryBits.join(" "));
   } else {
     disclaimerParts.push("القيمة تقديرية بناءً على الأصول المرئية والمستندات.");
   }
@@ -871,6 +878,7 @@ function buildPriceAnalysis(
     decision,
     items: itemizedValues,
     unvalued_items: unvaluedItems,
+    inspection_items: inspectionItems,
     valued_ratio: Math.round(valuedRatio * 100),
     valued_count: valuedAssetCount,
     total_count: totalAssetCount,
