@@ -18,6 +18,22 @@ interface SellerReputation {
   suggestions: string[];
 }
 
+/**
+ * Trust score formula (max 115):
+ *   phone_verified           → +15
+ *   completed_deals × 5      → up to +50  (cap at 10 deals)
+ *   avg_rating (0-5) × 10    → up to +50
+ *
+ * Verification is now derived solely from `profiles.phone_verified`
+ * (OTP verification). The legacy seller_verifications table was removed.
+ */
+function computeTrustScore(phoneVerified: boolean, completedDeals: number, avgRating: number): number {
+  const phoneBonus = phoneVerified ? 15 : 0;
+  const dealBonus = Math.min(completedDeals, 10) * 5;
+  const ratingBonus = avgRating > 0 ? Math.round(avgRating * 10) : 0;
+  return phoneBonus + dealBonus + ratingBonus;
+}
+
 export function useSellerReputation() {
   const [reputation, setReputation] = useState<SellerReputation | null>(null);
   const [loading, setLoading] = useState(false);
@@ -25,17 +41,15 @@ export function useSellerReputation() {
   const analyze = useCallback(async (sellerId: string) => {
     setLoading(true);
     try {
-      const [profileRes, reviewsRes, dealsRes, verificationsRes] = await Promise.all([
+      const [profileRes, reviewsRes, dealsRes] = await Promise.all([
         supabase.from("public_profiles" as any).select("*").eq("user_id", sellerId).maybeSingle() as unknown as Promise<{ data: any; error: any }>,
         supabase.from("seller_reviews").select("*").eq("seller_id", sellerId),
         supabase.from("deals").select("status").or(`seller_id.eq.${sellerId}`),
-        supabase.from("seller_verifications").select("verification_status").eq("user_id", sellerId).maybeSingle(),
       ]);
 
       const profile = profileRes.data;
       const reviews = reviewsRes.data || [];
       const deals = dealsRes.data || [];
-      const verification = verificationsRes.data;
 
       const completedDeals = deals.filter(d => d.status === "completed").length;
       const cancelledDeals = deals.filter(d => d.status === "cancelled").length;
@@ -46,8 +60,9 @@ export function useSellerReputation() {
         : 0;
 
       const responseRate = completedDeals / totalDeals;
-      const isVerified = verification?.verification_status === "approved";
-      const trustScore = profile?.trust_score || 50;
+      const phoneVerified = profile?.phone_verified === true;
+      const isVerified = phoneVerified;
+      const trustScore = computeTrustScore(phoneVerified, completedDeals, avgRating);
 
       // Calculate stars (1-5)
       let stars = 3;
@@ -65,10 +80,9 @@ export function useSellerReputation() {
 
       // Suggestions
       const suggestions: string[] = [];
-      if (!isVerified) suggestions.push("وثّق حسابك لزيادة ثقة المشترين");
+      if (!phoneVerified) suggestions.push("وثّق رقم جوالك لتعزيز المصداقية");
       if (reviews.length < 3) suggestions.push("شجّع المشترين على تقييمك بعد إتمام الصفقة");
       if (cancelledDeals > completedDeals) suggestions.push("نسبة الإلغاء مرتفعة، حاول إتمام الصفقات");
-      if (!profile?.phone_verified) suggestions.push("وثّق رقم جوالك لتعزيز المصداقية");
 
       const rep: SellerReputation = {
         sellerId,
@@ -78,7 +92,7 @@ export function useSellerReputation() {
         avgRating: Math.round(avgRating * 10) / 10,
         responseRate: Math.round(responseRate * 100),
         trustScore,
-        verificationLevel: profile?.verification_level || "none",
+        verificationLevel: phoneVerified ? "phone" : "none",
         isVerified,
         reviewCount: reviews.length,
         stars,

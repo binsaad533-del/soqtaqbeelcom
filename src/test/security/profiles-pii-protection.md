@@ -11,7 +11,7 @@
 | # | Finding | الخطورة | قبل | بعد |
 |---|---------|---------|-----|-----|
 | 1 | PII في `profiles` (email/phone للطرف المقابل) | High | ❌ Exposed | ✅ مغلق على مستوى RLS — لا توجد سياسة تتيح للمستخدمين العاديين قراءة صفوف غير صفوفهم. الوصول الوحيد عبر RPCs (`get_public_profile_v2` / `_safe` / `_legal`). |
-| 2 | seller_verifications (id_number) | Warn | ❌ | ❌ (لم يُعالج بعد — الإصلاح القادم) |
+| 2 | seller_verifications (id_number) | Warn | ❌ | ✅ مُحلّ — تم حذف الجدول والدوال (`mask_id_number`) والصفحات نهائياً (لم يكن مُستخدماً، 0 صفوف). التوثيق الآن عبر `profiles.phone_verified` فقط. |
 | 9 | listing_views INSERT مفتوح | Warn | ❌ | ❌ (الإصلاح القادم) |
 | 10 | failed_login_attempts INSERT مفتوح | Warn | ❌ | ❌ (الإصلاح القادم) |
 | - | Realtime topics غير محمية | Error | ❌ | ❌ (مستقل — يحتاج إصلاح منفصل) |
