@@ -719,11 +719,16 @@ serve(async (req) => {
       }
     }
 
+    if (!hasFinancials) {
+      result.confidenceLevel = "منخفض";
+    }
+
     const study = {
       ...result,
       _meta: {
         activityType: activityTemplate.label,
         hasRealCompetitorData: competitors.some(g => g.places.length > 0),
+        hasRealFinancials: hasFinancials,
         generatedAt: new Date().toISOString(),
         dealTypeFlag: isAssetsSetup ? "assets_setup_estimative" : null,
       },
