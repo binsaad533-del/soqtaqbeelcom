@@ -579,6 +579,28 @@ async function valuateAssets(
 ): Promise<any> {
   if (!assets.length) return null;
 
+  // FIX: short-circuit when image-stage already produced per-asset prices.
+  // Avoids a blind second AI call that has no visual context.
+  const allHavePrices = assets.every((a: any) =>
+    (typeof a.estimated_unit_price_sar === "number" && a.estimated_unit_price_sar > 0) ||
+    a.price_confidence === "يتطلب_معاينة"
+  );
+
+  if (allHavePrices) {
+    return {
+      valuations: assets.map((a: any) => ({
+        name: a.name,
+        base_price_sar: a.estimated_unit_price_sar || 0,
+        used_market_price_sar: a.estimated_unit_price_sar || 0,
+        estimated_age_factor: "unknown",
+        reasoning: a.price_reasoning || "تقدير من الصورة",
+        requires_inspection: a.price_confidence === "يتطلب_معاينة",
+        price_confidence: a.price_confidence || "متوسط",
+      })),
+      market_notes: "تقدير من تحليل الصور مباشرة",
+    };
+  }
+
   const assetList = assets.map((a: any) =>
     `- ${a.name} (النوع: ${a.type}, الحالة: ${a.condition}, الكمية: ${a.quantity}${a.details ? `, تفاصيل: ${a.details}` : ""})`
   ).join("\n");
