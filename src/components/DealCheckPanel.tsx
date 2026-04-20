@@ -668,22 +668,45 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                             تفصيل تقييم الأصول
                           </div>
                           <div className="divide-y divide-border/30">
-                            {priceAnalysis.items.map((item: any, i: number) => (
-                              <div key={i} className="px-3 py-2 flex items-center justify-between gap-2">
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-xs font-medium">{item.quantity > 1 ? `${item.quantity}x ` : ""}{item.name}</div>
-                                  <div className="text-[10px] text-muted-foreground">
-                                    {item.type} • {item.condition} ({Math.round(item.condition_multiplier * 100)}%)
+                            {priceAnalysis.items.map((item: any, i: number) => {
+                              const conf = item.price_confidence || (item.unvalued ? "يتطلب_معاينة" : "متوسط");
+                              const confStyles: Record<string, { dot: string; label: string; text: string }> = {
+                                "عالي": { dot: "bg-emerald-500", label: "ثقة عالية", text: "text-emerald-700 dark:text-emerald-400" },
+                                "متوسط": { dot: "bg-blue-500", label: "ثقة متوسطة", text: "text-blue-700 dark:text-blue-400" },
+                                "منخفض": { dot: "bg-amber-500", label: "تقدير عام", text: "text-amber-700 dark:text-amber-400" },
+                                "يتطلب_معاينة": { dot: "bg-muted-foreground/50", label: "احصل على تقييم معتمد", text: "text-muted-foreground" },
+                              };
+                              const style = confStyles[conf] || confStyles["متوسط"];
+                              const isInspection = conf === "يتطلب_معاينة" || item.requires_inspection;
+                              return (
+                                <div key={i} className="px-3 py-2 flex items-center justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-xs font-medium flex items-center gap-1.5">
+                                      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", style.dot)} />
+                                      <span className="truncate">{item.quantity > 1 ? `${item.quantity}x ` : ""}{item.name}</span>
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground mt-0.5">
+                                      {item.type} • {item.condition}
+                                      {item.condition_multiplier ? ` (${Math.round(item.condition_multiplier * 100)}%)` : ""}
+                                      <span className={cn("mx-1.5", style.text)}>•</span>
+                                      <span className={style.text}>{style.label}</span>
+                                    </div>
+                                  </div>
+                                  <div className="text-left shrink-0">
+                                    {isInspection ? (
+                                      <div className="text-[11px] text-muted-foreground italic">يتطلب معاينة</div>
+                                    ) : (
+                                      <>
+                                        <div className="text-xs font-medium">{item.total_value?.toLocaleString()} ر.س</div>
+                                        {item.quantity > 1 && (
+                                          <div className="text-[10px] text-muted-foreground">{item.adjusted_price?.toLocaleString()} × {item.quantity}</div>
+                                        )}
+                                      </>
+                                    )}
                                   </div>
                                 </div>
-                                <div className="text-left shrink-0">
-                                  <div className="text-xs font-medium">{item.total_value?.toLocaleString()} ر.س</div>
-                                  {item.quantity > 1 && (
-                                    <div className="text-[10px] text-muted-foreground">{item.adjusted_price?.toLocaleString()} × {item.quantity}</div>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                           <div className="bg-muted/30 px-3 py-2 flex justify-between items-center border-t border-border/30">
                             <span className="text-xs font-medium">الإجمالي التقديري</span>

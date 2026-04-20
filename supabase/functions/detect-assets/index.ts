@@ -23,7 +23,26 @@ const IMAGE_SYSTEM_PROMPT = `أنت محلل أصول بصري خبير متخص
 5. لا تكرر نفس العنصر إذا ظهر في أكثر من صورة (نفس الزاوية المختلفة)
 6. **ركّز على المعدات الكبيرة والثقيلة أولاً** قبل العناصر الصغيرة — لا تتجاهلها أبداً مهما كانت الصورة غير واضحة
 7. تجاهل العناصر الإنشائية: الجدران، الأرضيات، الإضاءة العادية، النوافذ
-8. إذا ظهرت معدات على نطاق واسع (ورشة كاملة)، عُدّ كل وحدة بدقة وأذكر تفاصيل كل آلة`;
+8. إذا ظهرت معدات على نطاق واسع (ورشة كاملة)، عُدّ كل وحدة بدقة وأذكر تفاصيل كل آلة
+
+## قواعد تقدير السعر من الصورة:
+1. افحص الصورة بدقة للبحث عن:
+   - الماركة والموديل على اللوحة أو الملصق
+   - حالة الأصل الفعلية (خدوش، تآكل، نظافة)
+   - العمر التقديري من المظهر
+   - حجم الأصل وجودة الصنع
+2. قدّر السعر في السوق الثانوي السعودي (حراج):
+   - للأصول ذات الماركات المعروفة: ابحث في ذاكرتك عن نطاق السعر
+   - للأصول الغامضة: قدّر بناءً على الحجم والجودة الظاهرة
+3. مستويات الثقة:
+   - "عالي": ماركة واضحة + حالة محددة + سعر معروف
+   - "متوسط": نوع معروف لكن ماركة غير واضحة
+   - "منخفض": تقدير عام بناءً على الفئة
+   - "يتطلب_معاينة": لا يمكن التقدير (صورة غير واضحة، أصل نادر)
+4. إذا اخترت "يتطلب_معاينة"، اترك estimated_unit_price_sar = 0 بدون قلق. لا تخترع أرقام عشوائية.
+5. للأدوات الكهربائية البسيطة (دريل، صاروخ، منشار):
+   - بدون ماركة واضحة: تقدير عام 150-400 ر.س للمستعمل
+   - مع ماركة معروفة: حسب الماركة`;
 
 const FILE_SYSTEM_PROMPT = `أنت محلل مستندات تجارية خبير. استخرج جميع المعدات والأصول المذكورة في النص التالي مع الكمية والنوع والحالة.
 
@@ -58,8 +77,25 @@ const ASSET_TOOL = {
               quantity: { type: "number", description: "الكمية المقدرة" },
               details: { type: "string", description: "تفاصيل إضافية مثل السعر أو الموديل" },
               source: { type: "string", enum: ["image", "file"], description: "مصدر الاكتشاف" },
+              estimated_unit_price_sar: {
+                type: "number",
+                description: "السعر التقديري للوحدة الواحدة من الصورة بالريال السعودي (السوق الثانوي السعودي)",
+              },
+              price_confidence: {
+                type: "string",
+                enum: ["عالي", "متوسط", "منخفض", "يتطلب_معاينة"],
+                description: "مستوى الثقة في التقدير. استخدم يتطلب_معاينة إذا لم يكن التقدير ممكناً من الصورة",
+              },
+              brand_visible: {
+                type: "string",
+                description: "الماركة أو الموديل المرئي على الأصل إن وجد (مثل Bosch GWS-750) - فارغ إذا غير واضح",
+              },
+              price_reasoning: {
+                type: "string",
+                description: "شرح مختصر لكيفية تقدير السعر من الصورة",
+              },
             },
-            required: ["name", "type", "condition", "quantity"],
+            required: ["name", "type", "condition", "quantity", "estimated_unit_price_sar", "price_confidence"],
             additionalProperties: false,
           },
         },
@@ -543,6 +579,28 @@ async function valuateAssets(
 ): Promise<any> {
   if (!assets.length) return null;
 
+  // FIX: short-circuit when image-stage already produced per-asset prices.
+  // Avoids a blind second AI call that has no visual context.
+  const allHavePrices = assets.every((a: any) =>
+    (typeof a.estimated_unit_price_sar === "number" && a.estimated_unit_price_sar > 0) ||
+    a.price_confidence === "يتطلب_معاينة"
+  );
+
+  if (allHavePrices) {
+    return {
+      valuations: assets.map((a: any) => ({
+        name: a.name,
+        base_price_sar: a.estimated_unit_price_sar || 0,
+        used_market_price_sar: a.estimated_unit_price_sar || 0,
+        estimated_age_factor: "unknown",
+        reasoning: a.price_reasoning || "تقدير من الصورة",
+        requires_inspection: a.price_confidence === "يتطلب_معاينة",
+        price_confidence: a.price_confidence || "متوسط",
+      })),
+      market_notes: "تقدير من تحليل الصور مباشرة",
+    };
+  }
+
   const assetList = assets.map((a: any) =>
     `- ${a.name} (النوع: ${a.type}, الحالة: ${a.condition}, الكمية: ${a.quantity}${a.details ? `, تفاصيل: ${a.details}` : ""})`
   ).join("\n");
@@ -621,6 +679,7 @@ function buildPriceAnalysis(
 
   const itemizedValues: any[] = [];
   const unvaluedItems: any[] = []; // FIX: track items the AI couldn't price
+  const inspectionItems: any[] = []; // items AI explicitly flagged as يتطلب_معاينة
   let totalEstimatedValue = 0;
   let totalLow = 0;
   let totalHigh = 0;
@@ -659,13 +718,20 @@ function buildPriceAnalysis(
 
     // FIX: skip assets with zero base price — don't pollute totals with silent zeros
     if (!effectiveBase || effectiveBase <= 0) {
-      unvaluedItems.push({
+      const requiresInspection = valuation?.requires_inspection === true || valuation?.price_confidence === "يتطلب_معاينة";
+      const reasonLabel = requiresInspection
+        ? "يتطلب معاينة ميدانية لتقدير دقيق"
+        : "لم يتمكن المحرك من تقدير السعر السوقي لهذا العنصر";
+      const itemEntry = {
         name: asset.name,
         type: asset.type,
         quantity: qty,
         condition: asset.condition,
-        reason: "لم يتمكن المحرك من تقدير السعر السوقي لهذا العنصر",
-      });
+        reason: reasonLabel,
+        requires_inspection: requiresInspection,
+      };
+      if (requiresInspection) inspectionItems.push(itemEntry);
+      else unvaluedItems.push(itemEntry);
       itemizedValues.push({
         name: asset.name,
         type: asset.type,
@@ -677,9 +743,11 @@ function buildPriceAnalysis(
         total_value: 0,
         value_low: 0,
         value_high: 0,
-        reasoning: "غير مُقيَّم — يتطلب مراجعة بشرية",
+        reasoning: requiresInspection ? "يتطلب معاينة — احصل على تقييم معتمد" : "غير مُقيَّم — يتطلب مراجعة بشرية",
         source: asset.source || "image",
+        price_confidence: requiresInspection ? "يتطلب_معاينة" : (valuation?.price_confidence || "منخفض"),
         unvalued: true,
+        requires_inspection: requiresInspection,
       });
       continue;
     }
@@ -721,6 +789,8 @@ function buildPriceAnalysis(
       value_high: highValue,
       reasoning: valuation?.reasoning || "",
       source: asset.source || "image",
+      price_confidence: valuation?.price_confidence || (usedMarketPrice > 0 ? "متوسط" : "منخفض"),
+      requires_inspection: false,
     });
   }
 
@@ -779,8 +849,15 @@ function buildPriceAnalysis(
 
   // Build a clear disclaimer — surface the missing-info reason if present
   const disclaimerParts: string[] = [];
-  if (unvaluedItems.length > 0) {
-    disclaimerParts.push(`القيمة تقديرية للأصول التي تم تقييمها فقط (${valuedAssetCount} من ${totalAssetCount}). ${unvaluedItems.length} عنصر يتطلب مراجعة بشرية.`);
+  if (unvaluedItems.length > 0 || inspectionItems.length > 0) {
+    const summaryBits: string[] = [`القيمة تقديرية للأصول التي تم تقييمها فقط (${valuedAssetCount} من ${totalAssetCount}).`];
+    if (inspectionItems.length > 0) {
+      summaryBits.push(`${inspectionItems.length} أصل يتطلب معاينة ميدانية لتقدير دقيق.`);
+    }
+    if (unvaluedItems.length > 0) {
+      summaryBits.push(`${unvaluedItems.length} عنصر يحتاج مراجعة بشرية.`);
+    }
+    disclaimerParts.push(summaryBits.join(" "));
   } else {
     disclaimerParts.push("القيمة تقديرية بناءً على الأصول المرئية والمستندات.");
   }
@@ -801,6 +878,7 @@ function buildPriceAnalysis(
     decision,
     items: itemizedValues,
     unvalued_items: unvaluedItems,
+    inspection_items: inspectionItems,
     valued_ratio: Math.round(valuedRatio * 100),
     valued_count: valuedAssetCount,
     total_count: totalAssetCount,
