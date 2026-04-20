@@ -172,6 +172,7 @@ serve(async (req) => {
           },
         ],
         tool_choice: { type: "function", function: { name: "report_cr_data" } },
+        temperature: 0.1,
       }),
     });
 
