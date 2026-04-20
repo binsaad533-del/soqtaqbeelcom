@@ -144,6 +144,7 @@ ${JSON.stringify(sampleRows?.slice(0, 5) || [], null, 2)}
           },
         ],
         tool_choice: { type: "function", function: { name: "report_column_mapping" } },
+        temperature: 0.1,
       }),
     });
 

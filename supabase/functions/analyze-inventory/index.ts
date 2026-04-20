@@ -396,6 +396,7 @@ serve(async (req) => {
           },
         ],
         tool_choice: { type: "function", function: { name: "report_inventory" } },
+        temperature: 0.1,
       }),
     });
 
