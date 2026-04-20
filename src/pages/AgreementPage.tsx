@@ -163,10 +163,23 @@ const AgreementPage = () => {
     setGenerating(true);
     try {
       const listing = await getListing(deal.listing_id);
-      const { data: buyerProfile } = await supabase
-        .from("profiles").select("full_name, phone").eq("user_id", deal.buyer_id).maybeSingle();
-      const { data: sellerProfile } = await supabase
-        .from("profiles").select("full_name, phone").eq("user_id", deal.seller_id).maybeSingle();
+
+      // Use legal RPC: requires both parties to have signed legal_confirmation.
+      // Server-side audits every disclosure of full phone numbers.
+      const isBuyer = user?.id === deal.buyer_id;
+      const counterpartyId = isBuyer ? deal.seller_id : deal.buyer_id;
+      const { data: counterpartyLegalArr } = await supabase.rpc(
+        "get_counterparty_profile_legal",
+        { target_user_id: counterpartyId, target_deal_id: deal.id },
+      );
+      const counterpartyLegal = (counterpartyLegalArr as any[] | null)?.[0] ?? null;
+
+      // Self profile (full data is always allowed by RLS for owner)
+      const { data: selfProfile } = await supabase
+        .from("profiles").select("full_name, phone").eq("user_id", user?.id).maybeSingle();
+
+      const buyerProfile = isBuyer ? selfProfile : counterpartyLegal;
+      const sellerProfile = isBuyer ? counterpartyLegal : selfProfile;
 
       const agreementData = {
         dealId: id,
@@ -271,12 +284,14 @@ const AgreementPage = () => {
       });
 
       if (updatedAgreement.buyer_approved && updatedAgreement.seller_approved && deal) {
-        const [buyerProfile, sellerProfile] = await Promise.all([
-          supabase.from("profiles").select("full_name, user_id").eq("user_id", deal.buyer_id).maybeSingle(),
-          supabase.from("profiles").select("full_name, user_id").eq("user_id", deal.seller_id).maybeSingle(),
+        // Names only — no contact info needed for completion email subject.
+        // Use public RPC (works regardless of viewer's relationship to the parties).
+        const [{ data: buyerArr }, { data: sellerArr }] = await Promise.all([
+          supabase.rpc("get_public_profile_v2", { target_user_id: deal.buyer_id }),
+          supabase.rpc("get_public_profile_v2", { target_user_id: deal.seller_id }),
         ]);
-        const buyerName = buyerProfile.data?.full_name || "المشتري";
-        const sellerName = sellerProfile.data?.full_name || "البائع";
+        const buyerName = (buyerArr as any[] | null)?.[0]?.full_name || "المشتري";
+        const sellerName = (sellerArr as any[] | null)?.[0]?.full_name || "البائع";
         if (user?.email) {
           const currentRole = user.id === deal.buyer_id ? "buyer" : "seller";
           const otherName = currentRole === "buyer" ? sellerName : buyerName;
