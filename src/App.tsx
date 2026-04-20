@@ -60,8 +60,6 @@ const MessagesPage = lazy(() => import("./pages/MessagesPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const InvoicePage = lazy(() => import("./pages/InvoicePage"));
 const PdfPreviewPage = lazy(() => import("./pages/PdfPreviewPage"));
-const VerifySellerPage = lazy(() => import("./pages/VerifySellerPage"));
-const AdminVerificationsPage = lazy(() => import("./pages/AdminVerificationsPage"));
 const SellerDashboardPage = lazy(() => import("./pages/SellerDashboardPage"));
 const NotificationSettingsPage = lazy(() => import("./pages/NotificationSettingsPage"));
 const AiChatPage = lazy(() => import("./pages/AiChatPage"));
@@ -227,14 +225,6 @@ const App = () => (
                   }
                 />
                 <Route
-                  path="/admin/verifications"
-                  element={
-                    <ProtectedRoute allowedRoles={["platform_owner", "supervisor"]}>
-                      <AdminVerificationsPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
                   path="/admin/roles"
                   element={
                     <ProtectedRoute allowedRoles={["platform_owner"]}>
@@ -257,14 +247,6 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <InvoicePage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/verify-seller"
-                  element={
-                    <ProtectedRoute>
-                      <VerifySellerPage />
                     </ProtectedRoute>
                   }
                 />

@@ -349,12 +349,10 @@ const TOOL_DEFS: Record<string, any> = {
     { deal_id: { type: "string" } }, ["deal_id"]),
 
   // ═══════════════════════════════════════════════
-  // SUPERVISOR WRITE — User & Verification (3)
+  // SUPERVISOR WRITE — Reports (1)
   // ═══════════════════════════════════════════════
-  approve_verification: def("approve_verification", "اعتماد طلب توثيق بائع",
-    { verification_id: { type: "string" }, notes: { type: "string" } }, ["verification_id"]),
-  reject_verification: def("reject_verification", "رفض طلب توثيق بائع مع السبب",
-    { verification_id: { type: "string" }, reason: { type: "string" } }, ["verification_id", "reason"]),
+  // Note: Seller verification is fully automatic via phone OTP (profiles.phone_verified).
+  // No manual approval/rejection workflow exists.
   resolve_report: def("resolve_report", "إغلاق بلاغ بعد المراجعة",
     { report_id: { type: "string" }, action_taken: { type: "string" } }, ["report_id", "action_taken"]),
 };
@@ -389,7 +387,7 @@ const ROLE_TOOLS: Record<string, string[]> = {
     // Supervisor write
     "change_listing_status", "change_deal_status", "submit_review_status",
     "report_listing_issue", "approve_listing_publish", "reject_draft_listing",
-    "approve_verification", "reject_verification", "resolve_report",
+    "resolve_report",
   ],
   customer: [
     // Read
@@ -455,13 +453,11 @@ async function executeTool(name: string, args: any, userId: string, role: string
     }
 
     case "get_pending_approvals": {
-      const [draftListings, pendingVerifications] = await Promise.all([
-        sb.from("listings").select("id, title, city, business_activity, created_at, owner_id")
-          .eq("status", "draft").is("deleted_at", null).order("created_at", { ascending: false }).limit(20),
-        sb.from("seller_verifications").select("id, user_id, submitted_at, verification_status")
-          .eq("verification_status", "pending").order("submitted_at", { ascending: false }).limit(10),
-      ]);
-      return { draft_listings: draftListings.data || [], pending_verifications: pendingVerifications.data || [] };
+      // Note: Seller verification is automated via phone OTP — no manual queue exists.
+      const { data: draftListings } = await sb.from("listings")
+        .select("id, title, city, business_activity, created_at, owner_id")
+        .eq("status", "draft").is("deleted_at", null).order("created_at", { ascending: false }).limit(20);
+      return { draft_listings: draftListings || [], pending_verifications: [] };
     }
 
     case "get_financial_summary": {
@@ -1786,42 +1782,10 @@ async function executeTool(name: string, args: any, userId: string, role: string
     }
 
     // ═══════════════════════════════════════════════
-    // SUPERVISOR WRITE — Verification & Reports
+    // SUPERVISOR WRITE — Reports
+    // Note: Seller verification is automated via phone OTP (profiles.phone_verified).
+    // There is no manual approve/reject workflow.
     // ═══════════════════════════════════════════════
-
-    case "approve_verification": {
-      if (role === "customer") return { error: "ليس لديك صلاحية" };
-      const { data: ver } = await sb.from("seller_verifications").select("id, user_id").eq("id", args.verification_id).single();
-      if (!ver) return { error: "طلب التوثيق غير موجود" };
-      const { error } = await sb.from("seller_verifications").update({
-        verification_status: "approved", reviewed_by: userId, reviewed_at: new Date().toISOString(),
-      }).eq("id", args.verification_id);
-      if (error) return { error: error.message };
-      // Update profile
-      await sb.from("profiles").update({ is_verified: true, verification_level: "full", updated_at: new Date().toISOString() }).eq("user_id", ver.user_id);
-      await sb.from("notifications").insert({
-        user_id: ver.user_id, title: "تم اعتماد توثيقك ✅", body: args.notes || "تم توثيق حسابك بنجاح",
-        type: "verification", reference_type: "verification",
-      });
-      await sb.from("audit_logs").insert({ user_id: userId, action: "verification_approved", resource_type: "verification",
-        resource_id: args.verification_id, details: { notes: args.notes } });
-      return { success: true, message: "تم اعتماد التوثيق" };
-    }
-
-    case "reject_verification": {
-      if (role === "customer") return { error: "ليس لديك صلاحية" };
-      const { data: ver } = await sb.from("seller_verifications").select("id, user_id").eq("id", args.verification_id).single();
-      if (!ver) return { error: "طلب التوثيق غير موجود" };
-      const { error } = await sb.from("seller_verifications").update({
-        verification_status: "rejected", reviewed_by: userId, reviewed_at: new Date().toISOString(), rejection_reason: args.reason,
-      }).eq("id", args.verification_id);
-      if (error) return { error: error.message };
-      await sb.from("notifications").insert({
-        user_id: ver.user_id, title: "تم رفض طلب التوثيق ❌", body: `السبب: ${args.reason}`,
-        type: "verification", reference_type: "verification",
-      });
-      return { success: true, message: "تم رفض طلب التوثيق" };
-    }
 
     case "resolve_report": {
       if (role === "customer") return { error: "ليس لديك صلاحية" };

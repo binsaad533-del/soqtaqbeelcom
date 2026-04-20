@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BadgeCheck } from "lucide-react";
+import { Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -9,7 +9,8 @@ interface Props {
   className?: string;
 }
 
-// Cache verified seller IDs in memory to avoid repeated queries
+// Cache phone-verified user IDs in memory to avoid repeated queries.
+// Source of truth: profiles.phone_verified (set by the OTP verification flow).
 const verifiedCache = new Map<string, boolean>();
 
 export function useVerifiedSellers(userIds: string[]) {
@@ -27,14 +28,15 @@ export function useVerifiedSellers(userIds: string[]) {
 
     (async () => {
       const { data } = await supabase
-        .from("seller_verifications")
-        .select("user_id")
-        .in("user_id", uncached)
-        .eq("verification_status", "approved");
+        .from("profiles")
+        .select("user_id, phone_verified")
+        .in("user_id", uncached);
 
-      const approvedIds = new Set((data || []).map((r: any) => r.user_id));
-      uncached.forEach(id => verifiedCache.set(id, approvedIds.has(id)));
-      const combined = new Set([...alreadyVerified, ...approvedIds]);
+      const verifiedIds = new Set(
+        (data || []).filter((r: any) => r.phone_verified === true).map((r: any) => r.user_id)
+      );
+      uncached.forEach(id => verifiedCache.set(id, verifiedIds.has(id)));
+      const combined = new Set([...alreadyVerified, ...verifiedIds]);
       setVerified(combined);
     })();
   }, [userIds.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -52,13 +54,11 @@ const VerifiedSellerBadge = ({ userId, size = "sm", className }: Props) => {
     }
     (async () => {
       const { data } = await supabase
-        .from("seller_verifications")
-        .select("id")
+        .from("profiles")
+        .select("phone_verified")
         .eq("user_id", userId)
-        .eq("verification_status", "approved")
-        .limit(1)
         .maybeSingle();
-      const result = !!data;
+      const result = data?.phone_verified === true;
       verifiedCache.set(userId, result);
       setIsVerified(result);
     })();
@@ -70,10 +70,10 @@ const VerifiedSellerBadge = ({ userId, size = "sm", className }: Props) => {
 
   return (
     <span
-      title="بائع موثق ✓"
+      title="جوال موثّق ✓"
       className={cn("inline-flex items-center text-primary", className)}
     >
-      <BadgeCheck size={iconSize} className="fill-primary text-primary-foreground" />
+      <Phone size={iconSize} className="text-primary" />
     </span>
   );
 };

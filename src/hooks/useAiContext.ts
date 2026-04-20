@@ -121,14 +121,6 @@ const pageContextMap: Record<string, { greeting: string; role: string; suggestio
       { id: "explain", icon: "📋", label: "شرح نظام العمولة", description: "أوضح لك كيف تشتغل العمولة", priority: "medium" },
     ],
   },
-  "/verify-seller": {
-    greeting: "التوثيق يزيد ثقة المشترين فيك 🏆",
-    role: "مساعد التوثيق",
-    suggestions: [
-      { id: "verify-steps", icon: "✅", label: "خطوات التوثيق", description: "أشرح لك كل خطوة من التوثيق", priority: "high" },
-      { id: "docs-needed", icon: "📄", label: "وش أحتاج؟", description: "أقولك الوثائق المطلوبة للتوثيق", priority: "high" },
-    ],
-  },
   "/seller-dashboard": {
     greeting: "لوحة البائع 📊 خلني ألخصلك الموقف",
     role: "مقبل البائع",
