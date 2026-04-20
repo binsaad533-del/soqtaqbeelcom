@@ -27,6 +27,7 @@ import { type DealStructureSelection } from "@/components/DealStructureEngine";
 import { DEAL_TYPE_MAP, detectConflicts, getRequiredDisclosures, getRequiredDocuments } from "@/lib/dealStructureConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { calculateTransparency } from "@/lib/transparencyScore";
+import { parseArabicPrice } from "@/lib/price-parser";
 import { getRules, validateDisclosure } from "@/lib/dealTypeFieldRules";
 import VerificationGate from "@/components/VerificationGate";
 import { useSEO } from "@/hooks/useSEO";
@@ -574,7 +575,7 @@ const CreateListingPage = () => {
           ...(extracted.district && !prev.district ? { district: extracted.district } : {}),
           ...(extracted.annual_rent && !prev.annual_rent ? { annual_rent: extracted.annual_rent } : {}),
           ...(extracted.lease_duration && !prev.lease_duration ? { lease_duration: extracted.lease_duration } : {}),
-          ...(extracted.asking_price && !prev.price ? { price: String(extracted.asking_price).replace(/[^\d]/g, "") } : {}),
+          ...(extracted.asking_price && !prev.price ? (() => { const p = parseArabicPrice(extracted.asking_price as string | number); return p ? { price: String(p) } : {}; })() : {}),
         }));
         if (extracted.area_sqm && !areaSqm) setAreaSqm(extracted.area_sqm);
         if (extracted.cr_number || extracted.entity_name) {
