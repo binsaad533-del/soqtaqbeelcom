@@ -73,7 +73,7 @@ const NegotiationPage = () => {
   const { getListing } = useListings();
   const { monitorChat, calculateDealRisk } = useFraudEngine();
   const navigate = useNavigate();
-  const { getProfile } = useProfiles();
+  const { getProfile, getCounterpartySafe } = useProfiles();
   const { getCommission } = useCommissions();
 
   const [deal, setDeal] = useState<any>(null);
@@ -314,7 +314,7 @@ const NegotiationPage = () => {
       setCommission(comm);
     }
     setLoading(false);
-  }, [dealId, getListing, getMessages, user, getProfile, calculateDealRisk, getCommission]);
+  }, [dealId, getListing, getMessages, user, getProfile, getCounterpartySafe, calculateDealRisk, getCommission]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
