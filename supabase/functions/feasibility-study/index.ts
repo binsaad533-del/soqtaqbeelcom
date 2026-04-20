@@ -106,6 +106,28 @@ function extractDocumentUrls(listing: any): string[] {
   return urls.slice(0, MAX_DOCUMENT_IMAGES);
 }
 
+/** Check if listing has real financial documents uploaded */
+const FINANCIAL_DOC_TYPES = new Set([
+  "financial_statement",
+  "bank_statement",
+  "invoice",
+  "salary_record",
+  "vat_certificate",
+  "zakat_certificate",
+]);
+
+function hasFinancialDocs(listing: any): boolean {
+  if (!Array.isArray(listing?.documents)) return false;
+  for (const doc of listing.documents) {
+    const docType = String(doc?.type || "").trim();
+    const filesCount = Array.isArray(doc?.files) ? doc.files.length : 0;
+    if (FINANCIAL_DOC_TYPES.has(docType) && filesCount > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function estimateInventoryWeight(item: any): number {
   const qty = Number(item?.qty) || 1;
   const unitPrice = Number(item?.unitPrice) || 0;
@@ -314,9 +336,8 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
   if (industrial) {
     sections.push("\n## ⚠️ تنبيه: منطقة صناعية");
     sections.push("- هذا النشاط يقع في منطقة صناعية — المنافسون غالباً لا يظهرون في Google Maps");
-    sections.push("- قدّر عدد المنافسين المحتملين بناءً على نوع النشاط والمنطقة (لا تقل عن 5-15 منافس تقديري)");
-    sections.push("- لا تُظهر 0 منافسين في أي نطاق — المناطق الصناعية مليئة بالورش والمصانع غير المسجلة");
-    sections.push("- اذكر بوضوح أن الأعداد تقديرية وليست دقيقة");
+    sections.push("- إذا ما فيه منافسين مسجلين في Google Maps: قل بصراحة 'يتطلب معاينة ميدانية' — لا تخمّن أرقاماً");
+    sections.push("- استخدم nearbyCount=0, neighborhoodCount=0, areaCount=0 إذا ما فيه بيانات موثّقة");
   }
 
   // Competitor data
@@ -328,7 +349,7 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
       sections.push(`\n### ${labels[i] || `نطاق ${group.radius}م`}:`);
       sections.push(`- عدد المنافسين المرصودين: ${group.places.length}`);
       if (industrial && group.places.length === 0) {
-        sections.push("- ⚠️ لم تظهر نتائج — لكن المناطق الصناعية تحتوي على منافسين غير مسجلين (قدّر 3-8 على الأقل)");
+        sections.push("- لم تظهر نتائج في هذا النطاق — اذكر أن الرصد يتطلب معاينة ميدانية");
       }
       if (topPlaces.length > 0) {
         topPlaces.forEach((p: any) => {
@@ -344,7 +365,7 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
     sections.push("\n## لا تتوفر بيانات منافسين (الموقع غير محدد على الخريطة)");
     sections.push("- قدّم تحليل تنافسي تقديري بناءً على نوع النشاط والمدينة");
     if (industrial) {
-      sections.push("- المناطق الصناعية تحتوي عادةً على 10-30 منافس في نطاق 10 كم — لا تقل 0");
+      sections.push("- في المناطق الصناعية، يُفضّل المعاينة الميدانية لتقدير المنافسة بدقة");
     }
   }
 
@@ -361,7 +382,15 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
   sections.push("- كن دقيقاً وعملياً في التقديرات المالية");
   sections.push("- اعتمد على بيانات المنافسين الحقيقية إن توفرت");
   sections.push("- قدّم 3 سيناريوهات واقعية (متفائل، واقعي، متحفظ)");
-  sections.push("- لا تترك أي حقل رقمي بقيمة 0 أو 'غير محدد' — قدّم تقديراً حتى لو كان بمستوى ثقة منخفض");
+  if (hasFinancials) {
+    sections.push("- عندك بيانات مالية موثّقة — استخدمها وقدّم تقديرات مدعومة");
+  } else {
+    sections.push("⚠️ مهم جداً: لا توجد بيانات مالية موثّقة (قوائم مالية، بنك، فواتير)");
+    sections.push("- لا تخترع أرقام ROI أو ربح شهري دقيقة");
+    sections.push("- استخدم confidenceLevel='منخفض' إلزامياً");
+    sections.push("- في revenueProjections: قدّم نطاقات واسعة وأوضح أنها تقديرية");
+    sections.push("- في executiveSummary: اذكر صراحة 'يتطلب بيانات مالية موثّقة للتحقق'");
+  }
 
   return sections.join("\n");
 }
