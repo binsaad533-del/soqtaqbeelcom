@@ -178,6 +178,23 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
         ensurePdfFontLoaded(),
       ]);
 
+      // For the legal PDF, fetch full phone of the counterparty via the audited RPC.
+      // Server enforces: viewer is party, counterparty signed, deal active.
+      let buyerPhoneFull: string | null = (isBuyer ? buyerProfile?.phone : null) || null;
+      let sellerPhoneFull: string | null = (isSeller ? sellerProfile?.phone : null) || null;
+      const counterpartyId = isBuyer ? deal.seller_id : deal.buyer_id;
+      if (counterpartyId) {
+        const { data: legalArr } = await supabase.rpc("get_counterparty_profile_legal", {
+          target_user_id: counterpartyId,
+          target_deal_id: deal.id,
+        });
+        const legal = (legalArr as any[] | null)?.[0] ?? null;
+        if (legal?.phone) {
+          if (isBuyer) sellerPhoneFull = legal.phone;
+          else buyerPhoneFull = legal.phone;
+        }
+      }
+
       const mount = createPdfMount();
       const sections: HTMLElement[] = [];
 
@@ -191,18 +208,18 @@ const LegalConfirmationPanel = ({ deal, listing, onConfirmed }: Props) => {
         { label: "الحالة", value: deal.status === "finalized" ? "مكتملة" : "قيد الاستكمال" },
       ]), true));
 
-      // Parties
-      const partyCard = (label: string, profile: Profile | null) => `
+      // Parties — use full phone (may be null if legal conditions not met yet)
+      const partyCard = (label: string, profile: Profile | null, phoneFull: string | null) => `
         <div style="border:0.5px solid ${PDF_COLORS.border};border-radius:18px;padding:16px;background:${PDF_COLORS.cardBg};display:grid;gap:6px;">
           <div style="font-size:10px;color:${PDF_COLORS.primary};font-weight:600;">${escapeHtml(label)}</div>
           <div style="font-size:14px;font-weight:600;color:${PDF_COLORS.text};">${escapeHtml(profile?.full_name || "—")}</div>
-          ${profile?.phone ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};direction:ltr;text-align:right;">${escapeHtml(profile.phone)}</div>` : ""}
+          ${phoneFull ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};direction:ltr;text-align:right;">${escapeHtml(phoneFull)}</div>` : ""}
           ${profile?.city ? `<div style="font-size:11px;color:${PDF_COLORS.textMuted};">${escapeHtml(profile.city)}</div>` : ""}
         </div>`;
       sections.push(buildPdfSection("أطراف الصفقة", `
         <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
-          ${partyCard("البائع", sellerProfile)}
-          ${partyCard("المشتري", buyerProfile)}
+          ${partyCard("البائع", sellerProfile, sellerPhoneFull)}
+          ${partyCard("المشتري", buyerProfile, buyerPhoneFull)}
         </div>
       `));
 
