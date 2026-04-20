@@ -841,6 +841,44 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     }
   };
 
+  // Guard: economic feasibility does not apply to "assets_only" deals.
+  // We ignore any pre-existing (hallucinated) study in DB and show the
+  // alternative card instead. We DO NOT delete DB rows.
+  const primaryDealType = String(listing?.primary_deal_type || listing?.deal_type || "").trim();
+  const isAssetsOnly = primaryDealType === "assets_only";
+
+  if (isAssetsOnly) {
+    return (
+      <div
+        ref={panelRef}
+        id="feasibility"
+        className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5 space-y-3"
+      >
+        <div className="flex items-center gap-2">
+          <AiStar size={18} />
+          <h3 className="text-base font-semibold">دراسة الجدوى الاقتصادية</h3>
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          هذي الصفقة من نوع <span className="font-medium text-foreground">"أصول فقط"</span> — أي بيع معدات
+          أو أصول دون نشاط تشغيلي. لذلك، دراسة الجدوى الاقتصادية لا تنطبق.
+        </p>
+        <div className="rounded-lg bg-background/60 border border-border/40 p-3 space-y-1.5">
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            بدائل أنسب لتقييم هذه الصفقة:
+          </div>
+          <div className="flex items-start gap-2 text-sm">
+            <span className="text-blue-500 mt-0.5">•</span>
+            <span><span className="font-medium">تقييم الأصل:</span> راجع قسم <span className="text-primary">"فحص الصفقة"</span></span>
+          </div>
+          <div className="flex items-start gap-2 text-sm">
+            <span className="text-blue-500 mt-0.5">•</span>
+            <span><span className="font-medium">مقارنة السوق:</span> راجع قسم <span className="text-primary">"تقييم الأصول"</span></span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loadingCache && !study) {
     return (
       <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 flex items-center justify-center gap-2">
