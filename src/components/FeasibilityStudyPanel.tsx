@@ -68,7 +68,7 @@ interface FeasibilityStudy {
   verdictColor: string;
   confidenceLevel: string;
   disclaimer: string;
-  _meta?: { activityType: string; hasRealCompetitorData: boolean; generatedAt: string };
+  _meta?: { activityType: string; hasRealCompetitorData: boolean; hasRealFinancials?: boolean; generatedAt: string; dealTypeFlag?: string | null };
 }
 
 interface FeasibilityStudyPanelProps {
@@ -974,6 +974,22 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           <div className={cn("text-xl font-bold", v.text)}>{rs.roiMonths} <span className="text-sm font-normal">شهر</span></div>
         </div>
       </div>
+
+      {/* Financial Data Warning Badge */}
+      {displayStudy._meta && displayStudy._meta.hasRealFinancials === false && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-2">
+          <span className="text-amber-600 mt-0.5 text-lg">⚠️</span>
+          <div className="flex-1">
+            <div className="text-sm font-medium text-amber-900 dark:text-amber-100">
+              هذه الأرقام تقديرية - لم يتم تقديم بيانات مالية موثّقة
+            </div>
+            <div className="text-xs text-amber-800/80 dark:text-amber-200/80 mt-1 leading-relaxed">
+              البائع لم يرفق قوائم مالية أو كشوف بنك أو فواتير تدعم هذه التقديرات.
+              يُنصح بطلب بيانات مالية موثّقة قبل اتخاذ قرار الاستثمار.
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Report body */}
       <div ref={reportRef} className="space-y-2.5 bg-background">
