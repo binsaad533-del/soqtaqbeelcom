@@ -112,8 +112,27 @@ function buildSearchQueries(asset: any) {
 
   const category = asset.category;
   const nameLower = (asset.name || "").toLowerCase();
-  if (category === "industrial_machine" || category === "industrial_equipment" ||
-      nameLower.includes("cnc") || nameLower.includes("صناعي")) {
+  const brandLower = (asset.brand || "").toLowerCase();
+
+  // قائمة ماركات صناعية/متخصصة - لو الماركة منها، نفعّل Alibaba تلقائياً
+  const INDUSTRIAL_BRANDS = [
+    "جاك", "jack", "جوكي", "juki", "هواهوا", "huahua",
+    "sign-cnc", "sign cnc", "signcnc", "blue-mak", "bluemak"
+  ];
+
+  // كلمات تدل على أن الأصل صناعي/متخصص
+  const INDUSTRIAL_KEYWORDS = [
+    "cnc", "صناعي", "صناعية", "ماكينة", "خياطة", "تطريز", "سرفلة",
+    "مسمار", "سنون", "دعاسة", "مكبس", "تجميع حواف", "edge band"
+  ];
+
+  const isIndustrialCategory = category === "industrial_machine" ||
+                                category === "industrial_equipment" ||
+                                category === "sewing_machine";
+  const isIndustrialBrand = INDUSTRIAL_BRANDS.some(b => brandLower.includes(b.toLowerCase()));
+  const hasIndustrialKeyword = INDUSTRIAL_KEYWORDS.some(k => nameLower.includes(k));
+
+  if (isIndustrialCategory || isIndustrialBrand || hasIndustrialKeyword) {
     const q = hasModelAndBrand ? `${asset.brand} ${asset.model}` : asset.name;
     queries.push({ query: `${q} industrial machinery price USD`, type: "alibaba_fallback" });
   }
@@ -333,8 +352,8 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
   } else if (medianAlibaba > 0) {
     const multiplier = getUsedDiscount(asset.condition, category);
     recommendedPrice = Math.round(medianAlibaba * multiplier);
-    confidence = alibabaPrices.length >= 3 ? "متوسط" : "منخفض";
-    reasoning = `${medianAlibaba} ر.س (من Alibaba) × ${Math.round(multiplier * 100)}%`;
+    confidence = "منخفض"; // دائماً منخفض لـ Alibaba بسبب عدم دقة السوق المحلي
+    reasoning = `${medianAlibaba} ر.س (من Alibaba) × ${Math.round(multiplier * 100)}% — سعر تقديري من مصادر عالمية`;
     source = "alibaba_fallback";
     priceRange = { min: Math.min(...alibabaPrices), max: Math.max(...alibabaPrices) };
   } else {
@@ -351,6 +370,10 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
     is_new: p.is_new,
   }));
 
+  const disclaimer = source === "alibaba_fallback"
+    ? "سعر تقديري من مصادر عالمية (Alibaba) — قد يختلف عن السوق السعودي بسبب الشحن والجمارك والوسطاء. للتقييم الدقيق، يُنصح بمعاينة متخصصة عبر جساس للتقييم."
+    : null;
+
   return {
     price_sar: recommendedPrice,
     confidence,
@@ -358,6 +381,7 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
     source,
     sources,
     price_range: priceRange,
+    disclaimer,
   };
 }
 
@@ -481,6 +505,10 @@ Deno.serve(async (req) => {
   // 6) دمج النتائج
   const allPricings = new Map<string, any>();
   for (const [key, cached] of cacheHits) {
+    const cachedDisclaimer = cached.source === "alibaba_fallback"
+      ? "سعر تقديري من مصادر عالمية (Alibaba) — قد يختلف عن السوق السعودي بسبب الشحن والجمارك والوسطاء. للتقييم الدقيق، يُنصح بمعاينة متخصصة عبر جساس للتقييم."
+      : null;
+
     allPricings.set(key, {
       price_sar: Number(cached.price_sar),
       confidence: cached.confidence,
@@ -488,6 +516,7 @@ Deno.serve(async (req) => {
       source: cached.source,
       sources: cached.gemini_sources || [],
       price_range: cached.price_range,
+      disclaimer: cachedDisclaimer,
       from_cache: true,
     });
   }
@@ -514,6 +543,7 @@ Deno.serve(async (req) => {
         source: pricing.source,
         sources: pricing.sources,
         price_range: pricing.price_range,
+        disclaimer: pricing.disclaimer || null,
         priced_at: new Date().toISOString(),
         from_cache: pricing.from_cache,
       }
