@@ -459,6 +459,7 @@ Deno.serve(async (req) => {
   }
 
   if (rawAssets.length === 0) {
+    await markFailed();
     return new Response(JSON.stringify({ error: "لا توجد أصول لتسعيرها" }),
       { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
