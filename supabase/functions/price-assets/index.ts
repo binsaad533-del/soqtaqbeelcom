@@ -543,6 +543,7 @@ Deno.serve(async (req) => {
         source: pricing.source,
         sources: pricing.sources,
         price_range: pricing.price_range,
+        disclaimer: pricing.disclaimer || null,
         priced_at: new Date().toISOString(),
         from_cache: pricing.from_cache,
       }
