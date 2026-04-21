@@ -1726,6 +1726,66 @@ export type Database = {
         }
         Relationships: []
       }
+      market_price_cache: {
+        Row: {
+          asset_name: string
+          brand: string | null
+          cache_key: string
+          category: string | null
+          condition: string
+          confidence: string
+          created_at: string | null
+          expires_at: string | null
+          gemini_reasoning: string | null
+          gemini_sources: Json | null
+          id: string
+          model: string | null
+          price_range: Json | null
+          price_sar: number
+          reasoning: string | null
+          serper_calls: number | null
+          source: string | null
+        }
+        Insert: {
+          asset_name: string
+          brand?: string | null
+          cache_key: string
+          category?: string | null
+          condition: string
+          confidence: string
+          created_at?: string | null
+          expires_at?: string | null
+          gemini_reasoning?: string | null
+          gemini_sources?: Json | null
+          id?: string
+          model?: string | null
+          price_range?: Json | null
+          price_sar: number
+          reasoning?: string | null
+          serper_calls?: number | null
+          source?: string | null
+        }
+        Update: {
+          asset_name?: string
+          brand?: string | null
+          cache_key?: string
+          category?: string | null
+          condition?: string
+          confidence?: string
+          created_at?: string | null
+          expires_at?: string | null
+          gemini_reasoning?: string | null
+          gemini_sources?: Json | null
+          id?: string
+          model?: string | null
+          price_range?: Json | null
+          price_sar?: number
+          reasoning?: string | null
+          serper_calls?: number | null
+          source?: string | null
+        }
+        Relationships: []
+      }
       match_notifications: {
         Row: {
           alert_id: string
