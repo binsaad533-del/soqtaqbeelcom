@@ -70,6 +70,7 @@ const SupportPage = lazy(() => import("./pages/SupportPage"));
 const NewTicketPage = lazy(() => import("./pages/NewTicketPage"));
 const TicketDetailPage = lazy(() => import("./pages/TicketDetailPage"));
 const AdminRolesPage = lazy(() => import("./pages/AdminRolesPage"));
+const AdminPriceTestPage = lazy(() => import("./pages/AdminPriceTestPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -304,6 +305,7 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/admin/price-test" element={<AdminPriceTestPage />} />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
                 <Route path="/pdf-preview" element={<PdfPreviewPage />} />
                 <Route path="*" element={<NotFound />} />
