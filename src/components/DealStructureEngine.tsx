@@ -248,61 +248,6 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
 
       {/* No conflict warnings - AI auto-resolves conflicts silently */}
 
-      {/* Selected summary */}
-      {selectedTypes.length > 0 && (
-        <div className="bg-accent/40 rounded-xl p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <AiStar size={18} animate={false} />
-            <span className="text-sm font-medium">ملخص هيكل الصفقة</span>
-          </div>
-          <div className="space-y-1.5">
-            {selectedTypes.map((typeId, idx) => {
-              const dt = DEAL_TYPE_MAP[typeId];
-              if (!dt) return null;
-              return (
-                <div key={typeId} className="flex items-center gap-2 text-xs">
-                  <span className={cn(
-                    "px-1.5 py-0.5 rounded font-medium",
-                    typeId === primaryType ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                  )}>
-                    {typeId === primaryType ? "رئيسي" : `بديل ${idx}`}
-                  </span>
-                  <span>{dt.label}</span>
-                </div>
-              );
-            })}
-          </div>
-          {/* Required Disclosures */}
-          <div className="pt-2 border-t border-border/30">
-            <div className="text-xs font-medium text-foreground mb-2 flex items-center gap-1">
-              <Shield size={12} className="text-warning" />
-              الإفصاحات المطلوبة ({getRequiredDisclosures(selectedTypes).length})
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {getRequiredDisclosures(selectedTypes).map((d, i) => (
-                <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-warning/10 text-warning border border-warning/15">
-                  {d}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Required Documents */}
-          <div className="pt-2 border-t border-border/30">
-            <div className="text-xs font-medium text-foreground mb-2 flex items-center gap-1">
-              <FileText size={12} className="text-primary" />
-              المستندات المطلوبة ({getRequiredDocuments(selectedTypes).length})
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {getRequiredDocuments(selectedTypes).map((d, i) => (
-                <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/15">
-                  {d}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
