@@ -113,6 +113,7 @@ async function processListing(listingId: string, force: boolean) {
         dealPrice: listing.price || null,
         listingData: listing,
         manualInventory,
+        listingId,
       });
       if (assetResult?.success && assetResult.detected) {
         combinedAssets = assetResult.detected.combined;
