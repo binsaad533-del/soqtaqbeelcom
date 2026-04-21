@@ -3,7 +3,8 @@ import {
   ShieldCheck, AlertTriangle, TrendingUp, MessageCircle,
   ChevronDown, ChevronUp, MapPin, BarChart3, Briefcase, CheckCircle2,
   FileQuestion, Target, Loader2, Activity, ShoppingCart, Store,
-  RefreshCw, Clock, Package, FileText, ImageIcon, DollarSign, ArrowDownRight, ArrowUpRight, Equal, Star
+  RefreshCw, Clock, Package, FileText, ImageIcon, DollarSign, ArrowDownRight, ArrowUpRight, Equal, Star,
+  Search, ExternalLink, Sparkles, Info
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
@@ -491,6 +492,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                 <p className={cn("text-lg font-medium", ratingStyle.text)}>{analysis.rating}</p>
               </div>
 
+              {/* Inventory Pricing Section (from price-assets) */}
+              <InventoryPricingSection listing={listing} />
+
               {/* Trust Score Section */}
               {trustScore && (
                 <TrustScoreSection trustScore={trustScore} />
@@ -846,6 +850,305 @@ const FACTOR_WEIGHTS: Record<string, number> = {
   price_logic: 20,
   legal_clarity: 20,
   media_quality: 15,
+};
+
+// ============= Inventory Pricing (price-assets output) =============
+
+const JASAAS_URL = "https://jasaas.sa";
+
+const PRICING_CONFIDENCE_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
+  "عالي": { bg: "bg-emerald-50 dark:bg-emerald-950/30", text: "text-emerald-700 dark:text-emerald-300", border: "border-emerald-200 dark:border-emerald-900", label: "ثقة عالية" },
+  "متوسط": { bg: "bg-blue-50 dark:bg-blue-950/30", text: "text-blue-700 dark:text-blue-300", border: "border-blue-200 dark:border-blue-900", label: "ثقة متوسطة" },
+  "منخفض": { bg: "bg-amber-50 dark:bg-amber-950/30", text: "text-amber-700 dark:text-amber-300", border: "border-amber-200 dark:border-amber-900", label: "ثقة منخفضة" },
+  "يتطلب_معاينة": { bg: "bg-muted", text: "text-muted-foreground", border: "border-border", label: "يتطلب معاينة" },
+};
+
+const PRICING_STATUS_LABEL: Record<string, { text: string; className: string }> = {
+  idle: { text: "لم يبدأ التسعير", className: "bg-muted text-muted-foreground" },
+  in_progress: { text: "جاري التسعير...", className: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300" },
+  completed: { text: "اكتمل التسعير", className: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300" },
+  failed: { text: "تعذّر التسعير", className: "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300" },
+};
+
+interface PricingInfo {
+  price_sar?: number;
+  confidence?: string;
+  reasoning?: string;
+  source?: string;
+  sources?: Array<{ title?: string; link?: string; price?: number } | string>;
+  price_range?: { min?: number; max?: number };
+  disclaimer?: string | null;
+  priced_at?: string;
+}
+
+interface InventoryItem {
+  name?: string;
+  type?: string;
+  category?: string;
+  brand?: string;
+  model?: string;
+  condition?: string;
+  quantity?: number;
+  details?: string;
+  pricing?: PricingInfo;
+}
+
+const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
+  const [sourcesOpen, setSourcesOpen] = useState(false);
+  const pricing = asset.pricing;
+  const confidence = pricing?.confidence || "يتطلب_معاينة";
+  const requiresInspection = confidence === "يتطلب_معاينة" || !pricing?.price_sar;
+  const style = PRICING_CONFIDENCE_STYLES[confidence] || PRICING_CONFIDENCE_STYLES["يتطلب_معاينة"];
+  const isAlibaba = pricing?.source === "alibaba_fallback";
+  const sources = Array.isArray(pricing?.sources) ? pricing!.sources! : [];
+
+  return (
+    <div className="px-3 py-3 space-y-2">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-medium flex items-center gap-1.5 flex-wrap">
+            <span className="truncate">
+              {asset.quantity && asset.quantity > 1 ? `${asset.quantity}× ` : ""}{asset.name || "أصل غير مسمى"}
+            </span>
+            <span className={cn("text-[10px] px-1.5 py-0.5 rounded-md shrink-0",
+              asset.condition === "جديد" ? "bg-emerald-50 text-emerald-700" :
+              asset.condition === "جيد" ? "bg-blue-50 text-blue-700" :
+              asset.condition === "مستعمل" ? "bg-amber-50 text-amber-700" :
+              asset.condition === "تالف" ? "bg-red-50 text-red-700" :
+              "bg-muted text-muted-foreground"
+            )}>
+              {asset.condition || "غير محدد"}
+            </span>
+          </div>
+          {asset.details && (
+            <div className="text-[10px] text-muted-foreground mt-0.5 truncate">{asset.details}</div>
+          )}
+        </div>
+
+        <div className="text-left shrink-0 flex flex-col items-end gap-1">
+          {!requiresInspection && pricing?.price_sar ? (
+            <>
+              <div className="text-sm font-semibold tabular-nums">
+                {pricing.price_sar.toLocaleString("en-US")} <span className="text-[10px] text-muted-foreground font-normal">ر.س</span>
+              </div>
+              <span className={cn("text-[10px] px-2 py-0.5 rounded-md border", style.bg, style.text, style.border)}>
+                {style.label}
+              </span>
+            </>
+          ) : (
+            <span className={cn("text-[10px] px-2 py-0.5 rounded-md border", style.bg, style.text, style.border)}>
+              {style.label}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Inspection CTA box */}
+      {requiresInspection && (
+        <div className="rounded-lg border border-border bg-muted/40 p-3 flex items-start gap-3">
+          <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center shrink-0">
+            <Search size={14} strokeWidth={1.5} className="text-muted-foreground" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-foreground/80 mb-2 leading-relaxed">
+              هذا الأصل يتطلب معاينة متخصصة لتقييم دقيق.
+            </p>
+            <a
+              href={JASAAS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+            >
+              احصل على تقييم معتمد عبر جساس للتقييم
+              <ExternalLink size={11} strokeWidth={1.8} />
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* Alibaba disclaimer */}
+      {!requiresInspection && isAlibaba && pricing?.disclaimer && (
+        <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-2.5 flex items-start gap-2">
+          <Info size={12} strokeWidth={1.8} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-[10px] text-amber-800 dark:text-amber-200 leading-relaxed">
+            {pricing.disclaimer}
+          </p>
+        </div>
+      )}
+
+      {/* Sources toggle */}
+      {!requiresInspection && sources.length > 0 && (
+        <div>
+          <button
+            onClick={() => setSourcesOpen(!sourcesOpen)}
+            className="text-[10px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+          >
+            {sourcesOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+            {sourcesOpen ? "إخفاء المصادر" : `اعرض المصادر (${sources.length})`}
+          </button>
+          {sourcesOpen && (
+            <ul className="mt-1.5 space-y-1 pr-3 border-r-2 border-border">
+              {sources.slice(0, 8).map((s, i) => {
+                const src = typeof s === "string" ? { link: s, title: s } : s;
+                if (!src?.link) return null;
+                return (
+                  <li key={i} className="text-[10px]">
+                    <a
+                      href={src.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline inline-flex items-center gap-1 truncate max-w-full"
+                    >
+                      <ExternalLink size={9} strokeWidth={1.8} className="shrink-0" />
+                      <span className="truncate">{src.title || src.link}</span>
+                      {src.price && <span className="text-muted-foreground tabular-nums">— {src.price.toLocaleString("en-US")} ر.س</span>}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const InventoryPricingSection = ({ listing }: { listing: any }) => {
+  const [pricingStatus, setPricingStatus] = useState<string>(listing?.pricing_status || "idle");
+  const [inventory, setInventory] = useState<InventoryItem[]>(() => {
+    const inv = listing?.inventory;
+    if (Array.isArray(inv) && inv.length > 0) return inv;
+    const combined = listing?.ai_assets_combined?.assets;
+    return Array.isArray(combined) ? combined : [];
+  });
+
+  // Realtime subscription for pricing updates
+  useEffect(() => {
+    if (!listing?.id) return;
+    const channel = supabase
+      .channel(`pricing-${listing.id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "listings", filter: `id=eq.${listing.id}` },
+        (payload) => {
+          const next = payload.new as any;
+          if (next?.pricing_status) setPricingStatus(next.pricing_status);
+          if (Array.isArray(next?.inventory)) setInventory(next.inventory);
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [listing?.id]);
+
+  const isInProgress = pricingStatus === "in_progress";
+  const hasNoAssets = inventory.length === 0;
+
+  // Calculate aggregates
+  const priced = inventory.filter((a) => a.pricing?.price_sar && a.pricing?.confidence !== "يتطلب_معاينة");
+  const requiresInspection = inventory.filter(
+    (a) => !a.pricing?.price_sar || a.pricing?.confidence === "يتطلب_معاينة"
+  );
+  const totalValue = priced.reduce((sum, a) => sum + (a.pricing?.price_sar || 0), 0);
+  const inspectionCount = requiresInspection.length;
+  const statusInfo = PRICING_STATUS_LABEL[pricingStatus] || PRICING_STATUS_LABEL.idle;
+
+  if (hasNoAssets && !isInProgress) return null;
+
+  return (
+    <div>
+      <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
+        <DollarSign size={15} strokeWidth={1.3} className="text-primary/60" />
+        تسعير الأصول التفصيلي
+        <span className={cn("text-[10px] px-2 py-0.5 rounded-md font-medium mr-auto", statusInfo.className)}>
+          {isInProgress && <Loader2 size={9} className="inline animate-spin ml-1" />}
+          {statusInfo.text}
+        </span>
+      </h4>
+
+      {/* In-progress state */}
+      {isInProgress && (
+        <div className="rounded-xl border border-border bg-muted/30 p-5 flex flex-col items-center gap-3">
+          <div className="relative">
+            <Sparkles size={28} strokeWidth={1.3} className="text-primary" />
+            <Loader2 size={42} strokeWidth={1} className="absolute -top-1.5 -left-1.5 text-primary/30 animate-spin" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-medium">جاري تسعير الأصول</p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              يستغرق التسعير عادةً 30-60 ثانية، سيتم تحديث الواجهة تلقائياً عند الانتهاء.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Summary + List (when not in progress, or even during, if we have prior data) */}
+      {!isInProgress && inventory.length > 0 && (
+        <>
+          {/* Summary cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
+            <div className="bg-muted/40 rounded-lg p-3 text-center">
+              <div className="text-[10px] text-muted-foreground">إجمالي الأصول</div>
+              <div className="text-lg font-semibold tabular-nums">{inventory.length}</div>
+            </div>
+            <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg p-3 text-center">
+              <div className="text-[10px] text-emerald-700 dark:text-emerald-300">القيمة المُسعّرة</div>
+              <div className="text-lg font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
+                {totalValue.toLocaleString("en-US")} <span className="text-[10px] font-normal">ر.س</span>
+              </div>
+            </div>
+            <div className="bg-muted/40 rounded-lg p-3 text-center col-span-2 md:col-span-1">
+              <div className="text-[10px] text-muted-foreground">يتطلب معاينة</div>
+              <div className="text-lg font-semibold tabular-nums">
+                {inspectionCount}
+                <span className="text-[10px] text-muted-foreground font-normal"> / {inventory.length}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA when there are inspection items */}
+          {inspectionCount > 0 && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 mb-3 flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Search size={16} strokeWidth={1.5} className="text-primary shrink-0" />
+                <p className="text-xs leading-relaxed">
+                  <span className="font-medium">{inspectionCount}</span> {inspectionCount === 1 ? "أصل يحتاج" : "أصل بحاجة"} لمعاينة متخصصة للتقييم الدقيق.
+                </p>
+              </div>
+              <a
+                href={JASAAS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity shrink-0"
+              >
+                جساس للتقييم
+                <ExternalLink size={11} strokeWidth={1.8} />
+              </a>
+            </div>
+          )}
+
+          {/* Asset list */}
+          <div className="border border-border/50 rounded-xl overflow-hidden">
+            <div className="bg-muted/30 px-3 py-2 text-xs font-medium flex items-center gap-1.5">
+              <ShoppingCart size={12} strokeWidth={1.3} />
+              تفصيل التسعير ({inventory.length})
+            </div>
+            <div className="divide-y divide-border/30">
+              {inventory.map((asset, i) => (
+                <AssetPricingRow key={i} asset={asset} />
+              ))}
+            </div>
+          </div>
+
+          <p className="text-[10px] text-muted-foreground/70 text-center mt-2 leading-relaxed">
+            الأسعار تقديرية مبنية على أبحاث السوق الحالية. للتقييم الرسمي، يُنصح بالتعاون مع جهة تقييم معتمدة.
+          </p>
+        </>
+      )}
+    </div>
+  );
 };
 
 const TrustScoreSection = ({ trustScore }: { trustScore: any }) => {
