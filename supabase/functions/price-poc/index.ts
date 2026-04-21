@@ -3,7 +3,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// قائمة سوداء صريحة فقط (عملات مختلفة)
 const BLACKLISTED_DOMAINS = [
   "ye.opensooq.com", "om.opensooq.com", "eg.opensooq.com",
   "jo.opensooq.com", "lb.opensooq.com", "iq.opensooq.com",
@@ -13,16 +12,37 @@ const BLACKLISTED_DOMAINS = [
   "ma.opensooq.com", "tn.opensooq.com", "sd.opensooq.com",
 ];
 
-// دومينات دولية مقبولة كـ fallback للصناعي فقط
 const INDUSTRIAL_FALLBACK_DOMAINS = [
   "alibaba.com", "made-in-china.com", "arabic.alibaba.com",
   "sa.made-in-china.com", "ar.made-in-china.com",
 ];
 
-// Social media / غير متاجر
 const NON_COMMERCIAL_DOMAINS = [
   "instagram.com", "facebook.com", "youtube.com", "tiktok.com",
   "twitter.com", "x.com", "linkedin.com", "pinterest.com",
+];
+
+// كلمات تدل على دول أخرى (لو ذُكرت في snippet → رفض)
+const FOREIGN_COUNTRY_KEYWORDS = [
+  "يمني", "يمن", "صنعاء", "عدن",
+  "عماني", "عمان", "مسقط", "oman", "muscat",
+  "قطري", "قطر", "الدوحة", "qatar",
+  "مصري", "مصر", "القاهرة", "egypt",
+  "أردني", "اردني", "الأردن", "عمّان", "jordan",
+  "إماراتي", "اماراتي", "دبي", "أبوظبي", "ابوظبي", "الإمارات", "uae", "dubai",
+  "كويتي", "الكويت", "kuwait",
+  "بحريني", "البحرين", "bahrain",
+  "عراقي", "العراق", "بغداد", "iraq",
+  "سوري", "سوريا", "دمشق", "syria",
+  "ليبي", "ليبيا", "طرابلس", "libya",
+  "فلسطيني", "فلسطين", "palestine",
+  "إيراني", "ايراني", "إيران", "iran",
+];
+
+// كلمات إيجابية — لو ظهرت → ثقة أعلى
+const SAUDI_KEYWORDS = [
+  "السعودية", "المملكة", "المملكه", "الرياض", "جدة", "مكة",
+  "الدمام", "الخبر", "المدينة", "الطائف", "ksa", "saudi",
 ];
 
 const TEST_ASSETS = [
@@ -78,48 +98,74 @@ function extractDomain(url: string): string {
   catch { return "unknown"; }
 }
 
-// فحص ذكي: هل هذه النتيجة من سياق سعودي؟
-function detectSaudiContext(
-  item: any,
-  queryType: string
-): { isSaudi: boolean, score: number, signals: string[] } {
-  const signals: string[] = [];
-  let score = 0;
-
+// فحص ذكي محسّن في V5: نقبل بوجود عملة ريال + عدم وجود إشارة دولة أخرى
+function analyzeContext(item: any): {
+  isSaudi: boolean,
+  confidence: "عالي" | "متوسط" | "منخفض" | "مرفوض",
+  reasons: string[],
+} {
+  const reasons: string[] = [];
   const domain = extractDomain(item.link || "");
   const url = (item.link || "").toLowerCase();
   const text = `${item.title || ""} ${item.snippet || ""}`.toLowerCase();
 
-  // إشارات قوية (+3 نقاط)
-  if (domain.endsWith(".sa") || domain.endsWith(".com.sa")) {
-    score += 3; signals.push("TLD سعودي");
-  }
-  if (url.includes("/sa/") || url.includes("/ar-sa/") || url.includes("/saudi-arabia/") || url.includes("ksa/")) {
-    score += 3; signals.push("مسار سعودي");
-  }
-  if (domain.includes("saudi") || domain.includes("ksa")) {
-    score += 3; signals.push("اسم دومين سعودي");
-  }
-
-  // إشارات متوسطة (+2 نقاط)
-  if (text.match(/ريال|ر\.?س|sar|sr\s+\d/i)) {
-    score += 2; signals.push("عملة ريال");
-  }
-  if (text.match(/السعودية|الرياض|جدة|الدمام|المملكة العربية|المملكه/)) {
-    score += 2; signals.push("ذكر سعودي صريح");
-  }
-
-  // إشارات سلبية
+  // 1) فحص القائمة السوداء أولاً
   if (BLACKLISTED_DOMAINS.some(d => domain.includes(d))) {
-    return { isSaudi: false, score: -10, signals: ["قائمة سوداء (عملة مختلفة)"] };
+    reasons.push("قائمة سوداء - عملة مختلفة");
+    return { isSaudi: false, confidence: "مرفوض", reasons };
   }
   if (NON_COMMERCIAL_DOMAINS.some(d => domain.includes(d))) {
-    return { isSaudi: false, score: -5, signals: ["موقع اجتماعي"] };
+    reasons.push("موقع اجتماعي");
+    return { isSaudi: false, confidence: "مرفوض", reasons };
   }
 
-  // الحد الأدنى للقبول
-  const isSaudi = score >= 2;
-  return { isSaudi, score, signals };
+  // 2) فحص وجود إشارة دولة أخرى في النص
+  const foreignKeywordsFound = FOREIGN_COUNTRY_KEYWORDS.filter(kw => text.includes(kw));
+  if (foreignKeywordsFound.length > 0) {
+    reasons.push(`دولة أخرى مذكورة: ${foreignKeywordsFound.slice(0, 2).join(", ")}`);
+    return { isSaudi: false, confidence: "مرفوض", reasons };
+  }
+
+  // 3) إشارات سعودية قوية
+  let saudiScore = 0;
+  const saudiSignals: string[] = [];
+
+  if (domain.endsWith(".sa") || domain.endsWith(".com.sa")) {
+    saudiScore += 3; saudiSignals.push("TLD سعودي");
+  }
+  if (url.includes("/sa/") || url.includes("/ar-sa/") || url.includes("/saudi-arabia/") || url.includes("/ksa/")) {
+    saudiScore += 3; saudiSignals.push("مسار سعودي");
+  }
+  if (domain.includes("saudi") || domain.includes("ksa")) {
+    saudiScore += 3; saudiSignals.push("دومين سعودي صريح");
+  }
+
+  // 4) فحص وجود عملة ريال/SAR/SR
+  const hasRiyalCurrency = /ريال|ر\.?س|\bsar\b|\bsr\s+\d|\d\s*sr\b/i.test(text);
+  if (hasRiyalCurrency) {
+    saudiScore += 2; saudiSignals.push("عملة ريال/SAR/SR");
+  }
+
+  // 5) كلمات سعودية صريحة
+  const saudiKeywordsFound = SAUDI_KEYWORDS.filter(kw => text.includes(kw));
+  if (saudiKeywordsFound.length > 0) {
+    saudiScore += 2; saudiSignals.push(`كلمة سعودية: ${saudiKeywordsFound[0]}`);
+  }
+
+  reasons.push(...saudiSignals);
+
+  // قرار القبول
+  if (saudiScore >= 5) return { isSaudi: true, confidence: "عالي", reasons };
+  if (saudiScore >= 3) return { isSaudi: true, confidence: "متوسط", reasons };
+
+  // منطق V5 الجديد: إذا وُجد عملة ريال ولا توجد دولة أخرى → قبول بثقة منخفضة
+  if (hasRiyalCurrency) {
+    reasons.push("قبول V5: ريال موجود بدون دولة أخرى");
+    return { isSaudi: true, confidence: "منخفض", reasons };
+  }
+
+  reasons.push(`لا إشارة سعودية كافية (score: ${saudiScore})`);
+  return { isSaudi: false, confidence: "مرفوض", reasons };
 }
 
 function extractPricesFromText(text: string): number[] {
@@ -168,20 +214,12 @@ function analyzeSearchResults(serperResult: any, queryType: string) {
   for (const item of organic) {
     const domain = extractDomain(item.link || "");
 
-    // قائمة سوداء صريحة
-    if (BLACKLISTED_DOMAINS.some(d => domain.includes(d))) {
-      rejectedItems.push({ domain, reason: "قائمة سوداء - عملة مختلفة", title: item.title });
-      continue;
-    }
-
-    // مواقع اجتماعية
-    if (NON_COMMERCIAL_DOMAINS.some(d => domain.includes(d))) {
-      rejectedItems.push({ domain, reason: "موقع اجتماعي", title: item.title });
-      continue;
-    }
-
-    // للـ alibaba fallback: نقبل الصناعي فقط
+    // للـ alibaba fallback: نقبل الصناعي فقط (بدون فحص سعودي)
     if (queryType === "alibaba_fallback") {
+      if (BLACKLISTED_DOMAINS.some(d => domain.includes(d))) {
+        rejectedItems.push({ domain, reason: "قائمة سوداء", title: item.title });
+        continue;
+      }
       const isIndustrial = INDUSTRIAL_FALLBACK_DOMAINS.some(d => domain.includes(d));
       if (!isIndustrial) {
         rejectedItems.push({ domain, reason: "ليس alibaba/made-in-china", title: item.title });
@@ -193,19 +231,20 @@ function analyzeSearchResults(serperResult: any, queryType: string) {
         acceptedPrices.push({
           price: priceInSar, source: domain, url: item.link || "",
           title: item.title || "", snippet: item.snippet || "",
-          from: "organic_usd_converted", context_score: 10,
-          signals: ["alibaba fallback"],
+          from: "organic_usd_converted", confidence_level: "متوسط",
+          reasons: ["alibaba fallback"],
         });
       }
       continue;
     }
 
-    // للاستعلامات السعودية: نفحص السياق
-    const context = detectSaudiContext(item, queryType);
-    if (!context.isSaudi) {
+    // للاستعلامات السعودية: نستخدم V5 logic
+    const contextAnalysis = analyzeContext(item);
+    if (!contextAnalysis.isSaudi) {
       rejectedItems.push({
-        domain, reason: `لا سياق سعودي (score: ${context.score})`,
-        signals: context.signals, title: item.title,
+        domain,
+        reason: contextAnalysis.reasons.join(" / "),
+        title: item.title,
       });
       continue;
     }
@@ -216,8 +255,9 @@ function analyzeSearchResults(serperResult: any, queryType: string) {
       acceptedPrices.push({
         price, source: domain, url: item.link || "",
         title: item.title || "", snippet: item.snippet || "",
-        from: "organic_sar", context_score: context.score,
-        signals: context.signals,
+        from: "organic_sar",
+        confidence_level: contextAnalysis.confidence,
+        reasons: contextAnalysis.reasons,
       });
     }
   }
@@ -288,7 +328,7 @@ Deno.serve(async (req) => {
       assetResult.final_recommendation = {
         price_sar: 0,
         confidence: "يتطلب_معاينة",
-        reasoning: "أصل غامض بدون ماركة أو وصف محدد — نوصي بمعاينة ميدانية",
+        reasoning: "أصل غامض بدون ماركة أو وصف محدد",
         source: "vague_asset_skip",
       };
       results.push(assetResult);
@@ -348,7 +388,7 @@ Deno.serve(async (req) => {
       priceRange = { min: Math.min(...alibabaPrices), max: Math.max(...alibabaPrices) };
     } else {
       confidence = "يتطلب_معاينة";
-      reasoning = "لم نجد مصادر سعرية موثوقة في السوق السعودي";
+      reasoning = "لم نجد مصادر سعرية موثوقة";
       source = "no_results";
     }
 
