@@ -505,6 +505,10 @@ Deno.serve(async (req) => {
   // 6) دمج النتائج
   const allPricings = new Map<string, any>();
   for (const [key, cached] of cacheHits) {
+    const cachedDisclaimer = cached.source === "alibaba_fallback"
+      ? "سعر تقديري من مصادر عالمية (Alibaba) — قد يختلف عن السوق السعودي بسبب الشحن والجمارك والوسطاء. للتقييم الدقيق، يُنصح بمعاينة متخصصة عبر جساس للتقييم."
+      : null;
+
     allPricings.set(key, {
       price_sar: Number(cached.price_sar),
       confidence: cached.confidence,
@@ -512,6 +516,7 @@ Deno.serve(async (req) => {
       source: cached.source,
       sources: cached.gemini_sources || [],
       price_range: cached.price_range,
+      disclaimer: cachedDisclaimer,
       from_cache: true,
     });
   }
