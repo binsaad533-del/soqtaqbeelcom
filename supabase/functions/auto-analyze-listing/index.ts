@@ -94,7 +94,41 @@ async function processListing(listingId: string, force: boolean) {
       }
     }
   }
-  const fileUrls: string[] = Array.from(fileUrlSet);
+
+  // إعادة تصنيف: الصور المرفوعة خطأً كمستندات تُنقل إلى photoUrls
+  const IMAGE_EXTS = /\.(jpg|jpeg|png|heic|heif|webp|gif|bmp|avif)(\?|$|#)/i;
+  const reclassifiedImages: string[] = [];
+  const trulyDocuments: string[] = [];
+  for (const url of fileUrlSet) {
+    if (IMAGE_EXTS.test(url)) {
+      reclassifiedImages.push(url);
+      photoUrlSet.add(url);
+    } else {
+      trulyDocuments.push(url);
+    }
+  }
+  const fileUrls: string[] = trulyDocuments;
+  // Rebuild photoUrls after reclassification
+  const photoUrlsFinal: string[] = Array.from(photoUrlSet);
+
+  console.log(`[auto-analyze:bg] reclassified ${reclassifiedImages.length} images from documents → photos`);
+  console.log(`[auto-analyze:bg] final: photoUrls=${photoUrlsFinal.length}, fileUrls=${fileUrls.length}`);
+
+  if (reclassifiedImages.length > 0) {
+    try {
+      await supabase.from("audit_logs").insert({
+        action: "images_reclassified_from_documents",
+        resource_type: "listing",
+        resource_id: listingId,
+        details: {
+          count: reclassifiedImages.length,
+          sample_urls: reclassifiedImages.slice(0, 3),
+        },
+      });
+    } catch (e) {
+      console.error("Failed to log reclassification:", e);
+    }
+  }
 
   // Step 1: Detect assets
   let combinedAssets = null;
