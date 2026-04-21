@@ -44,7 +44,17 @@ async function processListing(listingId: string, force: boolean) {
       },
       body: JSON.stringify(fnBody),
     });
-    return resp.json();
+    const text = await resp.text();
+    if (!resp.ok || !text) {
+      console.error(`[auto-analyze:bg] ${name} HTTP ${resp.status} bodyLen=${text.length} bodyPreview=${text.slice(0, 300)}`);
+    }
+    if (!text) return { success: false, error: `empty response (status ${resp.status})` };
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error(`[auto-analyze:bg] ${name} JSON parse failed: ${(e as Error).message} bodyPreview=${text.slice(0, 300)}`);
+      return { success: false, error: `invalid JSON from ${name}` };
+    }
   };
 
   // Collect photo URLs (handle object {category:[...]}, array, or nested) + dedup
