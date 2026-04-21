@@ -312,6 +312,24 @@ const CreateListingPage = () => {
     return null;
   };
 
+  // Document types that must be PDF only — images uploaded here are real-world
+  // misclassifications (e.g., equipment photos placed under "السجل التجاري")
+  const PDF_ONLY_TYPES = new Set([
+    "السجل التجاري",
+    "عقد الإيجار",
+    "رخصة البلدية",
+    "رخصة الدفاع المدني",
+    "إفصاح الالتزامات",
+    "التراخيص ذات الصلة",
+    "إقرار البائع بشأن الالتزامات",
+  ]);
+
+  const isImageFile = (file: File): boolean => {
+    if (file.type.startsWith("image/")) return true;
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    return ["jpg", "jpeg", "png", "heic", "heif", "webp", "gif", "bmp", "avif"].includes(ext);
+  };
+
   const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !activeDocType) return;
     const id = await ensureListing();
@@ -320,7 +338,14 @@ const CreateListingPage = () => {
     const files = Array.from(e.target.files);
     const urls: string[] = [];
     const verifierType = getVerifierType(activeDocType);
+    const isPdfOnlyField = PDF_ONLY_TYPES.has(activeDocType);
+    const imagesToReroute: File[] = [];
     for (const file of files) {
+      // Block images on PDF-only fields & queue them for auto-routing
+      if (isPdfOnlyField && isImageFile(file)) {
+        imagesToReroute.push(file);
+        continue;
+      }
       const validation = validateDocFile(file);
       if (!validation.valid) { toast.error(validation.error); continue; }
       const safeFolder = activeDocType.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "") || "general";
@@ -342,7 +367,6 @@ const CreateListingPage = () => {
             const detected = payload.document_type_detected || "غير معروف";
             const reason = payload.rejection_reason || payload.error || "الملف لا يطابق نوع الحقل.";
             toast.error(`❌ تم رفض "${file.name}" — لا يطابق "${activeDocType}"\nنوع الملف المكتشف: ${detected}\nالسبب: ${reason}`, { duration: 9000 });
-            // Do not add invalid file to the list
             continue;
           }
           toast.success(`✓ تم التحقق من "${file.name}" — يطابق "${activeDocType}"`);
@@ -355,6 +379,30 @@ const CreateListingPage = () => {
       }
       urls.push(result.url);
     }
+
+    // Notify user about rejected images & offer auto-routing
+    if (imagesToReroute.length > 0) {
+      toast.error(
+        `حقل "${activeDocType}" يقبل PDF فقط. تم رفض ${imagesToReroute.length} صورة.\nلرفع صور المعدات استخدم حقل "صور المعدات" أو الرفع الجماعي.`,
+        {
+          duration: 10000,
+          action: {
+            label: "نقل تلقائي إلى صور المعدات",
+            onClick: async () => {
+              try {
+                const dt = new DataTransfer();
+                imagesToReroute.forEach((f) => dt.items.add(f));
+                await handlePhotoUploadForGroup(dt.files, "equipment");
+              } catch (err) {
+                console.error("auto-reroute failed", err);
+                toast.error("تعذّر نقل الصور تلقائياً.");
+              }
+            },
+          },
+        }
+      );
+    }
+
     if (urls.length === 0) { setSaving(false); e.target.value = ""; return; }
     setUploadedDocs((prev) => ({ ...prev, [activeDocType]: [...(prev[activeDocType] || []), ...urls] }));
     const allDocs = { ...uploadedDocs, [activeDocType]: [...(uploadedDocs[activeDocType] || []), ...urls] };
