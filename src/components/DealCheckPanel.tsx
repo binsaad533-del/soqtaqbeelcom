@@ -492,6 +492,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                 <p className={cn("text-lg font-medium", ratingStyle.text)}>{analysis.rating}</p>
               </div>
 
+              {/* Inventory Pricing Section (from price-assets) */}
+              <InventoryPricingSection listing={listing} />
+
               {/* Trust Score Section */}
               {trustScore && (
                 <TrustScoreSection trustScore={trustScore} />
