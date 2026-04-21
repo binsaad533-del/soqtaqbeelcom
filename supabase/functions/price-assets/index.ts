@@ -352,8 +352,8 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
   } else if (medianAlibaba > 0) {
     const multiplier = getUsedDiscount(asset.condition, category);
     recommendedPrice = Math.round(medianAlibaba * multiplier);
-    confidence = alibabaPrices.length >= 3 ? "متوسط" : "منخفض";
-    reasoning = `${medianAlibaba} ر.س (من Alibaba) × ${Math.round(multiplier * 100)}%`;
+    confidence = "منخفض"; // دائماً منخفض لـ Alibaba بسبب عدم دقة السوق المحلي
+    reasoning = `${medianAlibaba} ر.س (من Alibaba) × ${Math.round(multiplier * 100)}% — سعر تقديري من مصادر عالمية`;
     source = "alibaba_fallback";
     priceRange = { min: Math.min(...alibabaPrices), max: Math.max(...alibabaPrices) };
   } else {
