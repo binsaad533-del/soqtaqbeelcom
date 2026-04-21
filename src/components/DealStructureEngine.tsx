@@ -94,7 +94,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
       <div>
         <h2 className="font-medium mb-1">هيكل الصفقة</h2>
         <p className="text-sm text-muted-foreground">
-          اختر نوع أو أكثر من أنواع الصفقة — يمكنك تقديم خيارات بديلة للمشتري
+          اختر نوع أو أكثر من أنواع الصفقة — يمكنك تقديم أكثر من خيار للمشتري
         </p>
       </div>
 
