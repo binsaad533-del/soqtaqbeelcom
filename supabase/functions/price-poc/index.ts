@@ -3,41 +3,27 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// قائمة الدومينات السعودية المعتمدة
-const APPROVED_SA_DOMAINS = [
-  "sa.opensooq.com",
-  "haraj.com.sa",
-  "extra.com",
-  "saco.sa",
-  "aptools.sa",
-  "arabiatools.com",
-  "carrefourksa.com",
-  "iffstore.com",
-  "noon.com",
-  "amazon.sa",
-  "kanbkam.com",
-  "toyota.com.sa",
-  "arabwheels.sa",
-  "ksa.yallamotor.com",
-  "syarah.com",
-  "motory.com",
-  "dubizzle.com.sa",
-  "microless.com",
-  "saudi.microless.com",
-  "chinesecars.me",
-  "carsvid.com",
-];
-
-// دومينات مرفوضة صراحة (عملات مختلفة)
-const REJECTED_DOMAINS = [
+// قائمة سوداء صريحة فقط (عملات مختلفة)
+const BLACKLISTED_DOMAINS = [
   "ye.opensooq.com", "om.opensooq.com", "eg.opensooq.com",
   "jo.opensooq.com", "lb.opensooq.com", "iq.opensooq.com",
   "sy.opensooq.com", "ae.dubizzle.com", "uae.dubizzle.com",
   "qa.opensooq.com", "bh.opensooq.com", "kw.opensooq.com",
+  "ly.opensooq.com", "ps.opensooq.com", "dz.opensooq.com",
+  "ma.opensooq.com", "tn.opensooq.com", "sd.opensooq.com",
 ];
 
-// Alibaba مقبول فقط كـ fallback للمعدات الصناعية
-const INDUSTRIAL_FALLBACK_DOMAINS = ["alibaba.com", "made-in-china.com"];
+// دومينات دولية مقبولة كـ fallback للصناعي فقط
+const INDUSTRIAL_FALLBACK_DOMAINS = [
+  "alibaba.com", "made-in-china.com", "arabic.alibaba.com",
+  "sa.made-in-china.com", "ar.made-in-china.com",
+];
+
+// Social media / غير متاجر
+const NON_COMMERCIAL_DOMAINS = [
+  "instagram.com", "facebook.com", "youtube.com", "tiktok.com",
+  "twitter.com", "x.com", "linkedin.com", "pinterest.com",
+];
 
 const TEST_ASSETS = [
   { name: "منشار دائري ماكيتا 5800NB", brand: "Makita", model: "5800NB", condition: "مستعمل", category: "power_tool" },
@@ -50,15 +36,11 @@ const TEST_ASSETS = [
   { name: "لوحة تحكم لآلة خياطة صناعية", brand: null, model: null, condition: "جيد", category: "unclear" },
 ];
 
-// فحص إذا الأصل غامض (بدون ماركة ووصف غير محدد)
 function isVagueAsset(asset: any): boolean {
   if (asset.brand && asset.model) return false;
   const name = asset.name.toLowerCase();
-  // كلمات محددة تكفي
-  const specificTerms = ["حصان", "hp", "cnc", "كيلو واط", "kw", "لتر", "liter", "متر", "mm", "سكرو", "راوتر", "صناعي"];
-  const hasSpecifics = specificTerms.some(t => name.includes(t));
-  if (!hasSpecifics) return true;
-  return false;
+  const specificTerms = ["حصان", "hp", "cnc", "كيلو واط", "kw", "لتر", "liter", "مم", "mm", "سكرو", "راوتر", "صناعي"];
+  return !specificTerms.some(t => name.includes(t));
 }
 
 function buildSearchQueries(asset: any): Array<{query: string, type: string}> {
@@ -67,16 +49,15 @@ function buildSearchQueries(asset: any): Array<{query: string, type: string}> {
 
   if (hasModel) {
     queries.push({ query: `${asset.brand} ${asset.model} سعر السعودية`, type: "new_ksa" });
-    queries.push({ query: `${asset.brand} ${asset.model} مستعمل site:opensooq.com OR site:haraj.com.sa OR site:dubizzle.com.sa`, type: "used_site" });
+    queries.push({ query: `${asset.brand} ${asset.model} مستعمل السعودية`, type: "used_ksa" });
   } else {
     queries.push({ query: `${asset.name} سعر السعودية`, type: "new_ksa" });
-    queries.push({ query: `${asset.name} مستعمل site:opensooq.com OR site:haraj.com.sa OR site:dubizzle.com.sa`, type: "used_site" });
+    queries.push({ query: `${asset.name} مستعمل السعودية`, type: "used_ksa" });
   }
 
-  // Alibaba fallback فقط للمعدات الصناعية
   if (asset.category === "industrial_machine" || asset.category === "industrial_equipment") {
     const q = hasModel ? `${asset.brand} ${asset.model}` : asset.name;
-    queries.push({ query: `${q} industrial machinery price`, type: "alibaba_fallback" });
+    queries.push({ query: `${q} industrial machinery price USD`, type: "alibaba_fallback" });
   }
 
   return queries;
@@ -97,18 +78,48 @@ function extractDomain(url: string): string {
   catch { return "unknown"; }
 }
 
-// فحص هل الدومين مقبول
-function isDomainAllowed(domain: string, queryType: string): { allowed: boolean, reason: string } {
-  if (REJECTED_DOMAINS.some(d => domain.includes(d))) {
-    return { allowed: false, reason: "دومين مرفوض (عملة مختلفة)" };
+// فحص ذكي: هل هذه النتيجة من سياق سعودي؟
+function detectSaudiContext(
+  item: any,
+  queryType: string
+): { isSaudi: boolean, score: number, signals: string[] } {
+  const signals: string[] = [];
+  let score = 0;
+
+  const domain = extractDomain(item.link || "");
+  const url = (item.link || "").toLowerCase();
+  const text = `${item.title || ""} ${item.snippet || ""}`.toLowerCase();
+
+  // إشارات قوية (+3 نقاط)
+  if (domain.endsWith(".sa") || domain.endsWith(".com.sa")) {
+    score += 3; signals.push("TLD سعودي");
   }
-  if (queryType === "alibaba_fallback") {
-    const isIndustrial = INDUSTRIAL_FALLBACK_DOMAINS.some(d => domain.includes(d));
-    if (isIndustrial) return { allowed: true, reason: "alibaba (مقبول للصناعي)" };
+  if (url.includes("/sa/") || url.includes("/ar-sa/") || url.includes("/saudi-arabia/") || url.includes("ksa/")) {
+    score += 3; signals.push("مسار سعودي");
   }
-  const isSA = APPROVED_SA_DOMAINS.some(d => domain.includes(d));
-  if (isSA) return { allowed: true, reason: "دومين سعودي معتمد" };
-  return { allowed: false, reason: "دومين غير معتمد" };
+  if (domain.includes("saudi") || domain.includes("ksa")) {
+    score += 3; signals.push("اسم دومين سعودي");
+  }
+
+  // إشارات متوسطة (+2 نقاط)
+  if (text.match(/ريال|ر\.?س|sar|sr\s+\d/i)) {
+    score += 2; signals.push("عملة ريال");
+  }
+  if (text.match(/السعودية|الرياض|جدة|الدمام|المملكة العربية|المملكه/)) {
+    score += 2; signals.push("ذكر سعودي صريح");
+  }
+
+  // إشارات سلبية
+  if (BLACKLISTED_DOMAINS.some(d => domain.includes(d))) {
+    return { isSaudi: false, score: -10, signals: ["قائمة سوداء (عملة مختلفة)"] };
+  }
+  if (NON_COMMERCIAL_DOMAINS.some(d => domain.includes(d))) {
+    return { isSaudi: false, score: -5, signals: ["موقع اجتماعي"] };
+  }
+
+  // الحد الأدنى للقبول
+  const isSaudi = score >= 2;
+  return { isSaudi, score, signals };
 }
 
 function extractPricesFromText(text: string): number[] {
@@ -151,46 +162,71 @@ function extractUSDPrices(text: string): number[] {
 
 function analyzeSearchResults(serperResult: any, queryType: string) {
   const organic = serperResult?.organic || [];
-  const extractedPrices: any[] = [];
+  const acceptedPrices: any[] = [];
   const rejectedItems: any[] = [];
 
   for (const item of organic) {
     const domain = extractDomain(item.link || "");
-    const domainCheck = isDomainAllowed(domain, queryType);
 
-    if (!domainCheck.allowed) {
-      rejectedItems.push({ domain, reason: domainCheck.reason, title: item.title });
+    // قائمة سوداء صريحة
+    if (BLACKLISTED_DOMAINS.some(d => domain.includes(d))) {
+      rejectedItems.push({ domain, reason: "قائمة سوداء - عملة مختلفة", title: item.title });
+      continue;
+    }
+
+    // مواقع اجتماعية
+    if (NON_COMMERCIAL_DOMAINS.some(d => domain.includes(d))) {
+      rejectedItems.push({ domain, reason: "موقع اجتماعي", title: item.title });
+      continue;
+    }
+
+    // للـ alibaba fallback: نقبل الصناعي فقط
+    if (queryType === "alibaba_fallback") {
+      const isIndustrial = INDUSTRIAL_FALLBACK_DOMAINS.some(d => domain.includes(d));
+      if (!isIndustrial) {
+        rejectedItems.push({ domain, reason: "ليس alibaba/made-in-china", title: item.title });
+        continue;
+      }
+      const combinedText = `${item.title || ""} ${item.snippet || ""}`;
+      const usdPrices = extractUSDPrices(combinedText);
+      for (const priceInSar of usdPrices) {
+        acceptedPrices.push({
+          price: priceInSar, source: domain, url: item.link || "",
+          title: item.title || "", snippet: item.snippet || "",
+          from: "organic_usd_converted", context_score: 10,
+          signals: ["alibaba fallback"],
+        });
+      }
+      continue;
+    }
+
+    // للاستعلامات السعودية: نفحص السياق
+    const context = detectSaudiContext(item, queryType);
+    if (!context.isSaudi) {
+      rejectedItems.push({
+        domain, reason: `لا سياق سعودي (score: ${context.score})`,
+        signals: context.signals, title: item.title,
+      });
       continue;
     }
 
     const combinedText = `${item.title || ""} ${item.snippet || ""}`;
     const sarPrices = extractPricesFromText(combinedText);
-
     for (const price of sarPrices) {
-      extractedPrices.push({
+      acceptedPrices.push({
         price, source: domain, url: item.link || "",
         title: item.title || "", snippet: item.snippet || "",
-        from: "organic_sar",
+        from: "organic_sar", context_score: context.score,
+        signals: context.signals,
       });
-    }
-
-    if (queryType === "alibaba_fallback") {
-      const usdPrices = extractUSDPrices(combinedText);
-      for (const priceInSar of usdPrices) {
-        extractedPrices.push({
-          price: priceInSar, source: domain, url: item.link || "",
-          title: item.title || "", snippet: item.snippet || "",
-          from: "organic_usd_converted",
-        });
-      }
     }
   }
 
   return {
     query_type: queryType,
     total_results: organic.length,
-    prices_found: extractedPrices.length,
-    extracted_prices: extractedPrices,
+    prices_found: acceptedPrices.length,
+    extracted_prices: acceptedPrices,
     rejected_count: rejectedItems.length,
     rejected_samples: rejectedItems.slice(0, 3),
   };
@@ -205,7 +241,6 @@ function calculateMedian(prices: number[]): number {
     : sorted[mid];
 }
 
-// خصومات مبسطة — 4 فئات فقط
 function getUsedDiscount(condition: string, category: string): number {
   if (category === "vehicle") {
     const v: any = { "جديد": 0.95, "شبه جديد": 0.85, "جيد": 0.70, "مستعمل": 0.60, "تالف": 0.35 };
@@ -215,12 +250,10 @@ function getUsedDiscount(condition: string, category: string): number {
     const i: any = { "جديد": 0.85, "شبه جديد": 0.70, "جيد": 0.55, "مستعمل": 0.45, "تالف": 0.25 };
     return i[condition] || 0.50;
   }
-  // power_tool وأي شيء غيره
   const p: any = { "جديد": 0.85, "شبه جديد": 0.75, "جيد": 0.65, "مستعمل": 0.55, "تالف": 0.30 };
   return p[condition] || 0.60;
 }
 
-// Sanity check: رفض الأسعار المستعملة أكبر من الجديد × 1.5
 function sanityFilterUsedPrices(usedPrices: number[], medianNew: number): number[] {
   if (medianNew <= 0) return usedPrices;
   const threshold = medianNew * 1.5;
@@ -251,7 +284,6 @@ Deno.serve(async (req) => {
       final_recommendation: null,
     };
 
-    // إذا الأصل غامض بدون ماركة، نسكب عن البحث
     if (isVagueAsset(asset)) {
       assetResult.final_recommendation = {
         price_sar: 0,
@@ -273,14 +305,13 @@ Deno.serve(async (req) => {
 
       const prices = analysis.extracted_prices.map((p: any) => p.price);
       if (q.type === "new_ksa") assetResult.all_prices_by_type.new.push(...prices);
-      else if (q.type === "used_site") assetResult.all_prices_by_type.used.push(...prices);
+      else if (q.type === "used_ksa") assetResult.all_prices_by_type.used.push(...prices);
       else if (q.type === "alibaba_fallback") assetResult.all_prices_by_type.alibaba.push(...prices);
     }
 
     const newPrices = assetResult.all_prices_by_type.new;
     const medianNew = calculateMedian(newPrices);
 
-    // Sanity check على أسعار المستعمل
     const rawUsedPrices = assetResult.all_prices_by_type.used;
     const usedPrices = sanityFilterUsedPrices(rawUsedPrices, medianNew);
     const rejectedUsedCount = rawUsedPrices.length - usedPrices.length;
@@ -298,20 +329,20 @@ Deno.serve(async (req) => {
     if (medianUsed > 0 && usedPrices.length >= 2) {
       recommendedPrice = medianUsed;
       confidence = usedPrices.length >= 3 ? "عالي" : "متوسط";
-      reasoning = `median من ${usedPrices.length} إعلان مستعمل (بعد تصفية ${rejectedUsedCount})`;
+      reasoning = `median من ${usedPrices.length} إعلان مستعمل (رُفض ${rejectedUsedCount})`;
       source = "used_market";
       priceRange = { min: Math.min(...usedPrices), max: Math.max(...usedPrices) };
     } else if (medianNew > 0) {
       const multiplier = getUsedDiscount(asset.condition, asset.category);
       recommendedPrice = Math.round(medianNew * multiplier);
-      confidence = newPrices.length >= 3 ? "متوسط" : "منخفض";
+      confidence = newPrices.length >= 5 ? "عالي" : newPrices.length >= 3 ? "متوسط" : "منخفض";
       reasoning = `${medianNew} ر.س جديد × ${multiplier} (${asset.condition}, ${asset.category})`;
       source = "new_with_discount";
       priceRange = { min: Math.min(...newPrices), max: Math.max(...newPrices) };
     } else if (medianAlibaba > 0) {
       const multiplier = getUsedDiscount(asset.condition, asset.category);
       recommendedPrice = Math.round(medianAlibaba * multiplier);
-      confidence = "منخفض";
+      confidence = alibabaPrices.length >= 3 ? "متوسط" : "منخفض";
       reasoning = `${medianAlibaba} ر.س من Alibaba × ${multiplier}`;
       source = "alibaba_fallback";
       priceRange = { min: Math.min(...alibabaPrices), max: Math.max(...alibabaPrices) };
@@ -323,15 +354,9 @@ Deno.serve(async (req) => {
 
     assetResult.final_recommendation = {
       price_sar: recommendedPrice,
-      confidence,
-      reasoning,
-      source,
-      median_new: medianNew,
-      median_used: medianUsed,
-      median_alibaba: medianAlibaba,
-      count_new: newPrices.length,
-      count_used: usedPrices.length,
-      count_alibaba: alibabaPrices.length,
+      confidence, reasoning, source,
+      median_new: medianNew, median_used: medianUsed, median_alibaba: medianAlibaba,
+      count_new: newPrices.length, count_used: usedPrices.length, count_alibaba: alibabaPrices.length,
       rejected_used_count: rejectedUsedCount,
       price_range: priceRange,
     };
@@ -339,10 +364,10 @@ Deno.serve(async (req) => {
     results.push(assetResult);
   }
 
-  // إحصائيات
   const covered = results.filter(r => r.final_recommendation.confidence !== "يتطلب_معاينة").length;
-  const inspectionOnly = results.filter(r => r.final_recommendation.confidence === "يتطلب_معاينة").length;
   const highConfidence = results.filter(r => r.final_recommendation.confidence === "عالي").length;
+  const mediumConfidence = results.filter(r => r.final_recommendation.confidence === "متوسط").length;
+  const inspectionOnly = results.filter(r => r.final_recommendation.confidence === "يتطلب_معاينة").length;
   const coveragePercent = Math.round((covered / results.length) * 100);
 
   return new Response(
@@ -354,6 +379,7 @@ Deno.serve(async (req) => {
         coverage_percent: coveragePercent,
         covered_assets: covered,
         high_confidence_assets: highConfidence,
+        medium_confidence_assets: mediumConfidence,
         requires_inspection: inspectionOnly,
       },
       results,
