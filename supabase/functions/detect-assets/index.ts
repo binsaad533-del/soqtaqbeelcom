@@ -195,6 +195,34 @@ async function downloadFileAsBase64(url: string): Promise<{ base64: string; mime
   }
 }
 
+// ---- AI fetch with timeout ----
+async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ---- Retry wrapper ----
+async function withRetry<T>(label: string, fn: () => Promise<T | null>): Promise<T | null> {
+  try {
+    const r = await fn();
+    if (r) return r;
+  } catch (e) {
+    console.error(`[${label}] attempt 1 failed:`, (e as Error).message);
+  }
+  await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+  try {
+    return await fn();
+  } catch (e) {
+    console.error(`[${label}] attempt 2 failed:`, (e as Error).message);
+    return null;
+  }
+}
+
 // ---- Image batch analysis ----
 async function analyzeImageBatch(
   urls: string[],
@@ -214,7 +242,8 @@ async function analyzeImageBatch(
     userContent.push({ type: "image_url", image_url: { url } });
   }
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const t0 = Date.now();
+  const response = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -230,11 +259,14 @@ async function analyzeImageBatch(
       tools: [ASSET_TOOL],
       tool_choice: { type: "function", function: { name: "report_detected_assets" } },
     }),
-  });
+  }, AI_CALL_TIMEOUT_MS);
+
+  const elapsed = Date.now() - t0;
+  console.log(`[detect-assets] image batch ${batchIndex + 1}/${totalBatches} (${urls.length} imgs) → HTTP ${response.status} in ${elapsed}ms`);
 
   if (!response.ok) {
     const t = await response.text();
-    console.error(`Image batch ${batchIndex} failed:`, response.status, t);
+    console.error(`Image batch ${batchIndex} failed:`, response.status, t.slice(0, 300));
     return null;
   }
 
@@ -244,7 +276,6 @@ async function analyzeImageBatch(
 
   try {
     const result = JSON.parse(toolCall.function.arguments);
-    // Tag each asset with source
     if (result.assets) {
       result.assets = result.assets.map((a: any) => ({ ...a, source: "image" }));
     }
