@@ -12,18 +12,41 @@ const AdminPriceTestPage = () => {
     setLoading(true);
     setResult("");
     setError("");
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
+
     try {
-      const { data, error } = await supabase.functions.invoke("price-poc");
-      if (error) {
-        setError(error.message || String(error));
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/price-poc`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const text = await response.text();
+        setError(`HTTP ${response.status}: ${text}`);
         toast.error("فشل التنفيذ");
-      } else {
-        setResult(JSON.stringify(data, null, 2));
-        toast.success("اكتمل الاختبار");
+        return;
       }
+
+      const data = await response.json();
+      setResult(JSON.stringify(data, null, 2));
+      toast.success("اكتمل الاختبار");
     } catch (e: any) {
-      setError(e?.message || String(e));
-      toast.error("خطأ غير متوقع");
+      clearTimeout(timeoutId);
+      if (e?.name === "AbortError") {
+        setError("انتهى وقت الانتظار (120 ثانية) — الدالة لم تستجب");
+        toast.error("Timeout 120s");
+      } else {
+        setError(e?.message || String(e));
+        toast.error("خطأ غير متوقع");
+      }
     } finally {
       setLoading(false);
     }
@@ -40,7 +63,7 @@ const AdminPriceTestPage = () => {
 
   return (
     <div className="container mx-auto max-w-5xl p-6 space-y-6">
-      <h1 className="text-2xl font-bold">اختبار تسعير الأصول V6 — Gemini 2.5 Pro كمحكّم</h1>
+      <h1 className="text-2xl font-bold">اختبار تسعير الأصول V6.2 — Gemini 2.5 Pro متوازي</h1>
 
       <Button
         onClick={runTest}
@@ -48,7 +71,7 @@ const AdminPriceTestPage = () => {
         size="lg"
         className="text-lg h-14 px-8"
       >
-        {loading ? "جاري التنفيذ... الرجاء الانتظار 40-60 ثانية" : "🚀 شغّل الاختبار"}
+        {loading ? "جاري التنفيذ بالتوازي... 15-30 ثانية (timeout 120s)" : "🚀 شغّل الاختبار"}
       </Button>
 
       {error && (

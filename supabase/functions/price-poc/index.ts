@@ -63,7 +63,7 @@ async function searchSerper(query: string, apiKey: string) {
     headers: { "X-API-KEY": apiKey, "Content-Type": "application/json" },
     body: JSON.stringify({ q: query, gl: "sa", hl: "ar", num: 10 }),
   });
-  if (!response.ok) return { error: `HTTP ${response.status}`, query };
+  if (!response.ok) return { error: `HTTP ${response.status}`, organic: [] };
   return await response.json();
 }
 
@@ -87,29 +87,24 @@ function basicFilter(organic: any[], queryType: string) {
       snippet: item.snippet || "",
       url: item.link || "",
       domain,
+      query_type: queryType,
     });
   }
   return candidates;
 }
 
-async function arbitrateWithGemini(
+async function arbitrateAssetWithGemini(
   asset: any,
-  candidates: any[],
-  queryType: string,
+  allCandidates: any[],
   apiKey: string
 ) {
-  if (candidates.length === 0) {
+  if (allCandidates.length === 0) {
     return { prices: [], reasoning: "لا توجد نتائج للفحص", raw_response: null };
   }
 
-  const candidatesText = candidates.map((c, i) =>
-    `[${i + 1}] الموقع: ${c.domain}\n    العنوان: ${c.title}\n    النص: ${c.snippet}`
+  const candidatesText = allCandidates.map((c, i) =>
+    `[${i + 1}] نوع البحث: ${c.query_type}\n    الموقع: ${c.domain}\n    العنوان: ${c.title}\n    النص: ${c.snippet}`
   ).join("\n\n");
-
-  const isAlibaba = queryType === "alibaba_fallback";
-  const currencyNote = isAlibaba 
-    ? "ملاحظة: النتائج من Alibaba/Made-in-China وأسعارها بالدولار. حوّل للريال بضرب 3.75."
-    : "ملاحظة: النتائج من السوق السعودي. قبول فقط الأسعار بالريال السعودي (ر.س، SAR، SR).";
 
   const systemPrompt = `أنت محكّم أسعار للسوق السعودي. مهمتك الوحيدة: اختيار الأسعار الموثوقة من نتائج بحث معطاة لك.
 
@@ -119,17 +114,17 @@ async function arbitrateWithGemini(
    - للمنتج المطلوب بالضبط (ليس منتج مشابه أو مختلف الموديل)
    - واضح أنها من السوق السعودي (ليس يمني/عماني/أردني إلخ)
    - معقولة (ليست رمزية أو إعلان مقطوع)
-3. إذا رأيت كلمة "قطر" في النص، ميّز:
-   - "قطر الدولة" → رفض النتيجة
-   - "قطر الدائرة/الأنبوب" (قياس) → اقبل
-4. إذا رأيت كلمة "عمان":
-   - "سلطنة عُمان/مسقط" → رفض
-   - "عمّان" (الأردن) → رفض
-   - لو مذكور كاسم منتج أو سياق مختلف → استخدم حكمك
-5. إذا لم تجد أي نتيجة موثوقة، أرجع مصفوفة فارغة. **الفراغ أفضل من الاختراع.**
-6. كل سعر تختاره يجب أن يرتبط برقم نتيجة [1..N] من القائمة المعطاة. لا ترجع أسعاراً من غير القائمة.
-
-${currencyNote}
+3. تمييز سياقي حاسم:
+   - "قطر الدولة" → رفض. "قطر الدائرة/الأنبوب" → اقبل
+   - "سلطنة عُمان/مسقط" → رفض. "عمّان الأردن" → رفض
+   - لو الكلمة تظهر كجزء من اسم المنتج أو قياس تقني → اقبل
+4. لنتائج نوع "alibaba_fallback": الأسعار بالدولار (حوّل للريال بضرب 3.75). اقبلها فقط كـ alibaba_source.
+5. لنتائج نوع "new_ksa" أو "used_ksa": يجب أن تكون بالريال السعودي.
+6. حدد لكل سعر:
+   - is_new: true إذا المنتج جديد (متجر تجزئة)
+   - is_new: false إذا المنتج مستعمل (إعلان من فرد أو قسم "مستعمل")
+   - source_type: "ksa_retail" أو "ksa_used" أو "alibaba"
+7. إذا لم تجد أي نتيجة موثوقة، أرجع selected_prices مصفوفة فارغة. **الفراغ أفضل من الاختراع.**
 
 **شكل الإجابة (JSON فقط بدون نص إضافي):**
 {
@@ -138,10 +133,13 @@ ${currencyNote}
       "candidate_index": 1,
       "price_sar": 199,
       "is_new": true,
+      "source_type": "ksa_retail",
       "reason": "Bosch GSB 570 جديد من extra.com بـ 199 ريال"
     }
   ],
-  "reasoning": "شرح مختصر للقرار العام"
+  "reasoning": "شرح مختصر للقرار العام",
+  "rejected_count": 5,
+  "rejected_reasons": "مثال: 3 نتائج من دول أخرى، 2 منتج مختلف"
 }`;
 
   const userPrompt = `الأصل المطلوب تسعيره:
@@ -149,14 +147,17 @@ ${currencyNote}
 ${asset.brand ? `- الماركة: ${asset.brand}` : ""}
 ${asset.model ? `- الموديل: ${asset.model}` : ""}
 - الحالة: ${asset.condition}
-- نوع البحث: ${queryType}
+- الفئة: ${asset.category}
 
-نتائج البحث:
+جميع نتائج البحث (من استعلامات متعددة):
 ${candidatesText}
 
-اختر الأسعار الموثوقة فقط. أرجع JSON.`;
+اختر الأسعار الموثوقة فقط من كل النتائج. أرجع JSON.`;
 
   try {
+    console.log(`[Gemini] بدء تحكيم: ${asset.name}`);
+    const startTime = Date.now();
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -173,6 +174,9 @@ ${candidatesText}
       }),
     });
 
+    const elapsed = Date.now() - startTime;
+    console.log(`[Gemini] انتهى تحكيم: ${asset.name} خلال ${elapsed}ms`);
+
     if (!response.ok) {
       const errText = await response.text();
       return { prices: [], reasoning: `خطأ Gemini: ${response.status}`, raw_response: errText };
@@ -180,9 +184,8 @@ ${candidatesText}
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
-    
     const cleaned = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
-    
+
     let parsed;
     try {
       parsed = JSON.parse(cleaned);
@@ -194,30 +197,35 @@ ${candidatesText}
     }
 
     if (!parsed || !Array.isArray(parsed.selected_prices)) {
-      return { prices: [], reasoning: "فشل في قراءة استجابة Gemini", raw_response: content };
+      return { prices: [], reasoning: "فشل قراءة استجابة Gemini", raw_response: content };
     }
 
     const enrichedPrices = parsed.selected_prices
       .filter((p: any) => typeof p.price_sar === "number" && p.price_sar > 0)
       .map((p: any) => {
-        const candidate = candidates[p.candidate_index - 1];
+        const candidate = allCandidates[p.candidate_index - 1];
         return {
           price: p.price_sar,
           is_new: p.is_new,
+          source_type: p.source_type || "unknown",
           reason: p.reason,
           source: candidate?.domain || "unknown",
           url: candidate?.url || "",
           title: candidate?.title || "",
           snippet: candidate?.snippet || "",
+          query_type: candidate?.query_type || "unknown",
         };
       });
 
     return {
       prices: enrichedPrices,
       reasoning: parsed.reasoning || "",
+      rejected_count: parsed.rejected_count || 0,
+      rejected_reasons: parsed.rejected_reasons || "",
       raw_response: content,
     };
   } catch (e: any) {
+    console.error(`[Gemini] خطأ: ${asset.name} - ${e.message}`);
     return { prices: [], reasoning: `خطأ: ${e.message}`, raw_response: null };
   }
 }
@@ -244,12 +252,129 @@ function getUsedDiscount(condition: string, category: string): number {
   return p[condition] || 0.60;
 }
 
+async function processAsset(asset: any, serperKey: string, lovableKey: string) {
+  const assetResult: any = {
+    asset_name: asset.name,
+    brand: asset.brand,
+    model: asset.model,
+    condition: asset.condition,
+    category: asset.category,
+    is_vague: isVagueAsset(asset),
+    searches: [],
+    gemini_verdict: null,
+    all_prices: { new: [], used: [], alibaba: [] },
+    final_recommendation: null,
+  };
+
+  if (isVagueAsset(asset)) {
+    assetResult.final_recommendation = {
+      price_sar: 0,
+      confidence: "يتطلب_معاينة",
+      reasoning: "أصل غامض بدون ماركة أو وصف محدد",
+      source: "vague_asset_skip",
+    };
+    return assetResult;
+  }
+
+  const queries = buildSearchQueries(asset);
+
+  console.log(`[Serper] ${asset.name}: بدء ${queries.length} استعلامات`);
+  const serperResults = await Promise.all(
+    queries.map(q => searchSerper(q.query, serperKey).then(r => ({ ...r, queryInfo: q })))
+  );
+  console.log(`[Serper] ${asset.name}: انتهت كل الاستعلامات`);
+
+  const allCandidates: any[] = [];
+  for (const sr of serperResults) {
+    const organic = sr?.organic || [];
+    const candidates = basicFilter(organic, sr.queryInfo.type);
+    allCandidates.push(...candidates);
+    assetResult.searches.push({
+      query: sr.queryInfo.query,
+      type: sr.queryInfo.type,
+      total_results: organic.length,
+      candidates_after_filter: candidates.length,
+    });
+  }
+
+  const verdict = await arbitrateAssetWithGemini(asset, allCandidates, lovableKey);
+
+  assetResult.gemini_verdict = {
+    total_candidates_sent: allCandidates.length,
+    selected_count: verdict.prices.length,
+    reasoning: verdict.reasoning,
+    rejected_count: verdict.rejected_count,
+    rejected_reasons: verdict.rejected_reasons,
+    prices: verdict.prices,
+  };
+
+  for (const p of verdict.prices) {
+    if (p.source_type === "alibaba") {
+      assetResult.all_prices.alibaba.push(p.price);
+    } else if (p.is_new) {
+      assetResult.all_prices.new.push(p.price);
+    } else {
+      assetResult.all_prices.used.push(p.price);
+    }
+  }
+
+  const newPrices = assetResult.all_prices.new;
+  const usedPrices = assetResult.all_prices.used;
+  const alibabaPrices = assetResult.all_prices.alibaba;
+
+  const medianNew = calculateMedian(newPrices);
+  const medianUsed = calculateMedian(usedPrices);
+  const medianAlibaba = calculateMedian(alibabaPrices);
+
+  let recommendedPrice = 0;
+  let confidence = "منخفض";
+  let reasoning = "";
+  let source = "";
+  let priceRange: any = null;
+
+  if (medianUsed > 0 && usedPrices.length >= 2) {
+    recommendedPrice = medianUsed;
+    confidence = usedPrices.length >= 3 ? "عالي" : "متوسط";
+    reasoning = `median من ${usedPrices.length} إعلان مستعمل (تحكيم Gemini)`;
+    source = "used_market_gemini";
+    priceRange = { min: Math.min(...usedPrices), max: Math.max(...usedPrices) };
+  } else if (medianNew > 0) {
+    const multiplier = getUsedDiscount(asset.condition, asset.category);
+    recommendedPrice = Math.round(medianNew * multiplier);
+    confidence = newPrices.length >= 5 ? "عالي" : newPrices.length >= 3 ? "متوسط" : "منخفض";
+    reasoning = `${medianNew} ر.س جديد × ${multiplier} (${asset.condition}, ${asset.category})`;
+    source = "new_with_discount_gemini";
+    priceRange = { min: Math.min(...newPrices), max: Math.max(...newPrices) };
+  } else if (medianAlibaba > 0) {
+    const multiplier = getUsedDiscount(asset.condition, asset.category);
+    recommendedPrice = Math.round(medianAlibaba * multiplier);
+    confidence = alibabaPrices.length >= 3 ? "متوسط" : "منخفض";
+    reasoning = `${medianAlibaba} ر.س من Alibaba × ${multiplier}`;
+    source = "alibaba_fallback_gemini";
+    priceRange = { min: Math.min(...alibabaPrices), max: Math.max(...alibabaPrices) };
+  } else {
+    confidence = "يتطلب_معاينة";
+    reasoning = "Gemini لم يجد أسعاراً موثوقة في النتائج";
+    source = "gemini_rejected_all";
+  }
+
+  assetResult.final_recommendation = {
+    price_sar: recommendedPrice,
+    confidence, reasoning, source,
+    median_new: medianNew, median_used: medianUsed, median_alibaba: medianAlibaba,
+    count_new: newPrices.length, count_used: usedPrices.length, count_alibaba: alibabaPrices.length,
+    price_range: priceRange,
+  };
+
+  return assetResult;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const SERPER_API_KEY = Deno.env.get("SERPER_API_KEY");
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  
+
   if (!SERPER_API_KEY) {
     return new Response(JSON.stringify({ error: "SERPER_API_KEY not configured" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -259,124 +384,18 @@ Deno.serve(async (req) => {
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
-  const results = [];
-  let totalSerperCalls = 0;
-  let totalGeminiCalls = 0;
+  const overallStart = Date.now();
+  console.log(`[V6.2] بدء معالجة ${TEST_ASSETS.length} أصول بالتوازي`);
 
-  for (const asset of TEST_ASSETS) {
-    const assetResult: any = {
-      asset_name: asset.name, brand: asset.brand, model: asset.model,
-      condition: asset.condition, category: asset.category,
-      is_vague: isVagueAsset(asset),
-      searches: [],
-      gemini_verdicts: [],
-      all_prices: { new: [], used: [], alibaba: [] },
-      final_recommendation: null,
-    };
+  const results = await Promise.all(
+    TEST_ASSETS.map(asset => processAsset(asset, SERPER_API_KEY, LOVABLE_API_KEY))
+  );
 
-    if (isVagueAsset(asset)) {
-      assetResult.final_recommendation = {
-        price_sar: 0,
-        confidence: "يتطلب_معاينة",
-        reasoning: "أصل غامض بدون ماركة أو وصف محدد",
-        source: "vague_asset_skip",
-      };
-      results.push(assetResult);
-      continue;
-    }
+  const totalElapsed = Date.now() - overallStart;
+  console.log(`[V6.2] انتهى خلال ${totalElapsed}ms`);
 
-    const queries = buildSearchQueries(asset);
-
-    for (const q of queries) {
-      const serperResult = await searchSerper(q.query, SERPER_API_KEY);
-      totalSerperCalls++;
-
-      const organic = serperResult?.organic || [];
-      const candidates = basicFilter(organic, q.type);
-      
-      assetResult.searches.push({
-        query: q.query,
-        type: q.type,
-        total_results: organic.length,
-        candidates_count: candidates.length,
-      });
-
-      if (candidates.length > 0) {
-        const verdict = await arbitrateWithGemini(asset, candidates, q.type, LOVABLE_API_KEY);
-        totalGeminiCalls++;
-        
-        assetResult.gemini_verdicts.push({
-          query_type: q.type,
-          selected_count: verdict.prices.length,
-          reasoning: verdict.reasoning,
-          prices: verdict.prices,
-        });
-
-        const prices = verdict.prices.map((p: any) => p.price);
-        if (q.type === "new_ksa") {
-          assetResult.all_prices.new.push(...prices);
-        } else if (q.type === "used_ksa") {
-          for (const p of verdict.prices) {
-            if (p.is_new) assetResult.all_prices.new.push(p.price);
-            else assetResult.all_prices.used.push(p.price);
-          }
-        } else if (q.type === "alibaba_fallback") {
-          assetResult.all_prices.alibaba.push(...prices);
-        }
-      }
-    }
-
-    const newPrices = assetResult.all_prices.new;
-    const usedPrices = assetResult.all_prices.used;
-    const alibabaPrices = assetResult.all_prices.alibaba;
-
-    const medianNew = calculateMedian(newPrices);
-    const medianUsed = calculateMedian(usedPrices);
-    const medianAlibaba = calculateMedian(alibabaPrices);
-
-    let recommendedPrice = 0;
-    let confidence = "منخفض";
-    let reasoning = "";
-    let source = "";
-    let priceRange: any = null;
-
-    if (medianUsed > 0 && usedPrices.length >= 2) {
-      recommendedPrice = medianUsed;
-      confidence = usedPrices.length >= 3 ? "عالي" : "متوسط";
-      reasoning = `median من ${usedPrices.length} إعلان مستعمل (اختيار Gemini)`;
-      source = "used_market_gemini";
-      priceRange = { min: Math.min(...usedPrices), max: Math.max(...usedPrices) };
-    } else if (medianNew > 0) {
-      const multiplier = getUsedDiscount(asset.condition, asset.category);
-      recommendedPrice = Math.round(medianNew * multiplier);
-      confidence = newPrices.length >= 5 ? "عالي" : newPrices.length >= 3 ? "متوسط" : "منخفض";
-      reasoning = `${medianNew} ر.س جديد × ${multiplier} (${asset.condition}, ${asset.category})`;
-      source = "new_with_discount_gemini";
-      priceRange = { min: Math.min(...newPrices), max: Math.max(...newPrices) };
-    } else if (medianAlibaba > 0) {
-      const multiplier = getUsedDiscount(asset.condition, asset.category);
-      recommendedPrice = Math.round(medianAlibaba * multiplier);
-      confidence = alibabaPrices.length >= 3 ? "متوسط" : "منخفض";
-      reasoning = `${medianAlibaba} ر.س من Alibaba × ${multiplier}`;
-      source = "alibaba_fallback_gemini";
-      priceRange = { min: Math.min(...alibabaPrices), max: Math.max(...alibabaPrices) };
-    } else {
-      confidence = "يتطلب_معاينة";
-      reasoning = "Gemini لم يجد أسعاراً موثوقة";
-      source = "gemini_rejected_all";
-    }
-
-    assetResult.final_recommendation = {
-      price_sar: recommendedPrice,
-      confidence, reasoning, source,
-      median_new: medianNew, median_used: medianUsed, median_alibaba: medianAlibaba,
-      count_new: newPrices.length, count_used: usedPrices.length, count_alibaba: alibabaPrices.length,
-      price_range: priceRange,
-    };
-
-    results.push(assetResult);
-  }
-
+  const totalSerperCalls = results.reduce((sum, r) => sum + (r.searches?.length || 0), 0);
+  const totalGeminiCalls = results.filter(r => !r.is_vague).length;
   const covered = results.filter(r => r.final_recommendation.confidence !== "يتطلب_معاينة").length;
   const highConfidence = results.filter(r => r.final_recommendation.confidence === "عالي").length;
   const mediumConfidence = results.filter(r => r.final_recommendation.confidence === "متوسط").length;
@@ -390,6 +409,7 @@ Deno.serve(async (req) => {
         total_serper_calls: totalSerperCalls,
         total_gemini_calls: totalGeminiCalls,
         estimated_serper_cost_usd: (totalSerperCalls * 0.001).toFixed(4),
+        execution_time_seconds: (totalElapsed / 1000).toFixed(1),
         coverage_percent: coveragePercent,
         covered_assets: covered,
         high_confidence_assets: highConfidence,
