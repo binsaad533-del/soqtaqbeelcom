@@ -370,6 +370,10 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
     is_new: p.is_new,
   }));
 
+  const disclaimer = source === "alibaba_fallback"
+    ? "سعر تقديري من مصادر عالمية (Alibaba) — قد يختلف عن السوق السعودي بسبب الشحن والجمارك والوسطاء. للتقييم الدقيق، يُنصح بمعاينة متخصصة عبر جساس للتقييم."
+    : null;
+
   return {
     price_sar: recommendedPrice,
     confidence,
@@ -377,6 +381,7 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
     source,
     sources,
     price_range: priceRange,
+    disclaimer,
   };
 }
 
