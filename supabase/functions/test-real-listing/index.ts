@@ -91,18 +91,23 @@ function normalizeAssetKey(asset: any): string {
 
 function buildSearchQueries(asset: any) {
   const queries = [];
-  const hasModel = asset.model && asset.brand;
   const name = asset.asset_name || asset.name;
+  const extractedBrand = asset.brand || extractBrandFromName(name);
+  const extractedModel = asset.model || extractModelFromName(name);
   const category = asset.category || "generic_equipment";
-  if (hasModel) {
-    queries.push({ query: `${asset.brand} ${asset.model} سعر السعودية`, type: "new_ksa" });
-    queries.push({ query: `${asset.brand} ${asset.model} مستعمل السعودية`, type: "used_ksa" });
+
+  const hasModelAndBrand = extractedBrand && extractedModel;
+  if (hasModelAndBrand) {
+    queries.push({ query: `${extractedBrand} ${extractedModel} سعر السعودية`, type: "new_ksa" });
+    queries.push({ query: `${extractedBrand} ${extractedModel} مستعمل السعودية`, type: "used_ksa" });
   } else {
     queries.push({ query: `${name} سعر السعودية`, type: "new_ksa" });
     queries.push({ query: `${name} مستعمل السعودية`, type: "used_ksa" });
   }
-  if (category === "industrial_machine" || category === "industrial_equipment") {
-    const q = hasModel ? `${asset.brand} ${asset.model}` : name;
+
+  if (category === "industrial_machine" || category === "industrial_equipment" ||
+      name.toLowerCase().includes("cnc") || name.toLowerCase().includes("صناعي")) {
+    const q = hasModelAndBrand ? `${extractedBrand} ${extractedModel}` : name;
     queries.push({ query: `${q} industrial machinery price USD`, type: "alibaba_fallback" });
   }
   return queries;
