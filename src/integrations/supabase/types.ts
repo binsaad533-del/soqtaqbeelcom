@@ -2919,6 +2919,25 @@ export type Database = {
           read_ct: number
         }[]
       }
+      vault_create_secret: {
+        Args: { p_description?: string; p_name: string; p_value: string }
+        Returns: string
+      }
+      vault_update_secret: {
+        Args: { p_id: string; p_value: string }
+        Returns: undefined
+      }
+      vault_upsert_secret: {
+        Args: { p_description?: string; p_name: string; p_value: string }
+        Returns: string
+      }
+      vault_verify_secrets: {
+        Args: never
+        Returns: {
+          length: number
+          name: string
+        }[]
+      }
     }
     Enums: {
       app_role:
