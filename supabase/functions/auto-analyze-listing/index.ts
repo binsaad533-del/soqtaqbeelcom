@@ -81,7 +81,6 @@ async function processListing(listingId: string, force: boolean) {
       console.log(`[auto-analyze:bg] photos field unexpected type=${typeof photosField}`);
     }
   }
-  const photoUrls: string[] = Array.from(photoUrlSet);
 
   // Collect file URLs + dedup
   const fileUrlSet = new Set<string>();
@@ -108,11 +107,11 @@ async function processListing(listingId: string, force: boolean) {
     }
   }
   const fileUrls: string[] = trulyDocuments;
-  // Rebuild photoUrls after reclassification
-  const photoUrlsFinal: string[] = Array.from(photoUrlSet);
+  // photoUrls built AFTER reclassification so re-routed images are included
+  const photoUrls: string[] = Array.from(photoUrlSet);
 
   console.log(`[auto-analyze:bg] reclassified ${reclassifiedImages.length} images from documents → photos`);
-  console.log(`[auto-analyze:bg] final: photoUrls=${photoUrlsFinal.length}, fileUrls=${fileUrls.length}`);
+  console.log(`[auto-analyze:bg] final: photoUrls=${photoUrls.length}, fileUrls=${fileUrls.length}`);
 
   if (reclassifiedImages.length > 0) {
     try {
