@@ -569,9 +569,13 @@ Deno.serve(async (req) => {
     };
   });
 
-  // 8) حفظ inventory المُحدّث
+  // 8) حفظ inventory المُحدّث + علامة الإنجاز
   await supabase.from("listings")
-    .update({ inventory: updatedInventory })
+    .update({
+      inventory: updatedInventory,
+      pricing_status: "completed",
+      pricing_completed_at: new Date().toISOString(),
+    })
     .eq("id", listing_id);
 
   // 9) إحصائيات
@@ -606,4 +610,12 @@ Deno.serve(async (req) => {
     }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
+  } catch (err: any) {
+    console.error("price-assets error:", err);
+    await markFailed();
+    return new Response(
+      JSON.stringify({ error: "Internal error", details: err?.message || String(err) }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
 });
