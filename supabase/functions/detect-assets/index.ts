@@ -295,6 +295,21 @@ async function analyzeFileBatch(
 ): Promise<any> {
   if (fileUrls.length === 0) return null;
 
+  // Defense-in-depth: filter out image URLs that may have leaked from documents
+  const skippedImages: string[] = [];
+  const realFiles = fileUrls.filter((url) => {
+    if (IMAGE_EXT_RE.test(url)) {
+      skippedImages.push(url);
+      return false;
+    }
+    return true;
+  });
+  if (skippedImages.length > 0) {
+    console.log(`[detect-assets] analyzeFileBatch: skipped ${skippedImages.length} image URLs leaked into fileUrls (sample=${skippedImages[0]})`);
+  }
+  if (realFiles.length === 0) return null;
+  fileUrls = realFiles;
+
   // Download and process each file
   const fileContents: Array<{ name: string; content: any }> = [];
   const textParts: string[] = [];
