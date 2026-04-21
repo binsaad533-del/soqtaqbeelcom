@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,8 +7,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const IMAGE_BATCH_SIZE = 10;
+// ---- Performance & limits ----
+const IMAGE_BATCH_SIZE = 6;          // smaller batches → faster individual call
 const FILE_BATCH_SIZE = 5;
+const IMAGE_CONCURRENCY = 3;         // 3 batches in parallel
+const FILE_CONCURRENCY = 2;
+const MAX_PHOTOS = 30;
+const MAX_FILES = 10;
+const AI_CALL_TIMEOUT_MS = 130_000;  // safety cutoff per AI call
+const RETRY_DELAY_MS = 2_000;
 
 const IMAGE_SYSTEM_PROMPT = `أنت مُثمّن أصول خبير في السوق السعودي والخليجي. مهمتك تحليل صور إعلانات التقبيل واكتشاف الأصول مع تقدير قيمتها السوقية.
 
@@ -187,6 +195,34 @@ async function downloadFileAsBase64(url: string): Promise<{ base64: string; mime
   }
 }
 
+// ---- AI fetch with timeout ----
+async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ---- Retry wrapper ----
+async function withRetry<T>(label: string, fn: () => Promise<T | null>): Promise<T | null> {
+  try {
+    const r = await fn();
+    if (r) return r;
+  } catch (e) {
+    console.error(`[${label}] attempt 1 failed:`, (e as Error).message);
+  }
+  await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+  try {
+    return await fn();
+  } catch (e) {
+    console.error(`[${label}] attempt 2 failed:`, (e as Error).message);
+    return null;
+  }
+}
+
 // ---- Image batch analysis ----
 async function analyzeImageBatch(
   urls: string[],
@@ -206,7 +242,8 @@ async function analyzeImageBatch(
     userContent.push({ type: "image_url", image_url: { url } });
   }
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const t0 = Date.now();
+  const response = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -222,11 +259,14 @@ async function analyzeImageBatch(
       tools: [ASSET_TOOL],
       tool_choice: { type: "function", function: { name: "report_detected_assets" } },
     }),
-  });
+  }, AI_CALL_TIMEOUT_MS);
+
+  const elapsed = Date.now() - t0;
+  console.log(`[detect-assets] image batch ${batchIndex + 1}/${totalBatches} (${urls.length} imgs) → HTTP ${response.status} in ${elapsed}ms`);
 
   if (!response.ok) {
     const t = await response.text();
-    console.error(`Image batch ${batchIndex} failed:`, response.status, t);
+    console.error(`Image batch ${batchIndex} failed:`, response.status, t.slice(0, 300));
     return null;
   }
 
@@ -236,7 +276,6 @@ async function analyzeImageBatch(
 
   try {
     const result = JSON.parse(toolCall.function.arguments);
-    // Tag each asset with source
     if (result.assets) {
       result.assets = result.assets.map((a: any) => ({ ...a, source: "image" }));
     }
@@ -300,7 +339,8 @@ async function analyzeFileBatch(
     userContent.push(fc.content);
   }
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const t0 = Date.now();
+  const response = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -316,11 +356,13 @@ async function analyzeFileBatch(
       tools: [ASSET_TOOL],
       tool_choice: { type: "function", function: { name: "report_detected_assets" } },
     }),
-  });
+  }, AI_CALL_TIMEOUT_MS);
+
+  console.log(`[detect-assets] file batch (${fileContents.length + textParts.length} items) → HTTP ${response.status} in ${Date.now() - t0}ms`);
 
   if (!response.ok) {
     const t = await response.text();
-    console.error("File analysis failed:", response.status, t);
+    console.error("File analysis failed:", response.status, t.slice(0, 300));
     return null;
   }
 
@@ -1043,17 +1085,38 @@ E) جودة الوسائط (15%): عدد الصور وتغطيتها (المست
   }
 }
 
+// ---- Run async tasks with bounded concurrency ----
+async function runWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T, index: number) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let cursor = 0;
+  const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (true) {
+      const i = cursor++;
+      if (i >= items.length) return;
+      results[i] = await worker(items[i], i);
+    }
+  });
+  await Promise.all(runners);
+  return results;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startedAt = Date.now();
+
   try {
-    const { photoUrls, fileUrls, businessActivity, dealPrice, listingData, manualInventory } = await req.json();
+    const { photoUrls, fileUrls, businessActivity, dealPrice, listingData, manualInventory, listingId } =
+      await req.json();
 
     const hasPhotos = Array.isArray(photoUrls) && photoUrls.length > 0;
     const hasFiles = Array.isArray(fileUrls) && fileUrls.length > 0;
-    // FIX: also accept manual inventory from listingData as a valid source
     const inventoryFromListing = Array.isArray(listingData?.inventory) ? listingData.inventory : [];
     const hasManual =
       (Array.isArray(manualInventory) && manualInventory.length > 0) ||
@@ -1074,27 +1137,80 @@ serve(async (req) => {
       );
     }
 
+    // Optional Supabase admin client for incremental writes
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const adminClient = (listingId && SUPABASE_URL && SERVICE_KEY)
+      ? createClient(SUPABASE_URL, SERVICE_KEY)
+      : null;
+
+    const writePartial = async (label: string, patch: Record<string, unknown>) => {
+      if (!adminClient || !listingId) return;
+      try {
+        const { error } = await adminClient.from("listings").update(patch).eq("id", listingId);
+        if (error) console.error(`[detect-assets] partial write (${label}) failed:`, error.message);
+        else console.log(`[detect-assets] partial write (${label}) OK`);
+      } catch (e) {
+        console.error(`[detect-assets] partial write (${label}) threw:`, (e as Error).message);
+      }
+    };
+
     const activity = businessActivity || "";
 
-    // --- IMAGE ANALYSIS: batch all images ---
-    let imageResult: any = null;
-    if (hasPhotos) {
-      const allPhotoUrls = photoUrls.filter((u: any) => typeof u === "string" && u.startsWith("http"));
-      const totalBatches = Math.ceil(allPhotoUrls.length / IMAGE_BATCH_SIZE);
-      const batchResults: any[] = [];
+    // --- Apply hard caps with truncation flags ---
+    const allPhotoUrls = hasPhotos
+      ? (photoUrls as any[]).filter((u) => typeof u === "string" && u.startsWith("http"))
+      : [];
+    const photosTruncated = allPhotoUrls.length > MAX_PHOTOS;
+    const usedPhotoUrls = photosTruncated ? allPhotoUrls.slice(0, MAX_PHOTOS) : allPhotoUrls;
 
+    const allFileUrls = hasFiles
+      ? (fileUrls as any[]).filter((u) => typeof u === "string" && u.startsWith("http"))
+      : [];
+    const filesTruncated = allFileUrls.length > MAX_FILES;
+    const usedFileUrls = filesTruncated ? allFileUrls.slice(0, MAX_FILES) : allFileUrls;
+
+    console.log(
+      `[detect-assets] start photos=${usedPhotoUrls.length}/${allPhotoUrls.length}` +
+      ` files=${usedFileUrls.length}/${allFileUrls.length} listingId=${listingId || "n/a"}` +
+      ` writes=${adminClient ? "incremental" : "final-only"}`
+    );
+
+    // --- IMAGE ANALYSIS: parallel batches with retry ---
+    let imageResult: any = null;
+    if (usedPhotoUrls.length > 0) {
+      const totalBatches = Math.ceil(usedPhotoUrls.length / IMAGE_BATCH_SIZE);
+      const batchSlices: string[][] = [];
       for (let i = 0; i < totalBatches; i++) {
-        const batch = allPhotoUrls.slice(i * IMAGE_BATCH_SIZE, (i + 1) * IMAGE_BATCH_SIZE);
-        const result = await analyzeImageBatch(batch, activity, i, totalBatches, LOVABLE_API_KEY);
-        if (result) batchResults.push(result);
-        if (i < totalBatches - 1) {
-          await new Promise(r => setTimeout(r, 1000));
-        }
+        batchSlices.push(usedPhotoUrls.slice(i * IMAGE_BATCH_SIZE, (i + 1) * IMAGE_BATCH_SIZE));
       }
 
-      if (batchResults.length > 0) {
-        const merged = mergeAndDeduplicate(batchResults);
-        const bestConfidence = batchResults.reduce((best: string, b: any) => {
+      // running aggregate so we can write after every completed batch
+      const completed: any[] = [];
+      let completedCount = 0;
+
+      const batchResults = await runWithConcurrency(batchSlices, IMAGE_CONCURRENCY, async (batch, i) => {
+        const result = await withRetry(`image-batch-${i + 1}`, () =>
+          analyzeImageBatch(batch, activity, i, totalBatches, LOVABLE_API_KEY)
+        );
+        completedCount++;
+        if (result) {
+          completed.push(result);
+          // Incremental write of currently-known assets
+          const partial = mergeAndDeduplicate(completed);
+          await writePartial(`images ${completedCount}/${totalBatches}`, {
+            ai_detected_assets: partial.assets,
+            ai_assets_combined: partial.assets,
+            ai_analysis_updated_at: new Date().toISOString(),
+          });
+        }
+        return result;
+      });
+
+      const successful = batchResults.filter(Boolean) as any[];
+      if (successful.length > 0) {
+        const merged = mergeAndDeduplicate(successful);
+        const bestConfidence = successful.reduce((best: string, b: any) => {
           if (b.confidence === "عالي") return "عالي";
           if (b.confidence === "متوسط" && best !== "عالي") return "متوسط";
           return best;
@@ -1106,37 +1222,54 @@ serve(async (req) => {
           detectedAt: new Date().toISOString(),
         };
       }
+      console.log(
+        `[detect-assets] images done in ${Date.now() - startedAt}ms` +
+        ` ok=${successful.length}/${totalBatches}`
+      );
     }
 
-    // --- FILE ANALYSIS: download, extract text, send to AI ---
+    // --- FILE ANALYSIS: parallel batches with retry ---
     let fileResult: any = null;
-    if (hasFiles) {
-      const validFileUrls = fileUrls.filter((u: any) => typeof u === "string" && u.startsWith("http"));
-      const fileBatchCount = Math.ceil(validFileUrls.length / FILE_BATCH_SIZE);
-      const fileBatchResults: any[] = [];
-
+    if (usedFileUrls.length > 0) {
+      const fileBatchCount = Math.ceil(usedFileUrls.length / FILE_BATCH_SIZE);
+      const fileSlices: string[][] = [];
       for (let i = 0; i < fileBatchCount; i++) {
-        const batch = validFileUrls.slice(i * FILE_BATCH_SIZE, (i + 1) * FILE_BATCH_SIZE);
-        const result = await analyzeFileBatch(batch, activity, LOVABLE_API_KEY);
-        if (result) fileBatchResults.push(result);
-        if (i < fileBatchCount - 1) await new Promise(r => setTimeout(r, 1500));
+        fileSlices.push(usedFileUrls.slice(i * FILE_BATCH_SIZE, (i + 1) * FILE_BATCH_SIZE));
       }
 
-      if (fileBatchResults.length > 0) {
-        fileResult = mergeAndDeduplicate(fileBatchResults);
+      const fileBatchResults = await runWithConcurrency(fileSlices, FILE_CONCURRENCY, (batch, i) =>
+        withRetry(`file-batch-${i + 1}`, () => analyzeFileBatch(batch, activity, LOVABLE_API_KEY))
+      );
+
+      const successful = fileBatchResults.filter(Boolean) as any[];
+      if (successful.length > 0) {
+        fileResult = mergeAndDeduplicate(successful);
         fileResult.detectedAt = new Date().toISOString();
-        fileResult.financialInfo = fileBatchResults
+        fileResult.financialInfo = successful
           .map((r: any) => r.financialInfo)
           .filter(Boolean)
           .join(" | ");
       }
+      console.log(
+        `[detect-assets] files done in ${Date.now() - startedAt}ms` +
+        ` ok=${successful.length}/${fileBatchCount}`
+      );
     }
 
-    // --- COMBINE (FIX 5: include manual inventory from listing or request) ---
+    // --- COMBINE ---
     const effectiveInventory = Array.isArray(manualInventory) && manualInventory.length > 0
       ? manualInventory
       : inventoryFromListing;
     const { combined, confidence } = combineResults(imageResult, fileResult, effectiveInventory);
+
+    // Incremental write after combine (covers files + manual)
+    if (combined?.assets?.length) {
+      await writePartial("combined", {
+        ai_detected_assets: combined.assets,
+        ai_assets_combined: combined.assets,
+        ai_analysis_updated_at: new Date().toISOString(),
+      });
+    }
 
     // --- VALUATION ---
     let priceAnalysis: any = null;
@@ -1155,6 +1288,10 @@ serve(async (req) => {
           typeof dealPrice === "number" ? dealPrice : null,
           confidence
         );
+        await writePartial("valuation", {
+          ai_price_analysis: priceAnalysis,
+          ai_analysis_updated_at: new Date().toISOString(),
+        });
       }
     }
 
@@ -1169,6 +1306,12 @@ serve(async (req) => {
         fileResult,
         LOVABLE_API_KEY
       );
+      if (trustScore) {
+        await writePartial("trust", {
+          ai_trust_score: trustScore,
+          ai_analysis_updated_at: new Date().toISOString(),
+        });
+      }
     }
 
     const output = {
@@ -1177,8 +1320,17 @@ serve(async (req) => {
       combined: { ...combined, confidence },
       priceAnalysis,
       trustScore,
+      truncated: photosTruncated || filesTruncated
+        ? {
+            photos: { used: usedPhotoUrls.length, total: allPhotoUrls.length },
+            files: { used: usedFileUrls.length, total: allFileUrls.length },
+          }
+        : null,
+      elapsedMs: Date.now() - startedAt,
       detectedAt: new Date().toISOString(),
     };
+
+    console.log(`[detect-assets] DONE in ${Date.now() - startedAt}ms`);
 
     return new Response(JSON.stringify({ success: true, detected: output }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
