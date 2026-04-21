@@ -10,12 +10,14 @@ const corsHeaders = {
 // ---- Performance & limits ----
 const IMAGE_BATCH_SIZE = 6;          // smaller batches → faster individual call
 const FILE_BATCH_SIZE = 5;
-const IMAGE_CONCURRENCY = 3;         // 3 batches in parallel
+const IMAGE_CONCURRENCY = 4;         // 4 batches in parallel (was 3)
 const FILE_CONCURRENCY = 2;
-const MAX_PHOTOS = 30;
-const MAX_FILES = 10;
+const MAX_PHOTOS = 120;              // raised from 30 to support real factories
+const MAX_FILES = 40;                // raised from 10
 const AI_CALL_TIMEOUT_MS = 130_000;  // safety cutoff per AI call
 const RETRY_DELAY_MS = 2_000;
+// Defense-in-depth: skip image URLs that leak into fileUrls
+const IMAGE_EXT_RE = /\.(jpg|jpeg|png|heic|heif|webp|gif|bmp|avif)(\?|$|#)/i;
 
 const IMAGE_SYSTEM_PROMPT = `أنت مُثمّن أصول خبير في السوق السعودي والخليجي. مهمتك تحليل صور إعلانات التقبيل واكتشاف الأصول مع تقدير قيمتها السوقية.
 
