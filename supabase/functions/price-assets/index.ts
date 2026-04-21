@@ -413,6 +413,23 @@ Deno.serve(async (req) => {
 
   const startTime = Date.now();
 
+  // وضع علامة "جاري التسعير"
+  await supabase.from("listings").update({
+    pricing_status: "in_progress",
+    pricing_started_at: new Date().toISOString(),
+  }).eq("id", listing_id);
+
+  // helper لتعليم الفشل عند أي خطأ مبكر/متأخر
+  const markFailed = async () => {
+    try {
+      await supabase.from("listings").update({
+        pricing_status: "failed",
+        pricing_completed_at: new Date().toISOString(),
+      }).eq("id", listing_id);
+    } catch (_) { /* ignore */ }
+  };
+
+  try {
   // 1) جلب الإعلان
   const { data: listing, error: listingError } = await supabase
     .from("listings")
@@ -421,6 +438,7 @@ Deno.serve(async (req) => {
     .single();
 
   if (listingError || !listing) {
+    await markFailed();
     return new Response(JSON.stringify({ error: "الإعلان غير موجود", details: listingError }),
       { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
@@ -441,6 +459,7 @@ Deno.serve(async (req) => {
   }
 
   if (rawAssets.length === 0) {
+    await markFailed();
     return new Response(JSON.stringify({ error: "لا توجد أصول لتسعيرها" }),
       { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
@@ -550,9 +569,13 @@ Deno.serve(async (req) => {
     };
   });
 
-  // 8) حفظ inventory المُحدّث
+  // 8) حفظ inventory المُحدّث + علامة الإنجاز
   await supabase.from("listings")
-    .update({ inventory: updatedInventory })
+    .update({
+      inventory: updatedInventory,
+      pricing_status: "completed",
+      pricing_completed_at: new Date().toISOString(),
+    })
     .eq("id", listing_id);
 
   // 9) إحصائيات
@@ -587,4 +610,12 @@ Deno.serve(async (req) => {
     }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
+  } catch (err: any) {
+    console.error("price-assets error:", err);
+    await markFailed();
+    return new Response(
+      JSON.stringify({ error: "Internal error", details: err?.message || String(err) }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
 });

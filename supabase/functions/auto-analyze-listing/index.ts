@@ -113,6 +113,21 @@ Deno.serve(async (req) => {
             ai_trust_score: assetResult.detected.trustScore || null,
             ai_analysis_updated_at: new Date().toISOString(),
           }).eq("id", listingId);
+
+          // استدعاء price-assets بشكل fire-and-forget (لا ننتظر النتيجة)
+          try {
+            fetch(`${supabaseUrl}/functions/v1/price-assets`, {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${serviceKey}`,
+                "apikey": anonKey,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ listing_id: listingId, force_refresh: false }),
+            }).catch(err => console.error("price-assets background call failed:", err));
+          } catch (e) {
+            console.error("Failed to trigger price-assets:", e);
+          }
         } else if (assetResult?.error) {
           console.error("detect-assets returned error:", assetResult.error);
         }
