@@ -413,6 +413,23 @@ Deno.serve(async (req) => {
 
   const startTime = Date.now();
 
+  // وضع علامة "جاري التسعير"
+  await supabase.from("listings").update({
+    pricing_status: "in_progress",
+    pricing_started_at: new Date().toISOString(),
+  }).eq("id", listing_id);
+
+  // helper لتعليم الفشل عند أي خطأ مبكر/متأخر
+  const markFailed = async () => {
+    try {
+      await supabase.from("listings").update({
+        pricing_status: "failed",
+        pricing_completed_at: new Date().toISOString(),
+      }).eq("id", listing_id);
+    } catch (_) { /* ignore */ }
+  };
+
+  try {
   // 1) جلب الإعلان
   const { data: listing, error: listingError } = await supabase
     .from("listings")
@@ -421,6 +438,7 @@ Deno.serve(async (req) => {
     .single();
 
   if (listingError || !listing) {
+    await markFailed();
     return new Response(JSON.stringify({ error: "الإعلان غير موجود", details: listingError }),
       { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
