@@ -47,34 +47,51 @@ async function processListing(listingId: string, force: boolean) {
     return resp.json();
   };
 
-  // Collect photo URLs
-  const photoUrls: string[] = [];
-  if (listing.photos && typeof listing.photos === "object") {
-    for (const urls of Object.values(listing.photos as Record<string, string[]>)) {
-      if (Array.isArray(urls)) {
-        for (const u of urls) {
-          if (typeof u === "string" && u.startsWith("http")) photoUrls.push(u);
+  // Collect photo URLs (handle object {category:[...]}, array, or nested) + dedup
+  const photoUrlSet = new Set<string>();
+  const photosField = listing.photos;
+  if (photosField) {
+    if (Array.isArray(photosField)) {
+      for (const u of photosField) {
+        if (typeof u === "string" && u.startsWith("http")) photoUrlSet.add(u);
+      }
+    } else if (typeof photosField === "object") {
+      for (const [key, urls] of Object.entries(photosField as Record<string, unknown>)) {
+        if (Array.isArray(urls)) {
+          for (const u of urls) {
+            if (typeof u === "string" && u.startsWith("http")) photoUrlSet.add(u);
+          }
+        } else if (typeof urls === "string" && (urls as string).startsWith("http")) {
+          photoUrlSet.add(urls as string);
+        } else {
+          console.log(`[auto-analyze:bg] photos.${key} unexpected type=${typeof urls}`);
         }
       }
+    } else {
+      console.log(`[auto-analyze:bg] photos field unexpected type=${typeof photosField}`);
     }
   }
+  const photoUrls: string[] = Array.from(photoUrlSet);
 
-  // Collect file URLs
-  const fileUrls: string[] = [];
+  // Collect file URLs + dedup
+  const fileUrlSet = new Set<string>();
   if (Array.isArray(listing.documents)) {
     for (const doc of listing.documents) {
       if (Array.isArray((doc as any)?.files)) {
         for (const url of (doc as any).files) {
-          if (typeof url === "string" && url.startsWith("http")) fileUrls.push(url);
+          if (typeof url === "string" && url.startsWith("http")) fileUrlSet.add(url);
         }
       }
     }
   }
+  const fileUrls: string[] = Array.from(fileUrlSet);
 
   // Step 1: Detect assets
   let combinedAssets = null;
   const manualInventory = Array.isArray(listing.inventory) ? listing.inventory : [];
   const hasAnyAssetSource = photoUrls.length > 0 || fileUrls.length > 0 || manualInventory.length > 0;
+
+  console.log(`[auto-analyze:bg] collected photoUrls=${photoUrls.length} fileUrls=${fileUrls.length} manualInventory=${manualInventory.length} photosType=${Array.isArray(photosField) ? 'array' : typeof photosField} hasAnyAssetSource=${hasAnyAssetSource}`);
 
   if (hasAnyAssetSource) {
     try {
