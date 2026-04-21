@@ -112,8 +112,27 @@ function buildSearchQueries(asset: any) {
 
   const category = asset.category;
   const nameLower = (asset.name || "").toLowerCase();
-  if (category === "industrial_machine" || category === "industrial_equipment" ||
-      nameLower.includes("cnc") || nameLower.includes("صناعي")) {
+  const brandLower = (asset.brand || "").toLowerCase();
+
+  // قائمة ماركات صناعية/متخصصة - لو الماركة منها، نفعّل Alibaba تلقائياً
+  const INDUSTRIAL_BRANDS = [
+    "جاك", "jack", "جوكي", "juki", "هواهوا", "huahua",
+    "sign-cnc", "sign cnc", "signcnc", "blue-mak", "bluemak"
+  ];
+
+  // كلمات تدل على أن الأصل صناعي/متخصص
+  const INDUSTRIAL_KEYWORDS = [
+    "cnc", "صناعي", "صناعية", "ماكينة", "خياطة", "تطريز", "سرفلة",
+    "مسمار", "سنون", "دعاسة", "مكبس", "تجميع حواف", "edge band"
+  ];
+
+  const isIndustrialCategory = category === "industrial_machine" ||
+                                category === "industrial_equipment" ||
+                                category === "sewing_machine";
+  const isIndustrialBrand = INDUSTRIAL_BRANDS.some(b => brandLower.includes(b.toLowerCase()));
+  const hasIndustrialKeyword = INDUSTRIAL_KEYWORDS.some(k => nameLower.includes(k));
+
+  if (isIndustrialCategory || isIndustrialBrand || hasIndustrialKeyword) {
     const q = hasModelAndBrand ? `${asset.brand} ${asset.model}` : asset.name;
     queries.push({ query: `${q} industrial machinery price USD`, type: "alibaba_fallback" });
   }
