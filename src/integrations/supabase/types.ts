@@ -1555,6 +1555,9 @@ export type Database = {
           owner_id: string
           photos: Json | null
           price: number | null
+          pricing_completed_at: string | null
+          pricing_started_at: string | null
+          pricing_status: string | null
           primary_deal_type: string | null
           published_at: string | null
           renew_count: number
@@ -1611,6 +1614,9 @@ export type Database = {
           owner_id: string
           photos?: Json | null
           price?: number | null
+          pricing_completed_at?: string | null
+          pricing_started_at?: string | null
+          pricing_status?: string | null
           primary_deal_type?: string | null
           published_at?: string | null
           renew_count?: number
@@ -1667,6 +1673,9 @@ export type Database = {
           owner_id?: string
           photos?: Json | null
           price?: number | null
+          pricing_completed_at?: string | null
+          pricing_started_at?: string | null
+          pricing_status?: string | null
           primary_deal_type?: string | null
           published_at?: string | null
           renew_count?: number
