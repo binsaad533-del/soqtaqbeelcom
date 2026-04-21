@@ -40,7 +40,7 @@ const AdminPriceTestPage = () => {
 
   return (
     <div className="container mx-auto max-w-5xl p-6 space-y-6">
-      <h1 className="text-2xl font-bold">اختبار تسعير الأصول V5 — قبول ذكي بالريال</h1>
+      <h1 className="text-2xl font-bold">اختبار تسعير الأصول V6 — Gemini 2.5 Pro كمحكّم</h1>
 
       <Button
         onClick={runTest}
@@ -48,7 +48,7 @@ const AdminPriceTestPage = () => {
         size="lg"
         className="text-lg h-14 px-8"
       >
-        {loading ? "جاري التنفيذ... الرجاء الانتظار 15-20 ثانية" : "🚀 شغّل الاختبار"}
+        {loading ? "جاري التنفيذ... الرجاء الانتظار 40-60 ثانية" : "🚀 شغّل الاختبار"}
       </Button>
 
       {error && (
