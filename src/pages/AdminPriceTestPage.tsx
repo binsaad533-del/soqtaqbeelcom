@@ -48,7 +48,7 @@ const AdminPriceTestPage = () => {
         size="lg"
         className="text-lg h-14 px-8"
       >
-        {loading ? "جاري التنفيذ... الرجاء الانتظار 15-20 ثانية" : "🚀 شغّل الاختبار"}
+        {loading ? "جاري التنفيذ... الرجاء الانتظار 40-60 ثانية" : "🚀 شغّل الاختبار"}
       </Button>
 
       {error && (
