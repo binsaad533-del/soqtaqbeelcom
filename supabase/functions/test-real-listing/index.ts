@@ -24,11 +24,60 @@ const INDUSTRIAL_FALLBACK_DOMAINS = [
 
 const TARGET_LISTING_ID = "65df6840-c2ac-43d5-bc2e-6771f35acfbb";
 
+const KNOWN_BRANDS = [
+  "ماكيتا", "makita", "بوش", "bosch", "ريوبي", "ryobi", "توتال", "total",
+  "جاك", "jack", "هواهوا", "huahua", "جوكي", "juki",
+  "sign-cnc", "sign cnc", "signcnc", "blue-mak", "bluemak",
+  "dewalt", "ديوالت", "milwaukee", "ميلواكي", "stanley", "ستانلي",
+  "hilti", "هيلتي", "einhell", "اينهل"
+];
+
+function extractBrandFromName(name: string): string | null {
+  const lower = (name || "").toLowerCase();
+  for (const brand of KNOWN_BRANDS) {
+    if (lower.includes(brand.toLowerCase())) return brand;
+  }
+  return null;
+}
+
+function extractModelFromName(name: string): string | null {
+  if (!name) return null;
+  const patterns = [
+    /\b([A-Z]+-?\d+[A-Z]*-?\d*[A-Z]*)\b/,
+    /\b(GSB\s*\d+)\b/i,
+    /\b(\d{3,4}[A-Z]{1,3})\b/,
+    /\bموديل\s+([A-Z0-9-]+)/i,
+    /\bmodel\s+([A-Z0-9-]+)/i,
+  ];
+  for (const p of patterns) {
+    const match = name.match(p);
+    if (match) return match[1];
+  }
+  return null;
+}
+
 function isVagueAsset(asset: any): boolean {
-  if (asset.brand && asset.model) return false;
-  const name = (asset.asset_name || asset.name || "").toLowerCase();
-  const specificTerms = ["حصان", "hp", "cnc", "كيلو واط", "kw", "لتر", "liter", "مم", "mm", "سكرو", "راوتر", "صناعي", "فولت", "volt"];
-  return !specificTerms.some(t => name.includes(t));
+  const name = asset.asset_name || asset.name || "";
+  const extractedBrand = asset.brand || extractBrandFromName(name);
+  const extractedModel = asset.model || extractModelFromName(name);
+
+  if (extractedBrand && extractedModel) return false;
+
+  if (extractedBrand) {
+    const specificTerms = [
+      "منشار", "دريل", "مثقاب", "صنفرة", "راوتر", "خياطة", "تجميع",
+      "cnc", "حصان", "hp", "كيلو واط", "kw", "لتر", "liter", "مم", "mm",
+      "سكرو", "صناعي", "فولت", "volt"
+    ];
+    const hasSpecific = specificTerms.some(t => name.toLowerCase().includes(t.toLowerCase()));
+    if (hasSpecific) return false;
+  }
+
+  const lower = name.toLowerCase();
+  const technicalTerms = ["حصان", "hp", "cnc", "كيلو واط", "kw", "لتر", "liter", "مم", "mm", "سكرو", "راوتر", "صناعي"];
+  if (technicalTerms.some(t => lower.includes(t))) return false;
+
+  return true;
 }
 
 function normalizeAssetKey(asset: any): string {
