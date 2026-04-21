@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,8 +7,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const IMAGE_BATCH_SIZE = 10;
+// ---- Performance & limits ----
+const IMAGE_BATCH_SIZE = 6;          // smaller batches → faster individual call
 const FILE_BATCH_SIZE = 5;
+const IMAGE_CONCURRENCY = 3;         // 3 batches in parallel
+const FILE_CONCURRENCY = 2;
+const MAX_PHOTOS = 30;
+const MAX_FILES = 10;
+const AI_CALL_TIMEOUT_MS = 130_000;  // safety cutoff per AI call
+const RETRY_DELAY_MS = 2_000;
 
 const IMAGE_SYSTEM_PROMPT = `أنت مُثمّن أصول خبير في السوق السعودي والخليجي. مهمتك تحليل صور إعلانات التقبيل واكتشاف الأصول مع تقدير قيمتها السوقية.
 
