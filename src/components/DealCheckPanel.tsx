@@ -1046,13 +1046,30 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
   const isInProgress = pricingStatus === "in_progress";
   const hasNoAssets = inventory.length === 0;
 
-  // Calculate aggregates
-  const priced = inventory.filter((a) => a.pricing?.price_sar && a.pricing?.confidence !== "يتطلب_معاينة");
-  const requiresInspection = inventory.filter(
-    (a) => !a.pricing?.price_sar || a.pricing?.confidence === "يتطلب_معاينة"
+  // === Governance rule: only count assets with a REAL pricing.price_sar > 0 ===
+  // This excludes vague_asset_skip, no_results, and any unverified estimates.
+  const priced = inventory.filter(
+    (a) =>
+      typeof a.pricing?.price_sar === "number" &&
+      a.pricing.price_sar > 0 &&
+      a.pricing?.confidence !== "يتطلب_معاينة"
   );
-  const totalValue = priced.reduce((sum, a) => sum + (a.pricing?.price_sar || 0), 0);
+  const requiresInspection = inventory.filter(
+    (a) =>
+      !a.pricing ||
+      !a.pricing.price_sar ||
+      a.pricing.price_sar <= 0 ||
+      a.pricing.confidence === "يتطلب_معاينة" ||
+      a.pricing.source === "vague_asset_skip" ||
+      a.pricing.source === "no_results"
+  );
+  // Total = sum of REAL priced assets only — no fallback to estimated_unit_price_sar
+  const totalValue = priced.reduce(
+    (sum, a) => sum + (a.pricing?.price_sar || 0) * (a.quantity || 1),
+    0
+  );
   const inspectionCount = requiresInspection.length;
+  const pricedCount = priced.length;
   const statusInfo = PRICING_STATUS_LABEL[pricingStatus] || PRICING_STATUS_LABEL.idle;
 
   if (hasNoAssets && !isInProgress) return null;
@@ -1084,14 +1101,20 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
         </div>
       )}
 
-      {/* Summary + List (when not in progress, or even during, if we have prior data) */}
+      {/* Summary + List */}
       {!isInProgress && inventory.length > 0 && (
         <>
           {/* Summary cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             <div className="bg-muted/40 rounded-lg p-3 text-center">
               <div className="text-[10px] text-muted-foreground">إجمالي الأصول</div>
               <div className="text-lg font-semibold tabular-nums">{inventory.length}</div>
+            </div>
+            <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg p-3 text-center">
+              <div className="text-[10px] text-emerald-700 dark:text-emerald-300">أصول مُسعّرة</div>
+              <div className="text-lg font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
+                {pricedCount}
+              </div>
             </div>
             <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg p-3 text-center">
               <div className="text-[10px] text-emerald-700 dark:text-emerald-300">القيمة المُسعّرة</div>
@@ -1099,33 +1122,43 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
                 {totalValue.toLocaleString("en-US")} <span className="text-[10px] font-normal">ر.س</span>
               </div>
             </div>
-            <div className="bg-muted/40 rounded-lg p-3 text-center col-span-2 md:col-span-1">
-              <div className="text-[10px] text-muted-foreground">يتطلب معاينة</div>
-              <div className="text-lg font-semibold tabular-nums">
+            <div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3 text-center">
+              <div className="text-[10px] text-amber-700 dark:text-amber-300">يتطلب معاينة جساس</div>
+              <div className="text-lg font-semibold text-amber-700 dark:text-amber-300 tabular-nums">
                 {inspectionCount}
-                <span className="text-[10px] text-muted-foreground font-normal"> / {inventory.length}</span>
               </div>
             </div>
           </div>
 
-          {/* CTA when there are inspection items */}
+          {/* Jasaas certified valuation CTA */}
           {inspectionCount > 0 && (
-            <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 mb-3 flex items-center gap-3 flex-wrap">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <Search size={16} strokeWidth={1.5} className="text-primary shrink-0" />
-                <p className="text-xs leading-relaxed">
-                  <span className="font-medium">{inspectionCount}</span> {inspectionCount === 1 ? "أصل يحتاج" : "أصل بحاجة"} لمعاينة متخصصة للتقييم الدقيق.
-                </p>
+            <div className="rounded-xl border border-primary/30 bg-gradient-to-l from-primary/10 to-primary/5 p-4 mb-3">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center shrink-0 border border-primary/20">
+                  <ShieldCheck size={20} strokeWidth={1.5} className="text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h5 className="text-sm font-semibold mb-1">أصول تحتاج تقييماً معتمداً</h5>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    <span className="font-medium text-foreground">{inspectionCount}</span> أصل من إعلانك يحتاج معاينة ميدانية من مقيّم معتمد لتحديد قيمته السوقية الدقيقة.
+                  </p>
+                </div>
               </div>
-              <a
-                href={JASAAS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity shrink-0"
-              >
-                جساس للتقييم
-                <ExternalLink size={11} strokeWidth={1.8} />
-              </a>
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                  <ShieldCheck size={11} strokeWidth={1.6} />
+                  الهيئة السعودية للمقيمين المعتمدين (تقييم)
+                </span>
+                <a
+                  href={JASAAS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                >
+                  احجز معاينة مع جساس للتقييم المعتمد
+                  <ExternalLink size={12} strokeWidth={1.8} />
+                </a>
+              </div>
             </div>
           )}
 
@@ -1143,7 +1176,7 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
           </div>
 
           <p className="text-[10px] text-muted-foreground/70 text-center mt-2 leading-relaxed">
-            الأسعار تقديرية مبنية على أبحاث السوق الحالية. للتقييم الرسمي، يُنصح بالتعاون مع جهة تقييم معتمدة.
+            الأسعار المعروضة مبنية على أبحاث سوقية حقيقية بمصادر موثقة. الأصول التي تحتاج معاينة لا تُحتسب في الإجمالي حفاظاً على الشفافية.
           </p>
         </>
       )}
