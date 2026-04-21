@@ -325,29 +325,74 @@ Deno.serve(async (req) => {
 
   const startTime = Date.now();
 
-  const assetsResponse = await fetch(
-    `${SUPABASE_URL}/rest/v1/listing_assets?listing_id=eq.${TARGET_LISTING_ID}&select=*`,
-    {
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
-      },
-    }
-  );
+  // الأصول مخزنة كـ JSON داخل عمود inventory في جدول listings
+  const listingUrl = `${SUPABASE_URL}/rest/v1/listings?id=eq.${TARGET_LISTING_ID}&select=id,title,inventory,ai_assets_combined,ai_detected_assets`;
+  console.log(`[TestReal] جلب الإعلان: ${listingUrl}`);
 
-  if (!assetsResponse.ok) {
-    return new Response(JSON.stringify({ error: "فشل جلب الأصول من Supabase" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  const listingResponse = await fetch(listingUrl, {
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": `Bearer ${SUPABASE_KEY}`,
+      "Accept": "application/json",
+    },
+  });
+
+  if (!listingResponse.ok) {
+    const errBody = await listingResponse.text();
+    console.error(`[TestReal] فشل API status=${listingResponse.status} body=${errBody}`);
+    return new Response(JSON.stringify({
+      error: "فشل جلب الإعلان من Supabase",
+      status: listingResponse.status,
+      supabase_response: errBody,
+      url: listingUrl,
+    }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
-  const allAssets = await assetsResponse.json();
-
-  if (!Array.isArray(allAssets) || allAssets.length === 0) {
-    return new Response(JSON.stringify({ error: "لا توجد أصول لهذا الإعلان", listing_id: TARGET_LISTING_ID }),
+  const listingRows = await listingResponse.json();
+  if (!Array.isArray(listingRows) || listingRows.length === 0) {
+    return new Response(JSON.stringify({ error: "الإعلان غير موجود", listing_id: TARGET_LISTING_ID }),
       { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
-  console.log(`[TestReal] عدد الأصول: ${allAssets.length}`);
+  const listing = listingRows[0];
+  // اختر مصدر الأصول: inventory أولاً، ثم ai_assets_combined كـ fallback
+  let rawAssets: any[] = [];
+  if (Array.isArray(listing.inventory) && listing.inventory.length > 0) {
+    rawAssets = listing.inventory;
+    console.log(`[TestReal] استخدام inventory: ${rawAssets.length} أصل`);
+  } else if (Array.isArray(listing.ai_assets_combined) && listing.ai_assets_combined.length > 0) {
+    rawAssets = listing.ai_assets_combined;
+    console.log(`[TestReal] استخدام ai_assets_combined: ${rawAssets.length} أصل`);
+  } else if (Array.isArray(listing.ai_detected_assets) && listing.ai_detected_assets.length > 0) {
+    rawAssets = listing.ai_detected_assets;
+    console.log(`[TestReal] استخدام ai_detected_assets: ${rawAssets.length} أصل`);
+  }
+
+  if (rawAssets.length === 0) {
+    return new Response(JSON.stringify({
+      error: "لا توجد أصول في الإعلان",
+      listing_id: TARGET_LISTING_ID,
+      listing_title: listing.title,
+      checked_fields: ["inventory", "ai_assets_combined", "ai_detected_assets"],
+    }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+
+  // تطبيع الحقول لتتطابق مع منطق الدالة (name/brand/model/condition/category/qty)
+  // الفلترة: استبعاد الأصول غير المضمّنة (included=false)
+  const allAssets = rawAssets
+    .filter((a: any) => a.included !== false)
+    .map((a: any, idx: number) => ({
+      id: a.id ?? `asset_${idx}`,
+      name: a.name || a.asset_name || "أصل بدون اسم",
+      asset_name: a.name || a.asset_name,
+      brand: a.brand || null,
+      model: a.model || null,
+      condition: a.condition || "جيد",
+      category: a.category || "generic_equipment",
+      qty: a.qty || a.quantity || 1,
+    }));
+
+  console.log(`[TestReal] عدد الأصول بعد التطبيع: ${allAssets.length} (من أصل ${rawAssets.length})`);
 
   const assetGroups = new Map<string, any[]>();
   for (const asset of allAssets) {
