@@ -40,7 +40,7 @@ const AdminPriceTestPage = () => {
 
   return (
     <div className="container mx-auto max-w-5xl p-6 space-y-6">
-      <h1 className="text-2xl font-bold">اختبار تسعير الأصول V4 — كشف سياق ذكي</h1>
+      <h1 className="text-2xl font-bold">اختبار تسعير الأصول V5 — قبول ذكي بالريال</h1>
 
       <Button
         onClick={runTest}
