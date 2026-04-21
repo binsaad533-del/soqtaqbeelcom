@@ -1,121 +1,141 @@
-// POC: اختبار Serper API لتسعير الأصول من السوق السعودي
-// الهدف: نتأكد من جودة النتائج قبل بناء Edge Function كاملة
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// الأصول التجريبية
 const TEST_ASSETS = [
-  { name: "منشار دائري ماكيتا 5800NB", brand: "Makita", model: "5800NB", condition: "مستعمل", category: "أداة" },
-  { name: "دريل Bosch GSB 570", brand: "Bosch", model: "GSB 570", condition: "جيد", category: "أداة" },
-  { name: "ماكينة CNC Sign-CNC A2-1530", brand: "Sign-CNC", model: "A2-1530", condition: "جيد", category: "آلة صناعية" },
-  { name: "ضاغط هواء أحمر", brand: null, model: null, condition: "جيد", category: "معدة" },
-  { name: "سيارة بيك أب بيضاء", brand: null, model: null, condition: "مستعمل", category: "مركبة" },
+  { name: "منشار دائري ماكيتا 5800NB", brand: "Makita", model: "5800NB", condition: "مستعمل", category: "power_tool" },
+  { name: "دريل Bosch GSB 570", brand: "Bosch", model: "GSB 570", condition: "جيد", category: "power_tool" },
+  { name: "ماكينة CNC Sign-CNC A2-1530", brand: "Sign-CNC", model: "A2-1530", condition: "جيد", category: "industrial_machine" },
+  { name: "ضاغط هواء أحمر", brand: null, model: null, condition: "جيد", category: "generic_equipment" },
+  { name: "سيارة بيك أب بيضاء", brand: null, model: null, condition: "مستعمل", category: "vehicle" },
+  { name: "ضاغط هواء صناعي 30 حصان سكرو", brand: null, model: null, condition: "جيد", category: "industrial_equipment" },
+  { name: "ماكينة CNC للخشب صينية راوتر", brand: null, model: null, condition: "جيد", category: "industrial_machine" },
+  { name: "لوحة تحكم لآلة خياطة صناعية", brand: null, model: null, condition: "جيد", category: "unclear" },
 ];
 
-// بناء استعلام ذكي حسب نوع الأصل وحالته
-function buildSearchQuery(asset: any, priceType: "new" | "used"): string {
+// بناء استعلامات متعددة حسب الفئة
+function buildSearchQueries(asset: any): Array<{query: string, type: string, priority: number}> {
+  const queries: Array<{query: string, type: string, priority: number}> = [];
   const hasModel = asset.model && asset.brand;
 
-  if (priceType === "new") {
-    if (hasModel) {
-      return `${asset.brand} ${asset.model} سعر السعودية`;
-    }
-    return `${asset.name} سعر جديد السعودية`;
+  // استعلام الجديد
+  if (hasModel) {
+    queries.push({
+      query: `${asset.brand} ${asset.model} سعر السعودية`,
+      type: "new_ksa",
+      priority: 1,
+    });
   } else {
-    // used
-    if (hasModel) {
-      return `${asset.brand} ${asset.model} مستعمل حراج`;
-    }
-    return `${asset.name} مستعمل حراج OpenSooq`;
+    queries.push({
+      query: `${asset.name} سعر جديد السعودية`,
+      type: "new_ksa",
+      priority: 1,
+    });
   }
+
+  // استعلام المستعمل - استخدام site: operator بدل حراج
+  if (hasModel) {
+    queries.push({
+      query: `${asset.brand} ${asset.model} مستعمل site:opensooq.com OR site:dubizzle.com`,
+      type: "used_site",
+      priority: 2,
+    });
+  } else {
+    queries.push({
+      query: `${asset.name} مستعمل site:opensooq.com OR site:dubizzle.com`,
+      type: "used_site",
+      priority: 2,
+    });
+  }
+
+  // للمعدات الصناعية: fallback على Alibaba إذا لزم
+  if (asset.category === "industrial_machine" || asset.category === "industrial_equipment") {
+    if (hasModel) {
+      queries.push({
+        query: `${asset.brand} ${asset.model} industrial machinery price`,
+        type: "alibaba_fallback",
+        priority: 3,
+      });
+    } else {
+      queries.push({
+        query: `${asset.name} industrial machinery alibaba price`,
+        type: "alibaba_fallback",
+        priority: 3,
+      });
+    }
+  }
+
+  return queries;
 }
 
-// استدعاء Serper API
-async function searchSerper(query: string, apiKey: string): Promise<any> {
-  const response = await fetch("https://google.serper.dev/search", {
+async function searchSerper(query: string, apiKey: string, useShopping = false): Promise<any> {
+  const endpoint = useShopping ? "https://google.serper.dev/shopping" : "https://google.serper.dev/search";
+  const response = await fetch(endpoint, {
     method: "POST",
-    headers: {
-      "X-API-KEY": apiKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      q: query,
-      gl: "sa", // Saudi Arabia
-      hl: "ar", // Arabic
-      num: 10,
-    }),
+    headers: { "X-API-KEY": apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify({ q: query, gl: "sa", hl: "ar", num: 10 }),
   });
-
-  if (!response.ok) {
-    return { error: `HTTP ${response.status}`, query };
-  }
+  if (!response.ok) return { error: `HTTP ${response.status}`, query };
   return await response.json();
 }
 
-// استخراج الأسعار من نص (snippet أو title)
 function extractPricesFromText(text: string): number[] {
   if (!text) return [];
-
   const prices: number[] = [];
-
-  // تحويل الأرقام العربية إلى إنجليزية
-  const normalized = text.replace(/[٠-٩]/g, (d) =>
-    String("٠١٢٣٤٥٦٧٨٩".indexOf(d))
-  );
-
-  // أنماط الأسعار السعودية
+  const normalized = text.replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
   const patterns = [
     /(\d{1,3}(?:,\d{3})*(?:\.\d+)?)\s*(?:ريال|ر\.?س|SAR|SR)/gi,
     /(?:ريال|ر\.?س|SAR|SR)\s*(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/gi,
-    /(\d{3,6})\s*(?:\$|USD)/gi,
   ];
-
   for (const pattern of patterns) {
     let match;
     while ((match = pattern.exec(normalized)) !== null) {
-      const priceStr = match[1].replace(/,/g, "");
-      const price = parseFloat(priceStr);
+      const price = parseFloat(match[1].replace(/,/g, ""));
+      if (price >= 50 && price <= 10000000) prices.push(price);
+    }
+  }
+  return prices;
+}
 
-      if (price >= 50 && price <= 10_000_000) {
-        if (match[0].includes("$") || match[0].includes("USD")) {
-          prices.push(Math.round(price * 3.75));
-        } else {
-          prices.push(price);
-        }
+// استخراج أسعار بالدولار وتحويلها لريال
+function extractUSDPrices(text: string): number[] {
+  if (!text) return [];
+  const prices: number[] = [];
+  const patterns = [
+    /\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/g,
+    /(\d{1,3}(?:,\d{3})*(?:\.\d+)?)\s*USD/gi,
+    /USD\s*(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/gi,
+  ];
+  for (const pattern of patterns) {
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const usd = parseFloat(match[1].replace(/,/g, ""));
+      if (usd >= 10 && usd <= 1000000) {
+        prices.push(Math.round(usd * 3.75));
       }
     }
   }
-
   return prices;
 }
 
 function analyzeSearchResults(serperResult: any, queryType: string) {
   const organic = serperResult?.organic || [];
   const shopping = serperResult?.shopping || [];
-
-  const extractedPrices: Array<{
-    price: number;
-    source: string;
-    url: string;
-    title: string;
-    snippet: string;
-  }> = [];
+  const extractedPrices: any[] = [];
 
   for (const item of shopping) {
     if (item.price) {
       const priceMatch = String(item.price).match(/[\d,\.]+/);
       if (priceMatch) {
         const price = parseFloat(priceMatch[0].replace(/,/g, ""));
-        if (price >= 50 && price <= 10_000_000) {
+        if (price >= 50 && price <= 10000000) {
           extractedPrices.push({
             price,
             source: item.source || "Shopping",
             url: item.link || "",
             title: item.title || "",
-            snippet: `Shopping: ${item.price}`,
+            from: "shopping",
           });
         }
       }
@@ -124,16 +144,33 @@ function analyzeSearchResults(serperResult: any, queryType: string) {
 
   for (const item of organic) {
     const combinedText = `${item.title || ""} ${item.snippet || ""}`;
-    const prices = extractPricesFromText(combinedText);
-
-    for (const price of prices) {
+    
+    // استخراج الأسعار بالريال
+    const sarPrices = extractPricesFromText(combinedText);
+    for (const price of sarPrices) {
       extractedPrices.push({
         price,
         source: extractDomain(item.link || ""),
         url: item.link || "",
         title: item.title || "",
         snippet: item.snippet || "",
+        from: "organic_sar",
       });
+    }
+
+    // للـ Alibaba fallback: استخراج الأسعار بالدولار
+    if (queryType === "alibaba_fallback") {
+      const usdPrices = extractUSDPrices(combinedText);
+      for (const priceInSar of usdPrices) {
+        extractedPrices.push({
+          price: priceInSar,
+          source: extractDomain(item.link || ""),
+          url: item.link || "",
+          title: item.title || "",
+          snippet: item.snippet || "",
+          from: "organic_usd_converted",
+        });
+      }
     }
   }
 
@@ -142,17 +179,12 @@ function analyzeSearchResults(serperResult: any, queryType: string) {
     total_results: organic.length + shopping.length,
     prices_found: extractedPrices.length,
     extracted_prices: extractedPrices,
-    raw_organic_count: organic.length,
-    raw_shopping_count: shopping.length,
   };
 }
 
 function extractDomain(url: string): string {
-  try {
-    return new URL(url).hostname.replace("www.", "");
-  } catch {
-    return "unknown";
-  }
+  try { return new URL(url).hostname.replace("www.", ""); } 
+  catch { return "unknown"; }
 }
 
 function calculateMedian(prices: number[]): number {
@@ -162,6 +194,32 @@ function calculateMedian(prices: number[]): number {
   return sorted.length % 2 === 0
     ? Math.round((sorted[mid - 1] + sorted[mid]) / 2)
     : sorted[mid];
+}
+
+// خصومات ذكية حسب الفئة والسعر الجديد
+function smartUsedDiscount(newPrice: number, condition: string, category: string): number {
+  const tierMultipliers: any = {
+    "جديد": { cheap: 0.90, mid: 0.85, heavy: 0.80 },
+    "شبه جديد": { cheap: 0.75, mid: 0.70, heavy: 0.65 },
+    "جيد": { cheap: 0.60, mid: 0.50, heavy: 0.40 },
+    "مستعمل": { cheap: 0.50, mid: 0.40, heavy: 0.35 },
+    "تالف": { cheap: 0.25, mid: 0.20, heavy: 0.15 },
+  };
+  
+  // تحديد tier حسب السعر الجديد
+  let tier = "mid";
+  if (newPrice < 500) tier = "cheap";
+  else if (newPrice > 5000) tier = "heavy";
+  
+  // السيارات تحتفظ بقيمتها أكثر
+  if (category === "vehicle") {
+    const vehicleMultipliers: any = {
+      "جديد": 0.95, "شبه جديد": 0.85, "جيد": 0.65, "مستعمل": 0.55, "تالف": 0.30,
+    };
+    return vehicleMultipliers[condition] || 0.55;
+  }
+  
+  return tierMultipliers[condition]?.[tier] || 0.50;
 }
 
 Deno.serve(async (req) => {
@@ -186,73 +244,108 @@ Deno.serve(async (req) => {
       brand: asset.brand,
       model: asset.model,
       condition: asset.condition,
-      searches: {},
+      category: asset.category,
+      searches: [],
+      all_prices_by_type: { new: [], used: [], alibaba: [] },
       final_recommendation: null,
     };
 
-    const newQuery = buildSearchQuery(asset, "new");
-    const newSerper = await searchSerper(newQuery, SERPER_API_KEY);
-    totalSerperCalls++;
+    const queries = buildSearchQueries(asset);
 
-    const newAnalysis = analyzeSearchResults(newSerper, "new");
-    assetResult.searches.new = {
-      query: newQuery,
-      ...newAnalysis,
-    };
+    for (const q of queries) {
+      const serperResult = await searchSerper(q.query, SERPER_API_KEY, false);
+      totalSerperCalls++;
+      const analysis = analyzeSearchResults(serperResult, q.type);
+      assetResult.searches.push({
+        query: q.query,
+        type: q.type,
+        ...analysis,
+      });
 
-    const usedQuery = buildSearchQuery(asset, "used");
-    const usedSerper = await searchSerper(usedQuery, SERPER_API_KEY);
-    totalSerperCalls++;
+      // تصنيف الأسعار
+      const prices = analysis.extracted_prices.map((p: any) => p.price);
+      if (q.type === "new_ksa") {
+        assetResult.all_prices_by_type.new.push(...prices);
+      } else if (q.type === "used_site") {
+        assetResult.all_prices_by_type.used.push(...prices);
+      } else if (q.type === "alibaba_fallback") {
+        assetResult.all_prices_by_type.alibaba.push(...prices);
+      }
+    }
 
-    const usedAnalysis = analyzeSearchResults(usedSerper, "used");
-    assetResult.searches.used = {
-      query: usedQuery,
-      ...usedAnalysis,
-    };
+    // Shopping API محاولة إضافية للماركات المعروفة
+    if (asset.brand && asset.model) {
+      const shoppingQuery = `${asset.brand} ${asset.model}`;
+      const shoppingResult = await searchSerper(shoppingQuery, SERPER_API_KEY, true);
+      totalSerperCalls++;
+      const shoppingAnalysis = analyzeSearchResults(shoppingResult, "shopping");
+      
+      assetResult.searches.push({
+        query: shoppingQuery,
+        type: "shopping",
+        ...shoppingAnalysis,
+      });
+      
+      const shoppingPrices = shoppingAnalysis.extracted_prices.map((p: any) => p.price);
+      assetResult.all_prices_by_type.new.push(...shoppingPrices);
+    }
 
-    const newPrices = newAnalysis.extracted_prices.map((p) => p.price);
-    const usedPrices = usedAnalysis.extracted_prices.map((p) => p.price);
+    // حساب التوصية النهائية
+    const newPrices = assetResult.all_prices_by_type.new;
+    const usedPrices = assetResult.all_prices_by_type.used;
+    const alibabaPrices = assetResult.all_prices_by_type.alibaba;
 
     const medianNew = calculateMedian(newPrices);
     const medianUsed = calculateMedian(usedPrices);
-
+    const medianAlibaba = calculateMedian(alibabaPrices);
+    
     let recommendedPrice = 0;
     let confidence = "منخفض";
     let reasoning = "";
-
-    if (medianUsed > 0) {
+    let source = "";
+    
+    if (medianUsed > 0 && usedPrices.length >= 2) {
       recommendedPrice = medianUsed;
-      confidence = usedPrices.length >= 3 ? "عالي" : usedPrices.length >= 2 ? "متوسط" : "منخفض";
-      reasoning = `median من ${usedPrices.length} مصدر مستعمل`;
+      confidence = usedPrices.length >= 3 ? "عالي" : "متوسط";
+      reasoning = `median من ${usedPrices.length} إعلان مستعمل`;
+      source = "used_market";
     } else if (medianNew > 0) {
-      const conditionDiscount: Record<string, number> = {
-        "جديد": 0.90,
-        "شبه جديد": 0.75,
-        "جيد": 0.55,
-        "مستعمل": 0.45,
-        "تالف": 0.25,
-      };
-      const multiplier = conditionDiscount[asset.condition] || 0.50;
+      const multiplier = smartUsedDiscount(medianNew, asset.condition, asset.category);
       recommendedPrice = Math.round(medianNew * multiplier);
       confidence = newPrices.length >= 3 ? "متوسط" : "منخفض";
-      reasoning = `${medianNew} ر.س جديد × ${multiplier} (حالة ${asset.condition})`;
+      reasoning = `${medianNew} ر.س جديد × ${multiplier} (${asset.condition}, ${asset.category})`;
+      source = "new_with_discount";
+    } else if (medianAlibaba > 0) {
+      const multiplier = smartUsedDiscount(medianAlibaba, asset.condition, asset.category);
+      recommendedPrice = Math.round(medianAlibaba * multiplier);
+      confidence = "منخفض";
+      reasoning = `${medianAlibaba} ر.س من Alibaba (${alibabaPrices.length} مرجع) × ${multiplier}`;
+      source = "alibaba_fallback";
     } else {
       confidence = "يتطلب_معاينة";
-      reasoning = "لم نجد مصادر سعرية موثوقة في البحث";
+      reasoning = "لم نجد مصادر سعرية موثوقة";
+      source = "none";
     }
 
     assetResult.final_recommendation = {
       price_sar: recommendedPrice,
       confidence,
       reasoning,
+      source,
       median_new: medianNew,
       median_used: medianUsed,
+      median_alibaba: medianAlibaba,
       count_new: newPrices.length,
       count_used: usedPrices.length,
+      count_alibaba: alibabaPrices.length,
     };
 
     results.push(assetResult);
   }
+
+  // حساب نسبة التغطية
+  const covered = results.filter(r => r.final_recommendation.confidence !== "يتطلب_معاينة").length;
+  const coveragePercent = Math.round((covered / results.length) * 100);
 
   return new Response(
     JSON.stringify({
@@ -260,11 +353,12 @@ Deno.serve(async (req) => {
         total_assets_tested: TEST_ASSETS.length,
         total_serper_calls: totalSerperCalls,
         estimated_cost_usd: (totalSerperCalls * 0.001).toFixed(4),
+        coverage_percent: coveragePercent,
+        covered_assets: covered,
+        uncovered_assets: results.length - covered,
       },
       results,
     }, null, 2),
-    {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    }
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 });
