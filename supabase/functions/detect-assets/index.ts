@@ -339,7 +339,8 @@ async function analyzeFileBatch(
     userContent.push(fc.content);
   }
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const t0 = Date.now();
+  const response = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -355,11 +356,13 @@ async function analyzeFileBatch(
       tools: [ASSET_TOOL],
       tool_choice: { type: "function", function: { name: "report_detected_assets" } },
     }),
-  });
+  }, AI_CALL_TIMEOUT_MS);
+
+  console.log(`[detect-assets] file batch (${fileContents.length + textParts.length} items) → HTTP ${response.status} in ${Date.now() - t0}ms`);
 
   if (!response.ok) {
     const t = await response.text();
-    console.error("File analysis failed:", response.status, t);
+    console.error("File analysis failed:", response.status, t.slice(0, 300));
     return null;
   }
 
