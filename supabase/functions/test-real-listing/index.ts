@@ -309,7 +309,15 @@ async function priceUniqueAsset(asset: any, serperKey: string, lovableKey: strin
     allCandidates.push(...candidates);
   }
 
-  const verdict = await arbitrateAssetWithGemini(asset, allCandidates, lovableKey);
+  // إثراء الأصل بالبيانات المستخرجة قبل تمريره لـ Gemini
+  const name = asset.asset_name || asset.name;
+  const enrichedAsset = {
+    ...asset,
+    brand: asset.brand || extractBrandFromName(name),
+    model: asset.model || extractModelFromName(name),
+  };
+
+  const verdict = await arbitrateAssetWithGemini(enrichedAsset, allCandidates, lovableKey);
 
   const newPrices: number[] = [];
   const usedPrices: number[] = [];
