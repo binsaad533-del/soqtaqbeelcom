@@ -19,57 +19,21 @@ const RETRY_DELAY_MS = 2_000;
 // Defense-in-depth: skip image URLs that leak into fileUrls
 const IMAGE_EXT_RE = /\.(jpg|jpeg|png|heic|heif|webp|gif|bmp|avif)(\?|$|#)/i;
 
-const IMAGE_SYSTEM_PROMPT = `أنت مُثمّن أصول خبير في السوق السعودي والخليجي. مهمتك تحليل صور إعلانات التقبيل واكتشاف الأصول مع تقدير قيمتها السوقية.
+const IMAGE_SYSTEM_PROMPT = `أنت مُحلّل أصول خبير في السوق السعودي. مهمتك اكتشاف الأصول من الصور فقط — **التسعير ليس مهمتك**.
 
 **قواعد الاكتشاف:**
 - اذكر كل أصل تراه بوضوح: ماركة، موديل، عدد، حالة
 - للأصول المتعددة المتطابقة: استخدم quantity
-- للأصول الغامضة جزئياً: اذكرها مع وضع price_confidence="يتطلب_معاينة"
+- في حقل brand_visible: اذكر الماركة/الموديل المرئي بوضوح فقط (لا تخمّن)
+- في details: اذكر أي تفاصيل تساعد في التسعير لاحقاً (الحجم، السعة، الخصائص المرئية)
 
-**قواعد التسعير — إلزامية:**
-لكل أصل تراه بوضوح، يجب تقدير estimated_unit_price_sar > 0 باستخدام معرفتك بالأسواق التالية حسب فئة الأصل:
-
-1. **أدوات يدوية كهربائية** (دريل، صاروخ، فارة، صنفرة، راوتر):
-   - المرجع: حراج، السوق المفتوح، OpenSooq، متاجر السعودية (ساكو، جرير)
-   - price_confidence: "متوسط" غالباً
-
-2. **ماركات عالمية معروفة** (Bosch, Makita, DeWalt, Hilti, Milwaukee):
-   - المرجع: extra.com، Amazon.sa، Noon، X-cite، مواقع الماركات الرسمية
-   - مع خصم الاستهلاك (30-50% للمستعمل حسب الحالة)
-   - price_confidence: "عالي" إذا ظهر الموديل، "متوسط" إذا ظهرت الماركة فقط
-
-3. **معدات CNC وصناعية كبيرة** (CNC routers, edge banders, panel saws):
-   - المرجع: Alibaba، Made-in-China، IndiaMART، موزعون خليجيون
-   - معظمها صيني المنشأ — قارن بالأسعار الجديدة واخصم الاستهلاك
-   - price_confidence: "متوسط" إذا ظهر الموديل
-
-4. **أثاث مكتبي** (كراسي، طاولات، مكاتب):
-   - المرجع: IKEA، Home Centre، السدحان للمستعمل، حراج
-   - price_confidence: "متوسط"
-
-5. **مركبات** (بيك أب، شاحنات):
-   - المرجع: syarah.com، حراج السيارات، Motory
-   - price_confidence: "متوسط" مع ذكر الموديل والسنة التقديرية
-
-6. **معدات لحام وضواغط وإنتاج متخصص**:
-   - المرجع: موزعون صناعيون سعوديون + Alibaba للمقارنة
-   - price_confidence: "متوسط"
-
-**متى تستخدم "يتطلب_معاينة" (حصراً):**
-- الأصل ضبابي أو مغطى جزئياً في الصورة
-- لا يمكن تحديد فئة الأصل أصلاً
-- الأصل تالف والتقييم يعتمد على فحص داخلي
-- مخزون غير واضح المحتوى الفعلي
-
-**ممنوع استخدام "يتطلب_معاينة" كمخرج للتردد.** إذا ترددت بين "منخفض" و"يتطلب_معاينة"، اختر "منخفض" وقدّم تقديراً.
-
-**في price_reasoning:** اذكر (1) أساس التقدير: ماركة/موديل/فئة، (2) المصدر المرجعي، (3) الحالة. جملة واحدة.
-مثال: "Bosch GSB 570 مستعمل - مرجع extra.com جديد ~380 ر.س، مستعمل حراج ~180 ر.س"
-
-**قواعد النزاهة:**
+**قواعد النزاهة الحاكمة (إلزامية):**
 - لا تخترع ماركات غير ظاهرة في الصورة
 - إذا الماركة ظاهرة لكن الموديل غير واضح، اذكر الماركة فقط
-- price_reasoning يجب أن يبرر الرقم، لا يكتفي بالقول "تقدير"
+- **ممنوع منعاً باتاً اقتراح أي سعر تقديري** — التسعير يتم لاحقاً عبر بحث سوقي حقيقي
+- مهمتك: وصف دقيق للأصل وحالته فقط
+
+**ملاحظة:** الأصول الغامضة أو غير الواضحة تُمرَّر إلى مسار "يتطلب معاينة" — لا تحاول تخمين أسعارها.
 `;
 
 const FILE_SYSTEM_PROMPT = `أنت محلل مستندات تجارية خبير. استخرج جميع المعدات والأصول المذكورة في النص التالي مع الكمية والنوع والحالة.
@@ -105,25 +69,12 @@ const ASSET_TOOL = {
               quantity: { type: "number", description: "الكمية المقدرة" },
               details: { type: "string", description: "تفاصيل إضافية مثل السعر أو الموديل" },
               source: { type: "string", enum: ["image", "file"], description: "مصدر الاكتشاف" },
-              estimated_unit_price_sar: {
-                type: "number",
-                description: "السعر التقديري للوحدة الواحدة من الصورة بالريال السعودي (السوق الثانوي السعودي)",
-              },
-              price_confidence: {
-                type: "string",
-                enum: ["عالي", "متوسط", "منخفض", "يتطلب_معاينة"],
-                description: "مستوى الثقة في التقدير. استخدم يتطلب_معاينة إذا لم يكن التقدير ممكناً من الصورة",
-              },
               brand_visible: {
                 type: "string",
                 description: "الماركة أو الموديل المرئي على الأصل إن وجد (مثل Bosch GWS-750) - فارغ إذا غير واضح",
               },
-              price_reasoning: {
-                type: "string",
-                description: "شرح مختصر لكيفية تقدير السعر من الصورة",
-              },
             },
-            required: ["name", "type", "condition", "quantity", "estimated_unit_price_sar", "price_confidence"],
+            required: ["name", "type", "condition", "quantity"],
             additionalProperties: false,
           },
         },
@@ -656,89 +607,14 @@ async function valuateAssets(
 ): Promise<any> {
   if (!assets.length) return null;
 
-  // FIX: short-circuit when image-stage already produced per-asset prices.
-  // Avoids a blind second AI call that has no visual context.
-  const allHavePrices = assets.every((a: any) =>
-    (typeof a.estimated_unit_price_sar === "number" && a.estimated_unit_price_sar > 0) ||
-    a.price_confidence === "يتطلب_معاينة"
-  );
-
-  if (allHavePrices) {
-    return {
-      valuations: assets.map((a: any) => ({
-        name: a.name,
-        base_price_sar: a.estimated_unit_price_sar || 0,
-        used_market_price_sar: a.estimated_unit_price_sar || 0,
-        estimated_age_factor: "unknown",
-        reasoning: a.price_reasoning || "تقدير من الصورة",
-        requires_inspection: a.price_confidence === "يتطلب_معاينة",
-        price_confidence: a.price_confidence || "متوسط",
-      })),
-      market_notes: "تقدير من تحليل الصور مباشرة",
-    };
-  }
-
-  const assetList = assets.map((a: any) =>
-    `- ${a.name} (النوع: ${a.type}, الحالة: ${a.condition}, الكمية: ${a.quantity}${a.details ? `, تفاصيل: ${a.details}` : ""})`
-  ).join("\n");
-
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      // FIX 3: Pro model has stronger pricing knowledge for SA market
-      model: "google/gemini-2.5-pro",
-      temperature: 0.2,
-      messages: [
-        {
-          role: "system",
-          content: `أنت خبير تقييم أصول في السوق السعودي مع خبرة في السوق الثانوي للمعدات المستعملة.
-
-لكل أصل، يجب تقدير سعرين:
-1) base_price_sar: سعر الوحدة جديدة من الوكيل المعتمد
-2) used_market_price_sar: السعر السوقي الفعلي للوحدة المستعملة (السوق الثانوي السعودي/حراج)
-
-قواعد حرجة:
-- للمعدات الثقيلة (شيولات، حفارات، رافعات، شاحنات): سعر المستعمل عادة 25-55% من الجديد بحسب العمر وساعات التشغيل
-- للمركبات: 40-70% بحسب العمر والممشى
-- للأجهزة الإلكترونية والتقنية: 30-60% بحسب العمر
-- للأثاث والمعدات البسيطة: 40-65%
-- للمعدات الصناعية الثقيلة (تبريد، أفران): 35-60%
-
-إلزامي:
-- يجب دائماً إعطاء قيمة رقمية موجبة لـ base_price_sar وuse_market_price_sar حتى لو كانت تقديرية تقريبية. لا تتركها صفر أو فارغة.
-- إذا لم تكن متأكداً، استخدم نطاقاً متحفظاً (مثلاً متوسط فئة المنتج في السوق السعودي) ووثّق التحفظ في reasoning و missing_critical_info.
-- لا تفترض المعدات جديدة إذا كانت الصورة تظهر معدة قائمة في موقع تشغيل
-- استخدم used_market_price_sar كأساس للتقييم وليس سعر الجديد
-- إذا لم تظهر سنة الصنع أو ساعات التشغيل، أدرجها في missing_critical_info واستخدم تقدير منتصف العمر (5-7 سنوات) مع نسبة إهلاك 50-60% من سعر الجديد`
-        },
-        {
-          role: "user",
-          content: `قيّم الأصول التالية لنشاط: ${businessActivity || "تجاري عام"}${dealPrice ? `\nالسعر المعروض للصفقة: ${dealPrice.toLocaleString()} ريال` : ""}\n\nالأصول:\n${assetList}\n\nملاحظة: هذه أصول قائمة (مستعملة) في إعلان بيع وليست جديدة من الوكيل.`
-        },
-      ],
-      tools: [VALUATION_TOOL],
-      tool_choice: { type: "function", function: { name: "report_valuations" } },
-    }),
-  });
-
-  if (!response.ok) {
-    console.error("Valuation failed:", response.status);
-    return null;
-  }
-
-  const data = await response.json();
-  const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-  if (!toolCall) return null;
-
-  try {
-    return JSON.parse(toolCall.function.arguments);
-  } catch {
-    return null;
-  }
+  // NOTE: per platform governance rules — no fabricated prices from model memory.
+  // detect-assets no longer asks Gemini for `estimated_unit_price_sar`.
+  // Real pricing happens downstream in `price-assets` (Serper + Gemini arbitration).
+  // This valuateAssets function is kept ONLY as a legacy fallback when price-assets
+  // is bypassed (which we no longer do in normal flow). It must NOT pre-fill prices
+  // from model memory. If called, it returns null so the caller surfaces "requires inspection".
+  console.log(`[detect-assets] valuateAssets called with ${assets.length} assets — skipping (governance: no model-memory pricing)`);
+  return null;
 }
 
 function buildPriceAnalysis(
