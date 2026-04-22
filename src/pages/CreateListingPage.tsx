@@ -34,6 +34,7 @@ import { useSEO } from "@/hooks/useSEO";
 
 import type { InventoryItem, InventoryPricingMode, DedupAction, CrExtractionResult } from "./create-listing/types";
 import type { FileUploadStatus, CreateListingSharedState } from "./create-listing/sharedState";
+import { useFileClassifications } from "@/hooks/useFileClassifications";
 import CreateListingStep1 from "./create-listing/CreateListingStep1";
 import CreateListingStep2 from "./create-listing/CreateListingStep2";
 import CreateListingStep3 from "./create-listing/CreateListingStep3";
