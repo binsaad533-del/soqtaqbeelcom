@@ -61,6 +61,7 @@ const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const InvoicePage = lazy(() => import("./pages/InvoicePage"));
 const PdfPreviewPage = lazy(() => import("./pages/PdfPreviewPage"));
 const SellerDashboardPage = lazy(() => import("./pages/SellerDashboardPage"));
+const SellerAccessRequestsPage = lazy(() => import("./pages/SellerAccessRequestsPage"));
 const NotificationSettingsPage = lazy(() => import("./pages/NotificationSettingsPage"));
 const AiChatPage = lazy(() => import("./pages/AiChatPage"));
 const MoqbilLogPage = lazy(() => import("./pages/MoqbilLogPage"));
@@ -259,6 +260,16 @@ const App = () => (
                     <ProtectedRoute>
                       <PageErrorBoundary label="لوحة البائع">
                         <SellerDashboardPage />
+                      </PageErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/seller-dashboard/access-requests"
+                  element={
+                    <ProtectedRoute>
+                      <PageErrorBoundary label="طلبات الوصول">
+                        <SellerAccessRequestsPage />
                       </PageErrorBoundary>
                     </ProtectedRoute>
                   }

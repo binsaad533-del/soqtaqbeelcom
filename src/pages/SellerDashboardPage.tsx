@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/table";
 import {
   Store, ShoppingBag, Pause, Users, Handshake, CheckCircle2,
-  TrendingUp, ArrowLeft, Plus, MessageSquare, Percent, ExternalLink, Eye, Trash2, BarChart3, Sparkles, Link2, Edit3,
+  TrendingUp, ArrowLeft, Plus, MessageSquare, Percent, ExternalLink, Eye, Trash2, BarChart3, Sparkles, Link2, Edit3, FileLock2,
 } from "lucide-react";
+import { useAccessRequests } from "@/hooks/useAccessRequests";
 import SarSymbol from "@/components/SarSymbol";
 import { toast } from "sonner";
 import PromoteListingDialog from "@/components/PromoteListingDialog";
@@ -73,6 +74,7 @@ const statusColor = (s: string) => {
 const SellerDashboardPage = () => {
   const { user } = useAuthContext();
   const { softDeleteListing } = useListings();
+  const { pendingCount } = useAccessRequests();
   const [stats, setStats] = useState<SellerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState<ListingRow[]>([]);
@@ -171,15 +173,21 @@ const SellerDashboardPage = () => {
         {/* Quick Links */}
         <div className="flex flex-wrap gap-2 mb-6">
           {[
-            { label: "إضافة إعلان", icon: Plus, to: "/create-listing?new=1", color: "bg-primary text-primary-foreground" },
-            { label: "التحليلات", icon: BarChart3, to: "/seller-analytics", color: "bg-secondary text-secondary-foreground" },
-            { label: "المحادثات", icon: MessageSquare, to: "/messages", color: "bg-secondary text-secondary-foreground" },
-            { label: "صفقاتي", icon: Handshake, to: "/deal-pipeline", color: "bg-secondary text-secondary-foreground" },
-            { label: "الإحالات", icon: Link2, to: "/referrals", color: "bg-secondary text-secondary-foreground" },
+            { label: "إضافة إعلان", icon: Plus, to: "/create-listing?new=1", color: "bg-primary text-primary-foreground", badge: 0 },
+            { label: "طلبات الوصول", icon: FileLock2, to: "/seller-dashboard/access-requests", color: "bg-secondary text-secondary-foreground", badge: pendingCount },
+            { label: "التحليلات", icon: BarChart3, to: "/seller-analytics", color: "bg-secondary text-secondary-foreground", badge: 0 },
+            { label: "المحادثات", icon: MessageSquare, to: "/messages", color: "bg-secondary text-secondary-foreground", badge: 0 },
+            { label: "صفقاتي", icon: Handshake, to: "/deal-pipeline", color: "bg-secondary text-secondary-foreground", badge: 0 },
+            { label: "الإحالات", icon: Link2, to: "/referrals", color: "bg-secondary text-secondary-foreground", badge: 0 },
           ].map(link => (
-            <Link key={link.to} to={link.to} className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium transition-opacity hover:opacity-80 ${link.color}`}>
+            <Link key={link.to} to={link.to} className={`relative flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium transition-opacity hover:opacity-80 ${link.color}`}>
               <link.icon size={13} strokeWidth={2} />
               {link.label}
+              {link.badge > 0 && (
+                <span className="min-w-[16px] h-[16px] rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center px-1 leading-none">
+                  {link.badge > 9 ? "9+" : link.badge}
+                </span>
+              )}
               <ExternalLink size={10} className="opacity-50" />
             </Link>
           ))}
