@@ -35,6 +35,7 @@ import {
   ArrowRightLeft,
   Eye,
   CheckCircle2,
+  ImageOff,
 } from "lucide-react";
 import {
   CATEGORY_LABELS,
@@ -108,6 +109,7 @@ function FileCard({
   onPreview,
 }: FilePreviewProps) {
   const isImg = isImage(file.file_type);
+  const [imgError, setImgError] = useState(false);
   const subOptions =
     file.final_category === "property_photo"
       ? PROPERTY_SUBCATEGORIES
@@ -131,13 +133,19 @@ function FileCard({
         onClick={onPreview}
         className="aspect-square w-full bg-muted rounded-md mb-2 overflow-hidden cursor-pointer flex items-center justify-center"
       >
-        {isImg ? (
+        {isImg && !imgError ? (
           <img
             src={file.file_url}
             alt={file.file_name}
             loading="lazy"
             className="w-full h-full object-cover"
+            onError={() => setImgError(true)}
           />
+        ) : isImg && imgError ? (
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground px-2">
+            <ImageOff className="w-8 h-8 mb-2" />
+            <span className="text-xs text-center">تعذّر تحميل المعاينة</span>
+          </div>
         ) : (
           <div className="flex flex-col items-center gap-1 text-muted-foreground">
             <FileText className="w-8 h-8" />
