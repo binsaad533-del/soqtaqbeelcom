@@ -946,26 +946,11 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
         </div>
       </div>
 
-      {/* Inspection CTA box */}
+      {/* Inspection note — quiet line; the unified Jasaas CTA lives above the asset list */}
       {requiresInspection && (
-        <div className="rounded-lg border border-border bg-muted/40 p-3 flex items-start gap-3">
-          <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center shrink-0">
-            <Search size={14} strokeWidth={1.5} className="text-muted-foreground" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-foreground/80 mb-2 leading-relaxed">
-              هذا الأصل يتطلب معاينة متخصصة لتقييم دقيق.
-            </p>
-            <a
-              href={JASAAS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
-            >
-              احصل على تقييم معتمد عبر جساس للتقييم
-              <ExternalLink size={11} strokeWidth={1.8} />
-            </a>
-          </div>
+        <div className="text-[11px] text-muted-foreground/80 italic flex items-center gap-1.5 pr-1">
+          <Search size={11} strokeWidth={1.5} className="shrink-0" />
+          قيمة دقيقة تحتاج معاينة متخصصة
         </div>
       )}
 
