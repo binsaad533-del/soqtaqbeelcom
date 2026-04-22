@@ -36,7 +36,16 @@ import {
   Eye,
   CheckCircle2,
   ImageOff,
+  Lock,
+  Globe,
+  Info,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   CATEGORY_LABELS,
   PROPERTY_SUBCATEGORIES,
@@ -97,7 +106,10 @@ interface FilePreviewProps {
   onUpdateSubcategory: (sub: string) => void;
   onDelete: () => void;
   onPreview: () => void;
+  onToggleProtection: () => void;
 }
+
+const PROTECTABLE_CATEGORIES: FileCategory[] = ["legal_document", "invoice_document"];
 
 function FileCard({
   file,
@@ -107,9 +119,13 @@ function FileCard({
   onUpdateSubcategory,
   onDelete,
   onPreview,
+  onToggleProtection,
 }: FilePreviewProps) {
   const isImg = isImage(file.file_type);
   const [imgError, setImgError] = useState(false);
+  const showProtectionBadge = PROTECTABLE_CATEGORIES.includes(
+    file.final_category as FileCategory,
+  );
   const subOptions =
     file.final_category === "property_photo"
       ? PROPERTY_SUBCATEGORIES
