@@ -109,11 +109,11 @@ export default function WhyOpportunityBox({ listing, analysisCache }: WhyOpportu
 
   return (
     <section
-      className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 via-primary/5 to-transparent p-5 sm:p-6"
+      className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-primary/[0.03] to-transparent p-5 sm:p-6"
       aria-labelledby="why-opportunity-title"
     >
       <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+        <Sparkles className="h-5 w-5 text-primary" />
         <h2
           id="why-opportunity-title"
           className="text-base sm:text-lg font-semibold text-foreground"
@@ -129,7 +129,7 @@ export default function WhyOpportunityBox({ listing, analysisCache }: WhyOpportu
               key={idx}
               className="flex items-start gap-3 text-sm text-foreground/90"
             >
-              <Icon className="h-4 w-4 mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <Icon className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
               <span className="leading-relaxed">{point.text}</span>
             </li>
           );
