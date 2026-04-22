@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import GoogleMapPicker, { type PlaceDetails } from "@/components/GoogleMapPicker";
 import ListingEditErrorBoundary from "@/components/ListingEditErrorBoundary";
 import { invokeWithRetry } from "@/lib/invokeWithRetry";
+import { buildTitle } from "@/lib/title-utils";
 
 interface ListingEditDialogProps {
   listing: Listing;
@@ -234,7 +235,11 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
 
     const generatedTitle = fields.title.trim()
       ? fields.title
-      : `${fields.business_activity || "مشروع"} — ${fields.district || ""}, ${fields.city || ""}`;
+      : buildTitle([
+          fields.business_activity || "مشروع",
+          fields.district,
+          fields.city,
+        ]);
 
     const updateData: any = {
       title: generatedTitle,
