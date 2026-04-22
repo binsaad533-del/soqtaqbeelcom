@@ -558,7 +558,66 @@ const CreateListingStep4 = ({ state }: Props) => {
           </div>
         </div>
 
-        <Button onClick={handlePublishClick} disabled={saving || loading || (!canPublish && publishAttempted)} className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
+        {/* Commit 5: Unified upload review summary (only for new unified listings) */}
+        {usesUnifiedUpload && (
+          <>
+            {unifiedFileCount === 0 && (
+              <div className="bg-muted/40 border border-border/40 rounded-xl p-3 flex items-start gap-2">
+                <AlertTriangle size={16} className="text-muted-foreground shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-foreground">لم ترفع أي ملفات</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    إعلانك بدون صور أو مستندات سيكون ضعيفاً ويقل ظهوره. يمكنك العودة لرفع ملفات.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {unifiedFileCount > 0 && unifiedUnconfirmedCount > 0 && (
+              <div className="bg-warning/10 border border-warning/30 rounded-xl p-3 flex items-start gap-2.5">
+                <AlertTriangle size={16} className="text-warning shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-2">
+                  <div>
+                    <p className="text-xs font-medium text-warning">تحتاج مراجعة ملفاتك</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {unifiedUnconfirmedCount} من {unifiedFileCount} ملف يحتاج تأكيد قبل النشر
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => setReviewDialogOpen(true)}
+                    size="sm"
+                    variant="outline"
+                    className="rounded-lg gap-1.5 h-8 border-warning/40 text-warning hover:bg-warning/10"
+                  >
+                    <FolderOpen size={13} strokeWidth={1.5} />
+                    راجع الآن
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {unifiedFileCount > 0 && unifiedUnconfirmedCount === 0 && (
+              <div className="bg-success/5 border border-success/20 rounded-xl p-3 flex items-center gap-2">
+                <Check size={14} className="text-success shrink-0" />
+                <p className="text-xs font-medium text-success">
+                  {unifiedFileCount} ملف جاهز للنشر
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        <Button
+          onClick={handlePublishClick}
+          disabled={saving || loading || (!canPublish && publishAttempted) || (usesUnifiedUpload && unifiedUnconfirmedCount > 0)}
+          title={
+            usesUnifiedUpload && unifiedUnconfirmedCount > 0
+              ? "يجب مراجعة ملفاتك قبل النشر"
+              : undefined
+          }
+          className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
+        >
           {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
           نشر الإعلان
         </Button>
