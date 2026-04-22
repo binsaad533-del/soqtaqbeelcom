@@ -36,6 +36,7 @@ const CreateListingStep2 = ({ state }: Props) => {
     uploadingGroup,
     uploadProgress,
     uploadedDocs,
+    docConfidence,
     setActivePhotoGroup,
     setActiveDocType,
     fileInputRef,
@@ -350,20 +351,35 @@ const CreateListingStep2 = ({ state }: Props) => {
           <span className="text-[10px] text-primary/80 bg-primary/5 px-2 py-0.5 rounded-md border border-primary/15">اختياري — تظهر للمشتري كمستندات موثقة</span>
         </div>
         <div className="space-y-2">
-          {dynamicDocTypes.map((doc) => (
-            <div key={doc} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card hover:border-primary/20 transition-all">
-              <div className="flex items-center gap-2.5">
-                <FileText size={14} strokeWidth={1.3} className="text-muted-foreground" />
-                <div>
-                  <span className="text-xs">{doc}</span>
-                  {uploadedDocs[doc]?.length > 0 && <span className="text-[10px] text-success mr-2">✓ {uploadedDocs[doc].length} ملف</span>}
+          {dynamicDocTypes.map((doc) => {
+            const docUrls = uploadedDocs[doc] || [];
+            const mediumCount = docUrls.filter((u) => docConfidence[u] === "medium").length;
+            const highCount = docUrls.filter((u) => docConfidence[u] === "high").length;
+            return (
+              <div key={doc} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card hover:border-primary/20 transition-all">
+                <div className="flex items-center gap-2.5">
+                  <FileText size={14} strokeWidth={1.3} className="text-muted-foreground" />
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs">{doc}</span>
+                    {docUrls.length > 0 && <span className="text-[10px] text-success mr-2">✓ {docUrls.length} ملف</span>}
+                    {highCount > 0 && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-success/10 text-success border border-success/20">
+                        ✓ واضح {highCount > 1 ? `(${highCount})` : ""}
+                      </span>
+                    )}
+                    {mediumCount > 0 && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-warning/10 text-warning border border-warning/30">
+                        ⚠ قد تحتاج معاينة {mediumCount > 1 ? `(${mediumCount})` : ""}
+                      </span>
+                    )}
+                  </div>
                 </div>
+                <button onClick={() => { setActiveDocType(doc); setTimeout(() => docInputRef.current?.click(), 50); }} className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]">
+                  <Upload size={12} strokeWidth={1.3} /> رفع
+                </button>
               </div>
-              <button onClick={() => { setActiveDocType(doc); setTimeout(() => docInputRef.current?.click(), 50); }} className="flex items-center gap-1 text-xs text-primary hover:underline active:scale-[0.97]">
-                <Upload size={12} strokeWidth={1.3} /> رفع
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

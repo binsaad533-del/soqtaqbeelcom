@@ -20,11 +20,11 @@ const FIELD_RULES: Record<string, { label: string; description: string; markers:
   equipment_photos: {
     label: "صور المعدات",
     description:
-      "صورة فوتوغرافية حقيقية لمعدة أو أجهزة أو أدوات أو أثاث تشغيلي يستخدم في النشاط التجاري (مثل: ثلاجات، أفران، مكائن قهوة، طاولات، رفوف، كاشير، شاشات، معدات مطبخ، معدات صالون...).",
+      "صورة فوتوغرافية لمعدة أو أجهزة أو أدوات أو أثاث أو قطع غيار أو أي شيء تشغيلي قد يستخدم في نشاط تجاري (مثل: ثلاجات، أفران، مكائن قهوة، طاولات، رفوف، كاشير، شاشات، معدات مطبخ، معدات صالون، ماكينات صناعية، أدوات يدوية، قطع غيار، حتى لو كانت غير مألوفة أو متخصصة).",
     markers:
-      "1) جهاز/معدة/أداة تشغيلية ظاهرة بوضوح\n2) صورة حقيقية وليست رسماً أو شعاراً\n3) المعدة منطقياً مرتبطة بنشاط تجاري",
+      "1) أي جسم مادي يبدو معدة/جهاز/أداة/أثاث/قطعة غيار\n2) لا يلزم الوضوح المثالي — تكفي القدرة على تمييز أنه ليس وجهاً أو طعاماً أو شاشة\n3) حتى لو كانت زاوية صعبة أو إضاءة ضعيفة أو لقطة قريبة جداً (close-up)",
     rejectExamples:
-      "صورة شخص، طعام جاهز فقط، مستندات/أوراق، شاشة كمبيوتر بنص، شعار، رسم توضيحي، صورة سيارة شخصية، صورة سيلفي، لقطة شاشة",
+      "selfie أو وجه شخصي، طعام/مشروبات جاهزة فقط، لقطة شاشة لتطبيق أو نص، سيارة شخصية، منظر طبيعي، حيوان، صورة فاضية أو سوداء كلياً أو معطوبة",
   },
   ownership_proof: {
     label: "إثبات ملكية",
@@ -37,18 +37,48 @@ const FIELD_RULES: Record<string, { label: string; description: string; markers:
   },
 };
 
-const SYSTEM_PROMPT = (rule: typeof FIELD_RULES[string]) => `أنت نظام تحقق صارم في منصة "سوق تقبيل" السعودية. مهمتك الوحيدة هي التحقق مما إذا كان الملف المرفوع يطابق نوع المستند المتوقع.
+const SYSTEM_PROMPT = (rule: typeof FIELD_RULES[string], expectedType: string) => {
+  const isEquipmentPhotos = expectedType === "equipment_photos";
+
+  const baseHeader = `أنت نظام تحقق في منصة "سوق تقبيل" السعودية. مهمتك التحقق مما إذا كان الملف المرفوع يطابق نوع المستند المتوقع.
 
 نوع المستند المتوقع: **${rule.label}**
 
 الوصف: ${rule.description}
 
-علامات القبول (يجب أن يحتوي الملف على عدة منها):
+علامات القبول:
 ${rule.markers}
 
-أمثلة على ما يجب رفضه فوراً:
+أمثلة على ما يجب رفضه:
 ${rule.rejectExamples}
+`;
 
+  if (isEquipmentPhotos) {
+    return `${baseHeader}
+قواعد خاصة بصور المعدات (3 مستويات):
+
+✅ القبول (is_valid: true) ينقسم إلى:
+   - confidence: "high" → صورة واضحة لمعدة/جهاز/أداة/قطعة غيار يمكن التعرف عليها بسهولة.
+   - confidence: "medium" → صورة لجسم يبدو معدة لكن: إضاءة ضعيفة، زاوية صعبة، معدة غير مألوفة/متخصصة، أو لقطة قريبة جداً (close-up). في هذه الحالة، اكتب في حقل notes: "الصورة مقبولة — قد تحتاج معاينة ميدانية من جساس للتحقق".
+
+❌ الرفض (is_valid: false) — فقط للحالات الواضحة التالية:
+   - selfie أو صورة وجه شخصية
+   - طعام أو مشروبات جاهزة فقط
+   - لقطة شاشة لنص أو تطبيق
+   - سيارة شخصية، منظر طبيعي، حيوانات
+   - صورة فاضية / سوداء كلياً / معطوبة
+
+عند الرفض، اكتب rejection_reason واضحاً وموجهاً للمستخدم بالعربية، مثل:
+"الصورة تبدو صورة شخصية (selfie) — الرجاء رفع صورة للمعدة"
+"الصورة تبدو طعاماً جاهزاً — الرجاء رفع صورة للمعدات التشغيلية"
+
+⚠️ مبدأ حاكم: لا ترفض لمجرد ضعف الإضاءة أو غرابة المعدة. اقبل بـ medium بدلاً من الرفض. الرفض فقط عندما يكون المحتوى واضحاً أنه ليس معدة.
+
+صف بدقة ما تراه فعلياً في حقل document_type_detected.
+أجب باستخدام الأداة المتوفرة فقط.`;
+  }
+
+  return `${baseHeader}
 قواعد صارمة (إلزامية):
 1. كن متشدداً جداً — لا تقبل ملفاً إلا إذا تطابق فعلياً مع كل علامات القبول الجوهرية.
 2. **اختبار التطابق المعكوس**: إذا كان الملف يطابق نوعاً آخر من المستندات (مثلاً: قائمة أصول عند طلب إثبات ملكية)، ارفضه فوراً مع توضيح أن نوعه الفعلي مختلف.
@@ -58,6 +88,7 @@ ${rule.rejectExamples}
 6. لا تخمن. كن صريحاً في rejection_reason إذا رفضت.
 7. أجب باستخدام الأداة المتوفرة فقط.
 8. عند الشك، ارفض. الرفض الخاطئ أفضل من القبول الخاطئ.`;
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -230,7 +261,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT(rule) },
+          { role: "system", content: SYSTEM_PROMPT(rule, expectedType) },
           { role: "user", content },
         ],
         tools: [
@@ -305,8 +336,27 @@ serve(async (req) => {
 
     const result = JSON.parse(toolCall.function.arguments);
 
+    // Extract a friendly file name from the URL for logging
+    const fileName = (() => {
+      try {
+        const u = new URL(documentUrl);
+        return decodeURIComponent(u.pathname.split("/").pop() || "unknown");
+      } catch {
+        return "unknown";
+      }
+    })();
+
+    // Unified diagnostic log for every verification decision
+    console.log("[verify-document] decision:", JSON.stringify({
+      file_name: fileName,
+      verifier_type: expectedType,
+      is_valid: result.is_valid,
+      confidence: result.confidence,
+      rejection_reason: result.rejection_reason || null,
+      notes: result.notes || null,
+    }));
+
     if (result.is_valid === false) {
-      console.warn("Document rejected:", { expectedType, detected: result.document_type_detected, reason: result.rejection_reason });
       return new Response(
         JSON.stringify({
           is_valid: false,

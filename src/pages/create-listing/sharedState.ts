@@ -17,6 +17,7 @@ export interface CreateListingSharedState {
   setUploadProgress: (v: { current: number; total: number }) => void;
   uploadedDocs: Record<string, string[]>;
   setUploadedDocs: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
+  docConfidence: Record<string, "high" | "medium">;
   activePhotoGroup: string | null;
   setActivePhotoGroup: (v: string | null) => void;
   activeDocType: string | null;
