@@ -26,7 +26,7 @@ interface Props {
   state: CreateListingSharedState;
 }
 
-const CreateListingStep2 = ({ state }: Props) => {
+const CreateListingStep2Legacy = ({ state }: Props) => {
   const {
     dealStructure,
     photos,
@@ -439,4 +439,4 @@ const CreateListingStep2 = ({ state }: Props) => {
   );
 };
 
-export default CreateListingStep2;
+export default CreateListingStep2Legacy;
