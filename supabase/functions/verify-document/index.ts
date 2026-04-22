@@ -336,8 +336,27 @@ serve(async (req) => {
 
     const result = JSON.parse(toolCall.function.arguments);
 
+    // Extract a friendly file name from the URL for logging
+    const fileName = (() => {
+      try {
+        const u = new URL(documentUrl);
+        return decodeURIComponent(u.pathname.split("/").pop() || "unknown");
+      } catch {
+        return "unknown";
+      }
+    })();
+
+    // Unified diagnostic log for every verification decision
+    console.log("[verify-document] decision:", JSON.stringify({
+      file_name: fileName,
+      verifier_type: expectedType,
+      is_valid: result.is_valid,
+      confidence: result.confidence,
+      rejection_reason: result.rejection_reason || null,
+      notes: result.notes || null,
+    }));
+
     if (result.is_valid === false) {
-      console.warn("Document rejected:", { expectedType, detected: result.document_type_detected, reason: result.rejection_reason });
       return new Response(
         JSON.stringify({
           is_valid: false,
