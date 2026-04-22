@@ -131,6 +131,15 @@ const CreateListingPage = () => {
   const [crExtracting, setCrExtracting] = useState(false);
   const [crExtractionDone, setCrExtractionDone] = useState(false);
 
+  // ═══════════ Unified Upload (Commit 4) ═══════════
+  // Default true for new listings, set to false when restoring legacy drafts
+  const [usesUnifiedUpload, setUsesUnifiedUpload] = useState(true);
+  const [classifyProgress, setClassifyProgress] = useState({ current: 0, total: 0 });
+  const [classifyingFiles, setClassifyingFiles] = useState(false);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [unifiedFileCount, setUnifiedFileCount] = useState(0);
+  const [unifiedUnconfirmedCount, setUnifiedUnconfirmedCount] = useState(0);
+
   const isCrOnly = false;
 
   const photoGroups = allPhotoGroups.filter((group) => {
