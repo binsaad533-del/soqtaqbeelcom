@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import type { UseAnalysisCacheReturn } from "@/hooks/useAnalysisCache";
