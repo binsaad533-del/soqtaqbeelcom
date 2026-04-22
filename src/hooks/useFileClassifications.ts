@@ -24,6 +24,7 @@ export interface FileClassification {
   final_category: string;
   final_subcategory: string | null;
   is_confirmed: boolean;
+  is_protected: boolean;
   classified_at: string;
   confirmed_at: string | null;
 }
@@ -210,6 +211,30 @@ export function useFileClassifications(listingId: string | null | undefined) {
     return true;
   }, []);
 
+  const toggleProtection = useCallback(
+    async (id: string, newValue: boolean) => {
+      // Optimistic update
+      setClassifications(prev =>
+        prev.map(c => (c.id === id ? { ...c, is_protected: newValue } : c)),
+      );
+      const { error: err } = await supabase
+        .from("file_classifications")
+        .update({ is_protected: newValue })
+        .eq("id", id);
+      if (err) {
+        // Rollback
+        setClassifications(prev =>
+          prev.map(c => (c.id === id ? { ...c, is_protected: !newValue } : c)),
+        );
+        toast.error("تعذّر تغيير الخصوصية");
+        return false;
+      }
+      toast.success(`تم جعل الملف ${newValue ? "محمياً" : "عاماً"}`);
+      return true;
+    },
+    [],
+  );
+
   const deleteAll = useCallback(async () => {
     if (!listingId) return false;
     const { error: err } = await supabase
@@ -237,5 +262,6 @@ export function useFileClassifications(listingId: string | null | undefined) {
     confirmAll,
     deleteFile,
     deleteAll,
+    toggleProtection,
   };
 }
