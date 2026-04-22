@@ -15,6 +15,7 @@ import SellerRatingDisplay from "@/components/SellerRatingDisplay";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
 import WhyOpportunityBox from "@/components/WhyOpportunityBox";
+import ListingStickyCtaBar from "@/components/ListingStickyCtaBar";
 import FeasibilityStudyPanel from "@/components/FeasibilityStudyPanel";
 import FinancialAnalysisPanel from "@/components/FinancialAnalysisPanel";
 import DealSimulationPanel from "@/components/DealSimulationPanel";
@@ -421,7 +422,7 @@ const ListingDetailsPage = () => {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(productJsonLd) }} />
-      <div className="py-8">
+      <div className="py-8 pb-24 lg:pb-8">
       <div className="container">
 
         {/* Owner / Admin action bar — top of page */}
@@ -1209,6 +1210,14 @@ const ListingDetailsPage = () => {
         </DialogContent>
       </Dialog>
     </div>
+    <ListingStickyCtaBar
+      listing={listing}
+      isOwner={isOwner}
+      isSimulation={isSimulation}
+      myActiveDeal={myActiveDeal}
+      startingDeal={startingDeal}
+      onStartNegotiation={handleStartNegotiation}
+    />
     </>
   );
 };
