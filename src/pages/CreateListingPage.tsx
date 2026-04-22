@@ -362,14 +362,38 @@ const CreateListingPage = () => {
             body: { documentUrl: result.url, expectedType: verifierType },
           });
           toast.dismiss(verifyToast);
-          const payload = (data || {}) as { is_valid?: boolean; document_type_detected?: string; rejection_reason?: string; error?: string };
+          const payload = (data || {}) as {
+            is_valid?: boolean;
+            document_type_detected?: string;
+            rejection_reason?: string;
+            confidence?: "high" | "medium" | "low";
+            notes?: string;
+            error?: string;
+          };
           if (error || payload.is_valid === false || payload.error) {
             const detected = payload.document_type_detected || "غير معروف";
             const reason = payload.rejection_reason || payload.error || "الملف لا يطابق نوع الحقل.";
-            toast.error(`❌ تم رفض "${file.name}" — لا يطابق "${activeDocType}"\nنوع الملف المكتشف: ${detected}\nالسبب: ${reason}`, { duration: 9000 });
+            toast.error(
+              `❌ تم رفض "${file.name}"\n${reason}`,
+              { duration: 9000 }
+            );
             continue;
           }
-          toast.success(`✓ تم التحقق من "${file.name}" — يطابق "${activeDocType}"`);
+          // Accepted — branch on confidence
+          if (verifierType === "equipment_photos" && payload.confidence === "medium") {
+            toast(
+              `⚠ تم قبول "${file.name}" — قد تحتاج معاينة من جساس`,
+              {
+                duration: 7000,
+                description: payload.notes || "الصورة مقبولة لكن قد تحتاج معاينة ميدانية للتأكد من حالة المعدة.",
+                style: { background: "hsl(var(--warning) / 0.12)", borderColor: "hsl(var(--warning))" },
+              }
+            );
+            setDocConfidence((prev) => ({ ...prev, [result.url!]: "medium" }));
+          } else {
+            toast.success(`✓ تم التحقق من "${file.name}"`);
+            setDocConfidence((prev) => ({ ...prev, [result.url!]: "high" }));
+          }
         } catch (err) {
           toast.dismiss(verifyToast);
           console.error("verify-document failed", err);
