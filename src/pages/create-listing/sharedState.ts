@@ -108,6 +108,27 @@ export interface CreateListingSharedState {
   handleDrop: (e: React.DragEvent<HTMLDivElement>, groupId: string) => void;
   dynamicDocTypes: string[];
   handleBulkDrop: (files: FileList) => void;
+
+  // ═══════════ Unified Upload (Commit 4) ═══════════
+  // Routing flag — true for new listings, false for legacy (77 existing)
+  usesUnifiedUpload: boolean;
+
+  // Classification progress
+  classifyProgress: { current: number; total: number };
+  classifyingFiles: boolean;
+
+  // Review dialog
+  reviewDialogOpen: boolean;
+  setReviewDialogOpen: (v: boolean) => void;
+
+  // Unified handlers
+  handleUnifiedUpload: (files: FileList) => Promise<void>;
+  handleConfirmClassifications: () => Promise<void>;
+  handleManualCrExtract: () => Promise<void>;
+
+  // Counts for review button
+  unifiedFileCount: number;
+  unifiedUnconfirmedCount: number;
 }
 
 export interface FileUploadStatus {
