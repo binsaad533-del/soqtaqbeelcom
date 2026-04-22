@@ -141,6 +141,13 @@ const CreateListingPage = () => {
   const [unifiedFileCount, setUnifiedFileCount] = useState(0);
   const [unifiedUnconfirmedCount, setUnifiedUnconfirmedCount] = useState(0);
 
+  // Realtime classifications hook (Commit 4 — counts + auto-refresh)
+  const { classifications: unifiedClassifications } = useFileClassifications(listingId);
+  useEffect(() => {
+    setUnifiedFileCount(unifiedClassifications.length);
+    setUnifiedUnconfirmedCount(unifiedClassifications.filter((c) => !c.is_confirmed).length);
+  }, [unifiedClassifications]);
+
   const isCrOnly = false;
 
   const photoGroups = allPhotoGroups.filter((group) => {
