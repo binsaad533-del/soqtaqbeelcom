@@ -857,6 +857,24 @@ const CreateListingPage = () => {
     stepDirection, totalPhotos, allPhotoUrls, imageReq, primaryDealLabel, disclosureScore,
     editingItemId, setEditingItemId, photoGroups, getGroupDisplayUrls, handleDrop, dynamicDocTypes,
     handleBulkDrop: (files: FileList) => handleBulkUploadFiles(files),
+    // ═══════════ Unified Upload (Commit 4) — stubs, full impl in Step E ═══════════
+    usesUnifiedUpload,
+    classifyProgress,
+    classifyingFiles,
+    reviewDialogOpen,
+    setReviewDialogOpen,
+    handleUnifiedUpload: async (files: FileList) => {
+      // TODO Step E: implement unified upload + classification
+      await handleBulkUploadFiles(files);
+    },
+    handleConfirmClassifications: async () => {
+      // TODO Step E: map final_category → photos/documents structure
+    },
+    handleManualCrExtract: async () => {
+      // TODO Step E: re-trigger extract-cr-data manually
+    },
+    unifiedFileCount,
+    unifiedUnconfirmedCount,
   };
 
   if (draftLoading) {
