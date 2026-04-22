@@ -15,6 +15,7 @@ import SellerRatingDisplay from "@/components/SellerRatingDisplay";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
 import WhyOpportunityBox from "@/components/WhyOpportunityBox";
+import ListingStickyCtaBar from "@/components/ListingStickyCtaBar";
 import FeasibilityStudyPanel from "@/components/FeasibilityStudyPanel";
 import FinancialAnalysisPanel from "@/components/FinancialAnalysisPanel";
 import DealSimulationPanel from "@/components/DealSimulationPanel";
