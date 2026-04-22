@@ -197,6 +197,42 @@ function FileCard({
               <CheckCircle2 className="w-2.5 h-2.5" /> مؤكد
             </Badge>
           )}
+          {showProtectionBadge && (
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={onToggleProtection}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium transition-colors",
+                      file.is_protected
+                        ? "bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80",
+                    )}
+                    aria-label={
+                      file.is_protected
+                        ? "تبديل إلى عامة"
+                        : "تبديل إلى محمية"
+                    }
+                  >
+                    {file.is_protected ? (
+                      <Lock className="w-2.5 h-2.5" />
+                    ) : (
+                      <Globe className="w-2.5 h-2.5" />
+                    )}
+                    <span>{file.is_protected ? "محمية" : "عامة"}</span>
+                    <ArrowRightLeft className="w-2.5 h-2.5 opacity-70" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[220px] text-xs">
+                  {file.is_protected
+                    ? "محمية: المشترون يطلبون موافقتك للاطلاع عليها"
+                    : "عامة: متاحة لأي شخص يشاهد الإعلان"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
         {file.ai_reasoning && (
           <p className="text-[10px] text-muted-foreground line-clamp-2" title={file.ai_reasoning}>
