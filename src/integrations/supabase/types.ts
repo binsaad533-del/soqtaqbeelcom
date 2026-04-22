@@ -981,6 +981,78 @@ export type Database = {
         }
         Relationships: []
       }
+      document_access_requests: {
+        Row: {
+          access_expires_at: string | null
+          categories: string[]
+          created_at: string
+          deal_id: string | null
+          decided_at: string | null
+          decided_by: string | null
+          document_refs: Json
+          id: string
+          listing_id: string
+          owner_id: string
+          rejection_reason: string | null
+          request_message: string | null
+          requester_id: string
+          scope: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          access_expires_at?: string | null
+          categories?: string[]
+          created_at?: string
+          deal_id?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          document_refs?: Json
+          id?: string
+          listing_id: string
+          owner_id: string
+          rejection_reason?: string | null
+          request_message?: string | null
+          requester_id: string
+          scope?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          access_expires_at?: string | null
+          categories?: string[]
+          created_at?: string
+          deal_id?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          document_refs?: Json
+          id?: string
+          listing_id?: string
+          owner_id?: string
+          rejection_reason?: string | null
+          request_message?: string | null
+          requester_id?: string
+          scope?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_access_requests_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_access_requests_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -1142,6 +1214,7 @@ export type Database = {
           final_subcategory: string | null
           id: string
           is_confirmed: boolean
+          is_protected: boolean
           listing_id: string
         }
         Insert: {
@@ -1158,6 +1231,7 @@ export type Database = {
           final_subcategory?: string | null
           id?: string
           is_confirmed?: boolean
+          is_protected?: boolean
           listing_id: string
         }
         Update: {
@@ -1174,6 +1248,7 @@ export type Database = {
           final_subcategory?: string | null
           id?: string
           is_confirmed?: boolean
+          is_protected?: boolean
           listing_id?: string
         }
         Relationships: [
