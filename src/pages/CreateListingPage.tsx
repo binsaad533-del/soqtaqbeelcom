@@ -1020,14 +1020,8 @@ const CreateListingPage = () => {
         try {
           const ext = (c.file_name?.split(".").pop() || "bin").toLowerCase().slice(0, 8);
           const newPath = `${ownerIdForPath}/${listingId}/${c.id}.${ext}`;
-          const { error: moveErr } = await supabase
-            .storage
-            .from(LEGACY_BUCKET)
-            .move(legacyPath, `__cross_bucket__/${newPath}`)
-            .then(() => ({ error: new Error("noop") }))
-            .catch(() => ({ error: new Error("noop") }));
-          // Supabase JS doesn't support cross-bucket move directly → fall back to copy+delete
-          void moveErr;
+
+          // Cross-bucket transfer: download from public → upload to private → delete original
 
           // Download then upload to new bucket (cross-bucket transfer)
           const { data: blob, error: dlErr } = await supabase
