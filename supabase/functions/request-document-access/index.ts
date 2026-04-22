@@ -156,6 +156,34 @@ Deno.serve(async (req) => {
         ? "تم اعتماد طلبك تلقائياً"
         : "تم إرسال طلبك للبائع للمراجعة";
 
+    // ── Notify owner (best-effort, server-to-server) ──────────
+    try {
+      const { data: requesterProfile } = await admin
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      await fetch(`${supabaseUrl}/functions/v1/notify-access-request`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${anonKey}`,
+          apikey: anonKey,
+        },
+        body: JSON.stringify({
+          owner_id: listing.owner_id,
+          listing_id,
+          listing_title: listing.title,
+          requester_name: requesterProfile?.full_name || null,
+          request_id: inserted.id,
+          status: inserted.status,
+        }),
+      });
+    } catch (notifyErr) {
+      console.warn("[request-document-access] notify failed (non-fatal)", notifyErr);
+    }
+
     return json({
       status: inserted.status === "approved" ? "auto_approved" : "pending",
       request_id: inserted.id,

@@ -1,20 +1,22 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Bell, Check, MessageCircle, DollarSign, FileText, Shield, Info, Filter } from "lucide-react";
+import { Bell, Check, MessageCircle, DollarSign, FileText, Shield, Info, Filter, FileLock2 } from "lucide-react";
 import { useNotifications, type Notification } from "@/hooks/useNotifications";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-type NotifFilter = "all" | "unread" | "deals" | "offers" | "messages";
+type NotifFilter = "all" | "unread" | "deals" | "offers" | "messages" | "documents";
 
 const ICON_MAP: Record<string, { icon: typeof Bell; color: string }> = {
   deal: { icon: FileText, color: "text-primary" },
   offer: { icon: DollarSign, color: "text-emerald-500" },
   message: { icon: MessageCircle, color: "text-sky-500" },
   security: { icon: Shield, color: "text-destructive" },
+  access_request: { icon: FileLock2, color: "text-amber-600" },
   info: { icon: Info, color: "text-muted-foreground" },
 };
 
 function getNotifIcon(type: string, refType: string | null) {
+  if (refType === "access_request" || type === "access_request") return ICON_MAP.access_request;
   if (refType === "deal") return ICON_MAP.deal;
   if (type === "offer" || refType === "offer") return ICON_MAP.offer;
   if (type === "message" || refType === "message") return ICON_MAP.message;
@@ -43,6 +45,7 @@ const NotificationBell = () => {
     else if (filter === "deals") items = items.filter(n => n.reference_type === "deal" || n.type === "deal");
     else if (filter === "offers") items = items.filter(n => n.type === "offer" || n.reference_type === "offer");
     else if (filter === "messages") items = items.filter(n => n.type === "message" || n.reference_type === "message");
+    else if (filter === "documents") items = items.filter(n => n.type === "access_request" || n.reference_type === "access_request");
     return items.slice(0, 30);
   }, [notifications, filter]);
 
@@ -79,7 +82,8 @@ const NotificationBell = () => {
 
   const handleClick = (n: Notification) => {
     if (!n.is_read) markAsRead(n.id);
-    if (n.reference_type === "deal" && n.reference_id) navigate(`/negotiate/${n.reference_id}`);
+    if (n.reference_type === "access_request" || n.type === "access_request") navigate(`/seller-dashboard/access-requests`);
+    else if (n.reference_type === "deal" && n.reference_id) navigate(`/negotiate/${n.reference_id}`);
     else if (n.reference_type === "listing" && n.reference_id) navigate(`/listing/${n.reference_id}`);
     else if (n.reference_type === "agreement" && n.reference_id) navigate(`/agreement/${n.reference_id}`);
     else if (n.reference_type === "message" && n.reference_id) navigate(`/messages`);
@@ -102,6 +106,7 @@ const NotificationBell = () => {
     { key: "deals", label: "صفقات" },
     { key: "offers", label: "عروض" },
     { key: "messages", label: "رسائل" },
+    { key: "documents", label: "وثائق" },
   ];
 
   return (
