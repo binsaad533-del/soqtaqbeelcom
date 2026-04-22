@@ -16,7 +16,7 @@ import { FormField } from "./FormFields";
 import { getRules } from "@/lib/dealTypeFieldRules";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
 import AiInlineStar from "@/components/AiInlineStar";
-import FileReviewDialog from "@/components/FileReviewDialog";
+import { FileReviewDialog } from "@/components/FileReviewDialog";
 import type { CreateListingSharedState } from "./sharedState";
 
 interface Props {
@@ -120,7 +120,7 @@ const CreateListingStep2Unified = ({ state }: Props) => {
       </div>
 
       {/* Upload progress (file uploading) */}
-      {fileStatuses.length > 0 && fileStatuses.some((f) => f.status === "uploading") && (
+      {fileStatuses.some((f) => f.status === "uploading") && (
         <div className="rounded-xl border border-border/40 bg-card p-3 space-y-1.5">
           <div className="flex items-center gap-2 text-xs font-medium">
             <Loader2 size={14} className="animate-spin text-primary" />
@@ -331,7 +331,7 @@ const CreateListingStep2Unified = ({ state }: Props) => {
           open={reviewDialogOpen}
           onOpenChange={setReviewDialogOpen}
           listingId={listingId}
-          onConfirmAndSave={handleConfirmClassifications}
+          onConfirmed={handleConfirmClassifications}
         />
       )}
     </div>
