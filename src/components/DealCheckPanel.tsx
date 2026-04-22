@@ -4,7 +4,7 @@ import {
   ChevronDown, ChevronUp, MapPin, BarChart3, Briefcase, CheckCircle2,
   FileQuestion, Target, Loader2, Activity, ShoppingCart, Store,
   RefreshCw, Clock, Package, FileText, ImageIcon, DollarSign, ArrowDownRight, ArrowUpRight, Equal, Star,
-  Search, ExternalLink, Sparkles, Info
+  Search, ExternalLink, Sparkles, Info, Wallet, Building2
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
@@ -491,6 +491,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                 </div>
                 <p className={cn("text-lg font-medium", ratingStyle.text)}>{analysis.rating}</p>
               </div>
+
+              {/* Price Context Box — explains how the asking price is composed */}
+              <PriceContextBox listing={listing} />
 
               {/* Inventory Pricing Section (from price-assets) */}
               <InventoryPricingSection listing={listing} />
@@ -1009,6 +1012,157 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
             </ul>
           )}
         </div>
+      )}
+    </div>
+  );
+};
+
+// ============= Price Context Box =============
+// Explains how the asking price is composed: tangible assets + items needing
+// inspection + intangible "extra value" (brand, licenses, customer base).
+// Uses the SAME inventory-based calculation as InventoryPricingSection so the
+// two sections always agree.
+
+const PriceContextBox = ({ listing }: { listing: any }) => {
+  const [inventory, setInventory] = useState<InventoryItem[]>(() => {
+    const inv = listing?.inventory;
+    if (Array.isArray(inv) && inv.length > 0) return inv;
+    const combined = listing?.ai_assets_combined?.assets;
+    return Array.isArray(combined) ? combined : [];
+  });
+
+  // Realtime: keep in sync with pricing updates (same channel pattern as InventoryPricingSection)
+  useEffect(() => {
+    if (!listing?.id) return;
+    const channel = supabase
+      .channel(`price-context-${listing.id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "listings", filter: `id=eq.${listing.id}` },
+        (payload) => {
+          const next = payload.new as any;
+          if (Array.isArray(next?.inventory)) setInventory(next.inventory);
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [listing?.id]);
+
+  const askingPrice = Number(listing?.price) || 0;
+
+  // Edge case: no asking price or no inventory data → hide entirely
+  if (askingPrice <= 0 || inventory.length === 0) return null;
+
+  // Same governance rule as InventoryPricingSection
+  const priced = inventory.filter(
+    (a) =>
+      typeof a.pricing?.price_sar === "number" &&
+      a.pricing.price_sar > 0 &&
+      a.pricing?.confidence !== "يتطلب_معاينة"
+  );
+  const requiresInspection = inventory.filter(
+    (a) =>
+      !a.pricing ||
+      !a.pricing.price_sar ||
+      a.pricing.price_sar <= 0 ||
+      a.pricing.confidence === "يتطلب_معاينة" ||
+      a.pricing.source === "vague_asset_skip" ||
+      a.pricing.source === "no_results"
+  );
+
+  const tangibleAssetsValue = priced.reduce(
+    (sum, a) => sum + (a.pricing?.price_sar || 0) * (a.quantity || 1),
+    0
+  );
+  const pricedCount = priced.length;
+  const inspectionCount = requiresInspection.length;
+  const goodwillValue = askingPrice - tangibleAssetsValue;
+
+  const fmt = (n: number) => n.toLocaleString("en-US");
+
+  return (
+    <div className="rounded-xl border border-primary/15 bg-gradient-to-br from-primary/5 to-card p-4 sm:p-5 space-y-3">
+      <div className="flex items-center gap-2">
+        <Sparkles size={16} strokeWidth={1.4} className="text-primary" />
+        <h4 className="text-sm font-semibold text-foreground">كيف يُبنى سعر هذه الصفقة؟</h4>
+      </div>
+
+      <div className="space-y-2.5">
+        {/* Tangible assets */}
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center shrink-0">
+            <Package size={14} strokeWidth={1.5} className="text-foreground/70" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-muted-foreground mb-0.5">قيمة الأصول المُسعّرة</div>
+            <div className="text-sm font-semibold text-foreground tabular-nums">
+              {fmt(tangibleAssetsValue)} <span className="text-[11px] text-muted-foreground font-normal">ر.س</span>
+              <span className="text-[11px] text-muted-foreground font-normal mr-2">({pricedCount} أصل)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Inspection-required assets — only if any */}
+        {inspectionCount > 0 && (
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center shrink-0">
+              <Search size={14} strokeWidth={1.5} className="text-foreground/70" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs text-muted-foreground mb-0.5">أصول تحتاج معاينة ميدانية</div>
+              <div className="text-sm font-medium text-foreground tabular-nums">
+                {fmt(inspectionCount)} أصل
+              </div>
+              <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                قيمتها التقديرية يحددها مقيّم جساس
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Intangible / extra value — only if positive */}
+        {goodwillValue > 0 && (
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center shrink-0">
+              <Sparkles size={14} strokeWidth={1.5} className="text-foreground/70" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs text-muted-foreground mb-0.5">
+                قيمة إضافية (اسم تجاري + تراخيص + قاعدة عملاء)
+              </div>
+              <div className="text-sm font-semibold text-foreground tabular-nums">
+                {fmt(goodwillValue)} <span className="text-[11px] text-muted-foreground font-normal">ر.س</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Asking price */}
+      <div className="border-t border-border pt-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Wallet size={15} strokeWidth={1.5} className="text-primary" />
+          <span className="text-sm font-medium text-foreground">السعر المطلوب</span>
+        </div>
+        <div className="text-base font-bold text-foreground tabular-nums">
+          {fmt(askingPrice)} <span className="text-[11px] text-muted-foreground font-normal">ر.س</span>
+        </div>
+      </div>
+
+      {/* CTA — only when inspection is needed */}
+      {inspectionCount > 0 && (
+        <a
+          href={JASAAS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex w-full items-center justify-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+        >
+          <Building2 size={13} strokeWidth={1.8} />
+          احجز معاينة جساس للدقة
+          <ExternalLink size={11} strokeWidth={1.8} />
+        </a>
       )}
     </div>
   );
