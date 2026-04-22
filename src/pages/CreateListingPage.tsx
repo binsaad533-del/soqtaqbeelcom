@@ -156,10 +156,12 @@ const CreateListingPage = () => {
         type_id: id, priority: i, is_primary: id === dealStructure.primaryType,
       })),
       status: "draft",
+      uses_unified_upload: true,
     } as never);
     if (error || !data) { toast.error("حدث خطأ أثناء حفظ المسودة"); return null; }
     const id = (data as { id: string }).id;
     setListingId(id);
+    setUsesUnifiedUpload(true);
     return id;
   }, [listingId, dealStructure, createListing]);
 
@@ -170,6 +172,8 @@ const CreateListingPage = () => {
 
   const applyDraftToState = useCallback((draft: Listing) => {
     setListingId(draft.id);
+    // Read flag from DB; older drafts default to false (legacy behavior)
+    setUsesUnifiedUpload(Boolean((draft as unknown as { uses_unified_upload?: boolean }).uses_unified_upload));
     const primaryType = draft.primary_deal_type || draft.deal_type || "";
     const selectedTypes = Array.isArray(draft.deal_options) && draft.deal_options.length > 0
       ? (draft.deal_options as Array<{ type_id: string; priority: number; is_primary: boolean }>).map((o) => o.type_id).filter(Boolean)
