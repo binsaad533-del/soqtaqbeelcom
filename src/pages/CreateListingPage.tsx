@@ -84,6 +84,7 @@ const CreateListingPage = () => {
   const [analysisSummary, setAnalysisSummary] = useState("");
   const [dedupActions, setDedupActions] = useState<DedupAction[]>([]);
   const [uploadedDocs, setUploadedDocs] = useState<Record<string, string[]>>({});
+  const [docConfidence, setDocConfidence] = useState<Record<string, "high" | "medium">>({});
   const [listingId, setListingId] = useState<string | null>(null);
   const [fileStatuses, setFileStatuses] = useState<FileUploadStatus[]>([]);
   const [saving, setSaving] = useState(false);
