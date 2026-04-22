@@ -27,6 +27,7 @@ import ListingEditDialog from "@/components/ListingEditDialog";
 import ListingOfferForm from "@/components/ListingOfferForm";
 import SellerOffersPanel from "@/components/SellerOffersPanel";
 import MoqbilAgentPanel from "@/components/MoqbilAgentPanel";
+import ProtectedDocumentsPanel from "@/components/ProtectedDocumentsPanel";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useListings, type Listing } from "@/hooks/useListings";
