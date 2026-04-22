@@ -14,6 +14,7 @@ import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import SellerRatingDisplay from "@/components/SellerRatingDisplay";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
+import WhyOpportunityBox from "@/components/WhyOpportunityBox";
 import FeasibilityStudyPanel from "@/components/FeasibilityStudyPanel";
 import FinancialAnalysisPanel from "@/components/FinancialAnalysisPanel";
 import DealSimulationPanel from "@/components/DealSimulationPanel";
@@ -828,6 +829,8 @@ const ListingDetailsPage = () => {
                 </div>
               )}
             </div>
+
+            <WhyOpportunityBox listing={listing} analysisCache={analysisCache} />
 
             <DealCheckPanel listing={listing} analysisCache={analysisCache} />
 
