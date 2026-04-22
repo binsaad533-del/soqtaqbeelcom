@@ -55,7 +55,7 @@ import {
   useFileClassifications,
 } from "@/hooks/useFileClassifications";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+
 
 interface FileReviewDialogProps {
   listingId: string | null;
@@ -315,6 +315,7 @@ export function FileReviewDialog({
     bulkMove,
     confirmAll,
     deleteFile,
+    toggleProtection,
   } = useFileClassifications(listingId);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -458,6 +459,14 @@ export function FileReviewDialog({
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <div className="p-3 border-t bg-muted/20">
+                          {PROTECTABLE_CATEGORIES.includes(cat) && (
+                            <div className="mb-3 flex items-start gap-2 rounded-md border border-amber-500/20 bg-amber-500/5 p-2.5 text-[11px] leading-relaxed text-amber-700 dark:text-amber-400">
+                              <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                              <span>
+                                هذه الوثائق محمية افتراضياً. يمكنك تغيير خصوصية كل ملف على حدة — المشترون سيطلبون موافقتك للاطلاع على المحمية.
+                              </span>
+                            </div>
+                          )}
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                             {files.map(file => (
                               <FileCard
@@ -471,6 +480,9 @@ export function FileReviewDialog({
                                 }
                                 onDelete={() => setDeleteConfirmId(file.id)}
                                 onPreview={() => setPreviewFile(file)}
+                                onToggleProtection={() =>
+                                  toggleProtection(file.id, !file.is_protected)
+                                }
                               />
                             ))}
                           </div>
