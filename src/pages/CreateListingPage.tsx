@@ -372,7 +372,6 @@ const CreateListingPage = () => {
             error?: string;
           };
           if (error || payload.is_valid === false || payload.error) {
-            const detected = payload.document_type_detected || "غير معروف";
             const reason = payload.rejection_reason || payload.error || "الملف لا يطابق نوع الحقل.";
             toast.error(
               `❌ تم رفض "${file.name}"\n${reason}`,
