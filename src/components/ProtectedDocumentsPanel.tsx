@@ -219,8 +219,6 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
     return null;
   }
 
-  const headerCount = hasProtected ? totalProtected : legacyDocuments.length;
-
   return (
     <>
       <div className="rounded-xl border border-border/40 bg-card p-4" dir="rtl">
