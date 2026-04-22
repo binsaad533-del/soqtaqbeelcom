@@ -36,7 +36,16 @@ import {
   Eye,
   CheckCircle2,
   ImageOff,
+  Lock,
+  Globe,
+  Info,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   CATEGORY_LABELS,
   PROPERTY_SUBCATEGORIES,
@@ -46,7 +55,7 @@ import {
   useFileClassifications,
 } from "@/hooks/useFileClassifications";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+
 
 interface FileReviewDialogProps {
   listingId: string | null;
@@ -97,7 +106,10 @@ interface FilePreviewProps {
   onUpdateSubcategory: (sub: string) => void;
   onDelete: () => void;
   onPreview: () => void;
+  onToggleProtection: () => void;
 }
+
+const PROTECTABLE_CATEGORIES: FileCategory[] = ["legal_document", "invoice_document"];
 
 function FileCard({
   file,
@@ -107,9 +119,13 @@ function FileCard({
   onUpdateSubcategory,
   onDelete,
   onPreview,
+  onToggleProtection,
 }: FilePreviewProps) {
   const isImg = isImage(file.file_type);
   const [imgError, setImgError] = useState(false);
+  const showProtectionBadge = PROTECTABLE_CATEGORIES.includes(
+    file.final_category as FileCategory,
+  );
   const subOptions =
     file.final_category === "property_photo"
       ? PROPERTY_SUBCATEGORIES
@@ -180,6 +196,42 @@ function FileCard({
             <Badge variant="outline" className="text-[10px] py-0 px-1.5 gap-0.5">
               <CheckCircle2 className="w-2.5 h-2.5" /> مؤكد
             </Badge>
+          )}
+          {showProtectionBadge && (
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={onToggleProtection}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium transition-colors",
+                      file.is_protected
+                        ? "bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80",
+                    )}
+                    aria-label={
+                      file.is_protected
+                        ? "تبديل إلى عامة"
+                        : "تبديل إلى محمية"
+                    }
+                  >
+                    {file.is_protected ? (
+                      <Lock className="w-2.5 h-2.5" />
+                    ) : (
+                      <Globe className="w-2.5 h-2.5" />
+                    )}
+                    <span>{file.is_protected ? "محمية" : "عامة"}</span>
+                    <ArrowRightLeft className="w-2.5 h-2.5 opacity-70" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[220px] text-xs">
+                  {file.is_protected
+                    ? "محمية: المشترون يطلبون موافقتك للاطلاع عليها"
+                    : "عامة: متاحة لأي شخص يشاهد الإعلان"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
         {file.ai_reasoning && (
@@ -263,6 +315,7 @@ export function FileReviewDialog({
     bulkMove,
     confirmAll,
     deleteFile,
+    toggleProtection,
   } = useFileClassifications(listingId);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -406,6 +459,14 @@ export function FileReviewDialog({
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <div className="p-3 border-t bg-muted/20">
+                          {PROTECTABLE_CATEGORIES.includes(cat) && (
+                            <div className="mb-3 flex items-start gap-2 rounded-md border border-amber-500/20 bg-amber-500/5 p-2.5 text-[11px] leading-relaxed text-amber-700 dark:text-amber-400">
+                              <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                              <span>
+                                هذه الوثائق محمية افتراضياً. يمكنك تغيير خصوصية كل ملف على حدة — المشترون سيطلبون موافقتك للاطلاع على المحمية.
+                              </span>
+                            </div>
+                          )}
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                             {files.map(file => (
                               <FileCard
@@ -419,6 +480,9 @@ export function FileReviewDialog({
                                 }
                                 onDelete={() => setDeleteConfirmId(file.id)}
                                 onPreview={() => setPreviewFile(file)}
+                                onToggleProtection={() =>
+                                  toggleProtection(file.id, !file.is_protected)
+                                }
                               />
                             ))}
                           </div>
