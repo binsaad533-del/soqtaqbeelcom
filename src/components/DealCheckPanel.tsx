@@ -4,7 +4,7 @@ import {
   ChevronDown, ChevronUp, MapPin, BarChart3, Briefcase, CheckCircle2,
   FileQuestion, Target, Loader2, Activity, ShoppingCart, Store,
   RefreshCw, Clock, Package, FileText, ImageIcon, DollarSign, ArrowDownRight, ArrowUpRight, Equal, Star,
-  Search, ExternalLink, Sparkles, Info
+  Search, ExternalLink, Sparkles, Info, Wallet, Building2
 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { Button } from "@/components/ui/button";
@@ -491,6 +491,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                 </div>
                 <p className={cn("text-lg font-medium", ratingStyle.text)}>{analysis.rating}</p>
               </div>
+
+              {/* Price Context Box — explains how the asking price is composed */}
+              <PriceContextBox listing={listing} />
 
               {/* Inventory Pricing Section (from price-assets) */}
               <InventoryPricingSection listing={listing} />
