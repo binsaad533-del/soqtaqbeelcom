@@ -1320,8 +1320,7 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
               inspectionPreview.length === 0
                 ? ""
                 : inspectionPreview.join("، ") + (inspectionSorted.length > 3 ? "..." : "");
-            // Smart default: if only one group is visible, open it
-            const onlyPricedVisible = pricedCount > 0 && inspectionCount === 0;
+            // Smart default: priced is always open; inspection opens only if it's the sole group
             const onlyInspectionVisible = inspectionCount > 0 && pricedCount === 0;
             const pricedDefaultOpen = true;
             const inspectionDefaultOpen = onlyInspectionVisible;
