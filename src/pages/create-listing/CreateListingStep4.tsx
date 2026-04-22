@@ -7,6 +7,7 @@ import {
   Loader2,
   MapPin,
   Image as ImageIcon,
+  FolderOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,10 @@ const CreateListingStep4 = ({ state }: Props) => {
     photosOk,
     disclosureErrors,
     imageReq,
+    usesUnifiedUpload,
+    unifiedFileCount,
+    unifiedUnconfirmedCount,
+    setReviewDialogOpen,
     totalPhotos,
     allPhotoUrls,
     primaryDealLabel,

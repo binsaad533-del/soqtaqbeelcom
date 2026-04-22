@@ -821,7 +821,9 @@ const CreateListingPage = () => {
   const photosOk = imageReq === "none" || imageReq === "optional" || totalPhotos > 0;
   const disclosureErrors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
   const locationOk = locationLat != null && locationLng != null;
-  const canPublish = photosOk && Object.keys(disclosureErrors).length === 0 && locationOk;
+  // Commit 5: Block publishing for unified listings if files need review
+  const unifiedReviewBlocking = usesUnifiedUpload && unifiedUnconfirmedCount > 0;
+  const canPublish = photosOk && Object.keys(disclosureErrors).length === 0 && locationOk && !unifiedReviewBlocking;
   const primaryDealLabel = DEAL_TYPE_MAP[dealStructure.primaryType]?.label || dealStructure.primaryType;
   const dynamicDocTypes = dealStructure.requiredDocuments.length > 0
     ? dealStructure.requiredDocuments
