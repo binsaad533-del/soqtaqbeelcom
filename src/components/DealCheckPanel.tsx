@@ -1302,18 +1302,84 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
             </div>
           )}
 
-          {/* Asset list */}
-          <div className="border border-border/50 rounded-xl overflow-hidden">
-            <div className="bg-muted/30 px-3 py-2 text-xs font-medium flex items-center gap-1.5">
-              <ShoppingCart size={12} strokeWidth={1.3} />
-              تفصيل التسعير ({inventory.length})
-            </div>
-            <div className="divide-y divide-border/30">
-              {inventory.map((asset, i) => (
-                <AssetPricingRow key={i} asset={asset} />
-              ))}
-            </div>
-          </div>
+          {/* Grouped asset list (priced / requires inspection) */}
+          {(() => {
+            const pricedSorted = [...priced].sort(
+              (a, b) =>
+                (b.pricing?.price_sar || 0) * (b.quantity || 1) -
+                (a.pricing?.price_sar || 0) * (a.quantity || 1)
+            );
+            const inspectionSorted = [...requiresInspection].sort((a, b) =>
+              (a.name || "").localeCompare(b.name || "", "ar")
+            );
+            const inspectionPreview = inspectionSorted
+              .slice(0, 3)
+              .map((a) => a.name)
+              .filter(Boolean);
+            const previewText =
+              inspectionPreview.length === 0
+                ? ""
+                : inspectionPreview.join("، ") + (inspectionSorted.length > 3 ? "..." : "");
+            // Smart default: if only one group is visible, open it
+            const onlyPricedVisible = pricedCount > 0 && inspectionCount === 0;
+            const onlyInspectionVisible = inspectionCount > 0 && pricedCount === 0;
+            const pricedDefaultOpen = true;
+            const inspectionDefaultOpen = onlyInspectionVisible;
+
+            return (
+              <div className="space-y-2">
+                {/* Group 1: Priced assets */}
+                {pricedCount > 0 && (
+                  <Collapsible defaultOpen={pricedDefaultOpen} className="border border-emerald-200/60 dark:border-emerald-900/40 rounded-xl overflow-hidden">
+                    <CollapsibleTrigger className="w-full bg-emerald-50/70 dark:bg-emerald-950/20 px-3 py-2.5 flex items-center gap-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors group">
+                      <CheckCircle2 size={14} strokeWidth={1.6} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">أصول مُسعّرة</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold tabular-nums">
+                        {pricedCount}
+                      </span>
+                      <span className="text-[10px] text-emerald-700/70 dark:text-emerald-300/70 mr-auto truncate tabular-nums">
+                        قيمة إجمالية: {totalValue.toLocaleString("en-US")} ر.س
+                      </span>
+                      <ChevronDown size={14} strokeWidth={1.6} className="text-emerald-600/60 dark:text-emerald-400/60 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="divide-y divide-border/30 bg-background">
+                        {pricedSorted.map((asset, i) => (
+                          <AssetPricingRow key={`p-${i}`} asset={asset} />
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+
+                {/* Group 2: Requires inspection */}
+                {inspectionCount > 0 && (
+                  <Collapsible defaultOpen={inspectionDefaultOpen} className="border border-amber-200/60 dark:border-amber-900/40 rounded-xl overflow-hidden">
+                    <CollapsibleTrigger className="w-full bg-amber-50/70 dark:bg-amber-950/20 px-3 py-2.5 flex items-center gap-2 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors group">
+                      <Search size={14} strokeWidth={1.6} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span className="text-xs font-medium text-amber-700 dark:text-amber-300 shrink-0">أصول تحتاج معاينة</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-semibold tabular-nums shrink-0">
+                        {inspectionCount}
+                      </span>
+                      {previewText && (
+                        <span className="text-[10px] text-amber-700/70 dark:text-amber-300/70 mr-auto truncate min-w-0 hidden sm:inline">
+                          مثل: {previewText}
+                        </span>
+                      )}
+                      <ChevronDown size={14} strokeWidth={1.6} className="text-amber-600/60 dark:text-amber-400/60 shrink-0 transition-transform group-data-[state=open]:rotate-180 mr-auto sm:mr-0" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="divide-y divide-border/30 bg-background">
+                        {inspectionSorted.map((asset, i) => (
+                          <AssetPricingRow key={`i-${i}`} asset={asset} />
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+              </div>
+            );
+          })()}
 
           <p className="text-[10px] text-muted-foreground/70 text-center mt-2 leading-relaxed">
             الأسعار المعروضة مبنية على أبحاث سوقية حقيقية بمصادر موثقة. الأصول التي تحتاج معاينة لا تُحتسب في الإجمالي حفاظاً على الشفافية.
