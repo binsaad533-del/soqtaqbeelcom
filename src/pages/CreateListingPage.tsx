@@ -848,6 +848,231 @@ const CreateListingPage = () => {
     handlePhotoUploadForGroup(files, groupId);
   }, [handlePhotoUploadForGroup]);
 
+  // ═══════════ Unified Upload Helpers (Commit 4 — Step E) ═══════════
+
+  // Helper: upload files to listing-files bucket and return URL list
+  const uploadFilesToStorage = useCallback(async (
+    id: string,
+    files: FileList | File[],
+  ): Promise<Array<{ url: string; name: string; type: string }>> => {
+    const fileArray = Array.from(files);
+    const out: Array<{ url: string; name: string; type: string }> = [];
+    const imageExts = ["jpg", "jpeg", "png", "webp", "heic", "heif", "gif", "bmp", "avif"];
+
+    for (const file of fileArray) {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "";
+      const isImage = file.type.startsWith("image/") || imageExts.includes(ext);
+      const folder = isImage ? "photos/all" : "docs/general";
+      try {
+        let prepared: File = file;
+        if (isImage) {
+          const validation = validateImageFile(file);
+          if (!validation.valid) { console.warn(`[unified] skip ${file.name}: ${validation.error}`); continue; }
+          prepared = await convertToJpeg(file);
+        } else {
+          const validation = validateDocFile(file);
+          if (!validation.valid) { console.warn(`[unified] skip ${file.name}: ${validation.error}`); continue; }
+        }
+        const result = await uploadFile(id, prepared, folder);
+        if (result.url) {
+          out.push({ url: result.url, name: file.name, type: file.type || (isImage ? "image/jpeg" : "application/octet-stream") });
+        }
+      } catch (err) {
+        console.error(`[unified] upload failed: ${file.name}`, err);
+      }
+    }
+    return out;
+  }, [uploadFile]);
+
+  // Helper: re-trigger CR extraction for a given doc URL
+  const triggerCrExtraction = useCallback(async (documentUrl: string) => {
+    setCrExtracting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("extract-cr-data", { body: { documentUrl } });
+      const payload = (data || {}) as CrExtractionResult & { error?: string };
+      if (error || payload.error || payload.is_valid_cr === false) {
+        toast.error("تعذّر استخراج بيانات السجل — يمكنك الاستخراج يدوياً لاحقاً", { duration: 7000 });
+        return;
+      }
+      const result = payload as CrExtractionResult;
+      setCrExtraction(result);
+      setCrExtractionDone(true);
+      setDisclosure((prev) => ({
+        ...prev,
+        ...(result.business_activity && !prev.business_activity ? { business_activity: result.business_activity } : {}),
+        ...(result.city && !prev.city ? { city: result.city } : {}),
+        ...(result.district && !prev.district ? { district: result.district } : {}),
+      }));
+      toast.success("✨ تم اكتشاف سجلك التجاري واستخراج بياناته تلقائياً");
+    } catch (err) {
+      console.error("[unified] CR extraction failed:", err);
+      toast.error("تعذّر استخراج بيانات السجل — يمكنك الاستخراج يدوياً لاحقاً", { duration: 7000 });
+    } finally {
+      setCrExtracting(false);
+    }
+  }, []);
+
+  // Helper: classify uploaded files in batches of 3 with 1s delay
+  const classifyAfterUpload = useCallback(async (
+    id: string,
+    uploaded: Array<{ url: string; name: string; type: string }>,
+  ) => {
+    if (uploaded.length === 0) return;
+    setClassifyingFiles(true);
+    setClassifyProgress({ current: 0, total: uploaded.length });
+
+    const BATCH_SIZE = 3;
+    const DELAY_MS = 1000;
+    let done = 0;
+
+    for (let i = 0; i < uploaded.length; i += BATCH_SIZE) {
+      const batch = uploaded.slice(i, i + BATCH_SIZE);
+      await Promise.all(batch.map(async (f) => {
+        try {
+          await supabase.functions.invoke("classify-uploaded-file", {
+            body: {
+              listing_id: id,
+              file_url: f.url,
+              file_name: f.name,
+              file_type: f.type,
+            },
+          });
+        } catch (err) {
+          console.error(`[unified] classify failed: ${f.name}`, err);
+        } finally {
+          done += 1;
+          setClassifyProgress({ current: done, total: uploaded.length });
+        }
+      }));
+      if (i + BATCH_SIZE < uploaded.length) {
+        await new Promise((r) => setTimeout(r, DELAY_MS));
+      }
+    }
+
+    setClassifyingFiles(false);
+    toast.success(`تم تصنيف ${uploaded.length} ملف — راجعها قبل النشر`);
+  }, []);
+
+  // Public handler: unified upload entry point
+  const handleUnifiedUpload = useCallback(async (files: FileList) => {
+    if (!files || files.length === 0) return;
+    const id = await ensureListing();
+    if (!id) return;
+    setSaving(true);
+    try {
+      const uploaded = await uploadFilesToStorage(id, files);
+      if (uploaded.length === 0) {
+        toast.error("تعذّر رفع الملفات");
+        return;
+      }
+      await classifyAfterUpload(id, uploaded);
+    } finally {
+      setSaving(false);
+    }
+  }, [ensureListing, uploadFilesToStorage, classifyAfterUpload]);
+
+  // Public handler: confirm classifications → map to photos/documents and save
+  const handleConfirmClassifications = useCallback(async () => {
+    if (!listingId) return;
+
+    const { data, error } = await supabase
+      .from("file_classifications")
+      .select("*")
+      .eq("listing_id", listingId);
+
+    if (error || !data) {
+      toast.error("تعذّر قراءة التصنيفات");
+      return;
+    }
+
+    const photosByGroup: Record<string, string[]> = {
+      interior: [], exterior: [], equipment: [], signage: [], building: [], street: [],
+    };
+    const invoiceUrls: string[] = [];
+    const legalUrls: string[] = [];
+    const assetListUrls: string[] = [];
+    let crRegisterUrl: string | null = null;
+
+    const validPhotoSubs = new Set(["interior", "exterior", "equipment", "signage", "building", "street"]);
+
+    for (const c of data) {
+      switch (c.final_category) {
+        case "equipment_photo":
+          photosByGroup.equipment.push(c.file_url);
+          break;
+        case "property_photo": {
+          const sub = c.final_subcategory || "exterior";
+          if (validPhotoSubs.has(sub)) {
+            photosByGroup[sub].push(c.file_url);
+          } else {
+            console.warn(`[unified] unexpected photo subcategory "${sub}" — falling back to exterior`, c);
+            photosByGroup.exterior.push(c.file_url);
+          }
+          break;
+        }
+        case "invoice_document":
+          invoiceUrls.push(c.file_url);
+          break;
+        case "legal_document":
+          legalUrls.push(c.file_url);
+          if (c.final_subcategory === "commercial_register" && !crRegisterUrl) {
+            crRegisterUrl = c.file_url;
+          }
+          break;
+        case "asset_list":
+          assetListUrls.push(c.file_url);
+          break;
+        // rejected, unclassified → skip
+      }
+    }
+
+    const newDocuments: Array<{ type: string; files: string[] }> = [];
+    if (invoiceUrls.length > 0) newDocuments.push({ type: "invoice", files: invoiceUrls });
+    if (legalUrls.length > 0) newDocuments.push({ type: "legal", files: legalUrls });
+    if (assetListUrls.length > 0) newDocuments.push({ type: "asset_list", files: assetListUrls });
+
+    setPhotos(photosByGroup);
+    setUploadedDocs({
+      ...(invoiceUrls.length > 0 ? { invoice: invoiceUrls } : {}),
+      ...(legalUrls.length > 0 ? { legal: legalUrls } : {}),
+      ...(assetListUrls.length > 0 ? { asset_list: assetListUrls } : {}),
+    });
+
+    try {
+      await updateListing(listingId, { photos: photosByGroup, documents: newDocuments } as never);
+    } catch (err) {
+      console.error("[unified] save listing failed", err);
+      toast.error("تعذّر حفظ التصنيفات");
+      return;
+    }
+
+    setReviewDialogOpen(false);
+    toast.success("تم حفظ تصنيفات ملفاتك");
+
+    if (crRegisterUrl && !crExtractionDone) {
+      await triggerCrExtraction(crRegisterUrl);
+    }
+  }, [listingId, updateListing, crExtractionDone, triggerCrExtraction]);
+
+  // Public handler: manual CR re-extraction
+  const handleManualCrExtract = useCallback(async () => {
+    if (!listingId) return;
+    const { data, error } = await supabase
+      .from("file_classifications")
+      .select("file_url")
+      .eq("listing_id", listingId)
+      .eq("final_category", "legal_document")
+      .eq("final_subcategory", "commercial_register")
+      .limit(1)
+      .maybeSingle();
+
+    if (error || !data?.file_url) {
+      toast.error("لم يتم العثور على سجل تجاري — ارفع سجلك التجاري أولاً");
+      return;
+    }
+    await triggerCrExtraction(data.file_url);
+  }, [listingId, triggerCrExtraction]);
+
   // Shared state for step components
   const sharedState: CreateListingSharedState = {
     dealStructure, setDealStructure, photos, setPhotos, localPreviews, setLocalPreviews,
@@ -865,22 +1090,15 @@ const CreateListingPage = () => {
     stepDirection, totalPhotos, allPhotoUrls, imageReq, primaryDealLabel, disclosureScore,
     editingItemId, setEditingItemId, photoGroups, getGroupDisplayUrls, handleDrop, dynamicDocTypes,
     handleBulkDrop: (files: FileList) => handleBulkUploadFiles(files),
-    // ═══════════ Unified Upload (Commit 4) — stubs, full impl in Step E ═══════════
+    // ═══════════ Unified Upload (Commit 4 — Step E) ═══════════
     usesUnifiedUpload,
     classifyProgress,
     classifyingFiles,
     reviewDialogOpen,
     setReviewDialogOpen,
-    handleUnifiedUpload: async (files: FileList) => {
-      // TODO Step E: implement unified upload + classification
-      await handleBulkUploadFiles(files);
-    },
-    handleConfirmClassifications: async () => {
-      // TODO Step E: map final_category → photos/documents structure
-    },
-    handleManualCrExtract: async () => {
-      // TODO Step E: re-trigger extract-cr-data manually
-    },
+    handleUnifiedUpload,
+    handleConfirmClassifications,
+    handleManualCrExtract,
     unifiedFileCount,
     unifiedUnconfirmedCount,
   };
