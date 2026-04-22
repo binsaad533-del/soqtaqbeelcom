@@ -774,61 +774,13 @@ const ListingDetailsPage = () => {
                 )} />
               )}
 
-              {/* Documents — hidden from public, visible to owner */}
-              {documents.length > 0 && (
-                <div className="rounded-xl border border-border/40 bg-card p-4" dir="rtl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <FileText size={16} strokeWidth={1.3} className="text-primary" />
-                    <span className="text-sm font-medium text-foreground">المستندات والوثائق</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-                    <Shield size={12} />
-                    <span>
-                      {isOwner
-                        ? `${documents.length} مستند مرفوع — ظاهرة لك لأنك مالك الإعلان`
-                        : `${documents.length} مستند متاح — يمكن الاطلاع عليها بعد بدء التفاوض`}
-                    </span>
-                  </div>
+              {/* Documents — privacy-aware panel (Commit 4+5) */}
+              <ProtectedDocumentsPanel
+                listingId={listing.id}
+                ownerId={listing.owner_id}
+                legacyDocuments={documents}
+              />
 
-                  {isOwner ? (
-                    <div className="space-y-2">
-                      {documents.map((doc) => (
-                        <a
-                          key={doc.id}
-                          href={doc.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/20 px-3 py-2 text-xs text-foreground transition-colors hover:bg-muted/40"
-                        >
-                          <div className="flex min-w-0 items-center gap-2">
-                            <FileText size={12} className="shrink-0 text-primary" />
-                            <span className="truncate">{doc.label}</span>
-                          </div>
-                          <span className="inline-flex items-center gap-1 text-primary shrink-0">
-                            فتح
-                            <ExternalLink size={12} />
-                          </span>
-                        </a>
-                      ))}
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex flex-wrap gap-2">
-                        {documents.map((doc) => (
-                          <span key={doc.id} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted text-[11px] text-muted-foreground">
-                            <FileText size={10} />
-                            {doc.type || doc.label}
-                          </span>
-                        ))}
-                      </div>
-                      <p className="mt-3 text-[11px] text-muted-foreground/70 flex items-center gap-1">
-                        <MessageCircle size={10} />
-                        ابدأ التفاوض للاطلاع على الوثائق الكاملة
-                      </p>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
 
             <WhyOpportunityBox listing={listing} analysisCache={analysisCache} />

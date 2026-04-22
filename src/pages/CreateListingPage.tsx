@@ -998,6 +998,78 @@ const CreateListingPage = () => {
       return;
     }
 
+    // ─── Move sensitive files (legal/invoice) to private bucket ───
+    // Path: {owner_id}/{listing_id}/{classification_id}.{ext}
+    const ownerIdForPath = user?.id;
+    const sensitiveCategories = new Set(["legal_document", "invoice_document"]);
+    const PRIVATE_BUCKET = "listing-documents";
+    const LEGACY_BUCKET = "listings";
+
+    const parseLegacyPath = (url: string): string | null => {
+      const m = url.match(/\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/);
+      if (!m) return null;
+      if (m[1] !== LEGACY_BUCKET) return null;
+      return decodeURIComponent(m[2]);
+    };
+
+    if (ownerIdForPath) {
+      for (const c of data) {
+        if (!sensitiveCategories.has(c.final_category)) continue;
+        const legacyPath = parseLegacyPath(c.file_url || "");
+        if (!legacyPath) continue; // already in new bucket or unknown shape
+        try {
+          const ext = (c.file_name?.split(".").pop() || "bin").toLowerCase().slice(0, 8);
+          const newPath = `${ownerIdForPath}/${listingId}/${c.id}.${ext}`;
+          const { error: moveErr } = await supabase
+            .storage
+            .from(LEGACY_BUCKET)
+            .move(legacyPath, `__cross_bucket__/${newPath}`)
+            .then(() => ({ error: new Error("noop") }))
+            .catch(() => ({ error: new Error("noop") }));
+          // Supabase JS doesn't support cross-bucket move directly → fall back to copy+delete
+          void moveErr;
+
+          // Download then upload to new bucket (cross-bucket transfer)
+          const { data: blob, error: dlErr } = await supabase
+            .storage
+            .from(LEGACY_BUCKET)
+            .download(legacyPath);
+          if (dlErr || !blob) {
+            console.warn(`[migrate] download failed for ${c.file_name}`, dlErr);
+            continue;
+          }
+          const { error: upErr } = await supabase
+            .storage
+            .from(PRIVATE_BUCKET)
+            .upload(newPath, blob, {
+              contentType: c.file_type || "application/octet-stream",
+              upsert: true,
+            });
+          if (upErr) {
+            console.warn(`[migrate] upload failed for ${c.file_name}`, upErr);
+            continue;
+          }
+          // Best-effort delete from legacy bucket
+          await supabase.storage.from(LEGACY_BUCKET).remove([legacyPath]).catch(() => {});
+
+          // Update file_classifications.file_url to the new bucket path reference
+          const newRefUrl = `${PRIVATE_BUCKET}/${newPath}`;
+          const { error: updErr } = await supabase
+            .from("file_classifications")
+            .update({ file_url: newRefUrl })
+            .eq("id", c.id);
+          if (updErr) {
+            console.warn(`[migrate] db update failed for ${c.file_name}`, updErr);
+            continue;
+          }
+          c.file_url = newRefUrl; // reflect locally for the mapping below
+        } catch (err) {
+          console.warn(`[migrate] unexpected error for ${c.file_name}`, err);
+          // graceful: keep original URL
+        }
+      }
+    }
+
     const photosByGroup: Record<string, string[]> = {
       interior: [], exterior: [], equipment: [], signage: [], building: [], street: [],
     };
@@ -1065,7 +1137,7 @@ const CreateListingPage = () => {
     if (crRegisterUrl && !crExtractionDone) {
       await triggerCrExtraction(crRegisterUrl);
     }
-  }, [listingId, updateListing, crExtractionDone, triggerCrExtraction]);
+  }, [listingId, updateListing, crExtractionDone, triggerCrExtraction, user?.id]);
 
   // Public handler: manual CR re-extraction
   const handleManualCrExtract = useCallback(async () => {
