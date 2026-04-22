@@ -1127,6 +1127,65 @@ export type Database = {
           },
         ]
       }
+      file_classifications: {
+        Row: {
+          ai_category: string
+          ai_confidence: string
+          ai_reasoning: string | null
+          ai_subcategory: string | null
+          classified_at: string
+          confirmed_at: string | null
+          file_name: string
+          file_type: string | null
+          file_url: string
+          final_category: string
+          final_subcategory: string | null
+          id: string
+          is_confirmed: boolean
+          listing_id: string
+        }
+        Insert: {
+          ai_category: string
+          ai_confidence: string
+          ai_reasoning?: string | null
+          ai_subcategory?: string | null
+          classified_at?: string
+          confirmed_at?: string | null
+          file_name: string
+          file_type?: string | null
+          file_url: string
+          final_category: string
+          final_subcategory?: string | null
+          id?: string
+          is_confirmed?: boolean
+          listing_id: string
+        }
+        Update: {
+          ai_category?: string
+          ai_confidence?: string
+          ai_reasoning?: string | null
+          ai_subcategory?: string | null
+          classified_at?: string
+          confirmed_at?: string | null
+          file_name?: string
+          file_type?: string | null
+          file_url?: string
+          final_category?: string
+          final_subcategory?: string | null
+          id?: string
+          is_confirmed?: boolean
+          listing_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_classifications_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fraud_flags: {
         Row: {
           created_at: string
@@ -1566,6 +1625,7 @@ export type Database = {
           surveillance_cameras: string | null
           title: string | null
           updated_at: string
+          uses_unified_upload: boolean
         }
         Insert: {
           ai_analysis_cache?: Json | null
@@ -1625,6 +1685,7 @@ export type Database = {
           surveillance_cameras?: string | null
           title?: string | null
           updated_at?: string
+          uses_unified_upload?: boolean
         }
         Update: {
           ai_analysis_cache?: Json | null
@@ -1684,6 +1745,7 @@ export type Database = {
           surveillance_cameras?: string | null
           title?: string | null
           updated_at?: string
+          uses_unified_upload?: boolean
         }
         Relationships: []
       }
