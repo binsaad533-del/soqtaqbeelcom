@@ -792,7 +792,21 @@ const CreateListingPage = () => {
         deal_disclosures: dealStructure.requiredDisclosures, required_documents: dealStructure.requiredDocuments,
         ai_structure_validation: dealCheckResult || null, location_lat: locationLat, location_lng: locationLng,
         area_sqm: areaSqm ? Number(areaSqm) : null, status: "published", published_at: new Date().toISOString(),
-        title: isCrOnly ? `سجل تجاري — ${crExtraction?.entity_name || disclosure.business_activity || "مشروع"}, ${disclosure.city || ""}` : `${disclosure.business_activity || "مشروع"} — ${disclosure.district || ""}, ${disclosure.city || ""}`,
+        title: (() => {
+          const buildTitle = (parts: (string | null | undefined)[]) =>
+            parts.map((p) => (p || "").trim()).filter(Boolean).join(" • ");
+          return isCrOnly
+            ? buildTitle([
+                "سجل تجاري",
+                crExtraction?.entity_name || disclosure.business_activity || "مشروع",
+                disclosure.city,
+              ])
+            : buildTitle([
+                disclosure.business_activity || "مشروع",
+                disclosure.district,
+                disclosure.city,
+              ]);
+        })(),
       } as never);
       if (error) { console.error("Publish failed:", error); toast.error("فشل نشر الإعلان"); setSaving(false); return; }
       await logAudit("listing_published", "listing", listingId, { title: disclosure.business_activity }).catch(() => {});
