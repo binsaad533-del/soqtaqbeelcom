@@ -72,6 +72,7 @@ const TicketDetailPage = lazy(() => import("./pages/TicketDetailPage"));
 const AdminRolesPage = lazy(() => import("./pages/AdminRolesPage"));
 const AdminPriceTestPage = lazy(() => import("./pages/AdminPriceTestPage"));
 const AdminTestRealListingPage = lazy(() => import("./pages/AdminTestRealListingPage"));
+const DevTestClassifierPage = lazy(() => import("./pages/DevTestClassifierPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -308,6 +309,16 @@ const App = () => (
                 />
                 <Route path="/admin/price-test" element={<AdminPriceTestPage />} />
                 <Route path="/admin/test-real-listing" element={<AdminTestRealListingPage />} />
+                <Route
+                  path="/dev/test-classifier"
+                  element={
+                    <ProtectedRoute allowedRoles={["platform_owner"]}>
+                      <PageErrorBoundary label="اختبار المصنّف">
+                        <DevTestClassifierPage />
+                      </PageErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/unsubscribe" element={<UnsubscribePage />} />
                 <Route path="/pdf-preview" element={<PdfPreviewPage />} />
                 <Route path="*" element={<NotFound />} />
