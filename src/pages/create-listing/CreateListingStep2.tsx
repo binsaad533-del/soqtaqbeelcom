@@ -36,6 +36,7 @@ const CreateListingStep2 = ({ state }: Props) => {
     uploadingGroup,
     uploadProgress,
     uploadedDocs,
+    docConfidence,
     setActivePhotoGroup,
     setActiveDocType,
     fileInputRef,
