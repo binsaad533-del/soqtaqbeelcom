@@ -74,7 +74,7 @@ const CreateListingStep2Unified = ({ state }: Props) => {
           صور المعدات والمكان + المستندات (PDF / Excel / Word) — كل شيء في منطقة رفع واحدة
         </p>
         <p className="text-sm font-semibold text-primary">
-          ✦ بدون مجموعات يدوية ✦
+          ومقبل .. طحطوح الصفقات بيكمل الباقي
         </p>
       </div>
 
