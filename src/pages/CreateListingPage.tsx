@@ -831,7 +831,7 @@ const CreateListingPage = () => {
   // Shared state for step components
   const sharedState: CreateListingSharedState = {
     dealStructure, setDealStructure, photos, setPhotos, localPreviews, setLocalPreviews,
-    uploadingGroup, setUploadingGroup, uploadProgress, setUploadProgress, uploadedDocs, setUploadedDocs,
+    uploadingGroup, setUploadingGroup, uploadProgress, setUploadProgress, uploadedDocs, setUploadedDocs, docConfidence,
     activePhotoGroup, setActivePhotoGroup, activeDocType, setActiveDocType,
     fileInputRef: fileInputRef as React.RefObject<HTMLInputElement>, docInputRef: docInputRef as React.RefObject<HTMLInputElement>, bulkInputRef: bulkInputRef as React.RefObject<HTMLInputElement>,
     draggingGroup, setDraggingGroup, fileStatuses, setFileStatuses,
