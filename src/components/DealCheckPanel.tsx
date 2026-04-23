@@ -883,6 +883,12 @@ interface PricingInfo {
   price_range?: { min?: number; max?: number };
   disclaimer?: string | null;
   priced_at?: string;
+  // ⭐ حقول OLV-TAQEEM (Commit 2) — اختيارية للتوافق الخلفي
+  market_value_sar?: number | null;
+  depreciation_rate?: number | null;
+  olv_discount?: number | null;
+  condition_taqeem?: string | null;
+  valuation_method?: "OLV-TAQEEM" | string | null;
 }
 
 interface InventoryItem {
@@ -932,9 +938,33 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
         <div className="text-left shrink-0 flex flex-col items-end gap-1">
           {!requiresInspection && pricing?.price_sar ? (
             <>
-              <div className="text-sm font-semibold tabular-nums">
-                {pricing.price_sar.toLocaleString("en-US")} <span className="text-[10px] text-muted-foreground font-normal">ر.س</span>
+              {/* القيمة السوقية (إن وُجدت ومختلفة عن قيمة التقبيل) */}
+              {pricing.market_value_sar && pricing.market_value_sar !== pricing.price_sar && (
+                <div className="text-[10px] text-muted-foreground tabular-nums">
+                  القيمة السوقية:{" "}
+                  <span className="font-medium text-foreground/70">
+                    {pricing.market_value_sar.toLocaleString("en-US")} ر.س
+                  </span>
+                </div>
+              )}
+
+              {/* قيمة التقبيل (السعر الأساسي) */}
+              <div className="flex items-baseline gap-1 tabular-nums">
+                {pricing.market_value_sar && pricing.market_value_sar !== pricing.price_sar && (
+                  <span className="text-[10px] text-muted-foreground">قيمة التقبيل:</span>
+                )}
+                <span className="text-sm font-semibold text-foreground">
+                  {pricing.price_sar.toLocaleString("en-US")} <span className="text-[10px] text-muted-foreground font-normal">ر.س</span>
+                </span>
               </div>
+
+              {/* نسبة OLV (إن وُجدت وكانت < 1) */}
+              {pricing.olv_discount && pricing.olv_discount < 1 && (
+                <div className="text-[10px] text-muted-foreground tabular-nums">
+                  خصم التصفية المنظمة {Math.round((1 - pricing.olv_discount) * 100)}%
+                </div>
+              )}
+
               <span className={cn("text-[10px] px-2 py-0.5 rounded-md border", style.bg, style.text, style.border)}>
                 {style.label}
               </span>
@@ -1208,6 +1238,14 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
     (sum, a) => sum + (a.pricing?.price_sar || 0) * (a.quantity || 1),
     0
   );
+  // ⭐ Total Market Value (TAQEEM) — fallback to price_sar if market_value_sar missing
+  const totalMarketValue = priced.reduce(
+    (sum, a) => {
+      const mv = a.pricing?.market_value_sar ?? a.pricing?.price_sar ?? 0;
+      return sum + mv * (a.quantity || 1);
+    },
+    0
+  );
   const inspectionCount = requiresInspection.length;
   const pricedCount = priced.length;
   const statusInfo = PRICING_STATUS_LABEL[pricingStatus] || PRICING_STATUS_LABEL.idle;
@@ -1257,10 +1295,25 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
               </div>
             </div>
             <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg p-3 text-center">
-              <div className="text-[10px] text-emerald-700 dark:text-emerald-300">القيمة المُسعّرة</div>
-              <div className="text-lg font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
-                {totalValue.toLocaleString("en-US")} <span className="text-[10px] font-normal">ر.س</span>
-              </div>
+              {totalMarketValue > totalValue ? (
+                <>
+                  <div className="text-[10px] text-muted-foreground tabular-nums">
+                    سوقية: {totalMarketValue.toLocaleString("en-US")} ر.س
+                  </div>
+                  <div className="text-[10px] text-emerald-700 dark:text-emerald-300 mt-0.5">قيمة التقبيل</div>
+                  <div className="text-lg font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
+                    {totalValue.toLocaleString("en-US")} <span className="text-[10px] font-normal">ر.س</span>
+                  </div>
+                  <div className="text-[9px] text-muted-foreground mt-0.5">التصفية المنظمة — OLV</div>
+                </>
+              ) : (
+                <>
+                  <div className="text-[10px] text-emerald-700 dark:text-emerald-300">القيمة المُسعّرة</div>
+                  <div className="text-lg font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
+                    {totalValue.toLocaleString("en-US")} <span className="text-[10px] font-normal">ر.س</span>
+                  </div>
+                </>
+              )}
             </div>
             <div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3 text-center">
               <div className="text-[10px] text-amber-700 dark:text-amber-300">يتطلب معاينة جساس</div>
@@ -1337,7 +1390,9 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
                         {pricedCount}
                       </span>
                       <span className="text-[10px] text-emerald-700/70 dark:text-emerald-300/70 mr-auto truncate tabular-nums">
-                        قيمة إجمالية: {totalValue.toLocaleString("en-US")} ر.س
+                        {totalMarketValue > totalValue
+                          ? <>سوقية: {totalMarketValue.toLocaleString("en-US")} · تقبيل: {totalValue.toLocaleString("en-US")} ر.س</>
+                          : <>قيمة إجمالية: {totalValue.toLocaleString("en-US")} ر.س</>}
                       </span>
                       <ChevronDown size={14} strokeWidth={1.6} className="text-emerald-600/60 dark:text-emerald-400/60 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
