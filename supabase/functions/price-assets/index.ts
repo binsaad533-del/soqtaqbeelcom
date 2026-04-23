@@ -330,6 +330,55 @@ function calculateMedian(prices: number[]): number {
     : sorted[mid];
 }
 
+/**
+ * يستنتج فئة الأصل من الاسم/النوع/الماركة
+ * يُستخدم حين يكون asset.category فارغاً أو generic_equipment
+ */
+function inferCategory(asset: any): string {
+  // 1) إن كان category موجوداً فعلاً ومحدداً، استخدمه
+  if (asset.category && asset.category !== "generic_equipment") {
+    return asset.category;
+  }
+  // 2) asset_type (من detect-assets)
+  const assetType = (asset.asset_type || "").toLowerCase();
+  const name = (asset.name || "").toLowerCase();
+  const combined = `${assetType} ${name}`;
+
+  // 3) كلمات دلالية للمركبات
+  const vehicleKeywords = [
+    "سيارة", "مركبة", "شاحنة", "وانيت", "بيك أب", "vehicle", "truck",
+    "car", "pickup", "باص", "حافلة", "دراجة", "motorcycle"
+  ];
+  if (vehicleKeywords.some(kw => combined.includes(kw))) {
+    return "vehicle";
+  }
+
+  // 4) كلمات دلالية للأثاث
+  const furnitureKeywords = [
+    "مكتب", "كرسي", "طاولة", "خزانة", "رف", "أريكة", "سرير",
+    "مطبخ صغير", "أوفيس", "محطة عمل", "desk", "chair", "table",
+    "furniture", "كابينة"
+  ];
+  if (furnitureKeywords.some(kw => combined.includes(kw))) {
+    return "furniture";
+  }
+
+  // 5) كلمات دلالية للصناعي
+  const industrialKeywords = [
+    "ماكينة", "آلة", "منشار", "مخرطة", "مطحنة", "معدة إنتاج",
+    "ضاغط", "كمبروسر", "كمبرسر", "مولد", "machine", "saw",
+    "router", "cnc", "compressor", "شفاط", "راوتر", "cutter",
+    "تخريز", "لحام", "drilling", "دريل", "خلاط", "فرن صناعي",
+    "industrial", "press", "مكبس"
+  ];
+  if (industrialKeywords.some(kw => combined.includes(kw))) {
+    return "industrial";
+  }
+
+  // 6) fallback
+  return "default";
+}
+
 function getUsedDiscount(condition: string, category: string): number {
   if (category === "vehicle") {
     const v: any = { "جديد": 0.95, "شبه جديد": 0.85, "جيد": 0.70, "مستعمل": 0.60, "تالف": 0.35 };
@@ -350,7 +399,7 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
     const pricingResult = calculatePricing(
       invoicePrice.price,
       asset.condition,
-      asset.category
+      inferCategory(asset)
     );
     const adjustedPrice = pricingResult.price_sar;
     const currencyNote = invoicePrice.currency === "USD→SAR"
@@ -417,7 +466,7 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
   const medianNew = calculateMedian(newPrices);
   const medianUsed = calculateMedian(usedPrices);
   const medianAlibaba = calculateMedian(alibabaPrices);
-  const category = asset.category;
+  const category = inferCategory(asset);
 
   let recommendedPrice = 0;
   let confidence = "منخفض";
