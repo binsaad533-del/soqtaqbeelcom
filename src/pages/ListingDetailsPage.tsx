@@ -791,13 +791,19 @@ const ListingDetailsPage = () => {
             {/* دراسة الجدوى الاقتصادية وتحليل المنافسين */}
             <FeasibilityStudyPanel listing={listing} analysisCache={analysisCache} isOwner={isOwner} />
 
-            {/* التحليل المالي ومحاكاة الصفقة */}
+            {/* محاكاة الصفقة */}
+            {/*
+              FinancialAnalysisPanel مُعطّل مؤقتاً — المعادلة client-side تعطي ROI سالباً
+              يتعارض مع FeasibilityStudyPanel (AI) في نفس الصفحة.
+              FeasibilityStudyPanel يعرض التحليل المالي بجودة أعلى.
+              للإعادة: احذف التعليق فقط.
+            */}
             {!isOwner && listing.price && (
               <div className="space-y-3">
-                <FinancialAnalysisPanel
+                {/* <FinancialAnalysisPanel
                   price={listing.price}
                   annualRent={listing.annual_rent || undefined}
-                />
+                /> */}
                 <DealSimulationPanel listingId={listing.id} />
               </div>
             )}
