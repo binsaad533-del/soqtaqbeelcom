@@ -158,9 +158,13 @@ async function processListing(listingId: string, force: boolean) {
           ai_analysis_updated_at: new Date().toISOString(),
         }).eq("id", listingId);
 
-        // Fire-and-forget price-assets
+        // Await price-assets (inside background task — does not affect HTTP response).
+        // Previously fire-and-forget, but the request was often killed when the parent
+        // worker finished, leaving inventory un-priced. With Commit 2 (B) the inventory
+        // is already seeded by detect-assets, so a price-assets failure is non-fatal.
         try {
-          fetch(`${supabaseUrl}/functions/v1/price-assets`, {
+          console.log(`[auto-analyze:bg] invoking price-assets for ${listingId}`);
+          const priceResp = await fetch(`${supabaseUrl}/functions/v1/price-assets`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${serviceKey}`,
@@ -168,9 +172,31 @@ async function processListing(listingId: string, force: boolean) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ listing_id: listingId, force_refresh: false }),
-          }).catch(err => console.error("price-assets background call failed:", err));
-        } catch (e) {
-          console.error("Failed to trigger price-assets:", e);
+          });
+
+          if (!priceResp.ok) {
+            const errText = await priceResp.text().catch(() => "unknown");
+            console.error(
+              `[auto-analyze:bg] price-assets failed status=${priceResp.status}: ${errText}`
+            );
+            await supabase.from("audit_logs").insert({
+              action: "price_assets_failed",
+              resource_type: "listing",
+              resource_id: listingId,
+              details: { status: priceResp.status, error: errText.slice(0, 500) },
+            }).then(() => {}, () => {}); // best-effort
+          } else {
+            console.log(`[auto-analyze:bg] price-assets completed for ${listingId}`);
+          }
+        } catch (err) {
+          console.error(`[auto-analyze:bg] price-assets call exception:`, err);
+          await supabase.from("audit_logs").insert({
+            action: "price_assets_exception",
+            resource_type: "listing",
+            resource_id: listingId,
+            details: { error: String(err).slice(0, 500) },
+          }).then(() => {}, () => {});
+          // Do not rethrow — auto-analyze continues with the rest of its work.
         }
       } else if (assetResult?.error) {
         console.error("detect-assets returned error:", assetResult.error);
