@@ -791,19 +791,16 @@ const ListingDetailsPage = () => {
             {/* دراسة الجدوى الاقتصادية وتحليل المنافسين */}
             <FeasibilityStudyPanel listing={listing} analysisCache={analysisCache} isOwner={isOwner} />
 
-            {/* محاكاة الصفقة */}
             {/*
-              FinancialAnalysisPanel مُعطّل مؤقتاً — المعادلة client-side تعطي ROI سالباً
-              يتعارض مع FeasibilityStudyPanel (AI) في نفس الصفحة.
-              FeasibilityStudyPanel يعرض التحليل المالي بجودة أعلى.
-              للإعادة: احذف التعليق فقط.
+              FinancialAnalysisPanel مُعطّل.
+              السبب: معادلة client-side (السعر × 8%) لا تعكس الإيراد الفعلي لمصنع تشغيلي.
+              البديل: FeasibilityStudyPanel (AI) يعرض تحليلاً مالياً أدق من السيناريوهات.
+              للإعادة بعد إصلاح المعادلة: أزل هذا التعليق.
             */}
+
+            {/* محاكاة الصفقة */}
             {!isOwner && listing.price && (
               <div className="space-y-3">
-                {/* <FinancialAnalysisPanel
-                  price={listing.price}
-                  annualRent={listing.annual_rent || undefined}
-                /> */}
                 <DealSimulationPanel listingId={listing.id} />
               </div>
             )}
