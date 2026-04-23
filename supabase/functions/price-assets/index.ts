@@ -482,6 +482,7 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
     sources,
     price_range: priceRange,
     disclaimer,
+    pricingResult,
   };
 }
 
@@ -665,6 +666,12 @@ Deno.serve(async (req) => {
         disclaimer: pricing.disclaimer || null,
         priced_at: new Date().toISOString(),
         from_cache: pricing.from_cache,
+        // 🆕 حقول منهجية TAQEEM/OLV
+        market_value_sar: pricing.pricingResult?.market_value_sar ?? null,
+        depreciation_rate: pricing.pricingResult?.depreciation_rate ?? null,
+        olv_discount: pricing.pricingResult?.olv_discount ?? null,
+        condition_taqeem: pricing.pricingResult?.condition_taqeem ?? null,
+        valuation_method: "OLV-TAQEEM",
       }
     };
   });
