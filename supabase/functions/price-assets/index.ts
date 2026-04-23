@@ -1,4 +1,5 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { calculatePricing, applyOlvOnly } from "../_shared/depreciation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -346,8 +347,12 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
   // ✅ أولوية #1: السعر من فاتورة البائع المرفقة (مصدر رسمي)
   const invoicePrice = extractPriceFromDetails(asset.details || "");
   if (invoicePrice) {
-    const multiplier = getUsedDiscount(asset.condition, asset.category);
-    const adjustedPrice = Math.round(invoicePrice.price * multiplier);
+    const pricingResult = calculatePricing(
+      invoicePrice.price,
+      asset.condition,
+      asset.category
+    );
+    const adjustedPrice = pricingResult.price_sar;
     const currencyNote = invoicePrice.currency === "USD→SAR"
       ? " (محوّل من USD بسعر 3.75 ر.س/$)"
       : "";
@@ -356,8 +361,7 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
       confidence: "عالي",
       reasoning:
         `${invoicePrice.price.toLocaleString("en-US")} ر.س${currencyNote} ` +
-        `(من فاتورة الشراء المرفقة) × ${Math.round(multiplier * 100)}% ` +
-        `(حالة ${asset.condition})`,
+        `(من فاتورة الشراء المرفقة) — ${pricingResult.reasoning}`,
       source: "invoice_extracted",
       sources: [{
         domain: "فاتورة البائع",
@@ -372,7 +376,8 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
       },
       disclaimer:
         "السعر مستخرج من فاتورة البائع المرفقة — راجع الفاتورة الأصلية " +
-        "في قسم الوثائق للتأكيد. تم تطبيق معامل الاستهلاك حسب حالة الأصل.",
+        "في قسم الوثائق للتأكيد. تم تطبيق معامل الإهلاك (TAQEEM) ومعامل OLV.",
+      pricingResult,
     };
   }
 
@@ -419,27 +424,38 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
   let reasoning = "";
   let source = "";
   let priceRange: any = null;
+  let pricingResult: any = undefined;
 
   if (medianUsed > 0 && usedPrices.length >= 2) {
-    recommendedPrice = medianUsed;
+    // ⭐ إصلاح: تطبيق OLV على السعر المستعمل (السوق يعكس الحالة، نحتاج خصم التصفية فقط)
+    const olvResult = applyOlvOnly(medianUsed, asset.condition, category);
+    recommendedPrice = olvResult.price_sar;
     confidence = usedPrices.length >= 3 ? "عالي" : "متوسط";
-    reasoning = `متوسط من ${usedPrices.length} إعلان مستعمل في السوق السعودي`;
+    reasoning = `متوسط من ${usedPrices.length} إعلان مستعمل في السوق السعودي — ${olvResult.reasoning}`;
     source = "used_market";
     priceRange = { min: Math.min(...usedPrices), max: Math.max(...usedPrices) };
+    pricingResult = {
+      market_value_sar: olvResult.market_value_sar,
+      olv_discount: olvResult.olv_discount,
+      depreciation_rate: null,
+      condition_taqeem: null,
+    };
   } else if (medianNew > 0) {
-    const multiplier = getUsedDiscount(asset.condition, category);
-    recommendedPrice = Math.round(medianNew * multiplier);
+    const pr = calculatePricing(medianNew, asset.condition, category);
+    recommendedPrice = pr.price_sar;
     confidence = newPrices.length >= 5 ? "عالي" : newPrices.length >= 3 ? "متوسط" : "منخفض";
-    reasoning = `${medianNew} ر.س (سعر جديد) × ${Math.round(multiplier * 100)}% (حالة ${asset.condition})`;
+    reasoning = `${medianNew} ر.س (سعر جديد) — ${pr.reasoning}`;
     source = "new_with_discount";
     priceRange = { min: Math.min(...newPrices), max: Math.max(...newPrices) };
+    pricingResult = pr;
   } else if (medianAlibaba > 0) {
-    const multiplier = getUsedDiscount(asset.condition, category);
-    recommendedPrice = Math.round(medianAlibaba * multiplier);
+    const pr = calculatePricing(medianAlibaba, asset.condition, category);
+    recommendedPrice = pr.price_sar;
     confidence = "منخفض"; // دائماً منخفض لـ Alibaba بسبب عدم دقة السوق المحلي
-    reasoning = `${medianAlibaba} ر.س (من Alibaba) × ${Math.round(multiplier * 100)}% — سعر تقديري من مصادر عالمية`;
+    reasoning = `${medianAlibaba} ر.س (من Alibaba) — ${pr.reasoning} — سعر تقديري من مصادر عالمية`;
     source = "alibaba_fallback";
     priceRange = { min: Math.min(...alibabaPrices), max: Math.max(...alibabaPrices) };
+    pricingResult = pr;
   } else {
     confidence = "يتطلب_معاينة";
     reasoning = "لم نجد أسعاراً موثوقة في السوق";
