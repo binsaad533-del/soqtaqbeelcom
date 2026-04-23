@@ -582,8 +582,8 @@ Deno.serve(async (req) => {
     uncachedGroups.map(async (g) => {
       const result = await priceAsset(g.representative, SERPER_API_KEY, LOVABLE_API_KEY);
 
-      // حفظ في الـ cache
-      if (result.source !== "vague_asset_skip") {
+      // حفظ في الـ cache (لا نخزّن invoice_extracted لأن السعر خاص بفاتورة هذا البائع)
+      if (result.source !== "vague_asset_skip" && result.source !== "invoice_extracted") {
         await supabase.from("market_price_cache").upsert({
           cache_key: g.key,
           brand: g.representative.brand,
