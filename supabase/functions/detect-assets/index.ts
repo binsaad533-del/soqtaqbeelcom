@@ -1162,6 +1162,50 @@ serve(async (req) => {
         ai_assets_combined: combined.assets,
         ai_analysis_updated_at: new Date().toISOString(),
       });
+
+      // Seed `inventory` if currently empty — protects UI from showing
+      // "Requires Inspection" when price-assets fails or is killed mid-run.
+      // price-assets will overwrite this later with priced versions.
+      // Trigger loop is safe: Commit 1 (D) excludes `inventory` from watch list
+      // and adds a 30s debounce on `ai_analysis_updated_at`.
+      if (adminClient && listingId) {
+        try {
+          const { data: currentListing, error: readErr } = await adminClient
+            .from("listings")
+            .select("inventory")
+            .eq("id", listingId)
+            .single();
+
+          if (readErr) throw readErr;
+
+          const currentInventory = currentListing?.inventory;
+          const isEmpty =
+            !currentInventory ||
+            !Array.isArray(currentInventory) ||
+            currentInventory.length === 0;
+
+          if (isEmpty) {
+            await writePartial("inventory_seed", {
+              inventory: combined.assets,
+            });
+            console.log(
+              `[detect-assets] inventory seeded with ${combined.assets.length} assets`
+            );
+          } else {
+            console.log(
+              `[detect-assets] inventory already populated (${
+                Array.isArray(currentInventory) ? currentInventory.length : "?"
+              } items), skipping seed`
+            );
+          }
+        } catch (err) {
+          // Graceful: do not fail the whole detect run if seed fails
+          console.warn(
+            `[detect-assets] inventory seed failed (non-fatal):`,
+            err instanceof Error ? err.message : err
+          );
+        }
+      }
     }
 
     // --- VALUATION ---
