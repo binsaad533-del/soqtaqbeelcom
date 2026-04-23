@@ -815,7 +815,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               )}
 
               <div className="text-[10px] text-muted-foreground/60 text-center pt-2 border-t border-border/20">
-                هذا التحليل استرشادي ولا يُعد تقييماً رسمياً مرخصاً. يُنصح بالتحقق الميداني والاستشارة المتخصصة قبل اتخاذ القرار النهائي.
+                هذا التحليل استرشادي بمنهجية OLV وفق معايير تقييم السعودية (TAQEEM). ليس بديلاً عن تقييم معتمد. للتقييم الرسمي: جساس (قريباً).
               </div>
 
               <div className="flex justify-center pt-1">
@@ -1169,16 +1169,16 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
 
       {/* CTA — only when inspection is needed */}
       {inspectionCount > 0 && (
-        <a
-          href={JASAAS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex w-full items-center justify-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+        <div
+          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground/70 cursor-not-allowed"
+          title="قريباً — جساس للتقييم المعتمد"
+          aria-disabled="true"
         >
-          <Building2 size={13} strokeWidth={1.8} />
           احجز معاينة جساس للدقة
-          <ExternalLink size={11} strokeWidth={1.8} />
-        </a>
+          <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary">
+            قريباً
+          </span>
+        </div>
       )}
     </div>
   );
@@ -1263,6 +1263,24 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
         </span>
       </h4>
 
+      {/* TAQEEM / OLV Disclaimer */}
+      <div className="mt-3 mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
+        <div className="flex items-start gap-2">
+          <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+          <div className="text-xs text-muted-foreground leading-relaxed">
+            الأسعار محسوبة بمنهجية{" "}
+            <span className="font-semibold text-foreground">
+              قيمة التصفية المنظمة (OLV)
+            </span>
+            {" "}وفقاً لمعايير{" "}
+            <span className="font-semibold text-foreground">
+              الهيئة السعودية للمقيمين المعتمدين (تقييم)
+            </span>
+            {" "}والمعيار الدولي IVS 160.1. تشمل الصيغة: إهلاك مادي حسب حالة الأصل × خصم التصفية المنظمة. للتقييم الرسمي المعتمد، يُرجى الاستعانة بجساس للتقييم.
+          </div>
+        </div>
+      </div>
+
       {/* In-progress state */}
       {isInProgress && (
         <div className="rounded-xl border border-border bg-muted/30 p-5 flex flex-col items-center gap-3">
@@ -1342,15 +1360,17 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
                   <ShieldCheck size={11} strokeWidth={1.6} />
                   الهيئة السعودية للمقيمين المعتمدين (تقييم)
                 </span>
-                <a
-                  href={JASAAS_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                <div
+                  className="inline-flex items-center gap-2 rounded-lg bg-muted px-4 py-2.5 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-70"
+                  title="قريباً — جساس للتقييم المعتمد"
+                  aria-disabled="true"
                 >
+                  <ShieldCheck className="h-4 w-4" />
                   احجز معاينة مع جساس للتقييم المعتمد
-                  <ExternalLink size={12} strokeWidth={1.8} />
-                </a>
+                  <span className="mr-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    قريباً
+                  </span>
+                </div>
               </div>
             </div>
           )}
