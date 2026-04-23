@@ -68,7 +68,58 @@ function normalizeAsset(raw: any, idx: number) {
     category: raw.category || "generic_equipment",
     qty: raw.qty || raw.quantity || 1,
     included: raw.included !== false,
+    // ✅ حقول إضافية للسماح بفحص فاتورة البائع داخل priceAsset
+    details: raw.details || "",
+    source: raw.source || "manual",
   };
+}
+
+/**
+ * يستخرج السعر من حقل details الذي يكتبه detect-assets عند تحليل الفواتير.
+ * يدعم: العربية ("السعر: 180,000.00 ريال سعودي")، الإنجليزية، والأرقام العربية-الهندية.
+ * يعيد العملة لتمييز التحويل من USD.
+ */
+function extractPriceFromDetails(
+  details: string,
+): { price: number; currency: "SAR" | "USD→SAR" } | null {
+  if (!details || typeof details !== "string") return null;
+
+  // تطبيع الأرقام العربية-الهندية والفارسية → ASCII
+  const normalized = details
+    .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+    .replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
+
+  // أنماط الريال السعودي (الأولوية)
+  const sarPatterns = [
+    /(?:السعر|سعر|الثمن|ثمن)\s*:?\s*(\d[\d,]*(?:\.\d+)?)\s*(?:ريال\s*سعودي|ريال|ر\.?\s*س|sar)/i,
+    /(\d[\d,]*(?:\.\d+)?)\s*(?:ريال\s*سعودي|ريال|ر\.?\s*س|sar)\b/i,
+    /(?:price|cost|amount)\s*:?\s*(\d[\d,]*(?:\.\d+)?)\s*sar/i,
+  ];
+  for (const p of sarPatterns) {
+    const m = normalized.match(p);
+    if (m) {
+      const num = parseFloat(m[1].replace(/,/g, ""));
+      if (Number.isFinite(num) && num > 0) return { price: num, currency: "SAR" };
+    }
+  }
+
+  // أنماط الدولار (تحويل × 3.75)
+  const usdPatterns = [
+    /(?:price|cost)\s*:?\s*\$?\s*(\d[\d,]*(?:\.\d+)?)\s*(?:usd|\$)/i,
+    /\$\s*(\d[\d,]*(?:\.\d+)?)/,
+    /(\d[\d,]*(?:\.\d+)?)\s*(?:دولار)/i,
+  ];
+  for (const p of usdPatterns) {
+    const m = normalized.match(p);
+    if (m) {
+      const num = parseFloat(m[1].replace(/,/g, ""));
+      if (Number.isFinite(num) && num > 0) {
+        return { price: Math.round(num * 3.75), currency: "USD→SAR" };
+      }
+    }
+  }
+
+  return null;
 }
 
 function isVagueAsset(asset: any): boolean {
@@ -292,6 +343,39 @@ function getUsedDiscount(condition: string, category: string): number {
 }
 
 async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
+  // ✅ أولوية #1: السعر من فاتورة البائع المرفقة (مصدر رسمي)
+  const invoicePrice = extractPriceFromDetails(asset.details || "");
+  if (invoicePrice) {
+    const multiplier = getUsedDiscount(asset.condition, asset.category);
+    const adjustedPrice = Math.round(invoicePrice.price * multiplier);
+    const currencyNote = invoicePrice.currency === "USD→SAR"
+      ? " (محوّل من USD بسعر 3.75 ر.س/$)"
+      : "";
+    return {
+      price_sar: adjustedPrice,
+      confidence: "عالي",
+      reasoning:
+        `${invoicePrice.price.toLocaleString("en-US")} ر.س${currencyNote} ` +
+        `(من فاتورة الشراء المرفقة) × ${Math.round(multiplier * 100)}% ` +
+        `(حالة ${asset.condition})`,
+      source: "invoice_extracted",
+      sources: [{
+        domain: "فاتورة البائع",
+        url: "",
+        title: "مستخرج من المستندات المرفقة",
+        price: invoicePrice.price,
+        is_new: asset.condition === "جديد",
+      }],
+      price_range: {
+        min: adjustedPrice,
+        max: invoicePrice.price,
+      },
+      disclaimer:
+        "السعر مستخرج من فاتورة البائع المرفقة — راجع الفاتورة الأصلية " +
+        "في قسم الوثائق للتأكيد. تم تطبيق معامل الاستهلاك حسب حالة الأصل.",
+    };
+  }
+
   if (isVagueAsset(asset)) {
     return {
       price_sar: 0,
@@ -498,8 +582,8 @@ Deno.serve(async (req) => {
     uncachedGroups.map(async (g) => {
       const result = await priceAsset(g.representative, SERPER_API_KEY, LOVABLE_API_KEY);
 
-      // حفظ في الـ cache
-      if (result.source !== "vague_asset_skip") {
+      // حفظ في الـ cache (لا نخزّن invoice_extracted لأن السعر خاص بفاتورة هذا البائع)
+      if (result.source !== "vague_asset_skip" && result.source !== "invoice_extracted") {
         await supabase.from("market_price_cache").upsert({
           cache_key: g.key,
           brand: g.representative.brand,
