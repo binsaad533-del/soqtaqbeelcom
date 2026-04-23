@@ -335,16 +335,35 @@ function calculateMedian(prices: number[]): number {
  * يُستخدم حين يكون asset.category فارغاً أو generic_equipment
  */
 function inferCategory(asset: any): string {
-  // 1) إن كان category موجوداً فعلاً ومحدداً، استخدمه
+  // 1) إن كان category موجوداً صريحاً وليس generic، استخدمه
   if (asset.category && asset.category !== "generic_equipment") {
     return asset.category;
   }
-  // 2) asset_type (من detect-assets)
+
   const assetType = (asset.asset_type || "").toLowerCase();
   const name = (asset.name || "").toLowerCase();
   const combined = `${assetType} ${name}`;
+  const nameUpper = (asset.name || "").toUpperCase();
 
-  // 3) كلمات دلالية للمركبات
+  // 2) ⭐ طبقة Brand Matching — أدق إشارة للفئة الصناعية
+  const INDUSTRIAL_BRANDS = [
+    // Woodworking Italian (من فواتير حقيقية)
+    "SCM", "CENTAURO", "CASATI", "ORMA", "DARI", "HUAHUA",
+    "BIESSE", "FELDER", "WEINIG", "HOMAG",
+    // Industrial tools generic
+    "BOSCH PROFESSIONAL", "MAKITA INDUSTRIAL", "JET", "POWERMATIC",
+    // Sewing industrial
+    "JUKI", "BROTHER", "SINGER INDUSTRIAL", "JACK",
+    // Metal working
+    "HAAS", "DMG MORI", "MAZAK", "OKUMA",
+    // Generic industrial indicators
+    "CNC", "NOVA"
+  ];
+  if (INDUSTRIAL_BRANDS.some(brand => nameUpper.includes(brand))) {
+    return "industrial";
+  }
+
+  // 3) مركبات
   const vehicleKeywords = [
     "سيارة", "مركبة", "شاحنة", "وانيت", "بيك أب", "vehicle", "truck",
     "car", "pickup", "باص", "حافلة", "دراجة", "motorcycle"
@@ -353,7 +372,7 @@ function inferCategory(asset: any): string {
     return "vehicle";
   }
 
-  // 4) كلمات دلالية للأثاث
+  // 4) أثاث
   const furnitureKeywords = [
     "مكتب", "كرسي", "طاولة", "خزانة", "رف", "أريكة", "سرير",
     "مطبخ صغير", "أوفيس", "محطة عمل", "desk", "chair", "table",
@@ -363,19 +382,32 @@ function inferCategory(asset: any): string {
     return "furniture";
   }
 
-  // 5) كلمات دلالية للصناعي
+  // 5) ⭐ Keywords صناعية (موسّعة للـ woodworking + general)
   const industrialKeywords = [
+    // Arabic
     "ماكينة", "آلة", "منشار", "مخرطة", "مطحنة", "معدة إنتاج",
-    "ضاغط", "كمبروسر", "كمبرسر", "مولد", "machine", "saw",
-    "router", "cnc", "compressor", "شفاط", "راوتر", "cutter",
-    "تخريز", "لحام", "drilling", "دريل", "خلاط", "فرن صناعي",
-    "industrial", "press", "مكبس"
+    "ضاغط", "كمبروسر", "كمبرسر", "مولد", "شفاط", "راوتر",
+    "تخريز", "لحام", "دريل", "خلاط", "فرن صناعي", "مكبس",
+    "مجفف", "خزان هواء", "مضخة", "مكنة",
+    // English — Woodworking
+    "machine", "saw", "router", "cnc", "compressor",
+    "cutter", "drilling", "planer", "moulder", "mortiser",
+    "guillotine", "bander", "splicing", "press", "dryer",
+    "air tank", "band saw", "edge", "spindle", "jointer",
+    // English — General industrial
+    "industrial", "manufacturing", "production", "workshop",
+    "lathe", "mill", "grinder", "welder", "forklift"
   ];
   if (industrialKeywords.some(kw => combined.includes(kw))) {
     return "industrial";
   }
 
-  // 6) fallback
+  // 6) asset_type heuristic
+  if (assetType === "آلة" || assetType === "معدة إنتاج" || assetType === "معدّة إنتاج") {
+    return "industrial";
+  }
+
+  // 7) fallback
   return "default";
 }
 
