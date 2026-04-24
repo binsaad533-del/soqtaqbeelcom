@@ -16,6 +16,7 @@ import LaunchBanner from "./LaunchBanner";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -24,6 +25,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const { user, signOut, role } = useAuthContext();
   const { tx } = useLanguage();
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -51,15 +53,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const navLinks = isFinancialManager
     ? [
-        { label: tx("الرئيسية", "Home"), path: "/" },
+        { label: t("nav.home"), path: "/" },
         { label: tx("الإدارة المالية", "Finance"), path: "/admin/finance" },
       ]
     : [
-        { label: tx("الرئيسية", "Home"), path: "/" },
-        { label: tx("سوق الفرص", "Marketplace"), path: "/marketplace" },
-        { label: tx("كيف تتم الصفقة", "How It Works"), path: "/how-it-works" },
-        { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing?new=1" },
-        { label: tx("لوحة التحكم", "Dashboard"), path: "/dashboard" },
+        { label: t("nav.home"), path: "/" },
+        { label: t("nav.marketplace"), path: "/marketplace" },
+        { label: t("nav.howItWorks"), path: "/how-it-works" },
+        { label: t("nav.addListing"), path: "/create-listing?new=1" },
+        { label: t("nav.dashboard"), path: "/dashboard" },
         { label: tx("نماذج PDF", "PDF Templates"), path: "/pdf-preview" },
       ];
 
@@ -125,7 +127,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-l from-primary to-primary/70 text-primary-foreground text-[12px] font-medium hover:opacity-90 transition-all"
                 >
                   <Plus size={13} strokeWidth={2} />
-                  {tx("أضف فرصة", "Add Listing")}
+                  {t("nav.addListing")}
                 </Link>
                 <Link
                   to="/messages"
@@ -165,7 +167,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <button
                   onClick={async () => { await signOut(); navigate("/"); }}
                   className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-                  title={tx("تسجيل الخروج", "Sign out")}
+                  title={t("common.logout")}
                 >
                   <LogOut size={17} strokeWidth={1.5} />
                 </button>
@@ -176,7 +178,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[13px] text-muted-foreground hover:text-foreground transition-colors"
               >
                 <LogIn size={15} strokeWidth={1.5} />
-                {tx("تسجيل الدخول", "Log in")}
+                {t("common.login")}
               </Link>
             )}
             <button
@@ -212,7 +214,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 onClick={() => setMobileOpen(false)}
                 className="block px-3 py-2.5 rounded-lg text-[13px] text-muted-foreground hover:text-foreground"
               >
-                {tx("تسجيل الدخول", "Log in")}
+                {t("common.login")}
               </Link>
             )}
           </div>
