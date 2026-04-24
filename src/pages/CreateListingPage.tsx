@@ -721,6 +721,50 @@ const CreateListingPage = () => {
   const [dealCheckError, setDealCheckError] = useState("");
   const [dealCheckInputKey, setDealCheckInputKey] = useState<string | null>(null);
   const [publishAttempted, setPublishAttempted] = useState(false);
+  const [duplicateCandidate, setDuplicateCandidate] = useState<{ id: string; title: string; price: number | null; city: string | null } | null>(null);
+  const [duplicateAcknowledged, setDuplicateAcknowledged] = useState(false);
+
+  // Detect potential duplicate listing among user's published listings
+  const checkForDuplicateListing = useCallback(async () => {
+    if (!user?.id || !listingId) return null;
+    try {
+      const { data, error } = await supabase
+        .from("listings")
+        .select("id, title, business_activity, city, deal_type, primary_deal_type, price")
+        .eq("owner_id", user.id)
+        .eq("status", "published")
+        .is("deleted_at", null);
+      if (error || !data) return null;
+      const currentCity = (disclosure.city || "").trim().toLowerCase();
+      const currentActivity = (disclosure.business_activity || "").trim().toLowerCase();
+      const currentDealType = (dealStructure.primaryType || "").trim().toLowerCase();
+      const titleSim = (a: string, b: string) => {
+        if (!a || !b) return 0;
+        const aw = new Set(a.toLowerCase().split(/\s+/).filter(w => w.length > 2));
+        const bw = new Set(b.toLowerCase().split(/\s+/).filter(w => w.length > 2));
+        if (aw.size === 0 || bw.size === 0) return 0;
+        let common = 0;
+        aw.forEach(w => { if (bw.has(w)) common++; });
+        return common / Math.max(aw.size, bw.size);
+      };
+      for (const row of data as any[]) {
+        if (row.id === listingId) continue;
+        const sameCity = currentCity && (row.city || "").trim().toLowerCase() === currentCity;
+        const rowActivity = (row.business_activity || "").trim().toLowerCase();
+        const sameActivity = currentActivity && rowActivity && (rowActivity === currentActivity || titleSim(currentActivity, row.title || "") >= 0.5);
+        const rowDealType = (row.primary_deal_type || row.deal_type || "").trim().toLowerCase();
+        const sameDealType = currentDealType && rowDealType === currentDealType;
+        const matches = [sameCity, sameActivity, sameDealType].filter(Boolean).length;
+        if (matches >= 2) {
+          return { id: row.id as string, title: (row.title || row.business_activity || "إعلان") as string, price: row.price ?? null, city: row.city ?? null };
+        }
+      }
+      return null;
+    } catch (e) {
+      console.warn("[duplicateCheck] failed:", e);
+      return null;
+    }
+  }, [user?.id, listingId, disclosure.city, disclosure.business_activity, dealStructure.primaryType]);
 
   const buildListingPayload = useCallback(() => ({
     ...disclosure, description: sellerNote || null,
