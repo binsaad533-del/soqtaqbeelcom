@@ -2,12 +2,10 @@ import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { safeJsonLd } from "@/lib/security";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { MapPin, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users, Trash2, Pause, Play, Sparkles, ChevronDown } from "lucide-react";
+import { MapPin, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users, Trash2, Pause, Play, Sparkles, ChevronDown, Wallet, Package } from "lucide-react";
 import PromoteListingDialog from "@/components/PromoteListingDialog";
 import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
-import CredibilityBadge from "@/components/CredibilityBadge";
-import CompetitiveIntelPanel from "@/components/CompetitiveIntelPanel";
 import ListingHealthReport from "@/components/ListingHealthReport";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import VerifiedSellerBadge from "@/components/VerifiedSellerBadge";
@@ -15,13 +13,10 @@ import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import SellerRatingDisplay from "@/components/SellerRatingDisplay";
 import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
-import WhyOpportunityBox from "@/components/WhyOpportunityBox";
 import ListingStickyCtaBar from "@/components/ListingStickyCtaBar";
 import FeasibilityStudyPanel from "@/components/FeasibilityStudyPanel";
-import FinancialAnalysisPanel from "@/components/FinancialAnalysisPanel";
 import DealSimulationPanel from "@/components/DealSimulationPanel";
 import { useAnalysisCache } from "@/hooks/useAnalysisCache";
-import TransparencyIndicator from "@/components/TransparencyIndicator";
 
 import QuickPriceEdit from "@/components/QuickPriceEdit";
 import ListingEditDialog from "@/components/ListingEditDialog";
@@ -738,31 +733,49 @@ const ListingDetailsPage = () => {
             </div>
 
 
+            {/* ====== بطاقة ملخص الصفقة (ثابتة — لا تنطوي) ====== */}
+            <DealSummaryCard listing={listing} />
+
+            {/* ====== هيكل الصفقة (Accordion) ====== */}
             {primaryConfig && (
-              <DealStructureDisplay
-                primaryConfig={primaryConfig}
-                primaryTypeId={primaryDealType}
-                alternatives={alternativeOptions}
-              />
+              <SectionAccordion
+                title="هيكل الصفقة"
+                icon={<Shield size={16} strokeWidth={1.4} className="text-primary" />}
+                summary={`${primaryConfig.label}${primaryConfig.includes.length > 0 ? ` — يشمل ${primaryConfig.includes.slice(0, 3).join("، ")}` : ""}`}
+              >
+                <DealStructureDisplay
+                  primaryConfig={primaryConfig}
+                  primaryTypeId={primaryDealType}
+                  alternatives={alternativeOptions}
+                />
+              </SectionAccordion>
             )}
 
-            {/* Details Card */}
-            <div className="bg-card rounded-2xl p-6 shadow-soft space-y-5">
-              {/* Summary */}
-              {(listing.description || listing.ai_summary) && (
-                <div className="border-b border-border/20 pb-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <AiStar size={20} animate={false} />
-                    <h2 className="font-medium">ملخص الفرصة</h2>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {listing.ai_summary || listing.description}
-                  </p>
-                </div>
-              )}
+            {/* ====== ملخص الفرصة (إن وُجد — يبقى مرئياً كبطاقة قصيرة) ====== */}
+            {(listing.description || listing.ai_summary) && (
+              <SectionAccordion
+                title="ملخص الفرصة"
+                icon={<AiStar size={16} animate={false} />}
+                summary={String(listing.ai_summary || listing.description || "").replace(/\s+/g, " ").trim().slice(0, 90) + ((String(listing.ai_summary || listing.description || "").length > 90) ? "…" : "")}
+              >
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {listing.ai_summary || listing.description}
+                </p>
+              </SectionAccordion>
+            )}
 
-              {/* Inventory */}
-              {inventory.length > 0 && (
+            {/* ====== جرد الأصول (Accordion) ====== */}
+            {inventory.length > 0 && (
+              <SectionAccordion
+                title={`جرد الأصول (${inventory.length})`}
+                icon={<Building2 size={16} strokeWidth={1.4} className="text-primary" />}
+                summary={(() => {
+                  const inv = (listing.inventory || []) as any[];
+                  const priced = inv.filter((a) => typeof a?.pricing?.price_sar === "number" && a.pricing.price_sar > 0 && a.pricing?.confidence !== "يتطلب_معاينة").length;
+                  const inspect = inv.length - priced;
+                  return inspect > 0 ? `${priced} مُسعَّر · ${inspect} يحتاج معاينة` : `${priced} مُسعَّر`;
+                })()}
+              >
                 <CollapsibleList title="جرد الأصول المؤكّد" items={inventory} threshold={5} renderItem={(item, i) => (
                   <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
                     <span className="text-sm">{item.name}</span>
@@ -774,36 +787,37 @@ const ListingDetailsPage = () => {
                     </div>
                   </div>
                 )} />
-              )}
+              </SectionAccordion>
+            )}
 
-              {/* Documents — privacy-aware panel (Commit 4+5) */}
+            {/* ====== المستندات والوثائق (Accordion) ====== */}
+            <SectionAccordion
+              title="المستندات والوثائق"
+              icon={<Shield size={16} strokeWidth={1.4} className="text-primary" />}
+              summary={`${documents.length} مستند${documents.length === 1 ? "" : ""}`}
+            >
               <ProtectedDocumentsPanel
                 listingId={listing.id}
                 ownerId={listing.owner_id}
                 legacyDocuments={documents}
               />
+            </SectionAccordion>
 
-            </div>
-
-            <WhyOpportunityBox listing={listing} analysisCache={analysisCache} />
-
+            {/* ====== فحص الصفقة + تسعير الأصول + الموثوقية + الجدوى (مكوّنات لها ترويسات داخلية) ====== */}
             <DealCheckPanel listing={listing} analysisCache={analysisCache} />
 
             {/* دراسة الجدوى الاقتصادية وتحليل المنافسين */}
             <FeasibilityStudyPanel listing={listing} analysisCache={analysisCache} isOwner={isOwner} />
 
-            {/*
-              FinancialAnalysisPanel مُعطّل.
-              السبب: معادلة client-side (السعر × 8%) لا تعكس الإيراد الفعلي لمصنع تشغيلي.
-              البديل: FeasibilityStudyPanel (AI) يعرض تحليلاً مالياً أدق من السيناريوهات.
-              للإعادة بعد إصلاح المعادلة: أزل هذا التعليق.
-            */}
-
             {/* محاكاة الصفقة */}
             {!isOwner && listing.price && (
-              <div className="space-y-3">
+              <SectionAccordion
+                title="محاكاة الصفقة"
+                icon={<Sparkles size={16} strokeWidth={1.4} className="text-primary" />}
+                summary="سيناريوهات السعر والتفاوض"
+              >
                 <DealSimulationPanel listingId={listing.id} />
-              </div>
+              </SectionAccordion>
             )}
           </div>
 
@@ -904,33 +918,8 @@ const ListingDetailsPage = () => {
                 )}
               </div>
 
-              {/* AI Credibility Badge */}
-              <CredibilityBadge data={(listing as any).ai_trust_score as any} />
-
-              {/* Competitive Intelligence — collapsed by default */}
-              <Collapsible className="mb-4">
-                <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-border/40 bg-card hover:bg-accent/20 transition-colors group">
-                  <span className="text-sm font-medium">تحليل المنافسين</span>
-                  <ChevronDown size={14} className="text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pt-2">
-                  <CompetitiveIntelPanel listingId={listing.id} />
-                </CollapsibleContent>
-              </Collapsible>
-
               {/* Listing Health Report - for owner */}
               {isOwner && <ListingHealthReport listingId={listing.id} />}
-
-              {/* Deal-type-aware Transparency Indicator — collapsed by default */}
-              <Collapsible className="mb-4">
-                <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-border/40 bg-card hover:bg-accent/20 transition-colors group">
-                  <span className="text-sm font-medium">اكتمال الإعلان</span>
-                  <ChevronDown size={14} className="text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pt-2">
-                  <TransparencyIndicator listing={listing} onListingUpdated={(updated) => setListing(updated as unknown as Listing)} />
-                </CollapsibleContent>
-              </Collapsible>
 
 
               {/* Seller Info Card */}
@@ -1324,6 +1313,121 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
           })}
         </div>
       )}
+    </div>
+  );
+};
+
+// ============================================================
+// Reusable section accordion — unified collapsed-by-default chrome
+// for every section in the listing details page.
+// ============================================================
+const SectionAccordion = ({
+  title,
+  icon,
+  summary,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  summary?: React.ReactNode;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) => {
+  return (
+    <Collapsible defaultOpen={defaultOpen} className="bg-card rounded-2xl shadow-soft overflow-hidden">
+      <CollapsibleTrigger className="w-full flex items-center justify-between gap-3 p-4 sm:p-5 hover:bg-accent/20 transition-colors group" dir="rtl">
+        <div className="flex items-center gap-2.5 min-w-0">
+          {icon}
+          <h3 className="text-sm sm:text-base font-medium text-foreground shrink-0">{title}</h3>
+        </div>
+        <div className="flex items-center gap-2 min-w-0 mr-auto">
+          {summary && (
+            <span className="text-[11px] sm:text-xs text-muted-foreground truncate text-left">
+              {summary}
+            </span>
+          )}
+          <ChevronDown
+            size={16}
+            strokeWidth={1.5}
+            className="text-muted-foreground shrink-0 transition-transform group-data-[state=open]:rotate-180"
+          />
+        </div>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-4 sm:px-5 pb-4 sm:pb-5">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+};
+
+// ============================================================
+// Deal Summary Card — fixed (non-collapsible), two-line summary
+// shown right after the photos.
+// ============================================================
+const DealSummaryCard = ({ listing }: { listing: any }) => {
+  const inv = Array.isArray(listing?.inventory) ? listing.inventory : [];
+  const totalAssets = inv.length;
+  const pricedTotal = inv.reduce((sum: number, a: any) => {
+    const p = Number(a?.pricing?.price_sar);
+    const q = Number(a?.quantity) > 0 ? Number(a.quantity) : 1;
+    return Number.isFinite(p) && p > 0 && a?.pricing?.confidence !== "يتطلب_معاينة" ? sum + p * q : sum;
+  }, 0);
+  const askingPrice = Number(listing?.price) || 0;
+  const dealLabel = DEAL_TYPE_MAP[listing?.primary_deal_type || listing?.deal_type]?.label
+    || getArabicDealType(listing?.primary_deal_type || listing?.deal_type);
+  const fmt = (n: number) => n.toLocaleString("en-US");
+
+  return (
+    <div className="bg-gradient-to-br from-primary/[0.06] via-card to-card rounded-2xl border border-primary/15 shadow-soft p-4 sm:p-5" dir="rtl">
+      {/* السطر 1: نشاط · مدينة · نوع الصفقة */}
+      <div className="flex items-center gap-2 flex-wrap text-sm sm:text-base font-semibold text-foreground">
+        <Building2 size={16} strokeWidth={1.4} className="text-primary shrink-0" />
+        <span className="truncate">
+          {listing?.business_activity || listing?.title || "فرصة تقبيل"}
+        </span>
+        <span className="text-muted-foreground/60 font-normal">·</span>
+        <span className="inline-flex items-center gap-1 text-muted-foreground font-normal">
+          <MapPin size={13} strokeWidth={1.4} />
+          {listing?.city || "—"}
+        </span>
+        {dealLabel && (
+          <>
+            <span className="text-muted-foreground/60 font-normal">·</span>
+            <span className="inline-flex items-center gap-1 text-primary text-xs sm:text-sm font-medium px-2 py-0.5 rounded-md bg-primary/10">
+              {dealLabel}
+            </span>
+          </>
+        )}
+      </div>
+
+      {/* السطر 2: السعر · قيمة الأصول · عدد الأصول */}
+      <div className="mt-3 flex items-center gap-3 flex-wrap text-xs sm:text-sm tabular-nums">
+        <span className="inline-flex items-center gap-1.5 text-foreground">
+          <Wallet size={13} strokeWidth={1.4} className="text-primary" />
+          <span className="text-muted-foreground">السعر المطلوب:</span>
+          <span className="font-semibold">{askingPrice > 0 ? `${fmt(askingPrice)} ر.س` : "—"}</span>
+        </span>
+        {pricedTotal > 0 && (
+          <>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="inline-flex items-center gap-1.5 text-foreground">
+              <Sparkles size={13} strokeWidth={1.4} className="text-primary" />
+              <span className="text-muted-foreground">قيمة الأصول المُسعَّرة:</span>
+              <span className="font-medium">{fmt(pricedTotal)} ر.س</span>
+            </span>
+          </>
+        )}
+        {totalAssets > 0 && (
+          <>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+              <Package size={13} strokeWidth={1.4} />
+              {totalAssets} أصل
+            </span>
+          </>
+        )}
+      </div>
     </div>
   );
 };
