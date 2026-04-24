@@ -487,6 +487,28 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
               <Eye size={24} className="text-muted-foreground/30" strokeWidth={1} />
             );
           })()}
+          {(() => {
+            const dealLabel = getArabicDealType(listing.primary_deal_type || listing.deal_type);
+            if (!dealLabel || dealLabel === "—") return null;
+            const colorMap: Record<string, string> = {
+              "تقبيل كامل": "bg-emerald-600/90 text-white",
+              "نقل أعمال بدون التزامات": "bg-blue-600/90 text-white",
+              "نقل أعمال": "bg-blue-600/90 text-white",
+              "تقبيل أصول + تجهيز تشغيلي": "bg-amber-600/90 text-white",
+              "أصول + تجهيز تشغيلي": "bg-amber-600/90 text-white",
+              "تقبيل أصول فقط": "bg-gray-600/90 text-white",
+              "تقبيل جزئي": "bg-gray-600/90 text-white",
+            };
+            const colorClass = colorMap[dealLabel] || "bg-gray-600/90 text-white";
+            return (
+              <div className={cn(
+                "absolute bottom-2 right-2 z-10 text-xs font-medium rounded-md px-2 py-1 backdrop-blur-sm",
+                colorClass
+              )}>
+                {dealLabel}
+              </div>
+            );
+          })()}
         </div>
         <div className="p-4">
           {seller && (
@@ -513,9 +535,6 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
 
           <div className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">
             {listing.title || listing.business_activity || "فرصة تقبيل"}
-          </div>
-          <div className="text-[10px] text-muted-foreground mb-1">
-            {getArabicDealType(listing.primary_deal_type || listing.deal_type)}
           </div>
           {(() => {
             const inv = Array.isArray(listing.inventory) ? listing.inventory : [];
