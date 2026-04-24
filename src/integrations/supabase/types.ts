@@ -1661,6 +1661,7 @@ export type Database = {
           category: string | null
           city: string | null
           civil_defense_license: string | null
+          cover_photo_url: string | null
           created_at: string
           deal_disclosures: Json | null
           deal_options: Json | null
@@ -1721,6 +1722,7 @@ export type Database = {
           category?: string | null
           city?: string | null
           civil_defense_license?: string | null
+          cover_photo_url?: string | null
           created_at?: string
           deal_disclosures?: Json | null
           deal_options?: Json | null
@@ -1781,6 +1783,7 @@ export type Database = {
           category?: string | null
           city?: string | null
           civil_defense_license?: string | null
+          cover_photo_url?: string | null
           created_at?: string
           deal_disclosures?: Json | null
           deal_options?: Json | null
