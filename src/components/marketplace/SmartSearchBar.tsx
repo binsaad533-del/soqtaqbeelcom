@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Loader2, X, Bell, Mail, Phone } from "lucide-react";
@@ -21,6 +22,7 @@ interface Props {
 }
 
 const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState("");
@@ -163,7 +165,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           onKeyDown={handleKeyDown}
-          placeholder="وش تدور عليه؟ الـAI يساعدك…"
+          placeholder={t("marketplace.aiSearch")}
           disabled={loading}
           className={cn(
             "w-full pr-10 pl-9 py-3 rounded-xl border text-sm transition-all",

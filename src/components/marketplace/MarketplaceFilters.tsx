@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { Search, MapPin, RotateCcw, ChevronDown, ChevronUp, Loader2, EyeOff } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -48,6 +49,7 @@ interface Props {
 export { defaultFilters };
 
 const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
+  const { t } = useTranslation();
   const [citySearch, setCitySearch] = useState("");
   const [showAllActivities, setShowAllActivities] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
@@ -107,7 +109,7 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
       {/* Result count */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">{resultCount}</span> مشروع متاح
+          <span className="font-medium text-foreground">{resultCount}</span> {t("marketplace.available")}
         </p>
         {!isDefault && (
           <button
@@ -122,7 +124,7 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
 
 
       {/* Deal Type Tabs */}
-      <Section label="نوع العملية">
+      <Section label={t("marketplace.dealType")}>
         <div className="flex flex-col gap-1.5">
           {dealTypes.map(dt => (
             <TabChip
@@ -137,7 +139,7 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
       </Section>
 
       {/* City */}
-      <Section label="المدينة">
+      <Section label={t("marketplace.city")}>
         <div className="relative mb-2">
           <MapPin size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" strokeWidth={1.3} />
           <input
@@ -166,7 +168,7 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
       </Section>
 
       {/* Activity */}
-      <Section label="النشاط">
+      <Section label={t("marketplace.activity")}>
         <div className="flex flex-wrap gap-1.5">
           {visibleActivities.map(a => (
             <Chip key={a} active={filters.activity === a} onClick={() => set("activity", a)}>
