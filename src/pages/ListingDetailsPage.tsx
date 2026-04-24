@@ -737,31 +737,49 @@ const ListingDetailsPage = () => {
             </div>
 
 
+            {/* ====== بطاقة ملخص الصفقة (ثابتة — لا تنطوي) ====== */}
+            <DealSummaryCard listing={listing} />
+
+            {/* ====== هيكل الصفقة (Accordion) ====== */}
             {primaryConfig && (
-              <DealStructureDisplay
-                primaryConfig={primaryConfig}
-                primaryTypeId={primaryDealType}
-                alternatives={alternativeOptions}
-              />
+              <SectionAccordion
+                title="هيكل الصفقة"
+                icon={<Shield size={16} strokeWidth={1.4} className="text-primary" />}
+                summary={`${primaryConfig.label}${primaryConfig.includes.length > 0 ? ` — يشمل ${primaryConfig.includes.slice(0, 3).join("، ")}` : ""}`}
+              >
+                <DealStructureDisplay
+                  primaryConfig={primaryConfig}
+                  primaryTypeId={primaryDealType}
+                  alternatives={alternativeOptions}
+                />
+              </SectionAccordion>
             )}
 
-            {/* Details Card */}
-            <div className="bg-card rounded-2xl p-6 shadow-soft space-y-5">
-              {/* Summary */}
-              {(listing.description || listing.ai_summary) && (
-                <div className="border-b border-border/20 pb-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <AiStar size={20} animate={false} />
-                    <h2 className="font-medium">ملخص الفرصة</h2>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {listing.ai_summary || listing.description}
-                  </p>
-                </div>
-              )}
+            {/* ====== ملخص الفرصة (إن وُجد — يبقى مرئياً كبطاقة قصيرة) ====== */}
+            {(listing.description || listing.ai_summary) && (
+              <SectionAccordion
+                title="ملخص الفرصة"
+                icon={<AiStar size={16} animate={false} />}
+                summary={String(listing.ai_summary || listing.description || "").replace(/\s+/g, " ").trim().slice(0, 90) + ((String(listing.ai_summary || listing.description || "").length > 90) ? "…" : "")}
+              >
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {listing.ai_summary || listing.description}
+                </p>
+              </SectionAccordion>
+            )}
 
-              {/* Inventory */}
-              {inventory.length > 0 && (
+            {/* ====== جرد الأصول (Accordion) ====== */}
+            {inventory.length > 0 && (
+              <SectionAccordion
+                title={`جرد الأصول (${inventory.length})`}
+                icon={<Building2 size={16} strokeWidth={1.4} className="text-primary" />}
+                summary={(() => {
+                  const inv = (listing.inventory || []) as any[];
+                  const priced = inv.filter((a) => typeof a?.pricing?.price_sar === "number" && a.pricing.price_sar > 0 && a.pricing?.confidence !== "يتطلب_معاينة").length;
+                  const inspect = inv.length - priced;
+                  return inspect > 0 ? `${priced} مُسعَّر · ${inspect} يحتاج معاينة` : `${priced} مُسعَّر`;
+                })()}
+              >
                 <CollapsibleList title="جرد الأصول المؤكّد" items={inventory} threshold={5} renderItem={(item, i) => (
                   <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
                     <span className="text-sm">{item.name}</span>
@@ -773,36 +791,37 @@ const ListingDetailsPage = () => {
                     </div>
                   </div>
                 )} />
-              )}
+              </SectionAccordion>
+            )}
 
-              {/* Documents — privacy-aware panel (Commit 4+5) */}
+            {/* ====== المستندات والوثائق (Accordion) ====== */}
+            <SectionAccordion
+              title="المستندات والوثائق"
+              icon={<Shield size={16} strokeWidth={1.4} className="text-primary" />}
+              summary={`${documents.length} مستند${documents.length === 1 ? "" : ""}`}
+            >
               <ProtectedDocumentsPanel
                 listingId={listing.id}
                 ownerId={listing.owner_id}
                 legacyDocuments={documents}
               />
+            </SectionAccordion>
 
-            </div>
-
-            <WhyOpportunityBox listing={listing} analysisCache={analysisCache} />
-
+            {/* ====== فحص الصفقة + تسعير الأصول + الموثوقية + الجدوى (مكوّنات لها ترويسات داخلية) ====== */}
             <DealCheckPanel listing={listing} analysisCache={analysisCache} />
 
             {/* دراسة الجدوى الاقتصادية وتحليل المنافسين */}
             <FeasibilityStudyPanel listing={listing} analysisCache={analysisCache} isOwner={isOwner} />
 
-            {/*
-              FinancialAnalysisPanel مُعطّل.
-              السبب: معادلة client-side (السعر × 8%) لا تعكس الإيراد الفعلي لمصنع تشغيلي.
-              البديل: FeasibilityStudyPanel (AI) يعرض تحليلاً مالياً أدق من السيناريوهات.
-              للإعادة بعد إصلاح المعادلة: أزل هذا التعليق.
-            */}
-
             {/* محاكاة الصفقة */}
             {!isOwner && listing.price && (
-              <div className="space-y-3">
+              <SectionAccordion
+                title="محاكاة الصفقة"
+                icon={<Sparkles size={16} strokeWidth={1.4} className="text-primary" />}
+                summary="سيناريوهات السعر والتفاوض"
+              >
                 <DealSimulationPanel listingId={listing.id} />
-              </div>
+              </SectionAccordion>
             )}
           </div>
 
