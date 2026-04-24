@@ -1317,4 +1317,119 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
   );
 };
 
+// ============================================================
+// Reusable section accordion — unified collapsed-by-default chrome
+// for every section in the listing details page.
+// ============================================================
+const SectionAccordion = ({
+  title,
+  icon,
+  summary,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  summary?: React.ReactNode;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) => {
+  return (
+    <Collapsible defaultOpen={defaultOpen} className="bg-card rounded-2xl shadow-soft overflow-hidden">
+      <CollapsibleTrigger className="w-full flex items-center justify-between gap-3 p-4 sm:p-5 hover:bg-accent/20 transition-colors group" dir="rtl">
+        <div className="flex items-center gap-2.5 min-w-0">
+          {icon}
+          <h3 className="text-sm sm:text-base font-medium text-foreground shrink-0">{title}</h3>
+        </div>
+        <div className="flex items-center gap-2 min-w-0 mr-auto">
+          {summary && (
+            <span className="text-[11px] sm:text-xs text-muted-foreground truncate text-left">
+              {summary}
+            </span>
+          )}
+          <ChevronDown
+            size={16}
+            strokeWidth={1.5}
+            className="text-muted-foreground shrink-0 transition-transform group-data-[state=open]:rotate-180"
+          />
+        </div>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-4 sm:px-5 pb-4 sm:pb-5">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+};
+
+// ============================================================
+// Deal Summary Card — fixed (non-collapsible), two-line summary
+// shown right after the photos.
+// ============================================================
+const DealSummaryCard = ({ listing }: { listing: any }) => {
+  const inv = Array.isArray(listing?.inventory) ? listing.inventory : [];
+  const totalAssets = inv.length;
+  const pricedTotal = inv.reduce((sum: number, a: any) => {
+    const p = Number(a?.pricing?.price_sar);
+    const q = Number(a?.quantity) > 0 ? Number(a.quantity) : 1;
+    return Number.isFinite(p) && p > 0 && a?.pricing?.confidence !== "يتطلب_معاينة" ? sum + p * q : sum;
+  }, 0);
+  const askingPrice = Number(listing?.price) || 0;
+  const dealLabel = DEAL_TYPE_MAP[listing?.primary_deal_type || listing?.deal_type]?.label
+    || getArabicDealType(listing?.primary_deal_type || listing?.deal_type);
+  const fmt = (n: number) => n.toLocaleString("en-US");
+
+  return (
+    <div className="bg-gradient-to-br from-primary/[0.06] via-card to-card rounded-2xl border border-primary/15 shadow-soft p-4 sm:p-5" dir="rtl">
+      {/* السطر 1: نشاط · مدينة · نوع الصفقة */}
+      <div className="flex items-center gap-2 flex-wrap text-sm sm:text-base font-semibold text-foreground">
+        <Building2 size={16} strokeWidth={1.4} className="text-primary shrink-0" />
+        <span className="truncate">
+          {listing?.business_activity || listing?.title || "فرصة تقبيل"}
+        </span>
+        <span className="text-muted-foreground/60 font-normal">·</span>
+        <span className="inline-flex items-center gap-1 text-muted-foreground font-normal">
+          <MapPin size={13} strokeWidth={1.4} />
+          {listing?.city || "—"}
+        </span>
+        {dealLabel && (
+          <>
+            <span className="text-muted-foreground/60 font-normal">·</span>
+            <span className="inline-flex items-center gap-1 text-primary text-xs sm:text-sm font-medium px-2 py-0.5 rounded-md bg-primary/10">
+              {dealLabel}
+            </span>
+          </>
+        )}
+      </div>
+
+      {/* السطر 2: السعر · قيمة الأصول · عدد الأصول */}
+      <div className="mt-3 flex items-center gap-3 flex-wrap text-xs sm:text-sm tabular-nums">
+        <span className="inline-flex items-center gap-1.5 text-foreground">
+          <Wallet size={13} strokeWidth={1.4} className="text-primary" />
+          <span className="text-muted-foreground">السعر المطلوب:</span>
+          <span className="font-semibold">{askingPrice > 0 ? `${fmt(askingPrice)} ر.س` : "—"}</span>
+        </span>
+        {pricedTotal > 0 && (
+          <>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="inline-flex items-center gap-1.5 text-foreground">
+              <Sparkles size={13} strokeWidth={1.4} className="text-primary" />
+              <span className="text-muted-foreground">قيمة الأصول المُسعَّرة:</span>
+              <span className="font-medium">{fmt(pricedTotal)} ر.س</span>
+            </span>
+          </>
+        )}
+        {totalAssets > 0 && (
+          <>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+              <Package size={13} strokeWidth={1.4} />
+              {totalAssets} أصل
+            </span>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export default ListingDetailsPage;
