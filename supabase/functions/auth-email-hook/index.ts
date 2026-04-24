@@ -81,7 +81,7 @@ const SAMPLE_DATA: Record<string, object> = {
 }
 
 // Helper: look up profile name by email using the database function
-async function getRecipientName(supabase: ReturnType<typeof createClient>, email: string): Promise<string | undefined> {
+async function getRecipientName(supabase: any, email: string): Promise<string | undefined> {
   try {
     const { data, error } = await supabase.rpc('get_profile_name_by_email', { _email: email })
     if (error || !data) return undefined
