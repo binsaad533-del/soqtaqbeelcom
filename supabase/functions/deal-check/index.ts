@@ -76,6 +76,33 @@ function normalizeListingForAnalysis(listing: any) {
     ? bulkInventoryPrice
     : inventory.reduce((sum: number, item: any) => sum + ((item.unitPrice || 0) * (item.qty || 1)), 0) || null;
 
+  // Compute pricing aggregates directly from raw listing.inventory (pricing.*)
+  const rawInventory = Array.isArray(listing?.inventory) ? listing.inventory : [];
+  let marketTotal = 0;
+  let olvTotal = 0;
+  let pricedCount = 0;
+  let needsInspectionCount = 0;
+  for (const item of rawInventory) {
+    const qty = Number(item?.quantity) || Number(item?.qty) || 1;
+    const market = Number(item?.pricing?.market_value_sar);
+    const olv = Number(item?.pricing?.price_sar);
+    const hasPricing = (Number.isFinite(market) && market > 0) || (Number.isFinite(olv) && olv > 0);
+    if (Number.isFinite(market) && market > 0) marketTotal += market * qty;
+    if (Number.isFinite(olv) && olv > 0) olvTotal += olv * qty;
+    if (hasPricing) {
+      pricedCount += 1;
+    } else {
+      needsInspectionCount += 1;
+    }
+  }
+  const pricingAggregates = {
+    market_value_total_sar: marketTotal > 0 ? Math.round(marketTotal) : null,
+    olv_total_sar: olvTotal > 0 ? Math.round(olvTotal) : null,
+    priced_assets_count: pricedCount,
+    needs_inspection_count: needsInspectionCount,
+    pricing_source_note: "الأسعار مبنية على عروض أسعار من الموردين وليست فواتير شراء فعلية",
+  };
+
   const documents = Array.isArray(listing?.documents)
     ? listing.documents
         .map((doc: any) => ({
