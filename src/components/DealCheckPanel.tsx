@@ -1317,17 +1317,17 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
                 {pricedCount > 0 && (
                   <Collapsible defaultOpen={pricedDefaultOpen} className="border border-emerald-200/60 dark:border-emerald-900/40 rounded-xl overflow-hidden">
                     <CollapsibleTrigger className="w-full bg-emerald-50/70 dark:bg-emerald-950/20 px-3 py-2.5 flex items-center gap-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors group">
-                      <CheckCircle2 size={14} strokeWidth={1.6} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">أصول مُسعّرة</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold tabular-nums">
+                      <CheckCircle2 size={16} strokeWidth={1.6} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span className="text-base font-semibold text-emerald-700 dark:text-emerald-300">أصول مُسعّرة</span>
+                      <span className="w-8 h-8 inline-flex items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-lg font-bold tabular-nums">
                         {pricedCount}
                       </span>
-                      <span className="text-[10px] text-emerald-700/70 dark:text-emerald-300/70 mr-auto truncate tabular-nums">
+                      <span className="text-base text-emerald-700/80 dark:text-emerald-300/80 mr-auto truncate tabular-nums">
                         {totalMarketValue > totalValue
                           ? <>سوقية: {totalMarketValue.toLocaleString("en-US")} · تقبيل: {totalValue.toLocaleString("en-US")} ر.س</>
                           : <>قيمة إجمالية: {totalValue.toLocaleString("en-US")} ر.س</>}
                       </span>
-                      <ChevronDown size={14} strokeWidth={1.6} className="text-emerald-600/60 dark:text-emerald-400/60 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+                      <ChevronDown size={16} strokeWidth={1.6} className="text-emerald-600/60 dark:text-emerald-400/60 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <div className="divide-y divide-border/30 bg-background">
