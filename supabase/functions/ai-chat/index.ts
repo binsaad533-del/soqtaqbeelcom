@@ -1477,6 +1477,37 @@ async function executeTool(name: string, args: any, userId: string, role: string
       return { success: true, listing_id: args.listing_id, updated_fields: Object.keys(upd).filter(k => k !== "updated_at") };
     }
 
+    case "cancel_my_listing": {
+      const { data: listing } = await sb.from("listings")
+        .select("id, owner_id, status, title")
+        .eq("id", args.listing_id).is("deleted_at", null).single();
+      if (!listing) return { error: "الإعلان غير موجود" };
+      if (role === "customer" && listing.owner_id !== userId) return { error: "ليس لديك صلاحية — هذا ليس إعلانك" };
+      if (listing.status === "cancelled") return { success: true, already_cancelled: true, message: "الإعلان ملغي مسبقاً" };
+
+      // Block if there is an active deal tied to this listing
+      const { data: activeDeals } = await sb.from("deals")
+        .select("id, status")
+        .eq("listing_id", args.listing_id)
+        .in("status", ["negotiating", "active", "in_progress", "agreement_pending", "ownership_transfer", "pending_completion"])
+        .limit(1);
+      if (activeDeals && activeDeals.length > 0) {
+        return { error: "لا يمكن إلغاء الإعلان — توجد صفقة جارية" };
+      }
+
+      const { error } = await sb.from("listings").update({
+        status: "cancelled", updated_at: new Date().toISOString()
+      }).eq("id", args.listing_id);
+      if (error) return { error: error.message };
+
+      await sb.from("audit_logs").insert({
+        user_id: userId, action: "listing_cancelled", resource_type: "listing",
+        resource_id: args.listing_id, details: { title: listing.title, performed_by: userId, source: "moqbil" }
+      });
+
+      return { success: true, listing_id: args.listing_id, status: "cancelled", message: "تم إلغاء الإعلان بنجاح" };
+    }
+
     case "publish_my_listing": {
       const { data: listing } = await sb.from("listings")
         .select("id, owner_id, status, title, price, city, business_activity, location_lat, location_lng, photos, deal_type, primary_deal_type")
