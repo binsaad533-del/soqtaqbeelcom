@@ -517,6 +517,24 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
           <div className="text-[10px] text-muted-foreground mb-1">
             {getArabicDealType(listing.primary_deal_type || listing.deal_type)}
           </div>
+          {(() => {
+            const inv = Array.isArray(listing.inventory) ? listing.inventory : [];
+            const invCount = inv.length;
+            const rent = listing.annual_rent ? Number(listing.annual_rent) : null;
+            const hasLicense = !!(listing.municipality_license || listing.civil_defense_license);
+            const hasLease = !!listing.lease_remaining;
+            const isOperational = invCount > 0 && hasLicense && hasLease;
+            const parts: string[] = [];
+            if (invCount > 0) parts.push(`${invCount} أصل`);
+            if (rent && rent > 0) parts.push(`إيجار ${rent.toLocaleString()}/سنة`);
+            if (isOperational) parts.push("جاهز للتشغيل");
+            if (parts.length === 0) return null;
+            return (
+              <div className="text-xs text-muted-foreground mb-1 truncate" title={parts.join(" · ")}>
+                {parts.join(" · ")}
+              </div>
+            );
+          })()}
           {listing.location_lat && listing.location_lng ? (
             <button
               type="button"
