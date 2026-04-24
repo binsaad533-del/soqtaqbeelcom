@@ -1515,37 +1515,8 @@ const TrustScoreSection = ({ trustScore }: { trustScore: any }) => {
 
           <p className="text-sm leading-relaxed mb-3">{trustScore.summary}</p>
 
-          {/* Strengths / Weaknesses / Warnings */}
-          {trustScore.strengths?.length > 0 && (
-            <div className="mb-2">
-              <div className="text-[10px] font-medium text-emerald-700 mb-1">نقاط القوة:</div>
-              <div className="flex flex-wrap gap-1">
-                {trustScore.strengths.map((s: string, i: number) => (
-                  <span key={i} className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md">✓ {s}</span>
-                ))}
-              </div>
-            </div>
-          )}
-          {trustScore.weaknesses?.length > 0 && (
-            <div className="mb-2">
-              <div className="text-[10px] font-medium text-amber-700 mb-1">نقاط الضعف:</div>
-              <div className="flex flex-wrap gap-1">
-                {trustScore.weaknesses.map((w: string, i: number) => (
-                  <span key={i} className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md">• {w}</span>
-                ))}
-              </div>
-            </div>
-          )}
-          {trustScore.warnings?.length > 0 && (
-            <div className="mb-2">
-              <div className="text-[10px] font-medium text-red-700 mb-1">تحذيرات:</div>
-              <div className="flex flex-wrap gap-1">
-                {trustScore.warnings.map((w: string, i: number) => (
-                  <span key={i} className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-md">⚠ {w}</span>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Strengths / Weaknesses / Warnings removed — duplicated in التوصية */}
+
 
           {/* Factor breakdown toggle */}
           {trustScore.factors && (
