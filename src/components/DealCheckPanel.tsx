@@ -1362,39 +1362,6 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
             </div>
           </div>
 
-          {/* Jasaas certified valuation CTA */}
-          {inspectionCount > 0 && (
-            <div className="rounded-xl border border-primary/30 bg-gradient-to-l from-primary/10 to-primary/5 p-4 mb-3">
-              <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center shrink-0 border border-primary/20">
-                  <ShieldCheck size={20} strokeWidth={1.5} className="text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h5 className="text-sm font-semibold mb-1">أصول تحتاج تقييماً معتمداً</h5>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    <span className="font-medium text-foreground">{inspectionCount}</span> أصل من إعلانك يحتاج معاينة ميدانية من مقيّم معتمد لتحديد قيمته السوقية الدقيقة.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <ShieldCheck size={11} strokeWidth={1.6} />
-                  الهيئة السعودية للمقيمين المعتمدين (تقييم)
-                </span>
-                <div
-                  className="inline-flex items-center gap-2 rounded-lg bg-muted px-4 py-2.5 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-70"
-                  title="قريباً — جساس للتقييم المعتمد"
-                  aria-disabled="true"
-                >
-                  <ShieldCheck className="h-4 w-4" />
-                  احجز معاينة مع جساس للتقييم المعتمد
-                  <span className="mr-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                    قريباً
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Grouped asset list (priced / requires inspection) */}
           {(() => {
