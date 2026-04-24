@@ -641,12 +641,17 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                         <div className="grid grid-cols-2 gap-3 mb-3">
                           <div>
                             <div className="text-[10px] text-muted-foreground">💰 النطاق التقديري</div>
-                            {priceAnalysis.estimated_range ? (
+                            {liveTotals.rangeLow > 0 && liveTotals.rangeHigh > 0 && liveTotals.rangeLow !== liveTotals.rangeHigh ? (
                               <div className="text-sm font-semibold leading-tight">
-                                {priceAnalysis.estimated_range.low?.toLocaleString()} – {priceAnalysis.estimated_range.high?.toLocaleString()} ر.س
+                                {liveTotals.rangeLow.toLocaleString()} – {liveTotals.rangeHigh.toLocaleString()} ر.س
                               </div>
                             ) : (
-                              <div className="text-sm font-semibold">{priceAnalysis.estimated_value?.toLocaleString()} ر.س</div>
+                              <div className="text-sm font-semibold">{liveTotals.takeoverTotal.toLocaleString()} ر.س</div>
+                            )}
+                            {liveTotals.marketTotal > 0 && liveTotals.marketTotal !== liveTotals.takeoverTotal && (
+                              <div className="text-[10px] text-muted-foreground mt-0.5">
+                                القيمة السوقية: <span className="font-medium">{liveTotals.marketTotal.toLocaleString()} ر.س</span>
+                              </div>
                             )}
                             {priceAnalysis.valuation_confidence && (
                               <div className="text-[10px] text-muted-foreground mt-0.5">
