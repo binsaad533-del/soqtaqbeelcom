@@ -593,27 +593,26 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                 <TrustScoreSection trustScore={trustScore} />
               )}
 
-              {/* Recommendation */}
-              <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
-                <div className="flex items-center gap-2 mb-2">
-                  <AiStar size={14} animate={false} />
-                  <span className="text-xs font-medium text-primary">التوصية</span>
-                </div>
-                <p className="text-sm leading-relaxed">{analysis.recommendation}</p>
-              </div>
-
-              <ListSection icon={TrendingUp} title="نقاط القوة" items={analysis.strengths} dotClass="bg-emerald-500/60" iconClass="text-emerald-600" />
-              <ListSection icon={AlertTriangle} title="المخاطر" items={analysis.risks} dotClass="bg-red-500/50" iconClass="text-red-500/70" />
-
               {!expanded && (
                 <Button variant="outline" size="sm" onClick={() => setExpanded(true)} className="w-full rounded-xl text-xs gap-1.5">
                   <ChevronDown size={14} />
-                  عرض التحليل الكامل
+                  استعرض الفحص
                 </Button>
               )}
 
               {expanded && (
                 <>
+                  {/* Recommendation */}
+                  <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AiStar size={14} animate={false} />
+                      <span className="text-xs font-medium text-primary">التوصية</span>
+                    </div>
+                    <p className="text-sm leading-relaxed">{analysis.recommendation}</p>
+                  </div>
+
+                  <ListSection icon={TrendingUp} title="نقاط القوة" items={analysis.strengths} dotClass="bg-emerald-500/60" iconClass="text-emerald-600" />
+                  <ListSection icon={AlertTriangle} title="المخاطر" items={analysis.risks} dotClass="bg-red-500/50" iconClass="text-red-500/70" />
                   <AnalysisSection icon={Briefcase} title="نظرة عامة على الصفقة" content={analysis.dealOverview} />
                   <AnalysisSection icon={Activity} title="النشاط التجاري" content={analysis.businessActivity} />
                   <AnalysisSection icon={CheckCircle2} title="تقييم الأصول والمعدات" content={analysis.assetAssessment} />
