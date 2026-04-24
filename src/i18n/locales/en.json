@@ -10,14 +10,16 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "send": "Send",
-    "close": "Close"
+    "close": "Close",
+    "all": "All"
   },
   "nav": {
     "home": "Home",
     "marketplace": "Marketplace",
     "addListing": "List a business",
     "messages": "Messages",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "howItWorks": "How it works"
   },
   "listing": {
     "price": "Asking price",
@@ -28,7 +30,21 @@
     "assetsOnly": "Assets only",
     "makeOffer": "Make an offer",
     "contact": "Message seller",
-    "report": "Report"
+    "report": "Report",
+    "verified": "Verified",
+    "verifiedSeller": "Verified seller",
+    "asset": "asset",
+    "views": "views",
+    "likes": "likes"
+  },
+  "marketplace": {
+    "title": "Business marketplace",
+    "subtitle": "Browse available business opportunities",
+    "available": "available",
+    "dealType": "Deal type",
+    "city": "City",
+    "activity": "Industry",
+    "aiSearch": "What are you looking for? AI can help…"
   },
   "moqbil": {
     "greeting": "Hi there! I'm Moqbil, your smart assistant",

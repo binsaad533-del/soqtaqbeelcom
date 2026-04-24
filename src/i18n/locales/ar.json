@@ -10,14 +10,16 @@
     "loading": "جارٍ التحميل...",
     "error": "حدث خطأ",
     "send": "إرسال",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "all": "الكل"
   },
   "nav": {
     "home": "الرئيسية",
     "marketplace": "سوق الفرص",
     "addListing": "أضف فرصة",
     "messages": "الرسائل",
-    "dashboard": "لوحة التحكم"
+    "dashboard": "لوحة التحكم",
+    "howItWorks": "كيف تتم الصفقة"
   },
   "listing": {
     "price": "السعر المطلوب",
@@ -28,7 +30,21 @@
     "assetsOnly": "تقبيل أصول فقط",
     "makeOffer": "قدّم عرض سعر",
     "contact": "تواصل على الخاص",
-    "report": "إبلاغ"
+    "report": "إبلاغ",
+    "verified": "موثوق",
+    "verifiedSeller": "بائع موثوق",
+    "asset": "أصل",
+    "views": "مشاهدة",
+    "likes": "إعجاب"
+  },
+  "marketplace": {
+    "title": "سوق التقبيل",
+    "subtitle": "استعرض فرص التقبيل المتاحة",
+    "available": "مشروع متاح",
+    "dealType": "نوع العملية",
+    "city": "المدينة",
+    "activity": "النشاط",
+    "aiSearch": "وش تدور عليه؟ الـAI يساعدك…"
   },
   "moqbil": {
     "greeting": "هلا وغلا، أنا مقبل، مساعدك الذكي",
