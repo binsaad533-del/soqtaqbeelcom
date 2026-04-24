@@ -50,7 +50,7 @@ const GENERIC_ASSET_PATTERNS: Array<{
   // ⚠️ الأنماط الأدق يجب أن تأتي قبل نمط grinder/sander العام
   { keywords: ["ماكينة لحام", "لحام كهربائي", "welding machine"], price_min: 800, price_max: 3500, name_ar: "ماكينة لحام" },
   { keywords: ["ضاغط هواء", "كمبروسر", "compressor"], price_min: 500, price_max: 2500, name_ar: "ضاغط هواء" },
-  { keywords: ["صاروخ جلخ", "جلاخة زاوية", "angle grinder"], price_min: 150, price_max: 600, name_ar: "صاروخ جلخ" },
+  { keywords: ["صاروخ جلخ", "صواريخ جلخ", "جلاخة زاوية", "angle grinder"], price_min: 150, price_max: 600, name_ar: "صاروخ جلخ" },
   { keywords: ["صاروخ تلميع", "polisher"], price_min: 150, price_max: 600, name_ar: "صاروخ تلميع" },
   { keywords: ["مكبس حراري", "heat press"], price_min: 1500, price_max: 8000, name_ar: "مكبس حراري" },
   { keywords: ["شفاط غبار", "dust collector"], price_min: 800, price_max: 3000, name_ar: "شفاط غبار" },
