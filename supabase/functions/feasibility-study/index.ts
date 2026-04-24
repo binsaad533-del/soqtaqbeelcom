@@ -346,6 +346,7 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
 
   // Inventory
   const inventorySummary = summarizeInventory(listing.inventory);
+  const inventoryTotals = computeInventoryTotals(listing.inventory);
   if (inventorySummary.totalLines > 0) {
     sections.push("\n## الأصول والمعدات:");
     sections.push(`- عدد البنود في المخزون: ${inventorySummary.totalLines}`);
@@ -357,6 +358,13 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
     if (inventorySummary.omittedLines > 0) {
       sections.push(`- يوجد ${inventorySummary.omittedLines} بند إضافي بالمخزون لم يُسرد بالتفصيل لتقليل حجم التحليل؛ اعتمد على الملخص في التقدير.`);
     }
+
+    sections.push("\n## إجماليات تسعير الأصول (محسوبة من inventory مباشرة):");
+    sections.push(`- إجمالي القيمة السوقية (سعر الجديد من الموردين): ${inventoryTotals.market_value_total_sar} ريال`);
+    sections.push(`- إجمالي قيمة التقبيل OLV (بعد الإهلاك والتصفية المنظمة): ${inventoryTotals.olv_total_sar} ريال`);
+    sections.push(`- عدد الأصول المُسعَّرة: ${inventoryTotals.priced_assets_count}`);
+    sections.push(`- عدد الأصول التي تحتاج معاينة: ${inventoryTotals.needs_inspection_count}`);
+    sections.push("- ملاحظة: الأسعار مبنية على عروض أسعار من الموردين — وليست فواتير شراء فعلية");
   }
 
   // Activity-specific context
