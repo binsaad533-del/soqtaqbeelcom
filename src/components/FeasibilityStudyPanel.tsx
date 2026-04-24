@@ -568,13 +568,13 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(analysisCache.analysisUpdatedAt || analysisCache.cacheAge || null);
   const [copied, setCopied] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    summary: true,
-    investment: true,
+    summary: false,
+    investment: false,
     costs: false,
-    revenue: true,
-    competitors: true,
+    revenue: false,
+    competitors: false,
     risks: false,
-    recommendations: true,
+    recommendations: false,
   });
   const [pdfLoading, setPdfLoading] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
@@ -619,7 +619,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           setStudy(resolveFeasibilityStudy(listing, data.study_data));
           setCachedAt(data.created_at);
           setLastUpdatedAt((data as any).last_updated_at || data.created_at);
-          setExpandedSections({ summary: true, investment: true, costs: true, revenue: true, competitors: true, risks: true, recommendations: true });
+          setExpandedSections({ summary: false, investment: false, costs: false, revenue: false, competitors: false, risks: false, recommendations: false });
         }
       } catch { /* ignore */ }
       setLoadingCache(false);
@@ -661,7 +661,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       const now = new Date().toISOString();
       setCachedAt(now);
       setLastUpdatedAt(now);
-      setExpandedSections({ summary: true, investment: true, costs: true, revenue: true, competitors: true, risks: true, recommendations: true });
+      setExpandedSections({ summary: false, investment: false, costs: false, revenue: false, competitors: false, risks: false, recommendations: false });
 
       // Save to unified cache + database
       await analysisCache.saveFeasibility(data.study);

@@ -1,7 +1,8 @@
 import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { safeJsonLd } from "@/lib/security";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { MapPin, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users, Trash2, Pause, Play, Sparkles } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { MapPin, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users, Trash2, Pause, Play, Sparkles, ChevronDown } from "lucide-react";
 import PromoteListingDialog from "@/components/PromoteListingDialog";
 import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
@@ -884,26 +885,52 @@ const ListingDetailsPage = () => {
 
               <div className="space-y-3 mb-6">
                 <InfoRow label="نوع الصفقة" value={primaryConfig?.label || getArabicDealType(primaryDealType)} />
-                {listing.annual_rent && <InfoRow label="الإيجار السنوي" value={<PriceDisplay amount={Number(listing.annual_rent)} size={10} />} />}
-                {listing.lease_duration && <InfoRow label="مدة العقد" value={listing.lease_duration} />}
-                {listing.lease_remaining && <InfoRow label="المتبقي" value={listing.lease_remaining} />}
-                {listing.municipality_license && <InfoRow label="رخصة البلدية" value={listing.municipality_license} />}
-                {listing.civil_defense_license && <InfoRow label="الدفاع المدني" value={listing.civil_defense_license} />}
-                
-                {listing.liabilities && <InfoRow label="الالتزامات" value={listing.liabilities} />}
+
+                {(listing.annual_rent || listing.lease_duration || listing.lease_remaining || listing.municipality_license || listing.civil_defense_license || listing.liabilities) && (
+                  <Collapsible>
+                    <CollapsibleTrigger className="w-full flex items-center justify-between text-xs text-primary hover:text-primary/80 transition-colors py-1.5 group">
+                      <span>عرض تفاصيل الإعلان الإضافية</span>
+                      <ChevronDown size={14} className="transition-transform group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-3 pt-2">
+                      {listing.annual_rent && <InfoRow label="الإيجار السنوي" value={<PriceDisplay amount={Number(listing.annual_rent)} size={10} />} />}
+                      {listing.lease_duration && <InfoRow label="مدة العقد" value={listing.lease_duration} />}
+                      {listing.lease_remaining && <InfoRow label="المتبقي" value={listing.lease_remaining} />}
+                      {listing.municipality_license && <InfoRow label="رخصة البلدية" value={listing.municipality_license} />}
+                      {listing.civil_defense_license && <InfoRow label="الدفاع المدني" value={listing.civil_defense_license} />}
+                      {listing.liabilities && <InfoRow label="الالتزامات" value={listing.liabilities} />}
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
               </div>
 
               {/* AI Credibility Badge */}
               <CredibilityBadge data={(listing as any).ai_trust_score as any} />
 
-              {/* Competitive Intelligence */}
-              <CompetitiveIntelPanel listingId={listing.id} />
+              {/* Competitive Intelligence — collapsed by default */}
+              <Collapsible className="mb-4">
+                <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-border/40 bg-card hover:bg-accent/20 transition-colors group">
+                  <span className="text-sm font-medium">تحليل المنافسين</span>
+                  <ChevronDown size={14} className="text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <CompetitiveIntelPanel listingId={listing.id} />
+                </CollapsibleContent>
+              </Collapsible>
 
               {/* Listing Health Report - for owner */}
               {isOwner && <ListingHealthReport listingId={listing.id} />}
 
-              {/* Deal-type-aware Transparency Indicator */}
-              <TransparencyIndicator listing={listing} className="mb-4" onListingUpdated={(updated) => setListing(updated as unknown as Listing)} />
+              {/* Deal-type-aware Transparency Indicator — collapsed by default */}
+              <Collapsible className="mb-4">
+                <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-border/40 bg-card hover:bg-accent/20 transition-colors group">
+                  <span className="text-sm font-medium">اكتمال الإعلان</span>
+                  <ChevronDown size={14} className="text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <TransparencyIndicator listing={listing} onListingUpdated={(updated) => setListing(updated as unknown as Listing)} />
+                </CollapsibleContent>
+              </Collapsible>
 
 
               {/* Seller Info Card */}
