@@ -230,6 +230,73 @@ const SOURCE_LABELS: Record<string, { icon: typeof ImageIcon; label: string }> =
   both: { icon: Package, label: "صور + مستندات" },
 };
 
+const CertifiedValuationFloatingTab = () => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      {/* Closed tab — fixed on right edge, vertically centered */}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="تقييم معتمد"
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-emerald-800 hover:bg-emerald-900 text-white shadow-lg rounded-l-lg px-2 py-4 flex items-center justify-center transition-colors"
+        style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+      >
+        <span className="text-xs font-semibold tracking-wide whitespace-nowrap">تقييم معتمد</span>
+      </button>
+
+      {/* Side panel */}
+      {open && (
+        <div className="fixed inset-0 z-50" onClick={() => setOpen(false)}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-[320px] max-w-[85vw] bg-card border border-border shadow-2xl rounded-l-2xl p-5 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+            dir="rtl"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+                  <ShieldCheck size={18} className="text-emerald-700 dark:text-emerald-400" />
+                </div>
+                <h4 className="text-sm font-semibold text-foreground">تقييم رسمي معتمد</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="text-muted-foreground hover:text-foreground text-lg leading-none"
+                aria-label="إغلاق"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs text-foreground leading-relaxed">
+                <span className="font-semibold">جساس للتقييم</span> — شركة معتمدة من الهيئة السعودية للمقيمين المعتمدين (تقييم).
+              </p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                نقدم تقييماً ميدانياً رسمياً لكامل المشروع بما يشمل الأصول والمعدات والقيمة التشغيلية.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              disabled
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-muted px-4 py-2.5 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-80"
+            >
+              احجز تقييمك الآن
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                قريباً
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
 const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const {
     cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing,
