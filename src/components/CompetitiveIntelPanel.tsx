@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingUp, BarChart3, ArrowUp, ArrowDown, Minus, Loader2, RefreshCw, Globe, MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { TrendingUp, BarChart3, ArrowUp, ArrowDown, Minus, Loader2, RefreshCw, Globe, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import ReactMarkdown from "react-markdown";
@@ -33,7 +33,6 @@ const CompetitiveIntelPanel = ({ listingId }: CompetitiveIntelProps) => {
   const [data, setData] = useState<IntelData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [open, setOpen] = useState(false);
 
   const analyze = async () => {
     setLoading(true);
