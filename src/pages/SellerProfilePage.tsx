@@ -290,7 +290,12 @@ const SellerProfilePage = () => {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {listings.map(listing => {
-              const photos = Array.isArray(listing.photos) ? listing.photos as string[] : [];
+              const rawPhotos = listing.photos as unknown;
+              const photos: string[] = Array.isArray(rawPhotos)
+                ? (rawPhotos as string[])
+                : (rawPhotos && typeof rawPhotos === "object" && Array.isArray((rawPhotos as { all?: unknown }).all)
+                    ? ((rawPhotos as { all: string[] }).all)
+                    : []);
               return (
                 <Link
                   key={listing.id}
