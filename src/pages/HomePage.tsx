@@ -87,7 +87,7 @@ function useFeaturedListings() {
     async function fetch() {
       const { data } = await supabase
         .from("listings")
-        .select("id, title, business_activity, city, district, price, photos, featured")
+        .select("id, title, business_activity, city, district, price, photos, featured, cover_photo_url")
         .eq("status", "published")
         .eq("featured", true)
         .order("published_at", { ascending: false })
