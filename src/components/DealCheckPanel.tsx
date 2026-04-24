@@ -797,11 +797,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                         </div>
                       )}
                       <p className="text-sm text-muted-foreground leading-relaxed mb-3">{analysis.marketComparison.details}</p>
-                      {analysis.marketComparison.assetBreakdown?.length > 0 && (
-                        <div className="border border-border/50 rounded-xl overflow-hidden">
-                          <div className="bg-muted/30 px-3 py-2 text-xs font-medium flex items-center gap-1.5">
-                            <ShoppingCart size={12} strokeWidth={1.3} />
-                            تفصيل مقارنة الأصول
+                      {/* Asset comparison breakdown table removed — was empty (all "غير متاح • تقدير AI") */}
                           </div>
                           <div className="divide-y divide-border/30">
                             {analysis.marketComparison.assetBreakdown.map((item, i) => (
