@@ -378,6 +378,26 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const displayConfidence = assetsCombined?.confidence || listing?.ai_detected_assets?.confidence;
   const displaySummary = assetsCombined?.summary || listing?.ai_detected_assets?.summary;
 
+  // ─── Live totals — always recomputed from listing.inventory (never read stored aggregates) ───
+  const liveInventory: any[] = Array.isArray(listing?.inventory) ? listing.inventory : [];
+  const liveTotals = liveInventory.reduce(
+    (acc, item) => {
+      const qty = Number(item?.quantity) > 0 ? Number(item.quantity) : 1;
+      const market = Number(item?.pricing?.market_value_sar);
+      const takeover = Number(item?.pricing?.price_sar);
+      if (Number.isFinite(market) && market > 0) acc.marketTotal += market * qty;
+      if (Number.isFinite(takeover) && takeover > 0) acc.takeoverTotal += takeover * qty;
+      const rangeMin = Number(item?.pricing?.price_range?.min);
+      const rangeMax = Number(item?.pricing?.price_range?.max);
+      if (Number.isFinite(rangeMin) && rangeMin > 0) acc.rangeLow += rangeMin * qty;
+      else if (Number.isFinite(takeover) && takeover > 0) acc.rangeLow += takeover * qty;
+      if (Number.isFinite(rangeMax) && rangeMax > 0) acc.rangeHigh += rangeMax * qty;
+      else if (Number.isFinite(takeover) && takeover > 0) acc.rangeHigh += takeover * qty;
+      return acc;
+    },
+    { marketTotal: 0, takeoverTotal: 0, rangeLow: 0, rangeHigh: 0 }
+  );
+
   return (
     <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
       {/* Header */}
@@ -621,12 +641,17 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                         <div className="grid grid-cols-2 gap-3 mb-3">
                           <div>
                             <div className="text-[10px] text-muted-foreground">💰 النطاق التقديري</div>
-                            {priceAnalysis.estimated_range ? (
+                            {liveTotals.rangeLow > 0 && liveTotals.rangeHigh > 0 && liveTotals.rangeLow !== liveTotals.rangeHigh ? (
                               <div className="text-sm font-semibold leading-tight">
-                                {priceAnalysis.estimated_range.low?.toLocaleString()} – {priceAnalysis.estimated_range.high?.toLocaleString()} ر.س
+                                {liveTotals.rangeLow.toLocaleString()} – {liveTotals.rangeHigh.toLocaleString()} ر.س
                               </div>
                             ) : (
-                              <div className="text-sm font-semibold">{priceAnalysis.estimated_value?.toLocaleString()} ر.س</div>
+                              <div className="text-sm font-semibold">{liveTotals.takeoverTotal.toLocaleString()} ر.س</div>
+                            )}
+                            {liveTotals.marketTotal > 0 && liveTotals.marketTotal !== liveTotals.takeoverTotal && (
+                              <div className="text-[10px] text-muted-foreground mt-0.5">
+                                القيمة السوقية: <span className="font-medium">{liveTotals.marketTotal.toLocaleString()} ر.س</span>
+                              </div>
                             )}
                             {priceAnalysis.valuation_confidence && (
                               <div className="text-[10px] text-muted-foreground mt-0.5">
@@ -716,9 +741,17 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                               );
                             })}
                           </div>
-                          <div className="bg-muted/30 px-3 py-2 flex justify-between items-center border-t border-border/30">
-                            <span className="text-xs font-medium">الإجمالي التقديري</span>
-                            <span className="text-sm font-semibold">{priceAnalysis.estimated_value?.toLocaleString()} ر.س</span>
+                          <div className="bg-muted/30 px-3 py-2 border-t border-border/30 space-y-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-medium">الإجمالي التقديري (قيمة التقبيل)</span>
+                              <span className="text-sm font-semibold">{liveTotals.takeoverTotal.toLocaleString()} ر.س</span>
+                            </div>
+                            {liveTotals.marketTotal > 0 && liveTotals.marketTotal !== liveTotals.takeoverTotal && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-[11px] text-muted-foreground">القيمة السوقية الإجمالية</span>
+                                <span className="text-[11px] text-muted-foreground">{liveTotals.marketTotal.toLocaleString()} ر.س</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
