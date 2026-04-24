@@ -885,13 +885,23 @@ const ListingDetailsPage = () => {
 
               <div className="space-y-3 mb-6">
                 <InfoRow label="نوع الصفقة" value={primaryConfig?.label || getArabicDealType(primaryDealType)} />
-                {listing.annual_rent && <InfoRow label="الإيجار السنوي" value={<PriceDisplay amount={Number(listing.annual_rent)} size={10} />} />}
-                {listing.lease_duration && <InfoRow label="مدة العقد" value={listing.lease_duration} />}
-                {listing.lease_remaining && <InfoRow label="المتبقي" value={listing.lease_remaining} />}
-                {listing.municipality_license && <InfoRow label="رخصة البلدية" value={listing.municipality_license} />}
-                {listing.civil_defense_license && <InfoRow label="الدفاع المدني" value={listing.civil_defense_license} />}
-                
-                {listing.liabilities && <InfoRow label="الالتزامات" value={listing.liabilities} />}
+
+                {(listing.annual_rent || listing.lease_duration || listing.lease_remaining || listing.municipality_license || listing.civil_defense_license || listing.liabilities) && (
+                  <Collapsible>
+                    <CollapsibleTrigger className="w-full flex items-center justify-between text-xs text-primary hover:text-primary/80 transition-colors py-1.5 group">
+                      <span>عرض تفاصيل الإعلان الإضافية</span>
+                      <ChevronDown size={14} className="transition-transform group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-3 pt-2">
+                      {listing.annual_rent && <InfoRow label="الإيجار السنوي" value={<PriceDisplay amount={Number(listing.annual_rent)} size={10} />} />}
+                      {listing.lease_duration && <InfoRow label="مدة العقد" value={listing.lease_duration} />}
+                      {listing.lease_remaining && <InfoRow label="المتبقي" value={listing.lease_remaining} />}
+                      {listing.municipality_license && <InfoRow label="رخصة البلدية" value={listing.municipality_license} />}
+                      {listing.civil_defense_license && <InfoRow label="الدفاع المدني" value={listing.civil_defense_license} />}
+                      {listing.liabilities && <InfoRow label="الالتزامات" value={listing.liabilities} />}
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
               </div>
 
               {/* AI Credibility Badge */}
