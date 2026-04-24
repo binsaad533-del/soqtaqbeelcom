@@ -267,7 +267,8 @@ async function searchNearbyCompetitors(
   apiKey: string,
   isIndustrial: boolean,
 ): Promise<{ radius: number; places: any[] }[]> {
-  const radii = [500, 2000, 10000];
+  const initialRadii = [500, 2000, 10000];
+  const expandedRadii = [25000, 50000];
   const results: { radius: number; places: any[] }[] = [];
 
   // For industrial zones, search with multiple keywords to catch hidden competitors
@@ -275,7 +276,7 @@ async function searchNearbyCompetitors(
     ? [keyword, ...INDUSTRIAL_KEYWORDS.slice(0, 5).filter(kw => !keyword.includes(kw))]
     : [keyword];
 
-  for (const radius of radii) {
+  const searchRadius = async (radius: number) => {
     const allPlaces: any[] = [];
     const seenNames = new Set<string>();
 
@@ -313,7 +314,20 @@ async function searchNearbyCompetitors(
       }
     }
 
-    results.push({ radius, places: allPlaces.slice(0, 15) });
+    return { radius, places: allPlaces.slice(0, 15) };
+  };
+
+  for (const radius of initialRadii) {
+    results.push(await searchRadius(radius));
+  }
+
+  // If no competitors found in any of the initial radii (likely industrial zone
+  // or remote area not well-mapped on Google), expand search to 25km and 50km.
+  const totalFound = results.reduce((sum, r) => sum + r.places.length, 0);
+  if (totalFound === 0) {
+    for (const radius of expandedRadii) {
+      results.push(await searchRadius(radius));
+    }
   }
 
   return results;
