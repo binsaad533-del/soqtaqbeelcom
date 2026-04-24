@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
+import { getOrderedPhotos } from "@/lib/photoOrdering";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
