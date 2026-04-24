@@ -73,6 +73,23 @@ const CreateListingStep2Legacy = ({ state }: Props) => {
 
   const iconMap: Record<string, typeof Camera> = { Camera, DoorOpen, Building2, MapPin, Tag, Wrench, FileText };
   const bulkPhotoCount = (localPreviews["all"] || photos["all"] || []).length;
+  const coverUrl = (state as unknown as { coverPhotoUrl?: string | null }).coverPhotoUrl ?? (photos["all"] || [])[0] ?? null;
+  const setAsCover = (url: string) => {
+    setPhotos(prev => {
+      const all = prev.all || [];
+      const without = all.filter(u => u !== url);
+      const updated = { ...prev, all: [url, ...without] };
+      if (listingId) {
+        updateListing(listingId, { photos: updated, cover_photo_url: url } as never).catch(() => {});
+      }
+      return updated;
+    });
+    setLocalPreviews(prev => {
+      const all = prev.all || [];
+      const without = all.filter(u => u !== url);
+      return { ...prev, all: [url, ...without] };
+    });
+  };
 
   return (
     <div key="step-1" className={`space-y-6 ${stepDirection === "next" ? "animate-step-slide-in-next" : "animate-step-slide-in-prev"}`}>
