@@ -2,7 +2,7 @@ import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { safeJsonLd } from "@/lib/security";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { MapPin, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users, Trash2, Pause, Play, Sparkles, ChevronDown } from "lucide-react";
+import { MapPin, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield, Star, Edit3, ArrowLeft, Heart, Share2, Eye, CalendarCheck, MessageSquare, Users, Trash2, Pause, Play, Sparkles, ChevronDown, Wallet, Package } from "lucide-react";
 import PromoteListingDialog from "@/components/PromoteListingDialog";
 import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
