@@ -809,6 +809,16 @@ const CreateListingPage = () => {
     const errors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
     if (!hasPhotos || Object.keys(errors).length > 0) { toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر"); return; }
     if (locationLat == null || locationLng == null) { toast.error("يجب تحديد الموقع على الخريطة قبل النشر"); return; }
+
+    // Duplicate detection — only if not yet acknowledged
+    if (!duplicateAcknowledged) {
+      const dup = await checkForDuplicateListing();
+      if (dup) {
+        setDuplicateCandidate(dup);
+        return;
+      }
+    }
+
     setShowPublishConfirm(true);
     setDealCheckLoading(true);
     setDealCheckError("");
