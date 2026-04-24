@@ -809,7 +809,7 @@ Deno.serve(async (req) => {
         depreciation_rate: pricing.pricingResult?.depreciation_rate ?? null,
         olv_discount: pricing.pricingResult?.olv_discount ?? null,
         condition_taqeem: pricing.pricingResult?.condition_taqeem ?? null,
-        valuation_method: "OLV-TAQEEM",
+        valuation_method: pricing.source === "generic_market_range" ? "GENERIC_RANGE" : "OLV-TAQEEM",
       }
     };
   });
