@@ -6,8 +6,6 @@ import { MapPin, MessageCircle, Building2, Loader2, Check, AlertTriangle, Shield
 import PromoteListingDialog from "@/components/PromoteListingDialog";
 import { Textarea } from "@/components/ui/textarea";
 import AiStar from "@/components/AiStar";
-import CredibilityBadge from "@/components/CredibilityBadge";
-import CompetitiveIntelPanel from "@/components/CompetitiveIntelPanel";
 import ListingHealthReport from "@/components/ListingHealthReport";
 import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import VerifiedSellerBadge from "@/components/VerifiedSellerBadge";
@@ -17,10 +15,8 @@ import { Button } from "@/components/ui/button";
 import DealCheckPanel from "@/components/DealCheckPanel";
 import ListingStickyCtaBar from "@/components/ListingStickyCtaBar";
 import FeasibilityStudyPanel from "@/components/FeasibilityStudyPanel";
-import FinancialAnalysisPanel from "@/components/FinancialAnalysisPanel";
 import DealSimulationPanel from "@/components/DealSimulationPanel";
 import { useAnalysisCache } from "@/hooks/useAnalysisCache";
-import TransparencyIndicator from "@/components/TransparencyIndicator";
 
 import QuickPriceEdit from "@/components/QuickPriceEdit";
 import ListingEditDialog from "@/components/ListingEditDialog";
