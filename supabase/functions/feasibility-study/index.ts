@@ -134,6 +134,40 @@ function estimateInventoryWeight(item: any): number {
   return qty * Math.max(unitPrice, 1);
 }
 
+function computeInventoryTotals(items: any[] | undefined) {
+  const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
+  let marketValueTotalSar = 0;
+  let olvTotalSar = 0;
+  let pricedAssetsCount = 0;
+  let needsInspectionCount = 0;
+
+  for (const item of safeItems) {
+    const qty = Number(item?.quantity ?? item?.qty) > 0 ? Number(item?.quantity ?? item?.qty) : 1;
+    const pricing = item?.pricing || {};
+    const marketValue = Number(pricing?.market_value_sar);
+    const olv = Number(pricing?.price_sar);
+    const needsInspection = Boolean(pricing?.needs_inspection || item?.needs_inspection);
+
+    const hasPricing = (Number.isFinite(marketValue) && marketValue > 0) || (Number.isFinite(olv) && olv > 0);
+
+    if (Number.isFinite(marketValue) && marketValue > 0) {
+      marketValueTotalSar += marketValue * qty;
+    }
+    if (Number.isFinite(olv) && olv > 0) {
+      olvTotalSar += olv * qty;
+    }
+    if (hasPricing) pricedAssetsCount += 1;
+    if (needsInspection || !hasPricing) needsInspectionCount += 1;
+  }
+
+  return {
+    market_value_total_sar: Math.round(marketValueTotalSar),
+    olv_total_sar: Math.round(olvTotalSar),
+    priced_assets_count: pricedAssetsCount,
+    needs_inspection_count: needsInspectionCount,
+  };
+}
+
 function summarizeInventory(items: any[] | undefined) {
   const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
   const sortedItems = [...safeItems].sort((a, b) => estimateInventoryWeight(b) - estimateInventoryWeight(a));
@@ -312,6 +346,7 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
 
   // Inventory
   const inventorySummary = summarizeInventory(listing.inventory);
+  const inventoryTotals = computeInventoryTotals(listing.inventory);
   if (inventorySummary.totalLines > 0) {
     sections.push("\n## الأصول والمعدات:");
     sections.push(`- عدد البنود في المخزون: ${inventorySummary.totalLines}`);
@@ -323,6 +358,13 @@ function buildFeasibilityPrompt(listing: any, activityTemplate: any, competitors
     if (inventorySummary.omittedLines > 0) {
       sections.push(`- يوجد ${inventorySummary.omittedLines} بند إضافي بالمخزون لم يُسرد بالتفصيل لتقليل حجم التحليل؛ اعتمد على الملخص في التقدير.`);
     }
+
+    sections.push("\n## إجماليات تسعير الأصول (محسوبة من inventory مباشرة):");
+    sections.push(`- إجمالي القيمة السوقية (سعر الجديد من الموردين): ${inventoryTotals.market_value_total_sar} ريال`);
+    sections.push(`- إجمالي قيمة التقبيل OLV (بعد الإهلاك والتصفية المنظمة): ${inventoryTotals.olv_total_sar} ريال`);
+    sections.push(`- عدد الأصول المُسعَّرة: ${inventoryTotals.priced_assets_count}`);
+    sections.push(`- عدد الأصول التي تحتاج معاينة: ${inventoryTotals.needs_inspection_count}`);
+    sections.push("- ملاحظة: الأسعار مبنية على عروض أسعار من الموردين — وليست فواتير شراء فعلية");
   }
 
   // Activity-specific context
@@ -417,7 +459,15 @@ const SYSTEM_PROMPT = `أنت مستشار مالي واقتصادي خبير م
 - وضّح الافتراضات وراء كل تقدير
 - هذه دراسة استرشادية وليست تقييم رسمي مرخص
 - قدّم التحليل بلغة مهنية واضحة
-- عند تحليل المنافسين، استخدم البيانات الفعلية من Google Maps`;
+- عند تحليل المنافسين، استخدم البيانات الفعلية من Google Maps
+
+## ⚠️ قاعدة الأرقام الفعلية (إلزامية):
+- قيمة الأصول الفعلية = قيمة التقبيل OLV (بعد الإهلاك والتصفية المنظمة)
+- لا تستخدم القيمة السوقية (سعر الجديد) في حساب ROI أو هيكل الاستثمار
+- أسعار الأصول مبنية على عروض أسعار من الموردين — وليست فواتير شراء فعلية
+- في هيكل الاستثمار، قيمة التقبيل = السعر المطلوب من البائع (وليس قيمة الأصول)
+- إذا لم تتوفر بيانات مالية فعلية (إيرادات، مصاريف)، صرّح بذلك بوضوح ولا تفترض أرقاماً
+- التكاليف التشغيلية يجب أن تستند إلى معايير السوق السعودي لنوع النشاط المحدد مع ذكر المصدر`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
