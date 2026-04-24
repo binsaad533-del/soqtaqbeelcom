@@ -1201,19 +1201,6 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
         </div>
       </div>
 
-      {/* CTA — only when inspection is needed */}
-      {inspectionCount > 0 && (
-        <div
-          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground/70 cursor-not-allowed"
-          title="قريباً — جساس للتقييم المعتمد"
-          aria-disabled="true"
-        >
-          احجز معاينة جساس للدقة
-          <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary">
-            قريباً
-          </span>
-        </div>
-      )}
     </div>
   );
 };
