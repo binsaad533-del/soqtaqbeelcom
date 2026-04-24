@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getOrderedPhotos } from "@/lib/photoOrdering";
 
 function useHomeStats(tx: (ar: string, en: string) => string) {
   const [stats, setStats] = useState([
