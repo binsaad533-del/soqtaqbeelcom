@@ -336,7 +336,7 @@ const HomePage = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {featured.map((listing, i) => {
-                const photos = listing.photos ? Object.values(listing.photos).flat() as string[] : [];
+                const photos = getOrderedPhotos(listing.photos as Record<string, string[]>, undefined, (listing as { cover_photo_url?: string | null }).cover_photo_url);
                 return (
                   <div
                     key={listing.id}
