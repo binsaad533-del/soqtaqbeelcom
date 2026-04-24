@@ -1345,6 +1345,37 @@ const CreateListingPage = () => {
         </div>
       </div>
 
+      {/* Duplicate Listing Warning Modal */}
+      {duplicateCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setDuplicateCandidate(null)}>
+          <div className="bg-card border border-border/50 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-5 animate-scale-in" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-3">
+                <AlertTriangle size={24} strokeWidth={1.5} className="text-amber-600" />
+              </div>
+              <h3 className="font-semibold text-lg mb-1">إعلان مشابه منشور بالفعل</h3>
+              <p className="text-sm text-muted-foreground">يبدو أن لديك إعلاناً مشابهاً منشوراً. هل تريد تعديله بدلاً من إنشاء إعلان جديد؟</p>
+            </div>
+            <div className="bg-muted/40 rounded-xl p-4 space-y-2 text-sm">
+              <div className="flex items-center justify-between"><span className="text-muted-foreground">الإعلان</span><span className="font-medium text-foreground truncate max-w-[60%] text-end">{duplicateCandidate.title}</span></div>
+              {duplicateCandidate.city && (<><div className="border-t border-border/30" /><div className="flex items-center justify-between"><span className="text-muted-foreground">المدينة</span><span className="font-medium text-foreground">{duplicateCandidate.city}</span></div></>)}
+              {duplicateCandidate.price != null && (<><div className="border-t border-border/30" /><div className="flex items-center justify-between"><span className="text-muted-foreground">السعر</span><span className="font-medium text-foreground">{Number(duplicateCandidate.price).toLocaleString()} <SarSymbol size={10} /></span></div></>)}
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button onClick={() => { const id = duplicateCandidate.id; setDuplicateCandidate(null); navigate(`/listing/${id}`); }} className="rounded-xl gradient-primary text-primary-foreground">
+                تعديل الإعلان الحالي
+              </Button>
+              <Button variant="outline" onClick={() => { setDuplicateCandidate(null); setDuplicateAcknowledged(true); setTimeout(() => handlePublishClick(), 0); }} className="rounded-xl">
+                نشر كإعلان جديد
+              </Button>
+              <Button variant="ghost" onClick={() => setDuplicateCandidate(null)} className="rounded-xl text-muted-foreground">
+                إلغاء
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Publish Confirmation Modal */}
       {showPublishConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => !dealCheckLoading && setShowPublishConfirm(false)}>
