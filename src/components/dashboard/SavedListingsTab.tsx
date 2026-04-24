@@ -5,6 +5,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import SarSymbol from "@/components/SarSymbol";
 import PriceDisplay from "@/components/PriceDisplay";
+import { getOrderedPhotos } from "@/lib/photoOrdering";
 import {
   Heart, MapPin, Eye, Loader2, Search, Trash2
 } from "lucide-react";
@@ -44,7 +45,7 @@ export default function SavedListingsTab() {
     const listingIds = likes.map(l => l.listing_id);
     const { data: listings } = await supabase
       .from("listings")
-      .select("id, title, business_activity, city, district, price, status, photos")
+      .select("id, title, business_activity, city, district, price, status, photos, cover_photo_url")
       .in("id", listingIds);
 
     const listingMap = new Map((listings || []).map(l => [l.id, l]));
@@ -119,7 +120,7 @@ export default function SavedListingsTab() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map(item => {
-            const photos = item.photos ? Object.values(item.photos).flat() as string[] : [];
+            const photos = getOrderedPhotos(item.photos as Record<string, string[]> | null, undefined, (item as { cover_photo_url?: string | null }).cover_photo_url);
             return (
               <div key={item.like_id} className="bg-card rounded-2xl shadow-soft border border-border/30 overflow-hidden hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-200 group relative">
                 <Link to={`/listing/${item.listing_id}`}>
