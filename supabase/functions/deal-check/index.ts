@@ -511,6 +511,26 @@ function buildAnalysisPrompt(listing: any, mode: AnalysisMode, previousAnalysis:
     });
   }
 
+  // Pricing aggregates computed directly from raw inventory (pricing.*)
+  if (scope.analyzeFields.includes("assets") && listing.pricing_aggregates) {
+    const agg = listing.pricing_aggregates;
+    const hasAnyPricing = (agg.market_value_total_sar && agg.market_value_total_sar > 0) ||
+                          (agg.olv_total_sar && agg.olv_total_sar > 0);
+    if (hasAnyPricing || agg.priced_assets_count > 0 || agg.needs_inspection_count > 0) {
+      sections.push("\n## 💰 إجماليات تسعير الأصول (محسوبة مباشرة من جرد الإعلان):");
+      if (agg.market_value_total_sar) {
+        sections.push(`- إجمالي القيمة السوقية للأصول المُسعَّرة (Market Value — جديد من المورد): ${agg.market_value_total_sar} ريال`);
+      }
+      if (agg.olv_total_sar) {
+        sections.push(`- إجمالي قيمة التقبيل (OLV — بعد الإهلاك والتصفية المنظمة): ${agg.olv_total_sar} ريال`);
+      }
+      sections.push(`- عدد الأصول المُسعَّرة: ${agg.priced_assets_count}`);
+      sections.push(`- عدد الأصول التي تحتاج معاينة (غير مُسعَّرة): ${agg.needs_inspection_count}`);
+      sections.push(`- ⚠️ ملاحظة: ${agg.pricing_source_note}`);
+      sections.push(`- ⚠️ عند مقارنة السعر المطلوب بقيمة الأصول، استخدم قيمة التقبيل OLV وليس القيمة السوقية`);
+    }
+  }
+
   // Include AI-detected assets (combined from images + files)
   if (scope.analyzeFields.includes("assets")) {
     const combined = listing.ai_assets_combined || listing.ai_detected_assets;
