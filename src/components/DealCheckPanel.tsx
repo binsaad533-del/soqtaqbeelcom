@@ -796,33 +796,10 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                           <div className="text-sm font-medium">{analysis.marketComparison.observedPriceRange}</div>
                         </div>
                       )}
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-3">{analysis.marketComparison.details}</p>
-                      {/* Asset comparison breakdown table removed — was empty (all "غير متاح • تقدير AI") */}
-                          </div>
-                          <div className="divide-y divide-border/30">
-                            {analysis.marketComparison.assetBreakdown.map((item, i) => (
-                              <div key={i} className="px-3 py-2.5 flex items-center justify-between gap-2">
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-xs font-medium truncate">{item.assetName}</div>
-                                  <div className="text-[10px] text-muted-foreground">
-                                    {item.marketRange} • {item.source}
-                                  </div>
-                                </div>
-                                <span className={cn("text-[10px] px-2 py-0.5 rounded-md shrink-0",
-                                  item.verdict === "معقول" ? "bg-emerald-50 text-emerald-700" :
-                                  item.verdict === "مبالغ فيه" ? "bg-red-50 text-red-700" :
-                                  item.verdict === "أقل من السوق" ? "bg-blue-50 text-blue-700" :
-                                  "bg-muted text-muted-foreground"
-                                )}>
-                                  {item.verdict}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                       <p className="text-sm text-muted-foreground leading-relaxed mb-3">{analysis.marketComparison.details}</p>
+                       {/* Asset comparison breakdown table removed — was empty (all "غير متاح • تقدير AI") */}
+                     </div>
+                   )}
 
                   {analysis.missingInfo.length > 0 && (
                     <ListSection icon={FileQuestion} title="معلومات ناقصة / توضيحات مطلوبة" items={analysis.missingInfo} dotClass="bg-amber-500/50" iconClass="text-amber-500" />
