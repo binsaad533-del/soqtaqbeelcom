@@ -848,7 +848,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               )}
 
               <div className="text-[10px] text-muted-foreground/60 text-center pt-2 border-t border-border/20">
-                هذا التحليل استرشادي بمنهجية OLV وفق معايير تقييم السعودية (TAQEEM). ليس بديلاً عن تقييم معتمد. للتقييم الرسمي: جساس (قريباً).
+                هذا التحليل استرشادي بمنهجية OLV وفق معايير تقييم السعودية (TAQEEM). ليس بديلاً عن تقييم معتمد.
               </div>
 
               <div className="flex justify-center pt-1">
