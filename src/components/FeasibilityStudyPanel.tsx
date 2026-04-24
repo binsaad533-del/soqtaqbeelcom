@@ -568,13 +568,13 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(analysisCache.analysisUpdatedAt || analysisCache.cacheAge || null);
   const [copied, setCopied] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    summary: true,
-    investment: true,
+    summary: false,
+    investment: false,
     costs: false,
-    revenue: true,
-    competitors: true,
+    revenue: false,
+    competitors: false,
     risks: false,
-    recommendations: true,
+    recommendations: false,
   });
   const [pdfLoading, setPdfLoading] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
