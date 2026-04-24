@@ -1072,21 +1072,40 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">{displayStudy.competitorAnalysis.summary}</p>
 
-            {/* Radius counts */}
-            <div className="grid grid-cols-3 gap-2">
-              <div className="rounded-lg bg-muted/30 p-2.5 text-center">
-                <div className="text-lg font-bold">{displayStudy.competitorAnalysis.nearbyCount}</div>
-                <div className="text-[10px] text-muted-foreground">500م (الشارع)</div>
-              </div>
-              <div className="rounded-lg bg-muted/30 p-2.5 text-center">
-                <div className="text-lg font-bold">{displayStudy.competitorAnalysis.neighborhoodCount}</div>
-                <div className="text-[10px] text-muted-foreground">2كم (الحي)</div>
-              </div>
-              <div className="rounded-lg bg-muted/30 p-2.5 text-center">
-                <div className="text-lg font-bold">{displayStudy.competitorAnalysis.areaCount}</div>
-                <div className="text-[10px] text-muted-foreground">10كم (المنطقة)</div>
-              </div>
-            </div>
+            {(() => {
+              const nearby = displayStudy.competitorAnalysis.nearbyCount || 0;
+              const neighborhood = displayStudy.competitorAnalysis.neighborhoodCount || 0;
+              const area = displayStudy.competitorAnalysis.areaCount || 0;
+              const topCount = displayStudy.competitorAnalysis.topCompetitors?.length || 0;
+              const totalDigital = nearby + neighborhood + area;
+
+              // No digital competitor data found at all → show neutral message instead of zeros
+              if (totalDigital === 0 && topCount === 0) {
+                return (
+                  <div className="rounded-lg bg-muted/30 p-3 text-center text-xs text-muted-foreground">
+                    لم تتوفر بيانات منافسين رقمية — المنافسة الفعلية تتطلب معاينة ميدانية
+                  </div>
+                );
+              }
+
+              // Standard radii display (only show non-zero buckets to avoid misleading zeros)
+              return (
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="rounded-lg bg-muted/30 p-2.5 text-center">
+                    <div className="text-lg font-bold">{nearby || "—"}</div>
+                    <div className="text-[10px] text-muted-foreground">500م (الشارع)</div>
+                  </div>
+                  <div className="rounded-lg bg-muted/30 p-2.5 text-center">
+                    <div className="text-lg font-bold">{neighborhood || "—"}</div>
+                    <div className="text-[10px] text-muted-foreground">2كم (الحي)</div>
+                  </div>
+                  <div className="rounded-lg bg-muted/30 p-2.5 text-center">
+                    <div className="text-lg font-bold">{area || "—"}</div>
+                    <div className="text-[10px] text-muted-foreground">10كم (المنطقة)</div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Top competitors */}
             {displayStudy.competitorAnalysis.topCompetitors && displayStudy.competitorAnalysis.topCompetitors.length > 0 && (
