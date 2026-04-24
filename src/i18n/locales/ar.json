@@ -1,0 +1,37 @@
+{
+  "common": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "search": "بحث",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "back": "رجوع",
+    "next": "التالي",
+    "loading": "جارٍ التحميل...",
+    "error": "حدث خطأ",
+    "send": "إرسال",
+    "close": "إغلاق"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "marketplace": "سوق الفرص",
+    "addListing": "أضف فرصة",
+    "messages": "الرسائل",
+    "dashboard": "لوحة التحكم"
+  },
+  "listing": {
+    "price": "السعر المطلوب",
+    "assets": "الأصول",
+    "location": "الموقع",
+    "dealType": "نوع الصفقة",
+    "fullTakeover": "تقبيل كامل",
+    "assetsOnly": "تقبيل أصول فقط",
+    "makeOffer": "قدّم عرض سعر",
+    "contact": "تواصل على الخاص",
+    "report": "إبلاغ"
+  },
+  "moqbil": {
+    "greeting": "هلا وغلا، أنا مقبل، مساعدك الذكي",
+    "placeholder": "اكتب رسالتك..."
+  }
+}
