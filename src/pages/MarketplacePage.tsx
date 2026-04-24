@@ -427,6 +427,7 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
   onToggleLike: () => void;
   isOnline: boolean;
 }) => {
+  const { t } = useTranslation();
   const seller = listing.sellerProfile;
   const badges = seller ? getSellerBadges(seller) : [];
 
