@@ -1450,10 +1450,9 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
               inspectionPreview.length === 0
                 ? ""
                 : inspectionPreview.join("، ") + (inspectionSorted.length > 3 ? "..." : "");
-            // Smart default: priced is always open; inspection opens only if it's the sole group
-            const onlyInspectionVisible = inspectionCount > 0 && pricedCount === 0;
-            const pricedDefaultOpen = true;
-            const inspectionDefaultOpen = onlyInspectionVisible;
+            // Both groups collapsed by default — user expands explicitly
+            const pricedDefaultOpen = false;
+            const inspectionDefaultOpen = false;
 
             return (
               <div className="space-y-2">
