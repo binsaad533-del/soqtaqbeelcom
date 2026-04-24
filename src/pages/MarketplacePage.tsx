@@ -477,7 +477,7 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
       <Link to={`/listing/${listing.id}`}>
         <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/30 flex items-center justify-center relative">
           {(() => {
-            const orderedPhotos = getOrderedPhotos(listing.photos as Record<string, string[]>);
+            const orderedPhotos = getOrderedPhotos(listing.photos as Record<string, string[]>, undefined, (listing as { cover_photo_url?: string | null }).cover_photo_url);
             return orderedPhotos.length > 0 ? (
               <>
                 <img src={orderedPhotos[0]} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />

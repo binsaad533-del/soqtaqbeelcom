@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getOrderedPhotos } from "@/lib/photoOrdering";
 
 function useHomeStats(tx: (ar: string, en: string) => string) {
   const [stats, setStats] = useState([
@@ -86,7 +87,7 @@ function useFeaturedListings() {
     async function fetch() {
       const { data } = await supabase
         .from("listings")
-        .select("id, title, business_activity, city, district, price, photos, featured")
+        .select("id, title, business_activity, city, district, price, photos, featured, cover_photo_url")
         .eq("status", "published")
         .eq("featured", true)
         .order("published_at", { ascending: false })
@@ -336,7 +337,7 @@ const HomePage = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {featured.map((listing, i) => {
-                const photos = listing.photos ? Object.values(listing.photos).flat() as string[] : [];
+                const photos = getOrderedPhotos(listing.photos as Record<string, string[]>, undefined, (listing as { cover_photo_url?: string | null }).cover_photo_url);
                 return (
                   <div
                     key={listing.id}

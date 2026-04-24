@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { t, DEAL_TYPE_LABELS } from "@/lib/translations";
+import { getOrderedPhotos } from "@/lib/photoOrdering";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -291,11 +292,10 @@ const SellerProfilePage = () => {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {listings.map(listing => {
               const rawPhotos = listing.photos as unknown;
-              const photos: string[] = Array.isArray(rawPhotos)
-                ? (rawPhotos as string[])
-                : (rawPhotos && typeof rawPhotos === "object" && Array.isArray((rawPhotos as { all?: unknown }).all)
-                    ? ((rawPhotos as { all: string[] }).all)
-                    : []);
+              const photosObj: Record<string, string[]> | null = Array.isArray(rawPhotos)
+                ? { all: rawPhotos as string[] }
+                : (rawPhotos && typeof rawPhotos === "object" ? rawPhotos as Record<string, string[]> : null);
+              const photos = getOrderedPhotos(photosObj, undefined, (listing as { cover_photo_url?: string | null }).cover_photo_url);
               return (
                 <Link
                   key={listing.id}

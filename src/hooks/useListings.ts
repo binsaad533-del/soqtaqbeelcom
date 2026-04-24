@@ -60,6 +60,7 @@ export interface Listing {
   fraud_flags: any[];
   fraud_score: number | null;
   area_sqm: number | null;
+  cover_photo_url: string | null;
 }
 
 export function useListings() {

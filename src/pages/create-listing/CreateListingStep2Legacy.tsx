@@ -13,6 +13,7 @@ import {
   Tag,
   Wrench,
   Image as ImageIcon,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AiInlineStar from "@/components/AiInlineStar";
@@ -72,6 +73,23 @@ const CreateListingStep2Legacy = ({ state }: Props) => {
 
   const iconMap: Record<string, typeof Camera> = { Camera, DoorOpen, Building2, MapPin, Tag, Wrench, FileText };
   const bulkPhotoCount = (localPreviews["all"] || photos["all"] || []).length;
+  const coverUrl = (state as unknown as { coverPhotoUrl?: string | null }).coverPhotoUrl ?? (photos["all"] || [])[0] ?? null;
+  const setAsCover = (url: string) => {
+    setPhotos(prev => {
+      const all = prev.all || [];
+      const without = all.filter(u => u !== url);
+      const updated = { ...prev, all: [url, ...without] };
+      if (listingId) {
+        updateListing(listingId, { photos: updated, cover_photo_url: url } as never).catch(() => {});
+      }
+      return updated;
+    });
+    setLocalPreviews(prev => {
+      const all = prev.all || [];
+      const without = all.filter(u => u !== url);
+      return { ...prev, all: [url, ...without] };
+    });
+  };
 
   return (
     <div key="step-1" className={`space-y-6 ${stepDirection === "next" ? "animate-step-slide-in-next" : "animate-step-slide-in-prev"}`}>
@@ -205,29 +223,53 @@ const CreateListingStep2Legacy = ({ state }: Props) => {
             <span className="text-xs font-medium">الصور المرفوعة ({bulkPhotoCount})</span>
           </div>
           <div className="flex gap-1.5 overflow-x-auto pb-1">
-            {(localPreviews["all"] || photos["all"] || []).map((url, i) => (
-              <div key={`all-${i}`} className="relative shrink-0 w-14 h-14 rounded-lg border border-border/30 overflow-hidden bg-muted/40 group/thumb">
-                <img src={url} alt="" loading="lazy" className="w-full h-full object-cover" />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const targetUrl = (photos["all"] || [])[i];
-                    if (targetUrl) {
-                      setPhotos(prev => {
-                        const updated = { ...prev, all: (prev.all || []).filter((_, idx) => idx !== i) };
-                        if (listingId) updateListing(listingId, { photos: updated } as never).catch(() => {});
-                        return updated;
-                      });
-                    }
-                    setLocalPreviews(prev => ({ ...prev, all: (prev.all || []).filter((_, idx) => idx !== i) }));
-                    setFileStatuses(prev => prev.filter(f => f.url !== targetUrl && f.previewUrl !== url));
-                  }}
-                  className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-destructive/80 text-white flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity"
-                >
-                  <Trash2 size={8} />
-                </button>
-              </div>
-            ))}
+            {(localPreviews["all"] || photos["all"] || []).map((url, i) => {
+              const realUrl = (photos["all"] || [])[i] || url;
+              const isCover = coverUrl === realUrl || (i === 0 && !coverUrl);
+              return (
+                <div key={`all-${i}`} className="relative shrink-0 w-14 h-14 rounded-lg border border-border/30 overflow-hidden bg-muted/40 group/thumb">
+                  <img src={url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                  {isCover && (
+                    <span className="absolute bottom-0 inset-x-0 bg-primary/90 text-primary-foreground text-[8px] font-medium text-center py-0.5 leading-tight">
+                      الغلاف
+                    </span>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (realUrl) setAsCover(realUrl);
+                    }}
+                    title="تعيين كصورة غلاف"
+                    className={cn(
+                      "absolute top-0.5 left-0.5 w-4 h-4 rounded-full flex items-center justify-center transition-opacity",
+                      isCover
+                        ? "bg-primary text-primary-foreground opacity-100"
+                        : "bg-background/80 text-muted-foreground opacity-0 group-hover/thumb:opacity-100 hover:bg-primary hover:text-primary-foreground"
+                    )}
+                  >
+                    <Star size={8} fill={isCover ? "currentColor" : "none"} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const targetUrl = (photos["all"] || [])[i];
+                      if (targetUrl) {
+                        setPhotos(prev => {
+                          const updated = { ...prev, all: (prev.all || []).filter((_, idx) => idx !== i) };
+                          if (listingId) updateListing(listingId, { photos: updated } as never).catch(() => {});
+                          return updated;
+                        });
+                      }
+                      setLocalPreviews(prev => ({ ...prev, all: (prev.all || []).filter((_, idx) => idx !== i) }));
+                      setFileStatuses(prev => prev.filter(f => f.url !== targetUrl && f.previewUrl !== url));
+                    }}
+                    className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-destructive/80 text-white flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity"
+                  >
+                    <Trash2 size={8} />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
