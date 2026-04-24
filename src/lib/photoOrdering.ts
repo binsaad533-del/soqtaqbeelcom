@@ -22,10 +22,12 @@ const DOCUMENT_GROUPS = new Set(["document_photos"]);
  * Document photos are excluded from the gallery.
  * An optional excludeUrls set can be passed to filter out specific URLs
  * (e.g., AI-identified document images within the "all" group).
+ * If coverUrl is provided and exists among the photos, it is moved to index 0.
  */
 export function getOrderedPhotos(
   photos: Record<string, string[]> | null | undefined,
-  excludeUrls?: Set<string> | string[]
+  excludeUrls?: Set<string> | string[],
+  coverUrl?: string | null
 ): string[] {
   if (!photos || typeof photos !== "object") return [];
 
@@ -45,12 +47,29 @@ export function getOrderedPhotos(
     return pa - pb;
   });
 
-  const allUrls = filteredEntries.flatMap(([, urls]) => (Array.isArray(urls) ? urls : []));
+  let allUrls = filteredEntries.flatMap(([, urls]) => (Array.isArray(urls) ? urls : []));
 
   // Filter out specific excluded URLs (document images identified by AI)
   if (excludeSet && excludeSet.size > 0) {
-    return allUrls.filter(url => !excludeSet.has(url));
+    allUrls = allUrls.filter(url => !excludeSet.has(url));
+  }
+
+  // Promote the explicit cover photo to index 0 if present
+  if (coverUrl && allUrls.includes(coverUrl)) {
+    allUrls = [coverUrl, ...allUrls.filter(u => u !== coverUrl)];
   }
 
   return allUrls;
+}
+
+/**
+ * Cheap helper for cards/listings that need the cover image only.
+ * Honors explicit cover_photo_url, then falls back to the smart-ordered first photo.
+ */
+export function getCoverPhoto(
+  photos: Record<string, string[]> | null | undefined,
+  coverUrl?: string | null
+): string | null {
+  const ordered = getOrderedPhotos(photos, undefined, coverUrl);
+  return ordered[0] ?? null;
 }
