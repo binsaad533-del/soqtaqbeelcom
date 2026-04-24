@@ -230,6 +230,73 @@ const SOURCE_LABELS: Record<string, { icon: typeof ImageIcon; label: string }> =
   both: { icon: Package, label: "صور + مستندات" },
 };
 
+const CertifiedValuationFloatingTab = () => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      {/* Closed tab — fixed on right edge, vertically centered */}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="تقييم معتمد"
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-emerald-800 hover:bg-emerald-900 text-white shadow-lg rounded-l-lg px-2 py-4 flex items-center justify-center transition-colors"
+        style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+      >
+        <span className="text-xs font-semibold tracking-wide whitespace-nowrap">تقييم معتمد</span>
+      </button>
+
+      {/* Side panel */}
+      {open && (
+        <div className="fixed inset-0 z-50" onClick={() => setOpen(false)}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-[320px] max-w-[85vw] bg-card border border-border shadow-2xl rounded-l-2xl p-5 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+            dir="rtl"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
+                  <ShieldCheck size={18} className="text-emerald-700 dark:text-emerald-400" />
+                </div>
+                <h4 className="text-sm font-semibold text-foreground">تقييم رسمي معتمد</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="text-muted-foreground hover:text-foreground text-lg leading-none"
+                aria-label="إغلاق"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs text-foreground leading-relaxed">
+                <span className="font-semibold">جساس للتقييم</span> — شركة معتمدة من الهيئة السعودية للمقيمين المعتمدين (تقييم).
+              </p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                نقدم تقييماً ميدانياً رسمياً لكامل المشروع بما يشمل الأصول والمعدات والقيمة التشغيلية.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              disabled
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-muted px-4 py-2.5 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-80"
+            >
+              احجز تقييمك الآن
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                قريباً
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
 const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const {
     cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing,
@@ -399,6 +466,8 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   );
 
   return (
+    <>
+    <CertifiedValuationFloatingTab />
     <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
       {/* Header */}
       <button
@@ -848,7 +917,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               )}
 
               <div className="text-[10px] text-muted-foreground/60 text-center pt-2 border-t border-border/20">
-                هذا التحليل استرشادي بمنهجية OLV وفق معايير تقييم السعودية (TAQEEM). ليس بديلاً عن تقييم معتمد. للتقييم الرسمي: جساس (قريباً).
+                هذا التحليل استرشادي بمنهجية OLV وفق معايير تقييم السعودية (TAQEEM). ليس بديلاً عن تقييم معتمد.
               </div>
 
               <div className="flex justify-center pt-1">
@@ -862,6 +931,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
@@ -1168,9 +1238,6 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
               <div className="text-sm font-medium text-foreground tabular-nums">
                 {fmt(inspectionCount)} أصل
               </div>
-              <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                قيمتها التقديرية يحددها مقيّم جساس
-              </div>
             </div>
           </div>
         )}
@@ -1204,19 +1271,6 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
         </div>
       </div>
 
-      {/* CTA — only when inspection is needed */}
-      {inspectionCount > 0 && (
-        <div
-          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground/70 cursor-not-allowed"
-          title="قريباً — جساس للتقييم المعتمد"
-          aria-disabled="true"
-        >
-          احجز معاينة جساس للدقة
-          <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-semibold text-primary">
-            قريباً
-          </span>
-        </div>
-      )}
     </div>
   );
 };
@@ -1313,7 +1367,7 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
             <span className="font-semibold text-foreground">
               الهيئة السعودية للمقيمين المعتمدين (تقييم)
             </span>
-            {" "}والمعيار الدولي IVS 160.1. تشمل الصيغة: إهلاك مادي حسب حالة الأصل × خصم التصفية المنظمة. للتقييم الرسمي المعتمد، يُرجى الاستعانة بجساس للتقييم.
+            {" "}والمعيار الدولي IVS 160.1. تشمل الصيغة: إهلاك مادي حسب حالة الأصل × خصم التصفية المنظمة.
           </div>
         </div>
       </div>
@@ -1371,46 +1425,13 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
               )}
             </div>
             <div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3 text-center">
-              <div className="text-[10px] text-amber-700 dark:text-amber-300">يتطلب معاينة جساس</div>
+              <div className="text-[10px] text-amber-700 dark:text-amber-300">يحتاج معاينة</div>
               <div className="text-lg font-semibold text-amber-700 dark:text-amber-300 tabular-nums">
                 {inspectionCount}
               </div>
             </div>
           </div>
 
-          {/* Jasaas certified valuation CTA */}
-          {inspectionCount > 0 && (
-            <div className="rounded-xl border border-primary/30 bg-gradient-to-l from-primary/10 to-primary/5 p-4 mb-3">
-              <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center shrink-0 border border-primary/20">
-                  <ShieldCheck size={20} strokeWidth={1.5} className="text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h5 className="text-sm font-semibold mb-1">أصول تحتاج تقييماً معتمداً</h5>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    <span className="font-medium text-foreground">{inspectionCount}</span> أصل من إعلانك يحتاج معاينة ميدانية من مقيّم معتمد لتحديد قيمته السوقية الدقيقة.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <ShieldCheck size={11} strokeWidth={1.6} />
-                  الهيئة السعودية للمقيمين المعتمدين (تقييم)
-                </span>
-                <div
-                  className="inline-flex items-center gap-2 rounded-lg bg-muted px-4 py-2.5 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-70"
-                  title="قريباً — جساس للتقييم المعتمد"
-                  aria-disabled="true"
-                >
-                  <ShieldCheck className="h-4 w-4" />
-                  احجز معاينة مع جساس للتقييم المعتمد
-                  <span className="mr-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                    قريباً
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Grouped asset list (priced / requires inspection) */}
           {(() => {
