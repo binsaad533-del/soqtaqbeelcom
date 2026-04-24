@@ -378,6 +378,26 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const displayConfidence = assetsCombined?.confidence || listing?.ai_detected_assets?.confidence;
   const displaySummary = assetsCombined?.summary || listing?.ai_detected_assets?.summary;
 
+  // ─── Live totals — always recomputed from listing.inventory (never read stored aggregates) ───
+  const liveInventory: any[] = Array.isArray(listing?.inventory) ? listing.inventory : [];
+  const liveTotals = liveInventory.reduce(
+    (acc, item) => {
+      const qty = Number(item?.quantity) > 0 ? Number(item.quantity) : 1;
+      const market = Number(item?.pricing?.market_value_sar);
+      const takeover = Number(item?.pricing?.price_sar);
+      if (Number.isFinite(market) && market > 0) acc.marketTotal += market * qty;
+      if (Number.isFinite(takeover) && takeover > 0) acc.takeoverTotal += takeover * qty;
+      const rangeMin = Number(item?.pricing?.price_range?.min);
+      const rangeMax = Number(item?.pricing?.price_range?.max);
+      if (Number.isFinite(rangeMin) && rangeMin > 0) acc.rangeLow += rangeMin * qty;
+      else if (Number.isFinite(takeover) && takeover > 0) acc.rangeLow += takeover * qty;
+      if (Number.isFinite(rangeMax) && rangeMax > 0) acc.rangeHigh += rangeMax * qty;
+      else if (Number.isFinite(takeover) && takeover > 0) acc.rangeHigh += takeover * qty;
+      return acc;
+    },
+    { marketTotal: 0, takeoverTotal: 0, rangeLow: 0, rangeHigh: 0 }
+  );
+
   return (
     <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
       {/* Header */}
