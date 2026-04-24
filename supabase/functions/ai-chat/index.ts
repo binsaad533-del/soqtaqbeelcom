@@ -1802,7 +1802,34 @@ async function executeTool(name: string, args: any, userId: string, role: string
         tables_included: ["listings", "deals", "profiles", "invoices"],
       }).select("id").single();
       if (error) return { error: error.message };
-      return { success: true, backup_id: data.id, message: "تم بدء النسخة الاحتياطية" };
+
+      // Actually invoke the backup edge function
+      try {
+        const { data: backupResult, error: invokeError } = await sb.functions.invoke('auto-backup', {
+          body: { triggered_by: userId, type: 'manual', backup_log_id: data.id }
+        });
+        if (invokeError) {
+          await sb.from("backup_logs").update({
+            status: "failed",
+            completed_at: new Date().toISOString(),
+            error_message: invokeError.message || String(invokeError),
+          }).eq("id", data.id);
+          return { error: `فشل تشغيل النسخة الاحتياطية: ${invokeError.message || invokeError}` };
+        }
+        await sb.from("backup_logs").update({
+          status: "completed",
+          completed_at: new Date().toISOString(),
+          metadata: backupResult ?? {},
+        }).eq("id", data.id);
+        return { success: true, backup_id: data.id, message: "تم تنفيذ النسخة الاحتياطية بنجاح", result: backupResult };
+      } catch (e: any) {
+        await sb.from("backup_logs").update({
+          status: "failed",
+          completed_at: new Date().toISOString(),
+          error_message: e?.message || String(e),
+        }).eq("id", data.id);
+        return { error: `فشل تشغيل النسخة الاحتياطية: ${e?.message || e}` };
+      }
     }
 
     case "feature_listing": {
