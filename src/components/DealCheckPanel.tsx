@@ -741,9 +741,17 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                               );
                             })}
                           </div>
-                          <div className="bg-muted/30 px-3 py-2 flex justify-between items-center border-t border-border/30">
-                            <span className="text-xs font-medium">الإجمالي التقديري</span>
-                            <span className="text-sm font-semibold">{priceAnalysis.estimated_value?.toLocaleString()} ر.س</span>
+                          <div className="bg-muted/30 px-3 py-2 border-t border-border/30 space-y-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-medium">الإجمالي التقديري (قيمة التقبيل)</span>
+                              <span className="text-sm font-semibold">{liveTotals.takeoverTotal.toLocaleString()} ر.س</span>
+                            </div>
+                            {liveTotals.marketTotal > 0 && liveTotals.marketTotal !== liveTotals.takeoverTotal && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-[11px] text-muted-foreground">القيمة السوقية الإجمالية</span>
+                                <span className="text-[11px] text-muted-foreground">{liveTotals.marketTotal.toLocaleString()} ر.س</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
