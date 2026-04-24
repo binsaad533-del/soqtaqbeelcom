@@ -864,6 +864,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
