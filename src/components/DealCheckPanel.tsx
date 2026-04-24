@@ -1387,51 +1387,9 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
         </div>
       )}
 
-      {/* Summary + List */}
+      {/* List (summary cards removed — duplicated in "كيف يُبنى سعر هذه الصفقة") */}
       {!isInProgress && inventory.length > 0 && (
         <>
-          {/* Summary cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-            <div className="bg-muted/40 rounded-lg p-3 text-center">
-              <div className="text-[10px] text-muted-foreground">إجمالي الأصول</div>
-              <div className="text-lg font-semibold tabular-nums">{inventory.length}</div>
-            </div>
-            <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg p-3 text-center">
-              <div className="text-[10px] text-emerald-700 dark:text-emerald-300">أصول مُسعّرة</div>
-              <div className="text-lg font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
-                {pricedCount}
-              </div>
-            </div>
-            <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg p-3 text-center">
-              {totalMarketValue > totalValue ? (
-                <>
-                  <div className="text-[10px] text-muted-foreground tabular-nums">
-                    سوقية: {totalMarketValue.toLocaleString("en-US")} ر.س
-                  </div>
-                  <div className="text-[10px] text-emerald-700 dark:text-emerald-300 mt-0.5">قيمة التقبيل</div>
-                  <div className="text-lg font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
-                    {totalValue.toLocaleString("en-US")} <span className="text-[10px] font-normal">ر.س</span>
-                  </div>
-                  <div className="text-[9px] text-muted-foreground mt-0.5">التصفية المنظمة — OLV</div>
-                </>
-              ) : (
-                <>
-                  <div className="text-[10px] text-emerald-700 dark:text-emerald-300">القيمة المُسعّرة</div>
-                  <div className="text-lg font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums">
-                    {totalValue.toLocaleString("en-US")} <span className="text-[10px] font-normal">ر.س</span>
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3 text-center">
-              <div className="text-[10px] text-amber-700 dark:text-amber-300">يحتاج معاينة</div>
-              <div className="text-lg font-semibold text-amber-700 dark:text-amber-300 tabular-nums">
-                {inspectionCount}
-              </div>
-            </div>
-          </div>
-
-
           {/* Grouped asset list (priced / requires inspection) */}
           {(() => {
             const pricedSorted = [...priced].sort(
