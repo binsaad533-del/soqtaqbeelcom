@@ -500,6 +500,26 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
   }
 
   if (isVagueAsset(asset)) {
+    // 🆕 محاولة تسعير الأصول العامة المعروفة قبل الاستسلام لـ "يتطلب معاينة"
+    const genericMatch = matchGenericAsset(asset.asset_name || asset.name || "");
+    if (genericMatch) {
+      const midPrice = Math.round((genericMatch.price_min + genericMatch.price_max) / 2);
+      return {
+        price_sar: midPrice,
+        confidence: "متوسط",
+        reasoning: `تسعير تقريبي لـ ${genericMatch.name_ar} بناءً على نطاق السوق السعودي. يُنصح بالتحقق الميداني للحصول على سعر دقيق.`,
+        source: "generic_market_range",
+        sources: [],
+        price_range: { min: genericMatch.price_min, max: genericMatch.price_max },
+        disclaimer: "سعر تقديري — هذا الأصل لم يُسعَّر بمصادر موثقة. النطاق مبني على متوسط السوق السعودي.",
+        pricingResult: {
+          market_value_sar: midPrice,
+          olv_discount: null,
+          depreciation_rate: null,
+          condition_taqeem: asset.condition || null,
+        },
+      };
+    }
     return {
       price_sar: 0,
       confidence: "يتطلب_معاينة",
