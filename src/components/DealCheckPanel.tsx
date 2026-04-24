@@ -399,6 +399,8 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   );
 
   return (
+    <>
+    <CertifiedValuationFloatingTab />
     <div className="bg-card rounded-2xl shadow-soft overflow-hidden">
       {/* Header */}
       <button
