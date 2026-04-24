@@ -910,7 +910,9 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
   const pricing = asset.pricing;
   const confidence = pricing?.confidence || "يتطلب_معاينة";
   const requiresInspection = confidence === "يتطلب_معاينة" || !pricing?.price_sar;
-  const style = PRICING_CONFIDENCE_STYLES[confidence] || PRICING_CONFIDENCE_STYLES["يتطلب_معاينة"];
+  const isGenericRange = pricing?.source === "generic_market_range";
+  const styleKey = isGenericRange ? "تقديري" : confidence;
+  const style = PRICING_CONFIDENCE_STYLES[styleKey] || PRICING_CONFIDENCE_STYLES["يتطلب_معاينة"];
   const isAlibaba = pricing?.source === "alibaba_fallback";
   const sources = Array.isArray(pricing?.sources) ? pricing!.sources! : [];
 
