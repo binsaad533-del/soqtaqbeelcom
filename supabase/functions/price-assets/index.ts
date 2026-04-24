@@ -47,6 +47,16 @@ const GENERIC_ASSET_PATTERNS: Array<{
   { keywords: ["ميزان ماء", "spirit level"], price_min: 15, price_max: 60, name_ar: "ميزان ماء" },
   { keywords: ["مكيف", "split", "air condition"], price_min: 500, price_max: 2000, name_ar: "مكيف سبليت" },
   { keywords: ["دريل", "drill"], price_min: 150, price_max: 800, name_ar: "دريل كهربائي" },
+  // ⚠️ الأنماط الأدق يجب أن تأتي قبل نمط grinder/sander العام
+  { keywords: ["ماكينة لحام", "لحام كهربائي", "welding machine"], price_min: 800, price_max: 3500, name_ar: "ماكينة لحام" },
+  { keywords: ["ضاغط هواء", "كمبروسر", "compressor"], price_min: 500, price_max: 2500, name_ar: "ضاغط هواء" },
+  { keywords: ["صاروخ جلخ", "جلاخة زاوية", "angle grinder"], price_min: 150, price_max: 600, name_ar: "صاروخ جلخ" },
+  { keywords: ["صاروخ تلميع", "polisher"], price_min: 150, price_max: 600, name_ar: "صاروخ تلميع" },
+  { keywords: ["مكبس حراري", "heat press"], price_min: 1500, price_max: 8000, name_ar: "مكبس حراري" },
+  { keywords: ["شفاط غبار", "dust collector"], price_min: 800, price_max: 3000, name_ar: "شفاط غبار" },
+  { keywords: ["جلاخة حجر", "bench grinder"], price_min: 200, price_max: 800, name_ar: "جلاخة حجر" },
+  { keywords: ["منشار شريطي", "band saw"], price_min: 1200, price_max: 5000, name_ar: "منشار شريطي" },
+  // النمط العام (يلتقط أي أداة جلخ/سندر متبقية)
   { keywords: ["فارة", "sander", "grinder"], price_min: 80, price_max: 400, name_ar: "أداة كهربائية يدوية" },
   { keywords: ["مغسلة", "sink"], price_min: 100, price_max: 400, name_ar: "مغسلة" },
   { keywords: ["محطة عمل", "workstation"], price_min: 600, price_max: 2500, name_ar: "محطة عمل مكتبية" },
@@ -58,14 +68,6 @@ const GENERIC_ASSET_PATTERNS: Array<{
   { keywords: ["ألواح خشبية", "wood panel", "خشب"], price_min: 30, price_max: 150, name_ar: "لوح خشبي" },
   { keywords: ["راوتر", "router tool"], price_min: 200, price_max: 800, name_ar: "راوتر يدوي" },
   { keywords: ["حوامل", "stand", "تخشيبة"], price_min: 50, price_max: 200, name_ar: "حامل/تخشيبة" },
-  { keywords: ["ماكينة لحام", "لحام كهربائي", "welding machine"], price_min: 800, price_max: 3500, name_ar: "ماكينة لحام" },
-  { keywords: ["ضاغط هواء", "كمبروسر", "compressor"], price_min: 500, price_max: 2500, name_ar: "ضاغط هواء" },
-  { keywords: ["صاروخ جلخ", "جلاخة زاوية", "angle grinder"], price_min: 150, price_max: 600, name_ar: "صاروخ جلخ" },
-  { keywords: ["صاروخ تلميع", "polisher"], price_min: 150, price_max: 600, name_ar: "صاروخ تلميع" },
-  { keywords: ["مكبس حراري", "heat press"], price_min: 1500, price_max: 8000, name_ar: "مكبس حراري" },
-  { keywords: ["شفاط غبار", "dust collector"], price_min: 800, price_max: 3000, name_ar: "شفاط غبار" },
-  { keywords: ["جلاخة حجر", "bench grinder"], price_min: 200, price_max: 800, name_ar: "جلاخة حجر" },
-  { keywords: ["منشار شريطي", "band saw"], price_min: 1200, price_max: 5000, name_ar: "منشار شريطي" },
 ];
 
 function matchGenericAsset(assetName: string): typeof GENERIC_ASSET_PATTERNS[0] | null {
