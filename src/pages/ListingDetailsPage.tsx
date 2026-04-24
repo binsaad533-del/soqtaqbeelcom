@@ -922,33 +922,8 @@ const ListingDetailsPage = () => {
                 )}
               </div>
 
-              {/* AI Credibility Badge */}
-              <CredibilityBadge data={(listing as any).ai_trust_score as any} />
-
-              {/* Competitive Intelligence — collapsed by default */}
-              <Collapsible className="mb-4">
-                <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-border/40 bg-card hover:bg-accent/20 transition-colors group">
-                  <span className="text-sm font-medium">تحليل المنافسين</span>
-                  <ChevronDown size={14} className="text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pt-2">
-                  <CompetitiveIntelPanel listingId={listing.id} />
-                </CollapsibleContent>
-              </Collapsible>
-
               {/* Listing Health Report - for owner */}
               {isOwner && <ListingHealthReport listingId={listing.id} />}
-
-              {/* Deal-type-aware Transparency Indicator — collapsed by default */}
-              <Collapsible className="mb-4">
-                <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-border/40 bg-card hover:bg-accent/20 transition-colors group">
-                  <span className="text-sm font-medium">اكتمال الإعلان</span>
-                  <ChevronDown size={14} className="text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pt-2">
-                  <TransparencyIndicator listing={listing} onListingUpdated={(updated) => setListing(updated as unknown as Listing)} />
-                </CollapsibleContent>
-              </Collapsible>
 
 
               {/* Seller Info Card */}
