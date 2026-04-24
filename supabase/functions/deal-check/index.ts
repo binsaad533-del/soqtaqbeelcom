@@ -162,6 +162,7 @@ function normalizeListingForAnalysis(listing: any) {
     inventory_pricing_mode: inventoryPricingMode,
     bulk_inventory_price: bulkInventoryPrice,
     inventory_total_price: inventoryTotalPrice,
+    pricing_aggregates: pricingAggregates,
     documents,
     deal_options: dealOptions,
     ai_document_classification: listing?.ai_document_classification || null,
