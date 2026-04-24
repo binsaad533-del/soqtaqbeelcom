@@ -76,6 +76,33 @@ function normalizeListingForAnalysis(listing: any) {
     ? bulkInventoryPrice
     : inventory.reduce((sum: number, item: any) => sum + ((item.unitPrice || 0) * (item.qty || 1)), 0) || null;
 
+  // Compute pricing aggregates directly from raw listing.inventory (pricing.*)
+  const rawInventory = Array.isArray(listing?.inventory) ? listing.inventory : [];
+  let marketTotal = 0;
+  let olvTotal = 0;
+  let pricedCount = 0;
+  let needsInspectionCount = 0;
+  for (const item of rawInventory) {
+    const qty = Number(item?.quantity) || Number(item?.qty) || 1;
+    const market = Number(item?.pricing?.market_value_sar);
+    const olv = Number(item?.pricing?.price_sar);
+    const hasPricing = (Number.isFinite(market) && market > 0) || (Number.isFinite(olv) && olv > 0);
+    if (Number.isFinite(market) && market > 0) marketTotal += market * qty;
+    if (Number.isFinite(olv) && olv > 0) olvTotal += olv * qty;
+    if (hasPricing) {
+      pricedCount += 1;
+    } else {
+      needsInspectionCount += 1;
+    }
+  }
+  const pricingAggregates = {
+    market_value_total_sar: marketTotal > 0 ? Math.round(marketTotal) : null,
+    olv_total_sar: olvTotal > 0 ? Math.round(olvTotal) : null,
+    priced_assets_count: pricedCount,
+    needs_inspection_count: needsInspectionCount,
+    pricing_source_note: "الأسعار مبنية على عروض أسعار من الموردين وليست فواتير شراء فعلية",
+  };
+
   const documents = Array.isArray(listing?.documents)
     ? listing.documents
         .map((doc: any) => ({
@@ -135,6 +162,7 @@ function normalizeListingForAnalysis(listing: any) {
     inventory_pricing_mode: inventoryPricingMode,
     bulk_inventory_price: bulkInventoryPrice,
     inventory_total_price: inventoryTotalPrice,
+    pricing_aggregates: pricingAggregates,
     documents,
     deal_options: dealOptions,
     ai_document_classification: listing?.ai_document_classification || null,
@@ -316,6 +344,14 @@ ${buildConsistencyRules(mode)}
 - الأولوية: 1) مقارنة بصفقات داخلية مشابهة 2) تقدير بناءً على الأصول والإيجار 3) تقدير AI
 - في marketComparison.marketPosition: لا تستخدم "غير محدد" — استخدم أحد: أقل من السوق / قريب من السوق / أعلى من السوق
 
+## ⚠️ قاعدة مقارنة السعر (إلزامية):
+- عند مقارنة السعر المطلوب بقيمة الأصول، قارنه بـ "قيمة التقبيل OLV" وليس بـ "القيمة السوقية"
+- قيمة التقبيل = القيمة بعد خصم الإهلاك والتصفية المنظمة (OLV)
+- القيمة السوقية = سعر الأصل الجديد من المورد (للاسترشاد فقط)
+- الفجوة بين السعر المطلوب وقيمة التقبيل هي المقياس الصحيح لعدالة السعر
+- إذا كان السعر المطلوب أقل من قيمة التقبيل OLV، هذا يعني فرصة وليس احتيال
+- أسعار الأصول مبنية على عروض أسعار من الموردين — وليست فواتير شراء فعلية
+
 ## ⚠️ كشف الأسعار المشبوهة والاحتيال (قاعدة حرجة):
 هذه القاعدة لها أولوية قصوى على جميع القواعد الأخرى.
 
@@ -473,6 +509,26 @@ function buildAnalysisPrompt(listing: any, mode: AnalysisMode, previousAnalysis:
       ].filter(Boolean).join(" — ");
       sections.push(`- ${details}`);
     });
+  }
+
+  // Pricing aggregates computed directly from raw inventory (pricing.*)
+  if (scope.analyzeFields.includes("assets") && listing.pricing_aggregates) {
+    const agg = listing.pricing_aggregates;
+    const hasAnyPricing = (agg.market_value_total_sar && agg.market_value_total_sar > 0) ||
+                          (agg.olv_total_sar && agg.olv_total_sar > 0);
+    if (hasAnyPricing || agg.priced_assets_count > 0 || agg.needs_inspection_count > 0) {
+      sections.push("\n## 💰 إجماليات تسعير الأصول (محسوبة مباشرة من جرد الإعلان):");
+      if (agg.market_value_total_sar) {
+        sections.push(`- إجمالي القيمة السوقية للأصول المُسعَّرة (Market Value — جديد من المورد): ${agg.market_value_total_sar} ريال`);
+      }
+      if (agg.olv_total_sar) {
+        sections.push(`- إجمالي قيمة التقبيل (OLV — بعد الإهلاك والتصفية المنظمة): ${agg.olv_total_sar} ريال`);
+      }
+      sections.push(`- عدد الأصول المُسعَّرة: ${agg.priced_assets_count}`);
+      sections.push(`- عدد الأصول التي تحتاج معاينة (غير مُسعَّرة): ${agg.needs_inspection_count}`);
+      sections.push(`- ⚠️ ملاحظة: ${agg.pricing_source_note}`);
+      sections.push(`- ⚠️ عند مقارنة السعر المطلوب بقيمة الأصول، استخدم قيمة التقبيل OLV وليس القيمة السوقية`);
+    }
   }
 
   // Include AI-detected assets (combined from images + files)
