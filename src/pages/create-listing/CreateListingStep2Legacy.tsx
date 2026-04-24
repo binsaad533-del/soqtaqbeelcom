@@ -13,6 +13,7 @@ import {
   Tag,
   Wrench,
   Image as ImageIcon,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AiInlineStar from "@/components/AiInlineStar";
