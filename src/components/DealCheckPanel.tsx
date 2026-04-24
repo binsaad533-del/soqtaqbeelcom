@@ -1168,9 +1168,6 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
               <div className="text-sm font-medium text-foreground tabular-nums">
                 {fmt(inspectionCount)} أصل
               </div>
-              <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                قيمتها التقديرية يحددها مقيّم جساس
-              </div>
             </div>
           </div>
         )}
