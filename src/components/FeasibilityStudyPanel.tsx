@@ -1070,8 +1070,6 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           }
         >
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">{displayStudy.competitorAnalysis.summary}</p>
-
             {(() => {
               const nearby = displayStudy.competitorAnalysis.nearbyCount || 0;
               const neighborhood = displayStudy.competitorAnalysis.neighborhoodCount || 0;
@@ -1079,7 +1077,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
               const topCount = displayStudy.competitorAnalysis.topCompetitors?.length || 0;
               const totalDigital = nearby + neighborhood + area;
 
-              // No digital competitor data found at all → show neutral message instead of zeros
+              // No digital competitor data found at all → show only neutral one-liner (no long summary)
               if (totalDigital === 0 && topCount === 0) {
                 return (
                   <div className="rounded-lg bg-muted/30 p-3 text-center text-xs text-muted-foreground">
@@ -1088,22 +1086,25 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
                 );
               }
 
-              // Standard radii display (only show non-zero buckets to avoid misleading zeros)
+              // Standard view: summary + radii (only show non-zero buckets to avoid misleading zeros)
               return (
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="rounded-lg bg-muted/30 p-2.5 text-center">
-                    <div className="text-lg font-bold">{nearby || "—"}</div>
-                    <div className="text-[10px] text-muted-foreground">500م (الشارع)</div>
+                <>
+                  <p className="text-sm text-muted-foreground">{displayStudy.competitorAnalysis.summary}</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="rounded-lg bg-muted/30 p-2.5 text-center">
+                      <div className="text-lg font-bold">{nearby || "—"}</div>
+                      <div className="text-[10px] text-muted-foreground">500م (الشارع)</div>
+                    </div>
+                    <div className="rounded-lg bg-muted/30 p-2.5 text-center">
+                      <div className="text-lg font-bold">{neighborhood || "—"}</div>
+                      <div className="text-[10px] text-muted-foreground">2كم (الحي)</div>
+                    </div>
+                    <div className="rounded-lg bg-muted/30 p-2.5 text-center">
+                      <div className="text-lg font-bold">{area || "—"}</div>
+                      <div className="text-[10px] text-muted-foreground">10كم (المنطقة)</div>
+                    </div>
                   </div>
-                  <div className="rounded-lg bg-muted/30 p-2.5 text-center">
-                    <div className="text-lg font-bold">{neighborhood || "—"}</div>
-                    <div className="text-[10px] text-muted-foreground">2كم (الحي)</div>
-                  </div>
-                  <div className="rounded-lg bg-muted/30 p-2.5 text-center">
-                    <div className="text-lg font-bold">{area || "—"}</div>
-                    <div className="text-[10px] text-muted-foreground">10كم (المنطقة)</div>
-                  </div>
-                </div>
+                </>
               );
             })()}
 
