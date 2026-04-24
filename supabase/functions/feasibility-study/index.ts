@@ -134,6 +134,40 @@ function estimateInventoryWeight(item: any): number {
   return qty * Math.max(unitPrice, 1);
 }
 
+function computeInventoryTotals(items: any[] | undefined) {
+  const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
+  let marketValueTotalSar = 0;
+  let olvTotalSar = 0;
+  let pricedAssetsCount = 0;
+  let needsInspectionCount = 0;
+
+  for (const item of safeItems) {
+    const qty = Number(item?.quantity ?? item?.qty) > 0 ? Number(item?.quantity ?? item?.qty) : 1;
+    const pricing = item?.pricing || {};
+    const marketValue = Number(pricing?.market_value_sar);
+    const olv = Number(pricing?.price_sar);
+    const needsInspection = Boolean(pricing?.needs_inspection || item?.needs_inspection);
+
+    const hasPricing = (Number.isFinite(marketValue) && marketValue > 0) || (Number.isFinite(olv) && olv > 0);
+
+    if (Number.isFinite(marketValue) && marketValue > 0) {
+      marketValueTotalSar += marketValue * qty;
+    }
+    if (Number.isFinite(olv) && olv > 0) {
+      olvTotalSar += olv * qty;
+    }
+    if (hasPricing) pricedAssetsCount += 1;
+    if (needsInspection || !hasPricing) needsInspectionCount += 1;
+  }
+
+  return {
+    market_value_total_sar: Math.round(marketValueTotalSar),
+    olv_total_sar: Math.round(olvTotalSar),
+    priced_assets_count: pricedAssetsCount,
+    needs_inspection_count: needsInspectionCount,
+  };
+}
+
 function summarizeInventory(items: any[] | undefined) {
   const safeItems = Array.isArray(items) ? items.filter(Boolean) : [];
   const sortedItems = [...safeItems].sort((a, b) => estimateInventoryWeight(b) - estimateInventoryWeight(a));
