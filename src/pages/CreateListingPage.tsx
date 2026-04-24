@@ -721,6 +721,50 @@ const CreateListingPage = () => {
   const [dealCheckError, setDealCheckError] = useState("");
   const [dealCheckInputKey, setDealCheckInputKey] = useState<string | null>(null);
   const [publishAttempted, setPublishAttempted] = useState(false);
+  const [duplicateCandidate, setDuplicateCandidate] = useState<{ id: string; title: string; price: number | null; city: string | null } | null>(null);
+  const [duplicateAcknowledged, setDuplicateAcknowledged] = useState(false);
+
+  // Detect potential duplicate listing among user's published listings
+  const checkForDuplicateListing = useCallback(async () => {
+    if (!user?.id || !listingId) return null;
+    try {
+      const { data, error } = await supabase
+        .from("listings")
+        .select("id, title, business_activity, city, deal_type, primary_deal_type, price")
+        .eq("owner_id", user.id)
+        .eq("status", "published")
+        .is("deleted_at", null);
+      if (error || !data) return null;
+      const currentCity = (disclosure.city || "").trim().toLowerCase();
+      const currentActivity = (disclosure.business_activity || "").trim().toLowerCase();
+      const currentDealType = (dealStructure.primaryType || "").trim().toLowerCase();
+      const titleSim = (a: string, b: string) => {
+        if (!a || !b) return 0;
+        const aw = new Set(a.toLowerCase().split(/\s+/).filter(w => w.length > 2));
+        const bw = new Set(b.toLowerCase().split(/\s+/).filter(w => w.length > 2));
+        if (aw.size === 0 || bw.size === 0) return 0;
+        let common = 0;
+        aw.forEach(w => { if (bw.has(w)) common++; });
+        return common / Math.max(aw.size, bw.size);
+      };
+      for (const row of data as any[]) {
+        if (row.id === listingId) continue;
+        const sameCity = currentCity && (row.city || "").trim().toLowerCase() === currentCity;
+        const rowActivity = (row.business_activity || "").trim().toLowerCase();
+        const sameActivity = currentActivity && rowActivity && (rowActivity === currentActivity || titleSim(currentActivity, row.title || "") >= 0.5);
+        const rowDealType = (row.primary_deal_type || row.deal_type || "").trim().toLowerCase();
+        const sameDealType = currentDealType && rowDealType === currentDealType;
+        const matches = [sameCity, sameActivity, sameDealType].filter(Boolean).length;
+        if (matches >= 2) {
+          return { id: row.id as string, title: (row.title || row.business_activity || "إعلان") as string, price: row.price ?? null, city: row.city ?? null };
+        }
+      }
+      return null;
+    } catch (e) {
+      console.warn("[duplicateCheck] failed:", e);
+      return null;
+    }
+  }, [user?.id, listingId, disclosure.city, disclosure.business_activity, dealStructure.primaryType]);
 
   const buildListingPayload = useCallback(() => ({
     ...disclosure, description: sellerNote || null,
@@ -765,6 +809,16 @@ const CreateListingPage = () => {
     const errors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
     if (!hasPhotos || Object.keys(errors).length > 0) { toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر"); return; }
     if (locationLat == null || locationLng == null) { toast.error("يجب تحديد الموقع على الخريطة قبل النشر"); return; }
+
+    // Duplicate detection — only if not yet acknowledged
+    if (!duplicateAcknowledged) {
+      const dup = await checkForDuplicateListing();
+      if (dup) {
+        setDuplicateCandidate(dup);
+        return;
+      }
+    }
+
     setShowPublishConfirm(true);
     setDealCheckLoading(true);
     setDealCheckError("");
@@ -1290,6 +1344,37 @@ const CreateListingPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Duplicate Listing Warning Modal */}
+      {duplicateCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setDuplicateCandidate(null)}>
+          <div className="bg-card border border-border/50 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-5 animate-scale-in" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-3">
+                <AlertTriangle size={24} strokeWidth={1.5} className="text-amber-600" />
+              </div>
+              <h3 className="font-semibold text-lg mb-1">إعلان مشابه منشور بالفعل</h3>
+              <p className="text-sm text-muted-foreground">يبدو أن لديك إعلاناً مشابهاً منشوراً. هل تريد تعديله بدلاً من إنشاء إعلان جديد؟</p>
+            </div>
+            <div className="bg-muted/40 rounded-xl p-4 space-y-2 text-sm">
+              <div className="flex items-center justify-between"><span className="text-muted-foreground">الإعلان</span><span className="font-medium text-foreground truncate max-w-[60%] text-end">{duplicateCandidate.title}</span></div>
+              {duplicateCandidate.city && (<><div className="border-t border-border/30" /><div className="flex items-center justify-between"><span className="text-muted-foreground">المدينة</span><span className="font-medium text-foreground">{duplicateCandidate.city}</span></div></>)}
+              {duplicateCandidate.price != null && (<><div className="border-t border-border/30" /><div className="flex items-center justify-between"><span className="text-muted-foreground">السعر</span><span className="font-medium text-foreground">{Number(duplicateCandidate.price).toLocaleString()} <SarSymbol size={10} /></span></div></>)}
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button onClick={() => { const id = duplicateCandidate.id; setDuplicateCandidate(null); navigate(`/listing/${id}`); }} className="rounded-xl gradient-primary text-primary-foreground">
+                تعديل الإعلان الحالي
+              </Button>
+              <Button variant="outline" onClick={() => { setDuplicateCandidate(null); setDuplicateAcknowledged(true); setTimeout(() => handlePublishClick(), 0); }} className="rounded-xl">
+                نشر كإعلان جديد
+              </Button>
+              <Button variant="ghost" onClick={() => setDuplicateCandidate(null)} className="rounded-xl text-muted-foreground">
+                إلغاء
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Publish Confirmation Modal */}
       {showPublishConfirm && (
