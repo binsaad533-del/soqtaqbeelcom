@@ -230,7 +230,7 @@ async function handleWebhook(req: Request): Promise<Response> {
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  )
+  ) as any
 
   // Look up recipient name from profile
   const recipientName = await getRecipientName(supabase, payload.data.email)
