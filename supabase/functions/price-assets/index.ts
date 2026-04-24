@@ -33,6 +33,43 @@ const KNOWN_BRANDS = [
   "hilti", "هيلتي", "einhell", "اينهل", "black & decker", "بلاك اند ديكر"
 ];
 
+// 🆕 أنماط الأصول العامة — أسعار سوق سعودية تقريبية لتجنب "يتطلب معاينة" للأصول الشائعة
+const GENERIC_ASSET_PATTERNS: Array<{
+  keywords: string[];
+  price_min: number;
+  price_max: number;
+  name_ar: string;
+}> = [
+  { keywords: ["طفاية", "fire extinguisher"], price_min: 80, price_max: 200, name_ar: "طفاية حريق" },
+  { keywords: ["كرسي مكتب", "office chair"], price_min: 200, price_max: 800, name_ar: "كرسي مكتب" },
+  { keywords: ["مكتب مدير", "مكتب", "desk"], price_min: 400, price_max: 2500, name_ar: "مكتب" },
+  { keywords: ["مرآة", "mirror"], price_min: 100, price_max: 600, name_ar: "مرآة" },
+  { keywords: ["ميزان ماء", "spirit level"], price_min: 15, price_max: 60, name_ar: "ميزان ماء" },
+  { keywords: ["مكيف", "split", "air condition"], price_min: 500, price_max: 2000, name_ar: "مكيف سبليت" },
+  { keywords: ["دريل", "drill"], price_min: 150, price_max: 800, name_ar: "دريل كهربائي" },
+  { keywords: ["فارة", "sander", "grinder"], price_min: 80, price_max: 400, name_ar: "أداة كهربائية يدوية" },
+  { keywords: ["مغسلة", "sink"], price_min: 100, price_max: 400, name_ar: "مغسلة" },
+  { keywords: ["محطة عمل", "workstation"], price_min: 600, price_max: 2500, name_ar: "محطة عمل مكتبية" },
+  { keywords: ["وحدة مطبخ", "kitchenette"], price_min: 300, price_max: 1200, name_ar: "وحدة مطبخ صغير" },
+  { keywords: ["إضاءة", "light", "lamp"], price_min: 50, price_max: 300, name_ar: "وحدة إضاءة" },
+  { keywords: ["طاولة عمل", "work table", "workbench"], price_min: 200, price_max: 1000, name_ar: "طاولة عمل" },
+  { keywords: ["شفرات منشار", "saw blade"], price_min: 30, price_max: 150, name_ar: "شفرة منشار" },
+  { keywords: ["عبوات دهان", "paint", "ترن", "thinner"], price_min: 20, price_max: 80, name_ar: "عبوة دهان/ترن" },
+  { keywords: ["ألواح خشبية", "wood panel", "خشب"], price_min: 30, price_max: 150, name_ar: "لوح خشبي" },
+  { keywords: ["راوتر", "router tool"], price_min: 200, price_max: 800, name_ar: "راوتر يدوي" },
+  { keywords: ["حوامل", "stand", "تخشيبة"], price_min: 50, price_max: 200, name_ar: "حامل/تخشيبة" },
+];
+
+function matchGenericAsset(assetName: string): typeof GENERIC_ASSET_PATTERNS[0] | null {
+  const nameLower = (assetName || "").toLowerCase();
+  for (const pattern of GENERIC_ASSET_PATTERNS) {
+    if (pattern.keywords.some(kw => nameLower.includes(kw.toLowerCase()))) {
+      return pattern;
+    }
+  }
+  return null;
+}
+
 function extractBrandFromName(name: string): string | null {
   const lower = (name || "").toLowerCase();
   for (const brand of KNOWN_BRANDS) {
@@ -463,6 +500,26 @@ async function priceAsset(asset: any, serperKey: string, lovableKey: string) {
   }
 
   if (isVagueAsset(asset)) {
+    // 🆕 محاولة تسعير الأصول العامة المعروفة قبل الاستسلام لـ "يتطلب معاينة"
+    const genericMatch = matchGenericAsset(asset.asset_name || asset.name || "");
+    if (genericMatch) {
+      const midPrice = Math.round((genericMatch.price_min + genericMatch.price_max) / 2);
+      return {
+        price_sar: midPrice,
+        confidence: "متوسط",
+        reasoning: `تسعير تقريبي لـ ${genericMatch.name_ar} بناءً على نطاق السوق السعودي. يُنصح بالتحقق الميداني للحصول على سعر دقيق.`,
+        source: "generic_market_range",
+        sources: [],
+        price_range: { min: genericMatch.price_min, max: genericMatch.price_max },
+        disclaimer: "سعر تقديري — هذا الأصل لم يُسعَّر بمصادر موثقة. النطاق مبني على متوسط السوق السعودي.",
+        pricingResult: {
+          market_value_sar: midPrice,
+          olv_discount: null,
+          depreciation_rate: null,
+          condition_taqeem: asset.condition || null,
+        },
+      };
+    }
     return {
       price_sar: 0,
       confidence: "يتطلب_معاينة",
@@ -681,7 +738,7 @@ Deno.serve(async (req) => {
       const result = await priceAsset(g.representative, SERPER_API_KEY, LOVABLE_API_KEY);
 
       // حفظ في الـ cache (لا نخزّن invoice_extracted لأن السعر خاص بفاتورة هذا البائع)
-      if (result.source !== "vague_asset_skip" && result.source !== "invoice_extracted") {
+      if (result.source !== "vague_asset_skip" && result.source !== "invoice_extracted" && result.source !== "generic_market_range") {
         await supabase.from("market_price_cache").upsert({
           cache_key: g.key,
           brand: g.representative.brand,
@@ -752,7 +809,7 @@ Deno.serve(async (req) => {
         depreciation_rate: pricing.pricingResult?.depreciation_rate ?? null,
         olv_discount: pricing.pricingResult?.olv_discount ?? null,
         condition_taqeem: pricing.pricingResult?.condition_taqeem ?? null,
-        valuation_method: "OLV-TAQEEM",
+        valuation_method: pricing.source === "generic_market_range" ? "GENERIC_RANGE" : "OLV-TAQEEM",
       }
     };
   });
