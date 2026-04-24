@@ -1343,17 +1343,17 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
                 {inspectionCount > 0 && (
                   <Collapsible defaultOpen={inspectionDefaultOpen} className="border border-amber-200/60 dark:border-amber-900/40 rounded-xl overflow-hidden">
                     <CollapsibleTrigger className="w-full bg-amber-50/70 dark:bg-amber-950/20 px-3 py-2.5 flex items-center gap-2 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors group">
-                      <Search size={14} strokeWidth={1.6} className="text-amber-600 dark:text-amber-400 shrink-0" />
-                      <span className="text-xs font-medium text-amber-700 dark:text-amber-300 shrink-0">أصول تحتاج معاينة</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-semibold tabular-nums shrink-0">
+                      <Search size={16} strokeWidth={1.6} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span className="text-base font-semibold text-amber-700 dark:text-amber-300 shrink-0">أصول تحتاج معاينة</span>
+                      <span className="w-8 h-8 inline-flex items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-lg font-bold tabular-nums shrink-0">
                         {inspectionCount}
                       </span>
                       {previewText && (
-                        <span className="text-[10px] text-amber-700/70 dark:text-amber-300/70 mr-auto truncate min-w-0 hidden sm:inline">
+                        <span className="text-xs text-amber-700/70 dark:text-amber-300/70 mr-auto truncate min-w-0 hidden sm:inline">
                           مثل: {previewText}
                         </span>
                       )}
-                      <ChevronDown size={14} strokeWidth={1.6} className="text-amber-600/60 dark:text-amber-400/60 shrink-0 transition-transform group-data-[state=open]:rotate-180 mr-auto sm:mr-0" />
+                      <ChevronDown size={16} strokeWidth={1.6} className="text-amber-600/60 dark:text-amber-400/60 shrink-0 transition-transform group-data-[state=open]:rotate-180 mr-auto sm:mr-0" />
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <div className="divide-y divide-border/30 bg-background">
