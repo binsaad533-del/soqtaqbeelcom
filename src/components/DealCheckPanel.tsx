@@ -1355,7 +1355,7 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
               )}
             </div>
             <div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3 text-center">
-              <div className="text-[10px] text-amber-700 dark:text-amber-300">يتطلب معاينة جساس</div>
+              <div className="text-[10px] text-amber-700 dark:text-amber-300">يحتاج معاينة</div>
               <div className="text-lg font-semibold text-amber-700 dark:text-amber-300 tabular-nums">
                 {inspectionCount}
               </div>
