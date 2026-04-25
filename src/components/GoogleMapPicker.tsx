@@ -348,7 +348,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         <div className="rounded-xl border border-border/50 bg-muted/30 p-5 space-y-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin size={16} className="text-primary" />
-            <span>الصق رابط الموقع من خرائط قوقل</span>
+            <span>{t("createListing.mapLink.label")}</span>
           </div>
           <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} loading={searching} />
           <AddressDisplay address={selectedAddress} onClear={clearLocation} />
@@ -363,10 +363,10 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
       <div className="rounded-xl border-2 border-primary/50 bg-primary/10 p-4 space-y-2">
         <div className="flex items-center gap-2 text-sm font-medium text-primary">
           <ClipboardPaste size={16} />
-          <span>📍 الصق رابط الموقع من خرائط قوقل</span>
+          <span>{t("createListing.mapLink.labelWithIcon")}</span>
         </div>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          افتح خرائط قوقل → اضغط على الموقع → انسخ الرابط والصقه هنا
+          {t("createListing.mapLink.helper")}
         </p>
         <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} loading={searching} />
       </div>
