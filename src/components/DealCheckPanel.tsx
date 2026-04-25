@@ -1019,12 +1019,12 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
               )}
 
               <span className={cn("text-[10px] px-2 py-0.5 rounded-md border", style.bg, style.text, style.border)}>
-                {style.label}
+                {confidenceLabel}
               </span>
             </>
           ) : (
             <span className={cn("text-[10px] px-2 py-0.5 rounded-md border", style.bg, style.text, style.border)}>
-              {style.label}
+              {confidenceLabel}
             </span>
           )}
         </div>
