@@ -117,7 +117,25 @@
     "operationalRights": "Operational rights",
     "debtsLiabilities": "Debts & third-party liabilities",
     "buyerAssumesLiabilities": "Buyer assumes all prior liabilities",
-    "checkLegalDisputes": "Existing legal disputes must be verified"
+    "checkLegalDisputes": "Existing legal disputes must be verified",
+    "excludes": "Excludes",
+    "viewDetails": "View details",
+    "setAsPrimary": "Set as primary",
+    "alternative": "Alternative"
+  },
+  "offer": {
+    "submitted": "Your offer was sent",
+    "newOffer": "Submit a new offer",
+    "accepted": "✓ Your offer was accepted!",
+    "rejected": "Offer was rejected",
+    "offersCount": "offers submitted",
+    "highestOffer": "Highest offer:",
+    "writePrice": "Enter your price",
+    "cancel": "Cancel",
+    "invalidPrice": "Please enter a valid price",
+    "rateLimited": "Rate limit exceeded. Please wait before submitting another offer",
+    "sendFailed": "Failed to submit offer",
+    "sentSuccess": "Your offer was sent successfully ✅"
   },
   "inventory": {
     "confirmedAssets": "Confirmed asset inventory",
