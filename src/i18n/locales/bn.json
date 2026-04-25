@@ -16,7 +16,9 @@
     "month": "মাস",
     "share": "শেয়ার করুন",
     "publish": "প্রকাশ করুন",
-    "saveDraft": "খসড়া হিসেবে সংরক্ষণ করুন"
+    "saveDraft": "খসড়া হিসেবে সংরক্ষণ করুন",
+    "showMore": "আরও দেখুন",
+    "showLess": "কম দেখুন"
   },
   "auth": {
     "enterPhone": "আপনার মোবাইল নম্বর লিখুন",
@@ -94,7 +96,65 @@
     "showExtraDetails": "অতিরিক্ত বিবরণ দেখান",
     "pricedAssetsValue": "মূল্য নির্ধারিত সম্পদের মোট মূল্য",
     "publicOfferTip": "প্রকাশ্য অফার চুক্তির স্বচ্ছতা বাড়ায় এবং আপনাকে সুবিধা দেয়",
-    "loginToViewDocs": "সুরক্ষিত নথিপত্রে প্রবেশের জন্য সাইন ইন করুন"
+    "loginToViewDocs": "সুরক্ষিত নথিপত্রে প্রবেশের জন্য সাইন ইন করুন",
+    "docsProtectedAskSeller": "এই নথিগুলি সুরক্ষিত — দেখার জন্য বিক্রেতার অনুমতি চান",
+    "requestAccess": "প্রবেশের অনুরোধ করুন",
+    "mainOption": "প্রধান বিকল্প",
+    "alternativeOptions": "বিকল্প পছন্দসমূহ:",
+    "includes": "অন্তর্ভুক্ত",
+    "excludes": "অন্তর্ভুক্ত নয়"
+  },
+  "deal": {
+    "mainOption": "প্রধান বিকল্প",
+    "fullTransferDesc": "সকল সম্পদ ও দায়সহ পূর্ণ ব্যবসা হস্তান্তর",
+    "includes": "অন্তর্ভুক্ত",
+    "commercialReg": "বাণিজ্যিক নিবন্ধন",
+    "tradeName": "ব্যবসার নাম",
+    "trademark": "ট্রেডমার্ক",
+    "assetsEquipment": "সম্পদ ও সরঞ্জাম",
+    "lease": "ভাড়া চুক্তি",
+    "inventory": "মজুদ",
+    "operationalRights": "পরিচালনার অধিকার",
+    "debtsLiabilities": "ঋণ ও তৃতীয় পক্ষের দায়",
+    "buyerAssumesLiabilities": "ক্রেতা পূর্বের সকল দায়ভার গ্রহণ করবেন",
+    "checkLegalDisputes": "বিদ্যমান আইনি বিরোধগুলি যাচাই করা আবশ্যক"
+  },
+  "inventory": {
+    "confirmedAssets": "নিশ্চিত সম্পদ তালিকা",
+    "unit": "একক"
+  },
+  "condition": {
+    "good": "ভালো",
+    "used": "ব্যবহৃত",
+    "new": "নতুন",
+    "unclear": "অস্পষ্ট",
+    "excellent": "চমৎকার"
+  },
+  "simulation": {
+    "title": "ডিল সিমুলেশন",
+    "basePrice": "মূল মূল্য:",
+    "currentPrice": "বর্তমান মূল্য",
+    "commission": "কমিশন:",
+    "asIs": "তালিকাভুক্ত মূল্যে",
+    "discount10": "10% ছাড়",
+    "discount20": "20% ছাড়",
+    "assetsOnly": "শুধু সম্পদ (মূল্যের 30%)",
+    "installment": "কিস্তিতে (+15%)",
+    "transition": "3 মাসের ক্রান্তিকালীন সময়সহ",
+    "bestScenario": "সেরা পরিস্থিতি"
+  },
+  "manage": {
+    "title": "তালিকা ব্যবস্থাপনা — অবস্থা:",
+    "yourListing": "আপনার তালিকা —",
+    "published": "প্রকাশিত",
+    "draft": "খসড়া",
+    "suspended": "সাময়িক স্থগিত",
+    "edit": "সম্পাদনা",
+    "pause": "বিরতি",
+    "resume": "পুনরায় সক্রিয়",
+    "promote": "তালিকা প্রচার করুন",
+    "delete": "মুছুন",
+    "featured": "বিশেষ তালিকা"
   },
   "marketplace": {
     "title": "ব্যবসা মার্কেটপ্লেস",

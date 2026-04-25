@@ -16,7 +16,9 @@
     "month": "个月",
     "share": "分享",
     "publish": "发布",
-    "saveDraft": "保存草稿"
+    "saveDraft": "保存草稿",
+    "showMore": "查看更多",
+    "showLess": "收起"
   },
   "auth": {
     "enterPhone": "请输入您的手机号码",
@@ -94,7 +96,65 @@
     "showExtraDetails": "显示更多详情",
     "pricedAssetsValue": "已定价资产总值",
     "publicOfferTip": "公开报价能提升交易透明度,也让您更具竞争力",
-    "loginToViewDocs": "请登录以申请查看受保护的文件"
+    "loginToViewDocs": "请登录以申请查看受保护的文件",
+    "docsProtectedAskSeller": "这些文件受保护——请向卖家申请查看许可",
+    "requestAccess": "申请访问",
+    "mainOption": "主要选项",
+    "alternativeOptions": "备选方案:",
+    "includes": "包含",
+    "excludes": "不包含"
+  },
+  "deal": {
+    "mainOption": "主要选项",
+    "fullTransferDesc": "整体转让业务,包含所有资产与负债",
+    "includes": "包含",
+    "commercialReg": "商业登记",
+    "tradeName": "商号",
+    "trademark": "商标",
+    "assetsEquipment": "资产与设备",
+    "lease": "租赁合同",
+    "inventory": "库存",
+    "operationalRights": "经营权",
+    "debtsLiabilities": "债务与对外负债",
+    "buyerAssumesLiabilities": "买方承担所有既往债务",
+    "checkLegalDisputes": "需核实现存的法律纠纷"
+  },
+  "inventory": {
+    "confirmedAssets": "已确认资产清单",
+    "unit": "件"
+  },
+  "condition": {
+    "good": "良好",
+    "used": "二手",
+    "new": "全新",
+    "unclear": "不明",
+    "excellent": "优秀"
+  },
+  "simulation": {
+    "title": "交易模拟",
+    "basePrice": "基础价格:",
+    "currentPrice": "当前价格",
+    "commission": "佣金:",
+    "asIs": "按挂牌价",
+    "discount10": "降价 10%",
+    "discount20": "降价 20%",
+    "assetsOnly": "仅资产(总价的 30%)",
+    "installment": "分期(+15%)",
+    "transition": "含 3 个月过渡期",
+    "bestScenario": "最佳方案"
+  },
+  "manage": {
+    "title": "管理刊登 — 状态:",
+    "yourListing": "您的刊登 —",
+    "published": "已发布",
+    "draft": "草稿",
+    "suspended": "已暂停",
+    "edit": "编辑",
+    "pause": "暂停",
+    "resume": "恢复",
+    "promote": "推广刊登",
+    "delete": "删除",
+    "featured": "精选刊登"
   },
   "marketplace": {
     "title": "商业机会市场",

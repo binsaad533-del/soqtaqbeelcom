@@ -16,7 +16,9 @@
     "month": "ماہ",
     "share": "شیئر کریں",
     "publish": "شائع کریں",
-    "saveDraft": "بطور مسودہ محفوظ کریں"
+    "saveDraft": "بطور مسودہ محفوظ کریں",
+    "showMore": "مزید دکھائیں",
+    "showLess": "کم دکھائیں"
   },
   "auth": {
     "enterPhone": "اپنا موبائل نمبر درج کریں",
@@ -94,7 +96,65 @@
     "showExtraDetails": "مزید تفصیلات دکھائیں",
     "pricedAssetsValue": "قیمت لگے اثاثوں کی مجموعی مالیت",
     "publicOfferTip": "عوامی پیشکشیں شفافیت بڑھاتی ہیں اور آپ کو برتری دیتی ہیں",
-    "loginToViewDocs": "محفوظ دستاویزات دیکھنے کے لیے سائن ان کریں"
+    "loginToViewDocs": "محفوظ دستاویزات دیکھنے کے لیے سائن ان کریں",
+    "docsProtectedAskSeller": "یہ دستاویزات محفوظ ہیں — دیکھنے کے لیے بیچنے والے سے اجازت طلب کریں",
+    "requestAccess": "رسائی کی درخواست کریں",
+    "mainOption": "بنیادی آپشن",
+    "alternativeOptions": "متبادل آپشنز:",
+    "includes": "شامل ہے",
+    "excludes": "شامل نہیں"
+  },
+  "deal": {
+    "mainOption": "بنیادی آپشن",
+    "fullTransferDesc": "کاروبار کی مکمل منتقلی بشمول تمام اثاثے اور واجبات",
+    "includes": "شامل ہے",
+    "commercialReg": "کمرشل رجسٹریشن",
+    "tradeName": "تجارتی نام",
+    "trademark": "ٹریڈ مارک",
+    "assetsEquipment": "اثاثے اور سامان",
+    "lease": "کرایہ نامہ",
+    "inventory": "اسٹاک",
+    "operationalRights": "آپریشنل حقوق",
+    "debtsLiabilities": "قرضے اور فریقِ ثالث کے واجبات",
+    "buyerAssumesLiabilities": "خریدار تمام سابقہ واجبات قبول کرے گا",
+    "checkLegalDisputes": "موجودہ قانونی تنازعات کی تصدیق ضروری ہے"
+  },
+  "inventory": {
+    "confirmedAssets": "تصدیق شدہ اثاثوں کی فہرست",
+    "unit": "یونٹ"
+  },
+  "condition": {
+    "good": "اچھا",
+    "used": "استعمال شدہ",
+    "new": "نیا",
+    "unclear": "غیر واضح",
+    "excellent": "بہترین"
+  },
+  "simulation": {
+    "title": "ڈیل سمولیشن",
+    "basePrice": "بنیادی قیمت:",
+    "currentPrice": "موجودہ قیمت",
+    "commission": "کمیشن:",
+    "asIs": "درج کردہ قیمت پر",
+    "discount10": "10% رعایت",
+    "discount20": "20% رعایت",
+    "assetsOnly": "صرف اثاثے (قیمت کا 30%)",
+    "installment": "اقساط (+15%)",
+    "transition": "3 ماہ کا منتقلی دورانیہ شامل",
+    "bestScenario": "بہترین منظرنامہ"
+  },
+  "manage": {
+    "title": "اشتہار کا انتظام — حالت:",
+    "yourListing": "آپ کا اشتہار —",
+    "published": "شائع شدہ",
+    "draft": "مسودہ",
+    "suspended": "عارضی طور پر معطل",
+    "edit": "ترمیم",
+    "pause": "روکیں",
+    "resume": "دوبارہ فعال کریں",
+    "promote": "اشتہار کو فروغ دیں",
+    "delete": "حذف کریں",
+    "featured": "نمایاں اشتہار"
   },
   "marketplace": {
     "title": "کاروباری مارکیٹ پلیس",
