@@ -15,7 +15,13 @@ import type { UseAnalysisCacheReturn } from "@/hooks/useAnalysisCache";
 import { hasSimulationPhotos } from "@/components/SimulationOverlay";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { mapConditionToKey, mapConfidenceToKey } from "@/lib/condition-utils";
+import {
+  mapConditionToKey,
+  mapConfidenceToKey,
+  mapFairnessToKey,
+  mapMarketPositionToKey,
+  mapRatingToKey,
+} from "@/lib/condition-utils";
 
 interface AssetBreakdownItem {
   assetName: string;
@@ -521,7 +527,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           )}
           {analysis && (
             <span className={cn("text-[11px] px-2.5 py-1 rounded-lg border", ratingStyle.bg, ratingStyle.text, ratingStyle.border)}>
-              {analysis.rating}
+              {t(`dealCheck.${mapRatingToKey(analysis.rating)}`)}
             </span>
           )}
           {!analysis && loading && (
@@ -544,10 +550,10 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               </div>
               <div className="text-center">
                 <p className="text-sm font-medium">
-                  {!useCache ? t("dealCheck.generatingInYourLanguage") : "جاري تحليل الصفقة..."}
+                  {!useCache ? t("dealCheck.generatingInYourLanguage") : t("dealCheck.analyzingProgress")}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  يتم فحص جميع الصور والمستندات والبيانات
+                  {t("dealCheck.checkingAllData")}
                 </p>
               </div>
             </div>
@@ -557,7 +563,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
             <div className="py-8 text-center">
               <p className="text-sm text-destructive mb-3">{error}</p>
               <Button variant="outline" size="sm" onClick={() => runDealCheck()} className="rounded-xl text-xs">
-                إعادة المحاولة
+                {t("dealCheck.retryAnalysis")}
               </Button>
             </div>
           )}
@@ -595,7 +601,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       <Clock size={11} />
                       <span>{t("dealCheck.lastUpdate")} {formatCacheAge(updatedDate)}</span>
                       {isRecent && <span className="text-emerald-600 dark:text-emerald-400 font-medium">• {t("dealCheck.updated")}</span>}
-                      {isStale && <span className="text-amber-500 font-medium">• يتم التحديث تلقائياً</span>}
+                      {isStale && <span className="text-amber-500 font-medium">• {t("dealCheck.autoUpdating")}</span>}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-muted-foreground/60">{t("dealCheck.autoUpdate")}</span>
@@ -604,7 +610,10 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                           CONFIDENCE_BADGE[analysis.confidenceLevel]?.bg || "bg-muted",
                           CONFIDENCE_BADGE[analysis.confidenceLevel]?.text || "text-muted-foreground"
                         )}>
-                          {t("dealCheck.confidence")} {analysis.confidenceLevel}
+                          {t("dealCheck.confidence")} {t(`dealCheck.confidenceLevel${
+                            analysis.confidenceLevel === "عالي" ? "High" :
+                            analysis.confidenceLevel === "منخفض" ? "Low" : "Medium"
+                          }`)}
                         </span>
                       )}
                     </div>
@@ -621,11 +630,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-[11px] text-muted-foreground">
-                      {t("dealCheck.priceFairness")} {FAIRNESS_ICONS[analysis.fairnessVerdict]} {analysis.fairnessVerdict}
+                      {t("dealCheck.priceFairness")} {FAIRNESS_ICONS[analysis.fairnessVerdict]} {t(`dealCheck.${mapFairnessToKey(analysis.fairnessVerdict)}`)}
                     </span>
                   </div>
                 </div>
-                <p className={cn("text-lg font-medium", ratingStyle.text)}>{analysis.rating}</p>
+                <p className={cn("text-lg font-medium", ratingStyle.text)}>{t(`dealCheck.${mapRatingToKey(analysis.rating)}`)}</p>
               </div>
 
               {/* Price Context Box — explains how the asking price is composed */}
@@ -816,7 +825,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       </h4>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
-                          <div className="text-xs text-muted-foreground">مقارنات</div>
+                          <div className="text-xs text-muted-foreground">{t("dealCheck.comparisons")}</div>
                           <div className="text-sm font-medium">{analysis.marketComparison.comparablesReviewed}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
@@ -826,14 +835,17 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
                           <div className="text-xs text-muted-foreground">{t("dealCheck.pricePosition")}</div>
                           <div className={cn("text-sm font-medium",
-                            analysis.marketComparison.marketPosition === "أقل من السوق" ? "text-emerald-600" :
-                            analysis.marketComparison.marketPosition === "أعلى من السوق" ? "text-red-500" :
+                            mapMarketPositionToKey(analysis.marketComparison.marketPosition) === "pricePosition_below" ? "text-emerald-600" :
+                            mapMarketPositionToKey(analysis.marketComparison.marketPosition) === "pricePosition_above" ? "text-red-500" :
                             "text-foreground"
-                          )}>{analysis.marketComparison.marketPosition}</div>
+                          )}>{t(`dealCheck.${mapMarketPositionToKey(analysis.marketComparison.marketPosition)}`)}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
                           <div className="text-xs text-muted-foreground">{t("dealCheck.confidenceLevel")}</div>
-                          <div className="text-sm font-medium">{analysis.marketComparison.confidence}</div>
+                          <div className="text-sm font-medium">{t(`dealCheck.confidenceLevel${
+                            analysis.marketComparison.confidence === "عالي" ? "High" :
+                            analysis.marketComparison.confidence === "منخفض" ? "Low" : "Medium"
+                          }`)}</div>
                         </div>
                       </div>
                       {analysis.marketComparison.observedPriceRange && analysis.marketComparison.observedPriceRange !== "غير متاح" && (

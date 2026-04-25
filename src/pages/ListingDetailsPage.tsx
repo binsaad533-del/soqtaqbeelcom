@@ -1410,8 +1410,8 @@ const DealSummaryCard = ({ listing }: { listing: any }) => {
     return Number.isFinite(p) && p > 0 && a?.pricing?.confidence !== "يتطلب_معاينة" ? sum + p * q : sum;
   }, 0);
   const askingPrice = Number(listing?.price) || 0;
-  const dealLabel = DEAL_TYPE_MAP[listing?.primary_deal_type || listing?.deal_type]?.label
-    || getArabicDealType(listing?.primary_deal_type || listing?.deal_type);
+  const dealTypeId = listing?.primary_deal_type || listing?.deal_type;
+  const dealLabel = dealTypeId ? t(`deal.${mapDealTypeToKey(dealTypeId)}`) : "";
   const fmt = (n: number) => n.toLocaleString("en-US");
 
   return (
