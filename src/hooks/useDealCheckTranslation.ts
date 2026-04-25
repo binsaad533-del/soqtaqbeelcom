@@ -36,20 +36,18 @@ const MARKET_COMPARISON_STRING_FIELDS = [
 ];
 
 /**
- * Translates AI-generated deal_check content into the active UI language.
- * For Arabic, returns the original analysis untouched.
+ * Translates AI-generated deal_check content (and ai_trust_score) into the active UI language.
+ * For Arabic, returns the original objects untouched.
  * For other languages, fetches translations via the translate-ai-content edge function and merges them.
- *
- * `dealCheckId` is the row id in deal_checks. `analysis` is the in-memory normalized object
- * (or raw cached object) whose string fields will be merged with the translated values.
  */
 export function useDealCheckTranslation<T extends Record<string, unknown> | null | undefined>(
   listingId: string | null | undefined,
   analysis: T,
+  trustScore?: Record<string, unknown> | null,
 ) {
   const { i18n } = useTranslation();
   const language = i18n.resolvedLanguage || i18n.language || "ar";
-  const enabled = !!listingId && !!analysis && language !== "ar";
+  const enabled = !!listingId && (!!analysis || !!trustScore) && language !== "ar";
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["deal-check-translation", listingId, language],
@@ -70,25 +68,20 @@ export function useDealCheckTranslation<T extends Record<string, unknown> | null
     retry: 1,
   });
 
-  if (!analysis || !enabled) {
+  if (!enabled || !data) {
     return {
       translatedAnalysis: analysis,
-      isTranslating: false,
-      translationError: null as unknown,
+      translatedTrustScore: trustScore ?? null,
+      isTranslating: enabled && isLoading,
+      translationError: enabled ? error : null,
     };
   }
 
-  if (!data) {
-    return {
-      translatedAnalysis: analysis,
-      isTranslating: isLoading,
-      translationError: error,
-    };
-  }
-
-  const merged = mergeTranslation(analysis as Record<string, unknown>, data);
+  const merged = analysis ? mergeTranslation(analysis as Record<string, unknown>, data) : analysis;
+  const mergedTrust = trustScore ? mergeTrustScoreTranslation(trustScore, data) : trustScore ?? null;
   return {
     translatedAnalysis: merged as T,
+    translatedTrustScore: mergedTrust,
     isTranslating: false,
     translationError: null as unknown,
   };
@@ -144,6 +137,30 @@ function mergeTranslation(
     result.marketComparison = mcMerged;
   }
 
+  return result;
+}
+
+const TRUST_STRING_FIELDS = ["summary", "level", "verdict"];
+const TRUST_ARRAY_FIELDS = ["strengths", "weaknesses", "warnings", "recommendations"];
+
+function mergeTrustScoreTranslation(
+  original: Record<string, unknown>,
+  translated: TranslatedFields,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...original };
+  for (const f of TRUST_STRING_FIELDS) {
+    const tv = translated[`trustScore.${f}`];
+    if (typeof tv === "string" && tv.length > 0) result[f] = tv;
+  }
+  for (const f of TRUST_ARRAY_FIELDS) {
+    const arr = original[f];
+    if (Array.isArray(arr)) {
+      result[f] = arr.map((item, idx) => {
+        const tv = translated[`trustScore.${f}.${idx}`];
+        return typeof tv === "string" && tv.length > 0 ? tv : item;
+      });
+    }
+  }
   return result;
 }
 
