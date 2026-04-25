@@ -294,7 +294,12 @@
     "smartAnalysis": "تحليل ذكي شامل للصفقة",
     "analyzing": "جاري التحليل",
     "savedAnalysis": "تحليل محفوظ",
-    "extraValue": "قيمة إضافية (اسم تجاري + تراخيص + قاعدة عملاء)"
+    "extraValue": "قيمة إضافية (اسم تجاري + تراخيص + قاعدة عملاء)",
+    "pricingIdle": "لم يبدأ التسعير",
+    "pricingInProgressShort": "قيد التسعير",
+    "pricingCompleted": "اكتمل التسعير",
+    "pricingFailed": "فشل التسعير",
+    "updatedAt": "محدّث:"
   },
   "feasibility": {
     "title": "دراسة الجدوى الاقتصادية",
