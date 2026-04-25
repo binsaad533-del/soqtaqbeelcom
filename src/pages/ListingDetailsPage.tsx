@@ -765,9 +765,13 @@ const ListingDetailsPage = () => {
                 icon={<AiStar size={16} animate={false} />}
                 summary={String(listing.ai_summary || listing.description || "").replace(/\s+/g, " ").trim().slice(0, 90) + ((String(listing.ai_summary || listing.description || "").length > 90) ? "…" : "")}
               >
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {listing.ai_summary || listing.description}
-                </p>
+                {isTranslating ? (
+                  <Skeleton className="h-20 w-full" />
+                ) : (
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {listing.ai_summary || listing.description}
+                  </p>
+                )}
               </SectionAccordion>
             )}
 
