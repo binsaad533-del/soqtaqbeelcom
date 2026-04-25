@@ -461,26 +461,29 @@ const FallbackSearchBar = ({
   setManualSearch: (v: string) => void;
   searching: boolean;
   onSearch: () => void;
-}) => (
-  <div className="flex gap-2" dir="rtl">
-    <Input
-      placeholder="ابحث: اسم الحي، المدينة، الشارع..."
-      value={manualSearch}
-      onChange={(e) => setManualSearch(e.target.value)}
-      onKeyDown={(e) => e.key === "Enter" && onSearch()}
-      className="flex-1 rounded-lg text-sm"
-    />
-    <Button
-      size="sm"
-      onClick={onSearch}
-      disabled={searching || !manualSearch.trim()}
-      className="rounded-lg gap-1.5"
-    >
-      {searching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-      بحث
-    </Button>
-  </div>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex gap-2" dir="rtl">
+      <Input
+        placeholder={t("createListing.mapLink.searchPlaceholder")}
+        value={manualSearch}
+        onChange={(e) => setManualSearch(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && onSearch()}
+        className="flex-1 rounded-lg text-sm"
+      />
+      <Button
+        size="sm"
+        onClick={onSearch}
+        disabled={searching || !manualSearch.trim()}
+        className="rounded-lg gap-1.5"
+      >
+        {searching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+        {t("createListing.mapLink.search")}
+      </Button>
+    </div>
+  );
+};
 
 /** Reusable paste location input */
 const PasteLocationBar = ({
@@ -493,38 +496,44 @@ const PasteLocationBar = ({
   setPasteInput: (v: string) => void;
   onPaste: () => void;
   loading?: boolean;
-}) => (
-  <div className="flex gap-2" dir="ltr">
-    <Input
-      placeholder="الصق رابط قوقل ماب هنا"
-      value={pasteInput}
-      onChange={(e) => setPasteInput(e.target.value)}
-      onKeyDown={(e) => e.key === "Enter" && onPaste()}
-      className="flex-1 rounded-lg text-sm text-left"
-      dir="ltr"
-    />
-    <Button
-      size="sm"
-      onClick={onPaste}
-      disabled={!pasteInput.trim() || pasteLoading}
-      className="rounded-lg gap-1.5"
-    >
-      {pasteLoading ? <Loader2 size={14} className="animate-spin" /> : <ClipboardPaste size={14} />}
-      تحديد
-    </Button>
-  </div>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex gap-2" dir="ltr">
+      <Input
+        placeholder={t("createListing.mapLink.placeholder")}
+        value={pasteInput}
+        onChange={(e) => setPasteInput(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && onPaste()}
+        className="flex-1 rounded-lg text-sm text-left"
+        dir="ltr"
+      />
+      <Button
+        size="sm"
+        onClick={onPaste}
+        disabled={!pasteInput.trim() || pasteLoading}
+        className="rounded-lg gap-1.5"
+      >
+        {pasteLoading ? <Loader2 size={14} className="animate-spin" /> : <ClipboardPaste size={14} />}
+        {t("createListing.mapLink.button")}
+      </Button>
+    </div>
+  );
+};
 
 /** Reusable address display */
 const AddressDisplay = ({ address, onClear }: { address: string | null; onClear: () => void }) => {
+  const { t } = useTranslation();
   if (!address) return null;
-  if (address === "لم يتم العثور على نتائج") {
-    return <p className="text-xs text-destructive">لم يتم العثور على نتائج، حاول بكلمات مختلفة</p>;
+  // Compare against translated sentinel values so logic survives language switch.
+  if (address === t("createListing.mapLink.noResults")) {
+    return <p className="text-xs text-destructive">{t("createListing.mapLink.noResultsHint")}</p>;
   }
-  if (address === "فشل البحث") {
-    return <p className="text-xs text-destructive">فشل البحث، حاول مرة أخرى</p>;
+  if (address === t("createListing.mapLink.searchFailed")) {
+    return <p className="text-xs text-destructive">{t("createListing.mapLink.searchFailedRetry")}</p>;
   }
-  if (address.startsWith("لم يتم التعرف على")) {
+  // "unrecognized coordinates" message: long, language-dependent — render as-is in destructive style.
+  if (address === t("createListing.mapLink.unrecognized")) {
     return <p className="text-xs text-destructive">{address}</p>;
   }
   return (
