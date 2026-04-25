@@ -664,7 +664,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     listing?.id,
     study as unknown as Record<string, unknown> | null,
   );
-  const displayStudy = (translatedStudyData as FeasibilityStudy | null) || study;
+  const i18nStudy = (translatedStudyData as unknown as FeasibilityStudy | null) || study;
 
   const runStudy = async () => {
     if (isSimulation) {
