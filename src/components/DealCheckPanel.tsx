@@ -317,6 +317,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   );
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
+  const [autoTriggered, setAutoTriggered] = useState(false);
   const isSimulation = hasSimulationPhotos(listing?.photos as Record<string, unknown> | null | undefined);
 
   useEffect(() => {
