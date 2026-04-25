@@ -9,15 +9,15 @@ import PriceDisplay from "@/components/PriceDisplay";
 import { useEffect, useRef, useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
 
-function useHomeStats(tx: (ar: string, en: string) => string) {
+function useHomeStats(t: (k: string) => string) {
   const [stats, setStats] = useState([
-    { value: "—", label: tx("فرصة نشطة", "Active opportunities") },
-    { value: "—", label: tx("مدينة", "Cities") },
-    { value: "—", label: tx("إفصاح مكتمل", "Disclosure complete") },
-    { value: "—", label: tx("صفقة مكتملة", "Completed deals") },
+    { value: "—", label: t("home.stats.active") },
+    { value: "—", label: t("home.stats.cities") },
+    { value: "—", label: t("home.stats.disclosure") },
+    { value: "—", label: t("home.stats.completed") },
   ]);
 
   useEffect(() => {
@@ -43,10 +43,10 @@ function useHomeStats(tx: (ar: string, en: string) => string) {
         : 0;
 
       setStats([
-        { value: activeListings.toLocaleString("en-GB"), label: tx("فرصة نشطة", "Active opportunities") },
-        { value: uniqueCities.toLocaleString("en-GB"), label: tx("مدينة", "Cities") },
-        { value: `${avgDisclosure}%`, label: tx("إفصاح مكتمل", "Disclosure complete") },
-        { value: completedDeals.toLocaleString("en-GB"), label: tx("صفقة مكتملة", "Completed deals") },
+        { value: activeListings.toLocaleString("en-GB"), label: t("home.stats.active") },
+        { value: uniqueCities.toLocaleString("en-GB"), label: t("home.stats.cities") },
+        { value: `${avgDisclosure}%`, label: t("home.stats.disclosure") },
+        { value: completedDeals.toLocaleString("en-GB"), label: t("home.stats.completed") },
       ]);
     }
 
@@ -64,7 +64,7 @@ function useHomeStats(tx: (ar: string, en: string) => string) {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [tx]);
+  }, [t]);
 
   return stats;
 }
@@ -134,13 +134,13 @@ function RotatingWord({ words }: { words: string[] }) {
 }
 
 const HomePage = () => {
+  const { t } = useTranslation();
   useSEO({
     title: "سوق تقبيل — تقبيل المشاريع والفرص التجارية بالذكاء الاصطناعي",
     description: "أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع التجارية — جرد وتقييم وتفاوض تلقائي بدون تعقيد",
     canonical: "/",
   });
-  const { tx } = useLanguage();
-  const stats = useHomeStats(tx);
+  const stats = useHomeStats(t);
   const featured = useFeaturedListings();
   const revealRefs = useRef<HTMLDivElement[]>([]);
 
@@ -165,54 +165,12 @@ const HomePage = () => {
   };
 
   const smartFeatures = [
-    {
-      num: "1",
-      title: tx("ارفع صور… والذكاء يجرد لك", "Upload photos and let AI inventory everything"),
-      desc: tx(
-        "بمجرد رفع صور المحل أو المشروع، الذكاء الاصطناعي يسوّي جرد كامل للأصول والمعدات تلقائيًا.",
-        "Once you upload shop or business photos, AI automatically creates a full inventory of assets and equipment."
-      ),
-    },
-    {
-      num: "2",
-      title: tx("تقييم استرشادي بالذكاء الاصطناعي", "AI-guided valuation via market comparisons"),
-      desc: tx(
-        "المنصة تحلل بيانات المشروع وتعطيك تقييماً استرشادياً بالذكاء الاصطناعي عبر مقارنات السوق.",
-        "The platform analyzes business data and gives you an AI-guided indicative valuation through market comparisons."
-      ),
-    },
-    {
-      num: "3",
-      title: tx("بدون تعبئة بيانات… الذكاء يكفي", "No manual forms, AI handles it"),
-      desc: tx(
-        "ارفع الصور والمستندات والذكاء الاصطناعي يستخرج كل البيانات المطلوبة بدون ما تكتب شيء.",
-        "Upload photos and documents, and AI extracts the required data without manual entry."
-      ),
-    },
-    {
-      num: "4",
-      title: tx("تفاوض ذكي داخل المنصة", "Smart negotiation inside the platform"),
-      desc: tx(
-        "مساعد ذكي يتفاوض معك ويقترح حلول عادلة ويساعدك توصل لأفضل صفقة.",
-        "An intelligent assistant helps negotiate, suggests fair solutions, and guides both sides to a better deal."
-      ),
-    },
-    {
-      num: "5",
-      title: tx("صفقات حقيقية… مو مجرد إعلانات", "Real transactions, not just listings"),
-      desc: tx(
-        "نركّز على إتمام الصفقة فعليًا، مو مجرد عرض إعلان بين آلاف الإعلانات.",
-        "We focus on completing real deals, not just posting another listing in a crowded marketplace."
-      ),
-    },
-    {
-      num: "6",
-      title: tx("تجربة منظمة من البداية للنهاية", "A guided journey from start to finish"),
-      desc: tx(
-        "من رفع الصور حتى توقيع الاتفاق، كل شيء واضح ومرتب في مكان واحد.",
-        "From uploading images to signing the agreement, everything stays clear and organized in one place."
-      ),
-    },
+    { num: "1", title: t("home.smart.f1Title"), desc: t("home.smart.f1Desc") },
+    { num: "2", title: t("home.smart.f2Title"), desc: t("home.smart.f2Desc") },
+    { num: "3", title: t("home.smart.f3Title"), desc: t("home.smart.f3Desc") },
+    { num: "4", title: t("home.smart.f4Title"), desc: t("home.smart.f4Desc") },
+    { num: "5", title: t("home.smart.f5Title"), desc: t("home.smart.f5Desc") },
+    { num: "6", title: t("home.smart.f6Title"), desc: t("home.smart.f6Desc") },
   ];
 
   const organizationJsonLd = {
@@ -222,10 +180,7 @@ const HomePage = () => {
     alternateName: "Soq Taqbeel",
     url: "https://soqtaqbeel.com",
     logo: "https://soqtaqbeel.com/logo-icon-gold.png",
-    description: tx(
-      "أول منصة سعودية بالذكاء الاصطناعي لتقبيل المشاريع التجارية",
-      "The first Saudi AI-powered platform for business transfers"
-    ),
+    description: t("home.orgDesc"),
     foundingDate: "2024",
     areaServed: { "@type": "Country", name: "Saudi Arabia" },
     sameAs: [],
@@ -256,46 +211,37 @@ const HomePage = () => {
         <div className="container relative z-10">
           <div className="max-w-2xl mx-auto text-center animate-reveal">
             <div className="flex flex-col items-center mb-8 -mt-4">
-              <img src={logoIconGold} alt={tx("سوق تقبيل", "Soq Taqbeel")} loading="lazy" className="h-28 md:h-36 w-auto" />
+              <img src={logoIconGold} alt={t("home.logoAlt")} loading="lazy" className="h-28 md:h-36 w-auto" />
               <span className="text-lg md:text-xl font-semibold tracking-[0.3em] text-foreground/70 mt-3 uppercase">SOQ TAQBEEL</span>
             </div>
             <p className="text-sm font-medium text-primary mb-1 tracking-wide">
-              {tx("أول منصة سعودية بالذكاء الاصطناعي", "The first Saudi AI-powered platform")} <AiInlineStar size={13} /> {tx("لتقبيل المشاريع", "for business transfers")}
+              {t("home.tagline1")} <AiInlineStar size={13} /> {t("home.tagline2")}
             </p>
             <p className="text-xs text-muted-foreground mb-3 max-w-md mx-auto leading-relaxed">
-              {tx(
-                "التقبيل هو نقل ملكية النشاط التجاري من بائع لمشتري — وسوق تقبيل هو المكان الأمثل لذلك",
-                "Taqbeel is the transfer of business ownership from seller to buyer — Soq Taqbeel is the best place for that"
-              )}
+              {t("home.definition")}
             </p>
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-medium leading-tight mb-5" style={{ lineHeight: 1.4 }}>
-              {tx("ارفع صور مشروعك…", "Upload your business photos…")}{" "}
-              <RotatingWord words={tx(
-                "مطعم,حلاق,مركز تجميل,ورشة,مكتب,اثاث,محطة",
-                "Restaurant,Barbershop,Beauty Center,Workshop,Office,Furniture,Station"
-              ).split(",")} />
+              {t("home.heroTitle")}{" "}
+              <RotatingWord words={t("home.heroRotating").split(",")} />
               <br />
-              <span className="gradient-text">{tx("والذكاء الاصطناعي يكمل الباقي", "and AI handles the rest")} <AiInlineStar size={20} /></span>
+              <span className="gradient-text">{t("home.heroAiHandles")} <AiInlineStar size={20} /></span>
             </h1>
 
             <p className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
-              {tx(
-                "جرد، تقييم، بيانات، وتفاوض — كلها تلقائيًا بدون ما تكتب سطر واحد.",
-                "Inventory, valuation, data extraction, and negotiation — all automated without writing a single line."
-              )}
+              {t("home.heroSub")}
             </p>
             <p className="text-xs md:text-sm text-muted-foreground/70 mb-8">
-              {tx("فقط ارفع الصور والمستندات وخلّ الـAI", "Just upload photos and documents and let AI")} <AiInlineStar size={11} /> {tx("يشتغل عنك.", "do the heavy lifting.")}
+              {t("home.heroNote1")} <AiInlineStar size={11} /> {t("home.heroNote2")}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft hover:shadow-soft-lg transition-shadow active:scale-[0.98]">
                 <Link to="/create-listing?new=1">
-                  {tx("اعرض مشروعك", "List your business")}
+                  {t("home.ctaList")}
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="rounded-xl border-border/60 hover:bg-accent/50 active:scale-[0.98]">
                 <Link to="/marketplace">
-                  {tx("تصفح الفرص", "Browse opportunities")}
+                  {t("home.ctaBrowse")}
                   <ArrowLeft size={16} strokeWidth={1.5} />
                 </Link>
               </Button>
@@ -324,13 +270,13 @@ const HomePage = () => {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Star size={18} className="text-primary" strokeWidth={1.5} fill="currentColor" />
-                  <h2 className="text-xl md:text-2xl font-medium">{tx("فرص مميزة", "Featured opportunities")}</h2>
+                  <h2 className="text-xl md:text-2xl font-medium">{t("home.featuredTitle")}</h2>
                 </div>
-                <p className="text-sm text-muted-foreground">{tx("فرص مختارة بعناية لك", "Curated opportunities for you")}</p>
+                <p className="text-sm text-muted-foreground">{t("home.featuredSubtitle")}</p>
               </div>
               <Button asChild variant="ghost" size="sm" className="text-primary hover:text-primary/80">
                 <Link to="/marketplace" className="flex items-center gap-1">
-                  {tx("عرض الكل", "View all")}
+                  {t("home.viewAll")}
                   <ArrowLeft size={14} strokeWidth={1.5} />
                 </Link>
               </Button>
@@ -350,17 +296,17 @@ const HomePage = () => {
                     >
                       <div className="h-40 bg-gradient-to-br from-primary/5 to-accent/20 flex items-center justify-center relative">
                         {photos.length > 0 ? (
-                          <img src={photos[0]} alt={listing.title || listing.business_activity || tx("فرصة مميزة", "Featured opportunity")} loading="lazy" className="w-full h-full object-cover" />
+                          <img src={photos[0]} alt={listing.title || listing.business_activity || t("home.featuredAlt")} loading="lazy" className="w-full h-full object-cover" />
                         ) : (
                           <Eye size={24} className="text-muted-foreground/20" strokeWidth={1} />
                         )}
                         <span className="absolute top-2.5 right-2.5 bg-primary/90 text-primary-foreground text-[10px] px-2.5 py-0.5 rounded-md flex items-center gap-1">
-                          <Star size={9} fill="currentColor" /> {tx("مميز", "Featured")}
+                          <Star size={9} fill="currentColor" /> {t("home.featuredBadge")}
                         </span>
                       </div>
                       <div className="p-4">
                         <div className="text-sm font-medium mb-1.5 group-hover:text-primary transition-colors">
-                          {listing.title || listing.business_activity || tx("فرصة تقبيل", "Business opportunity")}
+                          {listing.title || listing.business_activity || t("home.businessOpportunity")}
                         </div>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
                           <MapPin size={12} strokeWidth={1.3} />
@@ -368,7 +314,7 @@ const HomePage = () => {
                         </div>
                         <div className="flex items-center justify-between pt-2.5 border-t border-border/10">
                           <span className="text-sm font-medium text-primary">
-                            {listing.price ? <PriceDisplay amount={Number(listing.price)} size={10} /> : tx("السعر عند التواصل", "Price on request")}
+                            {listing.price ? <PriceDisplay amount={Number(listing.price)} size={10} /> : t("home.priceOnRequest")}
                           </span>
                         </div>
                       </div>
@@ -384,12 +330,9 @@ const HomePage = () => {
       <section className="py-16 md:py-24 border-t border-border/50">
         <div className="container">
           <div className="text-center mb-12" ref={addRevealRef} style={{ opacity: 0 }}>
-            <h2 className="text-2xl md:text-3xl font-medium mb-4">{tx("منصة بالذكاء الاصطناعي", "An AI-powered platform")} <AiInlineStar size={18} /> {tx("لإتمام الصفقات… مو مجرد عرض", "built to close deals, not just display listings")}</h2>
+            <h2 className="text-2xl md:text-3xl font-medium mb-4">{t("home.platformTitle1")} <AiInlineStar size={18} /> {t("home.platformTitle2")}</h2>
             <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              {tx(
-                "كل الأدوات اللي تحتاجها لتقييم، عرض، وتوثيق الصفقات في مكان واحد — بطريقة ذكية وسريعة وواضحة.",
-                "Everything you need to value, showcase, negotiate, and document deals in one smart, fast, and clear workflow."
-              )}
+              {t("home.platformDesc")}
             </p>
           </div>
 
@@ -415,14 +358,14 @@ const HomePage = () => {
       <section className="py-16 gradient-hero" ref={addRevealRef} style={{ opacity: 0 }}>
         <div className="container text-center">
           <AiStar size={36} className="justify-center mb-4" />
-          <h2 className="text-2xl md:text-3xl font-medium mb-2">{tx("ابدأ الآن خلال 30 ثانية", "Get started in 30 seconds")}</h2>
-          <p className="text-muted-foreground mb-6">{tx("سواء تبي تعرض مشروعك أو تدور فرصة… المنصة جاهزة لك", "Whether you want to list your business or discover an opportunity, the platform is ready for you")}</p>
+          <h2 className="text-2xl md:text-3xl font-medium mb-2">{t("home.ctaStartTitle")}</h2>
+          <p className="text-muted-foreground mb-6">{t("home.ctaStartDesc")}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button asChild size="lg" className="gradient-primary text-primary-foreground rounded-xl shadow-soft active:scale-[0.98]">
-              <Link to="/create-listing?new=1">{tx("اعرض مشروعك", "List your business")}</Link>
+              <Link to="/create-listing?new=1">{t("home.ctaList")}</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="rounded-xl border-border/60 hover:bg-accent/50 active:scale-[0.98]">
-              <Link to="/marketplace">{tx("تصفح الفرص", "Browse opportunities")}</Link>
+              <Link to="/marketplace">{t("home.ctaBrowse")}</Link>
             </Button>
           </div>
         </div>

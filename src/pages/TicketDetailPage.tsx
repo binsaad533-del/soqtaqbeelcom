@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useTickets, type SupportTicket, type TicketMessage } from "@/hooks/useTickets";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ const priorityLabels: Record<string, string> = {
 
 const TicketDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { tx } = useLanguage();
+  const { t } = useTranslation();
   const { user } = useAuthContext();
   const { getTicket, getMessages, sendMessage, updateTicketStatus, assignTicket, isStaff } = useTickets();
   const [ticket, setTicket] = useState<SupportTicket | null>(null);
@@ -34,20 +34,20 @@ const TicketDetailPage = () => {
   const [profiles, setProfiles] = useState<Record<string, string>>({});
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  useSEO({ title: tx("تذكرة الدعم | سوق تقبيل", "Support Ticket | Soq Taqbeel") });
+  useSEO({ title: t("support.metaDetail") });
 
   const refresh = async () => {
     if (!id) return;
-    const [t, m] = await Promise.all([getTicket(id), getMessages(id)]);
-    setTicket(t);
+    const [tk, m] = await Promise.all([getTicket(id), getMessages(id)]);
+    setTicket(tk);
     setMessages(m);
     setLoading(false);
     // Fetch profile names
     const ids = new Set(m.map(msg => msg.sender_id));
-    if (t) ids.add(t.user_id);
+    if (tk) ids.add(tk.user_id);
     const { data: profs } = await supabase.from("public_profiles" as any).select("user_id, full_name").in("user_id", Array.from(ids));
     const map: Record<string, string> = {};
-    profs?.forEach((p: any) => { map[p.user_id] = p.full_name || "مستخدم"; });
+    profs?.forEach((p: any) => { map[p.user_id] = p.full_name || t("support.user"); });
     setProfiles(map);
   };
 
@@ -84,7 +84,7 @@ const TicketDetailPage = () => {
 
   if (!ticket) return (
     <div className="container py-16 text-center text-muted-foreground">
-      {tx("التذكرة غير موجودة", "Ticket not found")}
+      {t("support.notFound")}
     </div>
   );
 
@@ -101,18 +101,18 @@ const TicketDetailPage = () => {
         <div className="flex gap-2 flex-wrap pt-1">
           {!isClosed && !isStaff && (
             <Button size="sm" variant="outline" onClick={() => { updateTicketStatus(ticket.id, "closed"); refresh(); }}>
-              <XCircle size={13} className="mr-1" /> {tx("إغلاق التذكرة", "Close Ticket")}
+              <XCircle size={13} className="mr-1" /> {t("support.closeTicket")}
             </Button>
           )}
           {!isClosed && isStaff && (
             <>
               {!ticket.assigned_to && (
                 <Button size="sm" variant="outline" onClick={() => { assignTicket(ticket.id); refresh(); toast.success("تم استلام التذكرة"); }}>
-                  <UserPlus size={13} className="mr-1" /> {tx("تعيين لي", "Assign to me")}
+                  <UserPlus size={13} className="mr-1" /> {t("support.assignToMe")}
                 </Button>
               )}
               <Button size="sm" variant="outline" onClick={() => { updateTicketStatus(ticket.id, "resolved"); refresh(); toast.success("تم الحل"); }}>
-                <CheckCircle size={13} className="mr-1" /> {tx("تم الحل", "Resolved")}
+                <CheckCircle size={13} className="mr-1" /> {t("support.resolved")}
               </Button>
             </>
           )}
@@ -132,7 +132,7 @@ const TicketDetailPage = () => {
                   : isMe ? "bg-muted" : "bg-card border border-border/30"
               )}>
                 <p className="text-[10px] text-muted-foreground mb-1">
-                  {m.is_staff ? tx("فريق الدعم", "Support") : profiles[m.sender_id] || tx("مستخدم", "User")}
+                  {m.is_staff ? t("support.supportTeam") : profiles[m.sender_id] || t("support.user")}
                   {" · "}
                   {new Date(m.created_at).toLocaleTimeString("en-SA", { hour: "2-digit", minute: "2-digit" })}
                 </p>
@@ -148,7 +148,7 @@ const TicketDetailPage = () => {
       {!isClosed && (
         <div className="flex gap-2">
           <Textarea value={reply} onChange={e => setReply(e.target.value)}
-            placeholder={tx("اكتب ردك...", "Write your reply...")}
+            placeholder={t("support.replyPlaceholder")}
             rows={2} className="flex-1 min-h-[60px]"
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }} />
           <Button size="icon" onClick={handleSend} disabled={sending || !reply.trim()}>
