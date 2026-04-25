@@ -20,6 +20,7 @@ import {
 } from "@/lib/pdfShared";
 import { useTranslation } from "react-i18next";
 import { mapFeasibilityVerdictToKey, mapConfidenceToKey } from "@/lib/condition-utils";
+import { useFeasibilityTranslation } from "@/hooks/useFeasibilityTranslation";
 /* ── Types ── */
 interface Scenario {
   monthlyRevenue: number;
@@ -656,6 +657,15 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isArabic, study, loading, loadingCache, autoTriggered, isSimulation, listing?.id]);
 
+  // Translate AI-generated study fields when user language is not Arabic.
+  // This merges translations on top of the original (Arabic) study so we don't
+  // need to regenerate the entire feasibility study per language.
+  const { translatedStudyData } = useFeasibilityTranslation(
+    listing?.id,
+    study as unknown as Record<string, unknown> | null,
+  );
+  const i18nStudy = (translatedStudyData as unknown as FeasibilityStudy | null) || study;
+
   const runStudy = async () => {
     if (isSimulation) {
       toast("هذا إعلان محاكاة ويعرض دراسة جدوى محفوظة مسبقاً.");
@@ -923,7 +933,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
 
   // If study is still null after all resolution attempts, force-build from listing data
   // — but only for Arabic. For other languages we must wait for/trigger AI generation.
-  const resolvedStudy = study || (isArabic ? buildEstimatedFeasibilityStudy(listing) : null);
+  const resolvedStudy = i18nStudy || (isArabic ? buildEstimatedFeasibilityStudy(listing) : null);
   if (!resolvedStudy) {
     return (
       <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
