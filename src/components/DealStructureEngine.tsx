@@ -94,9 +94,9 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="font-medium mb-1">هيكل الصفقة</h2>
+        <h2 className="font-medium mb-1">{t("createListing.dealStructureSection.title")}</h2>
         <p className="text-sm text-muted-foreground">
-          اختر نوع أو أكثر من أنواع الصفقة — يمكنك تقديم أكثر من خيار للمشتري
+          {t("createListing.dealStructureSection.subtitle")}
         </p>
       </div>
 
@@ -138,7 +138,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-medium text-sm">{dt.label}</span>
+                      <span className="font-medium text-sm">{t(`createListing.dealTypes.${dt.id}.label`, { defaultValue: dt.label })}</span>
                       {isPrimary && (
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium flex items-center gap-0.5">
                           <Star size={10} fill="currentColor" /> {t("deal.mainOption")}
@@ -150,7 +150,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">{dt.desc}</p>
+                    <p className="text-xs text-muted-foreground">{t(`createListing.dealTypes.${dt.id}.description`, { defaultValue: dt.desc })}</p>
 
                     {/* Quick actions when selected */}
                     {isSelected && (
@@ -221,7 +221,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                     {dt.cautionNotes.length > 0 && (
                       <div>
                         <div className="text-xs font-medium text-warning mb-1 flex items-center gap-1">
-                          <Shield size={12} /> تنبيهات
+                          <Shield size={12} /> {t("createListing.dealStructureSection.cautionLabel")}
                         </div>
                         <ul className="space-y-0.5">
                           {dt.cautionNotes.map((note, i) => (
@@ -234,10 +234,10 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                     )}
                     <div className="flex items-center gap-4 pt-1">
                       <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-                        <Shield size={11} /> {dt.mandatoryDisclosures.length} إفصاح مطلوب
+                        <Shield size={11} /> {t("createListing.dealStructureSection.disclosuresCount", { count: dt.mandatoryDisclosures.length })}
                       </div>
                       <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-                        <FileText size={11} /> {dt.requiredDocuments.length} مستند مطلوب
+                        <FileText size={11} /> {t("createListing.dealStructureSection.documentsCount", { count: dt.requiredDocuments.length })}
                       </div>
                     </div>
                   </div>
