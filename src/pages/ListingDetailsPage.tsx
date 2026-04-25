@@ -1409,7 +1409,7 @@ const DealSummaryCard = ({ listing }: { listing: any }) => {
       <div className="mt-3 flex items-center gap-3 flex-wrap text-xs sm:text-sm tabular-nums">
         <span className="inline-flex items-center gap-1.5 text-foreground">
           <Wallet size={13} strokeWidth={1.4} className="text-primary" />
-          <span className="text-muted-foreground">السعر المطلوب:</span>
+          <span className="text-muted-foreground">{t('listing.price')}:</span>
           <span className="font-semibold">{askingPrice > 0 ? `${fmt(askingPrice)} ر.س` : "—"}</span>
         </span>
         {pricedTotal > 0 && (
