@@ -73,7 +73,7 @@ const DealSimulationPanel = ({ listingId }: Props) => {
                     s.riskLevel === "medium" ? "bg-warning/10 text-warning" :
                     "bg-destructive/10 text-destructive"
                   )}>
-                    {s.riskLevel === "low" ? "منخفض" : s.riskLevel === "medium" ? "متوسط" : "مرتفع"}
+                    {s.riskLevel === "low" ? t("common.low") : s.riskLevel === "medium" ? t("common.medium") : t("common.high")}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
