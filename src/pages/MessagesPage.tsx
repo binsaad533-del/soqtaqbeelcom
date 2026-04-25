@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useLanguage } from "@/contexts/LanguageContext";
+
 import { MessageSquare, Search, Clock, Sparkles, AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -29,7 +29,6 @@ const MessagesPage = () => {
   const { t } = useTranslation();
   useSEO({ title: "المحادثات", description: "تابع محادثاتك ومفاوضاتك على سوق تقبيل", canonical: "/messages" });
   const { user } = useAuthContext();
-  const { tx } = useLanguage();
   const navigate = useNavigate();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -219,7 +218,7 @@ const MessagesPage = () => {
                         : "font-medium text-foreground/80"
                     )}
                   >
-                    {conv.otherPartyName || tx("مستخدم", "User")}
+                    {conv.otherPartyName || t("messages.user")}
                   </span>
                   <span className="text-[11px] text-muted-foreground whitespace-nowrap flex items-center gap-1">
                     <Clock size={11} />
@@ -247,7 +246,7 @@ const MessagesPage = () => {
                         : "text-muted-foreground"
                     )}
                   >
-                    {conv.lastMessage || tx("لا رسائل بعد", "No messages yet")}
+                    {conv.lastMessage || t("messages.noMessagesYet")}
                   </p>
                   <div className="flex items-center gap-1.5">
                     {/* AI in-chat hint */}

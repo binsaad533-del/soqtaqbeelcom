@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 import { useSEO } from "@/hooks/useSEO";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -27,14 +27,14 @@ const roleLabels: Record<string, string> = {
 const assignableRoles = ["customer", "supervisor", "financial_manager"];
 
 const AdminRolesPage = () => {
-  const { tx } = useLanguage();
+  const { t } = useTranslation();
   const { user } = useAuthContext();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [updating, setUpdating] = useState<string | null>(null);
 
-  useSEO({ title: tx("إدارة الأدوار | سوق تقبيل", "Role Management | Soq Taqbeel") });
+  useSEO({ title: t("adminRoles.metaTitle") });
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -59,7 +59,7 @@ const AdminRolesPage = () => {
 
   const handleRoleChange = async (targetUserId: string, newRole: string) => {
     if (targetUserId === user?.id) {
-      toast.error(tx("لا يمكنك تغيير دورك", "Cannot change your own role"));
+      toast.error(t("adminRoles.errCannotChangeSelf"));
       return;
     }
     setUpdating(targetUserId);
@@ -69,7 +69,7 @@ const AdminRolesPage = () => {
       .delete()
       .eq("user_id", targetUserId);
     if (delErr) {
-      toast.error(tx("حدث خطأ", "Error"));
+      toast.error(t("adminRoles.errGeneric"));
       setUpdating(null);
       return;
     }
@@ -77,7 +77,7 @@ const AdminRolesPage = () => {
       .from("user_roles")
       .insert({ user_id: targetUserId, role: newRole, assigned_by: user?.id } as any);
     if (insertErr) {
-      toast.error(tx("حدث خطأ", "Error"));
+      toast.error(t("adminRoles.errGeneric"));
       setUpdating(null);
       return;
     }
@@ -90,7 +90,7 @@ const AdminRolesPage = () => {
       details: { new_role: newRole },
     } as any);
 
-    toast.success(tx("تم تعيين الدور بنجاح", "Role assigned successfully"));
+    toast.success(t("adminRoles.assignSuccess"));
     setUsers(prev => prev.map(u => u.user_id === targetUserId ? { ...u, role: newRole } : u));
     setUpdating(null);
   };
@@ -107,13 +107,13 @@ const AdminRolesPage = () => {
     <div className="container py-8 max-w-4xl space-y-6">
       <div className="flex items-center gap-3">
         <ShieldCheck size={20} className="text-primary" />
-        <h1 className="text-xl font-bold">{tx("إدارة الأدوار", "Role Management")}</h1>
+        <h1 className="text-xl font-bold">{t("adminRoles.title")}</h1>
       </div>
 
       <div className="relative max-w-sm">
         <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder={tx("بحث بالاسم أو الإيميل أو الجوال...", "Search by name, email, or phone...")}
+          placeholder={t("adminRoles.searchPlaceholder")}
           className="pr-9 text-sm" />
       </div>
 
@@ -125,10 +125,10 @@ const AdminRolesPage = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/30">
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">{tx("الاسم", "Name")}</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">{tx("الإيميل", "Email")}</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">{tx("الجوال", "Phone")}</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">{tx("الدور", "Role")}</th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">{t("adminRoles.name")}</th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">{t("adminRoles.email")}</th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">{t("adminRoles.phone")}</th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">{t("adminRoles.role")}</th>
                 </tr>
               </thead>
               <tbody>
