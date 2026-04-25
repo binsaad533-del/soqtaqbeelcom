@@ -629,5 +629,119 @@
       "startSelling": "Start Selling",
       "browseMarket": "Browse Opportunities"
     }
+  },
+  "createListing": {
+    "seoTitle": "List a New Opportunity",
+    "seoDescription": "Create a new business takeover listing on Souq Taqbeel — add your project details and attract qualified buyers",
+    "verificationGate": "Phone verification is required before posting a listing",
+    "title": "List a Takeover Opportunity",
+    "subtitle": "Create a professional takeover listing with AI assistance",
+    "tagline": "Without writing a single line",
+    "completion": "Profile completion",
+    "draftRestored": "Your previous draft has been restored — you can resume where you left off",
+    "draftCheckingPrev": "Checking for previous drafts…",
+    "autoSave": {
+      "saving": "Saving…",
+      "saved": "Auto-saved"
+    },
+    "steps": {
+      "dealStructure": "Deal Structure",
+      "media": "Photos & Documents",
+      "analysis": "AI Analysis",
+      "disclosure": "Disclosure & Publish",
+      "hints": {
+        "dealStructure": "Pick the deal type — AI handles the rest ✦",
+        "media": "Just upload photos and documents — AI ✦ takes care of the rest",
+        "analysis": "AI ✦ analyzes and inventories automatically — just review and confirm",
+        "disclosure": "Complete the details and publish in one click"
+      }
+    },
+    "step1": {
+      "header": "Choose the right deal structure",
+      "subheader": "Select the deal type and the requirements will be tailored automatically",
+      "aiBadge": "✦ AI configures everything automatically ✦"
+    },
+    "dealStructureSection": {
+      "title": "Deal Structure",
+      "subtitle": "Pick one or more deal types — you may offer the buyer multiple options",
+      "cautionLabel": "Cautions",
+      "disclosuresCount": "{{count}} disclosures required",
+      "documentsCount": "{{count}} documents required"
+    },
+    "dealTypes": {
+      "full_takeover": {
+        "label": "Full Takeover",
+        "description": "Full transfer of the business including all assets, rights and outstanding liabilities"
+      },
+      "transfer_no_liabilities": {
+        "label": "Business Transfer Without Prior Liabilities",
+        "description": "Operational business transfer after the seller settles all prior liabilities"
+      },
+      "assets_setup": {
+        "label": "Assets + Operational Setup (No Commercial Registration)",
+        "description": "Turnkey operational setup transfer without moving the legal entity"
+      },
+      "assets_only": {
+        "label": "Assets Only",
+        "description": "Sale of physical assets only, with no transfer of the business activity"
+      }
+    },
+    "buttons": {
+      "back": "Back",
+      "saveAndContinue": "Save & continue later",
+      "publish": "Publish listing",
+      "publishConfirm": "Confirm publish",
+      "publishApprove": "Approve — publish listing"
+    },
+    "toasts": {
+      "draftSaveError": "An error occurred while saving the draft",
+      "draftSaved": "Draft saved",
+      "draftRestoredAuto": "Your previous draft was restored automatically",
+      "draftOpened": "Requested draft opened",
+      "draftNotFound": "Requested draft not found",
+      "selectDealStructure": "Please choose a deal structure first",
+      "completeRequired": "Please complete all required fields first",
+      "completeBeforePublish": "Please complete all required fields before publishing",
+      "locationRequired": "Please pin the location on the map before publishing",
+      "publishSuccess": "Listing published successfully! 🎉",
+      "publishFailed": "Failed to publish the listing",
+      "publishUnexpected": "An unexpected error occurred while publishing",
+      "commissionSuspended": "Your account is temporarily suspended due to an overdue commission.",
+      "analysisCurrent": "The current analysis is still up to date",
+      "analysisFailed": "Unable to run the check"
+    },
+    "duplicate": {
+      "heading": "A similar listing is already published",
+      "body": "It looks like you already have a similar listing published. Would you like to edit it instead of creating a new one?",
+      "listingLabel": "Listing",
+      "cityLabel": "City",
+      "priceLabel": "Price",
+      "editExisting": "Edit existing listing",
+      "publishAsNew": "Publish as a new listing",
+      "cancel": "Cancel"
+    },
+    "publishModal": {
+      "titleConfirm": "Confirm listing publication",
+      "titleCheck": "Deal check before publishing",
+      "subtitleConfirm": "The deal has been reviewed — would you like to proceed with publishing?",
+      "subtitleCheck": "AI is reviewing your deal and will give a recommendation before publishing",
+      "fieldTitle": "Title",
+      "fieldCity": "City",
+      "fieldPrice": "Price",
+      "checking": "Running deal check…",
+      "checkFailed": "Automated check could not be completed",
+      "fairness": "Price fairness:",
+      "cancel": "Cancel"
+    },
+    "confirmCard": {
+      "question": "Are these photos of the same asset or of multiple assets?",
+      "sameAsset": "Same asset",
+      "multipleAssets": "Multiple assets",
+      "qtyLabel": "Quantity:",
+      "confirm": "Confirm"
+    },
+    "fields": {
+      "selectPlaceholder": "Select…"
+    }
   }
 }
