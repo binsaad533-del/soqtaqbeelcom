@@ -791,10 +791,10 @@ const CreateListingPage = () => {
     const imgReq = getImageRequirement(dealStructure.primaryType);
     const hasPhotos = imgReq === "none" || imgReq === "optional" || totalPhotos > 0;
     const errors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
-    if (!hasPhotos || Object.keys(errors).length > 0) { toast.error("يرجى إكمال جميع الحقول المطلوبة أولاً"); return; }
+    if (!hasPhotos || Object.keys(errors).length > 0) { toast.error(t("createListing.toasts.completeRequired")); return; }
     const nextListingPayload = buildListingPayload();
     const nextInputKey = JSON.stringify(nextListingPayload);
-    if (dealCheckResult && dealCheckInputKey === nextInputKey) { toast.info("التحليل الحالي ما زال مطابقاً"); return; }
+    if (dealCheckResult && dealCheckInputKey === nextInputKey) { toast.info(t("createListing.toasts.analysisCurrent")); return; }
     setDealCheckLoading(true);
     setDealCheckError("");
     try {
