@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { safeJsonLd } from "@/lib/security";
 import { ArrowRight, Calendar, Clock, Tag } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,7 +10,8 @@ import ReactMarkdown from "react-markdown";
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { tx, lang } = useLanguage();
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.resolvedLanguage || i18n.language || "ar").split("-")[0];
 
   const { data: post, isLoading } = useQuery({
     queryKey: ["blog-post", slug],
@@ -31,7 +32,7 @@ const BlogPostPage = () => {
   });
 
   useSEO({
-    title: post ? (lang === "ar" ? post.title_ar : post.title_en || post.title_ar) : tx("المدونة", "Blog"),
+    title: post ? (lang === "ar" ? post.title_ar : post.title_en || post.title_ar) : t("blog.title"),
     description: post
       ? (lang === "ar" ? post.meta_description_ar : post.meta_description_en || post.meta_description_ar) || ""
       : "",
@@ -55,9 +56,9 @@ const BlogPostPage = () => {
   if (!post) {
     return (
       <div className="py-20 text-center">
-        <p className="text-muted-foreground mb-4">{tx("المقال غير موجود", "Article not found")}</p>
+        <p className="text-muted-foreground mb-4">{t("blog.notFound")}</p>
         <Link to="/blog" className="text-primary text-sm hover:underline">
-          {tx("العودة للمدونة", "Back to Blog")}
+          {t("blog.backToBlog")}
         </Link>
       </div>
     );
@@ -96,7 +97,7 @@ const BlogPostPage = () => {
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
         >
           <ArrowRight size={14} />
-          {tx("العودة للمدونة", "Back to Blog")}
+          {t("blog.backToBlog")}
         </Link>
 
         {/* Header */}
@@ -122,7 +123,7 @@ const BlogPostPage = () => {
             </span>
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Clock size={12} />
-              {tx(`${post.read_time_minutes} دقائق قراءة`, `${post.read_time_minutes} min read`)}
+              {t("blog.readTimeFull", { count: post.read_time_minutes })}
             </span>
           </div>
 
@@ -185,13 +186,13 @@ const BlogPostPage = () => {
         {/* CTA */}
         <div className="text-center mt-12 p-6 rounded-2xl gradient-hero">
           <p className="text-sm text-muted-foreground mb-3">
-            {tx("هل تبحث عن مشروع للتقبيل؟", "Looking for a business to acquire?")}
+            {t("blog.ctaLooking")}
           </p>
           <Link
             to="/marketplace"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
           >
-            {tx("تصفح السوق", "Browse Marketplace")}
+            {t("blog.browseMarketplace")}
           </Link>
         </div>
       </div>
