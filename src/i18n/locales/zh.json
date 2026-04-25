@@ -18,7 +18,10 @@
     "publish": "发布",
     "saveDraft": "保存草稿",
     "showMore": "查看更多",
-    "showLess": "收起"
+    "showLess": "收起",
+    "low": "低",
+    "medium": "中等",
+    "high": "高"
   },
   "auth": {
     "enterPhone": "请输入您的手机号码",
@@ -159,7 +162,10 @@
     "assetsOnly": "仅资产(总价的 30%)",
     "installment": "分期(+15%)",
     "transition": "含 3 个月过渡期",
-    "bestScenario": "最佳方案"
+    "bestScenario": "最佳方案",
+    "whatIf": "假设方案?",
+    "simulating": "正在模拟...",
+    "noData": "数据不足以进行模拟"
   },
   "manage": {
     "title": "管理刊登 — 状态:",
@@ -216,7 +222,15 @@
     "needsSpecializedInspection": "准确估值需要专业评估",
     "olvDiscount": "有序清算折扣",
     "marketValue": "市场价值:",
-    "taqbeelValue": "接管价值:"
+    "taqbeelValue": "接管价值:",
+    "criteriaDetails": "评估详情",
+    "pricePosition": "价格定位",
+    "observedRange": "观察到的价格区间",
+    "factorDataCompleteness": "资料完整度",
+    "factorAssetVerification": "资产核实",
+    "factorPriceLogic": "价格合理性",
+    "factorLegalClarity": "法律清晰度",
+    "factorMediaQuality": "媒体质量"
   },
   "feasibility": {
     "title": "经济可行性研究",
@@ -231,7 +245,18 @@
     "confidenceLevel": "置信度:",
     "paybackPeriod": "回本周期(实际)",
     "weeklyUpdate": "每周自动更新",
-    "noCompetitorData": "暂无线上竞争数据 — 实际竞争情况需要实地考察"
+    "noCompetitorData": "暂无线上竞争数据 — 实际竞争情况需要实地考察",
+    "optimistic": "乐观",
+    "realistic": "现实",
+    "conservative": "保守",
+    "monthlyProfit": "月利润",
+    "differentiators": "差异化机会:",
+    "financialRisks": "财务风险",
+    "operationalRisks": "运营风险",
+    "marketRisks": "市场风险",
+    "regulatoryRisks": "法规风险",
+    "mitigationStrategies": "缓解策略:",
+    "topCompetitors": "主要竞争对手:"
   },
   "moqbil": {
     "greeting": "您好!我是 Moqbil,您的智能助手",

@@ -18,7 +18,10 @@
     "publish": "Publish",
     "saveDraft": "Save as draft",
     "showMore": "Show more",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
   },
   "auth": {
     "enterPhone": "Enter your phone number",
@@ -159,7 +162,10 @@
     "assetsOnly": "Assets only (30% of price)",
     "installment": "Installments (+15%)",
     "transition": "With 3-month transition period",
-    "bestScenario": "Best scenario"
+    "bestScenario": "Best scenario",
+    "whatIf": "What if?",
+    "simulating": "Simulating...",
+    "noData": "Not enough data for simulation"
   },
   "manage": {
     "title": "Manage listing — status:",
@@ -216,7 +222,15 @@
     "needsSpecializedInspection": "Accurate value requires specialized inspection",
     "olvDiscount": "Orderly liquidation discount",
     "marketValue": "Market value:",
-    "taqbeelValue": "Takeover value:"
+    "taqbeelValue": "Takeover value:",
+    "criteriaDetails": "Criteria breakdown",
+    "pricePosition": "Price position",
+    "observedRange": "Observed price range",
+    "factorDataCompleteness": "Data completeness",
+    "factorAssetVerification": "Asset verification",
+    "factorPriceLogic": "Price logic",
+    "factorLegalClarity": "Legal clarity",
+    "factorMediaQuality": "Media quality"
   },
   "feasibility": {
     "title": "Economic feasibility study",
@@ -231,7 +245,18 @@
     "confidenceLevel": "Confidence level:",
     "paybackPeriod": "Payback period (realistic)",
     "weeklyUpdate": "Auto-updates weekly",
-    "noCompetitorData": "No digital competitor data available — actual competition requires field assessment"
+    "noCompetitorData": "No digital competitor data available — actual competition requires field assessment",
+    "optimistic": "Optimistic",
+    "realistic": "Realistic",
+    "conservative": "Conservative",
+    "monthlyProfit": "Monthly profit",
+    "differentiators": "Differentiation opportunities:",
+    "financialRisks": "Financial risks",
+    "operationalRisks": "Operational risks",
+    "marketRisks": "Market risks",
+    "regulatoryRisks": "Regulatory risks",
+    "mitigationStrategies": "Mitigation strategies:",
+    "topCompetitors": "Top competitors:"
   },
   "moqbil": {
     "greeting": "Hi there! I'm Moqbil, your smart assistant",
