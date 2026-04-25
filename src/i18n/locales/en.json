@@ -526,5 +526,108 @@
     "errCannotChangeSelf": "Cannot change your own role",
     "errGeneric": "Error",
     "assignSuccess": "Role assigned successfully"
+  },
+  "howItWorks": {
+    "seo": {
+      "title": "How Souq Taqbeel Works — Simple Steps to Sell or Buy a Business",
+      "description": "Learn the deal stages from posting a listing to completing the takeover — an intelligent system that manages every step automatically"
+    },
+    "hero": {
+      "logoAlt": "Souq Taqbeel",
+      "title": "How Does the Deal Work?",
+      "subtitle": "9 clear stages from listing to ownership transfer — with full transparency and protection"
+    },
+    "labels": {
+      "seller": "SELLER",
+      "buyer": "BUYER"
+    },
+    "stages": {
+      "addListing": {
+        "title": "Post the Listing",
+        "seller": "Adds their business with details, photos, and documents. AI analyzes assets and calculates the transparency score automatically."
+      },
+      "verification": {
+        "title": "Verification & Authentication",
+        "seller": "Verifies the account through the verification page by uploading the business name, commercial registration number, and ID details. Once approved, receives a “Verified Seller” badge."
+      },
+      "discovery": {
+        "title": "Discovering Opportunities",
+        "seller": "The listing appears in the marketplace with an AI rating and transparency badge. Tracks views and interest from the dashboard.",
+        "buyer": "Browses the marketplace using smart filters by city, activity, and price. Reviews details, transparency score, and seller rating."
+      },
+      "interest": {
+        "title": "Express Interest",
+        "seller": "Receives an instant notification when a buyer expresses interest. A direct chat opens and communication begins.",
+        "buyer": "Clicks “Express Interest” — a deal is automatically created in negotiation status and a chat opens with the seller."
+      },
+      "negotiation": {
+        "title": "Negotiation",
+        "seller": "A direct chat is opened with the buyer for exchanging price offers. Reviews each offer and accepts, rejects, or counters with AI assistance.",
+        "buyer": "Sends a formal price offer through the integrated offer system and negotiates with the seller in chat. The AI assistant analyzes price fairness and suggests professional responses."
+      },
+      "agreement": {
+        "title": "Agreement",
+        "seller": "Both parties agree on the final price and the deal moves automatically to the “Agreement” stage. The system generates an official digital agreement signed electronically by both parties.",
+        "buyer": "After agreeing on the price, reviews the agreement covering assets, terms, and obligations, and approves it with legal confirmation."
+      },
+      "escrow": {
+        "title": "Deal Escrow (In Development)",
+        "seller": "⚠️ This service is currently under development — the agreed amount will be deposited in a secure Escrow account managed by the platform. Funds are released to the seller only after the buyer confirms business handover.",
+        "buyer": "⚠️ This service is currently under development — the amount will be deposited in the platform's escrow account to protect buyer rights. Funds are protected and not released until ownership transfer is fully confirmed."
+      },
+      "transfer": {
+        "title": "Ownership Transfer",
+        "seller": "Officially transfers the business to the buyer and clicks “Start Ownership Transfer”. The buyer is notified instantly to verify and receive.",
+        "buyer": "Confirms receiving the business in full as agreed, then clicks “Confirm Receipt” to officially complete the deal."
+      },
+      "closing": {
+        "title": "Closing",
+        "seller": "After buyer confirms receipt, funds are released from escrow to the seller. An automatic invoice with 1% commission is issued and statistics are tracked from the seller dashboard.",
+        "buyer": "Confirms full receipt of the business; the deal is officially closed and an invoice is issued automatically. Rates the seller and shares the experience, and the listing changes to “Sold”."
+      }
+    },
+    "features": {
+      "title": "Why Souq Taqbeel?",
+      "subtitle": "Features that make your experience easier and safer",
+      "ai": {
+        "label": "Smart AI Analysis",
+        "desc": "Automatic asset classification and risk assessment"
+      },
+      "protection": {
+        "label": "Full Protection",
+        "desc": "Secure conversations and advanced reporting system"
+      },
+      "transparency": {
+        "label": "Total Transparency",
+        "desc": "Transparency and disclosure score for every listing"
+      },
+      "ratings": {
+        "label": "Trusted Ratings",
+        "desc": "Seller ratings from real buyers"
+      },
+      "commission": {
+        "label": "Fair Commission",
+        "desc": "Only 1% upon deal completion — no hidden fees"
+      },
+      "verification": {
+        "label": "Identity Verification",
+        "desc": "Multi-level verification system for sellers"
+      }
+    },
+    "commission": {
+      "title": "Platform Commission: Only 1% of Deal Value",
+      "subtitle": "No fees for browsing, negotiating, or listing — you pay only upon successful deal completion",
+      "currency": "SAR",
+      "listingFees": "Listing fees",
+      "negotiationFees": "Negotiation fees",
+      "uponCompletion": "Only upon deal completion",
+      "learnMore": "Learn more about commission →"
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "subtitle": "Whether you want to sell your business or search for an investment opportunity, the platform is ready to serve you",
+      "startSelling": "Start Selling",
+      "browseMarket": "Browse Opportunities"
+    }
   }
 }
