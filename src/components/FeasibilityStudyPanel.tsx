@@ -1084,9 +1084,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           onToggle={() => toggleSection("revenue")}
         >
           <div className="grid grid-cols-3 gap-2">
-            <ScenarioCard label="متفائل" scenario={displayStudy.revenueProjections.optimistic} color="emerald" icon={<ArrowUpRight size={12} />} />
-            <ScenarioCard label="واقعي" scenario={displayStudy.revenueProjections.realistic} color="blue" icon={<Minus size={12} />} />
-            <ScenarioCard label="متحفظ" scenario={displayStudy.revenueProjections.conservative} color="amber" icon={<ArrowDownRight size={12} />} />
+            <ScenarioCard label={t("feasibility.optimistic")} scenario={displayStudy.revenueProjections.optimistic} color="emerald" icon={<ArrowUpRight size={12} />} />
+            <ScenarioCard label={t("feasibility.realistic")} scenario={displayStudy.revenueProjections.realistic} color="blue" icon={<Minus size={12} />} />
+            <ScenarioCard label={t("feasibility.conservative")} scenario={displayStudy.revenueProjections.conservative} color="amber" icon={<ArrowDownRight size={12} />} />
           </div>
         </CollapsibleSection>
 
@@ -1144,7 +1144,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             {/* Top competitors */}
             {displayStudy.competitorAnalysis.topCompetitors && displayStudy.competitorAnalysis.topCompetitors.length > 0 && (
               <div className="space-y-1">
-                <div className="text-xs font-medium text-muted-foreground">أبرز المنافسين:</div>
+                <div className="text-xs font-medium text-muted-foreground">{t("feasibility.topCompetitors")}</div>
                 {displayStudy.competitorAnalysis.topCompetitors.slice(0, 5).map((c, i) => (
                   <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-border/20 last:border-0">
                     <div className="flex items-center gap-1.5">
@@ -1169,7 +1169,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             {/* Opportunities & Threats */}
             {displayStudy.competitorAnalysis.opportunities && displayStudy.competitorAnalysis.opportunities.length > 0 && (
               <div>
-                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">فرص التميّز:</div>
+                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">{t("feasibility.differentiators")}</div>
                 {displayStudy.competitorAnalysis.opportunities.map((o, i) => (
                   <div key={i} className="flex gap-1.5 text-xs text-muted-foreground"><CheckCircle2 size={10} className="text-emerald-500 shrink-0 mt-0.5" />{o}</div>
                 ))}
@@ -1187,15 +1187,15 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           badge={<span className={cn("text-xs font-semibold", RISK_COLORS[displayStudy.riskAssessment.overallRisk] || "")}>{displayStudy.riskAssessment.overallRisk}</span>}
         >
           <div className="space-y-2">
-            <RiskGroup label="مخاطر مالية" items={displayStudy.riskAssessment.financialRisks} />
-            <RiskGroup label="مخاطر تشغيلية" items={displayStudy.riskAssessment.operationalRisks} />
-            <RiskGroup label="مخاطر سوقية" items={displayStudy.riskAssessment.marketRisks} />
+            <RiskGroup label={t("feasibility.financialRisks")} items={displayStudy.riskAssessment.financialRisks} />
+            <RiskGroup label={t("feasibility.operationalRisks")} items={displayStudy.riskAssessment.operationalRisks} />
+            <RiskGroup label={t("feasibility.marketRisks")} items={displayStudy.riskAssessment.marketRisks} />
             {displayStudy.riskAssessment.regulatoryRisks && displayStudy.riskAssessment.regulatoryRisks.length > 0 && (
-              <RiskGroup label="مخاطر تنظيمية" items={displayStudy.riskAssessment.regulatoryRisks} />
+              <RiskGroup label={t("feasibility.regulatoryRisks")} items={displayStudy.riskAssessment.regulatoryRisks} />
             )}
             {displayStudy.riskAssessment.mitigationStrategies && displayStudy.riskAssessment.mitigationStrategies.length > 0 && (
               <div>
-                <div className="text-xs font-medium text-primary mb-1">استراتيجيات التخفيف:</div>
+                <div className="text-xs font-medium text-primary mb-1">{t("feasibility.mitigationStrategies")}</div>
                 {displayStudy.riskAssessment.mitigationStrategies.map((s, i) => (
                   <div key={i} className="flex gap-1.5 text-xs text-muted-foreground"><Lightbulb size={10} className="text-primary shrink-0 mt-0.5" />{s}</div>
                 ))}
@@ -1251,25 +1251,28 @@ const CollapsibleSection = ({
   </div>
 );
 
-const ScenarioCard = ({ label, scenario, color, icon }: { label: string; scenario: Scenario; color: string; icon: React.ReactNode }) => (
-  <div className={cn("rounded-lg border p-2.5 space-y-1.5", `border-${color}-500/20 bg-${color}-500/5`)}>
-    <div className="flex items-center gap-1 text-xs font-medium">
-      <span className={`text-${color}-600 dark:text-${color}-400`}>{icon}</span>
-      {label}
-    </div>
-    <div className="text-center">
-      <div className={cn("text-sm font-bold", `text-${color}-700 dark:text-${color}-300`)}>
-        {formatNum(scenario.monthlyProfit)}
+const ScenarioCard = ({ label, scenario, color, icon }: { label: string; scenario: Scenario; color: string; icon: React.ReactNode }) => {
+  const { t } = useTranslation();
+  return (
+    <div className={cn("rounded-lg border p-2.5 space-y-1.5", `border-${color}-500/20 bg-${color}-500/5`)}>
+      <div className="flex items-center gap-1 text-xs font-medium">
+        <span className={`text-${color}-600 dark:text-${color}-400`}>{icon}</span>
+        {label}
       </div>
-      <div className="text-[9px] text-muted-foreground">ربح شهري <SarSymbol className="inline w-2 h-2" /></div>
+      <div className="text-center">
+        <div className={cn("text-sm font-bold", `text-${color}-700 dark:text-${color}-300`)}>
+          {formatNum(scenario.monthlyProfit)}
+        </div>
+        <div className="text-[9px] text-muted-foreground">{t("feasibility.monthlyProfit")} <SarSymbol className="inline w-2 h-2" /></div>
+      </div>
+      <div className="flex justify-between text-[9px] text-muted-foreground">
+        <span>ROI: {scenario.annualROI}%</span>
+        <span>{scenario.roiMonths} {t("common.month")}</span>
+      </div>
+      <div className="text-[9px] text-muted-foreground/70 leading-relaxed">{scenario.assumptions}</div>
     </div>
-    <div className="flex justify-between text-[9px] text-muted-foreground">
-      <span>ROI: {scenario.annualROI}%</span>
-      <span>{scenario.roiMonths} شهر</span>
-    </div>
-    <div className="text-[9px] text-muted-foreground/70 leading-relaxed">{scenario.assumptions}</div>
-  </div>
-);
+  );
+};
 
 const RiskGroup = ({ label, items }: { label: string; items: string[] }) => {
   if (!items || items.length === 0) return null;

@@ -823,7 +823,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                           <div className="text-sm font-medium">{analysis.marketComparison.matchQuality}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
-                          <div className="text-xs text-muted-foreground">الموقف السعري</div>
+                          <div className="text-xs text-muted-foreground">{t("dealCheck.pricePosition")}</div>
                           <div className={cn("text-sm font-medium",
                             analysis.marketComparison.marketPosition === "أقل من السوق" ? "text-emerald-600" :
                             analysis.marketComparison.marketPosition === "أعلى من السوق" ? "text-red-500" :
@@ -837,7 +837,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       </div>
                       {analysis.marketComparison.observedPriceRange && analysis.marketComparison.observedPriceRange !== "غير متاح" && (
                         <div className="bg-accent/30 rounded-lg p-3 mb-3">
-                          <div className="text-xs text-muted-foreground mb-1">النطاق السعري المرصود</div>
+                          <div className="text-xs text-muted-foreground mb-1">{t("dealCheck.observedRange")}</div>
                           <div className="text-sm font-medium">{analysis.marketComparison.observedPriceRange}</div>
                         </div>
                       )}
@@ -886,12 +886,12 @@ const TRUST_LEVEL_CONFIG: Record<string, { bg: string; text: string; border: str
   "ضعيف": { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", barColor: "bg-red-500" },
 };
 
-const FACTOR_LABELS: Record<string, string> = {
-  data_completeness: "اكتمال البيانات",
-  asset_verification: "التحقق من الأصول",
-  price_logic: "منطقية السعر",
-  legal_clarity: "الوضوح القانوني",
-  media_quality: "جودة الوسائط",
+const FACTOR_LABEL_KEYS: Record<string, string> = {
+  data_completeness: "dealCheck.factorDataCompleteness",
+  asset_verification: "dealCheck.factorAssetVerification",
+  price_logic: "dealCheck.factorPriceLogic",
+  legal_clarity: "dealCheck.factorLegalClarity",
+  media_quality: "dealCheck.factorMediaQuality",
 };
 
 const FACTOR_WEIGHTS: Record<string, number> = {
@@ -1470,14 +1470,14 @@ const TrustScoreSection = ({ trustScore }: { trustScore: any }) => {
           {trustScore.factors && (
             <button onClick={() => setDetailsOpen(!detailsOpen)} className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1 mt-2">
               {detailsOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-              تفصيل المعايير
+              {t("dealCheck.criteriaDetails")}
             </button>
           )}
           {detailsOpen && trustScore.factors && (
             <div className="mt-2 space-y-1.5">
               {Object.entries(trustScore.factors).map(([key, value]) => (
                 <div key={key} className="flex items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground w-24 shrink-0">{FACTOR_LABELS[key] || key} ({FACTOR_WEIGHTS[key]}%)</span>
+                  <span className="text-[10px] text-muted-foreground w-24 shrink-0">{FACTOR_LABEL_KEYS[key] ? t(FACTOR_LABEL_KEYS[key]) : key} ({FACTOR_WEIGHTS[key]}%)</span>
                   <div className="flex-1 h-1.5 rounded-full bg-background/60">
                     <div className={cn("h-1.5 rounded-full",
                       (value as number) >= 7 ? "bg-emerald-500" :

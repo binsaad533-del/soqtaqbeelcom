@@ -18,7 +18,10 @@
     "publish": "شائع کریں",
     "saveDraft": "بطور مسودہ محفوظ کریں",
     "showMore": "مزید دکھائیں",
-    "showLess": "کم دکھائیں"
+    "showLess": "کم دکھائیں",
+    "low": "کم",
+    "medium": "درمیانہ",
+    "high": "زیادہ"
   },
   "auth": {
     "enterPhone": "اپنا موبائل نمبر درج کریں",
@@ -159,7 +162,10 @@
     "assetsOnly": "صرف اثاثے (قیمت کا 30%)",
     "installment": "اقساط (+15%)",
     "transition": "3 ماہ کا منتقلی دورانیہ شامل",
-    "bestScenario": "بہترین منظرنامہ"
+    "bestScenario": "بہترین منظرنامہ",
+    "whatIf": "کیا ہو اگر؟",
+    "simulating": "سیمولیشن جاری ہے...",
+    "noData": "سیمولیشن کے لیے کافی ڈیٹا نہیں"
   },
   "manage": {
     "title": "اشتہار کا انتظام — حالت:",
@@ -216,7 +222,15 @@
     "needsSpecializedInspection": "درست قیمت کے لیے ماہرانہ معائنہ درکار ہے",
     "olvDiscount": "منظم تصفیہ پر رعایت",
     "marketValue": "مارکیٹ ویلیو:",
-    "taqbeelValue": "منتقلی کی قدر:"
+    "taqbeelValue": "منتقلی کی قدر:",
+    "criteriaDetails": "معیار کی تفصیل",
+    "pricePosition": "قیمتی پوزیشن",
+    "observedRange": "مشاہدہ شدہ قیمت کا دائرہ",
+    "factorDataCompleteness": "ڈیٹا کی تکمیل",
+    "factorAssetVerification": "اثاثوں کی تصدیق",
+    "factorPriceLogic": "قیمت کی منطق",
+    "factorLegalClarity": "قانونی وضاحت",
+    "factorMediaQuality": "میڈیا کا معیار"
   },
   "feasibility": {
     "title": "اقتصادی فزیبلٹی اسٹڈی",
@@ -231,7 +245,18 @@
     "confidenceLevel": "اعتماد کی سطح:",
     "paybackPeriod": "واپسی کی مدت (حقیقی)",
     "weeklyUpdate": "ہفتہ وار خودکار اپ ڈیٹ",
-    "noCompetitorData": "کوئی ڈیجیٹل حریف ڈیٹا دستیاب نہیں — اصل مسابقت کا اندازہ موقع پر ہی ممکن ہے"
+    "noCompetitorData": "کوئی ڈیجیٹل حریف ڈیٹا دستیاب نہیں — اصل مسابقت کا اندازہ موقع پر ہی ممکن ہے",
+    "optimistic": "پر امید",
+    "realistic": "حقیقت پسند",
+    "conservative": "محتاط",
+    "monthlyProfit": "ماہانہ منافع",
+    "differentiators": "امتیازی مواقع:",
+    "financialRisks": "مالی خطرات",
+    "operationalRisks": "آپریشنل خطرات",
+    "marketRisks": "مارکیٹ کے خطرات",
+    "regulatoryRisks": "ریگولیٹری خطرات",
+    "mitigationStrategies": "کمی کی حکمت عملیاں:",
+    "topCompetitors": "اہم حریف:"
   },
   "moqbil": {
     "greeting": "السلام علیکم! میں Moqbil ہوں، آپ کا اسمارٹ معاون",

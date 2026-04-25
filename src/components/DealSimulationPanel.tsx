@@ -27,7 +27,7 @@ const DealSimulationPanel = ({ listingId }: Props) => {
         className="w-full flex items-center gap-2 p-2.5 rounded-xl border border-border/40 hover:border-primary/20 hover:bg-primary/[0.03] transition-all text-right"
       >
         <FlaskConical size={14} className="text-primary shrink-0" />
-        <span className="text-[11px] font-medium text-foreground/80">{t("simulation.title")} — ماذا لو؟</span>
+        <span className="text-[11px] font-medium text-foreground/80">{t("simulation.title")} — {t("simulation.whatIf")}</span>
         <AiStar size={12} className="mr-auto" />
       </button>
     );
@@ -46,7 +46,7 @@ const DealSimulationPanel = ({ listingId }: Props) => {
       {loading ? (
         <div className="flex items-center justify-center py-6">
           <Loader2 className="animate-spin text-primary" size={18} />
-          <span className="text-[10px] text-muted-foreground mr-2">جاري المحاكاة...</span>
+          <span className="text-[10px] text-muted-foreground mr-2">{t("simulation.simulating")}</span>
         </div>
       ) : result ? (
         <div className="space-y-2">
@@ -73,7 +73,7 @@ const DealSimulationPanel = ({ listingId }: Props) => {
                     s.riskLevel === "medium" ? "bg-warning/10 text-warning" :
                     "bg-destructive/10 text-destructive"
                   )}>
-                    {s.riskLevel === "low" ? "منخفض" : s.riskLevel === "medium" ? "متوسط" : "مرتفع"}
+                    {s.riskLevel === "low" ? t("common.low") : s.riskLevel === "medium" ? t("common.medium") : t("common.high")}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
@@ -91,7 +91,7 @@ const DealSimulationPanel = ({ listingId }: Props) => {
           </div>
         </div>
       ) : (
-        <p className="text-[10px] text-muted-foreground text-center py-4">لا توجد بيانات كافية للمحاكاة</p>
+        <p className="text-[10px] text-muted-foreground text-center py-4">{t("simulation.noData")}</p>
       )}
     </div>
   );

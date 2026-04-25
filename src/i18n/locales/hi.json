@@ -18,7 +18,10 @@
     "publish": "प्रकाशित करें",
     "saveDraft": "ड्राफ़्ट के रूप में सहेजें",
     "showMore": "और दिखाएँ",
-    "showLess": "कम दिखाएँ"
+    "showLess": "कम दिखाएँ",
+    "low": "कम",
+    "medium": "मध्यम",
+    "high": "उच्च"
   },
   "auth": {
     "enterPhone": "अपना मोबाइल नंबर दर्ज करें",
@@ -159,7 +162,10 @@
     "assetsOnly": "केवल संपत्तियाँ (मूल्य का 30%)",
     "installment": "किस्तों में (+15%)",
     "transition": "3 महीने के संक्रमण काल के साथ",
-    "bestScenario": "सर्वश्रेष्ठ परिदृश्य"
+    "bestScenario": "सर्वश्रेष्ठ परिदृश्य",
+    "whatIf": "क्या होगा अगर?",
+    "simulating": "सिम्युलेशन हो रहा है...",
+    "noData": "सिम्युलेशन के लिए पर्याप्त डेटा नहीं"
   },
   "manage": {
     "title": "लिस्टिंग प्रबंधन — स्थिति:",
@@ -216,7 +222,15 @@
     "needsSpecializedInspection": "सटीक मूल्य के लिए विशेषज्ञ निरीक्षण आवश्यक है",
     "olvDiscount": "व्यवस्थित परिसमापन छूट",
     "marketValue": "बाज़ार मूल्य:",
-    "taqbeelValue": "अधिग्रहण मूल्य:"
+    "taqbeelValue": "अधिग्रहण मूल्य:",
+    "criteriaDetails": "मानदंडों का विवरण",
+    "pricePosition": "मूल्य स्थिति",
+    "observedRange": "देखी गई मूल्य सीमा",
+    "factorDataCompleteness": "डेटा पूर्णता",
+    "factorAssetVerification": "संपत्ति सत्यापन",
+    "factorPriceLogic": "मूल्य तर्क",
+    "factorLegalClarity": "कानूनी स्पष्टता",
+    "factorMediaQuality": "मीडिया गुणवत्ता"
   },
   "feasibility": {
     "title": "आर्थिक व्यवहार्यता अध्ययन",
@@ -231,7 +245,18 @@
     "confidenceLevel": "विश्वास स्तर:",
     "paybackPeriod": "वापसी अवधि (वास्तविक)",
     "weeklyUpdate": "साप्ताहिक स्वतः अद्यतन",
-    "noCompetitorData": "कोई डिजिटल प्रतिस्पर्धी डेटा उपलब्ध नहीं है — वास्तविक प्रतिस्पर्धा का आकलन मौके पर ही संभव है"
+    "noCompetitorData": "कोई डिजिटल प्रतिस्पर्धी डेटा उपलब्ध नहीं है — वास्तविक प्रतिस्पर्धा का आकलन मौके पर ही संभव है",
+    "optimistic": "आशावादी",
+    "realistic": "यथार्थवादी",
+    "conservative": "रूढ़िवादी",
+    "monthlyProfit": "मासिक लाभ",
+    "differentiators": "विभेदीकरण के अवसर:",
+    "financialRisks": "वित्तीय जोखिम",
+    "operationalRisks": "परिचालन जोखिम",
+    "marketRisks": "बाजार जोखिम",
+    "regulatoryRisks": "नियामक जोखिम",
+    "mitigationStrategies": "न्यूनीकरण रणनीतियाँ:",
+    "topCompetitors": "प्रमुख प्रतिस्पर्धी:"
   },
   "moqbil": {
     "greeting": "नमस्ते! मैं Moqbil हूँ, आपका स्मार्ट सहायक",

@@ -18,7 +18,10 @@
     "publish": "نشر",
     "saveDraft": "حفظ كمسودة",
     "showMore": "عرض المزيد",
-    "showLess": "عرض أقل"
+    "showLess": "عرض أقل",
+    "low": "منخفض",
+    "medium": "متوسط",
+    "high": "مرتفع"
   },
   "auth": {
     "enterPhone": "أدخل رقم جوالك",
@@ -159,7 +162,10 @@
     "assetsOnly": "بدون أصول (أصول فقط 30%)",
     "installment": "تقسيط (زيادة 15%)",
     "transition": "مع فترة انتقالية 3 أشهر",
-    "bestScenario": "أفضل سيناريو"
+    "bestScenario": "أفضل سيناريو",
+    "whatIf": "ماذا لو؟",
+    "simulating": "جاري المحاكاة...",
+    "noData": "لا توجد بيانات كافية للمحاكاة"
   },
   "manage": {
     "title": "إدارة الإعلان — الحالة:",
@@ -216,7 +222,15 @@
     "needsSpecializedInspection": "قيمة دقيقة تحتاج معاينة متخصصة",
     "olvDiscount": "خصم التصفية المنظمة",
     "marketValue": "القيمة السوقية:",
-    "taqbeelValue": "قيمة التقبيل:"
+    "taqbeelValue": "قيمة التقبيل:",
+    "criteriaDetails": "تفصيل المعايير",
+    "pricePosition": "الموقف السعري",
+    "observedRange": "النطاق السعري المرصود",
+    "factorDataCompleteness": "اكتمال البيانات",
+    "factorAssetVerification": "التحقق من الأصول",
+    "factorPriceLogic": "منطقية السعر",
+    "factorLegalClarity": "الوضوح القانوني",
+    "factorMediaQuality": "جودة الوسائط"
   },
   "feasibility": {
     "title": "دراسة الجدوى الاقتصادية",
@@ -231,7 +245,18 @@
     "confidenceLevel": "مستوى الثقة:",
     "paybackPeriod": "فترة الاسترداد (واقعي)",
     "weeklyUpdate": "يُحدّث تلقائياً كل أسبوع",
-    "noCompetitorData": "لم تتوفر بيانات منافسين رقمية — المنافسة الفعلية تتطلب معاينة ميدانية"
+    "noCompetitorData": "لم تتوفر بيانات منافسين رقمية — المنافسة الفعلية تتطلب معاينة ميدانية",
+    "optimistic": "متفائل",
+    "realistic": "واقعي",
+    "conservative": "متحفظ",
+    "monthlyProfit": "ربح شهري",
+    "differentiators": "فرص التميّز:",
+    "financialRisks": "مخاطر مالية",
+    "operationalRisks": "مخاطر تشغيلية",
+    "marketRisks": "مخاطر سوقية",
+    "regulatoryRisks": "مخاطر تنظيمية",
+    "mitigationStrategies": "استراتيجيات التخفيف:",
+    "topCompetitors": "أبرز المنافسين:"
   },
   "moqbil": {
     "greeting": "هلا وغلا، أنا مقبل، مساعدك الذكي",

@@ -1245,9 +1245,25 @@ interface DealStructureDisplayProps {
   alternatives: Array<{ type_id: string; priority: number }>;
 }
 
+const DEAL_CONTENT_TRANSLATION_KEYS: Record<string, string> = {
+  "السجل التجاري": "deal.commercialReg",
+  "الاسم التجاري": "deal.tradeName",
+  "العلامة التجارية": "deal.trademark",
+  "الأصول والمعدات": "deal.assetsEquipment",
+  "عقد الإيجار": "deal.lease",
+  "المخزون": "deal.inventory",
+  "الحقوق التشغيلية": "deal.operationalRights",
+  "الديون والالتزامات تجاه الغير": "deal.debtsLiabilities",
+  "نقل الأعمال بالكامل بما تملكه وما عليها من التزامات": "deal.fullTransferDesc",
+  "يتحمل المشتري جميع الالتزامات السابقة": "deal.buyerAssumesLiabilities",
+  "يجب التحقق من النزاعات القانونية القائمة": "deal.checkLegalDisputes",
+};
+
 const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: DealStructureDisplayProps) => {
   const { t } = useTranslation();
   if (!primaryConfig) return null;
+
+  const tr = (s: string) => (DEAL_CONTENT_TRANSLATION_KEYS[s] ? t(DEAL_CONTENT_TRANSLATION_KEYS[s]) : s);
 
   return (
     <div className="bg-card rounded-2xl p-6 shadow-soft space-y-4">
@@ -1264,7 +1280,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
           </span>
           <span className="text-sm font-medium">{primaryConfig.label}</span>
         </div>
-        <p className="text-xs text-muted-foreground mb-3">{primaryConfig.desc}</p>
+        <p className="text-xs text-muted-foreground mb-3">{tr(primaryConfig.desc)}</p>
 
         {primaryConfig.includes.length > 0 && (
           <div className="mb-2">
@@ -1273,7 +1289,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
             </div>
             <div className="flex flex-wrap gap-1">
               {primaryConfig.includes.map((item, i) => (
-                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-success/10 text-success">{item}</span>
+                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-success/10 text-success">{tr(item)}</span>
               ))}
             </div>
           </div>
@@ -1285,7 +1301,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
             </div>
             <div className="flex flex-wrap gap-1">
               {primaryConfig.excludes.map((item, i) => (
-                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">{item}</span>
+                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">{tr(item)}</span>
               ))}
             </div>
           </div>
@@ -1294,7 +1310,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
           <div className="mt-2 pt-2 border-t border-border/30">
             {primaryConfig.cautionNotes.map((note, i) => (
               <div key={i} className="text-[11px] text-warning flex items-start gap-1 mt-0.5">
-                <AlertTriangle size={10} className="shrink-0 mt-0.5" /> {note}
+                <AlertTriangle size={10} className="shrink-0 mt-0.5" /> {tr(note)}
               </div>
             ))}
           </div>
@@ -1311,7 +1327,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
             return (
               <div key={alt.type_id} className="border border-border/30 rounded-lg p-3">
                 <div className="text-sm font-medium">{altConfig.label}</div>
-                <p className="text-xs text-muted-foreground mt-0.5">{altConfig.desc}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{tr(altConfig.desc)}</p>
               </div>
             );
           })}
