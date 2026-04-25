@@ -1417,7 +1417,7 @@ const DealSummaryCard = ({ listing }: { listing: any }) => {
             <span className="text-muted-foreground/40">·</span>
             <span className="inline-flex items-center gap-1.5 text-foreground">
               <Sparkles size={13} strokeWidth={1.4} className="text-primary" />
-              <span className="text-muted-foreground">قيمة الأصول المُسعَّرة:</span>
+              <span className="text-muted-foreground">{t('listing.pricedAssetsValue')}:</span>
               <span className="font-medium">{fmt(pricedTotal)} ر.س</span>
             </span>
           </>
