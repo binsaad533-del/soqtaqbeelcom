@@ -689,12 +689,12 @@ const ListingDetailsPage = () => {
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Eye size={14} strokeWidth={1.3} />
                   <span className="text-xs tabular-nums">{viewCount}</span>
-                  <span className="text-[10px]">مشاهدة</span>
+                  <span className="text-[10px]">{t('listing.views')}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Heart size={14} strokeWidth={1.3} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "text-red-400" : ""} />
                   <span className="text-xs tabular-nums">{likeCount}</span>
-                  <span className="text-[10px]">إعجاب</span>
+                  <span className="text-[10px]">{t('listing.likes')}</span>
                 </div>
               </div>
               <div className="flex items-center gap-1">
