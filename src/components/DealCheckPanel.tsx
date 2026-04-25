@@ -887,6 +887,15 @@ const TRUST_LEVEL_CONFIG: Record<string, { bg: string; text: string; border: str
   "ضعيف": { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", barColor: "bg-red-500" },
 };
 
+const VERDICT_KEY_MAP: Record<string, string> = {
+  "ممتاز": "excellent",
+  "جيد جداً": "veryGood",
+  "جيد": "good",
+  "متوسط": "acceptable",
+  "مقبول": "acceptable",
+  "ضعيف": "poor",
+};
+
 const FACTOR_LABEL_KEYS: Record<string, string> = {
   data_completeness: "dealCheck.factorDataCompleteness",
   asset_verification: "dealCheck.factorAssetVerification",
