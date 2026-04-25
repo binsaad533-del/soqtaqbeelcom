@@ -1197,7 +1197,7 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs text-muted-foreground mb-0.5">
-                قيمة إضافية (اسم تجاري + تراخيص + قاعدة عملاء)
+                {t("dealCheck.extraValue")}
               </div>
               <div className="text-sm font-semibold text-foreground tabular-nums">
                 {fmt(goodwillValue)} <span className="text-[11px] text-muted-foreground font-normal">ر.س</span>
@@ -1307,15 +1307,15 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
         <div className="flex items-start gap-2">
           <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
           <div className="text-xs text-muted-foreground leading-relaxed">
-            الأسعار محسوبة بمنهجية{" "}
+            {t("dealCheck.olvDisclaimerPrefix")}{" "}
             <span className="font-semibold text-foreground">
-              قيمة التصفية المنظمة (OLV)
+              {t("dealCheck.olvMethodology")}
             </span>
-            {" "}وفقاً لمعايير{" "}
+            {" "}{t("dealCheck.olvDisclaimerMiddle")}{" "}
             <span className="font-semibold text-foreground">
-              الهيئة السعودية للمقيمين المعتمدين (تقييم)
+              {t("dealCheck.olvAuthority")}
             </span>
-            {" "}والمعيار الدولي IVS 160.1. تشمل الصيغة: إهلاك مادي حسب حالة الأصل × خصم التصفية المنظمة.
+            {" "}{t("dealCheck.olvDisclaimerSuffix")}
           </div>
         </div>
       </div>
@@ -1328,9 +1328,9 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
             <Loader2 size={42} strokeWidth={1} className="absolute -top-1.5 -left-1.5 text-primary/30 animate-spin" />
           </div>
           <div className="text-center">
-            <p className="text-sm font-medium">جاري تسعير الأصول</p>
+            <p className="text-sm font-medium">{t("dealCheck.pricingInProgress")}</p>
             <p className="text-[11px] text-muted-foreground mt-1">
-              يستغرق التسعير عادةً 30-60 ثانية، سيتم تحديث الواجهة تلقائياً عند الانتهاء.
+              {t("dealCheck.pricingInProgressDesc")}
             </p>
           </div>
         </div>
@@ -1374,8 +1374,8 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
                       </span>
                       <span className="text-base text-emerald-700/80 dark:text-emerald-300/80 mr-auto truncate tabular-nums">
                         {totalMarketValue > totalValue
-                          ? <>سوقية: {totalMarketValue.toLocaleString("en-US")} · تقبيل: {totalValue.toLocaleString("en-US")} ر.س</>
-                          : <>قيمة إجمالية: {totalValue.toLocaleString("en-US")} ر.س</>}
+                          ? <>{t("common.marketValueLabel")} {totalMarketValue.toLocaleString("en-US")} · {t("common.takeoverValueLabel")} {totalValue.toLocaleString("en-US")} {t("common.currency")}</>
+                          : <>{t("common.totalValue")} {totalValue.toLocaleString("en-US")} {t("common.currency")}</>}
                       </span>
                       <ChevronDown size={16} strokeWidth={1.6} className="text-emerald-600/60 dark:text-emerald-400/60 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
