@@ -122,6 +122,7 @@ function FileCard({
   onPreview,
   onToggleProtection,
 }: FilePreviewProps) {
+  const { t } = useTranslation();
   const isImg = isImage(file.file_type);
   const [imgError, setImgError] = useState(false);
   const showProtectionBadge = PROTECTABLE_CATEGORIES.includes(
@@ -161,12 +162,12 @@ function FileCard({
         ) : isImg && imgError ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground px-2">
             <ImageOff className="w-8 h-8 mb-2" />
-            <span className="text-xs text-center">تعذّر تحميل المعاينة</span>
+            <span className="text-xs text-center">{t("createListing.fileReview.previewError")}</span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1 text-muted-foreground">
             <FileText className="w-8 h-8" />
-            <span className="text-xs">{file.file_type || "ملف"}</span>
+            <span className="text-xs">{file.file_type || t("createListing.fileReview.fileGeneric")}</span>
           </div>
         )}
       </div>
@@ -188,14 +189,14 @@ function FileCard({
             className="text-[10px] py-0 px-1.5"
           >
             {file.ai_confidence === "high"
-              ? "موثوق"
+              ? t("createListing.fileReview.confidenceHigh")
               : file.ai_confidence === "medium"
-              ? "متوسط"
-              : "منخفض"}
+              ? t("createListing.fileReview.confidenceMedium")
+              : t("createListing.fileReview.confidenceLow")}
           </Badge>
           {file.is_confirmed && (
             <Badge variant="outline" className="text-[10px] py-0 px-1.5 gap-0.5">
-              <CheckCircle2 className="w-2.5 h-2.5" /> مؤكد
+              <CheckCircle2 className="w-2.5 h-2.5" /> {t("createListing.fileReview.confirmedBadge")}
             </Badge>
           )}
           {showProtectionBadge && (
@@ -213,8 +214,8 @@ function FileCard({
                     )}
                     aria-label={
                       file.is_protected
-                        ? "تبديل إلى عامة"
-                        : "تبديل إلى محمية"
+                        ? t("createListing.fileReview.switchToPublic")
+                        : t("createListing.fileReview.switchToProtected")
                     }
                   >
                     {file.is_protected ? (
@@ -222,14 +223,14 @@ function FileCard({
                     ) : (
                       <Globe className="w-2.5 h-2.5" />
                     )}
-                    <span>{file.is_protected ? "محمية" : "عامة"}</span>
+                    <span>{file.is_protected ? t("createListing.fileReview.protectedLabel") : t("createListing.fileReview.publicLabel")}</span>
                     <ArrowRightLeft className="w-2.5 h-2.5 opacity-70" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-[220px] text-xs">
                   {file.is_protected
-                    ? "محمية: المشترون يطلبون موافقتك للاطلاع عليها"
-                    : "عامة: متاحة لأي شخص يشاهد الإعلان"}
+                    ? t("createListing.fileReview.protectedTooltip")
+                    : t("createListing.fileReview.publicTooltip")}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
