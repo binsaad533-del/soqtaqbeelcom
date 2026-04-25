@@ -933,7 +933,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
 
   // If study is still null after all resolution attempts, force-build from listing data
   // — but only for Arabic. For other languages we must wait for/trigger AI generation.
-  const resolvedStudy = study || (isArabic ? buildEstimatedFeasibilityStudy(listing) : null);
+  const resolvedStudy = i18nStudy || (isArabic ? buildEstimatedFeasibilityStudy(listing) : null);
   if (!resolvedStudy) {
     return (
       <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
