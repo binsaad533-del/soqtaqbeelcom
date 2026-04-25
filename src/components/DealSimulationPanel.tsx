@@ -60,13 +60,13 @@ const DealSimulationPanel = ({ listingId }: Props) => {
                 key={i}
                 className={cn(
                   "rounded-lg p-2 border text-[10px]",
-                  s.name === result.bestScenario
+                  s.id === result.bestScenario
                     ? "bg-success/5 border-success/20"
                     : "bg-card border-border/20"
                 )}
               >
                 <div className="flex items-center justify-between mb-0.5">
-                  <span className="font-semibold text-foreground/90">{s.name}</span>
+                  <span className="font-semibold text-foreground/90">{t(`simulation.scenarios.${s.id}Name`)}</span>
                   <span className={cn(
                     "text-[8px] px-1.5 py-0.5 rounded-full",
                     s.riskLevel === "low" ? "bg-success/10 text-success" :
@@ -80,8 +80,8 @@ const DealSimulationPanel = ({ listingId }: Props) => {
                   <span className="flex items-center gap-0.5"><SarSymbol size={7} /> {s.adjustedPrice.toLocaleString("en-US")}</span>
                   <span>{t("simulation.commission")} {s.commission.toLocaleString("en-US")}</span>
                 </div>
-                <p className="text-[9px] text-foreground/60 mt-0.5">{s.recommendation}</p>
-                {s.name === result.bestScenario && (
+                <p className="text-[9px] text-foreground/60 mt-0.5">{t(`simulation.scenarios.${s.id}Desc`)}</p>
+                {s.id === result.bestScenario && (
                   <div className="flex items-center gap-1 mt-1 text-success text-[9px] font-medium">
                     <ArrowRight size={8} /> {t("simulation.bestScenario")}
                   </div>

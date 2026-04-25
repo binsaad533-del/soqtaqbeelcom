@@ -142,9 +142,15 @@
   },
   "inventory": {
     "confirmedAssets": "已确认资产清单",
-    "unit": "件"
+    "unit": "件",
+    "priceDisclaimer": "显示的价格基于真实市场调研和有据可查的来源。需要现场检查的资产不计入总额，以保持透明度。"
   },
   "condition": {
+    "veryGood": "非常好",
+    "acceptable": "可接受",
+    "poor": "差",
+    "scrap": "报废",
+    "needsInspection": "需要检查",
     "good": "良好",
     "used": "二手",
     "new": "全新",
@@ -165,7 +171,21 @@
     "bestScenario": "最佳方案",
     "whatIf": "假设方案?",
     "simulating": "正在模拟...",
-    "noData": "数据不足以进行模拟"
+    "noData": "数据不足以进行模拟",
+    "scenarios": {
+      "currentName": "当前价格",
+      "currentDesc": "挂牌价格",
+      "discount10Name": "九折优惠",
+      "discount10Desc": "对买家更有吸引力，利润率合理",
+      "discount20Name": "八折优惠",
+      "discount20Desc": "快速出售",
+      "noAssetsName": "不含资产（仅资产30%）",
+      "noAssetsDesc": "适合只想要资产不要业务的人",
+      "installmentName": "分期付款（加15%）",
+      "installmentDesc": "更高价格换取更轻松的付款，但收款风险更高",
+      "transitionName": "含3个月过渡期",
+      "transitionDesc": "加上年度租金的四分之一以覆盖过渡期"
+    }
   },
   "manage": {
     "title": "管理刊登 — 状态:",
@@ -230,7 +250,12 @@
     "factorAssetVerification": "资产核实",
     "factorPriceLogic": "价格合理性",
     "factorLegalClarity": "法律清晰度",
-    "factorMediaQuality": "媒体质量"
+    "factorMediaQuality": "媒体质量",
+    "confidenceHigh": "高可信度",
+    "confidenceMedium": "中等可信度",
+    "confidenceLow": "低可信度",
+    "confidenceEstimate": "估算",
+    "confidenceNeedsInspection": "需要检查"
   },
   "feasibility": {
     "title": "经济可行性研究",

@@ -142,9 +142,15 @@
   },
   "inventory": {
     "confirmedAssets": "جرد الأصول المؤكَّد",
-    "unit": "وحدة"
+    "unit": "وحدة",
+    "priceDisclaimer": "الأسعار المعروضة مبنية على أبحاث سوقية حقيقية بمصادر موثقة. الأصول التي تحتاج معاينة لا تُحتسب في الإجمالي حفاظاً على الشفافية."
   },
   "condition": {
+    "veryGood": "جيد جداً",
+    "acceptable": "مقبول",
+    "poor": "رديء",
+    "scrap": "خردة",
+    "needsInspection": "يتطلب معاينة",
     "good": "جيد",
     "used": "مستعمل",
     "new": "جديد",
@@ -165,7 +171,21 @@
     "bestScenario": "أفضل سيناريو",
     "whatIf": "ماذا لو؟",
     "simulating": "جاري المحاكاة...",
-    "noData": "لا توجد بيانات كافية للمحاكاة"
+    "noData": "لا توجد بيانات كافية للمحاكاة",
+    "scenarios": {
+      "currentName": "السعر الحالي",
+      "currentDesc": "السعر المعروض كما هو",
+      "discount10Name": "تخفيض 10%",
+      "discount10Desc": "جاذبية أعلى للمشترين مع هامش ربح معقول",
+      "discount20Name": "تخفيض 20%",
+      "discount20Desc": "بيع سريع، مناسب إذا تبغى تبيع بأسرع وقت",
+      "noAssetsName": "بدون أصول (أصول فقط 30%)",
+      "noAssetsDesc": "مناسب لمن يبغى الأصول فقط بدون النشاط",
+      "installmentName": "تقسيط (زيادة 15%)",
+      "installmentDesc": "سعر أعلى مقابل تسهيل الدفع، لكن مخاطر التحصيل أعلى",
+      "transitionName": "مع فترة انتقالية 3 أشهر",
+      "transitionDesc": "إضافة ربع الإيجار السنوي لتغطية الفترة الانتقالية"
+    }
   },
   "manage": {
     "title": "إدارة الإعلان — الحالة:",
@@ -230,7 +250,12 @@
     "factorAssetVerification": "التحقق من الأصول",
     "factorPriceLogic": "منطقية السعر",
     "factorLegalClarity": "الوضوح القانوني",
-    "factorMediaQuality": "جودة الوسائط"
+    "factorMediaQuality": "جودة الوسائط",
+    "confidenceHigh": "ثقة عالية",
+    "confidenceMedium": "ثقة متوسطة",
+    "confidenceLow": "ثقة منخفضة",
+    "confidenceEstimate": "تقديري",
+    "confidenceNeedsInspection": "يتطلب معاينة"
   },
   "feasibility": {
     "title": "دراسة الجدوى الاقتصادية",

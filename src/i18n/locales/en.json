@@ -142,14 +142,20 @@
   },
   "inventory": {
     "confirmedAssets": "Confirmed asset inventory",
-    "unit": "unit"
+    "unit": "unit",
+    "priceDisclaimer": "Displayed prices are based on real market research with documented sources. Assets needing inspection are not included in totals to maintain transparency."
   },
   "condition": {
     "good": "Good",
     "used": "Used",
     "new": "New",
     "unclear": "Unclear",
-    "excellent": "Excellent"
+    "excellent": "Excellent",
+    "veryGood": "Very Good",
+    "acceptable": "Acceptable",
+    "poor": "Poor",
+    "scrap": "Scrap",
+    "needsInspection": "Needs Inspection"
   },
   "simulation": {
     "title": "Deal simulation",
@@ -165,7 +171,21 @@
     "bestScenario": "Best scenario",
     "whatIf": "What if?",
     "simulating": "Simulating...",
-    "noData": "Not enough data for simulation"
+    "noData": "Not enough data for simulation",
+    "scenarios": {
+      "currentName": "Current price",
+      "currentDesc": "Listed price as is",
+      "discount10Name": "10% discount",
+      "discount10Desc": "More attractive to buyers with reasonable margin",
+      "discount20Name": "20% discount",
+      "discount20Desc": "Quick sale if you want to sell fast",
+      "noAssetsName": "Without assets (assets only 30%)",
+      "noAssetsDesc": "Suitable for those wanting assets only without the business",
+      "installmentName": "Installments (+15%)",
+      "installmentDesc": "Higher price for easier payment but higher collection risk",
+      "transitionName": "With 3-month transition period",
+      "transitionDesc": "Adds quarter of annual rent to cover the transition period"
+    }
   },
   "manage": {
     "title": "Manage listing — status:",
@@ -230,7 +250,12 @@
     "factorAssetVerification": "Asset verification",
     "factorPriceLogic": "Price logic",
     "factorLegalClarity": "Legal clarity",
-    "factorMediaQuality": "Media quality"
+    "factorMediaQuality": "Media quality",
+    "confidenceHigh": "High Confidence",
+    "confidenceMedium": "Medium Confidence",
+    "confidenceLow": "Low Confidence",
+    "confidenceEstimate": "Estimate",
+    "confidenceNeedsInspection": "Needs Inspection"
   },
   "feasibility": {
     "title": "Economic feasibility study",
