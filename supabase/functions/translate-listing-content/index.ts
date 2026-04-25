@@ -11,6 +11,25 @@ const corsHeaders = {
 
 const TRANSLATABLE_INVENTORY_FIELDS = ["name", "details", "description", "category"];
 
+// Top-level listing text fields that should be translated. Numbers (e.g. "4", "1-2")
+// inside string values are preserved by the Gemini prompt rules.
+const TRANSLATABLE_LISTING_FIELDS = [
+  "title",
+  "description",
+  "city",
+  "district",
+  "business_activity",
+  "lease_duration",
+  "lease_paid_period",
+  "lease_remaining",
+  "liabilities",
+  "municipality_license",
+  "civil_defense_license",
+  "surveillance_cameras",
+  "overdue_rent",
+  "overdue_salaries",
+] as const;
+
 const LANGUAGE_NAMES: Record<string, string> = {
   en: "English",
   zh: "Simplified Chinese",
