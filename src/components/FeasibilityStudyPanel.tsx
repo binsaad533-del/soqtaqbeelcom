@@ -1084,9 +1084,9 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           onToggle={() => toggleSection("revenue")}
         >
           <div className="grid grid-cols-3 gap-2">
-            <ScenarioCard label="متفائل" scenario={displayStudy.revenueProjections.optimistic} color="emerald" icon={<ArrowUpRight size={12} />} />
-            <ScenarioCard label="واقعي" scenario={displayStudy.revenueProjections.realistic} color="blue" icon={<Minus size={12} />} />
-            <ScenarioCard label="متحفظ" scenario={displayStudy.revenueProjections.conservative} color="amber" icon={<ArrowDownRight size={12} />} />
+            <ScenarioCard label={t("feasibility.optimistic")} scenario={displayStudy.revenueProjections.optimistic} color="emerald" icon={<ArrowUpRight size={12} />} />
+            <ScenarioCard label={t("feasibility.realistic")} scenario={displayStudy.revenueProjections.realistic} color="blue" icon={<Minus size={12} />} />
+            <ScenarioCard label={t("feasibility.conservative")} scenario={displayStudy.revenueProjections.conservative} color="amber" icon={<ArrowDownRight size={12} />} />
           </div>
         </CollapsibleSection>
 
