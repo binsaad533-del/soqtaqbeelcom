@@ -27,7 +27,7 @@ const DealSimulationPanel = ({ listingId }: Props) => {
         className="w-full flex items-center gap-2 p-2.5 rounded-xl border border-border/40 hover:border-primary/20 hover:bg-primary/[0.03] transition-all text-right"
       >
         <FlaskConical size={14} className="text-primary shrink-0" />
-        <span className="text-[11px] font-medium text-foreground/80">{t("simulation.title")} — ماذا لو؟</span>
+        <span className="text-[11px] font-medium text-foreground/80">{t("simulation.title")} — {t("simulation.whatIf")}</span>
         <AiStar size={12} className="mr-auto" />
       </button>
     );
