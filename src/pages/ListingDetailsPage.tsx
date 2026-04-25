@@ -25,6 +25,7 @@ import SellerOffersPanel from "@/components/SellerOffersPanel";
 import MoqbilAgentPanel from "@/components/MoqbilAgentPanel";
 import ProtectedDocumentsPanel from "@/components/ProtectedDocumentsPanel";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useListingSocial } from "@/hooks/useListingSocial";
@@ -120,6 +121,7 @@ const normalizeListingDocuments = (documents: unknown[]): ListingDocumentItem[] 
 };
 
 const ListingDetailsPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, role } = useAuthContext();
@@ -687,12 +689,12 @@ const ListingDetailsPage = () => {
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Eye size={14} strokeWidth={1.3} />
                   <span className="text-xs tabular-nums">{viewCount}</span>
-                  <span className="text-[10px]">مشاهدة</span>
+                  <span className="text-[10px]">{t('listing.views')}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Heart size={14} strokeWidth={1.3} fill={isLiked ? "currentColor" : "none"} className={isLiked ? "text-red-400" : ""} />
                   <span className="text-xs tabular-nums">{likeCount}</span>
-                  <span className="text-[10px]">إعجاب</span>
+                  <span className="text-[10px]">{t('listing.likes')}</span>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -709,7 +711,7 @@ const ListingDetailsPage = () => {
                     "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
                     isLiked ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500"
                   )}
-                  title="إعجاب"
+                  title={t('listing.likes')}
                 >
                   <Heart size={14} strokeWidth={1.5} fill={isLiked ? "currentColor" : "none"} />
                 </button>
@@ -739,7 +741,7 @@ const ListingDetailsPage = () => {
             {/* ====== هيكل الصفقة (Accordion) ====== */}
             {primaryConfig && (
               <SectionAccordion
-                title="هيكل الصفقة"
+                title={t('listing.dealStructure')}
                 icon={<Shield size={16} strokeWidth={1.4} className="text-primary" />}
                 summary={`${primaryConfig.label}${primaryConfig.includes.length > 0 ? ` — يشمل ${primaryConfig.includes.slice(0, 3).join("، ")}` : ""}`}
               >
@@ -767,13 +769,13 @@ const ListingDetailsPage = () => {
             {/* ====== جرد الأصول (Accordion) ====== */}
             {inventory.length > 0 && (
               <SectionAccordion
-                title={`جرد الأصول (${inventory.length})`}
+                title={`${t('listing.assetInventory')} (${inventory.length})`}
                 icon={<Building2 size={16} strokeWidth={1.4} className="text-primary" />}
                 summary={(() => {
                   const inv = (listing.inventory || []) as any[];
                   const priced = inv.filter((a) => typeof a?.pricing?.price_sar === "number" && a.pricing.price_sar > 0 && a.pricing?.confidence !== "يتطلب_معاينة").length;
                   const inspect = inv.length - priced;
-                  return inspect > 0 ? `${priced} مُسعَّر · ${inspect} يحتاج معاينة` : `${priced} مُسعَّر`;
+                  return inspect > 0 ? `${priced} ${t('listing.priced')} · ${inspect} ${t('listing.needsInspection')}` : `${priced} ${t('listing.priced')}`;
                 })()}
               >
                 <CollapsibleList title="جرد الأصول المؤكّد" items={inventory} threshold={5} renderItem={(item, i) => (
@@ -792,9 +794,9 @@ const ListingDetailsPage = () => {
 
             {/* ====== المستندات والوثائق (Accordion) ====== */}
             <SectionAccordion
-              title="المستندات والوثائق"
+              title={t('listing.documents')}
               icon={<Shield size={16} strokeWidth={1.4} className="text-primary" />}
-              summary={`${documents.length} مستند${documents.length === 1 ? "" : ""}`}
+              summary={`${documents.length} ${t('listing.document')}`}
             >
               <ProtectedDocumentsPanel
                 listingId={listing.id}
@@ -812,9 +814,9 @@ const ListingDetailsPage = () => {
             {/* محاكاة الصفقة */}
             {!isOwner && listing.price && (
               <SectionAccordion
-                title="محاكاة الصفقة"
+                title={t('listing.dealSimulation')}
                 icon={<Sparkles size={16} strokeWidth={1.4} className="text-primary" />}
-                summary="سيناريوهات السعر والتفاوض"
+                summary={t('listing.priceScenarios')}
               >
                 <DealSimulationPanel listingId={listing.id} />
               </SectionAccordion>
@@ -898,12 +900,12 @@ const ListingDetailsPage = () => {
               </div>
 
               <div className="space-y-3 mb-6">
-                <InfoRow label="نوع الصفقة" value={primaryConfig?.label || getArabicDealType(primaryDealType)} />
+                <InfoRow label={t('listing.dealType')} value={primaryConfig?.label || getArabicDealType(primaryDealType)} />
 
                 {(listing.annual_rent || listing.lease_duration || listing.lease_remaining || listing.municipality_license || listing.civil_defense_license || listing.liabilities) && (
                   <Collapsible>
                     <CollapsibleTrigger className="w-full flex items-center justify-between text-xs text-primary hover:text-primary/80 transition-colors py-1.5 group">
-                      <span>عرض تفاصيل الإعلان الإضافية</span>
+                      <span>{t('listing.showExtraDetails')}</span>
                       <ChevronDown size={14} className="transition-transform group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="space-y-3 pt-2">
@@ -940,10 +942,10 @@ const ListingDetailsPage = () => {
                         )}
                         <VerifiedSellerBadge userId={sellerProfile.user_id} size="md" />
                       </div>
-                      <p className="text-[11px] text-muted-foreground">صاحب الفرصة</p>
+                      <p className="text-[11px] text-muted-foreground">{t('listing.opportunityOwner')}</p>
                     </div>
                     <Link to={`/seller/${sellerProfile.user_id}`} className="text-[10px] text-primary hover:underline shrink-0">
-                      الملف الشخصي
+                      {t('listing.profile')}
                     </Link>
                   </div>
                   <TrustBadge
@@ -980,7 +982,7 @@ const ListingDetailsPage = () => {
                       className="w-full rounded-xl text-base h-12 active:scale-[0.98] mb-3"
                     >
                       {startingDeal ? <Loader2 size={18} className="animate-spin" /> : <Heart size={18} strokeWidth={1.5} />}
-                      أبدِ اهتمامك
+                      {t('listing.showInterest')}
                     </Button>
                   )}
 
@@ -1011,7 +1013,7 @@ const ListingDetailsPage = () => {
                     className="w-full rounded-xl active:scale-[0.98]"
                   >
                     {startingDeal ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} strokeWidth={1.5} />}
-                    تواصل على الخاص
+                    {t('listing.contactSeller')}
                   </Button>
                 </>
               )}
@@ -1113,7 +1115,7 @@ const ListingDetailsPage = () => {
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
               <Heart className="h-6 w-6 text-primary" />
             </div>
-            <DialogTitle className="text-lg">أبدِ اهتمامك</DialogTitle>
+            <DialogTitle className="text-lg">{t('listing.showInterest')}</DialogTitle>
             <DialogDescription className="text-sm">
               أرسل رسالتك الأولى للبائع وابدأ التفاوض
             </DialogDescription>
@@ -1243,13 +1245,14 @@ interface DealStructureDisplayProps {
 }
 
 const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: DealStructureDisplayProps) => {
+  const { t } = useTranslation();
   if (!primaryConfig) return null;
 
   return (
     <div className="bg-card rounded-2xl p-6 shadow-soft space-y-4">
       <div className="flex items-center gap-2">
         <Shield size={18} strokeWidth={1.3} className="text-primary" />
-        <h3 className="font-medium">هيكل الصفقة</h3>
+        <h3 className="font-medium">{t('listing.dealStructure')}</h3>
       </div>
 
       {/* Primary deal type */}
@@ -1366,6 +1369,7 @@ const SectionAccordion = ({
 // shown right after the photos.
 // ============================================================
 const DealSummaryCard = ({ listing }: { listing: any }) => {
+  const { t } = useTranslation();
   const inv = Array.isArray(listing?.inventory) ? listing.inventory : [];
   const totalAssets = inv.length;
   const pricedTotal = inv.reduce((sum: number, a: any) => {
@@ -1405,7 +1409,7 @@ const DealSummaryCard = ({ listing }: { listing: any }) => {
       <div className="mt-3 flex items-center gap-3 flex-wrap text-xs sm:text-sm tabular-nums">
         <span className="inline-flex items-center gap-1.5 text-foreground">
           <Wallet size={13} strokeWidth={1.4} className="text-primary" />
-          <span className="text-muted-foreground">السعر المطلوب:</span>
+          <span className="text-muted-foreground">{t('listing.price')}:</span>
           <span className="font-semibold">{askingPrice > 0 ? `${fmt(askingPrice)} ر.س` : "—"}</span>
         </span>
         {pricedTotal > 0 && (
@@ -1413,7 +1417,7 @@ const DealSummaryCard = ({ listing }: { listing: any }) => {
             <span className="text-muted-foreground/40">·</span>
             <span className="inline-flex items-center gap-1.5 text-foreground">
               <Sparkles size={13} strokeWidth={1.4} className="text-primary" />
-              <span className="text-muted-foreground">قيمة الأصول المُسعَّرة:</span>
+              <span className="text-muted-foreground">{t('listing.pricedAssetsValue')}:</span>
               <span className="font-medium">{fmt(pricedTotal)} ر.س</span>
             </span>
           </>
@@ -1423,7 +1427,7 @@ const DealSummaryCard = ({ listing }: { listing: any }) => {
             <span className="text-muted-foreground/40">·</span>
             <span className="inline-flex items-center gap-1.5 text-muted-foreground">
               <Package size={13} strokeWidth={1.4} />
-              {totalAssets} أصل
+              {totalAssets} {t('listing.asset')}
             </span>
           </>
         )}
