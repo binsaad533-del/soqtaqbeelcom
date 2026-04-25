@@ -54,6 +54,7 @@ function loadGoogleMapsApi(apiKey: string): Promise<void> {
 const DEFAULT_CENTER = { lat: 24.7136, lng: 46.6753 }; // Riyadh
 
 const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPickerProps) => {
+  const { t } = useTranslation();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
@@ -64,7 +65,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   const [selectedAddress, setSelectedAddress] = useState<string | null>(() => {
     if (lat && lng) {
       const nearest = findNearestCity(lat, lng);
-      return nearest?.name ? `بالقرب من ${nearest.name}` : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      return nearest?.name ? t("createListing.mapLink.nearby", { name: nearest.name }) : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     }
     return null;
   });
@@ -76,7 +77,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   useEffect(() => {
     if (lat && lng && !selectedAddress) {
       const nearest = findNearestCity(lat, lng);
-      setSelectedAddress(nearest?.name ? `بالقرب من ${nearest.name}` : `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+      setSelectedAddress(nearest?.name ? t("createListing.mapLink.nearby", { name: nearest.name }) : `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lat, lng]);
@@ -101,11 +102,11 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         onLocationChange(position.lat(), position.lng(), results[0].formatted_address, details);
       } else {
         const nearest = findNearestCity(position.lat(), position.lng());
-        setSelectedAddress(`بالقرب من ${nearest.name}`);
+        setSelectedAddress(t("createListing.mapLink.nearby", { name: nearest.name }));
         onLocationChange(position.lat(), position.lng(), undefined, { city: nearest.name });
       }
     });
-  }, [extractPlaceDetails, onLocationChange]);
+  }, [extractPlaceDetails, onLocationChange, t]);
 
   const initMap = useCallback(async () => {
     try {
@@ -174,7 +175,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
 
       const input = document.createElement("input");
       input.type = "text";
-      input.placeholder = "ابحث عن موقع...";
+      input.placeholder = t("createListing.mapLink.mapsInputPlaceholder");
       input.className = "map-search-input";
       input.dir = "rtl";
       input.style.cssText =
