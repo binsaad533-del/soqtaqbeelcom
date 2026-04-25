@@ -1251,25 +1251,28 @@ const CollapsibleSection = ({
   </div>
 );
 
-const ScenarioCard = ({ label, scenario, color, icon }: { label: string; scenario: Scenario; color: string; icon: React.ReactNode }) => (
-  <div className={cn("rounded-lg border p-2.5 space-y-1.5", `border-${color}-500/20 bg-${color}-500/5`)}>
-    <div className="flex items-center gap-1 text-xs font-medium">
-      <span className={`text-${color}-600 dark:text-${color}-400`}>{icon}</span>
-      {label}
-    </div>
-    <div className="text-center">
-      <div className={cn("text-sm font-bold", `text-${color}-700 dark:text-${color}-300`)}>
-        {formatNum(scenario.monthlyProfit)}
+const ScenarioCard = ({ label, scenario, color, icon }: { label: string; scenario: Scenario; color: string; icon: React.ReactNode }) => {
+  const { t } = useTranslation();
+  return (
+    <div className={cn("rounded-lg border p-2.5 space-y-1.5", `border-${color}-500/20 bg-${color}-500/5`)}>
+      <div className="flex items-center gap-1 text-xs font-medium">
+        <span className={`text-${color}-600 dark:text-${color}-400`}>{icon}</span>
+        {label}
       </div>
-      <div className="text-[9px] text-muted-foreground">ربح شهري <SarSymbol className="inline w-2 h-2" /></div>
+      <div className="text-center">
+        <div className={cn("text-sm font-bold", `text-${color}-700 dark:text-${color}-300`)}>
+          {formatNum(scenario.monthlyProfit)}
+        </div>
+        <div className="text-[9px] text-muted-foreground">{t("feasibility.monthlyProfit")} <SarSymbol className="inline w-2 h-2" /></div>
+      </div>
+      <div className="flex justify-between text-[9px] text-muted-foreground">
+        <span>ROI: {scenario.annualROI}%</span>
+        <span>{scenario.roiMonths} {t("common.month")}</span>
+      </div>
+      <div className="text-[9px] text-muted-foreground/70 leading-relaxed">{scenario.assumptions}</div>
     </div>
-    <div className="flex justify-between text-[9px] text-muted-foreground">
-      <span>ROI: {scenario.annualROI}%</span>
-      <span>{scenario.roiMonths} شهر</span>
-    </div>
-    <div className="text-[9px] text-muted-foreground/70 leading-relaxed">{scenario.assumptions}</div>
-  </div>
-);
+  );
+};
 
 const RiskGroup = ({ label, items }: { label: string; items: string[] }) => {
   if (!items || items.length === 0) return null;
