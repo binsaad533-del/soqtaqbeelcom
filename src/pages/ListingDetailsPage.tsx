@@ -44,7 +44,7 @@ import { getArabicDealType } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
 import ReportListingDialog from "@/components/ReportListingDialog";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
-import { mapConditionToKey } from "@/lib/condition-utils";
+import { mapConditionToKey, mapDealTypeToKey } from "@/lib/condition-utils";
 
 
 type ListingDocumentItem = {
@@ -744,7 +744,7 @@ const ListingDetailsPage = () => {
               <SectionAccordion
                 title={t('listing.dealStructure')}
                 icon={<Shield size={16} strokeWidth={1.4} className="text-primary" />}
-                summary={`${primaryConfig.label}${primaryConfig.includes.length > 0 ? ` — يشمل ${primaryConfig.includes.slice(0, 3).join("، ")}` : ""}`}
+                summary={`${t(`deal.${mapDealTypeToKey(primaryDealType)}`)}${primaryConfig.includes.length > 0 ? ` — ${t('deal.dealSummary')}` : ""}`}
               >
                 <DealStructureDisplay
                   primaryConfig={primaryConfig}
