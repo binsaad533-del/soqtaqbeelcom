@@ -219,7 +219,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
               onClick={() => setShowForm(false)}
               className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              إلغاء
+              {t("offer.cancel")}
             </button>
           )}
         </div>
