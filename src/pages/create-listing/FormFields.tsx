@@ -40,12 +40,13 @@ export const FormField = ({ label, placeholder, suffix, value, onChange, error, 
   </div>
 );
 
-export const SelectField = ({ label, options, value, onChange, error }: {
+export const SelectField = ({ label, options, value, onChange, error, placeholder }: {
   label: string;
   options: string[];
   value: string;
   onChange: (v: string) => void;
   error?: string;
+  placeholder?: string;
 }) => (
   <div>
     <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
@@ -53,7 +54,7 @@ export const SelectField = ({ label, options, value, onChange, error }: {
       "w-full px-3 py-2 rounded-lg border bg-background text-sm focus:outline-none focus:ring-1 transition-all",
       error ? "border-destructive/60 focus:border-destructive/60 focus:ring-destructive/30" : "border-border/50 focus:border-primary/30 focus:ring-primary/20"
     )}>
-      <option value="">اختر...</option>
+      <option value="">{placeholder ?? "اختر..."}</option>
       {options.map((option) => <option key={option} value={option}>{option}</option>)}
     </select>
     {error && <p className="text-[11px] text-destructive mt-1 flex items-center gap-1"><AlertTriangle size={11} /> {error}</p>}

@@ -42,12 +42,12 @@ import CreateListingStep2 from "./create-listing/CreateListingStep2";
 import CreateListingStep3 from "./create-listing/CreateListingStep3";
 import CreateListingStep4 from "./create-listing/CreateListingStep4";
 
-const steps = [
-  { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على الـAI ✦" },
-  { label: "الصور والمستندات", icon: Camera, hint: "ارفع الصور والمستندات فقط — الـAI ✦ يتكفّل بالباقي" },
-  { label: "التحليل الذكي", icon: Eye, hint: "الـAI ✦ يحلل ويجرد تلقائياً — فقط راجع وأكّد" },
-  { label: "الإفصاح والنشر", icon: Check, hint: "أكمل البيانات وانشر بضغطة واحدة" },
-];
+const STEP_DEFS = [
+  { key: "dealStructure", icon: Shield },
+  { key: "media", icon: Camera },
+  { key: "analysis", icon: Eye },
+  { key: "disclosure", icon: Check },
+] as const;
 
 const allPhotoGroups = [
   { id: "interior", label: "صور داخلية للمحل", min: 3, icon: "Camera", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup"] as readonly string[] },
@@ -66,7 +66,12 @@ function getImageRequirement(dealType: string): "required" | "optional" | "none"
 
 const CreateListingPage = () => {
   const { t } = useTranslation();
-  useSEO({ title: "أضف فرصة جديدة", description: "أنشئ إعلان تقبيل جديد على سوق تقبيل — أضف تفاصيل مشروعك واجذب المشترين", canonical: "/create-listing" });
+  useSEO({ title: t("createListing.seoTitle"), description: t("createListing.seoDescription"), canonical: "/create-listing" });
+  const steps = STEP_DEFS.map((s) => ({
+    label: t(`createListing.steps.${s.key}`),
+    icon: s.icon,
+    hint: t(`createListing.steps.hints.${s.key}`),
+  }));
   const [currentStep, setCurrentStep] = useState(0);
   const [dealStructure, setDealStructure] = useState<DealStructureSelection>({
     selectedTypes: [],
@@ -169,7 +174,7 @@ const CreateListingPage = () => {
       status: "draft",
       uses_unified_upload: true,
     } as never);
-    if (error || !data) { toast.error("حدث خطأ أثناء حفظ المسودة"); return null; }
+    if (error || !data) { toast.error(t("createListing.toasts.draftSaveError")); return null; }
     const id = (data as { id: string }).id;
     setListingId(id);
     setUsesUnifiedUpload(true);
@@ -224,8 +229,8 @@ const CreateListingPage = () => {
     const restoreDraft = async () => {
       try {
         const draft = requestedDraftId ? await getListing(requestedDraftId) : await getMyDraft();
-        if (draft) { applyDraftToState(draft as Listing); toast.success(requestedDraftId ? "تم فتح المسودة المطلوبة" : "تم استعادة مسودتك السابقة تلقائياً", { icon: "📋" }); }
-        else if (requestedDraftId) toast.error("لم أجد المسودة المطلوبة");
+        if (draft) { applyDraftToState(draft as Listing); toast.success(requestedDraftId ? t("createListing.toasts.draftOpened") : t("createListing.toasts.draftRestoredAuto"), { icon: "📋" }); }
+        else if (requestedDraftId) toast.error(t("createListing.toasts.draftNotFound"));
       } catch (err) { console.error("Draft restore failed", err); }
       finally { setDraftLoading(false); }
     };
@@ -687,7 +692,7 @@ const CreateListingPage = () => {
   // Navigation
   const handleNext = async () => {
     if (currentStep === 0) {
-      if (!dealStructure.isValid) { toast.error("يرجى اختيار هيكل الصفقة أولاً"); return; }
+      if (!dealStructure.isValid) { toast.error(t("createListing.toasts.selectDealStructure")); return; }
       const id = await ensureListing();
       if (id) await updateListing(id, { deal_type: dealStructure.primaryType, primary_deal_type: dealStructure.primaryType, deal_options: dealStructure.selectedTypes.map((typeId, i) => ({ type_id: typeId, priority: i, is_primary: typeId === dealStructure.primaryType })) } as never);
     }
@@ -786,10 +791,10 @@ const CreateListingPage = () => {
     const imgReq = getImageRequirement(dealStructure.primaryType);
     const hasPhotos = imgReq === "none" || imgReq === "optional" || totalPhotos > 0;
     const errors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
-    if (!hasPhotos || Object.keys(errors).length > 0) { toast.error("يرجى إكمال جميع الحقول المطلوبة أولاً"); return; }
+    if (!hasPhotos || Object.keys(errors).length > 0) { toast.error(t("createListing.toasts.completeRequired")); return; }
     const nextListingPayload = buildListingPayload();
     const nextInputKey = JSON.stringify(nextListingPayload);
-    if (dealCheckResult && dealCheckInputKey === nextInputKey) { toast.info("التحليل الحالي ما زال مطابقاً"); return; }
+    if (dealCheckResult && dealCheckInputKey === nextInputKey) { toast.info(t("createListing.toasts.analysisCurrent")); return; }
     setDealCheckLoading(true);
     setDealCheckError("");
     try {
@@ -799,7 +804,7 @@ const CreateListingPage = () => {
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
       setDealCheckResult(data.analysis);
       setDealCheckInputKey(nextInputKey);
-    } catch (e: any) { console.error("[DealCheck] failed:", e); setDealCheckError(e.message || "تعذّر إجراء الفحص"); }
+    } catch (e: any) { console.error("[DealCheck] failed:", e); setDealCheckError(e.message || t("createListing.toasts.analysisFailed")); }
     finally { setDealCheckLoading(false); }
   };
 
@@ -809,8 +814,8 @@ const CreateListingPage = () => {
     const imgReq = getImageRequirement(dealStructure.primaryType);
     const hasPhotos = imgReq === "none" || imgReq === "optional" || totalPhotos > 0;
     const errors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
-    if (!hasPhotos || Object.keys(errors).length > 0) { toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر"); return; }
-    if (locationLat == null || locationLng == null) { toast.error("يجب تحديد الموقع على الخريطة قبل النشر"); return; }
+    if (!hasPhotos || Object.keys(errors).length > 0) { toast.error(t("createListing.toasts.completeBeforePublish")); return; }
+    if (locationLat == null || locationLng == null) { toast.error(t("createListing.toasts.locationRequired")); return; }
 
     // Duplicate detection — only if not yet acknowledged
     if (!duplicateAcknowledged) {
@@ -832,13 +837,13 @@ const CreateListingPage = () => {
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
       setDealCheckResult(data.analysis);
       setDealCheckInputKey(JSON.stringify(nextListingPayload));
-    } catch (e: any) { console.error("[DealCheck] Pre-publish failed:", e); setDealCheckError(e.message || "تعذّر إجراء الفحص"); }
+    } catch (e: any) { console.error("[DealCheck] Pre-publish failed:", e); setDealCheckError(e.message || t("createListing.toasts.analysisFailed")); }
     finally { setDealCheckLoading(false); }
   };
 
   const handlePublish = async () => {
     if (!listingId) return;
-    if (profile && (profile as any).is_commission_suspended) { toast.error("تم تعليق حسابك مؤقتاً بسبب عمولة متأخرة."); return; }
+    if (profile && (profile as any).is_commission_suspended) { toast.error(t("createListing.toasts.commissionSuspended")); return; }
     setShowPublishConfirm(false);
     setSaving(true);
     try {
@@ -861,14 +866,14 @@ const CreateListingPage = () => {
               disclosure.city,
             ]),
       } as never);
-      if (error) { console.error("Publish failed:", error); toast.error("فشل نشر الإعلان"); setSaving(false); return; }
+      if (error) { console.error("Publish failed:", error); toast.error(t("createListing.toasts.publishFailed")); setSaving(false); return; }
       await logAudit("listing_published", "listing", listingId, { title: disclosure.business_activity }).catch(() => {});
       import("@/lib/invokeWithRetry").then(({ invokeWithRetry }) => { invokeWithRetry("auto-analyze-listing", { listingId }).catch(() => {}); });
       if (autoSaveTimerRef.current) { clearInterval(autoSaveTimerRef.current); autoSaveTimerRef.current = null; }
       setSaving(false);
-      toast.success("تم نشر الإعلان بنجاح! 🎉");
+      toast.success(t("createListing.toasts.publishSuccess"));
       navigate(`/listing/${listingId}`);
-    } catch (err) { console.error("Publish error:", err); toast.error("حدث خطأ غير متوقع أثناء النشر"); setSaving(false); }
+    } catch (err) { console.error("Publish error:", err); toast.error(t("createListing.toasts.publishUnexpected")); setSaving(false); }
   };
 
   // Computed values
@@ -1242,26 +1247,26 @@ const CreateListingPage = () => {
     return (
       <div className="py-20 flex flex-col items-center justify-center gap-3">
         <Loader2 size={28} className="animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">جارٍ التحقق من المسودات السابقة...</p>
+        <p className="text-sm text-muted-foreground">{t("createListing.draftCheckingPrev")}</p>
       </div>
     );
   }
 
   return (
-    <VerificationGate message="يجب توثيق رقم جوالك قبل إضافة إعلان">
+    <VerificationGate message={t("createListing.verificationGate")}>
     <div className="py-8">
       <div className="container max-w-3xl">
-        <h1 className="text-2xl font-medium mb-2">إضافة فرصة تقبيل</h1>
-        <p className="text-sm text-muted-foreground">أنشئ إعلان تقبيل احترافي بمساعدة الذكاء الاصطناعي <AiInlineStar size={12} /></p>
+        <h1 className="text-2xl font-medium mb-2">{t("createListing.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("createListing.subtitle")} <AiInlineStar size={12} /></p>
         <p className="text-sm font-bold text-primary animate-fade-in [animation-delay:0.5s] [animation-fill-mode:backwards] mb-2">
           <Sparkles size={14} className="inline-block ml-1" />
-          بدون ما تكتب سطر واحد
+          {t("createListing.tagline")}
         </p>
 
         {draftRestored && (
           <div className="mb-4 bg-success/10 border border-success/30 rounded-xl px-4 py-2.5 flex items-center gap-2 animate-fade-in">
             <Check size={16} className="text-success shrink-0" />
-            <p className="text-xs text-success font-medium">تم استعادة مسودتك السابقة — يمكنك المتابعة من حيث توقفت</p>
+            <p className="text-xs text-success font-medium">{t("createListing.draftRestored")}</p>
             <button onClick={() => setDraftRestored(false)} className="mr-auto text-success/60 hover:text-success text-xs">✕</button>
           </div>
         )}
@@ -1297,7 +1302,7 @@ const CreateListingPage = () => {
         <div className="flex items-center justify-between mb-4 gap-3">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] text-muted-foreground">اكتمال البيانات</span>
+              <span className="text-[10px] text-muted-foreground">{t("createListing.completion")}</span>
               <span className="text-[10px] font-medium text-primary">{completionPercent}%</span>
             </div>
             <div className="h-1.5 rounded-full bg-muted overflow-hidden">
@@ -1307,12 +1312,12 @@ const CreateListingPage = () => {
           <div className="shrink-0">
             {autoSaveStatus === "saving" && (
               <div className="flex items-center gap-1.5 text-[10px] text-primary animate-fade-in">
-                <Loader2 size={12} className="animate-spin" /> جاري الحفظ...
+                <Loader2 size={12} className="animate-spin" /> {t("createListing.autoSave.saving")}
               </div>
             )}
             {autoSaveStatus === "saved" && (
               <div className="flex items-center gap-1.5 text-[10px] text-success animate-fade-in">
-                <Check size={12} strokeWidth={2} /> تم الحفظ تلقائياً
+                <Check size={12} strokeWidth={2} /> {t("createListing.autoSave.saved")}
               </div>
             )}
           </div>
@@ -1330,13 +1335,13 @@ const CreateListingPage = () => {
           <div className="flex items-center gap-2">
             {currentStep > 0 && (
               <Button variant="outline" onClick={handleBack} className="rounded-xl active:scale-[0.98]">
-                <ArrowRight size={16} strokeWidth={1.5} /> السابق
+                <ArrowRight size={16} strokeWidth={1.5} /> {t("createListing.buttons.back")}
               </Button>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={async () => { await saveDraft(); toast.success("تم حفظ المسودة", { icon: "💾", duration: 4000 }); navigate("/dashboard"); }} disabled={saving || !listingId} className="rounded-xl text-muted-foreground hover:text-foreground active:scale-[0.98]">
-              <Save size={15} strokeWidth={1.5} /> حفظ والمتابعة لاحقاً
+            <Button variant="ghost" onClick={async () => { await saveDraft(); toast.success(t("createListing.toasts.draftSaved"), { icon: "💾", duration: 4000 }); navigate("/dashboard"); }} disabled={saving || !listingId} className="rounded-xl text-muted-foreground hover:text-foreground active:scale-[0.98]">
+              <Save size={15} strokeWidth={1.5} /> {t("createListing.buttons.saveAndContinue")}
             </Button>
             {currentStep < steps.length - 1 && (
               <Button onClick={handleNext} disabled={(currentStep === 0 && !dealStructure.isValid) || saving || (currentStep === 2 && analyzing)} className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
@@ -1355,23 +1360,23 @@ const CreateListingPage = () => {
               <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-3">
                 <AlertTriangle size={24} strokeWidth={1.5} className="text-amber-600" />
               </div>
-              <h3 className="font-semibold text-lg mb-1">إعلان مشابه منشور بالفعل</h3>
-              <p className="text-sm text-muted-foreground">يبدو أن لديك إعلاناً مشابهاً منشوراً. هل تريد تعديله بدلاً من إنشاء إعلان جديد؟</p>
+              <h3 className="font-semibold text-lg mb-1">{t("createListing.duplicate.heading")}</h3>
+              <p className="text-sm text-muted-foreground">{t("createListing.duplicate.body")}</p>
             </div>
             <div className="bg-muted/40 rounded-xl p-4 space-y-2 text-sm">
-              <div className="flex items-center justify-between"><span className="text-muted-foreground">الإعلان</span><span className="font-medium text-foreground truncate max-w-[60%] text-end">{duplicateCandidate.title}</span></div>
-              {duplicateCandidate.city && (<><div className="border-t border-border/30" /><div className="flex items-center justify-between"><span className="text-muted-foreground">المدينة</span><span className="font-medium text-foreground">{duplicateCandidate.city}</span></div></>)}
-              {duplicateCandidate.price != null && (<><div className="border-t border-border/30" /><div className="flex items-center justify-between"><span className="text-muted-foreground">السعر</span><span className="font-medium text-foreground">{Number(duplicateCandidate.price).toLocaleString()} <SarSymbol size={10} /></span></div></>)}
+              <div className="flex items-center justify-between"><span className="text-muted-foreground">{t("createListing.duplicate.listingLabel")}</span><span className="font-medium text-foreground truncate max-w-[60%] text-end">{duplicateCandidate.title}</span></div>
+              {duplicateCandidate.city && (<><div className="border-t border-border/30" /><div className="flex items-center justify-between"><span className="text-muted-foreground">{t("createListing.duplicate.cityLabel")}</span><span className="font-medium text-foreground">{duplicateCandidate.city}</span></div></>)}
+              {duplicateCandidate.price != null && (<><div className="border-t border-border/30" /><div className="flex items-center justify-between"><span className="text-muted-foreground">{t("createListing.duplicate.priceLabel")}</span><span className="font-medium text-foreground">{Number(duplicateCandidate.price).toLocaleString()} <SarSymbol size={10} /></span></div></>)}
             </div>
             <div className="flex flex-col gap-2">
               <Button onClick={() => { const id = duplicateCandidate.id; setDuplicateCandidate(null); navigate(`/listing/${id}`); }} className="rounded-xl gradient-primary text-primary-foreground">
-                تعديل الإعلان الحالي
+                {t("createListing.duplicate.editExisting")}
               </Button>
               <Button variant="outline" onClick={() => { setDuplicateCandidate(null); setDuplicateAcknowledged(true); setTimeout(() => handlePublishClick(), 0); }} className="rounded-xl">
-                نشر كإعلان جديد
+                {t("createListing.duplicate.publishAsNew")}
               </Button>
               <Button variant="ghost" onClick={() => setDuplicateCandidate(null)} className="rounded-xl text-muted-foreground">
-                إلغاء
+                {t("createListing.duplicate.cancel")}
               </Button>
             </div>
           </div>
@@ -1386,26 +1391,26 @@ const CreateListingPage = () => {
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
                 {dealCheckResult ? <Check size={24} strokeWidth={1.5} className="text-primary" /> : <AiStar size={24} />}
               </div>
-              <h3 className="font-semibold text-lg mb-1">{dealCheckResult ? "تأكيد نشر الإعلان" : "فحص الصفقة قبل النشر"}</h3>
-              <p className="text-xs text-muted-foreground">{dealCheckResult ? "تمت مراجعة الصفقة — هل تريد المتابعة بالنشر؟" : "الـAI يحلل صفقتك ويعطيك توصية قبل النشر"}</p>
+              <h3 className="font-semibold text-lg mb-1">{dealCheckResult ? t("createListing.publishModal.titleConfirm") : t("createListing.publishModal.titleCheck")}</h3>
+              <p className="text-xs text-muted-foreground">{dealCheckResult ? t("createListing.publishModal.subtitleConfirm") : t("createListing.publishModal.subtitleCheck")}</p>
             </div>
             <div className="space-y-2 bg-muted/30 rounded-xl p-4 text-sm">
-              <div className="flex items-center justify-between"><span className="text-muted-foreground">العنوان</span><span className="font-medium text-foreground">{disclosure.business_activity || "—"}</span></div>
+              <div className="flex items-center justify-between"><span className="text-muted-foreground">{t("createListing.publishModal.fieldTitle")}</span><span className="font-medium text-foreground">{disclosure.business_activity || "—"}</span></div>
               <div className="border-t border-border/30" />
-              <div className="flex items-center justify-between"><span className="text-muted-foreground">المدينة</span><span className="font-medium text-foreground">{disclosure.city || "—"}</span></div>
+              <div className="flex items-center justify-between"><span className="text-muted-foreground">{t("createListing.publishModal.fieldCity")}</span><span className="font-medium text-foreground">{disclosure.city || "—"}</span></div>
               <div className="border-t border-border/30" />
-              <div className="flex items-center justify-between"><span className="text-muted-foreground">السعر</span><span className="font-medium text-foreground">{disclosure.price ? <>{Number(disclosure.price).toLocaleString()} <SarSymbol size={10} /></> : "—"}</span></div>
+              <div className="flex items-center justify-between"><span className="text-muted-foreground">{t("createListing.publishModal.fieldPrice")}</span><span className="font-medium text-foreground">{disclosure.price ? <>{Number(disclosure.price).toLocaleString()} <SarSymbol size={10} /></> : "—"}</span></div>
             </div>
             {dealCheckLoading && (
               <div className="py-8 flex flex-col items-center gap-3">
                 <div className="relative"><AiStar size={28} /><Loader2 size={44} strokeWidth={1} className="absolute -top-2 -left-2 text-primary/30 animate-spin" /></div>
-                <p className="text-sm font-medium">جاري فحص الصفقة...</p>
+                <p className="text-sm font-medium">{t("createListing.publishModal.checking")}</p>
               </div>
             )}
             {dealCheckError && !dealCheckLoading && (
               <div className="bg-warning/10 border border-warning/30 rounded-xl p-3 flex items-start gap-2">
                 <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
-                <div><p className="text-xs font-medium text-warning">تعذّر إجراء الفحص التلقائي</p><p className="text-[10px] text-muted-foreground mt-0.5">{dealCheckError}</p></div>
+                <div><p className="text-xs font-medium text-warning">{t("createListing.publishModal.checkFailed")}</p><p className="text-[10px] text-muted-foreground mt-0.5">{dealCheckError}</p></div>
               </div>
             )}
             {dealCheckResult && !dealCheckLoading && (
@@ -1421,15 +1426,15 @@ const CreateListingPage = () => {
                     dealCheckResult.ratingColor === "yellow" ? "text-amber-700" :
                     dealCheckResult.ratingColor === "red" ? "text-red-700" : "text-foreground"
                   )}>{dealCheckResult.rating}</span>
-                  <span className="text-[11px] text-muted-foreground">عدالة السعر: {dealCheckResult.fairnessVerdict}</span>
+                  <span className="text-[11px] text-muted-foreground">{t("createListing.publishModal.fairness")} {dealCheckResult.fairnessVerdict}</span>
                 </div>
               </div>
             )}
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setShowPublishConfirm(false)} disabled={dealCheckLoading} className="flex-1 rounded-xl">إلغاء</Button>
+              <Button variant="outline" onClick={() => setShowPublishConfirm(false)} disabled={dealCheckLoading} className="flex-1 rounded-xl">{t("createListing.publishModal.cancel")}</Button>
               <Button onClick={handlePublish} disabled={saving || dealCheckLoading} className="flex-1 gradient-primary text-primary-foreground rounded-xl">
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
-                {dealCheckResult ? "موافق — انشر الإعلان" : "تأكيد النشر"}
+                {dealCheckResult ? t("createListing.buttons.publishApprove") : t("createListing.buttons.publishConfirm")}
               </Button>
             </div>
           </div>
