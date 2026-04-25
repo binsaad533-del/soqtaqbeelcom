@@ -547,7 +547,7 @@ export function FileReviewDialog({
                     variant="outline"
                     onClick={() => window.open(previewFile.file_url, "_blank")}
                   >
-                    فتح في تبويب جديد
+                    {t("createListing.fileReview.openInNewTab")}
                   </Button>
                 </div>
               )}
