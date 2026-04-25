@@ -127,9 +127,10 @@ const CreateListingStep2Unified = ({ state }: Props) => {
           <div className="flex items-center gap-2 text-xs font-medium">
             <Loader2 size={14} className="animate-spin text-primary" />
             <span>
-              جاري رفع الملفات (
-              {fileStatuses.filter((f) => f.status === "uploaded").length}/
-              {fileStatuses.length})
+              {t("createListing.step2.uploadingProgress", {
+                current: fileStatuses.filter((f) => f.status === "uploaded").length,
+                total: fileStatuses.length,
+              })}
             </span>
           </div>
           <div className="h-1.5 rounded-full bg-muted overflow-hidden">
@@ -153,8 +154,10 @@ const CreateListingStep2Unified = ({ state }: Props) => {
           <div className="flex items-center gap-2 text-xs font-medium text-primary">
             <Sparkles size={14} className="animate-pulse" />
             <span>
-              جاري تصنيف الملفات بالـAI... ({classifyProgress.current}/
-              {classifyProgress.total})
+              {t("createListing.step2.classifyingProgress", {
+                current: classifyProgress.current,
+                total: classifyProgress.total,
+              })}
             </span>
           </div>
           <div className="h-1.5 rounded-full bg-muted overflow-hidden">
@@ -166,7 +169,7 @@ const CreateListingStep2Unified = ({ state }: Props) => {
             />
           </div>
           <p className="text-[10px] text-muted-foreground text-center">
-            معدات / مكان / فاتورة / وثيقة قانونية — كل ملف يُصنَّف منفصلاً
+            {t("createListing.step2.classifyingHint")}
           </p>
         </div>
       )}
