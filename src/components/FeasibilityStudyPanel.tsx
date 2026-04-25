@@ -20,6 +20,7 @@ import {
 } from "@/lib/pdfShared";
 import { useTranslation } from "react-i18next";
 import { mapFeasibilityVerdictToKey, mapConfidenceToKey } from "@/lib/condition-utils";
+import { useFeasibilityTranslation } from "@/hooks/useFeasibilityTranslation";
 /* ── Types ── */
 interface Scenario {
   monthlyRevenue: number;
