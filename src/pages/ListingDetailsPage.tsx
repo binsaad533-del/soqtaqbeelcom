@@ -982,7 +982,7 @@ const ListingDetailsPage = () => {
                       className="w-full rounded-xl text-base h-12 active:scale-[0.98] mb-3"
                     >
                       {startingDeal ? <Loader2 size={18} className="animate-spin" /> : <Heart size={18} strokeWidth={1.5} />}
-                      أبدِ اهتمامك
+                      {t('listing.showInterest')}
                     </Button>
                   )}
 
