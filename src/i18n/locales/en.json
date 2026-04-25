@@ -111,7 +111,20 @@
     "mainOption": "Primary option",
     "alternativeOptions": "Alternative options:",
     "includes": "Includes",
-    "excludes": "Excludes"
+    "excludes": "Excludes",
+    "annualRent": "Annual rent",
+    "contractDuration": "Contract duration",
+    "remaining": "Remaining",
+    "municipalLicense": "Municipal license",
+    "civilDefense": "Civil defense",
+    "liabilities": "Liabilities",
+    "active": "Active",
+    "none": "None",
+    "expired": "Expired",
+    "years": "years",
+    "year": "year",
+    "area": "Area:",
+    "sqm": "sqm"
   },
   "deal": {
     "mainOption": "Primary option",

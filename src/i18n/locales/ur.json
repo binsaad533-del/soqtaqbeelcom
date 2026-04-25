@@ -111,7 +111,20 @@
     "mainOption": "بنیادی آپشن",
     "alternativeOptions": "متبادل آپشنز:",
     "includes": "شامل ہے",
-    "excludes": "شامل نہیں"
+    "excludes": "شامل نہیں",
+    "annualRent": "سالانہ کرایہ",
+    "contractDuration": "معاہدے کی مدت",
+    "remaining": "باقی",
+    "municipalLicense": "میونسپل لائسنس",
+    "civilDefense": "سول ڈیفنس",
+    "liabilities": "واجبات",
+    "active": "فعال",
+    "none": "کوئی نہیں",
+    "expired": "ختم شدہ",
+    "years": "سال",
+    "year": "سال",
+    "area": "رقبہ:",
+    "sqm": "مربع میٹر"
   },
   "deal": {
     "mainOption": "بنیادی آپشن",

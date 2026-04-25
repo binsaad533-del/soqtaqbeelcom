@@ -44,7 +44,7 @@ import { getArabicDealType } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
 import ReportListingDialog from "@/components/ReportListingDialog";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
-import { mapConditionToKey, mapDealTypeToKey } from "@/lib/condition-utils";
+import { mapConditionToKey, mapDealTypeToKey, translateStatusValue, translateLeaseDuration } from "@/lib/condition-utils";
 
 
 type ListingDocumentItem = {
@@ -882,7 +882,7 @@ const ListingDetailsPage = () => {
               {(listing as any).area_sqm && (
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2">
                   <Building2 size={14} strokeWidth={1.3} />
-                  المساحة: {(listing as any).area_sqm} م²
+                  {t('listing.area')} {(listing as any).area_sqm} {t('listing.sqm')}
                 </div>
               )}
 
@@ -910,12 +910,12 @@ const ListingDetailsPage = () => {
                       <ChevronDown size={14} className="transition-transform group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="space-y-3 pt-2">
-                      {listing.annual_rent && <InfoRow label="الإيجار السنوي" value={<PriceDisplay amount={Number(listing.annual_rent)} size={10} />} />}
-                      {listing.lease_duration && <InfoRow label="مدة العقد" value={listing.lease_duration} />}
-                      {listing.lease_remaining && <InfoRow label="المتبقي" value={listing.lease_remaining} />}
-                      {listing.municipality_license && <InfoRow label="رخصة البلدية" value={listing.municipality_license} />}
-                      {listing.civil_defense_license && <InfoRow label="الدفاع المدني" value={listing.civil_defense_license} />}
-                      {listing.liabilities && <InfoRow label="الالتزامات" value={listing.liabilities} />}
+                      {listing.annual_rent && <InfoRow label={t('listing.annualRent')} value={<PriceDisplay amount={Number(listing.annual_rent)} size={10} />} />}
+                      {listing.lease_duration && <InfoRow label={t('listing.contractDuration')} value={translateLeaseDuration(listing.lease_duration, t)} />}
+                      {listing.lease_remaining && <InfoRow label={t('listing.remaining')} value={translateLeaseDuration(listing.lease_remaining, t)} />}
+                      {listing.municipality_license && <InfoRow label={t('listing.municipalLicense')} value={translateStatusValue(listing.municipality_license, t)} />}
+                      {listing.civil_defense_license && <InfoRow label={t('listing.civilDefense')} value={translateStatusValue(listing.civil_defense_license, t)} />}
+                      {listing.liabilities && <InfoRow label={t('listing.liabilities')} value={translateStatusValue(listing.liabilities, t)} />}
                     </CollapsibleContent>
                   </Collapsible>
                 )}

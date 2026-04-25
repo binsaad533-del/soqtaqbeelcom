@@ -111,7 +111,20 @@
     "mainOption": "الخيار الرئيسي",
     "alternativeOptions": "خيارات بديلة:",
     "includes": "يشمل",
-    "excludes": "لا يشمل"
+    "excludes": "لا يشمل",
+    "annualRent": "الإيجار السنوي",
+    "contractDuration": "مدة العقد",
+    "remaining": "المتبقي",
+    "municipalLicense": "رخصة البلدية",
+    "civilDefense": "الدفاع المدني",
+    "liabilities": "الالتزامات",
+    "active": "سارية",
+    "none": "لا يوجد",
+    "expired": "منتهية",
+    "years": "سنوات",
+    "year": "سنة",
+    "area": "المساحة:",
+    "sqm": "م²"
   },
   "deal": {
     "mainOption": "الخيار الرئيسي",
