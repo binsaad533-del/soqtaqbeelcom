@@ -1,6 +1,5 @@
 import { Globe, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { changeLanguage, LANG_LABELS, SUPPORTED_LANGS, type SupportedLang } from "@/i18n";
 import {
   DropdownMenu,
@@ -11,13 +10,10 @@ import {
 
 const LanguageToggle = () => {
   const { i18n } = useTranslation();
-  const { setLang } = useLanguage();
   const current = (i18n.resolvedLanguage || i18n.language || "ar").split("-")[0] as SupportedLang;
 
   const handleSelect = async (code: SupportedLang) => {
     await changeLanguage(code);
-    // Keep legacy LanguageContext (ar/en) in sync so existing tx() calls still work
-    if (code === "ar" || code === "en") setLang(code);
   };
 
   return (
