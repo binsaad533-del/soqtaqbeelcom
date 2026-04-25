@@ -307,6 +307,7 @@ export function FileReviewDialog({
   onOpenChange,
   onConfirmed,
 }: FileReviewDialogProps) {
+  const { t } = useTranslation();
   const {
     classifications,
     grouped,
