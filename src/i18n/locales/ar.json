@@ -27,7 +27,8 @@
     "marketValueLabel": "سوقية:",
     "takeoverValueLabel": "تقبيل:",
     "copied": "تم النسخ",
-    "updating": "جاري التحديث..."
+    "updating": "جاري التحديث...",
+    "welcomeBanner": "🎉 مرحباً بكم في الإطلاق الأول لمنصة سوق تقبيل — نسعد بملاحظاتكم لتطوير تجربتكم"
   },
   "auth": {
     "enterPhone": "أدخل رقم جوالك",

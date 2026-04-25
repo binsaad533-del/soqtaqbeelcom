@@ -11,6 +11,25 @@ const corsHeaders = {
 
 const TRANSLATABLE_INVENTORY_FIELDS = ["name", "details", "description", "category"];
 
+// Top-level listing text fields that should be translated. Numbers (e.g. "4", "1-2")
+// inside string values are preserved by the Gemini prompt rules.
+const TRANSLATABLE_LISTING_FIELDS = [
+  "title",
+  "description",
+  "city",
+  "district",
+  "business_activity",
+  "lease_duration",
+  "lease_paid_period",
+  "lease_remaining",
+  "liabilities",
+  "municipality_license",
+  "civil_defense_license",
+  "surveillance_cameras",
+  "overdue_rent",
+  "overdue_salaries",
+] as const;
+
 const LANGUAGE_NAMES: Record<string, string> = {
   en: "English",
   zh: "Simplified Chinese",
@@ -46,28 +65,28 @@ Deno.serve(async (req) => {
     );
 
     // 1. Read the listing
-    const { data: listing, error: listingErr } = await supabase
+    const selectColumns = ["id", "updated_at", "inventory", ...TRANSLATABLE_LISTING_FIELDS].join(", ");
+    const { data: listingRow, error: listingErr } = await supabase
       .from("listings")
-      .select("id, title, description, city, district, inventory, updated_at")
+      .select(selectColumns)
       .eq("id", listing_id)
       .maybeSingle();
 
-    if (listingErr || !listing) {
+    if (listingErr || !listingRow) {
       return new Response(JSON.stringify({ error: "Listing not found" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const listing = listingRow as any;
 
-    // 2. Compute hash of source content
-    const sourceContent = JSON.stringify({
-      title: listing.title ?? "",
-      description: listing.description ?? "",
-      city: listing.city ?? "",
-      district: listing.district ?? "",
-      inventory: listing.inventory ?? [],
-    });
-    const sourceHash = await hashString(sourceContent);
+    // 2. Compute hash of source content (covers all translatable fields + inventory)
+    const sourcePayload: Record<string, unknown> = { inventory: listing.inventory ?? [] };
+    for (const field of TRANSLATABLE_LISTING_FIELDS) {
+      sourcePayload[field] = listing[field] ?? "";
+    }
+    const sourceHash = await hashString(JSON.stringify(sourcePayload));
 
     // 3. Cache lookup
     const { data: cached } = await supabase
@@ -84,15 +103,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 4. Build translation payload
+    // 4. Build translation payload — loop over all whitelisted top-level fields
     const toTranslate: Record<string, string> = {};
-    if (listing.title && typeof listing.title === "string") toTranslate.title = listing.title;
-    if (listing.description && typeof listing.description === "string") {
-      toTranslate.description = listing.description;
-    }
-    if (listing.city && typeof listing.city === "string") toTranslate.city = listing.city;
-    if (listing.district && typeof listing.district === "string") {
-      toTranslate.district = listing.district;
+    for (const field of TRANSLATABLE_LISTING_FIELDS) {
+      const val = listing[field];
+      if (val && typeof val === "string" && val.trim().length > 0) {
+        toTranslate[field] = val;
+      }
     }
 
     const inventory = Array.isArray(listing.inventory) ? listing.inventory : [];

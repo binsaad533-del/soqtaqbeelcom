@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { X, Rocket } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 
 const STORAGE_KEY = "launch_banner_dismissed";
 
 const LaunchBanner = () => {
-  const { tx } = useLanguage();
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(() => {
     try { return sessionStorage.getItem(STORAGE_KEY) === "1"; } catch { return false; }
   });
@@ -22,10 +22,7 @@ const LaunchBanner = () => {
       <div className="flex items-center justify-center gap-2">
         <Rocket size={14} className="shrink-0 animate-pulse" />
         <span>
-          {tx(
-            "🎉 مرحباً بكم في الإطلاق الأول لمنصة سوق تقبيل — نسعد بملاحظاتكم لتطوير تجربتكم",
-            "🎉 Welcome to the first launch of Soq Taqbeel — we value your feedback"
-          )}
+          {t("common.welcomeBanner")}
         </span>
       </div>
       <button

@@ -27,7 +27,8 @@
     "marketValueLabel": "市场价：",
     "takeoverValueLabel": "收购价：",
     "copied": "已复制",
-    "updating": "更新中..."
+    "updating": "更新中...",
+    "welcomeBanner": "🎉 欢迎来到 Souq Taqbeel 首次发布 — 您的反馈对我们很重要"
   },
   "auth": {
     "enterPhone": "请输入您的手机号码",
