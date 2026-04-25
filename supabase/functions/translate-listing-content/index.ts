@@ -66,23 +66,25 @@ Deno.serve(async (req) => {
 
     // 1. Read the listing
     const selectColumns = ["id", "updated_at", "inventory", ...TRANSLATABLE_LISTING_FIELDS].join(", ");
-    const { data: listing, error: listingErr } = await supabase
+    const { data: listingRow, error: listingErr } = await supabase
       .from("listings")
       .select(selectColumns)
       .eq("id", listing_id)
       .maybeSingle();
 
-    if (listingErr || !listing) {
+    if (listingErr || !listingRow) {
       return new Response(JSON.stringify({ error: "Listing not found" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const listing = listingRow as any;
 
     // 2. Compute hash of source content (covers all translatable fields + inventory)
     const sourcePayload: Record<string, unknown> = { inventory: listing.inventory ?? [] };
     for (const field of TRANSLATABLE_LISTING_FIELDS) {
-      sourcePayload[field] = (listing as any)[field] ?? "";
+      sourcePayload[field] = listing[field] ?? "";
     }
     const sourceHash = await hashString(JSON.stringify(sourcePayload));
 
