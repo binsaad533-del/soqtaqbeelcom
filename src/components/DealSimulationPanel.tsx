@@ -91,7 +91,7 @@ const DealSimulationPanel = ({ listingId }: Props) => {
           </div>
         </div>
       ) : (
-        <p className="text-[10px] text-muted-foreground text-center py-4">لا توجد بيانات كافية للمحاكاة</p>
+        <p className="text-[10px] text-muted-foreground text-center py-4">{t("simulation.noData")}</p>
       )}
     </div>
   );
