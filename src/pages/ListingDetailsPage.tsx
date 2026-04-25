@@ -769,13 +769,13 @@ const ListingDetailsPage = () => {
             {/* ====== جرد الأصول (Accordion) ====== */}
             {inventory.length > 0 && (
               <SectionAccordion
-                title={`جرد الأصول (${inventory.length})`}
+                title={`${t('listing.assetInventory')} (${inventory.length})`}
                 icon={<Building2 size={16} strokeWidth={1.4} className="text-primary" />}
                 summary={(() => {
                   const inv = (listing.inventory || []) as any[];
                   const priced = inv.filter((a) => typeof a?.pricing?.price_sar === "number" && a.pricing.price_sar > 0 && a.pricing?.confidence !== "يتطلب_معاينة").length;
                   const inspect = inv.length - priced;
-                  return inspect > 0 ? `${priced} مُسعَّر · ${inspect} يحتاج معاينة` : `${priced} مُسعَّر`;
+                  return inspect > 0 ? `${priced} ${t('listing.priced')} · ${inspect} ${t('listing.needsInspection')}` : `${priced} ${t('listing.priced')}`;
                 })()}
               >
                 <CollapsibleList title="جرد الأصول المؤكّد" items={inventory} threshold={5} renderItem={(item, i) => (
