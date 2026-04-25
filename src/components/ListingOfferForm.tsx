@@ -54,13 +54,13 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
     if (!user) { navigate("/login"); return; }
     const numPrice = Number(price);
     if (!numPrice || numPrice <= 0) {
-      toast.error("يرجى إدخال سعر صحيح");
+      toast.error(t("offer.invalidPrice"));
       return;
     }
 
     // Rate limit: max 5 offers per 10 minutes
     if (isRateLimited(`offer_${user.id}`, 5, 10 * 60 * 1000)) {
-      toast.error("تم تجاوز الحد المسموح. يرجى الانتظار قبل إرسال عرض جديد");
+      toast.error(t("offer.rateLimited"));
       return;
     }
 
@@ -68,9 +68,9 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
 
     const { error } = await submitOffer(listingId, numPrice, safeMessage);
     if (error) {
-      toast.error("فشل إرسال العرض");
+      toast.error(t("offer.sendFailed"));
     } else {
-      toast.success("تم إرسال عرضك بنجاح ✅");
+      toast.success(t("offer.sentSuccess"));
       setShowForm(false);
       setMyOffer({ offered_price: numPrice, message, status: "pending" } as any);
       setPrice("");
@@ -106,10 +106,10 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-foreground">
-              {summary.total_offers} عرض مقدّم
+              {summary.total_offers} {t("offer.offersCount")}
             </p>
             <p className="text-[11px] text-muted-foreground">
-              أعلى عرض: {summary.highest_offer.toLocaleString("en-US")} <SarSymbol size={9} />
+              {t("offer.highestOffer")} {summary.highest_offer.toLocaleString("en-US")} <SarSymbol size={9} />
             </p>
           </div>
         </div>
@@ -120,7 +120,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <Check size={14} className="text-success" />
-              <span className="text-xs font-medium text-success">تم إرسال عرضك</span>
+              <span className="text-xs font-medium text-success">{t("offer.submitted")}</span>
             </div>
           </div>
           <p className="text-sm font-medium text-foreground">
@@ -131,12 +131,12 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
           )}
           {myOffer.status === "accepted" && (
             <div className="mt-2 text-xs font-medium text-success bg-success/10 rounded-lg px-2 py-1 inline-block">
-              ✓ تم قبول عرضك!
+              {t("offer.accepted")}
             </div>
           )}
           {myOffer.status === "rejected" && (
             <div className="mt-2 text-xs font-medium text-destructive bg-destructive/10 rounded-lg px-2 py-1 inline-block">
-              تم رفض العرض
+              {t("offer.rejected")}
               {myOffer.seller_response && <span className="block mt-1 font-normal">{myOffer.seller_response}</span>}
             </div>
           )}
@@ -147,7 +147,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
             onClick={() => setShowForm(true)}
           >
             <RefreshCw size={12} />
-            تقديم عرض جديد
+            {t("offer.newOffer")}
           </Button>
         </div>
       ) : (
@@ -155,7 +155,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
           <div className="flex items-center gap-2">
             <DollarSign size={14} className="text-primary" />
             <span className="text-xs font-semibold text-foreground">
-              {myOffer ? "تقديم عرض جديد" : t("listing.makeOffer")}
+              {myOffer ? t("offer.newOffer") : t("listing.makeOffer")}
             </span>
           </div>
 
@@ -190,7 +190,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
               inputMode="decimal"
               value={price}
               onChange={(e) => handlePriceChange(e.target.value)}
-              placeholder={listingPrice ? `${t("listing.price")}: ${Number(listingPrice).toLocaleString("en-US")}` : "اكتب سعرك"}
+              placeholder={listingPrice ? `${t("listing.price")}: ${Number(listingPrice).toLocaleString("en-US")}` : t("offer.writePrice")}
               className="w-full pr-12 pl-3 py-2.5 rounded-xl border border-border/50 bg-background text-sm text-right focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
               dir="rtl"
               lang="en"
@@ -219,7 +219,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
               onClick={() => setShowForm(false)}
               className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              إلغاء
+              {t("offer.cancel")}
             </button>
           )}
         </div>
