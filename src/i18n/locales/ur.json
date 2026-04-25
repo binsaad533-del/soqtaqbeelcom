@@ -21,7 +21,13 @@
     "showLess": "کم دکھائیں",
     "low": "کم",
     "medium": "درمیانہ",
-    "high": "زیادہ"
+    "high": "زیادہ",
+    "currency": "سعودی ریال",
+    "totalValue": "کل قیمت:",
+    "marketValueLabel": "مارکیٹ:",
+    "takeoverValueLabel": "حصول:",
+    "copied": "کاپی ہو گیا",
+    "updating": "اپ ڈیٹ ہو رہا ہے..."
   },
   "auth": {
     "enterPhone": "اپنا موبائل نمبر درج کریں",
@@ -124,7 +130,12 @@
     "excludes": "شامل نہیں",
     "viewDetails": "تفصیلات دیکھیں",
     "setAsPrimary": "بطور بنیادی منتخب کریں",
-    "alternative": "متبادل"
+    "alternative": "متبادل",
+    "type_full_takeover": "مکمل حصول",
+    "type_partial": "جزوی حصول",
+    "type_assets_only": "صرف اثاثے",
+    "type_franchise": "فرنچائز",
+    "dealSummary": "تجارتی رجسٹریشن، تجارتی نام، ٹریڈ مارک شامل"
   },
   "offer": {
     "submitted": "آپ کی پیشکش بھیج دی گئی",
@@ -198,7 +209,14 @@
     "resume": "دوبارہ فعال کریں",
     "promote": "اشتہار کو فروغ دیں",
     "delete": "حذف کریں",
-    "featured": "نمایاں اشتہار"
+    "featured": "نمایاں اشتہار",
+    "paused": "روک دیا گیا",
+    "deleted": "حذف شدہ",
+    "manageListing": "اشتہار کا انتظام",
+    "status": "حالت",
+    "share": "شیئر",
+    "back": "واپس",
+    "showMore": "مزید دیکھیں"
   },
   "marketplace": {
     "title": "کاروباری مارکیٹ پلیس",
@@ -255,7 +273,27 @@
     "confidenceMedium": "درمیانہ اعتماد",
     "confidenceLow": "کم اعتماد",
     "confidenceEstimate": "تخمینی",
-    "confidenceNeedsInspection": "معائنے کی ضرورت"
+    "confidenceNeedsInspection": "معائنے کی ضرورت",
+    "confidenceLevel": "اعتماد کی سطح",
+    "confidenceLevelLow": "کم",
+    "confidenceLevelMedium": "درمیانہ",
+    "confidenceLevelHigh": "بلند",
+    "verdict_acceptable_caution": "احتیاط کے ساتھ قابل قبول",
+    "verdict_good": "اچھا",
+    "verdict_excellent": "بہترین",
+    "verdict_risky": "زیادہ خطرہ",
+    "olvDisclaimerPrefix": "قیمتیں",
+    "olvMethodology": "منظم تصفیہ کی قیمت (OLV)",
+    "olvDisclaimerMiddle": "طریقہ کار سے شمار کی گئی ہیں، جو",
+    "olvAuthority": "سعودی مستند تخمینہ کاروں کے ادارے (TAQEEM)",
+    "olvDisclaimerSuffix": "معیارات اور IVS 160.1 کے مطابق ہیں۔ فارمولا: اثاثے کی حالت کے مطابق مادی فرسودگی × منظم تصفیہ رعایت۔",
+    "matchQuality": "مماثلت کا معیار",
+    "pricingInProgress": "اثاثوں کی قیمت کا تعین جاری ہے",
+    "pricingInProgressDesc": "قیمت کے تعین میں عام طور پر 30-60 سیکنڈ لگتے ہیں۔ مکمل ہونے پر ویو خودکار اپ ڈیٹ ہوگا۔",
+    "smartAnalysis": "سودے کا جامع ذہین تجزیہ",
+    "analyzing": "تجزیہ ہو رہا ہے",
+    "savedAnalysis": "محفوظ تجزیہ",
+    "extraValue": "اضافی قیمت (تجارتی نام + لائسنس + گاہکوں کی بنیاد)"
   },
   "feasibility": {
     "title": "اقتصادی فزیبلٹی اسٹڈی",
@@ -281,7 +319,27 @@
     "marketRisks": "مارکیٹ کے خطرات",
     "regulatoryRisks": "ریگولیٹری خطرات",
     "mitigationStrategies": "کمی کی حکمت عملیاں:",
-    "topCompetitors": "اہم حریف:"
+    "topCompetitors": "اہم حریف:",
+    "investmentAcceptableWithCaution": "احتیاط کے ساتھ قابل قبول سرمایہ کاری",
+    "investmentGood": "اچھی سرمایہ کاری",
+    "investmentExcellent": "بہترین سرمایہ کاری",
+    "investmentRisky": "زیادہ خطرے کی سرمایہ کاری",
+    "loadingStudy": "مطالعہ لوڈ ہو رہا ہے...",
+    "savedStudy": "محفوظ مطالعہ",
+    "saved": "محفوظ",
+    "refresh": "تازہ کریں",
+    "preparingStudy": "مطالعہ تیار ہو رہا ہے... (30 سیکنڈ لگ سکتے ہیں)",
+    "noDataForStudy": "فی الحال فزیبلٹی اسٹڈی تیار کرنے کے لیے کافی ڈیٹا دستیاب نہیں",
+    "prepareStudyNow": "ابھی مطالعہ تیار کریں",
+    "assetsOnlyTitle": "صرف اثاثے",
+    "assetsOnlyDesc": "یہ سودا \"صرف اثاثے\" کی قسم کا ہے — یعنی کاروباری سرگرمی کے بغیر سامان یا اثاثوں کی فروخت۔ اسی لیے معاشی فزیبلٹی اسٹڈی لاگو نہیں ہوتی۔",
+    "assetsOnlyAlternatives": "اس سودے کی جانچ کے بہتر متبادل:",
+    "assetsOnlyAltAssetCheck": "اثاثے کی قیمت: \"سودے کی جانچ\" سیکشن دیکھیں",
+    "assetsOnlyAltMarket": "مارکیٹ موازنہ: \"اثاثوں کی قیمت\" سیکشن دیکھیں",
+    "updatedAt": "اپ ڈیٹ:",
+    "googleMapsData": "Google Maps ڈیٹا",
+    "savedSimulation": "یہ ایک محفوظ سمولیشن اسٹڈی ہے",
+    "refreshLimit": "ہر 24 گھنٹے میں ایک بار تازہ کیا جا سکتا ہے"
   },
   "moqbil": {
     "greeting": "السلام علیکم! میں Moqbil ہوں، آپ کا اسمارٹ معاون",

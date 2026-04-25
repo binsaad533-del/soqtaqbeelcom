@@ -42,3 +42,50 @@ export const mapConfidenceToKey = (confidence?: string | null): string => {
   if (!confidence) return "NeedsInspection";
   return CONFIDENCE_KEYS[confidence.trim()] || "NeedsInspection";
 };
+
+/**
+ * Maps an Arabic deal type label (as stored on listings) to a translation key
+ * suffix. Used with `t(\`deal.${mapDealTypeToKey(x)}\`)`.
+ */
+const DEAL_TYPE_KEYS: Record<string, string> = {
+  "تقبيل كامل": "type_full_takeover",
+  "تقبيل جزئي": "type_partial",
+  "أصول فقط": "type_assets_only",
+  "تقبيل أصول فقط": "type_assets_only",
+  "امتياز تجاري": "type_franchise",
+  full_takeover: "type_full_takeover",
+  full_transfer: "type_full_takeover",
+  full: "type_full_takeover",
+  partial: "type_partial",
+  assets_only: "type_assets_only",
+  franchise: "type_franchise",
+};
+
+export const mapDealTypeToKey = (type?: string | null): string => {
+  if (!type) return "type_full_takeover";
+  return DEAL_TYPE_KEYS[type.trim()] || "type_full_takeover";
+};
+
+/**
+ * Maps an Arabic feasibility verdict to a translation key suffix.
+ * Used with `t(\`feasibility.${mapFeasibilityVerdictToKey(x)}\`)`.
+ */
+const FEASIBILITY_VERDICT_KEYS: Record<string, string> = {
+  "استثمار مقبول بحذر": "investmentAcceptableWithCaution",
+  "مقبولة مع حذر": "investmentAcceptableWithCaution",
+  "استثمار جيد": "investmentGood",
+  "استثمار ممتاز": "investmentExcellent",
+  "استثمار عالي المخاطر": "investmentRisky",
+  "استثمار متوسط": "investmentAcceptableWithCaution",
+};
+
+export const mapFeasibilityVerdictToKey = (verdict?: string | null): string => {
+  if (!verdict) return "investmentAcceptableWithCaution";
+  const trimmed = verdict.trim();
+  if (FEASIBILITY_VERDICT_KEYS[trimmed]) return FEASIBILITY_VERDICT_KEYS[trimmed];
+  // Fuzzy fallback
+  if (trimmed.includes("ممتاز")) return "investmentExcellent";
+  if (trimmed.includes("جيد")) return "investmentGood";
+  if (trimmed.includes("مخاطر") || trimmed.includes("عالي")) return "investmentRisky";
+  return "investmentAcceptableWithCaution";
+};

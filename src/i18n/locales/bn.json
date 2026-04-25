@@ -21,7 +21,13 @@
     "showLess": "কম দেখুন",
     "low": "কম",
     "medium": "মাঝারি",
-    "high": "উচ্চ"
+    "high": "উচ্চ",
+    "currency": "সৌদি রিয়াল",
+    "totalValue": "মোট মূল্য:",
+    "marketValueLabel": "বাজার:",
+    "takeoverValueLabel": "অধিগ্রহণ:",
+    "copied": "কপি হয়েছে",
+    "updating": "আপডেট হচ্ছে..."
   },
   "auth": {
     "enterPhone": "আপনার মোবাইল নম্বর লিখুন",
@@ -124,7 +130,12 @@
     "excludes": "অন্তর্ভুক্ত নয়",
     "viewDetails": "বিস্তারিত দেখুন",
     "setAsPrimary": "প্রাথমিক হিসেবে সেট করুন",
-    "alternative": "বিকল্প"
+    "alternative": "বিকল্প",
+    "type_full_takeover": "সম্পূর্ণ অধিগ্রহণ",
+    "type_partial": "আংশিক অধিগ্রহণ",
+    "type_assets_only": "শুধু সম্পদ",
+    "type_franchise": "ফ্র্যাঞ্চাইজ",
+    "dealSummary": "বাণিজ্যিক নিবন্ধন, ব্যবসার নাম, ট্রেডমার্ক অন্তর্ভুক্ত"
   },
   "offer": {
     "submitted": "আপনার প্রস্তাব পাঠানো হয়েছে",
@@ -198,7 +209,14 @@
     "resume": "পুনরায় সক্রিয়",
     "promote": "তালিকা প্রচার করুন",
     "delete": "মুছুন",
-    "featured": "বিশেষ তালিকা"
+    "featured": "বিশেষ তালিকা",
+    "paused": "স্থগিত",
+    "deleted": "মুছে ফেলা হয়েছে",
+    "manageListing": "বিজ্ঞাপন পরিচালনা",
+    "status": "অবস্থা",
+    "share": "শেয়ার",
+    "back": "ফিরে যান",
+    "showMore": "আরও দেখুন"
   },
   "marketplace": {
     "title": "ব্যবসা মার্কেটপ্লেস",
@@ -255,7 +273,27 @@
     "confidenceMedium": "মাঝারি আস্থা",
     "confidenceLow": "কম আস্থা",
     "confidenceEstimate": "আনুমানিক",
-    "confidenceNeedsInspection": "পরিদর্শন প্রয়োজন"
+    "confidenceNeedsInspection": "পরিদর্শন প্রয়োজন",
+    "confidenceLevel": "আস্থার স্তর",
+    "confidenceLevelLow": "কম",
+    "confidenceLevelMedium": "মাঝারি",
+    "confidenceLevelHigh": "উচ্চ",
+    "verdict_acceptable_caution": "সতর্কতার সাথে গ্রহণযোগ্য",
+    "verdict_good": "ভালো",
+    "verdict_excellent": "চমৎকার",
+    "verdict_risky": "উচ্চ ঝুঁকি",
+    "olvDisclaimerPrefix": "দাম",
+    "olvMethodology": "অর্ডারলি লিকুইডেশন ভ্যালু (OLV)",
+    "olvDisclaimerMiddle": "পদ্ধতিতে গণনা করা হয়েছে, যা",
+    "olvAuthority": "সৌদি অনুমোদিত মূল্যায়নকারী কর্তৃপক্ষ (TAQEEM)",
+    "olvDisclaimerSuffix": "মান এবং IVS 160.1 অনুসারে। সূত্র: সম্পদের অবস্থা অনুযায়ী ভৌত অবচয় × অর্ডারলি লিকুইডেশন ছাড়।",
+    "matchQuality": "মিলের মান",
+    "pricingInProgress": "সম্পদের মূল্য নির্ধারণ চলছে",
+    "pricingInProgressDesc": "মূল্য নির্ধারণে সাধারণত 30-60 সেকেন্ড সময় লাগে। শেষ হলে ভিউ স্বয়ংক্রিয়ভাবে আপডেট হবে।",
+    "smartAnalysis": "চুক্তির ব্যাপক স্মার্ট বিশ্লেষণ",
+    "analyzing": "বিশ্লেষণ চলছে",
+    "savedAnalysis": "সংরক্ষিত বিশ্লেষণ",
+    "extraValue": "অতিরিক্ত মূল্য (ব্যবসার নাম + লাইসেন্স + গ্রাহক ভিত্তি)"
   },
   "feasibility": {
     "title": "অর্থনৈতিক সম্ভাব্যতা সমীক্ষা",
@@ -281,7 +319,27 @@
     "marketRisks": "বাজার ঝুঁকি",
     "regulatoryRisks": "নিয়ন্ত্রক ঝুঁকি",
     "mitigationStrategies": "প্রশমন কৌশল:",
-    "topCompetitors": "প্রধান প্রতিযোগী:"
+    "topCompetitors": "প্রধান প্রতিযোগী:",
+    "investmentAcceptableWithCaution": "সতর্কতার সাথে গ্রহণযোগ্য বিনিয়োগ",
+    "investmentGood": "ভালো বিনিয়োগ",
+    "investmentExcellent": "চমৎকার বিনিয়োগ",
+    "investmentRisky": "উচ্চ ঝুঁকির বিনিয়োগ",
+    "loadingStudy": "গবেষণা লোড হচ্ছে...",
+    "savedStudy": "সংরক্ষিত গবেষণা",
+    "saved": "সংরক্ষিত",
+    "refresh": "রিফ্রেশ",
+    "preparingStudy": "গবেষণা প্রস্তুত হচ্ছে... (30 সেকেন্ড লাগতে পারে)",
+    "noDataForStudy": "এই মুহূর্তে সম্ভাব্যতা গবেষণা প্রস্তুত করার জন্য পর্যাপ্ত ডেটা নেই",
+    "prepareStudyNow": "এখনই গবেষণা প্রস্তুত করুন",
+    "assetsOnlyTitle": "শুধু সম্পদ",
+    "assetsOnlyDesc": "এই চুক্তি \"শুধু সম্পদ\" ধরনের — অর্থাৎ পরিচালনাগত কার্যক্রম ছাড়াই সরঞ্জাম বা সম্পদ বিক্রি। তাই অর্থনৈতিক সম্ভাব্যতা গবেষণা প্রযোজ্য নয়।",
+    "assetsOnlyAlternatives": "এই চুক্তি মূল্যায়নের ভালো বিকল্প:",
+    "assetsOnlyAltAssetCheck": "সম্পদ মূল্যায়ন: \"চুক্তি যাচাই\" বিভাগ দেখুন",
+    "assetsOnlyAltMarket": "বাজার তুলনা: \"সম্পদ মূল্যায়ন\" বিভাগ দেখুন",
+    "updatedAt": "আপডেট:",
+    "googleMapsData": "Google Maps ডেটা",
+    "savedSimulation": "এটি একটি সংরক্ষিত সিমুলেশন গবেষণা",
+    "refreshLimit": "24 ঘন্টায় একবার রিফ্রেশ করা যাবে"
   },
   "moqbil": {
     "greeting": "আসসালামু আলাইকুম! আমি Moqbil, আপনার স্মার্ট সহায়ক",

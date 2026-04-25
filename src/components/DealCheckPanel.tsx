@@ -436,7 +436,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
         language: i18n.language || "ar",
       });
 
-      if (fnError) throw new Error(fnError.message || "تعذّر إعادة التحليل حالياً");
+      if (fnError) throw new Error(fnError.message || t("dealCheck.reanalyze"));
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
 
       setAnalysis(normalizeDealCheckAnalysis(data.analysis, listing));
@@ -449,9 +449,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           .eq("id", listing.id);
       }
     } catch (e: any) {
-      toast.error("تعذّر إعادة التحليل حالياً");
+      toast.error(t("dealCheck.reanalyze"));
       if (!background) {
-        setError(e.message || "تعذّر إعادة التحليل حالياً");
+        setError(e.message || t("dealCheck.reanalyze"));
       }
     } finally {
       if (!background) setLoading(false);
@@ -507,8 +507,8 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
             <h3 className="font-medium text-sm">{t("listing.dealCheck")}</h3>
             <p className="text-[11px] text-muted-foreground">
               {analysis
-                ? `محدّث: ${cacheAge ? new Date(cacheAge).toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" }) : ""}`
-                : "تحليل ذكي شامل للصفقة"}
+                ? `${t("feasibility.updatedAt")} ${cacheAge ? new Date(cacheAge).toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" }) : ""}`
+                : t("dealCheck.smartAnalysis")}
             </p>
           </div>
         </div>
@@ -516,7 +516,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           {isRefreshing && (
             <span className="text-[10px] text-muted-foreground flex items-center gap-1">
               <RefreshCw size={10} className="animate-spin" />
-              جاري التحديث...
+              {t("common.updating")}
             </span>
           )}
           {analysis && (
@@ -528,7 +528,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
             <Loader2 size={16} className="animate-spin text-primary" />
           )}
           <span className="text-[11px] px-3 py-1.5 rounded-lg bg-primary/8 text-primary border border-primary/15">
-            {analysis ? t("listing.viewCheck") : loading ? "جاري التحليل" : t("listing.viewCheck")}
+            {analysis ? t("listing.viewCheck") : loading ? t("dealCheck.analyzing") : t("listing.viewCheck")}
           </span>
           {open ? <ChevronUp size={16} strokeWidth={1.3} className="text-muted-foreground" /> : <ChevronDown size={16} strokeWidth={1.3} className="text-muted-foreground" />}
         </div>
@@ -820,7 +820,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                           <div className="text-sm font-medium">{analysis.marketComparison.comparablesReviewed}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
-                          <div className="text-xs text-muted-foreground">جودة التطابق</div>
+                          <div className="text-xs text-muted-foreground">{t("dealCheck.matchQuality")}</div>
                           <div className="text-sm font-medium">{analysis.marketComparison.matchQuality}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
@@ -832,7 +832,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                           )}>{analysis.marketComparison.marketPosition}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
-                          <div className="text-xs text-muted-foreground">مستوى الثقة</div>
+                          <div className="text-xs text-muted-foreground">{t("dealCheck.confidenceLevel")}</div>
                           <div className="text-sm font-medium">{analysis.marketComparison.confidence}</div>
                         </div>
                       </div>
@@ -867,7 +867,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               <div className="flex justify-center pt-1">
                 <Button variant="ghost" size="sm" onClick={() => runDealCheck()} disabled={isSimulation || loading || isRefreshing} className="text-xs text-muted-foreground hover:text-foreground rounded-xl">
                   <Loader2 size={12} strokeWidth={1.5} className="ml-1" />
-                  {isSimulation ? "تحليل محفوظ" : t("dealCheck.reanalyze")}
+                  {isSimulation ? t("dealCheck.savedAnalysis") : t("dealCheck.reanalyze")}
                 </Button>
               </div>
             </div>
@@ -1197,7 +1197,7 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs text-muted-foreground mb-0.5">
-                قيمة إضافية (اسم تجاري + تراخيص + قاعدة عملاء)
+                {t("dealCheck.extraValue")}
               </div>
               <div className="text-sm font-semibold text-foreground tabular-nums">
                 {fmt(goodwillValue)} <span className="text-[11px] text-muted-foreground font-normal">ر.س</span>
@@ -1307,15 +1307,15 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
         <div className="flex items-start gap-2">
           <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
           <div className="text-xs text-muted-foreground leading-relaxed">
-            الأسعار محسوبة بمنهجية{" "}
+            {t("dealCheck.olvDisclaimerPrefix")}{" "}
             <span className="font-semibold text-foreground">
-              قيمة التصفية المنظمة (OLV)
+              {t("dealCheck.olvMethodology")}
             </span>
-            {" "}وفقاً لمعايير{" "}
+            {" "}{t("dealCheck.olvDisclaimerMiddle")}{" "}
             <span className="font-semibold text-foreground">
-              الهيئة السعودية للمقيمين المعتمدين (تقييم)
+              {t("dealCheck.olvAuthority")}
             </span>
-            {" "}والمعيار الدولي IVS 160.1. تشمل الصيغة: إهلاك مادي حسب حالة الأصل × خصم التصفية المنظمة.
+            {" "}{t("dealCheck.olvDisclaimerSuffix")}
           </div>
         </div>
       </div>
@@ -1328,9 +1328,9 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
             <Loader2 size={42} strokeWidth={1} className="absolute -top-1.5 -left-1.5 text-primary/30 animate-spin" />
           </div>
           <div className="text-center">
-            <p className="text-sm font-medium">جاري تسعير الأصول</p>
+            <p className="text-sm font-medium">{t("dealCheck.pricingInProgress")}</p>
             <p className="text-[11px] text-muted-foreground mt-1">
-              يستغرق التسعير عادةً 30-60 ثانية، سيتم تحديث الواجهة تلقائياً عند الانتهاء.
+              {t("dealCheck.pricingInProgressDesc")}
             </p>
           </div>
         </div>
@@ -1374,8 +1374,8 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
                       </span>
                       <span className="text-base text-emerald-700/80 dark:text-emerald-300/80 mr-auto truncate tabular-nums">
                         {totalMarketValue > totalValue
-                          ? <>سوقية: {totalMarketValue.toLocaleString("en-US")} · تقبيل: {totalValue.toLocaleString("en-US")} ر.س</>
-                          : <>قيمة إجمالية: {totalValue.toLocaleString("en-US")} ر.س</>}
+                          ? <>{t("common.marketValueLabel")} {totalMarketValue.toLocaleString("en-US")} · {t("common.takeoverValueLabel")} {totalValue.toLocaleString("en-US")} {t("common.currency")}</>
+                          : <>{t("common.totalValue")} {totalValue.toLocaleString("en-US")} {t("common.currency")}</>}
                       </span>
                       <ChevronDown size={16} strokeWidth={1.6} className="text-emerald-600/60 dark:text-emerald-400/60 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>

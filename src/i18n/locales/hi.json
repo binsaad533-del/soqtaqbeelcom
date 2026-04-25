@@ -21,7 +21,13 @@
     "showLess": "कम दिखाएँ",
     "low": "कम",
     "medium": "मध्यम",
-    "high": "उच्च"
+    "high": "उच्च",
+    "currency": "सऊदी रियाल",
+    "totalValue": "कुल मूल्य:",
+    "marketValueLabel": "बाजार:",
+    "takeoverValueLabel": "अधिग्रहण:",
+    "copied": "कॉपी किया गया",
+    "updating": "अपडेट हो रहा है..."
   },
   "auth": {
     "enterPhone": "अपना मोबाइल नंबर दर्ज करें",
@@ -124,7 +130,12 @@
     "excludes": "शामिल नहीं",
     "viewDetails": "विवरण देखें",
     "setAsPrimary": "मुख्य के रूप में सेट करें",
-    "alternative": "वैकल्पिक"
+    "alternative": "वैकल्पिक",
+    "type_full_takeover": "पूर्ण अधिग्रहण",
+    "type_partial": "आंशिक अधिग्रहण",
+    "type_assets_only": "केवल संपत्ति",
+    "type_franchise": "फ्रैंचाइज़",
+    "dealSummary": "वाणिज्यिक पंजीकरण, व्यापार नाम, ट्रेडमार्क शामिल"
   },
   "offer": {
     "submitted": "आपका प्रस्ताव भेज दिया गया",
@@ -198,7 +209,14 @@
     "resume": "पुनः सक्रिय करें",
     "promote": "लिस्टिंग प्रमोट करें",
     "delete": "हटाएँ",
-    "featured": "विशेष लिस्टिंग"
+    "featured": "विशेष लिस्टिंग",
+    "paused": "रोका गया",
+    "deleted": "हटाया गया",
+    "manageListing": "विज्ञापन प्रबंधित करें",
+    "status": "स्थिति",
+    "share": "साझा करें",
+    "back": "वापस",
+    "showMore": "और दिखाएँ"
   },
   "marketplace": {
     "title": "व्यवसाय मार्केटप्लेस",
@@ -255,7 +273,27 @@
     "confidenceMedium": "मध्यम विश्वसनीयता",
     "confidenceLow": "कम विश्वसनीयता",
     "confidenceEstimate": "अनुमानित",
-    "confidenceNeedsInspection": "निरीक्षण आवश्यक"
+    "confidenceNeedsInspection": "निरीक्षण आवश्यक",
+    "confidenceLevel": "विश्वसनीयता स्तर",
+    "confidenceLevelLow": "कम",
+    "confidenceLevelMedium": "मध्यम",
+    "confidenceLevelHigh": "उच्च",
+    "verdict_acceptable_caution": "सावधानी के साथ स्वीकार्य",
+    "verdict_good": "अच्छा",
+    "verdict_excellent": "उत्कृष्ट",
+    "verdict_risky": "उच्च जोखिम",
+    "olvDisclaimerPrefix": "कीमतें",
+    "olvMethodology": "ऑर्डरली लिक्विडेशन वैल्यू (OLV)",
+    "olvDisclaimerMiddle": "पद्धति से गणना की गई हैं, जो",
+    "olvAuthority": "सऊदी अधिकृत मूल्यांकनकर्ता प्राधिकरण (TAQEEM)",
+    "olvDisclaimerSuffix": "मानकों और IVS 160.1 के अनुरूप है। सूत्र: संपत्ति की स्थिति के अनुसार भौतिक मूल्यह्रास × ऑर्डरली लिक्विडेशन छूट।",
+    "matchQuality": "मिलान गुणवत्ता",
+    "pricingInProgress": "संपत्ति की कीमत निर्धारण जारी है",
+    "pricingInProgressDesc": "मूल्य निर्धारण में आमतौर पर 30-60 सेकंड लगते हैं। पूरा होने पर दृश्य स्वतः अपडेट होगा।",
+    "smartAnalysis": "सौदे का व्यापक स्मार्ट विश्लेषण",
+    "analyzing": "विश्लेषण हो रहा है",
+    "savedAnalysis": "सहेजा गया विश्लेषण",
+    "extraValue": "अतिरिक्त मूल्य (व्यापार नाम + लाइसेंस + ग्राहक आधार)"
   },
   "feasibility": {
     "title": "आर्थिक व्यवहार्यता अध्ययन",
@@ -281,7 +319,27 @@
     "marketRisks": "बाजार जोखिम",
     "regulatoryRisks": "नियामक जोखिम",
     "mitigationStrategies": "न्यूनीकरण रणनीतियाँ:",
-    "topCompetitors": "प्रमुख प्रतिस्पर्धी:"
+    "topCompetitors": "प्रमुख प्रतिस्पर्धी:",
+    "investmentAcceptableWithCaution": "सावधानी के साथ स्वीकार्य निवेश",
+    "investmentGood": "अच्छा निवेश",
+    "investmentExcellent": "उत्कृष्ट निवेश",
+    "investmentRisky": "उच्च जोखिम वाला निवेश",
+    "loadingStudy": "अध्ययन लोड हो रहा है...",
+    "savedStudy": "सहेजा गया अध्ययन",
+    "saved": "सहेजा गया",
+    "refresh": "रीफ्रेश",
+    "preparingStudy": "अध्ययन तैयार हो रहा है... (30 सेकंड लग सकते हैं)",
+    "noDataForStudy": "फिलहाल व्यवहार्यता अध्ययन तैयार करने के लिए पर्याप्त डेटा नहीं है",
+    "prepareStudyNow": "अभी अध्ययन तैयार करें",
+    "assetsOnlyTitle": "केवल संपत्ति",
+    "assetsOnlyDesc": "यह सौदा \"केवल संपत्ति\" प्रकार का है — बिना संचालन के उपकरण या संपत्ति की बिक्री। इसलिए आर्थिक व्यवहार्यता अध्ययन लागू नहीं होता।",
+    "assetsOnlyAlternatives": "इस सौदे का मूल्यांकन करने के बेहतर विकल्प:",
+    "assetsOnlyAltAssetCheck": "संपत्ति मूल्यांकन: \"सौदा जाँच\" अनुभाग देखें",
+    "assetsOnlyAltMarket": "बाजार तुलना: \"संपत्ति मूल्यांकन\" अनुभाग देखें",
+    "updatedAt": "अपडेट:",
+    "googleMapsData": "Google Maps डेटा",
+    "savedSimulation": "यह एक सहेजा गया सिमुलेशन अध्ययन है",
+    "refreshLimit": "24 घंटे में एक बार रीफ्रेश किया जा सकता है"
   },
   "moqbil": {
     "greeting": "नमस्ते! मैं Moqbil हूँ, आपका स्मार्ट सहायक",

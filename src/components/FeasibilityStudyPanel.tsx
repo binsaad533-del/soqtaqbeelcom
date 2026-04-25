@@ -19,6 +19,7 @@ import {
   formatPdfPrice, escapeHtml, PDF_COLORS,
 } from "@/lib/pdfShared";
 import { useTranslation } from "react-i18next";
+import { mapFeasibilityVerdictToKey } from "@/lib/condition-utils";
 /* ── Types ── */
 interface Scenario {
   monthlyRevenue: number;
@@ -708,8 +709,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       }
       toast.success("تم تحديث دراسة الجدوى بنجاح");
     } catch (err: any) {
-      toast.error("تعذّر إعادة التحليل حالياً");
-      setError(err.message || "تعذّر إعادة التحليل حالياً");
+      toast.error(t("dealCheck.reanalyze"));
+      setError(err.message || t("dealCheck.reanalyze"));
     } finally {
       setLoading(false);
     }
@@ -999,8 +1000,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       {/* Verdict Badge */}
       <div className={cn("rounded-xl border p-4 flex items-center justify-between", v.bg, v.border)}>
         <div>
-          <div className={cn("text-lg font-bold", v.text)}>{displayStudy.verdict}</div>
-          <div className="text-xs text-muted-foreground">{t("feasibility.confidenceLevel")} {displayStudy.confidenceLevel}</div>
+          <div className={cn("text-lg font-bold", v.text)}>{t(`feasibility.${mapFeasibilityVerdictToKey(displayStudy.verdict)}`)}</div>
+          <div className="text-xs text-muted-foreground">{t("feasibility.confidenceLevel")}: {displayStudy.confidenceLevel}</div>
         </div>
         <div className="text-left">
           <div className="text-xs text-muted-foreground">{t("feasibility.paybackPeriod")}</div>
