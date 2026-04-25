@@ -533,7 +533,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               {t("common.updating")}
             </span>
           )}
-          {analysis && (
+          {analysis && displayAnalysis && (
             <span className={cn("text-[11px] px-2.5 py-1 rounded-lg border", ratingStyle.bg, ratingStyle.text, ratingStyle.border)}>
               {t(`dealCheck.${mapRatingToKey(displayAnalysis.rating)}`)}
             </span>
@@ -595,7 +595,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
             </div>
           )}
 
-          {analysis && !loading && (
+          {analysis && displayAnalysis && !loading && (
             <div className="space-y-5">
               {/* Cache Info Bar */}
               {(cacheAge || analysisUpdatedAt) && (() => {
