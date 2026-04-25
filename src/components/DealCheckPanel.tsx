@@ -1419,7 +1419,7 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
           })()}
 
           <p className="text-[10px] text-muted-foreground/70 text-center mt-2 leading-relaxed">
-            الأسعار المعروضة مبنية على أبحاث سوقية حقيقية بمصادر موثقة. الأصول التي تحتاج معاينة لا تُحتسب في الإجمالي حفاظاً على الشفافية.
+            {t("inventory.priceDisclaimer")}
           </p>
         </>
       )}
