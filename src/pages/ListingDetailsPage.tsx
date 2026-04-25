@@ -44,6 +44,7 @@ import { getArabicDealType } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
 import ReportListingDialog from "@/components/ReportListingDialog";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
+import { mapConditionToKey } from "@/lib/condition-utils";
 
 
 type ListingDocumentItem = {
@@ -784,7 +785,7 @@ const ListingDetailsPage = () => {
                     <div className="flex items-center gap-4">
                       <span className="text-sm text-muted-foreground">{item.qty} {t("inventory.unit")}</span>
                       <span className={`text-xs px-2 py-0.5 rounded-md ${item.condition === "جديد" || item.condition === "شبه جديد" ? "bg-success/10 text-success" : item.condition === "تالف" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}>
-                        {item.condition}
+                        {t(`condition.${mapConditionToKey(item.condition)}`)}
                       </span>
                     </div>
                   </div>
