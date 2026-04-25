@@ -199,7 +199,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                         <div className="flex flex-wrap gap-1.5">
                           {dt.includes.map((item, i) => (
                             <span key={i} className="text-[11px] px-2 py-0.5 rounded-md bg-success/10 text-success">
-                              {item}
+                              {tDealItem(t, dt.id, "includes", i, item)}
                             </span>
                           ))}
                         </div>
@@ -213,7 +213,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                         <div className="flex flex-wrap gap-1.5">
                           {dt.excludes.map((item, i) => (
                             <span key={i} className="text-[11px] px-2 py-0.5 rounded-md bg-destructive/10 text-destructive">
-                              {item}
+                              {tDealItem(t, dt.id, "excludes", i, item)}
                             </span>
                           ))}
                         </div>
@@ -227,7 +227,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                         <ul className="space-y-0.5">
                           {dt.cautionNotes.map((note, i) => (
                             <li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1">
-                              <span className="text-warning mt-0.5">•</span> {note}
+                              <span className="text-warning mt-0.5">•</span> {tDealItem(t, dt.id, "cautionNotes", i, note)}
                             </li>
                           ))}
                         </ul>
