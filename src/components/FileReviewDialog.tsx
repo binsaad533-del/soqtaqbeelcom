@@ -394,11 +394,11 @@ export function FileReviewDialog({
           {selectedIds.size > 0 && (
             <div className="px-6 py-3 bg-primary/5 border-b flex items-center gap-3 flex-wrap">
               <span className="text-sm font-medium">
-                تم اختيار {selectedIds.size} ملف
+                {t("createListing.fileReview.selected", { count: selectedIds.size })}
               </span>
               <Select onValueChange={(v) => handleBulkMove(v as FileCategory)}>
                 <SelectTrigger className="h-8 w-48 text-xs">
-                  <SelectValue placeholder="نقل إلى فئة..." />
+                  <SelectValue placeholder={t("createListing.fileReview.moveToCategory")} />
                 </SelectTrigger>
                 <SelectContent>
                   {CATEGORY_ORDER.map(cat => (
@@ -409,7 +409,7 @@ export function FileReviewDialog({
                 </SelectContent>
               </Select>
               <Button size="sm" variant="ghost" onClick={clearSelection}>
-                إلغاء الاختيار
+                {t("createListing.fileReview.clearSelection")}
               </Button>
             </div>
           )}
