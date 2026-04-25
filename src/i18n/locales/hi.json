@@ -16,7 +16,9 @@
     "month": "माह",
     "share": "शेयर करें",
     "publish": "प्रकाशित करें",
-    "saveDraft": "ड्राफ़्ट के रूप में सहेजें"
+    "saveDraft": "ड्राफ़्ट के रूप में सहेजें",
+    "showMore": "और दिखाएँ",
+    "showLess": "कम दिखाएँ"
   },
   "auth": {
     "enterPhone": "अपना मोबाइल नंबर दर्ज करें",
@@ -94,7 +96,65 @@
     "showExtraDetails": "अतिरिक्त विवरण दिखाएं",
     "pricedAssetsValue": "मूल्यांकित संपत्तियों का कुल मूल्य",
     "publicOfferTip": "सार्वजनिक ऑफ़र पारदर्शिता बढ़ाते हैं और आपको बढ़त देते हैं",
-    "loginToViewDocs": "सुरक्षित दस्तावेज़ों तक पहुँच के लिए साइन इन करें"
+    "loginToViewDocs": "सुरक्षित दस्तावेज़ों तक पहुँच के लिए साइन इन करें",
+    "docsProtectedAskSeller": "ये दस्तावेज़ सुरक्षित हैं — देखने के लिए विक्रेता से अनुमति माँगें",
+    "requestAccess": "पहुँच का अनुरोध करें",
+    "mainOption": "मुख्य विकल्प",
+    "alternativeOptions": "वैकल्पिक विकल्प:",
+    "includes": "शामिल है",
+    "excludes": "शामिल नहीं"
+  },
+  "deal": {
+    "mainOption": "मुख्य विकल्प",
+    "fullTransferDesc": "व्यवसाय का पूर्ण हस्तांतरण, सभी संपत्तियों और देनदारियों सहित",
+    "includes": "शामिल है",
+    "commercialReg": "व्यापार पंजीकरण",
+    "tradeName": "व्यापार नाम",
+    "trademark": "ट्रेडमार्क",
+    "assetsEquipment": "संपत्तियाँ और उपकरण",
+    "lease": "किराया अनुबंध",
+    "inventory": "स्टॉक",
+    "operationalRights": "परिचालन अधिकार",
+    "debtsLiabilities": "ऋण और तीसरे पक्ष की देनदारियाँ",
+    "buyerAssumesLiabilities": "खरीदार सभी पूर्व देनदारियाँ वहन करेगा",
+    "checkLegalDisputes": "मौजूदा कानूनी विवादों की पुष्टि अवश्य करें"
+  },
+  "inventory": {
+    "confirmedAssets": "पुष्ट संपत्ति सूची",
+    "unit": "इकाई"
+  },
+  "condition": {
+    "good": "अच्छा",
+    "used": "इस्तेमाल किया हुआ",
+    "new": "नया",
+    "unclear": "अस्पष्ट",
+    "excellent": "उत्कृष्ट"
+  },
+  "simulation": {
+    "title": "डील सिमुलेशन",
+    "basePrice": "मूल मूल्य:",
+    "currentPrice": "वर्तमान मूल्य",
+    "commission": "कमीशन:",
+    "asIs": "सूचीबद्ध मूल्य पर",
+    "discount10": "10% छूट",
+    "discount20": "20% छूट",
+    "assetsOnly": "केवल संपत्तियाँ (मूल्य का 30%)",
+    "installment": "किस्तों में (+15%)",
+    "transition": "3 महीने के संक्रमण काल के साथ",
+    "bestScenario": "सर्वश्रेष्ठ परिदृश्य"
+  },
+  "manage": {
+    "title": "लिस्टिंग प्रबंधन — स्थिति:",
+    "yourListing": "आपकी लिस्टिंग —",
+    "published": "प्रकाशित",
+    "draft": "ड्राफ़्ट",
+    "suspended": "अस्थायी रूप से रोकी गई",
+    "edit": "संपादित करें",
+    "pause": "रोकें",
+    "resume": "पुनः सक्रिय करें",
+    "promote": "लिस्टिंग प्रमोट करें",
+    "delete": "हटाएँ",
+    "featured": "विशेष लिस्टिंग"
   },
   "marketplace": {
     "title": "व्यवसाय मार्केटप्लेस",

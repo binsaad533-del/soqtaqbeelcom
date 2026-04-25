@@ -430,16 +430,16 @@ const ListingDetailsPage = () => {
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Shield size={14} className="text-primary" strokeWidth={1.5} />
               <span className="font-medium text-foreground">
-                {isOwner ? "إعلانك —" : isPlatformAdmin ? "إدارة الإعلان —" : "—"}
+                {isOwner ? t("manage.yourListing") : isPlatformAdmin ? t("manage.title") : "—"}
               </span>
               <span>
-                الحالة: {listing.status === "published" ? "منشور" : listing.status === "suspended" ? "موقوف مؤقتاً" : listing.status === "draft" ? "مسودة" : listing.status}
+                {listing.status === "published" ? t("manage.published") : listing.status === "suspended" ? t("manage.suspended") : listing.status === "draft" ? t("manage.draft") : listing.status}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {!(myActiveDeal && (myActiveDeal.status === "finalized" || myActiveDeal.status === "completed")) && (
                 <Button variant="outline" size="sm" className="rounded-xl text-xs h-8" onClick={() => setEditDialogOpen(true)}>
-                  <Edit3 size={13} strokeWidth={1.5} /> تعديل
+                  <Edit3 size={13} strokeWidth={1.5} /> {t("manage.edit")}
                 </Button>
               )}
               <Button
@@ -456,7 +456,7 @@ const ListingDetailsPage = () => {
                   }
                 }}
               >
-                <Share2 size={13} strokeWidth={1.5} /> مشاركة
+                <Share2 size={13} strokeWidth={1.5} /> {t("common.share")}
               </Button>
               {(listing.status === "published" || listing.status === "suspended") && (
                 <Button
@@ -482,9 +482,9 @@ const ListingDetailsPage = () => {
                   {statusToggling ? (
                     <Loader2 size={13} className="animate-spin" />
                   ) : listing.status === "published" ? (
-                    <><Pause size={13} strokeWidth={1.5} /> إيقاف مؤقت</>
+                    <><Pause size={13} strokeWidth={1.5} /> {t("manage.pause")}</>
                   ) : (
-                    <><Play size={13} strokeWidth={1.5} /> إعادة تفعيل</>
+                    <><Play size={13} strokeWidth={1.5} /> {t("manage.resume")}</>
                   )}
                 </Button>
               )}
@@ -494,12 +494,12 @@ const ListingDetailsPage = () => {
                   className="rounded-xl text-xs h-8 bg-gradient-to-l from-primary to-primary/70 text-primary-foreground"
                   onClick={() => setPromoteDialogOpen(true)}
                 >
-                  <Sparkles size={13} strokeWidth={1.5} /> ترقية الإعلان
+                  <Sparkles size={13} strokeWidth={1.5} /> {t("manage.promote")}
                 </Button>
               )}
               {listing.featured && (
                 <span className="inline-flex items-center gap-1 rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2.5 py-1 text-[11px] font-medium">
-                  <Sparkles size={12} strokeWidth={1.5} /> إعلان مميز
+                  <Sparkles size={12} strokeWidth={1.5} /> {t("manage.featured")}
                 </span>
               )}
               <Button
@@ -522,7 +522,7 @@ const ListingDetailsPage = () => {
                   navigate("/dashboard");
                 }}
               >
-                {deleting ? <Loader2 size={13} className="animate-spin" /> : <><Trash2 size={13} strokeWidth={1.5} /> حذف</>}
+                {deleting ? <Loader2 size={13} className="animate-spin" /> : <><Trash2 size={13} strokeWidth={1.5} /> {t("manage.delete")}</>}
               </Button>
             </div>
           </div>
@@ -778,11 +778,11 @@ const ListingDetailsPage = () => {
                   return inspect > 0 ? `${priced} ${t('listing.priced')} · ${inspect} ${t('listing.needsInspection')}` : `${priced} ${t('listing.priced')}`;
                 })()}
               >
-                <CollapsibleList title="جرد الأصول المؤكّد" items={inventory} threshold={5} renderItem={(item, i) => (
+                <CollapsibleList title={t("inventory.confirmedAssets")} items={inventory} threshold={5} renderItem={(item, i) => (
                   <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
                     <span className="text-sm">{item.name}</span>
                     <div className="flex items-center gap-4">
-                      <span className="text-sm text-muted-foreground">{item.qty} وحدة</span>
+                      <span className="text-sm text-muted-foreground">{item.qty} {t("inventory.unit")}</span>
                       <span className={`text-xs px-2 py-0.5 rounded-md ${item.condition === "جديد" || item.condition === "شبه جديد" ? "bg-success/10 text-success" : item.condition === "تالف" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}>
                         {item.condition}
                       </span>
@@ -1004,7 +1004,7 @@ const ListingDetailsPage = () => {
                     className="mb-4"
                   />
                   <p className="text-[11px] text-muted-foreground text-center mb-2">
-                    💡 تقديم العروض على العام يزيد من شفافية الصفقة ويعطيك أفضلية
+                    💡 {t("listing.publicOfferTip")}
                   </p>
                   <Button
                     onClick={handleStartNegotiation}
@@ -1212,6 +1212,7 @@ const CollapsibleList = <T,>({ title, icon, items, threshold, renderItem }: {
   threshold: number;
   renderItem: (item: T, index: number) => React.ReactNode;
 }) => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const needsExpand = items.length > threshold;
   const visibleItems = needsExpand && !expanded ? items.slice(0, threshold) : items;
@@ -1231,7 +1232,7 @@ const CollapsibleList = <T,>({ title, icon, items, threshold, renderItem }: {
           onClick={() => setExpanded(!expanded)}
           className="mt-3 text-xs text-primary hover:text-primary/80 transition-colors"
         >
-          {expanded ? "عرض أقل" : `عرض المزيد (${items.length - threshold}+)`}
+          {expanded ? t("common.showLess") : `${t("common.showMore")} (${items.length - threshold}+)`}
         </button>
       )}
     </div>
@@ -1259,7 +1260,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
       <div className="border border-primary/20 bg-primary/5 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium flex items-center gap-0.5">
-            <Star size={10} fill="currentColor" /> الخيار الرئيسي
+            <Star size={10} fill="currentColor" /> {t("listing.mainOption")}
           </span>
           <span className="text-sm font-medium">{primaryConfig.label}</span>
         </div>
@@ -1268,7 +1269,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
         {primaryConfig.includes.length > 0 && (
           <div className="mb-2">
             <div className="text-[11px] font-medium text-success mb-1 flex items-center gap-1">
-              <Check size={11} /> يشمل
+              <Check size={11} /> {t("listing.includes")}
             </div>
             <div className="flex flex-wrap gap-1">
               {primaryConfig.includes.map((item, i) => (
@@ -1280,7 +1281,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
         {primaryConfig.excludes.length > 0 && (
           <div>
             <div className="text-[11px] font-medium text-destructive mb-1 flex items-center gap-1">
-              <AlertTriangle size={11} /> لا يشمل
+              <AlertTriangle size={11} /> {t("listing.excludes")}
             </div>
             <div className="flex flex-wrap gap-1">
               {primaryConfig.excludes.map((item, i) => (
@@ -1303,7 +1304,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
       {/* Alternative options */}
       {alternatives.length > 0 && (
         <div className="space-y-2">
-          <div className="text-xs text-muted-foreground font-medium">خيارات بديلة:</div>
+          <div className="text-xs text-muted-foreground font-medium">{t("listing.alternativeOptions")}</div>
           {alternatives.map((alt) => {
             const altConfig = DEAL_TYPE_MAP[alt.type_id];
             if (!altConfig) return null;

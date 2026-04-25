@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Heart, MessageCircle, Wallet, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -28,6 +29,7 @@ export default function ListingStickyCtaBar({
 }: ListingStickyCtaBarProps) {
   const [visible, setVisible] = useState(false);
   const [offerSheetOpen, setOfferSheetOpen] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (isOwner) return; // لا حاجة للاستماع لو المالك
@@ -106,7 +108,7 @@ export default function ListingStickyCtaBar({
               className="h-11 rounded-xl px-3 active:scale-[0.98]"
             >
               <Wallet size={16} strokeWidth={1.5} />
-              عرض سعر
+              {t("listing.makeOffer")}
             </Button>
           </SheetTrigger>
           <SheetContent
@@ -134,7 +136,7 @@ export default function ListingStickyCtaBar({
           ) : (
             <Heart size={16} strokeWidth={1.5} />
           )}
-          أبدِ اهتمامك
+          {t("listing.showInterest")}
         </Button>
       </div>
     );

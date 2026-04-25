@@ -16,7 +16,9 @@
     "month": "شهر",
     "share": "مشاركة",
     "publish": "نشر",
-    "saveDraft": "حفظ كمسودة"
+    "saveDraft": "حفظ كمسودة",
+    "showMore": "عرض المزيد",
+    "showLess": "عرض أقل"
   },
   "auth": {
     "enterPhone": "أدخل رقم جوالك",
@@ -94,7 +96,65 @@
     "showExtraDetails": "عرض تفاصيل الإعلان الإضافية",
     "pricedAssetsValue": "قيمة الأصول المُسعَّرة",
     "publicOfferTip": "تقديم العروض على العام يزيد من شفافية الصفقة ويعطيك أفضلية",
-    "loginToViewDocs": "سجّل دخولك لطلب الاطلاع على الوثائق المحمية"
+    "loginToViewDocs": "سجّل دخولك لطلب الاطلاع على الوثائق المحمية",
+    "docsProtectedAskSeller": "هذه الوثائق محمية — اطلب موافقة البائع للاطلاع عليها",
+    "requestAccess": "طلب الوصول",
+    "mainOption": "الخيار الرئيسي",
+    "alternativeOptions": "خيارات بديلة:",
+    "includes": "يشمل",
+    "excludes": "لا يشمل"
+  },
+  "deal": {
+    "mainOption": "الخيار الرئيسي",
+    "fullTransferDesc": "نقل الأعمال بالكامل بما تملكه وما عليها من التزامات",
+    "includes": "يشمل",
+    "commercialReg": "السجل التجاري",
+    "tradeName": "الاسم التجاري",
+    "trademark": "العلامة التجارية",
+    "assetsEquipment": "الأصول والمعدات",
+    "lease": "عقد الإيجار",
+    "inventory": "المخزون",
+    "operationalRights": "الحقوق التشغيلية",
+    "debtsLiabilities": "الديون والالتزامات تجاه الغير",
+    "buyerAssumesLiabilities": "يتحمل المشتري جميع الالتزامات السابقة",
+    "checkLegalDisputes": "يجب التحقق من النزاعات القانونية القائمة"
+  },
+  "inventory": {
+    "confirmedAssets": "جرد الأصول المؤكَّد",
+    "unit": "وحدة"
+  },
+  "condition": {
+    "good": "جيد",
+    "used": "مستعمل",
+    "new": "جديد",
+    "unclear": "غير واضح",
+    "excellent": "ممتاز"
+  },
+  "simulation": {
+    "title": "محاكاة الصفقة",
+    "basePrice": "السعر الأساسي:",
+    "currentPrice": "السعر الحالي",
+    "commission": "عمولة:",
+    "asIs": "السعر المعروض كما هو",
+    "discount10": "تخفيض 10%",
+    "discount20": "تخفيض 20%",
+    "assetsOnly": "بدون أصول (أصول فقط 30%)",
+    "installment": "تقسيط (زيادة 15%)",
+    "transition": "مع فترة انتقالية 3 أشهر",
+    "bestScenario": "أفضل سيناريو"
+  },
+  "manage": {
+    "title": "إدارة الإعلان — الحالة:",
+    "yourListing": "إعلانك —",
+    "published": "منشور",
+    "draft": "مسودة",
+    "suspended": "موقوف مؤقتاً",
+    "edit": "تعديل",
+    "pause": "إيقاف مؤقت",
+    "resume": "إعادة تفعيل",
+    "promote": "ترقية الإعلان",
+    "delete": "حذف",
+    "featured": "إعلان مميز"
   },
   "marketplace": {
     "title": "سوق التقبيل",
