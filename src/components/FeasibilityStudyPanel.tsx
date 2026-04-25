@@ -657,6 +657,15 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isArabic, study, loading, loadingCache, autoTriggered, isSimulation, listing?.id]);
 
+  // Translate AI-generated study fields when user language is not Arabic.
+  // This merges translations on top of the original (Arabic) study so we don't
+  // need to regenerate the entire feasibility study per language.
+  const { translatedStudyData } = useFeasibilityTranslation(
+    listing?.id,
+    study as unknown as Record<string, unknown> | null,
+  );
+  const displayStudy = (translatedStudyData as FeasibilityStudy | null) || study;
+
   const runStudy = async () => {
     if (isSimulation) {
       toast("هذا إعلان محاكاة ويعرض دراسة جدوى محفوظة مسبقاً.");
