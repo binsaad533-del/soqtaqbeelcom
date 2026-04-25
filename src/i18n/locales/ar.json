@@ -14,7 +14,41 @@
     "all": "الكل",
     "hideDetails": "إخفاء التفاصيل",
     "month": "شهر",
-    "share": "مشاركة"
+    "share": "مشاركة",
+    "publish": "نشر",
+    "saveDraft": "حفظ كمسودة"
+  },
+  "auth": {
+    "enterPhone": "أدخل رقم جوالك",
+    "phoneNumber": "رقم الجوال",
+    "sendOtp": "إرسال رمز التحقق",
+    "otpCode": "رمز التحقق",
+    "verify": "تحقق",
+    "createAccount": "حساب جديد"
+  },
+  "dashboard": {
+    "myListings": "إعلاناتي",
+    "myOffers": "عروضي",
+    "myMessages": "رسائلي",
+    "myDeals": "صفقاتي"
+  },
+  "messages": {
+    "noMessages": "لا توجد رسائل",
+    "noConversations": "لا توجد محادثات بعد",
+    "searchPlaceholder": "ابحث في المحادثات..."
+  },
+  "footer": {
+    "terms": "الشروط",
+    "privacy": "الخصوصية",
+    "about": "من نحن",
+    "howItWorks": "كيف تعمل المنصة",
+    "contact": "تواصل معنا",
+    "help": "مركز المساعدة",
+    "blog": "المدونة",
+    "commission": "العمولة",
+    "support": "الدعم الفني",
+    "installApp": "تثبيت التطبيق",
+    "madeInSaudi": "في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦"
   },
   "nav": {
     "home": "الرئيسية",
