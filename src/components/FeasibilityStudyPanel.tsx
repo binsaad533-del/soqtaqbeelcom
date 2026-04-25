@@ -1187,15 +1187,15 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           badge={<span className={cn("text-xs font-semibold", RISK_COLORS[displayStudy.riskAssessment.overallRisk] || "")}>{displayStudy.riskAssessment.overallRisk}</span>}
         >
           <div className="space-y-2">
-            <RiskGroup label="مخاطر مالية" items={displayStudy.riskAssessment.financialRisks} />
-            <RiskGroup label="مخاطر تشغيلية" items={displayStudy.riskAssessment.operationalRisks} />
-            <RiskGroup label="مخاطر سوقية" items={displayStudy.riskAssessment.marketRisks} />
+            <RiskGroup label={t("feasibility.financialRisks")} items={displayStudy.riskAssessment.financialRisks} />
+            <RiskGroup label={t("feasibility.operationalRisks")} items={displayStudy.riskAssessment.operationalRisks} />
+            <RiskGroup label={t("feasibility.marketRisks")} items={displayStudy.riskAssessment.marketRisks} />
             {displayStudy.riskAssessment.regulatoryRisks && displayStudy.riskAssessment.regulatoryRisks.length > 0 && (
-              <RiskGroup label="مخاطر تنظيمية" items={displayStudy.riskAssessment.regulatoryRisks} />
+              <RiskGroup label={t("feasibility.regulatoryRisks")} items={displayStudy.riskAssessment.regulatoryRisks} />
             )}
             {displayStudy.riskAssessment.mitigationStrategies && displayStudy.riskAssessment.mitigationStrategies.length > 0 && (
               <div>
-                <div className="text-xs font-medium text-primary mb-1">استراتيجيات التخفيف:</div>
+                <div className="text-xs font-medium text-primary mb-1">{t("feasibility.mitigationStrategies")}</div>
                 {displayStudy.riskAssessment.mitigationStrategies.map((s, i) => (
                   <div key={i} className="flex gap-1.5 text-xs text-muted-foreground"><Lightbulb size={10} className="text-primary shrink-0 mt-0.5" />{s}</div>
                 ))}
