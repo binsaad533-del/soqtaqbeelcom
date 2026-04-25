@@ -58,22 +58,9 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
       return;
     }
 
-    if (isRateLimited(`offer:${user.id}`, 5, 60000)) {
-      toast.error(t("offer.rateLimited"));
-      return;
-    }
-
-    const sanitizedMessage = message ? sanitizeInput(message) : null;
-    const result = await submitOffer(listingId, numPrice, sanitizedMessage);
-    if (!result) {
-      toast.error(t("offer.sendFailed"));
-      return;
-    }
-    toast.success(t("offer.sentSuccess"));
-
     // Rate limit: max 5 offers per 10 minutes
     if (isRateLimited(`offer_${user.id}`, 5, 10 * 60 * 1000)) {
-      toast.error("تم تجاوز الحد المسموح. يرجى الانتظار قبل إرسال عرض جديد");
+      toast.error(t("offer.rateLimited"));
       return;
     }
 
@@ -81,9 +68,9 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
 
     const { error } = await submitOffer(listingId, numPrice, safeMessage);
     if (error) {
-      toast.error("فشل إرسال العرض");
+      toast.error(t("offer.sendFailed"));
     } else {
-      toast.success("تم إرسال عرضك بنجاح ✅");
+      toast.success(t("offer.sentSuccess"));
       setShowForm(false);
       setMyOffer({ offered_price: numPrice, message, status: "pending" } as any);
       setPrice("");
