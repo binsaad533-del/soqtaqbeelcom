@@ -1144,7 +1144,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             {/* Top competitors */}
             {displayStudy.competitorAnalysis.topCompetitors && displayStudy.competitorAnalysis.topCompetitors.length > 0 && (
               <div className="space-y-1">
-                <div className="text-xs font-medium text-muted-foreground">أبرز المنافسين:</div>
+                <div className="text-xs font-medium text-muted-foreground">{t("feasibility.topCompetitors")}</div>
                 {displayStudy.competitorAnalysis.topCompetitors.slice(0, 5).map((c, i) => (
                   <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-border/20 last:border-0">
                     <div className="flex items-center gap-1.5">
