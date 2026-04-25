@@ -142,7 +142,8 @@
   },
   "inventory": {
     "confirmedAssets": "已确认资产清单",
-    "unit": "件"
+    "unit": "件",
+    "priceDisclaimer": "显示的价格基于真实市场调研和有据可查的来源。需要现场检查的资产不计入总额，以保持透明度。"
   },
   "condition": {
     "veryGood": "非常好",

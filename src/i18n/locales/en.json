@@ -142,7 +142,8 @@
   },
   "inventory": {
     "confirmedAssets": "Confirmed asset inventory",
-    "unit": "unit"
+    "unit": "unit",
+    "priceDisclaimer": "Displayed prices are based on real market research with documented sources. Assets needing inspection are not included in totals to maintain transparency."
   },
   "condition": {
     "good": "Good",
