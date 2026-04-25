@@ -237,6 +237,26 @@ function buildDealCheckPayload(dealCheck: Record<string, unknown>): Record<strin
   return out;
 }
 
+const TRUST_SCORE_STRING_FIELDS = ["summary", "level", "verdict"];
+const TRUST_SCORE_ARRAY_FIELDS = ["strengths", "weaknesses", "warnings", "recommendations"];
+
+function buildTrustScorePayload(trustScore: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const f of TRUST_SCORE_STRING_FIELDS) {
+    const v = trustScore[f];
+    if (typeof v === "string" && v.trim().length > 0) out[`trustScore.${f}`] = v;
+  }
+  for (const f of TRUST_SCORE_ARRAY_FIELDS) {
+    const arr = trustScore[f];
+    if (Array.isArray(arr)) {
+      arr.forEach((item, idx) => {
+        if (typeof item === "string" && item.trim().length > 0) out[`trustScore.${f}.${idx}`] = item;
+      });
+    }
+  }
+  return out;
+}
+
 function buildFeasibilityPayload(studyData: Record<string, unknown>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const f of FEASIBILITY_STRING_FIELDS) {
