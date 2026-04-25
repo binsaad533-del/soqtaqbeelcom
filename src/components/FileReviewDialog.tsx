@@ -418,14 +418,14 @@ export function FileReviewDialog({
           <div className="flex-1 overflow-y-auto p-6 space-y-3">
             {isLoading && (
               <div className="text-center py-12 text-muted-foreground">
-                جاري التحميل...
+                {t("createListing.fileReview.loading")}
               </div>
             )}
 
             {!isLoading && totalFiles === 0 && (
               <div className="text-center py-12 text-muted-foreground">
                 <FileText className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                <p>لا توجد ملفات مصنّفة بعد</p>
+                <p>{t("createListing.fileReview.empty")}</p>
               </div>
             )}
 
