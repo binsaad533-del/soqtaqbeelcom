@@ -1245,13 +1245,14 @@ interface DealStructureDisplayProps {
 }
 
 const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: DealStructureDisplayProps) => {
+  const { t } = useTranslation();
   if (!primaryConfig) return null;
 
   return (
     <div className="bg-card rounded-2xl p-6 shadow-soft space-y-4">
       <div className="flex items-center gap-2">
         <Shield size={18} strokeWidth={1.3} className="text-primary" />
-        <h3 className="font-medium">هيكل الصفقة</h3>
+        <h3 className="font-medium">{t('listing.dealStructure')}</h3>
       </div>
 
       {/* Primary deal type */}
