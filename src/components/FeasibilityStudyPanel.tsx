@@ -708,8 +708,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       }
       toast.success("تم تحديث دراسة الجدوى بنجاح");
     } catch (err: any) {
-      toast.error("تعذّر إعادة التحليل حالياً");
-      setError(err.message || "تعذّر إعادة التحليل حالياً");
+      toast.error(t("dealCheck.reanalyze"));
+      setError(err.message || t("dealCheck.reanalyze"));
     } finally {
       setLoading(false);
     }

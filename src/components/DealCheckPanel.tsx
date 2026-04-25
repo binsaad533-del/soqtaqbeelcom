@@ -449,9 +449,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           .eq("id", listing.id);
       }
     } catch (e: any) {
-      toast.error("تعذّر إعادة التحليل حالياً");
+      toast.error(t("dealCheck.reanalyze"));
       if (!background) {
-        setError(e.message || "تعذّر إعادة التحليل حالياً");
+        setError(e.message || t("dealCheck.reanalyze"));
       }
     } finally {
       if (!background) setLoading(false);
