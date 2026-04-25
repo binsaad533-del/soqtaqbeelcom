@@ -403,11 +403,11 @@ const ActionArea = ({
       <div className="flex flex-col gap-2 rounded-lg bg-muted/30 p-3">
         <p className="text-xs text-muted-foreground flex items-center gap-1.5">
           <Lock size={11} strokeWidth={1.5} />
-          سجّل دخولك لطلب الاطلاع على الوثائق المحمية
+          <GuestLoginText />
         </p>
         <Button size="sm" variant="outline" onClick={onLoginClick} className="w-fit">
           <LogIn size={13} className="ml-1.5" strokeWidth={1.5} />
-          تسجيل الدخول
+          <LoginButtonText />
         </Button>
       </div>
     );
