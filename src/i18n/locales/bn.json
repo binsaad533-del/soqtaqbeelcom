@@ -111,7 +111,20 @@
     "mainOption": "প্রধান বিকল্প",
     "alternativeOptions": "বিকল্প পছন্দসমূহ:",
     "includes": "অন্তর্ভুক্ত",
-    "excludes": "অন্তর্ভুক্ত নয়"
+    "excludes": "অন্তর্ভুক্ত নয়",
+    "annualRent": "বার্ষিক ভাড়া",
+    "contractDuration": "চুক্তির মেয়াদ",
+    "remaining": "অবশিষ্ট",
+    "municipalLicense": "পৌর লাইসেন্স",
+    "civilDefense": "সিভিল ডিফেন্স",
+    "liabilities": "দায়",
+    "active": "সক্রিয়",
+    "none": "কিছু নেই",
+    "expired": "মেয়াদোত্তীর্ণ",
+    "years": "বছর",
+    "year": "বছর",
+    "area": "আয়তন:",
+    "sqm": "বর্গ মিটার"
   },
   "deal": {
     "mainOption": "প্রধান বিকল্প",

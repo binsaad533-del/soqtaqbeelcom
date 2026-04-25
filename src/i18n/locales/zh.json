@@ -111,7 +111,20 @@
     "mainOption": "主要选项",
     "alternativeOptions": "备选方案:",
     "includes": "包含",
-    "excludes": "不包含"
+    "excludes": "不包含",
+    "annualRent": "年租金",
+    "contractDuration": "合同期限",
+    "remaining": "剩余",
+    "municipalLicense": "市政执照",
+    "civilDefense": "民防",
+    "liabilities": "负债",
+    "active": "有效",
+    "none": "无",
+    "expired": "已过期",
+    "years": "年",
+    "year": "年",
+    "area": "面积:",
+    "sqm": "平方米"
   },
   "deal": {
     "mainOption": "主要选项",

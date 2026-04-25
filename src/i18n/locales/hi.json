@@ -111,7 +111,20 @@
     "mainOption": "मुख्य विकल्प",
     "alternativeOptions": "वैकल्पिक विकल्प:",
     "includes": "शामिल है",
-    "excludes": "शामिल नहीं"
+    "excludes": "शामिल नहीं",
+    "annualRent": "वार्षिक किराया",
+    "contractDuration": "अनुबंध अवधि",
+    "remaining": "शेष",
+    "municipalLicense": "नगरपालिका लाइसेंस",
+    "civilDefense": "नागरिक सुरक्षा",
+    "liabilities": "देनदारियां",
+    "active": "सक्रिय",
+    "none": "कोई नहीं",
+    "expired": "समाप्त",
+    "years": "वर्ष",
+    "year": "वर्ष",
+    "area": "क्षेत्रफल:",
+    "sqm": "वर्ग मीटर"
   },
   "deal": {
     "mainOption": "मुख्य विकल्प",
