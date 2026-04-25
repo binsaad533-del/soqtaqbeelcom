@@ -1115,7 +1115,7 @@ const ListingDetailsPage = () => {
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
               <Heart className="h-6 w-6 text-primary" />
             </div>
-            <DialogTitle className="text-lg">أبدِ اهتمامك</DialogTitle>
+            <DialogTitle className="text-lg">{t('listing.showInterest')}</DialogTitle>
             <DialogDescription className="text-sm">
               أرسل رسالتك الأولى للبائع وابدأ التفاوض
             </DialogDescription>
