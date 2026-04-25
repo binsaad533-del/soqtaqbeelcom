@@ -299,7 +299,10 @@
     "pricingInProgressShort": "قیمت کاری جاری ہے",
     "pricingCompleted": "قیمت کاری مکمل",
     "pricingFailed": "قیمت کاری ناکام",
-    "updatedAt": "اپ ڈیٹ:"
+    "updatedAt": "اپ ڈیٹ:",
+    "verdict_veryGood": "بہت اچھا",
+    "verdict_acceptable": "قابل قبول",
+    "verdict_poor": "خراب"
   },
   "feasibility": {
     "title": "اقتصادی فزیبلٹی اسٹڈی",

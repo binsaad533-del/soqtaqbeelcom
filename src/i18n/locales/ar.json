@@ -299,7 +299,10 @@
     "pricingInProgressShort": "قيد التسعير",
     "pricingCompleted": "اكتمل التسعير",
     "pricingFailed": "فشل التسعير",
-    "updatedAt": "محدّث:"
+    "updatedAt": "محدّث:",
+    "verdict_veryGood": "جيد جداً",
+    "verdict_acceptable": "مقبول",
+    "verdict_poor": "ضعيف"
   },
   "feasibility": {
     "title": "دراسة الجدوى الاقتصادية",

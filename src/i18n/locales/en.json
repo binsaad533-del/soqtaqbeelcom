@@ -299,7 +299,10 @@
     "pricingInProgressShort": "Pricing in progress",
     "pricingCompleted": "Pricing complete",
     "pricingFailed": "Pricing failed",
-    "updatedAt": "Updated:"
+    "updatedAt": "Updated:",
+    "verdict_veryGood": "Very Good",
+    "verdict_acceptable": "Acceptable",
+    "verdict_poor": "Poor"
   },
   "feasibility": {
     "title": "Economic feasibility study",

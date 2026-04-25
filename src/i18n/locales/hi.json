@@ -299,7 +299,10 @@
     "pricingInProgressShort": "मूल्यांकन जारी है",
     "pricingCompleted": "मूल्यांकन पूर्ण",
     "pricingFailed": "मूल्यांकन विफल",
-    "updatedAt": "अद्यतन:"
+    "updatedAt": "अद्यतन:",
+    "verdict_veryGood": "बहुत अच्छा",
+    "verdict_acceptable": "स्वीकार्य",
+    "verdict_poor": "खराब"
   },
   "feasibility": {
     "title": "आर्थिक व्यवहार्यता अध्ययन",

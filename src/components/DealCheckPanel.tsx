@@ -887,6 +887,15 @@ const TRUST_LEVEL_CONFIG: Record<string, { bg: string; text: string; border: str
   "ضعيف": { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", barColor: "bg-red-500" },
 };
 
+const VERDICT_KEY_MAP: Record<string, string> = {
+  "ممتاز": "excellent",
+  "جيد جداً": "veryGood",
+  "جيد": "good",
+  "متوسط": "acceptable",
+  "مقبول": "acceptable",
+  "ضعيف": "poor",
+};
+
 const FACTOR_LABEL_KEYS: Record<string, string> = {
   data_completeness: "dealCheck.factorDataCompleteness",
   asset_verification: "dealCheck.factorAssetVerification",
@@ -1419,7 +1428,7 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
           })()}
 
           <p className="text-[10px] text-muted-foreground/70 text-center mt-2 leading-relaxed">
-            الأسعار المعروضة مبنية على أبحاث سوقية حقيقية بمصادر موثقة. الأصول التي تحتاج معاينة لا تُحتسب في الإجمالي حفاظاً على الشفافية.
+            {t("inventory.priceDisclaimer")}
           </p>
         </>
       )}
@@ -1450,7 +1459,7 @@ const TrustScoreSection = ({ trustScore }: { trustScore: any }) => {
             {trustScore.trust_score} / 10
           </span>
           <span className={cn("text-[10px] px-2 py-0.5 rounded-md font-medium", levelStyle.bg, levelStyle.text, levelStyle.border, "border")}>
-            {trustScore.level}
+            {t(`dealCheck.verdict_${VERDICT_KEY_MAP[trustScore.level] || "good"}`)}
           </span>
           {open ? <ChevronUp size={14} className="text-muted-foreground" /> : <ChevronDown size={14} className="text-muted-foreground" />}
         </div>
