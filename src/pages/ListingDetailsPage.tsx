@@ -25,6 +25,7 @@ import SellerOffersPanel from "@/components/SellerOffersPanel";
 import MoqbilAgentPanel from "@/components/MoqbilAgentPanel";
 import ProtectedDocumentsPanel from "@/components/ProtectedDocumentsPanel";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { useListings, type Listing } from "@/hooks/useListings";
 import { useListingSocial } from "@/hooks/useListingSocial";
