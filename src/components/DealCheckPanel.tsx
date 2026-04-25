@@ -1039,11 +1039,11 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
       )}
 
       {/* Alibaba disclaimer */}
-      {!requiresInspection && isAlibaba && pricing?.disclaimer && (
+      {!requiresInspection && isAlibaba && (
         <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 p-2.5 flex items-start gap-2">
           <Info size={12} strokeWidth={1.8} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <p className="text-[10px] text-amber-800 dark:text-amber-200 leading-relaxed">
-            {pricing.disclaimer}
+            {t("dealCheck.alibabaDisclaimer")}
           </p>
         </div>
       )}
