@@ -4,6 +4,25 @@ import { useTranslation } from "react-i18next";
 
 type TranslatedFields = Record<string, string>;
 
+// Must stay in sync with TRANSLATABLE_LISTING_FIELDS in
+// supabase/functions/translate-listing-content/index.ts
+const TRANSLATABLE_LISTING_FIELDS = [
+  "title",
+  "description",
+  "city",
+  "district",
+  "business_activity",
+  "lease_duration",
+  "lease_paid_period",
+  "lease_remaining",
+  "liabilities",
+  "municipality_license",
+  "civil_defense_license",
+  "surveillance_cameras",
+  "overdue_rent",
+  "overdue_salaries",
+] as const;
+
 export function useListingTranslation<T extends { id?: string; inventory?: any } | null | undefined>(
   listing: T,
 ) {
