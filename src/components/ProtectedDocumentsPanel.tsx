@@ -419,7 +419,7 @@ const ActionArea = ({
       <div className="flex flex-col gap-2 rounded-lg bg-muted/30 p-3">
         <p className="text-xs text-muted-foreground flex items-center gap-1.5">
           <Lock size={11} strokeWidth={1.5} />
-          هذه الوثائق محمية — اطلب موافقة البائع للاطلاع عليها
+          {t("listing.docsProtectedAskSeller")}
         </p>
         <Button
           size="sm"
@@ -428,7 +428,7 @@ const ActionArea = ({
           className="w-fit"
         >
           <KeyRound size={13} className="ml-1.5" strokeWidth={1.5} />
-          طلب الوصول
+          {t("listing.requestAccess")}
         </Button>
       </div>
     );
