@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { useSEO } from "@/hooks/useSEO";
 import { ar } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 
 interface Conversation {
   dealId: string;
@@ -25,6 +26,7 @@ interface Conversation {
 }
 
 const MessagesPage = () => {
+  const { t } = useTranslation();
   useSEO({ title: "المحادثات", description: "تابع محادثاتك ومفاوضاتك على سوق تقبيل", canonical: "/messages" });
   const { user } = useAuthContext();
   const { tx } = useLanguage();
@@ -166,13 +168,13 @@ const MessagesPage = () => {
     <div className="container max-w-2xl py-6 space-y-4">
       <div className="flex items-center gap-3">
         <MessageSquare size={22} className="text-primary" />
-        <h1 className="text-xl font-bold">{tx("المحادثات", "Messages")}</h1>
+        <h1 className="text-xl font-bold">{t("nav.messages")}</h1>
       </div>
 
       <div className="relative">
         <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder={tx("ابحث في المحادثات...", "Search conversations...")}
+          placeholder={t("messages.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pr-9"
@@ -187,7 +189,7 @@ const MessagesPage = () => {
         <div className="text-center py-20 text-muted-foreground space-y-2">
           <MessageSquare size={40} className="mx-auto opacity-30" />
           <p className="text-sm">
-            {tx("لا توجد محادثات بعد", "No conversations yet")}
+            {t("messages.noConversations")}
           </p>
         </div>
       ) : (

@@ -14,7 +14,41 @@
     "all": "All",
     "hideDetails": "Hide details",
     "month": "month",
-    "share": "Share"
+    "share": "Share",
+    "publish": "Publish",
+    "saveDraft": "Save as draft"
+  },
+  "auth": {
+    "enterPhone": "Enter your phone number",
+    "phoneNumber": "Phone number",
+    "sendOtp": "Send verification code",
+    "otpCode": "Verification code",
+    "verify": "Verify",
+    "createAccount": "Create account"
+  },
+  "dashboard": {
+    "myListings": "My listings",
+    "myOffers": "My offers",
+    "myMessages": "My messages",
+    "myDeals": "My deals"
+  },
+  "messages": {
+    "noMessages": "No messages yet",
+    "noConversations": "No conversations yet",
+    "searchPlaceholder": "Search conversations..."
+  },
+  "footer": {
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "about": "About us",
+    "howItWorks": "How it works",
+    "contact": "Contact us",
+    "help": "Help center",
+    "blog": "Blog",
+    "commission": "Commission",
+    "support": "Support",
+    "installApp": "Install app",
+    "madeInSaudi": "Made in Saudi Arabia — built for it 🇸🇦"
   },
   "nav": {
     "home": "Home",

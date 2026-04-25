@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { heicTo, isHeic } from "heic-to";
 import { validateImageFile, validateDocFile, logAudit } from "@/lib/security";
 import {
@@ -64,6 +65,7 @@ function getImageRequirement(dealType: string): "required" | "optional" | "none"
 }
 
 const CreateListingPage = () => {
+  const { t } = useTranslation();
   useSEO({ title: "أضف فرصة جديدة", description: "أنشئ إعلان تقبيل جديد على سوق تقبيل — أضف تفاصيل مشروعك واجذب المشترين", canonical: "/create-listing" });
   const [currentStep, setCurrentStep] = useState(0);
   const [dealStructure, setDealStructure] = useState<DealStructureSelection>({
@@ -1338,7 +1340,7 @@ const CreateListingPage = () => {
             </Button>
             {currentStep < steps.length - 1 && (
               <Button onClick={handleNext} disabled={(currentStep === 0 && !dealStructure.isValid) || saving || (currentStep === 2 && analyzing)} className="gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]">
-                التالي <ArrowLeft size={16} strokeWidth={1.5} />
+                {t("common.next")} <ArrowLeft size={16} strokeWidth={1.5} />
               </Button>
             )}
           </div>

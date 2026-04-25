@@ -27,6 +27,7 @@ import SavedListingsTab from "@/components/dashboard/SavedListingsTab";
 import AccountSettingsPanel from "@/components/AccountSettingsPanel";
 import MoqbilAgentPanel from "@/components/MoqbilAgentPanel";
 import MoqbilDashboard from "@/components/MoqbilDashboard";
+import { useTranslation } from "react-i18next";
 
 /* ── Status helpers ── */
 const statusBadge = (s: string) => {
@@ -48,6 +49,7 @@ const fmtCurrency = (n: number) =>
   n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n.toLocaleString("en-US");
 
 const CustomerDashboardPage = () => {
+  const { t } = useTranslation();
   useSEO({ title: "لوحة العميل", description: "لوحة تحكم العميل — تابع إعلاناتك وصفقاتك على سوق تقبيل", canonical: "/dashboard" });
   const { profile, user } = useAuthContext();
   const navigate = useNavigate();
@@ -478,7 +480,7 @@ const CustomerDashboardPage = () => {
               <MessageSquare size={16} className="text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-xs font-semibold">رسائلي</h3>
+              <h3 className="text-xs font-semibold">{t("dashboard.myMessages")}</h3>
               <p className="text-[10px] text-muted-foreground">عرض جميع المحادثات</p>
             </div>
             <ChevronLeft size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -634,9 +636,9 @@ const CustomerDashboardPage = () => {
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="flex gap-1 bg-muted/40 rounded-xl p-1 w-fit overflow-x-auto max-w-full scrollbar-hide">
                 {[
-                  { id: "deals" as const, label: "صفقاتي", icon: Briefcase, count: deals.length, desc: "تابع جميع صفقاتك الجارية والمكتملة" },
-                  { id: "listings" as const, label: "إعلاناتي", icon: Store, count: listings.length, desc: "إدارة إعلاناتك ومسوداتك" },
-                  { id: "offers" as const, label: "عروضي", icon: ShoppingCart, count: undefined, desc: "العروض التي قدمتها على إعلانات أخرى" },
+                  { id: "deals" as const, label: t("dashboard.myDeals"), icon: Briefcase, count: deals.length, desc: "تابع جميع صفقاتك الجارية والمكتملة" },
+                  { id: "listings" as const, label: t("dashboard.myListings"), icon: Store, count: listings.length, desc: "إدارة إعلاناتك ومسوداتك" },
+                  { id: "offers" as const, label: t("dashboard.myOffers"), icon: ShoppingCart, count: undefined, desc: "العروض التي قدمتها على إعلانات أخرى" },
                   { id: "saved" as const, label: "المحفوظة", icon: Heart, count: undefined, desc: "الإعلانات التي حفظتها للمراجعة لاحقاً" },
                   { id: "notifications" as const, label: "الإشعارات", icon: Bell, count: undefined, desc: "تفضيلات التنبيهات والإشعارات" },
                   { id: "agent" as const, label: "وكيل مقبل", icon: Bot, count: undefined, desc: "مساعدك الذكي الذي يعمل بالنيابة عنك" },
