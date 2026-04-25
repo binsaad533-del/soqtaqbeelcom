@@ -1369,6 +1369,7 @@ const SectionAccordion = ({
 // shown right after the photos.
 // ============================================================
 const DealSummaryCard = ({ listing }: { listing: any }) => {
+  const { t } = useTranslation();
   const inv = Array.isArray(listing?.inventory) ? listing.inventory : [];
   const totalAssets = inv.length;
   const pricedTotal = inv.reduce((sum: number, a: any) => {
