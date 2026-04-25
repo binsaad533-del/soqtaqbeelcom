@@ -1427,7 +1427,7 @@ const DealSummaryCard = ({ listing }: { listing: any }) => {
             <span className="text-muted-foreground/40">·</span>
             <span className="inline-flex items-center gap-1.5 text-muted-foreground">
               <Package size={13} strokeWidth={1.4} />
-              {totalAssets} أصل
+              {totalAssets} {t('listing.asset')}
             </span>
           </>
         )}
