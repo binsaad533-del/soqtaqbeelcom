@@ -203,6 +203,8 @@
     "missingInfo": "معلومات ناقصة / توضيحات مطلوبة",
     "negotiationTips": "إرشادات التفاوض",
     "reanalyze": "إعادة التحليل",
+    "generatingInYourLanguage": "جارٍ توليد التحليل بلغتك...",
+    "tapToGenerateInYourLanguage": "اضغط لتوليد التحليل بلغتك",
     "disclaimer": "هذا التحليل استرشادي بمنهجية OLV وفق معايير تقييم السعودية (TAQEEM). ليس بديلاً عن تقييم معتمد.",
     "confidence": "ثقة:",
     "lastUpdate": "آخر تحديث:",

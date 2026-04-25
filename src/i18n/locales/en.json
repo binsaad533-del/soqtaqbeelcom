@@ -203,6 +203,8 @@
     "missingInfo": "Missing information / clarifications needed",
     "negotiationTips": "Negotiation guidance",
     "reanalyze": "Re-analyze",
+    "generatingInYourLanguage": "Generating analysis in your language...",
+    "tapToGenerateInYourLanguage": "Tap to generate analysis in your language",
     "disclaimer": "This analysis is indicative using OLV methodology per Saudi TAQEEM standards. Not a substitute for certified valuation.",
     "confidence": "Confidence:",
     "lastUpdate": "Last update:",

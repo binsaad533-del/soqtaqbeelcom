@@ -317,6 +317,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   );
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
+  const [autoTriggered, setAutoTriggered] = useState(false);
   const isSimulation = hasSimulationPhotos(listing?.photos as Record<string, unknown> | null | undefined);
 
   useEffect(() => {
@@ -327,6 +328,20 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
       setOpen(true);
     }
   }, [cachedDealCheck, listing, useCache]);
+
+  // Auto-trigger re-analysis when language is non-Arabic and there's no analysis yet
+  // (cached analysis is Arabic-only — user needs it in their selected language).
+  useEffect(() => {
+    if (useCache) return;
+    if (analysis) return;
+    if (loading || isRefreshing) return;
+    if (autoTriggered) return;
+    if (!open) return;
+    if (isSimulation) return;
+    setAutoTriggered(true);
+    runDealCheck();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useCache, analysis, loading, isRefreshing, autoTriggered, open, isSimulation]);
 
   const getAllPhotoUrls = (): string[] => {
     if (!listing?.photos) return [];
@@ -527,7 +542,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                 <Loader2 size={52} strokeWidth={1} className="absolute -top-2 -left-2 text-primary/30 animate-spin" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium">جاري تحليل الصفقة...</p>
+                <p className="text-sm font-medium">
+                  {!useCache ? t("dealCheck.generatingInYourLanguage") : "جاري تحليل الصفقة..."}
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   يتم فحص جميع الصور والمستندات والبيانات
                 </p>
@@ -540,6 +557,25 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               <p className="text-sm text-destructive mb-3">{error}</p>
               <Button variant="outline" size="sm" onClick={() => runDealCheck()} className="rounded-xl text-xs">
                 إعادة المحاولة
+              </Button>
+            </div>
+          )}
+
+          {!analysis && !loading && !error && (
+            <div className="py-10 flex flex-col items-center gap-3 text-center">
+              <AiStar size={32} />
+              <p className="text-sm text-muted-foreground">
+                {t("dealCheck.tapToGenerateInYourLanguage")}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => runDealCheck()}
+                disabled={isSimulation || loading || isRefreshing}
+                className="rounded-xl text-xs gap-1.5"
+              >
+                <RefreshCw size={12} />
+                {t("dealCheck.reanalyze")}
               </Button>
             </div>
           )}

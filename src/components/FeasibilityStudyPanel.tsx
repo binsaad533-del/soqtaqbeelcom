@@ -557,16 +557,20 @@ const resolveFeasibilityStudy = (listing: any, raw?: any): FeasibilityStudy | nu
 
 const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityStudyPanelProps) => {
   const { t, i18n } = useTranslation();
+  const isArabic = (i18n.language || "ar").toLowerCase() === "ar";
   const [study, setStudy] = useState<FeasibilityStudy | null>(() =>
-    resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility),
+    isArabic ? resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility) : null,
   );
   const [loading, setLoading] = useState(false);
   // If we already have a study from initialization, skip loading state entirely
-  const [loadingCache, setLoadingCache] = useState(() => !resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility));
+  const [loadingCache, setLoadingCache] = useState(() =>
+    isArabic ? !resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility) : false,
+  );
   const [error, setError] = useState<string | null>(null);
   const [cachedAt, setCachedAt] = useState<string | null>(analysisCache.cacheAge || null);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(analysisCache.analysisUpdatedAt || analysisCache.cacheAge || null);
   const [copied, setCopied] = useState(false);
+  const [autoTriggered, setAutoTriggered] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     summary: false,
     investment: false,
@@ -589,11 +593,12 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   }, [study]);
 
   useEffect(() => {
+    if (!isArabic) return;
     const immediateStudy = resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility);
     setStudy(immediateStudy);
     setCachedAt(analysisCache.cacheAge || immediateStudy?._meta?.generatedAt || null);
     setLastUpdatedAt(analysisCache.analysisUpdatedAt || analysisCache.cacheAge || immediateStudy?._meta?.generatedAt || null);
-  }, [listing?.id]);
+  }, [listing?.id, isArabic]);
 
   const toggleSection = (key: string) =>
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -635,6 +640,20 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       setLoadingCache(false);
     })();
   }, [listing?.id, i18n.language]);
+
+  // Auto-trigger study generation when language is non-Arabic and no study yet
+  // (cached/estimated study is Arabic-only — user needs it in their selected language).
+  useEffect(() => {
+    if (isArabic) return;
+    if (study) return;
+    if (loading || loadingCache) return;
+    if (autoTriggered) return;
+    if (isSimulation) return;
+    if (!listing?.id) return;
+    setAutoTriggered(true);
+    runStudy();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isArabic, study, loading, loadingCache, autoTriggered, isSimulation, listing?.id]);
 
   const runStudy = async () => {
     if (isSimulation) {
@@ -902,7 +921,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   }
 
   // If study is still null after all resolution attempts, force-build from listing data
-  const resolvedStudy = study || buildEstimatedFeasibilityStudy(listing);
+  // — but only for Arabic. For other languages we must wait for/trigger AI generation.
+  const resolvedStudy = study || (isArabic ? buildEstimatedFeasibilityStudy(listing) : null);
   if (!resolvedStudy) {
     return (
       <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
@@ -913,21 +933,21 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
         {loading ? (
           <div className="py-8 flex flex-col items-center gap-3">
             <Loader2 size={24} className="animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">جاري إعداد الدراسة... (قد تستغرق 30 ثانية)</p>
+            <p className="text-sm text-muted-foreground">
+              {!isArabic ? t("dealCheck.generatingInYourLanguage") : "جاري إعداد الدراسة... (قد تستغرق 30 ثانية)"}
+            </p>
           </div>
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              لا تتوفر بيانات كافية لإعداد دراسة الجدوى حالياً
+              {!isArabic ? t("dealCheck.tapToGenerateInYourLanguage") : "لا تتوفر بيانات كافية لإعداد دراسة الجدوى حالياً"}
             </p>
             {error && <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{error}</p>}
-            {isOwner && (
-              <Button onClick={runStudy} variant="outline" className="w-full gap-2" size="sm" disabled={isSimulation || !canRefresh}>
-                <BarChart3 size={14} />
-                {isSimulation ? "دراسة محفوظة" : "إعداد الدراسة الآن"}
-                <AiStar size={12} />
-              </Button>
-            )}
+            <Button onClick={runStudy} variant="outline" className="w-full gap-2" size="sm" disabled={isSimulation || loading || !canRefresh}>
+              <BarChart3 size={14} />
+              {isSimulation ? "دراسة محفوظة" : (!isArabic ? t("dealCheck.reanalyze") : "إعداد الدراسة الآن")}
+              <AiStar size={12} />
+            </Button>
           </>
         )}
       </div>
