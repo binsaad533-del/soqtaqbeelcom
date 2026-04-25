@@ -307,10 +307,23 @@ function buildConsistencyRules(mode: AnalysisMode): string {
 - إذا تغيّرت بيانات تسعير الأصول (pricing_aggregates) أو أُضيف قسم إجماليات التسعير لأول مرة — يجب إعادة تقييم عدالة السعر والتوصية بناءً على قيمة التقبيل OLV الجديدة، حتى لو باقي المدخلات لم تتغير`; 
 }
 
-function buildSystemPrompt(perspective: AnalysisPerspective, mode: AnalysisMode): string {
+function languageInstructionFor(language: string): string {
+  const map: Record<string, string> = {
+    ar: "Arabic",
+    en: "English",
+    zh: "Simplified Chinese",
+    hi: "Hindi",
+    ur: "Urdu",
+    bn: "Bengali",
+  };
+  const langName = map[language] || "Arabic";
+  return `\n\nIMPORTANT: Respond entirely in ${langName}. All analysis text, recommendations, strengths, risks, descriptions, and any free-form prose fields must be written in ${langName}. Numbers and currency (SAR/ر.س) stay as-is. Asset/brand names (e.g. SCM OLIMPIC K360R) stay as-is. Do not change the JSON structure, field names, or enum values.`;
+}
+
+function buildSystemPrompt(perspective: AnalysisPerspective, mode: AnalysisMode, language: string = "ar"): string {
   const perspectiveBlock = perspective === "seller" ? buildSellerPerspective() : BUYER_PERSPECTIVE;
 
-  return `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية دقيقة وثابتة لكل صفقة.
+  const base = `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية دقيقة وثابتة لكل صفقة.
 
 ## تحليل الوثائق المرفقة:
 - إذا تم إرفاق صور مستندات (سجل تجاري، عقد إيجار، رخص، فواتير)، حلّلها واستخرج منها كل المعلومات المفيدة
