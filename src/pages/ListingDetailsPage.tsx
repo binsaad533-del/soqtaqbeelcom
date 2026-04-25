@@ -794,9 +794,9 @@ const ListingDetailsPage = () => {
 
             {/* ====== المستندات والوثائق (Accordion) ====== */}
             <SectionAccordion
-              title="المستندات والوثائق"
+              title={t('listing.documents')}
               icon={<Shield size={16} strokeWidth={1.4} className="text-primary" />}
-              summary={`${documents.length} مستند${documents.length === 1 ? "" : ""}`}
+              summary={`${documents.length} ${t('listing.document')}`}
             >
               <ProtectedDocumentsPanel
                 listingId={listing.id}
