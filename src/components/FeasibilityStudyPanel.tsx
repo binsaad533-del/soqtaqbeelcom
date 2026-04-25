@@ -1169,7 +1169,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             {/* Opportunities & Threats */}
             {displayStudy.competitorAnalysis.opportunities && displayStudy.competitorAnalysis.opportunities.length > 0 && (
               <div>
-                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">فرص التميّز:</div>
+                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">{t("feasibility.differentiators")}</div>
                 {displayStudy.competitorAnalysis.opportunities.map((o, i) => (
                   <div key={i} className="flex gap-1.5 text-xs text-muted-foreground"><CheckCircle2 size={10} className="text-emerald-500 shrink-0 mt-0.5" />{o}</div>
                 ))}
