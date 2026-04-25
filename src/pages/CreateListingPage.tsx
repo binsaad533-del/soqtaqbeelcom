@@ -318,11 +318,11 @@ const CreateListingPage = () => {
       }
       setPhotos((prev) => {
         const updatedPhotos = { ...prev, [group]: [...(prev[group] || []), ...uploadedUrls] };
-        updateListing(id, { photos: updatedPhotos } as never).catch(() => toast.error("تعذّر حفظ الصور."));
+        updateListing(id, { photos: updatedPhotos } as never).catch(() => toast.error(t("createListing.toasts.upload.photoSaveError")));
         return updatedPhotos;
       });
       if (uploadedUrls.length > 0) {
-        toast.success(`تم تجهيز ورفع ${uploadedUrls.length} ملف بنجاح`);
+        toast.success(t("createListing.toasts.upload.photosUploaded", { count: uploadedUrls.length }));
         if (isCrOnly && group === "cr_doc" && uploadedUrls.length > 0 && !crExtractionDone) handleCrExtraction(uploadedUrls[0]);
       }
     } finally { setSaving(false); setUploadingGroup(null); }
