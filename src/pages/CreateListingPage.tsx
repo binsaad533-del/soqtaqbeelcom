@@ -580,16 +580,16 @@ const CreateListingPage = () => {
       // Detect explicit validation rejection from edge function (data carries is_valid_cr=false)
       const payload = (data || {}) as CrExtractionResult & { error?: string };
       if (payload.is_valid_cr === false) {
-        const detected = payload.document_type_detected || "غير معروف";
-        const reason = payload.rejection_reason || "هذا الملف ليس سجلاً تجارياً سعودياً.";
-        toast.error(`❌ الملف مرفوض — ليس سجلاً تجارياً\nنوع المستند: ${detected}\n${reason}`, { duration: 9000 });
+        const detected = payload.document_type_detected || t("createListing.toasts.cr.crDetectedUnknown");
+        const reason = payload.rejection_reason || t("createListing.toasts.cr.crRejectionDefault");
+        toast.error(t("createListing.toasts.cr.crRejected", { detected, reason }), { duration: 9000 });
         removeRejectedDoc(documentUrl);
         setCrExtraction(null);
         setCrExtractionDone(false);
         return;
       }
       if (error || !data || payload.error) {
-        throw new Error(payload.error || error?.message || "فشل استخراج البيانات");
+        throw new Error(payload.error || error?.message || t("createListing.toasts.cr.crFetchFail"));
       }
       const result = payload as CrExtractionResult;
       setCrExtraction(result);
@@ -600,12 +600,12 @@ const CreateListingPage = () => {
         ...(result.city && !prev.city ? { city: result.city } : {}),
         ...(result.district && !prev.district ? { district: result.district } : {}),
       }));
-      if (result.extraction_confidence === "high") toast.success("تم التحقق من السجل التجاري واستخراج البيانات بنجاح ✓", { duration: 5000 });
-      else if (result.extraction_confidence === "medium") toast.info("تم التحقق — استُخرجت بعض البيانات، يرجى المراجعة", { duration: 5000 });
-      else toast.warning("تم التحقق لكن جودة الصورة منخفضة — قد تحتاج لرفع صورة أوضح", { duration: 6000 });
+      if (result.extraction_confidence === "high") toast.success(t("createListing.toasts.cr.crSuccess"), { duration: 5000 });
+      else if (result.extraction_confidence === "medium") toast.info(t("createListing.toasts.cr.crMedium"), { duration: 5000 });
+      else toast.warning(t("createListing.toasts.cr.crLow"), { duration: 6000 });
     } catch (err) {
       console.error("CR extraction failed:", err);
-      const msg = err instanceof Error ? err.message : "تعذّر استخراج البيانات من السجل التجاري";
+      const msg = err instanceof Error ? err.message : t("createListing.toasts.cr.crGenericFail");
       toast.error(msg, { duration: 7000 });
       setCrExtractionDone(true);
     } finally { setCrExtracting(false); }
