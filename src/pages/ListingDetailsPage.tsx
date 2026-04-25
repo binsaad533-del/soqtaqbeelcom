@@ -858,7 +858,11 @@ const ListingDetailsPage = () => {
                 </div>
               )}
 
-              <h1 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || "فرصة تقبيل"}</h1>
+              {isTranslating ? (
+                <Skeleton className="h-7 w-3/4 mb-2" />
+              ) : (
+                <h1 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || "فرصة تقبيل"}</h1>
+              )}
               {sellerProfile && (
                 <Link to={`/seller/${sellerProfile.user_id}`} className="flex items-center gap-1.5 mb-1 group/seller">
                   <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary">
@@ -868,7 +872,9 @@ const ListingDetailsPage = () => {
                   <VerifiedSellerBadge userId={sellerProfile.user_id} size="sm" />
                 </Link>
               )}
-              {listing.location_lat && listing.location_lng ? (
+              {isTranslating ? (
+                <Skeleton className="h-5 w-32 mb-4" />
+              ) : listing.location_lat && listing.location_lng ? (
                 <button
                   type="button"
                   onClick={() => window.open(`https://www.google.com/maps?q=${listing.location_lat},${listing.location_lng}`, '_blank', 'noopener,noreferrer')}
