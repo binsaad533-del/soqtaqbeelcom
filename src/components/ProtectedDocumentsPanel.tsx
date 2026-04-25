@@ -20,6 +20,7 @@ import { useFileClassifications, type FileClassification } from "@/hooks/useFile
 import RequestAccessDialog from "./RequestAccessDialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface LegacyDocItem {
   id: string;
@@ -54,6 +55,7 @@ function fileLabel(c: FileClassification): string {
 
 const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { classifications, isLoading: classificationsLoading } =
     useFileClassifications(listingId);
   const {
@@ -149,7 +151,7 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
       <div className="rounded-xl border border-border/40 bg-card p-4" dir="rtl">
         <div className="flex items-center gap-2 mb-2">
           <FileText size={16} strokeWidth={1.3} className="text-primary" />
-          <span className="text-sm font-medium text-foreground">المستندات والوثائق</span>
+          <span className="text-sm font-medium text-foreground">{t("listing.documents")}</span>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
           <Shield size={12} />
@@ -226,7 +228,7 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
           <div className="flex items-center gap-2">
             <FileText size={16} strokeWidth={1.3} className="text-primary" />
             <span className="text-sm font-medium text-foreground">
-              المستندات والوثائق
+              {t("listing.documents")}
               {hasProtected && (
                 <span className="text-muted-foreground"> ({totalProtected} محمية)</span>
               )}

@@ -55,7 +55,9 @@
     "opportunityOwner": "Opportunity owner",
     "profile": "Profile",
     "showExtraDetails": "Show additional details",
-    "pricedAssetsValue": "Priced assets value"
+    "pricedAssetsValue": "Priced assets value",
+    "publicOfferTip": "Public offers increase deal transparency and give you an advantage",
+    "loginToViewDocs": "Sign in to request access to protected documents"
   },
   "marketplace": {
     "title": "Business marketplace",

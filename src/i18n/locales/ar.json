@@ -55,7 +55,9 @@
     "opportunityOwner": "صاحب الفرصة",
     "profile": "الملف الشخصي",
     "showExtraDetails": "عرض تفاصيل الإعلان الإضافية",
-    "pricedAssetsValue": "قيمة الأصول المُسعَّرة"
+    "pricedAssetsValue": "قيمة الأصول المُسعَّرة",
+    "publicOfferTip": "تقديم العروض على العام يزيد من شفافية الصفقة ويعطيك أفضلية",
+    "loginToViewDocs": "سجّل دخولك لطلب الاطلاع على الوثائق المحمية"
   },
   "marketplace": {
     "title": "سوق التقبيل",
