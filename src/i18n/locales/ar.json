@@ -258,11 +258,6 @@
     "mitigationStrategies": "استراتيجيات التخفيف:",
     "topCompetitors": "أبرز المنافسين:"
   },
-  "simulation": {
-    "whatIf": "ماذا لو؟",
-    "simulating": "جاري المحاكاة...",
-    "noData": "لا توجد بيانات كافية للمحاكاة"
-  },
   "moqbil": {
     "greeting": "هلا وغلا، أنا مقبل، مساعدك الذكي",
     "placeholder": "اكتب رسالتك..."
