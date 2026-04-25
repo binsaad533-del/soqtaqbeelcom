@@ -664,9 +664,10 @@ serve(async (req) => {
   }
 
   try {
-    const { listing, perspective: rawPerspective, sellerName, mode: rawMode, previousAnalysis } = await req.json();
+    const { listing, perspective: rawPerspective, sellerName, mode: rawMode, previousAnalysis, language: rawLanguage } = await req.json();
     const perspective: AnalysisPerspective = rawPerspective === "seller" ? "seller" : "buyer";
     const mode: AnalysisMode = rawMode === "update" ? "update" : "create";
+    const language: string = typeof rawLanguage === "string" && rawLanguage.trim() ? rawLanguage.trim() : "ar";
 
     if (!listing) {
       return new Response(
@@ -700,7 +701,7 @@ serve(async (req) => {
         temperature: 0.1,
         top_p: 0.1,
         messages: [
-          { role: "system", content: buildSystemPrompt(perspective, mode) },
+          { role: "system", content: buildSystemPrompt(perspective, mode, language) },
           { role: "user", content: userContent },
         ],
         tools: [
