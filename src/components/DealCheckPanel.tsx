@@ -886,12 +886,12 @@ const TRUST_LEVEL_CONFIG: Record<string, { bg: string; text: string; border: str
   "ضعيف": { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", barColor: "bg-red-500" },
 };
 
-const FACTOR_LABELS: Record<string, string> = {
-  data_completeness: "اكتمال البيانات",
-  asset_verification: "التحقق من الأصول",
-  price_logic: "منطقية السعر",
-  legal_clarity: "الوضوح القانوني",
-  media_quality: "جودة الوسائط",
+const FACTOR_LABEL_KEYS: Record<string, string> = {
+  data_completeness: "dealCheck.factorDataCompleteness",
+  asset_verification: "dealCheck.factorAssetVerification",
+  price_logic: "dealCheck.factorPriceLogic",
+  legal_clarity: "dealCheck.factorLegalClarity",
+  media_quality: "dealCheck.factorMediaQuality",
 };
 
 const FACTOR_WEIGHTS: Record<string, number> = {
