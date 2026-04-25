@@ -22,6 +22,7 @@ import {
   mapMarketPositionToKey,
   mapRatingToKey,
 } from "@/lib/condition-utils";
+import { useDealCheckTranslation } from "@/hooks/useDealCheckTranslation";
 
 interface AssetBreakdownItem {
   assetName: string;
@@ -327,6 +328,13 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const [autoTriggered, setAutoTriggered] = useState(false);
   const isSimulation = hasSimulationPhotos(listing?.photos as Record<string, unknown> | null | undefined);
 
+  // Translate AI-generated analysis into the active UI language (no-op for Arabic).
+  const { translatedAnalysis } = useDealCheckTranslation(
+    listing?.id,
+    analysis as unknown as Record<string, unknown> | null,
+  );
+  const displayAnalysis = (translatedAnalysis as unknown as DealCheckAnalysis | null) || analysis;
+
   useEffect(() => {
     if (!useCache) return;
     const normalized = normalizeDealCheckAnalysis(cachedDealCheck, listing);
@@ -525,9 +533,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               {t("common.updating")}
             </span>
           )}
-          {analysis && (
+          {analysis && displayAnalysis && (
             <span className={cn("text-[11px] px-2.5 py-1 rounded-lg border", ratingStyle.bg, ratingStyle.text, ratingStyle.border)}>
-              {t(`dealCheck.${mapRatingToKey(analysis.rating)}`)}
+              {t(`dealCheck.${mapRatingToKey(displayAnalysis.rating)}`)}
             </span>
           )}
           {!analysis && loading && (
@@ -587,7 +595,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
             </div>
           )}
 
-          {analysis && !loading && (
+          {analysis && displayAnalysis && !loading && (
             <div className="space-y-5">
               {/* Cache Info Bar */}
               {(cacheAge || analysisUpdatedAt) && (() => {
@@ -605,14 +613,14 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-muted-foreground/60">{t("dealCheck.autoUpdate")}</span>
-                      {analysis.confidenceLevel && (
+                      {displayAnalysis.confidenceLevel && (
                         <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium",
-                          CONFIDENCE_BADGE[analysis.confidenceLevel]?.bg || "bg-muted",
-                          CONFIDENCE_BADGE[analysis.confidenceLevel]?.text || "text-muted-foreground"
+                          CONFIDENCE_BADGE[displayAnalysis.confidenceLevel]?.bg || "bg-muted",
+                          CONFIDENCE_BADGE[displayAnalysis.confidenceLevel]?.text || "text-muted-foreground"
                         )}>
                           {t("dealCheck.confidence")} {t(`dealCheck.confidenceLevel${
-                            analysis.confidenceLevel === "عالي" ? "High" :
-                            analysis.confidenceLevel === "منخفض" ? "Low" : "Medium"
+                            displayAnalysis.confidenceLevel === "عالي" ? "High" :
+                            displayAnalysis.confidenceLevel === "منخفض" ? "Low" : "Medium"
                           }`)}
                         </span>
                       )}
@@ -630,11 +638,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-[11px] text-muted-foreground">
-                      {t("dealCheck.priceFairness")} {FAIRNESS_ICONS[analysis.fairnessVerdict]} {t(`dealCheck.${mapFairnessToKey(analysis.fairnessVerdict)}`)}
+                      {t("dealCheck.priceFairness")} {FAIRNESS_ICONS[displayAnalysis.fairnessVerdict]} {t(`dealCheck.${mapFairnessToKey(displayAnalysis.fairnessVerdict)}`)}
                     </span>
                   </div>
                 </div>
-                <p className={cn("text-lg font-medium", ratingStyle.text)}>{t(`dealCheck.${mapRatingToKey(analysis.rating)}`)}</p>
+                <p className={cn("text-lg font-medium", ratingStyle.text)}>{t(`dealCheck.${mapRatingToKey(displayAnalysis.rating)}`)}</p>
               </div>
 
               {/* Price Context Box — explains how the asking price is composed */}
@@ -663,11 +671,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       <AiStar size={14} animate={false} />
                       <span className="text-xs font-medium text-primary">{t("dealCheck.recommendation")}</span>
                     </div>
-                    <p className="text-sm leading-relaxed">{analysis.recommendation}</p>
+                    <p className="text-sm leading-relaxed">{displayAnalysis.recommendation}</p>
                   </div>
 
-                  <ListSection icon={TrendingUp} title={t("dealCheck.strengths")} items={analysis.strengths} dotClass="bg-emerald-500/60" iconClass="text-emerald-600" />
-                  <ListSection icon={AlertTriangle} title={t("dealCheck.risks")} items={analysis.risks} dotClass="bg-red-500/50" iconClass="text-red-500/70" />
+                  <ListSection icon={TrendingUp} title={t("dealCheck.strengths")} items={displayAnalysis.strengths} dotClass="bg-emerald-500/60" iconClass="text-emerald-600" />
+                  <ListSection icon={AlertTriangle} title={t("dealCheck.risks")} items={displayAnalysis.risks} dotClass="bg-red-500/50" iconClass="text-red-500/70" />
 
                   {/* Price Analysis Section */}
                   {priceAnalysis && (
@@ -813,11 +821,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                     </div>
                   )}
 
-                  <AnalysisSection icon={MapPin} title={t("dealCheck.locationAssessment")} content={analysis.locationAssessment} />
-                  <AnalysisSection icon={BarChart3} title={t("dealCheck.competition")} content={analysis.competitionSnapshot} />
-                  <AnalysisSection icon={ShieldCheck} title={t("dealCheck.operationalReadiness")} content={analysis.operationalReadiness} />
+                  <AnalysisSection icon={MapPin} title={t("dealCheck.locationAssessment")} content={displayAnalysis.locationAssessment} />
+                  <AnalysisSection icon={BarChart3} title={t("dealCheck.competition")} content={displayAnalysis.competitionSnapshot} />
+                  <AnalysisSection icon={ShieldCheck} title={t("dealCheck.operationalReadiness")} content={displayAnalysis.operationalReadiness} />
 
-                  {analysis.marketComparison && (
+                  {displayAnalysis.marketComparison && (
                     <div>
                       <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
                         <Store size={15} strokeWidth={1.3} className="text-primary/60" />
@@ -826,44 +834,44 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
                           <div className="text-xs text-muted-foreground">{t("dealCheck.comparisons")}</div>
-                          <div className="text-sm font-medium">{analysis.marketComparison.comparablesReviewed}</div>
+                          <div className="text-sm font-medium">{displayAnalysis.marketComparison.comparablesReviewed}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
                           <div className="text-xs text-muted-foreground">{t("dealCheck.matchQuality")}</div>
-                          <div className="text-sm font-medium">{analysis.marketComparison.matchQuality}</div>
+                          <div className="text-sm font-medium">{displayAnalysis.marketComparison.matchQuality}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
                           <div className="text-xs text-muted-foreground">{t("dealCheck.pricePosition")}</div>
                           <div className={cn("text-sm font-medium",
-                            mapMarketPositionToKey(analysis.marketComparison.marketPosition) === "pricePosition_below" ? "text-emerald-600" :
-                            mapMarketPositionToKey(analysis.marketComparison.marketPosition) === "pricePosition_above" ? "text-red-500" :
+                            mapMarketPositionToKey(displayAnalysis.marketComparison.marketPosition) === "pricePosition_below" ? "text-emerald-600" :
+                            mapMarketPositionToKey(displayAnalysis.marketComparison.marketPosition) === "pricePosition_above" ? "text-red-500" :
                             "text-foreground"
-                          )}>{t(`dealCheck.${mapMarketPositionToKey(analysis.marketComparison.marketPosition)}`)}</div>
+                          )}>{t(`dealCheck.${mapMarketPositionToKey(displayAnalysis.marketComparison.marketPosition)}`)}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
                           <div className="text-xs text-muted-foreground">{t("dealCheck.confidenceLevel")}</div>
                           <div className="text-sm font-medium">{t(`dealCheck.confidenceLevel${
-                            analysis.marketComparison.confidence === "عالي" ? "High" :
-                            analysis.marketComparison.confidence === "منخفض" ? "Low" : "Medium"
+                            displayAnalysis.marketComparison.confidence === "عالي" ? "High" :
+                            displayAnalysis.marketComparison.confidence === "منخفض" ? "Low" : "Medium"
                           }`)}</div>
                         </div>
                       </div>
-                      {analysis.marketComparison.observedPriceRange && analysis.marketComparison.observedPriceRange !== "غير متاح" && (
+                      {displayAnalysis.marketComparison.observedPriceRange && displayAnalysis.marketComparison.observedPriceRange !== "غير متاح" && (
                         <div className="bg-accent/30 rounded-lg p-3 mb-3">
                           <div className="text-xs text-muted-foreground mb-1">{t("dealCheck.observedRange")}</div>
-                          <div className="text-sm font-medium">{analysis.marketComparison.observedPriceRange}</div>
+                          <div className="text-sm font-medium">{displayAnalysis.marketComparison.observedPriceRange}</div>
                         </div>
                       )}
-                       <p className="text-sm text-muted-foreground leading-relaxed mb-3">{analysis.marketComparison.details}</p>
+                       <p className="text-sm text-muted-foreground leading-relaxed mb-3">{displayAnalysis.marketComparison.details}</p>
                        {/* Asset comparison breakdown table removed — was empty (all "غير متاح • تقدير AI") */}
                      </div>
                    )}
 
-                  {analysis.missingInfo.length > 0 && (
-                    <ListSection icon={FileQuestion} title={t("dealCheck.missingInfo")} items={analysis.missingInfo} dotClass="bg-amber-500/50" iconClass="text-amber-500" />
+                  {displayAnalysis.missingInfo.length > 0 && (
+                    <ListSection icon={FileQuestion} title={t("dealCheck.missingInfo")} items={displayAnalysis.missingInfo} dotClass="bg-amber-500/50" iconClass="text-amber-500" />
                   )}
 
-                  <ListSection icon={MessageCircle} title={t("dealCheck.negotiationTips")} items={analysis.negotiationGuidance} dotClass="bg-blue-500/50" iconClass="text-blue-500" />
+                  <ListSection icon={MessageCircle} title={t("dealCheck.negotiationTips")} items={displayAnalysis.negotiationGuidance} dotClass="bg-blue-500/50" iconClass="text-blue-500" />
 
                   <Button variant="ghost" size="sm" onClick={() => setExpanded(false)} className="w-full text-xs text-muted-foreground hover:text-foreground rounded-xl gap-1.5">
                     <ChevronUp size={14} />
