@@ -19,7 +19,7 @@ import {
   formatPdfPrice, escapeHtml, PDF_COLORS,
 } from "@/lib/pdfShared";
 import { useTranslation } from "react-i18next";
-import { mapFeasibilityVerdictToKey } from "@/lib/condition-utils";
+import { mapFeasibilityVerdictToKey, mapConfidenceToKey } from "@/lib/condition-utils";
 /* ── Types ── */
 interface Scenario {
   monthlyRevenue: number;
