@@ -117,7 +117,25 @@
     "operationalRights": "经营权",
     "debtsLiabilities": "债务与对外负债",
     "buyerAssumesLiabilities": "买方承担所有既往债务",
-    "checkLegalDisputes": "需核实现存的法律纠纷"
+    "checkLegalDisputes": "需核实现存的法律纠纷",
+    "excludes": "不包含",
+    "viewDetails": "查看详情",
+    "setAsPrimary": "设为主选项",
+    "alternative": "备选"
+  },
+  "offer": {
+    "submitted": "您的报价已发送",
+    "newOffer": "提交新报价",
+    "accepted": "✓ 您的报价已被接受!",
+    "rejected": "报价已被拒绝",
+    "offersCount": "份报价",
+    "highestOffer": "最高报价:",
+    "writePrice": "输入您的价格",
+    "cancel": "取消",
+    "invalidPrice": "请输入有效价格",
+    "rateLimited": "已超过限制,请稍后再提交新报价",
+    "sendFailed": "报价发送失败",
+    "sentSuccess": "您的报价已成功发送 ✅"
   },
   "inventory": {
     "confirmedAssets": "已确认资产清单",
