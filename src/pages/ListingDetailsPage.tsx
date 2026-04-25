@@ -942,10 +942,10 @@ const ListingDetailsPage = () => {
                         )}
                         <VerifiedSellerBadge userId={sellerProfile.user_id} size="md" />
                       </div>
-                      <p className="text-[11px] text-muted-foreground">صاحب الفرصة</p>
+                      <p className="text-[11px] text-muted-foreground">{t('listing.opportunityOwner')}</p>
                     </div>
                     <Link to={`/seller/${sellerProfile.user_id}`} className="text-[10px] text-primary hover:underline shrink-0">
-                      الملف الشخصي
+                      {t('listing.profile')}
                     </Link>
                   </div>
                   <TrustBadge
