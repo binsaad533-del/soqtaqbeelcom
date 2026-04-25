@@ -1279,7 +1279,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium flex items-center gap-0.5">
             <Star size={10} fill="currentColor" /> {t("listing.mainOption")}
           </span>
-          <span className="text-sm font-medium">{primaryConfig.label}</span>
+          <span className="text-sm font-medium">{t(`deal.${mapDealTypeToKey(primaryTypeId)}`)}</span>
         </div>
         <p className="text-xs text-muted-foreground mb-3">{tr(primaryConfig.desc)}</p>
 
