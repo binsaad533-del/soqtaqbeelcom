@@ -907,13 +907,13 @@ const FACTOR_WEIGHTS: Record<string, number> = {
 
 const JASAAS_URL = "https://jasaas.sa";
 
-const PRICING_CONFIDENCE_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
-  "عالي": { bg: "bg-emerald-50 dark:bg-emerald-950/30", text: "text-emerald-700 dark:text-emerald-300", border: "border-emerald-200 dark:border-emerald-900", label: "ثقة عالية" },
-  "متوسط": { bg: "bg-blue-50 dark:bg-blue-950/30", text: "text-blue-700 dark:text-blue-300", border: "border-blue-200 dark:border-blue-900", label: "ثقة متوسطة" },
-  "منخفض": { bg: "bg-amber-50 dark:bg-amber-950/30", text: "text-amber-700 dark:text-amber-300", border: "border-amber-200 dark:border-amber-900", label: "ثقة منخفضة" },
-  "يتطلب_معاينة": { bg: "bg-muted", text: "text-muted-foreground", border: "border-border", label: "يتطلب معاينة" },
+const PRICING_CONFIDENCE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+  "عالي": { bg: "bg-emerald-50 dark:bg-emerald-950/30", text: "text-emerald-700 dark:text-emerald-300", border: "border-emerald-200 dark:border-emerald-900" },
+  "متوسط": { bg: "bg-blue-50 dark:bg-blue-950/30", text: "text-blue-700 dark:text-blue-300", border: "border-blue-200 dark:border-blue-900" },
+  "منخفض": { bg: "bg-amber-50 dark:bg-amber-950/30", text: "text-amber-700 dark:text-amber-300", border: "border-amber-200 dark:border-amber-900" },
+  "يتطلب_معاينة": { bg: "bg-muted", text: "text-muted-foreground", border: "border-border" },
   // 🆕 GENERIC_RANGE — أصول عامة بنطاق سوق سعودي تقريبي
-  "تقديري": { bg: "bg-yellow-50 dark:bg-yellow-950/30", text: "text-yellow-700 dark:text-yellow-300", border: "border-yellow-200 dark:border-yellow-900", label: "تقديري" },
+  "تقديري": { bg: "bg-yellow-50 dark:bg-yellow-950/30", text: "text-yellow-700 dark:text-yellow-300", border: "border-yellow-200 dark:border-yellow-900" },
 };
 
 const PRICING_STATUS_LABEL: Record<string, { text: string; className: string }> = {
@@ -961,6 +961,7 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
   const isGenericRange = pricing?.source === "generic_market_range";
   const styleKey = isGenericRange ? "تقديري" : confidence;
   const style = PRICING_CONFIDENCE_STYLES[styleKey] || PRICING_CONFIDENCE_STYLES["يتطلب_معاينة"];
+  const confidenceLabel = t(`dealCheck.confidence${mapConfidenceToKey(styleKey)}`);
   const isAlibaba = pricing?.source === "alibaba_fallback";
   const sources = Array.isArray(pricing?.sources) ? pricing!.sources! : [];
 
@@ -979,7 +980,7 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
               asset.condition === "تالف" ? "bg-red-50 text-red-700" :
               "bg-muted text-muted-foreground"
             )}>
-              {asset.condition || "غير محدد"}
+              {t(`condition.${mapConditionToKey(asset.condition)}`)}
             </span>
           </div>
           {asset.details && (
