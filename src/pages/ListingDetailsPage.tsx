@@ -433,7 +433,7 @@ const ListingDetailsPage = () => {
                 {isOwner ? t("manage.yourListing") : isPlatformAdmin ? t("manage.title") : "—"}
               </span>
               <span>
-                {t("manage.title").replace(/—.*/, "").trim()} {listing.status === "published" ? t("manage.published") : listing.status === "suspended" ? t("manage.suspended") : listing.status === "draft" ? t("manage.draft") : listing.status}
+                {listing.status === "published" ? t("manage.published") : listing.status === "suspended" ? t("manage.suspended") : listing.status === "draft" ? t("manage.draft") : listing.status}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
