@@ -228,6 +228,7 @@
     "aiSearch": "您在寻找什么?让 AI 帮您找…"
   },
   "dealCheck": {
+    "alibabaDisclaimer": "来自全球来源（阿里巴巴）的估算价格——由于运费、关税和中间商，可能与沙特市场有所不同。如需准确评估，建议通过Jasaas进行专业检查",
     "overallRating": "综合评级",
     "priceFairness": "价格合理度:",
     "howPriceBuilt": "此交易的价格是如何构成的?",
