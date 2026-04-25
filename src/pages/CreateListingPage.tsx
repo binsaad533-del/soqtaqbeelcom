@@ -313,8 +313,8 @@ const CreateListingPage = () => {
           if (previewUrl) setLocalPreviews((prev) => ({ ...prev, [group]: [...(prev[group] || []), previewUrl] }));
           const result = await uploadFile(id, preparedFile, `photos/${group}`);
           if (result.url) uploadedUrls.push(result.url);
-          else toast.error(`${originalFile.name}: ${result.error || "فشل الرفع"}`);
-        } catch (error) { console.error("photo preparation failed", error); toast.error(`تعذّر تجهيز الصورة ${originalFile.name}`); }
+          else toast.error(`${originalFile.name}: ${result.error || t("createListing.toasts.upload.uploadFailGeneric")}`);
+        } catch (error) { console.error("photo preparation failed", error); toast.error(t("createListing.toasts.upload.photoPrepareFail", { name: originalFile.name })); }
       }
       setPhotos((prev) => {
         const updatedPhotos = { ...prev, [group]: [...(prev[group] || []), ...uploadedUrls] };
