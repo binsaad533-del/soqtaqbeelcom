@@ -560,20 +560,20 @@ export function FileReviewDialog({
       <Dialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
         <DialogContent dir="rtl" className="max-w-md">
           <DialogHeader>
-            <DialogTitle>تأكيد الحذف</DialogTitle>
+            <DialogTitle>{t("createListing.fileReview.deleteTitle")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            سيتم حذف هذا التصنيف فقط. الملف الأصلي يبقى محفوظاً في التخزين.
+            {t("createListing.fileReview.deleteMessage")}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
-              إلغاء
+              {t("createListing.fileReview.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
             >
-              حذف
+              {t("createListing.fileReview.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>
