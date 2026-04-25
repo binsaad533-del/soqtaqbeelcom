@@ -1024,8 +1024,8 @@ const CreateListingPage = () => {
     }
 
     setClassifyingFiles(false);
-    toast.success(`تم تصنيف ${uploaded.length} ملف — راجعها قبل النشر`);
-  }, []);
+    toast.success(t("createListing.toasts.classification.classified", { count: uploaded.length }));
+  }, [t]);
 
   // Public handler: unified upload entry point
   const handleUnifiedUpload = useCallback(async (files: FileList) => {
@@ -1036,7 +1036,7 @@ const CreateListingPage = () => {
     try {
       const uploaded = await uploadFilesToStorage(id, files);
       if (uploaded.length === 0) {
-        toast.error("تعذّر رفع الملفات");
+        toast.error(t("createListing.toasts.upload.unifiedFailed"));
         return;
       }
       await classifyAfterUpload(id, uploaded);
@@ -1055,7 +1055,7 @@ const CreateListingPage = () => {
       .eq("listing_id", listingId);
 
     if (error || !data) {
-      toast.error("تعذّر قراءة التصنيفات");
+      toast.error(t("createListing.toasts.classification.readFail"));
       return;
     }
 
