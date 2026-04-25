@@ -598,8 +598,12 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   const toggleSection = (key: string) =>
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  // Check if refresh is allowed (24h cooldown)
+  // Check if refresh is allowed (24h cooldown).
+  // For non-Arabic languages, bypass the cooldown — cached study is Arabic-only,
+  // so the user must be allowed to regenerate in their language.
   const canRefresh = (() => {
+    const lang = (i18n.language || "ar").toLowerCase();
+    if (lang !== "ar") return true;
     if (!lastUpdatedAt) return true;
     const age = Date.now() - new Date(lastUpdatedAt).getTime();
     return age >= 24 * 60 * 60 * 1000;
