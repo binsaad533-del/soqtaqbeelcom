@@ -45,6 +45,8 @@ import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/com
 import ReportListingDialog from "@/components/ReportListingDialog";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
 import { mapConditionToKey, mapDealTypeToKey, translateStatusValue, translateLeaseDuration } from "@/lib/condition-utils";
+import { useListingTranslation } from "@/hooks/useListingTranslation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 type ListingDocumentItem = {
@@ -134,7 +136,9 @@ const ListingDetailsPage = () => {
   const { getSellerReviews } = useSellerReviews();
   const queryClient = useQueryClient();
   const cachedSnapshot = id ? listingDetailsStateCache.get(id) : undefined;
-  const [listing, setListing] = useState<Listing | null>(() => cachedSnapshot?.listing ?? null);
+  const [originalListing, setListing] = useState<Listing | null>(() => cachedSnapshot?.listing ?? null);
+  const { translatedListing, isTranslating } = useListingTranslation(originalListing);
+  const listing = (translatedListing ?? originalListing) as Listing | null;
 
   // Dynamic SEO with OG tags for smart social sharing
   const listingTitle = listing ? (listing.title || listing.business_activity || "فرصة تقبيل") : "تفاصيل الإعلان";
@@ -761,9 +765,13 @@ const ListingDetailsPage = () => {
                 icon={<AiStar size={16} animate={false} />}
                 summary={String(listing.ai_summary || listing.description || "").replace(/\s+/g, " ").trim().slice(0, 90) + ((String(listing.ai_summary || listing.description || "").length > 90) ? "…" : "")}
               >
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {listing.ai_summary || listing.description}
-                </p>
+                {isTranslating ? (
+                  <Skeleton className="h-20 w-full" />
+                ) : (
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {listing.ai_summary || listing.description}
+                  </p>
+                )}
               </SectionAccordion>
             )}
 
@@ -854,7 +862,11 @@ const ListingDetailsPage = () => {
                 </div>
               )}
 
-              <h1 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || "فرصة تقبيل"}</h1>
+              {isTranslating ? (
+                <Skeleton className="h-7 w-3/4 mb-2" />
+              ) : (
+                <h1 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || "فرصة تقبيل"}</h1>
+              )}
               {sellerProfile && (
                 <Link to={`/seller/${sellerProfile.user_id}`} className="flex items-center gap-1.5 mb-1 group/seller">
                   <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary">
@@ -864,7 +876,9 @@ const ListingDetailsPage = () => {
                   <VerifiedSellerBadge userId={sellerProfile.user_id} size="sm" />
                 </Link>
               )}
-              {listing.location_lat && listing.location_lng ? (
+              {isTranslating ? (
+                <Skeleton className="h-5 w-32 mb-4" />
+              ) : listing.location_lat && listing.location_lng ? (
                 <button
                   type="button"
                   onClick={() => window.open(`https://www.google.com/maps?q=${listing.location_lat},${listing.location_lng}`, '_blank', 'noopener,noreferrer')}
