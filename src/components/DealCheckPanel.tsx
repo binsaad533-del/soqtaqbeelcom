@@ -1470,7 +1470,7 @@ const TrustScoreSection = ({ trustScore }: { trustScore: any }) => {
           {trustScore.factors && (
             <button onClick={() => setDetailsOpen(!detailsOpen)} className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1 mt-2">
               {detailsOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-              تفصيل المعايير
+              {t("dealCheck.criteriaDetails")}
             </button>
           )}
           {detailsOpen && trustScore.factors && (
