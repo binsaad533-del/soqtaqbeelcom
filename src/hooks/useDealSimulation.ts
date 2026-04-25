@@ -1,7 +1,16 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+export type ScenarioId =
+  | "current"
+  | "discount10"
+  | "discount20"
+  | "noAssets"
+  | "installment"
+  | "transition";
+
 interface SimulationScenario {
+  id: ScenarioId;
   name: string;
   adjustedPrice: number;
   commission: number;
@@ -12,7 +21,7 @@ interface SimulationScenario {
 interface SimulationResult {
   basePrice: number;
   scenarios: SimulationScenario[];
-  bestScenario: string;
+  bestScenario: ScenarioId;
 }
 
 export function useDealSimulation() {
@@ -38,6 +47,7 @@ export function useDealSimulation() {
 
       const scenarios: SimulationScenario[] = [
         {
+          id: "current",
           name: "السعر الحالي",
           adjustedPrice: base,
           commission: base * 0.01,
@@ -45,6 +55,7 @@ export function useDealSimulation() {
           recommendation: "السعر المعروض كما هو",
         },
         {
+          id: "discount10",
           name: "تخفيض 10%",
           adjustedPrice: base * 0.9,
           commission: base * 0.9 * 0.01,
@@ -52,6 +63,7 @@ export function useDealSimulation() {
           recommendation: "جاذبية أعلى للمشترين مع هامش ربح معقول",
         },
         {
+          id: "discount20",
           name: "تخفيض 20%",
           adjustedPrice: base * 0.8,
           commission: base * 0.8 * 0.01,
@@ -59,6 +71,7 @@ export function useDealSimulation() {
           recommendation: "بيع سريع، مناسب إذا تبغى تبيع بأسرع وقت",
         },
         {
+          id: "noAssets",
           name: "بدون أصول (أصول فقط 30%)",
           adjustedPrice: base * 0.3,
           commission: base * 0.3 * 0.01,
@@ -66,6 +79,7 @@ export function useDealSimulation() {
           recommendation: "مناسب لمن يبغى الأصول فقط بدون النشاط",
         },
         {
+          id: "installment",
           name: "تقسيط (زيادة 15%)",
           adjustedPrice: base * 1.15,
           commission: base * 1.15 * 0.01,
@@ -73,6 +87,7 @@ export function useDealSimulation() {
           recommendation: "سعر أعلى مقابل تسهيل الدفع، لكن مخاطر التحصيل أعلى",
         },
         {
+          id: "transition",
           name: "مع فترة انتقالية 3 أشهر",
           adjustedPrice: base + (rent / 4),
           commission: (base + (rent / 4)) * 0.01,
@@ -90,7 +105,7 @@ export function useDealSimulation() {
       const res: SimulationResult = {
         basePrice: base,
         scenarios,
-        bestScenario: best.name,
+        bestScenario: best.id,
       };
 
       setResult(res);
