@@ -117,7 +117,25 @@
     "operationalRights": "الحقوق التشغيلية",
     "debtsLiabilities": "الديون والالتزامات تجاه الغير",
     "buyerAssumesLiabilities": "يتحمل المشتري جميع الالتزامات السابقة",
-    "checkLegalDisputes": "يجب التحقق من النزاعات القانونية القائمة"
+    "checkLegalDisputes": "يجب التحقق من النزاعات القانونية القائمة",
+    "excludes": "لا يشمل",
+    "viewDetails": "عرض التفاصيل",
+    "setAsPrimary": "تعيين كرئيسي",
+    "alternative": "بديل"
+  },
+  "offer": {
+    "submitted": "تم إرسال عرضك",
+    "newOffer": "تقديم عرض جديد",
+    "accepted": "✓ تم قبول عرضك!",
+    "rejected": "تم رفض العرض",
+    "offersCount": "عرض مقدّم",
+    "highestOffer": "أعلى عرض:",
+    "writePrice": "اكتب سعرك",
+    "cancel": "إلغاء",
+    "invalidPrice": "يرجى إدخال سعر صحيح",
+    "rateLimited": "تم تجاوز الحد المسموح. يرجى الانتظار قبل إرسال عرض جديد",
+    "sendFailed": "فشل إرسال العرض",
+    "sentSuccess": "تم إرسال عرضك بنجاح ✅"
   },
   "inventory": {
     "confirmedAssets": "جرد الأصول المؤكَّد",
