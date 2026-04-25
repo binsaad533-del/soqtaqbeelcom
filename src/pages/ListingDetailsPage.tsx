@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import PriceDisplay from "@/components/PriceDisplay";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
+import { tDealItemByValue } from "@/lib/dealStructureI18n";
 import { getArabicDealType } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
 import ReportListingDialog from "@/components/ReportListingDialog";
@@ -1260,25 +1261,22 @@ interface DealStructureDisplayProps {
   alternatives: Array<{ type_id: string; priority: number }>;
 }
 
+// Legacy map kept ONLY for description strings & a couple of long sentences.
+// All deal-item lists (includes/excludes/disclosures/cautions) are now
+// translated by index via dealStructureI18n.tDealItemByValue, so they no
+// longer need to be enumerated here.
 const DEAL_CONTENT_TRANSLATION_KEYS: Record<string, string> = {
-  "السجل التجاري": "deal.commercialReg",
-  "الاسم التجاري": "deal.tradeName",
-  "العلامة التجارية": "deal.trademark",
-  "الأصول والمعدات": "deal.assetsEquipment",
-  "عقد الإيجار": "deal.lease",
-  "المخزون": "deal.inventory",
-  "الحقوق التشغيلية": "deal.operationalRights",
-  "الديون والالتزامات تجاه الغير": "deal.debtsLiabilities",
   "نقل الأعمال بالكامل بما تملكه وما عليها من التزامات": "deal.fullTransferDesc",
-  "يتحمل المشتري جميع الالتزامات السابقة": "deal.buyerAssumesLiabilities",
-  "يجب التحقق من النزاعات القانونية القائمة": "deal.checkLegalDisputes",
 };
 
 const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: DealStructureDisplayProps) => {
   const { t } = useTranslation();
   if (!primaryConfig) return null;
 
-  const tr = (s: string) => (DEAL_CONTENT_TRANSLATION_KEYS[s] ? t(DEAL_CONTENT_TRANSLATION_KEYS[s]) : s);
+  const tr = (s: string) => {
+    if (DEAL_CONTENT_TRANSLATION_KEYS[s]) return t(DEAL_CONTENT_TRANSLATION_KEYS[s]);
+    return tDealItemByValue(t, s);
+  };
 
   return (
     <div className="bg-card rounded-2xl p-6 shadow-soft space-y-4">

@@ -854,6 +854,114 @@
       "deleteMessage": "Only this classification will be deleted. The original file remains in storage.",
       "cancel": "Cancel",
       "delete": "Delete"
+    },
+    "dealItems": {
+      "full_takeover": {
+        "includes": [
+          "Commercial Registration",
+          "Trade Name",
+          "Trademark",
+          "Assets & Equipment",
+          "Lease Contract",
+          "Inventory",
+          "Operational Rights",
+          "Debts & Third-Party Liabilities"
+        ],
+        "excludes": [],
+        "mandatoryDisclosures": [
+          "All debts",
+          "All financial obligations",
+          "Lease obligations",
+          "Salaries & labor obligations",
+          "Supplier obligations",
+          "Active contracts",
+          "Legal disputes if any",
+          "Taxes / Zakat / government dues",
+          "Trade name / trademark ownership"
+        ],
+        "cautionNotes": [
+          "Buyer assumes all prior liabilities",
+          "Existing legal disputes must be verified"
+        ]
+      },
+      "transfer_no_liabilities": {
+        "includes": [
+          "Commercial Registration",
+          "Trade Name",
+          "Trademark",
+          "Assets & Equipment",
+          "Lease Contract (with landlord consent)",
+          "Inventory",
+          "Operational Rights"
+        ],
+        "excludes": [
+          "Prior debts",
+          "Prior liabilities"
+        ],
+        "mandatoryDisclosures": [
+          "Seller declaration of liabilities settlement",
+          "Lease details",
+          "Operational rights details",
+          "Workforce transfer details if applicable",
+          "Confirmation buyer assumes no prior liabilities"
+        ],
+        "cautionNotes": [
+          "Landlord consent for lease transfer must be confirmed",
+          "Actual settlement of liabilities must be verified"
+        ]
+      },
+      "assets_setup": {
+        "includes": [
+          "Assets & Equipment",
+          "Fit-out & Décor",
+          "Inventory",
+          "Location (via lease transfer or new contract)"
+        ],
+        "excludes": [
+          "Commercial Registration",
+          "Trade Name",
+          "Trademark",
+          "Prior legal liabilities"
+        ],
+        "mandatoryDisclosures": [
+          "Asset list",
+          "Equipment condition",
+          "Inventory summary",
+          "Location arrangement details",
+          "Clarification: Commercial Registration not included",
+          "Clarification: prior liabilities not included"
+        ],
+        "cautionNotes": [
+          "Buyer must obtain a new Commercial Registration",
+          "Does not include any legal rights of prior business"
+        ]
+      },
+      "assets_only": {
+        "includes": [
+          "Equipment",
+          "Furniture",
+          "Fit-out",
+          "Inventory"
+        ],
+        "excludes": [
+          "Business activity",
+          "Commercial Registration",
+          "Trade Name",
+          "Location",
+          "Liabilities"
+        ],
+        "mandatoryDisclosures": [
+          "Detailed asset list",
+          "Condition of each asset",
+          "Ownership confirmation",
+          "Quantity where applicable",
+          "Clarification: business activity not transferred"
+        ],
+        "cautionNotes": [
+          "Does not include any rights to location or business activity",
+          "Buyer is responsible for relocation and operations"
+        ]
+      }
     }
   }
 }
