@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTickets } from "@/hooks/useTickets";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 import { useSEO } from "@/hooks/useSEO";
 import { Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,10 +29,10 @@ const categoryLabels: Record<string, string> = {
 };
 
 const SupportPage = () => {
-  const { tx } = useLanguage();
+  const { t } = useTranslation();
   const { tickets, loading } = useTickets();
   const [filter, setFilter] = useState("all");
-  useSEO({ title: tx("تذاكري — الدعم الفني | سوق تقبيل", "My Tickets — Support | Soq Taqbeel") });
+  useSEO({ title: t("support.metaTickets") });
 
   const filtered = filter === "all" ? tickets : tickets.filter(t => t.status === filter);
 
@@ -45,21 +45,21 @@ const SupportPage = () => {
   return (
     <div className="container py-8 max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{tx("تذاكر الدعم الفني", "Support Tickets")}</h1>
+        <h1 className="text-xl font-bold">{t("support.title")}</h1>
         <Link to="/support/new">
           <Button size="sm" className="gap-1.5">
             <Plus size={14} />
-            {tx("تذكرة جديدة", "New Ticket")}
+            {t("support.newTicket")}
           </Button>
         </Link>
       </div>
 
       <Select value={filter} onValueChange={setFilter}>
         <SelectTrigger className="w-48">
-          <SelectValue placeholder={tx("فلترة حسب الحالة", "Filter by status")} />
+          <SelectValue placeholder={t("support.filterByStatus")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{tx("الكل", "All")}</SelectItem>
+          <SelectItem value="all">{t("support.all")}</SelectItem>
           {Object.entries(statusLabels).map(([k, v]) => (
             <SelectItem key={k} value={k}>{v.ar}</SelectItem>
           ))}
@@ -68,7 +68,7 @@ const SupportPage = () => {
 
       {filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
-          {tx("لا توجد تذاكر", "No tickets found")}
+          {t("support.noTickets")}
         </div>
       ) : (
         <div className="space-y-2">
