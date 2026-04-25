@@ -1182,17 +1182,17 @@ const CreateListingPage = () => {
       await updateListing(listingId, { photos: photosByGroup, documents: newDocuments } as never);
     } catch (err) {
       console.error("[unified] save listing failed", err);
-      toast.error("تعذّر حفظ التصنيفات");
+      toast.error(t("createListing.toasts.classification.saveFail"));
       return;
     }
 
     setReviewDialogOpen(false);
-    toast.success("تم حفظ تصنيفات ملفاتك");
+    toast.success(t("createListing.toasts.classification.saved"));
 
     if (crRegisterUrl && !crExtractionDone) {
       await triggerCrExtraction(crRegisterUrl);
     }
-  }, [listingId, updateListing, crExtractionDone, triggerCrExtraction, user?.id]);
+  }, [listingId, updateListing, crExtractionDone, triggerCrExtraction, user?.id, t]);
 
   // Public handler: manual CR re-extraction
   const handleManualCrExtract = useCallback(async () => {
@@ -1207,11 +1207,11 @@ const CreateListingPage = () => {
       .maybeSingle();
 
     if (error || !data?.file_url) {
-      toast.error("لم يتم العثور على سجل تجاري — ارفع سجلك التجاري أولاً");
+      toast.error(t("createListing.toasts.cr.crManualNotFound"));
       return;
     }
     await triggerCrExtraction(data.file_url);
-  }, [listingId, triggerCrExtraction]);
+  }, [listingId, triggerCrExtraction, t]);
 
   // Shared state for step components
   const sharedState: CreateListingSharedState = {
