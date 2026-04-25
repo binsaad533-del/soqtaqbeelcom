@@ -769,7 +769,8 @@
       "priceLabel": "价格",
       "editExisting": "编辑现有信息",
       "publishAsNew": "作为新信息发布",
-      "cancel": "取消"
+      "cancel": "取消",
+      "defaultTitle": "广告"
     },
     "publishModal": {
       "titleConfirm": "确认发布信息",

@@ -769,7 +769,8 @@
       "priceLabel": "السعر",
       "editExisting": "تعديل الإعلان الحالي",
       "publishAsNew": "نشر كإعلان جديد",
-      "cancel": "إلغاء"
+      "cancel": "إلغاء",
+      "defaultTitle": "إعلان"
     },
     "publishModal": {
       "titleConfirm": "تأكيد نشر الإعلان",

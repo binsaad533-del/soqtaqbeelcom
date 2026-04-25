@@ -769,7 +769,8 @@
       "priceLabel": "قیمت",
       "editExisting": "موجودہ اشتہار میں ترمیم",
       "publishAsNew": "نئے اشتہار کے طور پر شائع کریں",
-      "cancel": "منسوخ"
+      "cancel": "منسوخ",
+      "defaultTitle": "اشتہار"
     },
     "publishModal": {
       "titleConfirm": "اشاعت کی تصدیق",

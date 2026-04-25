@@ -769,7 +769,8 @@
       "priceLabel": "মূল্য",
       "editExisting": "বিদ্যমান তালিকা সম্পাদনা",
       "publishAsNew": "নতুন তালিকা হিসেবে প্রকাশ",
-      "cancel": "বাতিল"
+      "cancel": "বাতিল",
+      "defaultTitle": "বিজ্ঞাপন"
     },
     "publishModal": {
       "titleConfirm": "তালিকা প্রকাশ নিশ্চিত করুন",

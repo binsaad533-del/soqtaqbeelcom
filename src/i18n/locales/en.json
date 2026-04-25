@@ -769,7 +769,8 @@
       "priceLabel": "Price",
       "editExisting": "Edit existing listing",
       "publishAsNew": "Publish as a new listing",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "defaultTitle": "Listing"
     },
     "publishModal": {
       "titleConfirm": "Confirm listing publication",
