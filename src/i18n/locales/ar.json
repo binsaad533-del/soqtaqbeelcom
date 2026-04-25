@@ -242,7 +242,23 @@
     "confidenceLevel": "مستوى الثقة:",
     "paybackPeriod": "فترة الاسترداد (واقعي)",
     "weeklyUpdate": "يُحدّث تلقائياً كل أسبوع",
-    "noCompetitorData": "لم تتوفر بيانات منافسين رقمية — المنافسة الفعلية تتطلب معاينة ميدانية"
+    "noCompetitorData": "لم تتوفر بيانات منافسين رقمية — المنافسة الفعلية تتطلب معاينة ميدانية",
+    "optimistic": "متفائل",
+    "realistic": "واقعي",
+    "conservative": "متحفظ",
+    "monthlyProfit": "ربح شهري",
+    "differentiators": "فرص التميّز:",
+    "financialRisks": "مخاطر مالية",
+    "operationalRisks": "مخاطر تشغيلية",
+    "marketRisks": "مخاطر سوقية",
+    "regulatoryRisks": "مخاطر تنظيمية",
+    "mitigationStrategies": "استراتيجيات التخفيف:",
+    "topCompetitors": "أبرز المنافسين:"
+  },
+  "simulation": {
+    "whatIf": "ماذا لو؟",
+    "simulating": "جاري المحاكاة...",
+    "noData": "لا توجد بيانات كافية للمحاكاة"
   },
   "moqbil": {
     "greeting": "هلا وغلا، أنا مقبل، مساعدك الذكي",
