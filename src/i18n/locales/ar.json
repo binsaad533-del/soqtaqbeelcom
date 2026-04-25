@@ -16,7 +16,9 @@
     "month": "شهر",
     "share": "مشاركة",
     "publish": "نشر",
-    "saveDraft": "حفظ كمسودة"
+    "saveDraft": "حفظ كمسودة",
+    "showMore": "عرض المزيد",
+    "showLess": "عرض أقل"
   },
   "auth": {
     "enterPhone": "أدخل رقم جوالك",
