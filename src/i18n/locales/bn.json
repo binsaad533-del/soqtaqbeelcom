@@ -27,7 +27,8 @@
     "marketValueLabel": "বাজার:",
     "takeoverValueLabel": "অধিগ্রহণ:",
     "copied": "কপি হয়েছে",
-    "updating": "আপডেট হচ্ছে..."
+    "updating": "আপডেট হচ্ছে...",
+    "welcomeBanner": "🎉 Souq Taqbeel-এর প্রথম লঞ্চে স্বাগতম — আপনার মতামত আমাদের কাছে গুরুত্বপূর্ণ"
   },
   "auth": {
     "enterPhone": "আপনার মোবাইল নম্বর লিখুন",

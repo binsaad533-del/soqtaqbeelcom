@@ -27,7 +27,8 @@
     "marketValueLabel": "Market:",
     "takeoverValueLabel": "Takeover:",
     "copied": "Copied",
-    "updating": "Updating..."
+    "updating": "Updating...",
+    "welcomeBanner": "🎉 Welcome to the first launch of Soq Taqbeel — we value your feedback"
   },
   "auth": {
     "enterPhone": "Enter your phone number",
