@@ -381,12 +381,12 @@ const CreateListingPage = () => {
       const safeFolder = activeDocType.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "") || "general";
       const result = await uploadFile(id, file, `docs/${safeFolder}`);
       if (!result.url) {
-        toast.error(`${file.name}: ${result.error || "فشل الرفع"}`);
+        toast.error(`${file.name}: ${result.error || t("createListing.toasts.upload.uploadFailGeneric")}`);
         continue;
       }
       // AI content verification for the three critical doc types
       if (verifierType) {
-        const verifyToast = toast.loading(`🔍 جاري التحقق من "${file.name}" عبر الذكاء الاصطناعي...`);
+        const verifyToast = toast.loading(t("createListing.toasts.cr.verifyToast", { name: file.name }));
         try {
           const { data, error } = await supabase.functions.invoke("verify-document", {
             body: { documentUrl: result.url, expectedType: verifierType },
@@ -401,9 +401,9 @@ const CreateListingPage = () => {
             error?: string;
           };
           if (error || payload.is_valid === false || payload.error) {
-            const reason = payload.rejection_reason || payload.error || "الملف لا يطابق نوع الحقل.";
+          const reason = payload.rejection_reason || payload.error || t("createListing.toasts.cr.rejectionDefault");
             toast.error(
-              `❌ تم رفض "${file.name}"\n${reason}`,
+              t("createListing.toasts.cr.verifyRejected", { name: file.name, reason }),
               { duration: 9000 }
             );
             continue;
@@ -411,22 +411,22 @@ const CreateListingPage = () => {
           // Accepted — branch on confidence
           if (verifierType === "equipment_photos" && payload.confidence === "medium") {
             toast(
-              `⚠ تم قبول "${file.name}" — قد تحتاج معاينة من جساس`,
+              t("createListing.toasts.cr.verifyMediumWarn", { name: file.name }),
               {
                 duration: 7000,
-                description: payload.notes || "الصورة مقبولة لكن قد تحتاج معاينة ميدانية للتأكد من حالة المعدة.",
+                description: payload.notes || t("createListing.toasts.cr.verifyMediumDescDefault"),
                 style: { background: "hsl(var(--warning) / 0.12)", borderColor: "hsl(var(--warning))" },
               }
             );
             setDocConfidence((prev) => ({ ...prev, [result.url!]: "medium" }));
           } else {
-            toast.success(`✓ تم التحقق من "${file.name}"`);
+            toast.success(t("createListing.toasts.cr.verifyAccepted", { name: file.name }));
             setDocConfidence((prev) => ({ ...prev, [result.url!]: "high" }));
           }
         } catch (err) {
           toast.dismiss(verifyToast);
           console.error("verify-document failed", err);
-          toast.error(`تعذّر التحقق من "${file.name}". تم رفض الملف للأمان.`);
+          toast.error(t("createListing.toasts.cr.verifyFail", { name: file.name }));
           continue;
         }
       }
@@ -436,11 +436,11 @@ const CreateListingPage = () => {
     // Notify user about rejected images & offer auto-routing
     if (imagesToReroute.length > 0) {
       toast.error(
-        `حقل "${activeDocType}" يقبل PDF فقط. تم رفض ${imagesToReroute.length} صورة.\nلرفع صور المعدات استخدم حقل "صور المعدات" أو الرفع الجماعي.`,
+        t("createListing.toasts.upload.pdfOnlyReject", { field: activeDocType, count: imagesToReroute.length }),
         {
           duration: 10000,
           action: {
-            label: "نقل تلقائي إلى صور المعدات",
+            label: t("createListing.toasts.upload.rerouteAction"),
             onClick: async () => {
               try {
                 const dt = new DataTransfer();
@@ -448,7 +448,7 @@ const CreateListingPage = () => {
                 await handlePhotoUploadForGroup(dt.files, "equipment");
               } catch (err) {
                 console.error("auto-reroute failed", err);
-                toast.error("تعذّر نقل الصور تلقائياً.");
+                toast.error(t("createListing.toasts.upload.rerouteFail"));
               }
             },
           },
