@@ -10,6 +10,7 @@ import { checkPasswordStrength, isRateLimited } from "@/lib/security";
 import PasswordStrengthBar from "@/components/PasswordStrengthBar";
 import { useSecurityIncidents } from "@/hooks/useSecurityIncidents";
 import { useSEO } from "@/hooks/useSEO";
+import { useTranslation } from "react-i18next";
 
 const COUNTRY_CODES = [
   { code: "+966", flag: "🇸🇦", name: "السعودية" },
@@ -23,6 +24,7 @@ const COUNTRY_CODES = [
 ];
 
 const LoginPage = () => {
+  const { t } = useTranslation();
   useSEO({ title: "تسجيل الدخول", description: "سجّل دخولك إلى سوق تقبيل لإدارة إعلاناتك وصفقاتك التجارية", canonical: "/login" });
   const [isLogin, setIsLogin] = useState(true);
   const [loginMethod, setLoginMethod] = useState<"phone" | "email">("phone");
@@ -289,7 +291,7 @@ const LoginPage = () => {
                     isLogin ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground"
                   }`}
                 >
-                  تسجيل الدخول
+                  {t("common.login")}
                 </button>
                 <button
                   onClick={() => { setIsLogin(false); setError(""); setSuccess(""); }}
@@ -297,7 +299,7 @@ const LoginPage = () => {
                     !isLogin ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground"
                   }`}
                 >
-                  حساب جديد
+                  {t("auth.createAccount")}
                 </button>
               </div>
 
@@ -313,7 +315,7 @@ const LoginPage = () => {
                   }`}
                 >
                   <Phone size={13} strokeWidth={1.3} />
-                  رقم الجوال
+                  {t("auth.phoneNumber")}
                 </button>
                 <button
                   type="button"
@@ -495,7 +497,7 @@ const LoginPage = () => {
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       جاري المعالجة...
                     </span>
-                  ) : isLogin ? "تسجيل الدخول" : "إنشاء الحساب"}
+                  ) : isLogin ? t("common.login") : t("auth.createAccount")}
                 </button>
 
                 {isLogin && (
