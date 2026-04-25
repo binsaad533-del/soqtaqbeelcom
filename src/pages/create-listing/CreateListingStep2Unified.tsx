@@ -70,13 +70,13 @@ const CreateListingStep2Unified = ({ state }: Props) => {
           <FileText size={20} strokeWidth={1.5} className="text-primary" />
         </div>
         <h2 className="font-semibold text-sm mb-1">
-          ارفع كل ملفاتك مرة واحدة — الـAI يصنّف ويرتّب الباقي ✦
+          {t("createListing.step2.headerTitle")}
         </h2>
         <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed mb-1">
-          صور المعدات والمكان + المستندات (PDF / Excel / Word) — كل شيء في منطقة رفع واحدة
+          {t("createListing.step2.headerSubtitle")}
         </p>
         <p className="text-sm font-semibold text-primary">
-          ومقبل .. طحطوح الصفقات بيكمل الباقي
+          {t("createListing.step2.headerTagline")}
         </p>
       </div>
 
@@ -111,13 +111,13 @@ const CreateListingStep2Unified = ({ state }: Props) => {
           )}
         />
         <h3 className="font-medium text-sm mb-1">
-          اسحب أو اضغط لرفع كل ملفات الإعلان دفعة واحدة
+          {t("createListing.step2.dropzoneTitle")}
         </h3>
         <p className="text-xs text-muted-foreground mb-2">
-          صور (JPG, PNG, HEIC) + مستندات (PDF, Excel, Word) — حتى 200 صورة و 100 مستند
+          {t("createListing.step2.dropzoneHint")}
         </p>
         <p className="text-[10px] text-primary font-medium">
-          ✦ الـAI يصنّف كل ملف تلقائياً (معدات / مكان / فاتورة / وثيقة قانونية)
+          {t("createListing.step2.dropzoneAi")}
         </p>
       </div>
 
