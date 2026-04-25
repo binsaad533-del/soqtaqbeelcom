@@ -542,7 +542,9 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                 <Loader2 size={52} strokeWidth={1} className="absolute -top-2 -left-2 text-primary/30 animate-spin" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium">جاري تحليل الصفقة...</p>
+                <p className="text-sm font-medium">
+                  {!useCache ? t("dealCheck.generatingInYourLanguage") : "جاري تحليل الصفقة..."}
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   يتم فحص جميع الصور والمستندات والبيانات
                 </p>
@@ -555,6 +557,25 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               <p className="text-sm text-destructive mb-3">{error}</p>
               <Button variant="outline" size="sm" onClick={() => runDealCheck()} className="rounded-xl text-xs">
                 إعادة المحاولة
+              </Button>
+            </div>
+          )}
+
+          {!analysis && !loading && !error && (
+            <div className="py-10 flex flex-col items-center gap-3 text-center">
+              <AiStar size={32} />
+              <p className="text-sm text-muted-foreground">
+                {t("dealCheck.tapToGenerateInYourLanguage")}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => runDealCheck()}
+                disabled={isSimulation || loading || isRefreshing}
+                className="rounded-xl text-xs gap-1.5"
+              >
+                <RefreshCw size={12} />
+                {t("dealCheck.reanalyze")}
               </Button>
             </div>
           )}
