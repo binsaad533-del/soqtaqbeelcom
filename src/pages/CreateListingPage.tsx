@@ -174,7 +174,7 @@ const CreateListingPage = () => {
       status: "draft",
       uses_unified_upload: true,
     } as never);
-    if (error || !data) { toast.error("حدث خطأ أثناء حفظ المسودة"); return null; }
+    if (error || !data) { toast.error(t("createListing.toasts.draftSaveError")); return null; }
     const id = (data as { id: string }).id;
     setListingId(id);
     setUsesUnifiedUpload(true);
@@ -229,8 +229,8 @@ const CreateListingPage = () => {
     const restoreDraft = async () => {
       try {
         const draft = requestedDraftId ? await getListing(requestedDraftId) : await getMyDraft();
-        if (draft) { applyDraftToState(draft as Listing); toast.success(requestedDraftId ? "تم فتح المسودة المطلوبة" : "تم استعادة مسودتك السابقة تلقائياً", { icon: "📋" }); }
-        else if (requestedDraftId) toast.error("لم أجد المسودة المطلوبة");
+        if (draft) { applyDraftToState(draft as Listing); toast.success(requestedDraftId ? t("createListing.toasts.draftOpened") : t("createListing.toasts.draftRestoredAuto"), { icon: "📋" }); }
+        else if (requestedDraftId) toast.error(t("createListing.toasts.draftNotFound"));
       } catch (err) { console.error("Draft restore failed", err); }
       finally { setDraftLoading(false); }
     };
@@ -692,7 +692,7 @@ const CreateListingPage = () => {
   // Navigation
   const handleNext = async () => {
     if (currentStep === 0) {
-      if (!dealStructure.isValid) { toast.error("يرجى اختيار هيكل الصفقة أولاً"); return; }
+      if (!dealStructure.isValid) { toast.error(t("createListing.toasts.selectDealStructure")); return; }
       const id = await ensureListing();
       if (id) await updateListing(id, { deal_type: dealStructure.primaryType, primary_deal_type: dealStructure.primaryType, deal_options: dealStructure.selectedTypes.map((typeId, i) => ({ type_id: typeId, priority: i, is_primary: typeId === dealStructure.primaryType })) } as never);
     }
@@ -804,7 +804,7 @@ const CreateListingPage = () => {
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
       setDealCheckResult(data.analysis);
       setDealCheckInputKey(nextInputKey);
-    } catch (e: any) { console.error("[DealCheck] failed:", e); setDealCheckError(e.message || "تعذّر إجراء الفحص"); }
+    } catch (e: any) { console.error("[DealCheck] failed:", e); setDealCheckError(e.message || t("createListing.toasts.analysisFailed")); }
     finally { setDealCheckLoading(false); }
   };
 
@@ -814,8 +814,8 @@ const CreateListingPage = () => {
     const imgReq = getImageRequirement(dealStructure.primaryType);
     const hasPhotos = imgReq === "none" || imgReq === "optional" || totalPhotos > 0;
     const errors = validateDisclosure(dealStructure.primaryType || "full_takeover", disclosure);
-    if (!hasPhotos || Object.keys(errors).length > 0) { toast.error("يرجى إكمال جميع الحقول المطلوبة قبل النشر"); return; }
-    if (locationLat == null || locationLng == null) { toast.error("يجب تحديد الموقع على الخريطة قبل النشر"); return; }
+    if (!hasPhotos || Object.keys(errors).length > 0) { toast.error(t("createListing.toasts.completeBeforePublish")); return; }
+    if (locationLat == null || locationLng == null) { toast.error(t("createListing.toasts.locationRequired")); return; }
 
     // Duplicate detection — only if not yet acknowledged
     if (!duplicateAcknowledged) {
@@ -837,13 +837,13 @@ const CreateListingPage = () => {
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
       setDealCheckResult(data.analysis);
       setDealCheckInputKey(JSON.stringify(nextListingPayload));
-    } catch (e: any) { console.error("[DealCheck] Pre-publish failed:", e); setDealCheckError(e.message || "تعذّر إجراء الفحص"); }
+    } catch (e: any) { console.error("[DealCheck] Pre-publish failed:", e); setDealCheckError(e.message || t("createListing.toasts.analysisFailed")); }
     finally { setDealCheckLoading(false); }
   };
 
   const handlePublish = async () => {
     if (!listingId) return;
-    if (profile && (profile as any).is_commission_suspended) { toast.error("تم تعليق حسابك مؤقتاً بسبب عمولة متأخرة."); return; }
+    if (profile && (profile as any).is_commission_suspended) { toast.error(t("createListing.toasts.commissionSuspended")); return; }
     setShowPublishConfirm(false);
     setSaving(true);
     try {
@@ -866,14 +866,14 @@ const CreateListingPage = () => {
               disclosure.city,
             ]),
       } as never);
-      if (error) { console.error("Publish failed:", error); toast.error("فشل نشر الإعلان"); setSaving(false); return; }
+      if (error) { console.error("Publish failed:", error); toast.error(t("createListing.toasts.publishFailed")); setSaving(false); return; }
       await logAudit("listing_published", "listing", listingId, { title: disclosure.business_activity }).catch(() => {});
       import("@/lib/invokeWithRetry").then(({ invokeWithRetry }) => { invokeWithRetry("auto-analyze-listing", { listingId }).catch(() => {}); });
       if (autoSaveTimerRef.current) { clearInterval(autoSaveTimerRef.current); autoSaveTimerRef.current = null; }
       setSaving(false);
-      toast.success("تم نشر الإعلان بنجاح! 🎉");
+      toast.success(t("createListing.toasts.publishSuccess"));
       navigate(`/listing/${listingId}`);
-    } catch (err) { console.error("Publish error:", err); toast.error("حدث خطأ غير متوقع أثناء النشر"); setSaving(false); }
+    } catch (err) { console.error("Publish error:", err); toast.error(t("createListing.toasts.publishUnexpected")); setSaving(false); }
   };
 
   // Computed values
