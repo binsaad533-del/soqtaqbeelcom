@@ -1477,7 +1477,7 @@ const TrustScoreSection = ({ trustScore }: { trustScore: any }) => {
             <div className="mt-2 space-y-1.5">
               {Object.entries(trustScore.factors).map(([key, value]) => (
                 <div key={key} className="flex items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground w-24 shrink-0">{FACTOR_LABELS[key] || key} ({FACTOR_WEIGHTS[key]}%)</span>
+                  <span className="text-[10px] text-muted-foreground w-24 shrink-0">{FACTOR_LABEL_KEYS[key] ? t(FACTOR_LABEL_KEYS[key]) : key} ({FACTOR_WEIGHTS[key]}%)</span>
                   <div className="flex-1 h-1.5 rounded-full bg-background/60">
                     <div className={cn("h-1.5 rounded-full",
                       (value as number) >= 7 ? "bg-emerald-500" :
