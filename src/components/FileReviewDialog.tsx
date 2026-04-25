@@ -383,10 +383,10 @@ export function FileReviewDialog({
           <DialogHeader className="p-6 pb-4 border-b">
             <DialogTitle className="text-xl flex items-center gap-2">
               <FileText className="w-5 h-5 text-primary" />
-              مراجعة تصنيف ملفاتك ({totalFiles} ملف)
+              {t("createListing.fileReview.title", { count: totalFiles })}
             </DialogTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              راجع تصنيف الذكاء الاصطناعي لملفاتك. يمكنك نقل أي ملف لفئة أخرى أو تعديل النوع الفرعي قبل الحفظ النهائي.
+              {t("createListing.fileReview.subtitle")}
             </p>
           </DialogHeader>
 
