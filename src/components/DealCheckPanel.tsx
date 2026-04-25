@@ -1298,7 +1298,7 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
         {t("dealCheck.detailedPricing")}
         <span className={cn("text-[10px] px-2 py-0.5 rounded-md font-medium mr-auto", statusInfo.className)}>
           {isInProgress && <Loader2 size={9} className="inline animate-spin ml-1" />}
-          {statusInfo.text}
+          {t(statusInfo.textKey)}
         </span>
       </h4>
 
