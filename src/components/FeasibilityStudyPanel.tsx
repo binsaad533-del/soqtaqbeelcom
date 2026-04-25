@@ -921,7 +921,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   }
 
   // If study is still null after all resolution attempts, force-build from listing data
-  const resolvedStudy = study || buildEstimatedFeasibilityStudy(listing);
+  // — but only for Arabic. For other languages we must wait for/trigger AI generation.
+  const resolvedStudy = study || (isArabic ? buildEstimatedFeasibilityStudy(listing) : null);
   if (!resolvedStudy) {
     return (
       <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
@@ -932,21 +933,21 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
         {loading ? (
           <div className="py-8 flex flex-col items-center gap-3">
             <Loader2 size={24} className="animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">جاري إعداد الدراسة... (قد تستغرق 30 ثانية)</p>
+            <p className="text-sm text-muted-foreground">
+              {!isArabic ? t("dealCheck.generatingInYourLanguage") : "جاري إعداد الدراسة... (قد تستغرق 30 ثانية)"}
+            </p>
           </div>
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              لا تتوفر بيانات كافية لإعداد دراسة الجدوى حالياً
+              {!isArabic ? t("dealCheck.tapToGenerateInYourLanguage") : "لا تتوفر بيانات كافية لإعداد دراسة الجدوى حالياً"}
             </p>
             {error && <p className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2">{error}</p>}
-            {isOwner && (
-              <Button onClick={runStudy} variant="outline" className="w-full gap-2" size="sm" disabled={isSimulation || !canRefresh}>
-                <BarChart3 size={14} />
-                {isSimulation ? "دراسة محفوظة" : "إعداد الدراسة الآن"}
-                <AiStar size={12} />
-              </Button>
-            )}
+            <Button onClick={runStudy} variant="outline" className="w-full gap-2" size="sm" disabled={isSimulation || loading || !canRefresh}>
+              <BarChart3 size={14} />
+              {isSimulation ? "دراسة محفوظة" : (!isArabic ? t("dealCheck.reanalyze") : "إعداد الدراسة الآن")}
+              <AiStar size={12} />
+            </Button>
           </>
         )}
       </div>
