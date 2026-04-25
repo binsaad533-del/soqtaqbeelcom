@@ -219,7 +219,15 @@
     "needsSpecializedInspection": "قيمة دقيقة تحتاج معاينة متخصصة",
     "olvDiscount": "خصم التصفية المنظمة",
     "marketValue": "القيمة السوقية:",
-    "taqbeelValue": "قيمة التقبيل:"
+    "taqbeelValue": "قيمة التقبيل:",
+    "criteriaDetails": "تفصيل المعايير",
+    "pricePosition": "الموقف السعري",
+    "observedRange": "النطاق السعري المرصود",
+    "factorDataCompleteness": "اكتمال البيانات",
+    "factorAssetVerification": "التحقق من الأصول",
+    "factorPriceLogic": "منطقية السعر",
+    "factorLegalClarity": "الوضوح القانوني",
+    "factorMediaQuality": "جودة الوسائط"
   },
   "feasibility": {
     "title": "دراسة الجدوى الاقتصادية",
