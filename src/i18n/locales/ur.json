@@ -117,7 +117,25 @@
     "operationalRights": "آپریشنل حقوق",
     "debtsLiabilities": "قرضے اور فریقِ ثالث کے واجبات",
     "buyerAssumesLiabilities": "خریدار تمام سابقہ واجبات قبول کرے گا",
-    "checkLegalDisputes": "موجودہ قانونی تنازعات کی تصدیق ضروری ہے"
+    "checkLegalDisputes": "موجودہ قانونی تنازعات کی تصدیق ضروری ہے",
+    "excludes": "شامل نہیں",
+    "viewDetails": "تفصیلات دیکھیں",
+    "setAsPrimary": "بطور بنیادی منتخب کریں",
+    "alternative": "متبادل"
+  },
+  "offer": {
+    "submitted": "آپ کی پیشکش بھیج دی گئی",
+    "newOffer": "نئی پیشکش بھیجیں",
+    "accepted": "✓ آپ کی پیشکش قبول کر لی گئی!",
+    "rejected": "پیشکش مسترد کر دی گئی",
+    "offersCount": "پیشکشیں موصول",
+    "highestOffer": "سب سے زیادہ پیشکش:",
+    "writePrice": "اپنی قیمت درج کریں",
+    "cancel": "منسوخ کریں",
+    "invalidPrice": "براہ کرم درست قیمت درج کریں",
+    "rateLimited": "حد سے تجاوز ہو گیا۔ نئی پیشکش بھیجنے سے پہلے انتظار کریں",
+    "sendFailed": "پیشکش بھیجنے میں ناکامی",
+    "sentSuccess": "آپ کی پیشکش کامیابی سے بھیج دی گئی ✅"
   },
   "inventory": {
     "confirmedAssets": "تصدیق شدہ اثاثوں کی فہرست",
