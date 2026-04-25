@@ -134,7 +134,9 @@ const ListingDetailsPage = () => {
   const { getSellerReviews } = useSellerReviews();
   const queryClient = useQueryClient();
   const cachedSnapshot = id ? listingDetailsStateCache.get(id) : undefined;
-  const [listing, setListing] = useState<Listing | null>(() => cachedSnapshot?.listing ?? null);
+  const [originalListing, setListing] = useState<Listing | null>(() => cachedSnapshot?.listing ?? null);
+  const { translatedListing, isTranslating } = useListingTranslation(originalListing);
+  const listing = (translatedListing ?? originalListing) as Listing | null;
 
   // Dynamic SEO with OG tags for smart social sharing
   const listingTitle = listing ? (listing.title || listing.business_activity || "فرصة تقبيل") : "تفاصيل الإعلان";
