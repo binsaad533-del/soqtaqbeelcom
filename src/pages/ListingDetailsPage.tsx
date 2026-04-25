@@ -711,7 +711,7 @@ const ListingDetailsPage = () => {
                     "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
                     isLiked ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500"
                   )}
-                  title="إعجاب"
+                  title={t('listing.likes')}
                 >
                   <Heart size={14} strokeWidth={1.5} fill={isLiked ? "currentColor" : "none"} />
                 </button>
