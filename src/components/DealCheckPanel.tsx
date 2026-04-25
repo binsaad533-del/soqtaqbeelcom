@@ -683,14 +683,14 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                             <div className="text-[10px] text-muted-foreground">💰 النطاق التقديري</div>
                             {liveTotals.rangeLow > 0 && liveTotals.rangeHigh > 0 && liveTotals.rangeLow !== liveTotals.rangeHigh ? (
                               <div className="text-sm font-semibold leading-tight">
-                                {liveTotals.rangeLow.toLocaleString()} – {liveTotals.rangeHigh.toLocaleString()} ر.س
+                                {liveTotals.rangeLow.toLocaleString()} – {liveTotals.rangeHigh.toLocaleString()} {t("common.currency")}
                               </div>
                             ) : (
-                              <div className="text-sm font-semibold">{liveTotals.takeoverTotal.toLocaleString()} ر.س</div>
+                              <div className="text-sm font-semibold">{liveTotals.takeoverTotal.toLocaleString()} {t("common.currency")}</div>
                             )}
                             {liveTotals.marketTotal > 0 && liveTotals.marketTotal !== liveTotals.takeoverTotal && (
                               <div className="text-[10px] text-muted-foreground mt-0.5">
-                                {t("dealCheck.marketValue")} <span className="font-medium">{liveTotals.marketTotal.toLocaleString()} ر.س</span>
+                                {t("dealCheck.marketValue")} <span className="font-medium">{liveTotals.marketTotal.toLocaleString()} {t("common.currency")}</span>
                               </div>
                             )}
                             {priceAnalysis.valuation_confidence && (
@@ -705,7 +705,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                           </div>
                           <div>
                             <div className="text-[10px] text-muted-foreground">🏷️ السعر المعروض</div>
-                            <div className="text-sm font-semibold">{priceAnalysis.deal_price?.toLocaleString()} ر.س</div>
+                            <div className="text-sm font-semibold">{priceAnalysis.deal_price?.toLocaleString()} {t("common.currency")}</div>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
@@ -770,7 +770,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                                       <div className="text-[11px] text-muted-foreground italic">{t("dealCheck.requiresInspection")}</div>
                                     ) : (
                                       <>
-                                        <div className="text-xs font-medium">{item.total_value?.toLocaleString()} ر.س</div>
+                                        <div className="text-xs font-medium">{item.total_value?.toLocaleString()} {t("common.currency")}</div>
                                         {item.quantity > 1 && (
                                           <div className="text-[10px] text-muted-foreground">{item.adjusted_price?.toLocaleString()} × {item.quantity}</div>
                                         )}
@@ -784,12 +784,12 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                           <div className="bg-muted/30 px-3 py-2 border-t border-border/30 space-y-1">
                             <div className="flex justify-between items-center">
                               <span className="text-xs font-medium">الإجمالي التقديري (قيمة التقبيل)</span>
-                              <span className="text-sm font-semibold">{liveTotals.takeoverTotal.toLocaleString()} ر.س</span>
+                              <span className="text-sm font-semibold">{liveTotals.takeoverTotal.toLocaleString()} {t("common.currency")}</span>
                             </div>
                             {liveTotals.marketTotal > 0 && liveTotals.marketTotal !== liveTotals.takeoverTotal && (
                               <div className="flex justify-between items-center">
                                 <span className="text-[11px] text-muted-foreground">القيمة السوقية الإجمالية</span>
-                                <span className="text-[11px] text-muted-foreground">{liveTotals.marketTotal.toLocaleString()} ر.س</span>
+                                <span className="text-[11px] text-muted-foreground">{liveTotals.marketTotal.toLocaleString()} {t("common.currency")}</span>
                               </div>
                             )}
                           </div>
@@ -996,7 +996,7 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
                 <div className="text-[10px] text-muted-foreground tabular-nums">
                   {t("dealCheck.marketValue")}{" "}
                   <span className="font-medium text-foreground/70">
-                    {pricing.market_value_sar.toLocaleString("en-US")} ر.س
+                    {pricing.market_value_sar.toLocaleString("en-US")} {t("common.currency")}
                   </span>
                 </div>
               )}
@@ -1007,7 +1007,7 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
                   <span className="text-[10px] text-muted-foreground">{t("dealCheck.taqbeelValue")}</span>
                 )}
                 <span className="text-sm font-semibold text-foreground">
-                  {pricing.price_sar.toLocaleString("en-US")} <span className="text-[10px] text-muted-foreground font-normal">ر.س</span>
+                  {pricing.price_sar.toLocaleString("en-US")} <span className="text-[10px] text-muted-foreground font-normal">{t("common.currency")}</span>
                 </span>
               </div>
 
@@ -1073,7 +1073,7 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
                     >
                       <ExternalLink size={9} strokeWidth={1.8} className="shrink-0" />
                       <span className="truncate">{src.title || src.link}</span>
-                      {src.price && <span className="text-muted-foreground tabular-nums">— {src.price.toLocaleString("en-US")} ر.س</span>}
+                      {src.price && <span className="text-muted-foreground tabular-nums">— {src.price.toLocaleString("en-US")} {t("common.currency")}</span>}
                     </a>
                   </li>
                 );
@@ -1168,7 +1168,7 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
           <div className="flex-1 min-w-0">
             <div className="text-xs text-muted-foreground mb-0.5">{t("listing.pricedAssetsValue")}</div>
             <div className="text-sm font-semibold text-foreground tabular-nums">
-              {fmt(tangibleAssetsValue)} <span className="text-[11px] text-muted-foreground font-normal">ر.س</span>
+              {fmt(tangibleAssetsValue)} <span className="text-[11px] text-muted-foreground font-normal">{t("common.currency")}</span>
               <span className="text-[11px] text-muted-foreground font-normal mr-2">({pricedCount} {t("listing.asset")})</span>
             </div>
           </div>
@@ -1200,7 +1200,7 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
                 {t("dealCheck.extraValue")}
               </div>
               <div className="text-sm font-semibold text-foreground tabular-nums">
-                {fmt(goodwillValue)} <span className="text-[11px] text-muted-foreground font-normal">ر.س</span>
+                {fmt(goodwillValue)} <span className="text-[11px] text-muted-foreground font-normal">{t("common.currency")}</span>
               </div>
             </div>
           </div>
@@ -1214,7 +1214,7 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
           <span className="text-sm font-medium text-foreground">{t("listing.price")}</span>
         </div>
         <div className="text-base font-bold text-foreground tabular-nums">
-          {fmt(askingPrice)} <span className="text-[11px] text-muted-foreground font-normal">ر.س</span>
+          {fmt(askingPrice)} <span className="text-[11px] text-muted-foreground font-normal">{t("common.currency")}</span>
         </div>
       </div>
 
