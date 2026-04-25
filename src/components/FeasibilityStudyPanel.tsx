@@ -19,7 +19,7 @@ import {
   formatPdfPrice, escapeHtml, PDF_COLORS,
 } from "@/lib/pdfShared";
 import { useTranslation } from "react-i18next";
-import { mapFeasibilityVerdictToKey, mapConfidenceToKey } from "@/lib/condition-utils";
+import { mapFeasibilityVerdictToKey, mapConfidenceToKey, mapDensityToKey, mapOverallRiskToKey } from "@/lib/condition-utils";
 import { useFeasibilityTranslation } from "@/hooks/useFeasibilityTranslation";
 /* ── Types ── */
 interface Scenario {
@@ -1113,7 +1113,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           onToggle={() => toggleSection("competitors")}
           badge={
             <span className={cn("text-xs font-semibold", DENSITY_COLORS[displayStudy.competitorAnalysis.competitiveDensity] || "")}>
-              {displayStudy.competitorAnalysis.competitiveDensity}
+              {t(`feasibility.density_${mapDensityToKey(displayStudy.competitorAnalysis.competitiveDensity)}`)}
             </span>
           }
         >
@@ -1199,7 +1199,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           icon={<Shield size={14} />}
           isOpen={expandedSections.risks}
           onToggle={() => toggleSection("risks")}
-          badge={<span className={cn("text-xs font-semibold", RISK_COLORS[displayStudy.riskAssessment.overallRisk] || "")}>{displayStudy.riskAssessment.overallRisk}</span>}
+          badge={<span className={cn("text-xs font-semibold", RISK_COLORS[displayStudy.riskAssessment.overallRisk] || "")}>{t(`feasibility.overallRisk_${mapOverallRiskToKey(displayStudy.riskAssessment.overallRisk)}`)}</span>}
         >
           <div className="space-y-2">
             <RiskGroup label={t("feasibility.financialRisks")} items={displayStudy.riskAssessment.financialRisks} />
