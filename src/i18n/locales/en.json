@@ -11,7 +11,10 @@
     "error": "An error occurred",
     "send": "Send",
     "close": "Close",
-    "all": "All"
+    "all": "All",
+    "hideDetails": "Hide details",
+    "month": "month",
+    "share": "Share"
   },
   "nav": {
     "home": "Home",
