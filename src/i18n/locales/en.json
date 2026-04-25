@@ -228,6 +228,7 @@
     "aiSearch": "What are you looking for? AI can help…"
   },
   "dealCheck": {
+    "alibabaDisclaimer": "Estimated price from global sources (Alibaba) — may differ from Saudi market due to shipping, customs, and intermediaries. For accurate valuation, we recommend a specialized inspection via Jasaas Valuation",
     "overallRating": "Overall rating",
     "priceFairness": "Price fairness:",
     "howPriceBuilt": "How is this deal priced?",
