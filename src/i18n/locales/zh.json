@@ -299,7 +299,10 @@
     "pricingInProgressShort": "定价中",
     "pricingCompleted": "定价已完成",
     "pricingFailed": "定价失败",
-    "updatedAt": "更新时间："
+    "updatedAt": "更新时间：",
+    "verdict_veryGood": "非常好",
+    "verdict_acceptable": "可接受",
+    "verdict_poor": "差"
   },
   "feasibility": {
     "title": "经济可行性研究",

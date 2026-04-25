@@ -299,7 +299,10 @@
     "pricingInProgressShort": "মূল্য নির্ধারণ চলছে",
     "pricingCompleted": "মূল্য নির্ধারণ সম্পন্ন",
     "pricingFailed": "মূল্য নির্ধারণ ব্যর্থ",
-    "updatedAt": "আপডেট:"
+    "updatedAt": "আপডেট:",
+    "verdict_veryGood": "খুব ভালো",
+    "verdict_acceptable": "গ্রহণযোগ্য",
+    "verdict_poor": "খারাপ"
   },
   "feasibility": {
     "title": "অর্থনৈতিক সম্ভাব্যতা সমীক্ষা",
