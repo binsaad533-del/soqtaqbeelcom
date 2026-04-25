@@ -588,7 +588,7 @@ serve(async (req) => {
       model: "google/gemini-3-flash-preview",
       temperature: 0.15,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: SYSTEM_PROMPT + languageInstructionFor(language) },
         { role: "user", content: userContent },
       ],
       tools: [
