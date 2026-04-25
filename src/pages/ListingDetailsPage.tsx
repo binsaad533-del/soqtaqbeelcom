@@ -900,7 +900,7 @@ const ListingDetailsPage = () => {
               </div>
 
               <div className="space-y-3 mb-6">
-                <InfoRow label="نوع الصفقة" value={primaryConfig?.label || getArabicDealType(primaryDealType)} />
+                <InfoRow label={t('listing.dealType')} value={primaryConfig?.label || getArabicDealType(primaryDealType)} />
 
                 {(listing.annual_rent || listing.lease_duration || listing.lease_remaining || listing.municipality_license || listing.civil_defense_license || listing.liabilities) && (
                   <Collapsible>
