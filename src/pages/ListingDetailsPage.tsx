@@ -44,7 +44,7 @@ import { getArabicDealType } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
 import ReportListingDialog from "@/components/ReportListingDialog";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
-import { mapConditionToKey, mapDealTypeToKey } from "@/lib/condition-utils";
+import { mapConditionToKey, mapDealTypeToKey, translateStatusValue, translateLeaseDuration } from "@/lib/condition-utils";
 
 
 type ListingDocumentItem = {
