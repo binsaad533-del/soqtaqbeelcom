@@ -1,5 +1,6 @@
 /// <reference types="google.maps" />
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { MapPin, Loader2, X, Search, ClipboardPaste } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,7 @@ function loadGoogleMapsApi(apiKey: string): Promise<void> {
 const DEFAULT_CENTER = { lat: 24.7136, lng: 46.6753 }; // Riyadh
 
 const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPickerProps) => {
+  const { t } = useTranslation();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
@@ -63,7 +65,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   const [selectedAddress, setSelectedAddress] = useState<string | null>(() => {
     if (lat && lng) {
       const nearest = findNearestCity(lat, lng);
-      return nearest?.name ? `بالقرب من ${nearest.name}` : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      return nearest?.name ? t("createListing.mapLink.nearby", { name: nearest.name }) : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     }
     return null;
   });
@@ -75,7 +77,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   useEffect(() => {
     if (lat && lng && !selectedAddress) {
       const nearest = findNearestCity(lat, lng);
-      setSelectedAddress(nearest?.name ? `بالقرب من ${nearest.name}` : `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+      setSelectedAddress(nearest?.name ? t("createListing.mapLink.nearby", { name: nearest.name }) : `${lat.toFixed(5)}, ${lng.toFixed(5)}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lat, lng]);
@@ -100,11 +102,11 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         onLocationChange(position.lat(), position.lng(), results[0].formatted_address, details);
       } else {
         const nearest = findNearestCity(position.lat(), position.lng());
-        setSelectedAddress(`بالقرب من ${nearest.name}`);
+        setSelectedAddress(t("createListing.mapLink.nearby", { name: nearest.name }));
         onLocationChange(position.lat(), position.lng(), undefined, { city: nearest.name });
       }
     });
-  }, [extractPlaceDetails, onLocationChange]);
+  }, [extractPlaceDetails, onLocationChange, t]);
 
   const initMap = useCallback(async () => {
     try {
@@ -173,7 +175,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
 
       const input = document.createElement("input");
       input.type = "text";
-      input.placeholder = "ابحث عن موقع...";
+      input.placeholder = t("createListing.mapLink.mapsInputPlaceholder");
       input.className = "map-search-input";
       input.dir = "rtl";
       input.style.cssText =
@@ -242,7 +244,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         const rLat = parseFloat(r.lat);
         const rLng = parseFloat(r.lon);
         const nearest = findNearestCity(rLat, rLng);
-        const addr = r.display_name || `بالقرب من ${nearest.name}`;
+        const addr = r.display_name || t("createListing.mapLink.nearby", { name: nearest.name });
         setSelectedAddress(addr);
         onLocationChange(rLat, rLng, addr, { city: nearest.name, address: addr });
 
@@ -255,10 +257,10 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
           markerRef.current.setVisible(true);
         }
       } else {
-        setSelectedAddress("لم يتم العثور على نتائج");
+        setSelectedAddress(t("createListing.mapLink.noResults"));
       }
     } catch {
-      setSelectedAddress("فشل البحث");
+      setSelectedAddress(t("createListing.mapLink.searchFailed"));
     }
     setSearching(false);
   };
@@ -274,7 +276,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   const applyParsedLocation = (pLat: number, pLng: number) => {
     const addr = `${pLat.toFixed(5)}, ${pLng.toFixed(5)}`;
     const nearest = findNearestCity(pLat, pLng);
-    setSelectedAddress(nearest.name ? `بالقرب من ${nearest.name}` : addr);
+    setSelectedAddress(nearest.name ? t("createListing.mapLink.nearby", { name: nearest.name }) : addr);
     // Always pass city from nearest city lookup so disclosure gets filled
     onLocationChange(pLat, pLng, addr, { city: nearest.name, address: addr });
     setPasteInput("");
@@ -303,7 +305,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
 
     if (isShortLink(trimmed)) {
       setSearching(true);
-      setSelectedAddress("جاري تحويل الرابط...");
+      setSelectedAddress(t("createListing.mapLink.resolving"));
       try {
         const { data } = await supabase.functions.invoke("resolve-maps-url", {
           body: { url: trimmed },
@@ -312,12 +314,12 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         if (data?.resolvedUrl) {
           inputToParse = data.resolvedUrl;
         } else {
-          setSelectedAddress("جرب نسخ الرابط الكامل من متصفح الخرائط بدل التطبيق");
+          setSelectedAddress(t("createListing.mapLink.shortLinkHint"));
           setSearching(false);
           return;
         }
       } catch {
-        setSelectedAddress("جرب نسخ الرابط الكامل من متصفح الخرائط بدل التطبيق");
+        setSelectedAddress(t("createListing.mapLink.shortLinkHint"));
         setSearching(false);
         return;
       }
@@ -331,12 +333,12 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     }
 
     if (isShortLink(trimmed)) {
-      setSelectedAddress("جرب نسخ الرابط الكامل من متصفح الخرائط بدل التطبيق");
+      setSelectedAddress(t("createListing.mapLink.shortLinkHint"));
       setSearching(false);
       return;
     }
 
-    setSelectedAddress("لم يتم التعرف على الإحداثيات — جرب لصق رابط خرائط قوقل أو إحداثيات مثل: 24.7136, 46.6753");
+    setSelectedAddress(t("createListing.mapLink.unrecognized"));
   };
 
   // Pure fallback UI when maps completely failed
@@ -346,7 +348,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         <div className="rounded-xl border border-border/50 bg-muted/30 p-5 space-y-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin size={16} className="text-primary" />
-            <span>الصق رابط الموقع من خرائط قوقل</span>
+            <span>{t("createListing.mapLink.label")}</span>
           </div>
           <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} loading={searching} />
           <AddressDisplay address={selectedAddress} onClear={clearLocation} />
@@ -361,10 +363,10 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
       <div className="rounded-xl border-2 border-primary/50 bg-primary/10 p-4 space-y-2">
         <div className="flex items-center gap-2 text-sm font-medium text-primary">
           <ClipboardPaste size={16} />
-          <span>📍 الصق رابط الموقع من خرائط قوقل</span>
+          <span>{t("createListing.mapLink.labelWithIcon")}</span>
         </div>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
-          افتح خرائط قوقل → اضغط على الموقع → انسخ الرابط والصقه هنا
+          {t("createListing.mapLink.helper")}
         </p>
         <PasteLocationBar pasteInput={pasteInput} setPasteInput={setPasteInput} onPaste={handlePasteLocation} loading={searching} />
       </div>
@@ -459,26 +461,29 @@ const FallbackSearchBar = ({
   setManualSearch: (v: string) => void;
   searching: boolean;
   onSearch: () => void;
-}) => (
-  <div className="flex gap-2" dir="rtl">
-    <Input
-      placeholder="ابحث: اسم الحي، المدينة، الشارع..."
-      value={manualSearch}
-      onChange={(e) => setManualSearch(e.target.value)}
-      onKeyDown={(e) => e.key === "Enter" && onSearch()}
-      className="flex-1 rounded-lg text-sm"
-    />
-    <Button
-      size="sm"
-      onClick={onSearch}
-      disabled={searching || !manualSearch.trim()}
-      className="rounded-lg gap-1.5"
-    >
-      {searching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-      بحث
-    </Button>
-  </div>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex gap-2" dir="rtl">
+      <Input
+        placeholder={t("createListing.mapLink.searchPlaceholder")}
+        value={manualSearch}
+        onChange={(e) => setManualSearch(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && onSearch()}
+        className="flex-1 rounded-lg text-sm"
+      />
+      <Button
+        size="sm"
+        onClick={onSearch}
+        disabled={searching || !manualSearch.trim()}
+        className="rounded-lg gap-1.5"
+      >
+        {searching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+        {t("createListing.mapLink.search")}
+      </Button>
+    </div>
+  );
+};
 
 /** Reusable paste location input */
 const PasteLocationBar = ({
@@ -491,38 +496,44 @@ const PasteLocationBar = ({
   setPasteInput: (v: string) => void;
   onPaste: () => void;
   loading?: boolean;
-}) => (
-  <div className="flex gap-2" dir="ltr">
-    <Input
-      placeholder="الصق رابط قوقل ماب هنا"
-      value={pasteInput}
-      onChange={(e) => setPasteInput(e.target.value)}
-      onKeyDown={(e) => e.key === "Enter" && onPaste()}
-      className="flex-1 rounded-lg text-sm text-left"
-      dir="ltr"
-    />
-    <Button
-      size="sm"
-      onClick={onPaste}
-      disabled={!pasteInput.trim() || pasteLoading}
-      className="rounded-lg gap-1.5"
-    >
-      {pasteLoading ? <Loader2 size={14} className="animate-spin" /> : <ClipboardPaste size={14} />}
-      تحديد
-    </Button>
-  </div>
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex gap-2" dir="ltr">
+      <Input
+        placeholder={t("createListing.mapLink.placeholder")}
+        value={pasteInput}
+        onChange={(e) => setPasteInput(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && onPaste()}
+        className="flex-1 rounded-lg text-sm text-left"
+        dir="ltr"
+      />
+      <Button
+        size="sm"
+        onClick={onPaste}
+        disabled={!pasteInput.trim() || pasteLoading}
+        className="rounded-lg gap-1.5"
+      >
+        {pasteLoading ? <Loader2 size={14} className="animate-spin" /> : <ClipboardPaste size={14} />}
+        {t("createListing.mapLink.button")}
+      </Button>
+    </div>
+  );
+};
 
 /** Reusable address display */
 const AddressDisplay = ({ address, onClear }: { address: string | null; onClear: () => void }) => {
+  const { t } = useTranslation();
   if (!address) return null;
-  if (address === "لم يتم العثور على نتائج") {
-    return <p className="text-xs text-destructive">لم يتم العثور على نتائج، حاول بكلمات مختلفة</p>;
+  // Compare against translated sentinel values so logic survives language switch.
+  if (address === t("createListing.mapLink.noResults")) {
+    return <p className="text-xs text-destructive">{t("createListing.mapLink.noResultsHint")}</p>;
   }
-  if (address === "فشل البحث") {
-    return <p className="text-xs text-destructive">فشل البحث، حاول مرة أخرى</p>;
+  if (address === t("createListing.mapLink.searchFailed")) {
+    return <p className="text-xs text-destructive">{t("createListing.mapLink.searchFailedRetry")}</p>;
   }
-  if (address.startsWith("لم يتم التعرف على")) {
+  // "unrecognized coordinates" message: long, language-dependent — render as-is in destructive style.
+  if (address === t("createListing.mapLink.unrecognized")) {
     return <p className="text-xs text-destructive">{address}</p>;
   }
   return (

@@ -962,6 +962,24 @@
           "Buyer is responsible for relocation and operations"
         ]
       }
+    },
+    "mapLink": {
+      "label": "Paste Google Maps link",
+      "labelWithIcon": "📍 Paste Google Maps link",
+      "helper": "Open Google Maps → tap the location → copy the link and paste it here",
+      "placeholder": "Paste Google Maps URL here",
+      "button": "Set",
+      "searchPlaceholder": "Search: district, city, street...",
+      "search": "Search",
+      "mapsInputPlaceholder": "Search for a location...",
+      "nearby": "Near {{name}}",
+      "noResults": "No results found",
+      "noResultsHint": "No results found, try different keywords",
+      "searchFailed": "Search failed",
+      "searchFailedRetry": "Search failed, please try again",
+      "resolving": "Resolving link...",
+      "shortLinkHint": "Try copying the full URL from the Maps browser instead of the app",
+      "unrecognized": "Coordinates not recognized — try pasting a Google Maps link or coordinates like: 24.7136, 46.6753"
     }
   }
 }
