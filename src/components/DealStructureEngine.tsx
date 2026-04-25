@@ -9,6 +9,7 @@ import {
   getRequiredDocuments,
   type ConflictRule,
 } from "@/lib/dealStructureConfig";
+import { tDealItem } from "@/lib/dealStructureI18n";
 import { cn } from "@/lib/utils";
 import AiStar from "@/components/AiStar";
 import {
