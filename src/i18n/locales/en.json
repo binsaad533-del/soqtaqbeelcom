@@ -294,7 +294,12 @@
     "smartAnalysis": "Comprehensive smart analysis of the deal",
     "analyzing": "Analyzing",
     "savedAnalysis": "Saved analysis",
-    "extraValue": "Extra value (trade name + licenses + customer base)"
+    "extraValue": "Extra value (trade name + licenses + customer base)",
+    "pricingIdle": "Pricing not started",
+    "pricingInProgressShort": "Pricing in progress",
+    "pricingCompleted": "Pricing complete",
+    "pricingFailed": "Pricing failed",
+    "updatedAt": "Updated:"
   },
   "feasibility": {
     "title": "Economic feasibility study",

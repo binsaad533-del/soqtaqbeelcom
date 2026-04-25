@@ -294,7 +294,12 @@
     "smartAnalysis": "对交易的全面智能分析",
     "analyzing": "分析中",
     "savedAnalysis": "已保存的分析",
-    "extraValue": "额外价值（商号 + 许可证 + 客户群）"
+    "extraValue": "额外价值（商号 + 许可证 + 客户群）",
+    "pricingIdle": "尚未开始定价",
+    "pricingInProgressShort": "定价中",
+    "pricingCompleted": "定价已完成",
+    "pricingFailed": "定价失败",
+    "updatedAt": "更新时间："
   },
   "feasibility": {
     "title": "经济可行性研究",

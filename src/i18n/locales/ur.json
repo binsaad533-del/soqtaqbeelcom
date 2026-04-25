@@ -294,7 +294,12 @@
     "smartAnalysis": "سودے کا جامع ذہین تجزیہ",
     "analyzing": "تجزیہ ہو رہا ہے",
     "savedAnalysis": "محفوظ تجزیہ",
-    "extraValue": "اضافی قیمت (تجارتی نام + لائسنس + گاہکوں کی بنیاد)"
+    "extraValue": "اضافی قیمت (تجارتی نام + لائسنس + گاہکوں کی بنیاد)",
+    "pricingIdle": "قیمت کاری شروع نہیں ہوئی",
+    "pricingInProgressShort": "قیمت کاری جاری ہے",
+    "pricingCompleted": "قیمت کاری مکمل",
+    "pricingFailed": "قیمت کاری ناکام",
+    "updatedAt": "اپ ڈیٹ:"
   },
   "feasibility": {
     "title": "اقتصادی فزیبلٹی اسٹڈی",
