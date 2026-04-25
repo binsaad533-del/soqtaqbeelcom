@@ -980,6 +980,226 @@
       "resolving": "लिंक हल किया जा रहा है...",
       "shortLinkHint": "ऐप के बजाय मैप्स ब्राउज़र से पूरा URL कॉपी करने का प्रयास करें",
       "unrecognized": "निर्देशांक पहचाने नहीं गए — गूगल मैप्स लिंक या निर्देशांक पेस्ट करें, जैसे: 24.7136, 46.6753"
+    },
+    "step3": {
+      "confidence": {
+        "high": "उच्च विश्वास",
+        "medium": "मध्यम विश्वास",
+        "low": "पुष्टि आवश्यक"
+      },
+      "analyzing": {
+        "excelAndPhotos": "Excel फ़ाइल और तस्वीरें विश्लेषण की जा रही हैं...",
+        "excelOnly": "Excel फ़ाइल का विश्लेषण हो रहा है...",
+        "docsOnly": "दस्तावेज़ों का विश्लेषण हो रहा है...",
+        "photosOnly": "AI तस्वीरों का विश्लेषण कर रहा है...",
+        "hintExcel": "{{count}} Excel फ़ाइल पढ़ी जा रही हैं, प्रत्येक से पहली 500 पंक्तियाँ निकाली जा रही हैं",
+        "hintDocs": "अपलोड किए गए दस्तावेज़ों से डेटा निकाला जा रहा है",
+        "hintPhotos": "संपत्तियों की पहचान और कैमरा कोणों का चयन हो रहा है",
+        "relax": "कुछ करने की आवश्यकता नहीं — AI संभाल रहा है"
+      },
+      "intro": {
+        "titleExcelAndPhotos": "तस्वीरों और Excel का AI विश्लेषण",
+        "titleExcelOnly": "Excel का AI विश्लेषण",
+        "titleDocsOnly": "दस्तावेज़ों का AI विश्लेषण",
+        "titlePhotosOnly": "तस्वीरों का AI विश्लेषण",
+        "hintExcelAndPhotos": "AI Excel फ़ाइलें पढ़ेगा और तस्वीरों का विश्लेषण कर संपत्तियाँ स्वतः निकालेगा",
+        "hintExcelOnly": "AI Excel फ़ाइल पढ़ेगा और संपत्तियाँ व इन्वेंट्री स्वतः निकालेगा",
+        "hintDocsOnly": "AI अपलोड किए गए दस्तावेज़ों का विश्लेषण कर डेटा स्वतः निकालेगा",
+        "hintPhotosOnly": "AI आपकी तस्वीरों का विश्लेषण कर संपत्तियाँ स्वतः पहचानेगा",
+        "cta": "बस बटन दबाएँ — बाकी हम पर",
+        "noNeedNotice": "इस प्रकार के सौदे के लिए तस्वीरें ज़रूरी नहीं — आप जारी रख सकते हैं या विश्लेषण बेहतर करने के लिए Excel/दस्तावेज़ अपलोड कर सकते हैं",
+        "missingRequired": "कृपया पहले पिछले चरण में तस्वीरें या Excel/दस्तावेज़ अपलोड करें",
+        "missingOptional": "कोई तस्वीर या दस्तावेज़ अपलोड नहीं — आप जारी रख सकते हैं या अपलोड करने वापस जा सकते हैं",
+        "excelDetected": "{{count}} Excel फ़ाइल मिली — प्रत्येक की पहली 500 पंक्तियाँ स्वतः विश्लेषित होंगी।",
+        "photosLimit": "आपके पास {{count}} तस्वीरें हैं — केवल पहली 30 का विश्लेषण होगा। शेष सहेजी जाएँगी पर विश्लेषित नहीं होंगी।"
+      },
+      "analyzeButton": {
+        "excelAndPhotos": "AI विश्लेषण शुरू करें ({{photos}} तस्वीरें + {{excel}} Excel)",
+        "excelOnly": "Excel विश्लेषण शुरू करें ({{count}} फ़ाइल)",
+        "docsOnly": "दस्तावेज़ विश्लेषण शुरू करें ({{count}} फ़ाइल)",
+        "photosOnly": "AI विश्लेषण शुरू करें ({{total}} में से {{analyzed}} तस्वीरें)"
+      },
+      "results": {
+        "title": "AI विश्लेषण परिणाम",
+        "dedupTitle": "दोहराए गए आइटम स्वतः मर्ज हो गए",
+        "dedupItem": "— {{description}} ({{count}} आइटम)",
+        "pricingMode": "मूल्य निर्धारण विधि:",
+        "modePerItem": "प्रत्येक आइटम का मूल्य",
+        "modeBulk": "कुल मूल्य",
+        "bulkPriceLabel": "कुल मूल्य:",
+        "bulkPricePlaceholder": "उदाहरण: 50000",
+        "includedCount": "{{count}} संपत्ति शामिल",
+        "outOfTotal": "कुल {{count}} में से",
+        "addItem": "आइटम जोड़ें",
+        "defaultNewItemName": "नया आइटम",
+        "addedManually": "मैन्युअल रूप से जोड़ा गया",
+        "multipleAngles": "कई कोण",
+        "pricePlaceholder": "मूल्य",
+        "unitPriceEquals": "= {{value}}"
+      },
+      "conditions": {
+        "new": "नया",
+        "almostNew": "लगभग नया",
+        "good": "अच्छा",
+        "damaged": "खराब"
+      },
+      "totals": {
+        "pricedSummary": "मूल्य निर्धारित संपत्तियाँ ({{priced}}/{{included}}) — {{qty}} इकाइयाँ",
+        "notPriced": "मूल्य निर्धारित नहीं",
+        "unpricedHint": "{{count}} आइटम बिना मूल्य — बाद में जोड़ सकते हैं",
+        "bulkTotalLabel": "संपत्तियों का कुल मूल्य",
+        "bulkNotSet": "निर्धारित नहीं"
+      }
+    },
+    "step4": {
+      "sectionTitle": "खुलासा जानकारी",
+      "crAutoFillTitle": "वाणिज्यिक रजिस्ट्रेशन से फ़ील्ड स्वतः भरे गए",
+      "crAutoFillHint": "जानकारी देखें, ज़रूरत हो तो संपादित करें — फिर मूल्य निर्धारित करें",
+      "disclosuresTitle": "सौदे का खुलासा",
+      "validationTitle": "प्रकाशन से पहले अनिवार्य फ़ील्ड भरें",
+      "validationPhotos": "कम से कम एक तस्वीर अनिवार्य है",
+      "placeholderSelect": "चुनें...",
+      "fields": {
+        "activityLabel": "व्यवसाय प्रकार *",
+        "activityLabelAuto": "व्यवसाय प्रकार * ✓ स्वतः निकाला गया",
+        "activityPlaceholder": "उदा. फास्ट-फूड रेस्तरां",
+        "cityLabel": "शहर *",
+        "cityLabelAuto": "शहर ✓ नक़्शे से",
+        "cityPlaceholder": "रियाद",
+        "priceLabel": "मांग मूल्य (SAR) *",
+        "pricePlaceholder": "100,000",
+        "annualRentLabel": "वार्षिक किराया (SAR)",
+        "annualRentPlaceholder": "उदा. 60000",
+        "leaseDuration": "लीज अवधि",
+        "leasePaidPeriod": "किराया भुगतान स्थिति",
+        "leaseRemaining": "शेष लीज अवधि",
+        "liabilities": "वित्तीय देनदारी (कर्ज़ / किस्तें)",
+        "overdueSalaries": "बकाया वेतन",
+        "overdueRent": "बकाया किराया",
+        "municipalityLicense": "नगरपालिका लाइसेंस",
+        "civilDefenseLicense": "नागरिक सुरक्षा लाइसेंस",
+        "surveillanceCameras": "निगरानी कैमरे"
+      },
+      "options": {
+        "leaseDuration": {
+          "سنة": "1 वर्ष",
+          "سنتين": "2 वर्ष",
+          "3 سنوات": "3 वर्ष",
+          "4 سنوات": "4 वर्ष",
+          "5 سنوات": "5 वर्ष",
+          "أكثر من 5 سنوات": "5 वर्ष से अधिक"
+        },
+        "leasePaidPeriod": {
+          "مسدد بالكامل": "पूरा भुगतान",
+          "متأخر شهر": "1 माह बकाया",
+          "متأخر شهرين": "2 माह बकाया",
+          "متأخر 3 أشهر أو أكثر": "3 माह या अधिक बकाया"
+        },
+        "leaseRemaining": {
+          "أقل من 6 أشهر": "6 माह से कम",
+          "6-12 شهر": "6–12 माह",
+          "1-2 سنة": "1–2 वर्ष",
+          "2-3 سنوات": "2–3 वर्ष",
+          "أكثر من 3 سنوات": "3 वर्ष से अधिक"
+        },
+        "liabilities": {
+          "لا يوجد": "नहीं है",
+          "أقل من 10,000": "10,000 से कम",
+          "10,000 - 50,000": "10,000 – 50,000",
+          "50,000 - 100,000": "50,000 – 100,000",
+          "أكثر من 100,000": "100,000 से अधिक"
+        },
+        "overdueMonths": {
+          "لا يوجد": "नहीं है",
+          "شهر واحد": "1 माह",
+          "شهرين": "2 माह",
+          "3 أشهر أو أكثر": "3 माह या अधिक"
+        },
+        "licenseStatus": {
+          "سارية": "सक्रिय",
+          "منتهية": "समाप्त",
+          "قيد التجديد": "नवीनीकरण में",
+          "غير موجودة": "उपलब्ध नहीं"
+        },
+        "cameras": {
+          "موجودة وتعمل": "लगे हैं और चालू हैं",
+          "موجودة لا تعمل": "लगे हैं पर बंद हैं",
+          "غير موجودة": "नहीं लगे"
+        }
+      },
+      "mapPickedTitle": "स्थान नक़्शे पर निर्धारित",
+      "mapPickedHint": "Google Maps में खोलने के लिए दबाएँ →",
+      "dealCheck": {
+        "introTitle": "प्रकाशन से पहले सौदा जाँच",
+        "introHint": "AI आपके डेटा का विश्लेषण करता है और सुधार के सुझाव देता है",
+        "introButton": "सौदा जाँच चलाएँ",
+        "introNote": "आप जाँच के बिना भी प्रकाशित कर सकते हैं",
+        "loading": "सौदा जाँच चल रही है...",
+        "errorTitle": "स्वचालित जाँच नहीं चल सकी",
+        "priceFairness": "मूल्य उचितता: {{verdict}}",
+        "recommendation": "सिफारिश",
+        "risks": "मुख्य जोखिम",
+        "strengths": "ताकत",
+        "missing": "गुम जानकारी",
+        "afterAdjust": "इस विश्लेषण के आधार पर ऊपर का डेटा (जैसे मूल्य या खुलासे) समायोजित करें और दोबारा जाँच करें — या सीधे प्रकाशित करें।",
+        "rerun": "संपादन के बाद दोबारा विश्लेषण"
+      },
+      "summary": {
+        "title": "विज्ञापन सारांश",
+        "subtitle": "प्रकाशन से पहले डेटा देखें",
+        "dealStructureTitle": "सौदा संरचना",
+        "primaryBadge": "प्राथमिक",
+        "alternateBadge": "विकल्प {{n}}",
+        "sentenceProject": "परियोजना",
+        "sentenceDash": "—",
+        "sentenceTemplate": "{{activity}}, {{district}}, {{city}} में।",
+        "sentenceStructure": " सौदा संरचना: {{label}}.",
+        "sentenceAssets": " पुष्टि की गई संपत्तियाँ: {{count}} आइटम ({{qty}} इकाइयाँ).",
+        "sentenceAnnualRent": " वार्षिक किराया {{value}} रियाल।",
+        "sentenceLeaseRemaining": " शेष लीज {{value}}.",
+        "sentencePrice": " मांग मूल्य {{value}} रियाल।",
+        "statPhotos": "तस्वीरें",
+        "statAssets": "शामिल संपत्तियाँ",
+        "statDocs": "दस्तावेज़",
+        "photosMissingNotice": "कम से कम एक तस्वीर ज़रूरी है — तस्वीर व दस्तावेज़ चरण पर लौटें",
+        "previewHeader": "खरीदार ऐसे देखेंगे",
+        "previewActivityFallback": "व्यवसाय का नाम",
+        "previewDistrictFallback": "क्षेत्र",
+        "previewCityFallback": "शहर",
+        "previewPhotos": "{{count}} तस्वीरें",
+        "previewAssets": "{{count}} संपत्तियाँ",
+        "photoAlt": "विज्ञापन तस्वीर"
+      },
+      "sellerNote": {
+        "label": "खरीदारों के लिए संदेश (वैकल्पिक)",
+        "placeholder": "अगर परियोजना के बारे में कुछ कहना हो, {{name}} ✍️",
+        "fallbackName": "विज्ञापन स्वामी"
+      },
+      "unifiedReview": {
+        "emptyTitle": "आपने कोई फ़ाइल अपलोड नहीं की",
+        "emptyHint": "बिना तस्वीरों या दस्तावेज़ों के विज्ञापन कमज़ोर रहेगा और कम दिखेगा। आप अपलोड करने वापस जा सकते हैं।",
+        "needsReviewTitle": "आपकी फ़ाइलें समीक्षा माँगती हैं",
+        "needsReviewHint": "{{total}} में से {{unconfirmed}} फ़ाइलें प्रकाशन से पहले पुष्टि माँगती हैं",
+        "reviewNow": "अभी समीक्षा करें",
+        "readyTitle": "{{count}} फ़ाइल(ें) प्रकाशन के लिए तैयार"
+      },
+      "publishButton": "विज्ञापन प्रकाशित करें",
+      "publishBlockedTitle": "प्रकाशन से पहले फ़ाइलों की समीक्षा ज़रूरी है"
+    },
+    "inventoryDefaults": {
+      "unnamedAsset": "बेनाम संपत्ति",
+      "unclear": "अस्पष्ट",
+      "otherCategory": "अन्य",
+      "itemFromFiles": "फ़ाइलों से आइटम",
+      "stockCategory": "इन्वेंट्री",
+      "extractedFromFile": "संलग्न फ़ाइल से निकाला गया",
+      "extractedFromFileWithPrice": "संलग्न फ़ाइल से निकाला गया — इकाई मूल्य: {{price}} रियाल"
+    },
+    "dealLabel": {
+      "full_takeover": "पूर्ण अधिग्रहण",
+      "no_liabilities": "व्यवसाय हस्तांतरण (पूर्व दायित्वों के बिना)",
+      "assets_setup": "संपत्तियाँ + परिचालन सेटअप (बिना वाणिज्यिक रजिस्ट्रेशन)",
+      "assets_only": "केवल संपत्तियाँ"
     }
   }
 }

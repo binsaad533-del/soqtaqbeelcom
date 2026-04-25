@@ -980,6 +980,226 @@
       "resolving": "لنک حل کیا جا رہا ہے...",
       "shortLinkHint": "ایپ کے بجائے میپس براؤزر سے مکمل لنک کاپی کرنے کی کوشش کریں",
       "unrecognized": "نقاط شناخت نہیں ہوئے — گوگل میپس لنک یا نقاط پیسٹ کریں جیسے: 24.7136, 46.6753"
+    },
+    "step3": {
+      "confidence": {
+        "high": "اعلیٰ اعتماد",
+        "medium": "درمیانہ اعتماد",
+        "low": "تصدیق درکار"
+      },
+      "analyzing": {
+        "excelAndPhotos": "Excel فائل اور تصاویر کا تجزیہ ہو رہا ہے...",
+        "excelOnly": "Excel فائل کا تجزیہ ہو رہا ہے...",
+        "docsOnly": "دستاویزات کا تجزیہ ہو رہا ہے...",
+        "photosOnly": "AI تصاویر کا تجزیہ کر رہا ہے...",
+        "hintExcel": "{{count}} Excel فائلیں پڑھی جا رہی ہیں، ہر ایک سے پہلی 500 سطریں نکالی جا رہی ہیں",
+        "hintDocs": "اپ لوڈ شدہ دستاویزات سے ڈیٹا نکالا جا رہا ہے",
+        "hintPhotos": "اثاثوں کی شناخت اور کیمرہ زاویوں کی نشاندہی ہو رہی ہے",
+        "relax": "آپ کو کچھ نہیں کرنا — AI سنبھال رہا ہے"
+      },
+      "intro": {
+        "titleExcelAndPhotos": "تصاویر اور Excel کا AI تجزیہ",
+        "titleExcelOnly": "Excel کا AI تجزیہ",
+        "titleDocsOnly": "دستاویزات کا AI تجزیہ",
+        "titlePhotosOnly": "تصاویر کا AI تجزیہ",
+        "hintExcelAndPhotos": "AI Excel فائلیں پڑھے گا اور تصاویر کا تجزیہ کر کے اثاثے خودکار نکالے گا",
+        "hintExcelOnly": "AI Excel فائل پڑھے گا اور اثاثے و انوینٹری خودکار نکالے گا",
+        "hintDocsOnly": "AI اپ لوڈ شدہ دستاویزات کا تجزیہ کر کے ڈیٹا خودکار نکالے گا",
+        "hintPhotosOnly": "AI آپ کی تصاویر کا تجزیہ کر کے اثاثے خودکار پہچانے گا",
+        "cta": "بس بٹن دبائیں — باقی ہم پر",
+        "noNeedNotice": "اس قسم کے سودے کے لیے تصاویر لازمی نہیں — آپ جاری رکھ سکتے ہیں یا تجزیہ بہتر بنانے کے لیے Excel/دستاویز اپ لوڈ کر سکتے ہیں",
+        "missingRequired": "براہ کرم پہلے پچھلے مرحلے میں تصاویر یا Excel/دستاویز اپ لوڈ کریں",
+        "missingOptional": "کوئی تصویر یا دستاویز اپ لوڈ نہیں — آپ جاری رکھ سکتے ہیں یا اپ لوڈ کے لیے واپس جا سکتے ہیں",
+        "excelDetected": "{{count}} Excel فائل ملی — ہر فائل کی پہلی 500 سطریں خودکار تجزیہ ہوں گی۔",
+        "photosLimit": "آپ کے پاس {{count}} تصاویر ہیں — صرف پہلی 30 کا تجزیہ ہوگا۔ باقی محفوظ ہوں گی مگر تجزیہ نہیں ہوگا۔"
+      },
+      "analyzeButton": {
+        "excelAndPhotos": "AI تجزیہ شروع کریں ({{photos}} تصاویر + {{excel}} Excel)",
+        "excelOnly": "Excel تجزیہ شروع کریں ({{count}} فائل)",
+        "docsOnly": "دستاویز تجزیہ شروع کریں ({{count}} فائل)",
+        "photosOnly": "AI تجزیہ شروع کریں ({{total}} میں سے {{analyzed}} تصاویر)"
+      },
+      "results": {
+        "title": "AI تجزیہ کے نتائج",
+        "dedupTitle": "دہرے عناصر خودکار ضم کر دیے گئے",
+        "dedupItem": "— {{description}} ({{count}} عناصر)",
+        "pricingMode": "قیمت کا طریقہ:",
+        "modePerItem": "ہر عنصر کی قیمت",
+        "modeBulk": "مجموعی قیمت",
+        "bulkPriceLabel": "مجموعی قیمت:",
+        "bulkPricePlaceholder": "مثال: 50000",
+        "includedCount": "{{count}} اثاثہ شامل",
+        "outOfTotal": "کل {{count}} میں سے",
+        "addItem": "عنصر شامل کریں",
+        "defaultNewItemName": "نیا عنصر",
+        "addedManually": "دستی طور پر شامل کیا گیا",
+        "multipleAngles": "متعدد زاویے",
+        "pricePlaceholder": "قیمت",
+        "unitPriceEquals": "= {{value}}"
+      },
+      "conditions": {
+        "new": "نیا",
+        "almostNew": "تقریباً نیا",
+        "good": "اچھا",
+        "damaged": "خراب"
+      },
+      "totals": {
+        "pricedSummary": "قیمت شدہ اثاثے ({{priced}}/{{included}}) — {{qty}} ٹکڑے",
+        "notPriced": "قیمت متعین نہیں",
+        "unpricedHint": "{{count}} عناصر بغیر قیمت — بعد میں شامل کر سکتے ہیں",
+        "bulkTotalLabel": "اثاثوں کی مجموعی قیمت",
+        "bulkNotSet": "متعین نہیں"
+      }
+    },
+    "step4": {
+      "sectionTitle": "افشا کی معلومات",
+      "crAutoFillTitle": "کمرشل رجسٹریشن سے فیلڈز خودکار بھر دی گئیں",
+      "crAutoFillHint": "ڈیٹا دیکھیں، ضرورت ہو تو ترمیم کریں — پھر قیمت متعین کریں",
+      "disclosuresTitle": "سودے کی افشا",
+      "validationTitle": "اشاعت سے پہلے لازمی فیلڈز مکمل کریں",
+      "validationPhotos": "کم از کم ایک تصویر ضروری ہے",
+      "placeholderSelect": "منتخب کریں...",
+      "fields": {
+        "activityLabel": "کاروبار کی قسم *",
+        "activityLabelAuto": "کاروبار کی قسم * ✓ خودکار نکالا گیا",
+        "activityPlaceholder": "مثال: فاسٹ فوڈ ریسٹورنٹ",
+        "cityLabel": "شہر *",
+        "cityLabelAuto": "شہر ✓ نقشے سے",
+        "cityPlaceholder": "ریاض",
+        "priceLabel": "مطلوبہ قیمت (SAR) *",
+        "pricePlaceholder": "100,000",
+        "annualRentLabel": "سالانہ کرایہ (SAR)",
+        "annualRentPlaceholder": "مثال: 60000",
+        "leaseDuration": "لیز کی مدت",
+        "leasePaidPeriod": "کرایہ کی ادائیگی کی صورتحال",
+        "leaseRemaining": "باقی لیز مدت",
+        "liabilities": "مالی واجبات (قرض / اقساط)",
+        "overdueSalaries": "بقایا تنخواہیں",
+        "overdueRent": "بقایا کرایہ",
+        "municipalityLicense": "میونسپلٹی لائسنس",
+        "civilDefenseLicense": "سول ڈیفنس لائسنس",
+        "surveillanceCameras": "نگرانی کے کیمرے"
+      },
+      "options": {
+        "leaseDuration": {
+          "سنة": "1 سال",
+          "سنتين": "2 سال",
+          "3 سنوات": "3 سال",
+          "4 سنوات": "4 سال",
+          "5 سنوات": "5 سال",
+          "أكثر من 5 سنوات": "5 سال سے زیادہ"
+        },
+        "leasePaidPeriod": {
+          "مسدد بالكامل": "مکمل ادا",
+          "متأخر شهر": "1 ماہ بقایا",
+          "متأخر شهرين": "2 ماہ بقایا",
+          "متأخر 3 أشهر أو أكثر": "3 ماہ یا زیادہ بقایا"
+        },
+        "leaseRemaining": {
+          "أقل من 6 أشهر": "6 ماہ سے کم",
+          "6-12 شهر": "6–12 ماہ",
+          "1-2 سنة": "1–2 سال",
+          "2-3 سنوات": "2–3 سال",
+          "أكثر من 3 سنوات": "3 سال سے زیادہ"
+        },
+        "liabilities": {
+          "لا يوجد": "نہیں ہے",
+          "أقل من 10,000": "10,000 سے کم",
+          "10,000 - 50,000": "10,000 – 50,000",
+          "50,000 - 100,000": "50,000 – 100,000",
+          "أكثر من 100,000": "100,000 سے زیادہ"
+        },
+        "overdueMonths": {
+          "لا يوجد": "نہیں ہے",
+          "شهر واحد": "1 ماہ",
+          "شهرين": "2 ماہ",
+          "3 أشهر أو أكثر": "3 ماہ یا زیادہ"
+        },
+        "licenseStatus": {
+          "سارية": "فعال",
+          "منتهية": "ختم شدہ",
+          "قيد التجديد": "تجدید زیرِ عمل",
+          "غير موجودة": "موجود نہیں"
+        },
+        "cameras": {
+          "موجودة وتعمل": "نصب اور کام کر رہے",
+          "موجودة لا تعمل": "نصب لیکن کام نہیں",
+          "غير موجودة": "نصب نہیں"
+        }
+      },
+      "mapPickedTitle": "نقشے پر مقام طے ہو گیا",
+      "mapPickedHint": "Google Maps میں کھولنے کے لیے دبائیں →",
+      "dealCheck": {
+        "introTitle": "اشاعت سے پہلے سودے کی جانچ",
+        "introHint": "AI آپ کے ڈیٹا کا تجزیہ کر کے اشتہار بہتر بنانے کی تجاویز دیتا ہے",
+        "introButton": "سودے کی جانچ کریں",
+        "introNote": "آپ جانچ کے بغیر بھی شائع کر سکتے ہیں",
+        "loading": "سودے کی جانچ جاری ہے...",
+        "errorTitle": "خودکار جانچ ممکن نہ ہو سکی",
+        "priceFairness": "قیمت کی منصفانہ ہونا: {{verdict}}",
+        "recommendation": "سفارش",
+        "risks": "اہم خطرات",
+        "strengths": "مضبوط نکات",
+        "missing": "غائب معلومات",
+        "afterAdjust": "اس تجزیہ کی بنیاد پر اوپر کا ڈیٹا (مثلاً قیمت یا افشا) ایڈجسٹ کریں اور دوبارہ جانچ کریں — یا براہِ راست شائع کریں۔",
+        "rerun": "ترمیم کے بعد دوبارہ تجزیہ"
+      },
+      "summary": {
+        "title": "اشتہار کا خلاصہ",
+        "subtitle": "اشاعت سے پہلے ڈیٹا چیک کریں",
+        "dealStructureTitle": "سودے کا ڈھانچہ",
+        "primaryBadge": "بنیادی",
+        "alternateBadge": "متبادل {{n}}",
+        "sentenceProject": "منصوبہ",
+        "sentenceDash": "—",
+        "sentenceTemplate": "{{activity}} {{district}}, {{city}} میں۔",
+        "sentenceStructure": " سودے کا ڈھانچہ: {{label}}۔",
+        "sentenceAssets": " تصدیق شدہ اثاثے: {{count}} عناصر ({{qty}} ٹکڑے)۔",
+        "sentenceAnnualRent": " سالانہ کرایہ {{value}} ریال۔",
+        "sentenceLeaseRemaining": " باقی لیز {{value}}۔",
+        "sentencePrice": " مطلوبہ قیمت {{value}} ریال۔",
+        "statPhotos": "تصاویر",
+        "statAssets": "شامل اثاثے",
+        "statDocs": "دستاویزات",
+        "photosMissingNotice": "کم از کم ایک تصویر لازمی ہے — تصاویر و دستاویزات کے مرحلے پر واپس جائیں",
+        "previewHeader": "خریداروں کو ایسے نظر آئے گا",
+        "previewActivityFallback": "کاروبار کا نام",
+        "previewDistrictFallback": "علاقہ",
+        "previewCityFallback": "شہر",
+        "previewPhotos": "{{count}} تصاویر",
+        "previewAssets": "{{count}} اثاثے",
+        "photoAlt": "اشتہار کی تصویر"
+      },
+      "sellerNote": {
+        "label": "خریداروں کے لیے پیغام (اختیاری)",
+        "placeholder": "اگر منصوبے کے بارے میں کچھ کہنا ہو، {{name}} ✍️",
+        "fallbackName": "اشتہار کا مالک"
+      },
+      "unifiedReview": {
+        "emptyTitle": "آپ نے کوئی فائل اپ لوڈ نہیں کی",
+        "emptyHint": "تصاویر یا دستاویزات کے بغیر اشتہار کمزور رہے گا اور کم نظر آئے گا۔ واپس جا کر اپ لوڈ کر سکتے ہیں۔",
+        "needsReviewTitle": "آپ کی فائلیں جائزے کی منتظر ہیں",
+        "needsReviewHint": "{{total}} میں سے {{unconfirmed}} فائلیں اشاعت سے پہلے تصدیق چاہتی ہیں",
+        "reviewNow": "ابھی جائزہ لیں",
+        "readyTitle": "{{count}} فائل(یں) اشاعت کے لیے تیار"
+      },
+      "publishButton": "اشتہار شائع کریں",
+      "publishBlockedTitle": "اشاعت سے پہلے فائلوں کا جائزہ لازمی ہے"
+    },
+    "inventoryDefaults": {
+      "unnamedAsset": "بے نام اثاثہ",
+      "unclear": "غیر واضح",
+      "otherCategory": "دیگر",
+      "itemFromFiles": "فائلوں سے عنصر",
+      "stockCategory": "انوینٹری",
+      "extractedFromFile": "منسلک فائل سے نکالا گیا",
+      "extractedFromFileWithPrice": "منسلک فائل سے نکالا گیا — فی یونٹ قیمت: {{price}} ریال"
+    },
+    "dealLabel": {
+      "full_takeover": "مکمل قبضہ",
+      "no_liabilities": "کاروبار کی منتقلی (سابقہ ذمہ داریوں کے بغیر)",
+      "assets_setup": "اثاثے + آپریشنل سیٹ اپ (کمرشل رجسٹریشن کے بغیر)",
+      "assets_only": "صرف اثاثے"
     }
   }
 }
