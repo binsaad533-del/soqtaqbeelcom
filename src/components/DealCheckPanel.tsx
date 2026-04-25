@@ -527,7 +527,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           )}
           {analysis && (
             <span className={cn("text-[11px] px-2.5 py-1 rounded-lg border", ratingStyle.bg, ratingStyle.text, ratingStyle.border)}>
-              {analysis.rating}
+              {t(`dealCheck.${mapRatingToKey(analysis.rating)}`)}
             </span>
           )}
           {!analysis && loading && (
@@ -550,10 +550,10 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               </div>
               <div className="text-center">
                 <p className="text-sm font-medium">
-                  {!useCache ? t("dealCheck.generatingInYourLanguage") : "جاري تحليل الصفقة..."}
+                  {!useCache ? t("dealCheck.generatingInYourLanguage") : t("dealCheck.analyzingProgress")}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  يتم فحص جميع الصور والمستندات والبيانات
+                  {t("dealCheck.checkingAllData")}
                 </p>
               </div>
             </div>
@@ -563,7 +563,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
             <div className="py-8 text-center">
               <p className="text-sm text-destructive mb-3">{error}</p>
               <Button variant="outline" size="sm" onClick={() => runDealCheck()} className="rounded-xl text-xs">
-                إعادة المحاولة
+                {t("dealCheck.retryAnalysis")}
               </Button>
             </div>
           )}
@@ -601,7 +601,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       <Clock size={11} />
                       <span>{t("dealCheck.lastUpdate")} {formatCacheAge(updatedDate)}</span>
                       {isRecent && <span className="text-emerald-600 dark:text-emerald-400 font-medium">• {t("dealCheck.updated")}</span>}
-                      {isStale && <span className="text-amber-500 font-medium">• يتم التحديث تلقائياً</span>}
+                      {isStale && <span className="text-amber-500 font-medium">• {t("dealCheck.autoUpdating")}</span>}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-muted-foreground/60">{t("dealCheck.autoUpdate")}</span>
