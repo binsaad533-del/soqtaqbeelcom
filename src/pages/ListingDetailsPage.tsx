@@ -44,7 +44,7 @@ import { getArabicDealType } from "@/lib/translations";
 import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/components/SimulationOverlay";
 import ReportListingDialog from "@/components/ReportListingDialog";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
-import { mapConditionToKey } from "@/lib/condition-utils";
+import { mapConditionToKey, mapDealTypeToKey } from "@/lib/condition-utils";
 
 
 type ListingDocumentItem = {
@@ -744,7 +744,7 @@ const ListingDetailsPage = () => {
               <SectionAccordion
                 title={t('listing.dealStructure')}
                 icon={<Shield size={16} strokeWidth={1.4} className="text-primary" />}
-                summary={`${primaryConfig.label}${primaryConfig.includes.length > 0 ? ` — يشمل ${primaryConfig.includes.slice(0, 3).join("، ")}` : ""}`}
+                summary={`${t(`deal.${mapDealTypeToKey(primaryDealType)}`)}${primaryConfig.includes.length > 0 ? ` — ${t('deal.dealSummary')}` : ""}`}
               >
                 <DealStructureDisplay
                   primaryConfig={primaryConfig}
@@ -1279,7 +1279,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium flex items-center gap-0.5">
             <Star size={10} fill="currentColor" /> {t("listing.mainOption")}
           </span>
-          <span className="text-sm font-medium">{primaryConfig.label}</span>
+          <span className="text-sm font-medium">{t(`deal.${mapDealTypeToKey(primaryTypeId)}`)}</span>
         </div>
         <p className="text-xs text-muted-foreground mb-3">{tr(primaryConfig.desc)}</p>
 
