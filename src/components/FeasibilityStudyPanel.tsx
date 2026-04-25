@@ -606,8 +606,14 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   })();
 
   // Load cached study on mount - NO edge function call
+  // Bypass cache when user language is not Arabic (cached studies are Arabic-only).
   useEffect(() => {
     if (!listing?.id) { setLoadingCache(false); return; }
+    const lang = (i18n.language || "ar").toLowerCase();
+    if (lang !== "ar") {
+      setLoadingCache(false);
+      return;
+    }
     (async () => {
       try {
         const { data } = await supabase
@@ -624,7 +630,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       } catch { /* ignore */ }
       setLoadingCache(false);
     })();
-  }, [listing?.id]);
+  }, [listing?.id, i18n.language]);
 
   const runStudy = async () => {
     if (isSimulation) {
