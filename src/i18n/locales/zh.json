@@ -962,6 +962,24 @@
           "买方负责搬迁与运营"
         ]
       }
+    },
+    "mapLink": {
+      "label": "粘贴谷歌地图链接",
+      "labelWithIcon": "📍 粘贴谷歌地图链接",
+      "helper": "打开谷歌地图 → 点击位置 → 复制链接并粘贴到此处",
+      "placeholder": "在此粘贴谷歌地图链接",
+      "button": "确定",
+      "searchPlaceholder": "搜索：区域、城市、街道……",
+      "search": "搜索",
+      "mapsInputPlaceholder": "搜索位置……",
+      "nearby": "靠近 {{name}}",
+      "noResults": "未找到结果",
+      "noResultsHint": "未找到结果，请尝试其他关键词",
+      "searchFailed": "搜索失败",
+      "searchFailedRetry": "搜索失败,请重试",
+      "resolving": "正在解析链接……",
+      "shortLinkHint": "请尝试从地图浏览器(而非应用)复制完整链接",
+      "unrecognized": "无法识别坐标 — 请粘贴谷歌地图链接或坐标,例如:24.7136, 46.6753"
     }
   }
 }
