@@ -82,12 +82,12 @@ export function useListingTranslation<T extends { id?: string; inventory?: any }
 
   const translatedListing = {
     ...original,
-    title: data.title || original.title,
-    description: data.description || original.description,
-    city: data.city || original.city,
-    district: data.district || original.district,
     inventory: mergedInventory,
-  } as T;
+  } as any;
+
+  for (const field of TRANSLATABLE_LISTING_FIELDS) {
+    if (data[field]) translatedListing[field] = data[field];
+  }
 
   return {
     translatedListing,
