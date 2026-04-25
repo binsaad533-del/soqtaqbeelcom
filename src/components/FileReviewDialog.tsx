@@ -500,12 +500,12 @@ export function FileReviewDialog({
           <DialogFooter className="p-4 border-t bg-muted/20 flex-row items-center justify-between sm:justify-between gap-2">
             <div className="text-xs text-muted-foreground">
               {unconfirmedCount > 0
-                ? `${unconfirmedCount} ملف بانتظار التأكيد`
-                : "كل الملفات مؤكدة ✓"}
+                ? t("createListing.fileReview.pendingConfirmation", { count: unconfirmedCount })
+                : t("createListing.fileReview.allConfirmed")}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                إغلاق
+                {t("createListing.fileReview.close")}
               </Button>
               <Button
                 onClick={handleConfirm}
@@ -513,7 +513,7 @@ export function FileReviewDialog({
                 className="gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                {confirming ? "جاري الحفظ..." : "تأكيد وحفظ"}
+                {confirming ? t("createListing.fileReview.confirmingSave") : t("createListing.fileReview.confirmAndSave")}
               </Button>
             </div>
           </DialogFooter>
