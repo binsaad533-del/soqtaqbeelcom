@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { X, Rocket } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 
 const STORAGE_KEY = "launch_banner_dismissed";
 
 const LaunchBanner = () => {
-  const { tx } = useLanguage();
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(() => {
     try { return sessionStorage.getItem(STORAGE_KEY) === "1"; } catch { return false; }
   });
