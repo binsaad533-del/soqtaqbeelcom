@@ -21,7 +21,13 @@
     "showLess": "Show less",
     "low": "Low",
     "medium": "Medium",
-    "high": "High"
+    "high": "High",
+    "currency": "SAR",
+    "totalValue": "Total value:",
+    "marketValueLabel": "Market:",
+    "takeoverValueLabel": "Takeover:",
+    "copied": "Copied",
+    "updating": "Updating..."
   },
   "auth": {
     "enterPhone": "Enter your phone number",
@@ -124,7 +130,12 @@
     "excludes": "Excludes",
     "viewDetails": "View details",
     "setAsPrimary": "Set as primary",
-    "alternative": "Alternative"
+    "alternative": "Alternative",
+    "type_full_takeover": "Full Takeover",
+    "type_partial": "Partial Takeover",
+    "type_assets_only": "Assets Only",
+    "type_franchise": "Franchise",
+    "dealSummary": "Includes commercial registration, trade name, trademark"
   },
   "offer": {
     "submitted": "Your offer was sent",
@@ -198,7 +209,14 @@
     "resume": "Resume",
     "promote": "Promote listing",
     "delete": "Delete",
-    "featured": "Featured listing"
+    "featured": "Featured listing",
+    "paused": "Paused",
+    "deleted": "Deleted",
+    "manageListing": "Manage listing",
+    "status": "Status",
+    "share": "Share",
+    "back": "Back",
+    "showMore": "Show more"
   },
   "marketplace": {
     "title": "Business marketplace",
@@ -255,7 +273,27 @@
     "confidenceMedium": "Medium Confidence",
     "confidenceLow": "Low Confidence",
     "confidenceEstimate": "Estimate",
-    "confidenceNeedsInspection": "Needs Inspection"
+    "confidenceNeedsInspection": "Needs Inspection",
+    "confidenceLevel": "Confidence level",
+    "confidenceLevelLow": "Low",
+    "confidenceLevelMedium": "Medium",
+    "confidenceLevelHigh": "High",
+    "verdict_acceptable_caution": "Acceptable with caution",
+    "verdict_good": "Good",
+    "verdict_excellent": "Excellent",
+    "verdict_risky": "High risk",
+    "olvDisclaimerPrefix": "Prices are calculated using",
+    "olvMethodology": "Orderly Liquidation Value (OLV)",
+    "olvDisclaimerMiddle": "methodology, in line with",
+    "olvAuthority": "the Saudi Authority for Accredited Valuers (TAQEEM)",
+    "olvDisclaimerSuffix": "standards and IVS 160.1. Formula: physical depreciation by asset condition × orderly liquidation discount.",
+    "matchQuality": "Match quality",
+    "pricingInProgress": "Pricing assets in progress",
+    "pricingInProgressDesc": "Pricing usually takes 30-60 seconds. The view will refresh automatically when done.",
+    "smartAnalysis": "Comprehensive smart analysis of the deal",
+    "analyzing": "Analyzing",
+    "savedAnalysis": "Saved analysis",
+    "extraValue": "Extra value (trade name + licenses + customer base)"
   },
   "feasibility": {
     "title": "Economic feasibility study",
@@ -281,7 +319,27 @@
     "marketRisks": "Market risks",
     "regulatoryRisks": "Regulatory risks",
     "mitigationStrategies": "Mitigation strategies:",
-    "topCompetitors": "Top competitors:"
+    "topCompetitors": "Top competitors:",
+    "investmentAcceptableWithCaution": "Acceptable investment with caution",
+    "investmentGood": "Good investment",
+    "investmentExcellent": "Excellent investment",
+    "investmentRisky": "High-risk investment",
+    "loadingStudy": "Loading study...",
+    "savedStudy": "Saved study",
+    "saved": "Saved",
+    "refresh": "Refresh",
+    "preparingStudy": "Preparing study... (may take 30 seconds)",
+    "noDataForStudy": "Not enough data to prepare a feasibility study at this time",
+    "prepareStudyNow": "Prepare study now",
+    "assetsOnlyTitle": "Assets only",
+    "assetsOnlyDesc": "This deal is \"Assets Only\" — selling equipment or assets without an operating business. The economic feasibility study does not apply here.",
+    "assetsOnlyAlternatives": "Better alternatives to evaluate this deal:",
+    "assetsOnlyAltAssetCheck": "Asset valuation: see the \"Deal Check\" section",
+    "assetsOnlyAltMarket": "Market comparison: see the \"Asset Valuation\" section",
+    "updatedAt": "Updated:",
+    "googleMapsData": "Google Maps data",
+    "savedSimulation": "This is a saved simulation study",
+    "refreshLimit": "Can refresh once every 24 hours"
   },
   "moqbil": {
     "greeting": "Hi there! I'm Moqbil, your smart assistant",

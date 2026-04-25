@@ -21,7 +21,13 @@
     "showLess": "收起",
     "low": "低",
     "medium": "中等",
-    "high": "高"
+    "high": "高",
+    "currency": "沙特里亚尔",
+    "totalValue": "总价值：",
+    "marketValueLabel": "市场价：",
+    "takeoverValueLabel": "收购价：",
+    "copied": "已复制",
+    "updating": "更新中..."
   },
   "auth": {
     "enterPhone": "请输入您的手机号码",
@@ -124,7 +130,12 @@
     "excludes": "不包含",
     "viewDetails": "查看详情",
     "setAsPrimary": "设为主选项",
-    "alternative": "备选"
+    "alternative": "备选",
+    "type_full_takeover": "全面收购",
+    "type_partial": "部分收购",
+    "type_assets_only": "仅资产",
+    "type_franchise": "特许经营",
+    "dealSummary": "包括商业登记、商号、商标"
   },
   "offer": {
     "submitted": "您的报价已发送",
@@ -198,7 +209,14 @@
     "resume": "恢复",
     "promote": "推广刊登",
     "delete": "删除",
-    "featured": "精选刊登"
+    "featured": "精选刊登",
+    "paused": "已暂停",
+    "deleted": "已删除",
+    "manageListing": "管理刊登",
+    "status": "状态",
+    "share": "分享",
+    "back": "返回",
+    "showMore": "查看更多"
   },
   "marketplace": {
     "title": "商业机会市场",
@@ -255,7 +273,27 @@
     "confidenceMedium": "中等可信度",
     "confidenceLow": "低可信度",
     "confidenceEstimate": "估算",
-    "confidenceNeedsInspection": "需要检查"
+    "confidenceNeedsInspection": "需要检查",
+    "confidenceLevel": "置信度",
+    "confidenceLevelLow": "低",
+    "confidenceLevelMedium": "中",
+    "confidenceLevelHigh": "高",
+    "verdict_acceptable_caution": "谨慎可接受",
+    "verdict_good": "良好",
+    "verdict_excellent": "优秀",
+    "verdict_risky": "高风险",
+    "olvDisclaimerPrefix": "价格采用",
+    "olvMethodology": "有序清算价值 (OLV)",
+    "olvDisclaimerMiddle": "方法计算，符合",
+    "olvAuthority": "沙特认证评估师协会 (TAQEEM)",
+    "olvDisclaimerSuffix": "标准及 IVS 160.1。公式：按资产状况的实物折旧 × 有序清算折扣。",
+    "matchQuality": "匹配质量",
+    "pricingInProgress": "正在为资产定价",
+    "pricingInProgressDesc": "定价通常需要30-60秒，完成后界面将自动更新。",
+    "smartAnalysis": "对交易的全面智能分析",
+    "analyzing": "分析中",
+    "savedAnalysis": "已保存的分析",
+    "extraValue": "额外价值（商号 + 许可证 + 客户群）"
   },
   "feasibility": {
     "title": "经济可行性研究",
@@ -281,7 +319,27 @@
     "marketRisks": "市场风险",
     "regulatoryRisks": "法规风险",
     "mitigationStrategies": "缓解策略:",
-    "topCompetitors": "主要竞争对手:"
+    "topCompetitors": "主要竞争对手:",
+    "investmentAcceptableWithCaution": "谨慎可接受的投资",
+    "investmentGood": "良好投资",
+    "investmentExcellent": "优秀投资",
+    "investmentRisky": "高风险投资",
+    "loadingStudy": "正在加载研究...",
+    "savedStudy": "已保存的研究",
+    "saved": "已保存",
+    "refresh": "刷新",
+    "preparingStudy": "正在准备研究...（可能需要30秒）",
+    "noDataForStudy": "目前没有足够的数据来准备可行性研究",
+    "prepareStudyNow": "立即准备研究",
+    "assetsOnlyTitle": "仅资产",
+    "assetsOnlyDesc": "此交易类型为\"仅资产\" —— 即出售设备或资产而不含运营业务。因此经济可行性研究不适用。",
+    "assetsOnlyAlternatives": "评估此交易的更好替代方案：",
+    "assetsOnlyAltAssetCheck": "资产估值：请参阅\"交易审核\"部分",
+    "assetsOnlyAltMarket": "市场比较：请参阅\"资产估值\"部分",
+    "updatedAt": "已更新：",
+    "googleMapsData": "Google 地图数据",
+    "savedSimulation": "这是已保存的模拟研究",
+    "refreshLimit": "每24小时可刷新一次"
   },
   "moqbil": {
     "greeting": "您好!我是 Moqbil,您的智能助手",
