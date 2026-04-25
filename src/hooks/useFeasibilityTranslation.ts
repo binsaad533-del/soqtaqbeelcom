@@ -20,19 +20,19 @@ const ARRAY_FIELDS = ["recommendations", "strengths", "risks", "opportunities"];
  * Arabic → returns original; other languages → fetches and merges translations.
  */
 export function useFeasibilityTranslation<T extends Record<string, unknown> | null | undefined>(
-  feasibilityId: string | null | undefined,
+  listingId: string | null | undefined,
   studyData: T,
 ) {
   const { i18n } = useTranslation();
   const language = i18n.resolvedLanguage || i18n.language || "ar";
-  const enabled = !!feasibilityId && !!studyData && language !== "ar";
+  const enabled = !!listingId && !!studyData && language !== "ar";
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["feasibility-translation", feasibilityId, language],
+    queryKey: ["feasibility-translation", listingId, language],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("translate-ai-content", {
         body: {
-          content_id: feasibilityId,
+          listing_id: listingId,
           content_type: "feasibility",
           target_language: language,
         },

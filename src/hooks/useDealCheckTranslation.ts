@@ -44,19 +44,19 @@ const MARKET_COMPARISON_STRING_FIELDS = [
  * (or raw cached object) whose string fields will be merged with the translated values.
  */
 export function useDealCheckTranslation<T extends Record<string, unknown> | null | undefined>(
-  dealCheckId: string | null | undefined,
+  listingId: string | null | undefined,
   analysis: T,
 ) {
   const { i18n } = useTranslation();
   const language = i18n.resolvedLanguage || i18n.language || "ar";
-  const enabled = !!dealCheckId && !!analysis && language !== "ar";
+  const enabled = !!listingId && !!analysis && language !== "ar";
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["deal-check-translation", dealCheckId, language],
+    queryKey: ["deal-check-translation", listingId, language],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("translate-ai-content", {
         body: {
-          content_id: dealCheckId,
+          listing_id: listingId,
           content_type: "deal_check",
           target_language: language,
         },
