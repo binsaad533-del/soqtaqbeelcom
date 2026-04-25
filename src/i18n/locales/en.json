@@ -16,7 +16,9 @@
     "month": "month",
     "share": "Share",
     "publish": "Publish",
-    "saveDraft": "Save as draft"
+    "saveDraft": "Save as draft",
+    "showMore": "Show more",
+    "showLess": "Show less"
   },
   "auth": {
     "enterPhone": "Enter your phone number",
@@ -94,7 +96,65 @@
     "showExtraDetails": "Show additional details",
     "pricedAssetsValue": "Priced assets value",
     "publicOfferTip": "Public offers increase deal transparency and give you an advantage",
-    "loginToViewDocs": "Sign in to request access to protected documents"
+    "loginToViewDocs": "Sign in to request access to protected documents",
+    "docsProtectedAskSeller": "These documents are protected — request the seller's approval to view them",
+    "requestAccess": "Request access",
+    "mainOption": "Primary option",
+    "alternativeOptions": "Alternative options:",
+    "includes": "Includes",
+    "excludes": "Excludes"
+  },
+  "deal": {
+    "mainOption": "Primary option",
+    "fullTransferDesc": "Full business transfer including all assets and liabilities",
+    "includes": "Includes",
+    "commercialReg": "Commercial registration",
+    "tradeName": "Trade name",
+    "trademark": "Trademark",
+    "assetsEquipment": "Assets & equipment",
+    "lease": "Lease contract",
+    "inventory": "Inventory",
+    "operationalRights": "Operational rights",
+    "debtsLiabilities": "Debts & third-party liabilities",
+    "buyerAssumesLiabilities": "Buyer assumes all prior liabilities",
+    "checkLegalDisputes": "Existing legal disputes must be verified"
+  },
+  "inventory": {
+    "confirmedAssets": "Confirmed asset inventory",
+    "unit": "unit"
+  },
+  "condition": {
+    "good": "Good",
+    "used": "Used",
+    "new": "New",
+    "unclear": "Unclear",
+    "excellent": "Excellent"
+  },
+  "simulation": {
+    "title": "Deal simulation",
+    "basePrice": "Base price:",
+    "currentPrice": "Current price",
+    "commission": "Commission:",
+    "asIs": "Listed price as-is",
+    "discount10": "10% discount",
+    "discount20": "20% discount",
+    "assetsOnly": "Assets only (30% of price)",
+    "installment": "Installments (+15%)",
+    "transition": "With 3-month transition period",
+    "bestScenario": "Best scenario"
+  },
+  "manage": {
+    "title": "Manage listing — status:",
+    "yourListing": "Your listing —",
+    "published": "Published",
+    "draft": "Draft",
+    "suspended": "Paused",
+    "edit": "Edit",
+    "pause": "Pause",
+    "resume": "Resume",
+    "promote": "Promote listing",
+    "delete": "Delete",
+    "featured": "Featured listing"
   },
   "marketplace": {
     "title": "Business marketplace",
