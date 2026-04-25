@@ -90,7 +90,7 @@ export function useListingTranslation<T extends { id?: string; inventory?: any }
   }
 
   return {
-    translatedListing,
+    translatedListing: translatedListing as T,
     isTranslating: false,
     translationError: null as unknown,
   };
