@@ -22,6 +22,7 @@ import {
   mapMarketPositionToKey,
   mapRatingToKey,
 } from "@/lib/condition-utils";
+import { useDealCheckTranslation } from "@/hooks/useDealCheckTranslation";
 
 interface AssetBreakdownItem {
   assetName: string;
