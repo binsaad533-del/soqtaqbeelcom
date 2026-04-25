@@ -329,6 +329,20 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     }
   }, [cachedDealCheck, listing, useCache]);
 
+  // Auto-trigger re-analysis when language is non-Arabic and there's no analysis yet
+  // (cached analysis is Arabic-only — user needs it in their selected language).
+  useEffect(() => {
+    if (useCache) return;
+    if (analysis) return;
+    if (loading || isRefreshing) return;
+    if (autoTriggered) return;
+    if (!open) return;
+    if (isSimulation) return;
+    setAutoTriggered(true);
+    runDealCheck();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useCache, analysis, loading, isRefreshing, autoTriggered, open, isSimulation]);
+
   const getAllPhotoUrls = (): string[] => {
     if (!listing?.photos) return [];
     const photos = listing.photos as Record<string, string[]>;
