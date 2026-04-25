@@ -299,7 +299,7 @@ const CertifiedValuationFloatingTab = () => {
 };
 
 const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing,
     assetsCombined, detectedAssetsImages, detectedAssetsFiles, analysisUpdatedAt, saveDetectedAssets,
@@ -411,6 +411,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
       const { invokeWithRetry } = await import("@/lib/invokeWithRetry");
       const { data, error: fnError } = await invokeWithRetry("deal-check", {
         listing: listingWithAssets, perspective: "buyer",
+        language: i18n.language || "ar",
       });
 
       if (fnError) throw new Error(fnError.message || "تعذّر إعادة التحليل حالياً");

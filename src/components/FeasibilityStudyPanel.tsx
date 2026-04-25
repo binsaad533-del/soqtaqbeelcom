@@ -556,7 +556,7 @@ const resolveFeasibilityStudy = (listing: any, raw?: any): FeasibilityStudy | nu
   normalizeFeasibilityStudy(raw, listing) || buildEstimatedFeasibilityStudy(listing);
 
 const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityStudyPanelProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [study, setStudy] = useState<FeasibilityStudy | null>(() =>
     resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility),
   );
@@ -640,7 +640,10 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     setError(null);
     try {
       const { invokeWithRetry } = await import("@/lib/invokeWithRetry");
-      const { data, error: fnError } = await invokeWithRetry("feasibility-study", { listing });
+      const { data, error: fnError } = await invokeWithRetry("feasibility-study", {
+        listing,
+        language: i18n.language || "ar",
+      });
       if (fnError) {
         const response = (fnError as any)?.context;
         let message = "تعذّر إعداد الدراسة حالياً، يرجى المحاولة بعد قليل";
