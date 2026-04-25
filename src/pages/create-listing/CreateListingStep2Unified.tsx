@@ -25,6 +25,7 @@ interface Props {
 }
 
 const CreateListingStep2Unified = ({ state }: Props) => {
+  const { t } = useTranslation();
   const {
     dealStructure,
     fileStatuses,
