@@ -1013,7 +1013,7 @@ const ListingDetailsPage = () => {
                     className="w-full rounded-xl active:scale-[0.98]"
                   >
                     {startingDeal ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} strokeWidth={1.5} />}
-                    تواصل على الخاص
+                    {t('listing.contactSeller')}
                   </Button>
                 </>
               )}
