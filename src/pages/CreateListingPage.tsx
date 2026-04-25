@@ -42,12 +42,12 @@ import CreateListingStep2 from "./create-listing/CreateListingStep2";
 import CreateListingStep3 from "./create-listing/CreateListingStep3";
 import CreateListingStep4 from "./create-listing/CreateListingStep4";
 
-const steps = [
-  { label: "هيكل الصفقة", icon: Shield, hint: "اختر نوع الصفقة — والباقي على الـAI ✦" },
-  { label: "الصور والمستندات", icon: Camera, hint: "ارفع الصور والمستندات فقط — الـAI ✦ يتكفّل بالباقي" },
-  { label: "التحليل الذكي", icon: Eye, hint: "الـAI ✦ يحلل ويجرد تلقائياً — فقط راجع وأكّد" },
-  { label: "الإفصاح والنشر", icon: Check, hint: "أكمل البيانات وانشر بضغطة واحدة" },
-];
+const STEP_DEFS = [
+  { key: "dealStructure", icon: Shield },
+  { key: "media", icon: Camera },
+  { key: "analysis", icon: Eye },
+  { key: "disclosure", icon: Check },
+] as const;
 
 const allPhotoGroups = [
   { id: "interior", label: "صور داخلية للمحل", min: 3, icon: "Camera", dealTypes: ["full_takeover", "transfer_no_liabilities", "assets_setup"] as readonly string[] },
@@ -66,7 +66,12 @@ function getImageRequirement(dealType: string): "required" | "optional" | "none"
 
 const CreateListingPage = () => {
   const { t } = useTranslation();
-  useSEO({ title: "أضف فرصة جديدة", description: "أنشئ إعلان تقبيل جديد على سوق تقبيل — أضف تفاصيل مشروعك واجذب المشترين", canonical: "/create-listing" });
+  useSEO({ title: t("createListing.seoTitle"), description: t("createListing.seoDescription"), canonical: "/create-listing" });
+  const steps = STEP_DEFS.map((s) => ({
+    label: t(`createListing.steps.${s.key}`),
+    icon: s.icon,
+    hint: t(`createListing.steps.hints.${s.key}`),
+  }));
   const [currentStep, setCurrentStep] = useState(0);
   const [dealStructure, setDealStructure] = useState<DealStructureSelection>({
     selectedTypes: [],
