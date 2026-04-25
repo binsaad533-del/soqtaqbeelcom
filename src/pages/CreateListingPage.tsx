@@ -609,7 +609,7 @@ const CreateListingPage = () => {
       toast.error(msg, { duration: 7000 });
       setCrExtractionDone(true);
     } finally { setCrExtracting(false); }
-  }, [removeRejectedDoc]);
+  }, [removeRejectedDoc, t]);
 
   const handleAnalyze = async () => {
     const allPhotoUrlsForAnalysis = Object.values(photos).flat();
