@@ -1001,7 +1001,11 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       <div className={cn("rounded-xl border p-4 flex items-center justify-between", v.bg, v.border)}>
         <div>
           <div className={cn("text-lg font-bold", v.text)}>{t(`feasibility.${mapFeasibilityVerdictToKey(displayStudy.verdict)}`)}</div>
-          <div className="text-xs text-muted-foreground">{t("feasibility.confidenceLevel")}: {t(`dealCheck.confidenceLevel${mapConfidenceToKey(displayStudy.confidenceLevel) === "High" ? "High" : mapConfidenceToKey(displayStudy.confidenceLevel) === "Low" ? "Low" : "Medium"}`)}</div>
+          <div className="text-xs text-muted-foreground">{t("feasibility.confidenceLevel")}: {(() => {
+            const k = mapConfidenceToKey(displayStudy.confidenceLevel);
+            const norm = k === "High" || k === "Low" ? k : "Medium";
+            return t(`dealCheck.confidenceLevel${norm}`);
+          })()}</div>
         </div>
         <div className="text-left">
           <div className="text-xs text-muted-foreground">{t("feasibility.paybackPeriod")}</div>
