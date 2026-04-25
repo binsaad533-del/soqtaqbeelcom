@@ -975,7 +975,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             const dateStr = lastUpdatedAt || cachedAt;
             return (
               <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                محدّث: {new Date(dateStr!).toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" })}
+                {t("dealCheck.updatedAt")} {new Date(dateStr!).toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" })}
                 <span className="text-muted-foreground/50">• {t("feasibility.weeklyUpdate")}</span>
               </span>
             );
@@ -1001,7 +1001,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       <div className={cn("rounded-xl border p-4 flex items-center justify-between", v.bg, v.border)}>
         <div>
           <div className={cn("text-lg font-bold", v.text)}>{t(`feasibility.${mapFeasibilityVerdictToKey(displayStudy.verdict)}`)}</div>
-          <div className="text-xs text-muted-foreground">{t("feasibility.confidenceLevel")}: {displayStudy.confidenceLevel}</div>
+          <div className="text-xs text-muted-foreground">{t("feasibility.confidenceLevel")}: {t(`dealCheck.confidenceLevel${mapConfidenceToKey(displayStudy.confidenceLevel) === "High" ? "High" : mapConfidenceToKey(displayStudy.confidenceLevel) === "Low" ? "Low" : "Medium"}`)}</div>
         </div>
         <div className="text-left">
           <div className="text-xs text-muted-foreground">{t("feasibility.paybackPeriod")}</div>
