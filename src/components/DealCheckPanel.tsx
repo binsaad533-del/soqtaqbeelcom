@@ -916,11 +916,11 @@ const PRICING_CONFIDENCE_STYLES: Record<string, { bg: string; text: string; bord
   "تقديري": { bg: "bg-yellow-50 dark:bg-yellow-950/30", text: "text-yellow-700 dark:text-yellow-300", border: "border-yellow-200 dark:border-yellow-900" },
 };
 
-const PRICING_STATUS_LABEL: Record<string, { text: string; className: string }> = {
-  idle: { text: "لم يبدأ التسعير", className: "bg-muted text-muted-foreground" },
-  in_progress: { text: "جاري التسعير...", className: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300" },
-  completed: { text: "اكتمل التسعير", className: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300" },
-  failed: { text: "تعذّر التسعير", className: "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300" },
+const PRICING_STATUS_LABEL: Record<string, { textKey: string; className: string }> = {
+  idle: { textKey: "dealCheck.pricingIdle", className: "bg-muted text-muted-foreground" },
+  in_progress: { textKey: "dealCheck.pricingInProgressShort", className: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300" },
+  completed: { textKey: "dealCheck.pricingCompleted", className: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300" },
+  failed: { textKey: "dealCheck.pricingFailed", className: "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300" },
 };
 
 interface PricingInfo {
