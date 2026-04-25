@@ -641,6 +641,20 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     })();
   }, [listing?.id, i18n.language]);
 
+  // Auto-trigger study generation when language is non-Arabic and no study yet
+  // (cached/estimated study is Arabic-only — user needs it in their selected language).
+  useEffect(() => {
+    if (isArabic) return;
+    if (study) return;
+    if (loading || loadingCache) return;
+    if (autoTriggered) return;
+    if (isSimulation) return;
+    if (!listing?.id) return;
+    setAutoTriggered(true);
+    runStudy();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isArabic, study, loading, loadingCache, autoTriggered, isSimulation, listing?.id]);
+
   const runStudy = async () => {
     if (isSimulation) {
       toast("هذا إعلان محاكاة ويعرض دراسة جدوى محفوظة مسبقاً.");
