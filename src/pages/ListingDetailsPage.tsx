@@ -121,6 +121,7 @@ const normalizeListingDocuments = (documents: unknown[]): ListingDocumentItem[] 
 };
 
 const ListingDetailsPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, role } = useAuthContext();
