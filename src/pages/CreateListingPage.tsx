@@ -614,11 +614,11 @@ const CreateListingPage = () => {
   const handleAnalyze = async () => {
     const allPhotoUrlsForAnalysis = Object.values(photos).flat();
     const allDocUrls = Object.values(uploadedDocs).flat();
-    if (allPhotoUrlsForAnalysis.length === 0 && allDocUrls.length === 0) { toast.error("يرجى رفع صور أو ملف Excel/مستند أولاً"); return; }
+    if (allPhotoUrlsForAnalysis.length === 0 && allDocUrls.length === 0) { toast.error(t("createListing.toasts.analysis.noFiles")); return; }
     const unsupportedUrls = allPhotoUrlsForAnalysis.filter((url) => /\.(heic|heif)(\?|$)/i.test(url));
-    if (unsupportedUrls.length > 0) { toast.error("هناك صور قديمة بصيغة HEIC غير قابلة للتحليل"); return; }
+    if (unsupportedUrls.length > 0) { toast.error(t("createListing.toasts.analysis.heicUnsupported")); return; }
     const limitedUrls = allPhotoUrlsForAnalysis.slice(0, 30);
-    if (allPhotoUrlsForAnalysis.length > 30) toast.info(`لديك ${allPhotoUrlsForAnalysis.length} صورة — سيتم تحليل أول 30`);
+    if (allPhotoUrlsForAnalysis.length > 30) toast.info(t("createListing.toasts.analysis.limited", { count: allPhotoUrlsForAnalysis.length }));
     setAnalyzing(true);
     setAnalyzeProgress(10);
     const progressInterval = setInterval(() => setAnalyzeProgress((prev) => Math.min(prev + 8, 85)), 1500);
@@ -626,7 +626,7 @@ const CreateListingPage = () => {
       const { data, error } = await supabase.functions.invoke("analyze-inventory", { body: { photoUrls: limitedUrls, photoGroups: photos, documentUrls: allDocUrls } });
       clearInterval(progressInterval);
       setAnalyzeProgress(100);
-      if (error || !data || (data as { error?: string }).error) throw new Error((data as { error?: string })?.error || error?.message || "فشل التحليل");
+      if (error || !data || (data as { error?: string }).error) throw new Error((data as { error?: string })?.error || error?.message || t("createListing.toasts.analysis.fetchFail"));
       const assets: InventoryItem[] = (((data as any).assets) || []).map((asset: any, i: number) => ({
         id: String(i + 1), name: String(asset.name || "أصل غير مسمى"), qty: Number(asset.quantity || 1),
         condition: String(asset.condition || "غير واضح"), category: String(asset.category || "أخرى"),
@@ -684,8 +684,8 @@ const CreateListingPage = () => {
           setCrExtractionDone(true);
         }
       }
-      toast.success("تم تحليل الملفات المرفوعة واستخراج البيانات بنجاح ✦");
-    } catch (err) { clearInterval(progressInterval); toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء تحليل الملفات"); }
+      toast.success(t("createListing.toasts.analysis.success"));
+    } catch (err) { clearInterval(progressInterval); toast.error(err instanceof Error ? err.message : t("createListing.toasts.analysis.fail")); }
     finally { setAnalyzing(false); }
   };
 
