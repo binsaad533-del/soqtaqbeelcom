@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   DEAL_TYPES,
   DEAL_TYPE_MAP,
@@ -35,6 +36,7 @@ interface DealStructureEngineProps {
 }
 
 const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
+  const { t } = useTranslation();
   const [expandedType, setExpandedType] = useState<string | null>(null);
 
   const { selectedTypes, primaryType } = value;
@@ -139,12 +141,12 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                       <span className="font-medium text-sm">{dt.label}</span>
                       {isPrimary && (
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium flex items-center gap-0.5">
-                          <Star size={10} fill="currentColor" /> الخيار الرئيسي
+                          <Star size={10} fill="currentColor" /> {t("deal.mainOption")}
                         </span>
                       )}
                       {isSelected && !isPrimary && idx >= 0 && (
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                          بديل {idx}
+                          {t("deal.alternative")} {idx}
                         </span>
                       )}
                     </div>
@@ -158,7 +160,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                             onClick={() => setPrimary(dt.id)}
                             className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
                           >
-                            <Star size={10} /> تعيين كرئيسي
+                            <Star size={10} /> {t("deal.setAsPrimary")}
                           </button>
                         )}
                         {selectedTypes.length > 1 && idx > 0 && (
@@ -179,7 +181,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                   <button
                     onClick={() => setExpandedType(isExpanded ? null : dt.id)}
                     className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 shrink-0 transition-colors"
-                    title="عرض التفاصيل"
+                    title={t("deal.viewDetails")}
                   >
                     {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </button>
@@ -191,7 +193,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                     {dt.includes.length > 0 && (
                       <div>
                         <div className="text-xs font-medium text-success mb-1 flex items-center gap-1">
-                          <Check size={12} /> يشمل
+                          <Check size={12} /> {t("deal.includes")}
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {dt.includes.map((item, i) => (
@@ -205,7 +207,7 @@ const DealStructureEngine = ({ value, onChange }: DealStructureEngineProps) => {
                     {dt.excludes.length > 0 && (
                       <div>
                         <div className="text-xs font-medium text-destructive mb-1 flex items-center gap-1">
-                          <AlertTriangle size={12} /> لا يشمل
+                          <AlertTriangle size={12} /> {t("deal.excludes")}
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {dt.excludes.map((item, i) => (
