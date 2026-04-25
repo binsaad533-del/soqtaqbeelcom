@@ -65,9 +65,10 @@ Deno.serve(async (req) => {
     );
 
     // 1. Read the listing
+    const selectColumns = ["id", "updated_at", "inventory", ...TRANSLATABLE_LISTING_FIELDS].join(", ");
     const { data: listing, error: listingErr } = await supabase
       .from("listings")
-      .select("id, title, description, city, district, inventory, updated_at")
+      .select(selectColumns)
       .eq("id", listing_id)
       .maybeSingle();
 
@@ -78,15 +79,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2. Compute hash of source content
-    const sourceContent = JSON.stringify({
-      title: listing.title ?? "",
-      description: listing.description ?? "",
-      city: listing.city ?? "",
-      district: listing.district ?? "",
-      inventory: listing.inventory ?? [],
-    });
-    const sourceHash = await hashString(sourceContent);
+    // 2. Compute hash of source content (covers all translatable fields + inventory)
+    const sourcePayload: Record<string, unknown> = { inventory: listing.inventory ?? [] };
+    for (const field of TRANSLATABLE_LISTING_FIELDS) {
+      sourcePayload[field] = (listing as any)[field] ?? "";
+    }
+    const sourceHash = await hashString(JSON.stringify(sourcePayload));
 
     // 3. Cache lookup
     const { data: cached } = await supabase
