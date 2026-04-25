@@ -629,5 +629,119 @@
       "startSelling": "开始出售",
       "browseMarket": "浏览商机"
     }
+  },
+  "createListing": {
+    "seoTitle": "发布新机会",
+    "seoDescription": "在 Souq Taqbeel 上发布新的企业转让信息——添加项目详情,吸引合格买家",
+    "verificationGate": "发布信息前需先验证手机号",
+    "title": "发布转让机会",
+    "subtitle": "借助人工智能创建专业的企业转让信息",
+    "tagline": "无需编写任何文字",
+    "completion": "信息完成度",
+    "draftRestored": "已恢复您的上一份草稿——可从中断处继续",
+    "draftCheckingPrev": "正在检查历史草稿……",
+    "autoSave": {
+      "saving": "保存中……",
+      "saved": "已自动保存"
+    },
+    "steps": {
+      "dealStructure": "交易结构",
+      "media": "图片与文件",
+      "analysis": "智能分析",
+      "disclosure": "披露与发布",
+      "hints": {
+        "dealStructure": "选择交易类型——其余交给 AI ✦",
+        "media": "只需上传图片和文件——AI ✦ 会处理其余事宜",
+        "analysis": "AI ✦ 自动分析与盘点——您只需复核并确认",
+        "disclosure": "完善信息,一键发布"
+      }
+    },
+    "step1": {
+      "header": "选择合适的交易结构",
+      "subheader": "选定交易类型后,系统将自动定制相关要求",
+      "aiBadge": "✦ AI 全程自动配置 ✦"
+    },
+    "dealStructureSection": {
+      "title": "交易结构",
+      "subtitle": "可选择一种或多种交易类型——可向买家提供多个方案",
+      "cautionLabel": "提示",
+      "disclosuresCount": "需要披露 {{count}} 项",
+      "documentsCount": "需要提交 {{count}} 份文件"
+    },
+    "dealTypes": {
+      "full_takeover": {
+        "label": "完全收购",
+        "description": "整体转让企业,包括全部资产、权益及未结清债务"
+      },
+      "transfer_no_liabilities": {
+        "label": "无历史债务的业务转让",
+        "description": "卖方先行清理所有历史债务后再进行运营业务转让"
+      },
+      "assets_setup": {
+        "label": "资产+运营装修(不含工商登记)",
+        "description": "整套即开即用的运营装修转让,但不转移法律实体"
+      },
+      "assets_only": {
+        "label": "仅资产",
+        "description": "仅出售实物资产,不转让任何业务经营权"
+      }
+    },
+    "buttons": {
+      "back": "上一步",
+      "saveAndContinue": "保存并稍后继续",
+      "publish": "发布信息",
+      "publishConfirm": "确认发布",
+      "publishApprove": "已确认——立即发布"
+    },
+    "toasts": {
+      "draftSaveError": "保存草稿时发生错误",
+      "draftSaved": "草稿已保存",
+      "draftRestoredAuto": "已自动恢复您的上一份草稿",
+      "draftOpened": "已打开所选草稿",
+      "draftNotFound": "未找到所选草稿",
+      "selectDealStructure": "请先选择交易结构",
+      "completeRequired": "请先完成所有必填项",
+      "completeBeforePublish": "请在发布前完成所有必填项",
+      "locationRequired": "发布前请在地图上标注位置",
+      "publishSuccess": "信息发布成功! 🎉",
+      "publishFailed": "发布信息失败",
+      "publishUnexpected": "发布过程中发生意外错误",
+      "commissionSuspended": "您的账户因佣金逾期已被暂时暂停。",
+      "analysisCurrent": "当前分析仍然有效",
+      "analysisFailed": "无法执行该项检查"
+    },
+    "duplicate": {
+      "heading": "已发布相似信息",
+      "body": "您似乎已发布过类似的信息。是否希望编辑现有信息而非新建?",
+      "listingLabel": "信息",
+      "cityLabel": "城市",
+      "priceLabel": "价格",
+      "editExisting": "编辑现有信息",
+      "publishAsNew": "作为新信息发布",
+      "cancel": "取消"
+    },
+    "publishModal": {
+      "titleConfirm": "确认发布信息",
+      "titleCheck": "发布前的交易检查",
+      "subtitleConfirm": "交易已审核——是否继续发布?",
+      "subtitleCheck": "AI 正在分析您的交易并将在发布前给出建议",
+      "fieldTitle": "标题",
+      "fieldCity": "城市",
+      "fieldPrice": "价格",
+      "checking": "正在执行交易检查……",
+      "checkFailed": "自动检查未能完成",
+      "fairness": "价格合理性:",
+      "cancel": "取消"
+    },
+    "confirmCard": {
+      "question": "这些图片是同一资产还是多件资产?",
+      "sameAsset": "同一资产",
+      "multipleAssets": "多件资产",
+      "qtyLabel": "数量:",
+      "confirm": "确认"
+    },
+    "fields": {
+      "selectPlaceholder": "请选择……"
+    }
   }
 }

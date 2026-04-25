@@ -629,5 +629,119 @@
       "startSelling": "ابدأ البيع",
       "browseMarket": "تصفح الفرص"
     }
+  },
+  "createListing": {
+    "seoTitle": "أضف فرصة جديدة",
+    "seoDescription": "أنشئ إعلان تقبيل جديد على سوق تقبيل — أضف تفاصيل مشروعك واجذب المشترين",
+    "verificationGate": "يجب توثيق رقم جوالك قبل إضافة إعلان",
+    "title": "إضافة فرصة تقبيل",
+    "subtitle": "أنشئ إعلان تقبيل احترافي بمساعدة الذكاء الاصطناعي",
+    "tagline": "بدون ما تكتب سطر واحد",
+    "completion": "اكتمال البيانات",
+    "draftRestored": "تم استعادة مسودتك السابقة — يمكنك المتابعة من حيث توقفت",
+    "draftCheckingPrev": "جارٍ التحقق من المسودات السابقة...",
+    "autoSave": {
+      "saving": "جاري الحفظ...",
+      "saved": "تم الحفظ تلقائياً"
+    },
+    "steps": {
+      "dealStructure": "هيكل الصفقة",
+      "media": "الصور والمستندات",
+      "analysis": "التحليل الذكي",
+      "disclosure": "الإفصاح والنشر",
+      "hints": {
+        "dealStructure": "اختر نوع الصفقة — والباقي على الـAI ✦",
+        "media": "ارفع الصور والمستندات فقط — الـAI ✦ يتكفّل بالباقي",
+        "analysis": "الـAI ✦ يحلل ويجرد تلقائياً — فقط راجع وأكّد",
+        "disclosure": "أكمل البيانات وانشر بضغطة واحدة"
+      }
+    },
+    "step1": {
+      "header": "اختر هيكل الصفقة المناسب",
+      "subheader": "حدد نوع الصفقة وسيتم تخصيص المتطلبات تلقائياً حسب اختيارك",
+      "aiBadge": "✦ الـAI يحدد كل شيء لك تلقائياً ✦"
+    },
+    "dealStructureSection": {
+      "title": "هيكل الصفقة",
+      "subtitle": "اختر نوع أو أكثر من أنواع الصفقة — يمكنك تقديم أكثر من خيار للمشتري",
+      "cautionLabel": "تنبيهات",
+      "disclosuresCount": "{{count}} إفصاح مطلوب",
+      "documentsCount": "{{count}} مستند مطلوب"
+    },
+    "dealTypes": {
+      "full_takeover": {
+        "label": "تقبيل كامل",
+        "description": "نقل الأعمال بالكامل بما تملكه وما عليها من التزامات"
+      },
+      "transfer_no_liabilities": {
+        "label": "تقبيل نقل أعمال بدون التزامات سابقة",
+        "description": "تقبيل نقل أعمال تشغيلية بعد تصفية الالتزامات السابقة من جانب البائع"
+      },
+      "assets_setup": {
+        "label": "تقبيل أصول + تجهيز تشغيلي (بدون سجل تجاري)",
+        "description": "تقبيل تجهيز تشغيلي جاهز بدون نقل الكيان القانوني"
+      },
+      "assets_only": {
+        "label": "تقبيل أصول فقط",
+        "description": "تقبيل بيع الأصول المادية فقط بدون نقل النشاط"
+      }
+    },
+    "buttons": {
+      "back": "السابق",
+      "saveAndContinue": "حفظ والمتابعة لاحقاً",
+      "publish": "نشر الإعلان",
+      "publishConfirm": "تأكيد النشر",
+      "publishApprove": "موافق — انشر الإعلان"
+    },
+    "toasts": {
+      "draftSaveError": "حدث خطأ أثناء حفظ المسودة",
+      "draftSaved": "تم حفظ المسودة",
+      "draftRestoredAuto": "تم استعادة مسودتك السابقة تلقائياً",
+      "draftOpened": "تم فتح المسودة المطلوبة",
+      "draftNotFound": "لم أجد المسودة المطلوبة",
+      "selectDealStructure": "يرجى اختيار هيكل الصفقة أولاً",
+      "completeRequired": "يرجى إكمال جميع الحقول المطلوبة أولاً",
+      "completeBeforePublish": "يرجى إكمال جميع الحقول المطلوبة قبل النشر",
+      "locationRequired": "يجب تحديد الموقع على الخريطة قبل النشر",
+      "publishSuccess": "تم نشر الإعلان بنجاح! 🎉",
+      "publishFailed": "فشل نشر الإعلان",
+      "publishUnexpected": "حدث خطأ غير متوقع أثناء النشر",
+      "commissionSuspended": "تم تعليق حسابك مؤقتاً بسبب عمولة متأخرة.",
+      "analysisCurrent": "التحليل الحالي ما زال مطابقاً",
+      "analysisFailed": "تعذّر إجراء الفحص"
+    },
+    "duplicate": {
+      "heading": "إعلان مشابه منشور بالفعل",
+      "body": "يبدو أن لديك إعلاناً مشابهاً منشوراً. هل تريد تعديله بدلاً من إنشاء إعلان جديد؟",
+      "listingLabel": "الإعلان",
+      "cityLabel": "المدينة",
+      "priceLabel": "السعر",
+      "editExisting": "تعديل الإعلان الحالي",
+      "publishAsNew": "نشر كإعلان جديد",
+      "cancel": "إلغاء"
+    },
+    "publishModal": {
+      "titleConfirm": "تأكيد نشر الإعلان",
+      "titleCheck": "فحص الصفقة قبل النشر",
+      "subtitleConfirm": "تمت مراجعة الصفقة — هل تريد المتابعة بالنشر؟",
+      "subtitleCheck": "الـAI يحلل صفقتك ويعطيك توصية قبل النشر",
+      "fieldTitle": "العنوان",
+      "fieldCity": "المدينة",
+      "fieldPrice": "السعر",
+      "checking": "جاري فحص الصفقة...",
+      "checkFailed": "تعذّر إجراء الفحص التلقائي",
+      "fairness": "عدالة السعر:",
+      "cancel": "إلغاء"
+    },
+    "confirmCard": {
+      "question": "هل هذه الصور لنفس الأصل أم لأصول متعددة؟",
+      "sameAsset": "هذا نفس الأصل",
+      "multipleAssets": "هذه أصول متعددة",
+      "qtyLabel": "عدد القطع:",
+      "confirm": "تأكيد"
+    },
+    "fields": {
+      "selectPlaceholder": "اختر..."
+    }
   }
 }
