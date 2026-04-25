@@ -909,6 +909,7 @@ interface InventoryItem {
 }
 
 const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
+  const { t } = useTranslation();
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const pricing = asset.pricing;
   const confidence = pricing?.confidence || "يتطلب_معاينة";
@@ -948,7 +949,7 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
               {/* القيمة السوقية (إن وُجدت ومختلفة عن قيمة التقبيل) */}
               {pricing.market_value_sar && pricing.market_value_sar !== pricing.price_sar && (
                 <div className="text-[10px] text-muted-foreground tabular-nums">
-                  القيمة السوقية:{" "}
+                  {t("dealCheck.marketValue")}{" "}
                   <span className="font-medium text-foreground/70">
                     {pricing.market_value_sar.toLocaleString("en-US")} ر.س
                   </span>
@@ -958,7 +959,7 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
               {/* قيمة التقبيل (السعر الأساسي) */}
               <div className="flex items-baseline gap-1 tabular-nums">
                 {pricing.market_value_sar && pricing.market_value_sar !== pricing.price_sar && (
-                  <span className="text-[10px] text-muted-foreground">قيمة التقبيل:</span>
+                  <span className="text-[10px] text-muted-foreground">{t("dealCheck.taqbeelValue")}</span>
                 )}
                 <span className="text-sm font-semibold text-foreground">
                   {pricing.price_sar.toLocaleString("en-US")} <span className="text-[10px] text-muted-foreground font-normal">ر.س</span>
@@ -968,7 +969,7 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
               {/* نسبة OLV (إن وُجدت وكانت < 1) */}
               {pricing.olv_discount && pricing.olv_discount < 1 && (
                 <div className="text-[10px] text-muted-foreground tabular-nums">
-                  خصم التصفية المنظمة {Math.round((1 - pricing.olv_discount) * 100)}%
+                  {t("dealCheck.olvDiscount")} {Math.round((1 - pricing.olv_discount) * 100)}%
                 </div>
               )}
 
@@ -988,7 +989,7 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
       {requiresInspection && (
         <div className="text-[11px] text-muted-foreground/80 italic flex items-center gap-1.5 pr-1">
           <Search size={11} strokeWidth={1.5} className="shrink-0" />
-          قيمة دقيقة تحتاج معاينة متخصصة
+          {t("dealCheck.needsSpecializedInspection")}
         </div>
       )}
 
@@ -1010,7 +1011,7 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
             className="text-[10px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
           >
             {sourcesOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-            {sourcesOpen ? "إخفاء المصادر" : `اعرض المصادر (${sources.length})`}
+            {sourcesOpen ? "إخفاء المصادر" : `${t("dealCheck.showSources")} (${sources.length})`}
           </button>
           {sourcesOpen && (
             <ul className="mt-1.5 space-y-1 pr-3 border-r-2 border-border">
