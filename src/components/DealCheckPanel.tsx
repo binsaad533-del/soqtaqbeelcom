@@ -436,7 +436,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
         language: i18n.language || "ar",
       });
 
-      if (fnError) throw new Error(fnError.message || "تعذّر إعادة التحليل حالياً");
+      if (fnError) throw new Error(fnError.message || t("dealCheck.reanalyze"));
       if (!data?.success) throw new Error(data?.error || "فشل التحليل");
 
       setAnalysis(normalizeDealCheckAnalysis(data.analysis, listing));
@@ -507,8 +507,8 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
             <h3 className="font-medium text-sm">{t("listing.dealCheck")}</h3>
             <p className="text-[11px] text-muted-foreground">
               {analysis
-                ? `محدّث: ${cacheAge ? new Date(cacheAge).toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" }) : ""}`
-                : "تحليل ذكي شامل للصفقة"}
+                ? `${t("feasibility.updatedAt")} ${cacheAge ? new Date(cacheAge).toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" }) : ""}`
+                : t("dealCheck.smartAnalysis")}
             </p>
           </div>
         </div>
@@ -516,7 +516,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
           {isRefreshing && (
             <span className="text-[10px] text-muted-foreground flex items-center gap-1">
               <RefreshCw size={10} className="animate-spin" />
-              جاري التحديث...
+              {t("common.updating")}
             </span>
           )}
           {analysis && (
@@ -528,7 +528,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
             <Loader2 size={16} className="animate-spin text-primary" />
           )}
           <span className="text-[11px] px-3 py-1.5 rounded-lg bg-primary/8 text-primary border border-primary/15">
-            {analysis ? t("listing.viewCheck") : loading ? "جاري التحليل" : t("listing.viewCheck")}
+            {analysis ? t("listing.viewCheck") : loading ? t("dealCheck.analyzing") : t("listing.viewCheck")}
           </span>
           {open ? <ChevronUp size={16} strokeWidth={1.3} className="text-muted-foreground" /> : <ChevronDown size={16} strokeWidth={1.3} className="text-muted-foreground" />}
         </div>
@@ -820,7 +820,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                           <div className="text-sm font-medium">{analysis.marketComparison.comparablesReviewed}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
-                          <div className="text-xs text-muted-foreground">جودة التطابق</div>
+                          <div className="text-xs text-muted-foreground">{t("dealCheck.matchQuality")}</div>
                           <div className="text-sm font-medium">{analysis.marketComparison.matchQuality}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
@@ -832,7 +832,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                           )}>{analysis.marketComparison.marketPosition}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
-                          <div className="text-xs text-muted-foreground">مستوى الثقة</div>
+                          <div className="text-xs text-muted-foreground">{t("dealCheck.confidenceLevel")}</div>
                           <div className="text-sm font-medium">{analysis.marketComparison.confidence}</div>
                         </div>
                       </div>
@@ -867,7 +867,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               <div className="flex justify-center pt-1">
                 <Button variant="ghost" size="sm" onClick={() => runDealCheck()} disabled={isSimulation || loading || isRefreshing} className="text-xs text-muted-foreground hover:text-foreground rounded-xl">
                   <Loader2 size={12} strokeWidth={1.5} className="ml-1" />
-                  {isSimulation ? "تحليل محفوظ" : t("dealCheck.reanalyze")}
+                  {isSimulation ? t("dealCheck.savedAnalysis") : t("dealCheck.reanalyze")}
                 </Button>
               </div>
             </div>
