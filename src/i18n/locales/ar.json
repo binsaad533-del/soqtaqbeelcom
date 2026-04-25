@@ -18,7 +18,10 @@
     "publish": "نشر",
     "saveDraft": "حفظ كمسودة",
     "showMore": "عرض المزيد",
-    "showLess": "عرض أقل"
+    "showLess": "عرض أقل",
+    "low": "منخفض",
+    "medium": "متوسط",
+    "high": "مرتفع"
   },
   "auth": {
     "enterPhone": "أدخل رقم جوالك",
