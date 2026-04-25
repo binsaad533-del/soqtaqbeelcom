@@ -905,7 +905,7 @@ const ListingDetailsPage = () => {
                 {(listing.annual_rent || listing.lease_duration || listing.lease_remaining || listing.municipality_license || listing.civil_defense_license || listing.liabilities) && (
                   <Collapsible>
                     <CollapsibleTrigger className="w-full flex items-center justify-between text-xs text-primary hover:text-primary/80 transition-colors py-1.5 group">
-                      <span>عرض تفاصيل الإعلان الإضافية</span>
+                      <span>{t('listing.showExtraDetails')}</span>
                       <ChevronDown size={14} className="transition-transform group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="space-y-3 pt-2">
