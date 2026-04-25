@@ -250,7 +250,7 @@ function FileCard({
           onValueChange={onUpdateSubcategory}
         >
           <SelectTrigger className="h-7 text-xs mb-2">
-            <SelectValue placeholder="نوع فرعي..." />
+            <SelectValue placeholder={t("createListing.fileReview.subPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {subOptions.map(opt => (
