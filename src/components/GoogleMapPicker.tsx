@@ -244,7 +244,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         const rLat = parseFloat(r.lat);
         const rLng = parseFloat(r.lon);
         const nearest = findNearestCity(rLat, rLng);
-        const addr = r.display_name || `بالقرب من ${nearest.name}`;
+        const addr = r.display_name || t("createListing.mapLink.nearby", { name: nearest.name });
         setSelectedAddress(addr);
         onLocationChange(rLat, rLng, addr, { city: nearest.name, address: addr });
 
@@ -257,10 +257,10 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
           markerRef.current.setVisible(true);
         }
       } else {
-        setSelectedAddress("لم يتم العثور على نتائج");
+        setSelectedAddress(t("createListing.mapLink.noResults"));
       }
     } catch {
-      setSelectedAddress("فشل البحث");
+      setSelectedAddress(t("createListing.mapLink.searchFailed"));
     }
     setSearching(false);
   };
@@ -276,7 +276,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
   const applyParsedLocation = (pLat: number, pLng: number) => {
     const addr = `${pLat.toFixed(5)}, ${pLng.toFixed(5)}`;
     const nearest = findNearestCity(pLat, pLng);
-    setSelectedAddress(nearest.name ? `بالقرب من ${nearest.name}` : addr);
+    setSelectedAddress(nearest.name ? t("createListing.mapLink.nearby", { name: nearest.name }) : addr);
     // Always pass city from nearest city lookup so disclosure gets filled
     onLocationChange(pLat, pLng, addr, { city: nearest.name, address: addr });
     setPasteInput("");
@@ -305,7 +305,7 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
 
     if (isShortLink(trimmed)) {
       setSearching(true);
-      setSelectedAddress("جاري تحويل الرابط...");
+      setSelectedAddress(t("createListing.mapLink.resolving"));
       try {
         const { data } = await supabase.functions.invoke("resolve-maps-url", {
           body: { url: trimmed },
@@ -314,12 +314,12 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
         if (data?.resolvedUrl) {
           inputToParse = data.resolvedUrl;
         } else {
-          setSelectedAddress("جرب نسخ الرابط الكامل من متصفح الخرائط بدل التطبيق");
+          setSelectedAddress(t("createListing.mapLink.shortLinkHint"));
           setSearching(false);
           return;
         }
       } catch {
-        setSelectedAddress("جرب نسخ الرابط الكامل من متصفح الخرائط بدل التطبيق");
+        setSelectedAddress(t("createListing.mapLink.shortLinkHint"));
         setSearching(false);
         return;
       }
@@ -333,12 +333,12 @@ const GoogleMapPicker = ({ lat, lng, onLocationChange, className }: GoogleMapPic
     }
 
     if (isShortLink(trimmed)) {
-      setSelectedAddress("جرب نسخ الرابط الكامل من متصفح الخرائط بدل التطبيق");
+      setSelectedAddress(t("createListing.mapLink.shortLinkHint"));
       setSearching(false);
       return;
     }
 
-    setSelectedAddress("لم يتم التعرف على الإحداثيات — جرب لصق رابط خرائط قوقل أو إحداثيات مثل: 24.7136, 46.6753");
+    setSelectedAddress(t("createListing.mapLink.unrecognized"));
   };
 
   // Pure fallback UI when maps completely failed
