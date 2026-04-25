@@ -965,7 +965,7 @@ const CreateListingPage = () => {
       const { data, error } = await supabase.functions.invoke("extract-cr-data", { body: { documentUrl } });
       const payload = (data || {}) as CrExtractionResult & { error?: string };
       if (error || payload.error || payload.is_valid_cr === false) {
-        toast.error("تعذّر استخراج بيانات السجل — يمكنك الاستخراج يدوياً لاحقاً", { duration: 7000 });
+        toast.error(t("createListing.toasts.cr.crUnifiedFail"), { duration: 7000 });
         return;
       }
       const result = payload as CrExtractionResult;
@@ -977,14 +977,14 @@ const CreateListingPage = () => {
         ...(result.city && !prev.city ? { city: result.city } : {}),
         ...(result.district && !prev.district ? { district: result.district } : {}),
       }));
-      toast.success("✨ تم اكتشاف سجلك التجاري واستخراج بياناته تلقائياً");
+      toast.success(t("createListing.toasts.cr.crUnifiedSuccess"));
     } catch (err) {
       console.error("[unified] CR extraction failed:", err);
-      toast.error("تعذّر استخراج بيانات السجل — يمكنك الاستخراج يدوياً لاحقاً", { duration: 7000 });
+      toast.error(t("createListing.toasts.cr.crUnifiedFail"), { duration: 7000 });
     } finally {
       setCrExtracting(false);
     }
-  }, []);
+  }, [t]);
 
   // Helper: classify uploaded files in batches of 3 with 1s delay
   const classifyAfterUpload = useCallback(async (
