@@ -1000,8 +1000,8 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       {/* Verdict Badge */}
       <div className={cn("rounded-xl border p-4 flex items-center justify-between", v.bg, v.border)}>
         <div>
-          <div className={cn("text-lg font-bold", v.text)}>{displayStudy.verdict}</div>
-          <div className="text-xs text-muted-foreground">{t("feasibility.confidenceLevel")} {displayStudy.confidenceLevel}</div>
+          <div className={cn("text-lg font-bold", v.text)}>{t(`feasibility.${mapFeasibilityVerdictToKey(displayStudy.verdict)}`)}</div>
+          <div className="text-xs text-muted-foreground">{t("feasibility.confidenceLevel")}: {displayStudy.confidenceLevel}</div>
         </div>
         <div className="text-left">
           <div className="text-xs text-muted-foreground">{t("feasibility.paybackPeriod")}</div>
