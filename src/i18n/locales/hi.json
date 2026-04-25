@@ -145,6 +145,11 @@
     "unit": "इकाई"
   },
   "condition": {
+    "veryGood": "बहुत अच्छा",
+    "acceptable": "स्वीकार्य",
+    "poor": "खराब",
+    "scrap": "कबाड़",
+    "needsInspection": "निरीक्षण आवश्यक",
     "good": "अच्छा",
     "used": "इस्तेमाल किया हुआ",
     "new": "नया",

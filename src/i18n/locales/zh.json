@@ -145,6 +145,11 @@
     "unit": "件"
   },
   "condition": {
+    "veryGood": "非常好",
+    "acceptable": "可接受",
+    "poor": "差",
+    "scrap": "报废",
+    "needsInspection": "需要检查",
     "good": "良好",
     "used": "二手",
     "new": "全新",

@@ -145,6 +145,11 @@
     "unit": "یونٹ"
   },
   "condition": {
+    "veryGood": "بہت اچھا",
+    "acceptable": "قابل قبول",
+    "poor": "خراب",
+    "scrap": "کباڑ",
+    "needsInspection": "معائنے کی ضرورت",
     "good": "اچھا",
     "used": "استعمال شدہ",
     "new": "نیا",

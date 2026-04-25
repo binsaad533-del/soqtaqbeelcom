@@ -145,6 +145,11 @@
     "unit": "একক"
   },
   "condition": {
+    "veryGood": "খুব ভালো",
+    "acceptable": "গ্রহণযোগ্য",
+    "poor": "খারাপ",
+    "scrap": "ভাঙা",
+    "needsInspection": "পরিদর্শন প্রয়োজন",
     "good": "ভালো",
     "used": "ব্যবহৃত",
     "new": "নতুন",

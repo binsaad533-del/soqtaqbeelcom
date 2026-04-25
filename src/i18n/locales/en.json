@@ -149,7 +149,12 @@
     "used": "Used",
     "new": "New",
     "unclear": "Unclear",
-    "excellent": "Excellent"
+    "excellent": "Excellent",
+    "veryGood": "Very Good",
+    "acceptable": "Acceptable",
+    "poor": "Poor",
+    "scrap": "Scrap",
+    "needsInspection": "Needs Inspection"
   },
   "simulation": {
     "title": "Deal simulation",

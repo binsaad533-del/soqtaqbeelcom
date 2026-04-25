@@ -145,6 +145,11 @@
     "unit": "وحدة"
   },
   "condition": {
+    "veryGood": "جيد جداً",
+    "acceptable": "مقبول",
+    "poor": "رديء",
+    "scrap": "خردة",
+    "needsInspection": "يتطلب معاينة",
     "good": "جيد",
     "used": "مستعمل",
     "new": "جديد",
