@@ -1048,6 +1048,7 @@ const AssetPricingRow = ({ asset }: { asset: InventoryItem }) => {
 // two sections always agree.
 
 const PriceContextBox = ({ listing }: { listing: any }) => {
+  const { t } = useTranslation();
   const [inventory, setInventory] = useState<InventoryItem[]>(() => {
     const inv = listing?.inventory;
     if (Array.isArray(inv) && inv.length > 0) return inv;
@@ -1110,7 +1111,7 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
     <div className="rounded-xl border border-primary/15 bg-gradient-to-br from-primary/5 to-card p-4 sm:p-5 space-y-3">
       <div className="flex items-center gap-2">
         <Sparkles size={16} strokeWidth={1.4} className="text-primary" />
-        <h4 className="text-sm font-semibold text-foreground">كيف يُبنى سعر هذه الصفقة؟</h4>
+        <h4 className="text-sm font-semibold text-foreground">{t("dealCheck.howPriceBuilt")}</h4>
       </div>
 
       <div className="space-y-2.5">
@@ -1120,10 +1121,10 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
             <Package size={14} strokeWidth={1.5} className="text-foreground/70" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-xs text-muted-foreground mb-0.5">قيمة الأصول المُسعّرة</div>
+            <div className="text-xs text-muted-foreground mb-0.5">{t("listing.pricedAssetsValue")}</div>
             <div className="text-sm font-semibold text-foreground tabular-nums">
               {fmt(tangibleAssetsValue)} <span className="text-[11px] text-muted-foreground font-normal">ر.س</span>
-              <span className="text-[11px] text-muted-foreground font-normal mr-2">({pricedCount} أصل)</span>
+              <span className="text-[11px] text-muted-foreground font-normal mr-2">({pricedCount} {t("listing.asset")})</span>
             </div>
           </div>
         </div>
@@ -1135,9 +1136,9 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
               <Search size={14} strokeWidth={1.5} className="text-foreground/70" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs text-muted-foreground mb-0.5">أصول تحتاج معاينة ميدانية</div>
+              <div className="text-xs text-muted-foreground mb-0.5">{t("dealCheck.assetsNeedInspection")}</div>
               <div className="text-sm font-medium text-foreground tabular-nums">
-                {fmt(inspectionCount)} أصل
+                {fmt(inspectionCount)} {t("listing.asset")}
               </div>
             </div>
           </div>
@@ -1165,7 +1166,7 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
       <div className="border-t border-border pt-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Wallet size={15} strokeWidth={1.5} className="text-primary" />
-          <span className="text-sm font-medium text-foreground">السعر المطلوب</span>
+          <span className="text-sm font-medium text-foreground">{t("listing.price")}</span>
         </div>
         <div className="text-base font-bold text-foreground tabular-nums">
           {fmt(askingPrice)} <span className="text-[11px] text-muted-foreground font-normal">ر.س</span>
@@ -1177,6 +1178,7 @@ const PriceContextBox = ({ listing }: { listing: any }) => {
 };
 
 const InventoryPricingSection = ({ listing }: { listing: any }) => {
+  const { t } = useTranslation();
   const [pricingStatus, setPricingStatus] = useState<string>(listing?.pricing_status || "idle");
   const [inventory, setInventory] = useState<InventoryItem[]>(() => {
     const inv = listing?.inventory;
@@ -1248,7 +1250,7 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
     <div>
       <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
         <DollarSign size={15} strokeWidth={1.3} className="text-primary/60" />
-        تسعير الأصول التفصيلي
+        {t("dealCheck.detailedPricing")}
         <span className={cn("text-[10px] px-2 py-0.5 rounded-md font-medium mr-auto", statusInfo.className)}>
           {isInProgress && <Loader2 size={9} className="inline animate-spin ml-1" />}
           {statusInfo.text}
@@ -1321,7 +1323,7 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
                   <Collapsible defaultOpen={pricedDefaultOpen} className="border border-emerald-200/60 dark:border-emerald-900/40 rounded-xl overflow-hidden">
                     <CollapsibleTrigger className="w-full bg-emerald-50/70 dark:bg-emerald-950/20 px-3 py-2.5 flex items-center gap-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors group">
                       <CheckCircle2 size={16} strokeWidth={1.6} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <span className="text-base font-semibold text-emerald-700 dark:text-emerald-300">أصول مُسعّرة</span>
+                      <span className="text-base font-semibold text-emerald-700 dark:text-emerald-300">{t("dealCheck.pricedAssets")}</span>
                       <span className="w-8 h-8 inline-flex items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-lg font-bold tabular-nums">
                         {pricedCount}
                       </span>
@@ -1347,7 +1349,7 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
                   <Collapsible defaultOpen={inspectionDefaultOpen} className="border border-amber-200/60 dark:border-amber-900/40 rounded-xl overflow-hidden">
                     <CollapsibleTrigger className="w-full bg-amber-50/70 dark:bg-amber-950/20 px-3 py-2.5 flex items-center gap-2 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors group">
                       <Search size={16} strokeWidth={1.6} className="text-amber-600 dark:text-amber-400 shrink-0" />
-                      <span className="text-base font-semibold text-amber-700 dark:text-amber-300 shrink-0">أصول تحتاج معاينة</span>
+                      <span className="text-base font-semibold text-amber-700 dark:text-amber-300 shrink-0">{t("dealCheck.inspectionAssets")}</span>
                       <span className="w-8 h-8 inline-flex items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-lg font-bold tabular-nums shrink-0">
                         {inspectionCount}
                       </span>
@@ -1381,6 +1383,7 @@ const InventoryPricingSection = ({ listing }: { listing: any }) => {
 };
 
 const TrustScoreSection = ({ trustScore }: { trustScore: any }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const levelStyle = TRUST_LEVEL_CONFIG[trustScore.level] || TRUST_LEVEL_CONFIG["متوسط"];
@@ -1395,7 +1398,7 @@ const TrustScoreSection = ({ trustScore }: { trustScore: any }) => {
       >
         <div className="flex items-center gap-2">
           <Star size={16} strokeWidth={1.3} className={levelStyle.text} />
-          <span className={cn("text-sm font-medium", levelStyle.text)}>مؤشر موثوقية الصفقة</span>
+          <span className={cn("text-sm font-medium", levelStyle.text)}>{t("dealCheck.reliabilityIndex")}</span>
         </div>
         <div className="flex items-center gap-2">
           <span className={cn("text-lg font-bold", levelStyle.text)}>
