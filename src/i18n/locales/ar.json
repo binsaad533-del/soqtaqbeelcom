@@ -394,7 +394,13 @@
     "updatedAt": "محدّث:",
     "googleMapsData": "بيانات Google Maps",
     "savedSimulation": "هذه دراسة محاكاة محفوظة",
-    "refreshLimit": "يمكن التحديث مرة كل 24 ساعة"
+    "refreshLimit": "يمكن التحديث مرة كل 24 ساعة",
+    "density_low": "منخفضة",
+    "density_medium": "متوسطة",
+    "density_high": "عالية",
+    "overallRisk_low": "منخفض",
+    "overallRisk_medium": "متوسط",
+    "overallRisk_high": "مرتفع"
   },
   "moqbil": {
     "greeting": "هلا وغلا، أنا مقبل، مساعدك الذكي",

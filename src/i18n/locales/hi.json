@@ -394,7 +394,13 @@
     "updatedAt": "अपडेट:",
     "googleMapsData": "Google Maps डेटा",
     "savedSimulation": "यह एक सहेजा गया सिमुलेशन अध्ययन है",
-    "refreshLimit": "24 घंटे में एक बार रीफ्रेश किया जा सकता है"
+    "refreshLimit": "24 घंटे में एक बार रीफ्रेश किया जा सकता है",
+    "density_low": "कम",
+    "density_medium": "मध्यम",
+    "density_high": "उच्च",
+    "overallRisk_low": "कम",
+    "overallRisk_medium": "मध्यम",
+    "overallRisk_high": "उच्च"
   },
   "moqbil": {
     "greeting": "नमस्ते! मैं Moqbil हूँ, आपका स्मार्ट सहायक",

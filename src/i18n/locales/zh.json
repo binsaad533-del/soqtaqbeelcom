@@ -394,7 +394,13 @@
     "updatedAt": "已更新：",
     "googleMapsData": "Google 地图数据",
     "savedSimulation": "这是已保存的模拟研究",
-    "refreshLimit": "每24小时可刷新一次"
+    "refreshLimit": "每24小时可刷新一次",
+    "density_low": "低",
+    "density_medium": "中等",
+    "density_high": "高",
+    "overallRisk_low": "低",
+    "overallRisk_medium": "中等",
+    "overallRisk_high": "高"
   },
   "moqbil": {
     "greeting": "您好!我是 Moqbil,您的智能助手",

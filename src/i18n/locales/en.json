@@ -394,7 +394,13 @@
     "updatedAt": "Updated:",
     "googleMapsData": "Google Maps data",
     "savedSimulation": "This is a saved simulation study",
-    "refreshLimit": "Can refresh once every 24 hours"
+    "refreshLimit": "Can refresh once every 24 hours",
+    "density_low": "Low",
+    "density_medium": "Medium",
+    "density_high": "High",
+    "overallRisk_low": "Low",
+    "overallRisk_medium": "Medium",
+    "overallRisk_high": "High"
   },
   "moqbil": {
     "greeting": "Hi there! I'm Moqbil, your smart assistant",

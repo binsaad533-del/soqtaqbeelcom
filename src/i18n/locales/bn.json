@@ -394,7 +394,13 @@
     "updatedAt": "আপডেট:",
     "googleMapsData": "Google Maps ডেটা",
     "savedSimulation": "এটি একটি সংরক্ষিত সিমুলেশন গবেষণা",
-    "refreshLimit": "24 ঘন্টায় একবার রিফ্রেশ করা যাবে"
+    "refreshLimit": "24 ঘন্টায় একবার রিফ্রেশ করা যাবে",
+    "density_low": "কম",
+    "density_medium": "মাঝারি",
+    "density_high": "উচ্চ",
+    "overallRisk_low": "কম",
+    "overallRisk_medium": "মাঝারি",
+    "overallRisk_high": "উচ্চ"
   },
   "moqbil": {
     "greeting": "আসসালামু আলাইকুম! আমি Moqbil, আপনার স্মার্ট সহায়ক",

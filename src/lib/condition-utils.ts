@@ -218,3 +218,49 @@ export const mapFairnessLabelToKey = (verdictKey: string): string => {
     default: return "fairnessLabel_unclear";
   }
 };
+
+/**
+ * Maps an Arabic competitive density label ("منخفضة"/"متوسطة"/"عالية")
+ * to a stable translation key under `feasibility.*`.
+ */
+const DENSITY_KEYS: Record<string, string> = {
+  "منخفضة": "density_low",
+  "منخفض": "density_low",
+  "متوسطة": "density_medium",
+  "متوسط": "density_medium",
+  "عالية": "density_high",
+  "عالي": "density_high",
+};
+
+export const mapDensityToKey = (value?: string | null): string => {
+  if (!value) return "density_medium";
+  const trimmed = value.trim();
+  if (DENSITY_KEYS[trimmed]) return DENSITY_KEYS[trimmed];
+  if (trimmed.includes("عالي")) return "density_high";
+  if (trimmed.includes("منخفض")) return "density_low";
+  return "density_medium";
+};
+
+/**
+ * Maps an Arabic overall risk label ("منخفض"/"متوسط"/"مرتفع")
+ * to a stable translation key under `feasibility.*`.
+ */
+const OVERALL_RISK_KEYS: Record<string, string> = {
+  "منخفض": "overallRisk_low",
+  "منخفضة": "overallRisk_low",
+  "متوسط": "overallRisk_medium",
+  "متوسطة": "overallRisk_medium",
+  "مرتفع": "overallRisk_high",
+  "مرتفعة": "overallRisk_high",
+  "عالي": "overallRisk_high",
+  "عالية": "overallRisk_high",
+};
+
+export const mapOverallRiskToKey = (value?: string | null): string => {
+  if (!value) return "overallRisk_medium";
+  const trimmed = value.trim();
+  if (OVERALL_RISK_KEYS[trimmed]) return OVERALL_RISK_KEYS[trimmed];
+  if (trimmed.includes("مرتفع") || trimmed.includes("عالي")) return "overallRisk_high";
+  if (trimmed.includes("منخفض")) return "overallRisk_low";
+  return "overallRisk_medium";
+};
