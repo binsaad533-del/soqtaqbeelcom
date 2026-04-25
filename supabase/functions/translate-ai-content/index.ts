@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
 async function handleDealCheck(supabase: any, listingId: string, lang: string) {
   const { data: row, error } = await supabase
     .from("listings")
-    .select("id, ai_analysis_cache, ai_structure_validation")
+    .select("id, ai_analysis_cache, ai_structure_validation, ai_trust_score")
     .eq("id", listingId)
     .maybeSingle();
 
@@ -128,11 +128,17 @@ async function handleDealCheck(supabase: any, listingId: string, lang: string) {
       ? row.ai_structure_validation as Record<string, unknown>
       : null);
 
-  if (!dealCheck) {
+  const trustScore = (row.ai_trust_score && typeof row.ai_trust_score === "object")
+    ? row.ai_trust_score as Record<string, unknown>
+    : null;
+
+  if (!dealCheck && !trustScore) {
     return jsonResponse({ translated: {}, from_cache: false });
   }
 
-  const sourceHash = await hashString(JSON.stringify(dealCheck));
+  // Combine dealCheck + trustScore for hashing & translation
+  const combinedSource = { dealCheck, trustScore };
+  const sourceHash = await hashString(JSON.stringify(combinedSource));
   const translations = (cache.translations && typeof cache.translations === "object")
     ? cache.translations as Record<string, any>
     : {};
@@ -141,7 +147,10 @@ async function handleDealCheck(supabase: any, listingId: string, lang: string) {
     return jsonResponse({ translated: cached.data || {}, from_cache: true });
   }
 
-  const toTranslate = buildDealCheckPayload(dealCheck);
+  const toTranslate: Record<string, string> = {};
+  if (dealCheck) Object.assign(toTranslate, buildDealCheckPayload(dealCheck));
+  if (trustScore) Object.assign(toTranslate, buildTrustScorePayload(trustScore));
+
   if (Object.keys(toTranslate).length === 0) {
     await persistListingTranslation(supabase, listingId, cache, translations, lang, {}, sourceHash);
     return jsonResponse({ translated: {}, from_cache: false });
@@ -222,6 +231,26 @@ function buildDealCheckPayload(dealCheck: Record<string, unknown>): Record<strin
             if (typeof v === "string" && v.trim().length > 0) out[`marketComparison.assetBreakdown.${idx}.${k}`] = v;
           }
         }
+      });
+    }
+  }
+  return out;
+}
+
+const TRUST_SCORE_STRING_FIELDS = ["summary", "level", "verdict"];
+const TRUST_SCORE_ARRAY_FIELDS = ["strengths", "weaknesses", "warnings", "recommendations"];
+
+function buildTrustScorePayload(trustScore: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const f of TRUST_SCORE_STRING_FIELDS) {
+    const v = trustScore[f];
+    if (typeof v === "string" && v.trim().length > 0) out[`trustScore.${f}`] = v;
+  }
+  for (const f of TRUST_SCORE_ARRAY_FIELDS) {
+    const arr = trustScore[f];
+    if (Array.isArray(arr)) {
+      arr.forEach((item, idx) => {
+        if (typeof item === "string" && item.trim().length > 0) out[`trustScore.${f}.${idx}`] = item;
       });
     }
   }

@@ -20,7 +20,7 @@ const Footer = () => {
     { label: t("footer.help"), path: "/help" },
     { label: t("footer.blog"), path: "/blog" },
     { label: t("footer.commission"), path: "/commission" },
-    { label: tx("نماذج PDF", "PDF Templates"), path: "/pdf-preview" },
+    { label: t("footer.pdfTemplates"), path: "/pdf-preview" },
     { label: t("footer.support"), path: "/support" },
     { label: t("footer.installApp"), path: "/install" },
   ];
