@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
 import { sanitizeInput, isRateLimited } from "@/lib/security";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   listingId: string;
@@ -21,6 +22,7 @@ interface Props {
 const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props) => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { submitOffer, getOffersSummary, getMyOffer, loading } = useListingOffers();
 
   const [price, setPrice] = useState("");
@@ -153,14 +155,14 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
           <div className="flex items-center gap-2">
             <DollarSign size={14} className="text-primary" />
             <span className="text-xs font-semibold text-foreground">
-              {myOffer ? "تقديم عرض جديد" : "قدّم عرض سعر"}
+              {myOffer ? "تقديم عرض جديد" : t("listing.makeOffer")}
             </span>
           </div>
 
           {listingPrice && listingPrice > 0 && (
             <div className="flex gap-1.5">
               {[
-                { label: "سعر الإعلان", value: listingPrice },
+                { label: t("listing.listingPrice"), value: listingPrice },
                 { label: "-5%", value: Math.round(listingPrice * 0.95) },
                 { label: "-10%", value: Math.round(listingPrice * 0.90) },
               ].map((opt) => (
@@ -188,7 +190,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
               inputMode="decimal"
               value={price}
               onChange={(e) => handlePriceChange(e.target.value)}
-              placeholder={listingPrice ? `السعر المطلوب: ${Number(listingPrice).toLocaleString("en-US")}` : "اكتب سعرك"}
+              placeholder={listingPrice ? `${t("listing.price")}: ${Number(listingPrice).toLocaleString("en-US")}` : "اكتب سعرك"}
               className="w-full pr-12 pl-3 py-2.5 rounded-xl border border-border/50 bg-background text-sm text-right focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
               dir="rtl"
               lang="en"
@@ -198,7 +200,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="رسالة للبائع (اختياري)..."
+            placeholder={t("listing.messageToSeller")}
             rows={2}
             className="w-full px-3 py-2 rounded-xl border border-border/50 bg-background text-xs resize-none focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
           />
@@ -209,7 +211,7 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
             className="w-full gradient-primary text-primary-foreground rounded-xl gap-1"
           >
             {loading ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-            إرسال العرض
+            {t("listing.submitOffer")}
           </Button>
 
           {myOffer && (

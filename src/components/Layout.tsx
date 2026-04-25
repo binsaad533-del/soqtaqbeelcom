@@ -230,7 +230,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowRight size={15} strokeWidth={1.5} />
-            {tx("رجوع", "Back")}
+            {t("common.back")}
           </button>
         </div>
       )}

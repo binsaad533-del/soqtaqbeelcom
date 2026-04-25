@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { sanitizeInput, isRateLimited } from "@/lib/security";
+import { useTranslation } from "react-i18next";
 
 const REPORT_REASONS = [
   { value: "misleading", label: "معلومات مضللة" },
@@ -24,6 +25,7 @@ interface ReportListingDialogProps {
 
 const ReportListingDialog = ({ listingId, className }: ReportListingDialogProps) => {
   const { user } = useAuthContext();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [details, setDetails] = useState("");
@@ -71,7 +73,7 @@ const ReportListingDialog = ({ listingId, className }: ReportListingDialogProps)
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm" className={`gap-1.5 text-muted-foreground hover:text-destructive ${className}`}>
           <Flag size={14} />
-          إبلاغ
+          {t("listing.report")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-sm">
