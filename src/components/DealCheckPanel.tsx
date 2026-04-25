@@ -1459,7 +1459,7 @@ const TrustScoreSection = ({ trustScore }: { trustScore: any }) => {
             {trustScore.trust_score} / 10
           </span>
           <span className={cn("text-[10px] px-2 py-0.5 rounded-md font-medium", levelStyle.bg, levelStyle.text, levelStyle.border, "border")}>
-            {trustScore.level}
+            {t(`dealCheck.verdict_${VERDICT_KEY_MAP[trustScore.level] || "good"}`)}
           </span>
           {open ? <ChevronUp size={14} className="text-muted-foreground" /> : <ChevronDown size={14} className="text-muted-foreground" />}
         </div>
