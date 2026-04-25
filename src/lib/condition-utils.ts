@@ -89,3 +89,45 @@ export const mapFeasibilityVerdictToKey = (verdict?: string | null): string => {
   if (trimmed.includes("مخاطر") || trimmed.includes("عالي")) return "investmentRisky";
   return "investmentAcceptableWithCaution";
 };
+
+/**
+ * Maps Arabic status values like "سارية", "لا يوجد", "منتهية" used in
+ * listing meta fields (municipal_license, civil_defense_license, liabilities)
+ * to translation keys under the `listing.*` namespace.
+ */
+const STATUS_VALUE_KEYS: Record<string, string> = {
+  "سارية": "active",
+  "ساري": "active",
+  "نشطة": "active",
+  "نشط": "active",
+  "لا يوجد": "none",
+  "لايوجد": "none",
+  "منتهية": "expired",
+  "منتهي": "expired",
+};
+
+export const translateStatusValue = (
+  value: string | null | undefined,
+  t: (key: string) => string,
+): string => {
+  if (!value) return "";
+  const trimmed = value.trim();
+  const key = STATUS_VALUE_KEYS[trimmed];
+  return key ? t(`listing.${key}`) : trimmed;
+};
+
+/**
+ * Translates lease duration phrases like "4 سنوات" / "1-2 سنة" by replacing the
+ * Arabic year noun with the localized one. Numbers and ranges stay untouched.
+ */
+export const translateLeaseDuration = (
+  value: string | null | undefined,
+  t: (key: string) => string,
+): string => {
+  if (!value) return "";
+  let out = value.trim();
+  // Translate plural first to avoid partial match
+  out = out.replace(/سنوات/g, t("listing.years"));
+  out = out.replace(/سنة/g, t("listing.year"));
+  return out;
+};
