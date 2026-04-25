@@ -394,7 +394,13 @@
     "updatedAt": "اپ ڈیٹ:",
     "googleMapsData": "Google Maps ڈیٹا",
     "savedSimulation": "یہ ایک محفوظ سمولیشن اسٹڈی ہے",
-    "refreshLimit": "ہر 24 گھنٹے میں ایک بار تازہ کیا جا سکتا ہے"
+    "refreshLimit": "ہر 24 گھنٹے میں ایک بار تازہ کیا جا سکتا ہے",
+    "density_low": "کم",
+    "density_medium": "درمیانہ",
+    "density_high": "زیادہ",
+    "overallRisk_low": "کم",
+    "overallRisk_medium": "درمیانہ",
+    "overallRisk_high": "زیادہ"
   },
   "moqbil": {
     "greeting": "السلام علیکم! میں Moqbil ہوں، آپ کا اسمارٹ معاون",
