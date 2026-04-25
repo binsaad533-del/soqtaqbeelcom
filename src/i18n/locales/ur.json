@@ -171,7 +171,21 @@
     "bestScenario": "بہترین منظرنامہ",
     "whatIf": "کیا ہو اگر؟",
     "simulating": "سیمولیشن جاری ہے...",
-    "noData": "سیمولیشن کے لیے کافی ڈیٹا نہیں"
+    "noData": "سیمولیشن کے لیے کافی ڈیٹا نہیں",
+    "scenarios": {
+      "currentName": "موجودہ قیمت",
+      "currentDesc": "درج شدہ قیمت جیسی ہے",
+      "discount10Name": "10% رعایت",
+      "discount10Desc": "خریداروں کے لیے زیادہ پرکشش",
+      "discount20Name": "20% رعایت",
+      "discount20Desc": "تیزی سے فروخت",
+      "noAssetsName": "اثاثوں کے بغیر (صرف 30%)",
+      "noAssetsDesc": "صرف اثاثے چاہنے والوں کے لیے",
+      "installmentName": "قسط (+15%)",
+      "installmentDesc": "آسان ادائیگی کے لیے زیادہ قیمت",
+      "transitionName": "3 ماہ کی منتقلی مدت کے ساتھ",
+      "transitionDesc": "منتقلی مدت کی تغطیہ کے لیے سالانہ کرایے کا ایک چوتھائی"
+    }
   },
   "manage": {
     "title": "اشتہار کا انتظام — حالت:",
@@ -236,7 +250,12 @@
     "factorAssetVerification": "اثاثوں کی تصدیق",
     "factorPriceLogic": "قیمت کی منطق",
     "factorLegalClarity": "قانونی وضاحت",
-    "factorMediaQuality": "میڈیا کا معیار"
+    "factorMediaQuality": "میڈیا کا معیار",
+    "confidenceHigh": "اعلیٰ اعتماد",
+    "confidenceMedium": "درمیانہ اعتماد",
+    "confidenceLow": "کم اعتماد",
+    "confidenceEstimate": "تخمینی",
+    "confidenceNeedsInspection": "معائنے کی ضرورت"
   },
   "feasibility": {
     "title": "اقتصادی فزیبلٹی اسٹڈی",

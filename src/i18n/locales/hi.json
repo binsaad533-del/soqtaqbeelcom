@@ -171,7 +171,21 @@
     "bestScenario": "सर्वश्रेष्ठ परिदृश्य",
     "whatIf": "क्या होगा अगर?",
     "simulating": "सिम्युलेशन हो रहा है...",
-    "noData": "सिम्युलेशन के लिए पर्याप्त डेटा नहीं"
+    "noData": "सिम्युलेशन के लिए पर्याप्त डेटा नहीं",
+    "scenarios": {
+      "currentName": "वर्तमान मूल्य",
+      "currentDesc": "सूचीबद्ध मूल्य जैसा है",
+      "discount10Name": "10% छूट",
+      "discount10Desc": "खरीदारों के लिए अधिक आकर्षक",
+      "discount20Name": "20% छूट",
+      "discount20Desc": "तेजी से बिक्री",
+      "noAssetsName": "संपत्ति के बिना (केवल 30%)",
+      "noAssetsDesc": "केवल संपत्ति चाहने वालों के लिए",
+      "installmentName": "किस्त (+15%)",
+      "installmentDesc": "आसान भुगतान के लिए अधिक कीमत",
+      "transitionName": "3 महीने की संक्रमण अवधि के साथ",
+      "transitionDesc": "संक्रमण अवधि कवर करने हेतु वार्षिक किराये का एक चौथाई जोड़ा गया"
+    }
   },
   "manage": {
     "title": "लिस्टिंग प्रबंधन — स्थिति:",
@@ -236,7 +250,12 @@
     "factorAssetVerification": "संपत्ति सत्यापन",
     "factorPriceLogic": "मूल्य तर्क",
     "factorLegalClarity": "कानूनी स्पष्टता",
-    "factorMediaQuality": "मीडिया गुणवत्ता"
+    "factorMediaQuality": "मीडिया गुणवत्ता",
+    "confidenceHigh": "उच्च विश्वसनीयता",
+    "confidenceMedium": "मध्यम विश्वसनीयता",
+    "confidenceLow": "कम विश्वसनीयता",
+    "confidenceEstimate": "अनुमानित",
+    "confidenceNeedsInspection": "निरीक्षण आवश्यक"
   },
   "feasibility": {
     "title": "आर्थिक व्यवहार्यता अध्ययन",

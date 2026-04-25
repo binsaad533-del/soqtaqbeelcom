@@ -171,7 +171,21 @@
     "bestScenario": "সেরা পরিস্থিতি",
     "whatIf": "যদি কী হয়?",
     "simulating": "সিমুলেশন চলছে...",
-    "noData": "সিমুলেশনের জন্য পর্যাপ্ত ডেটা নেই"
+    "noData": "সিমুলেশনের জন্য পর্যাপ্ত ডেটা নেই",
+    "scenarios": {
+      "currentName": "বর্তমান মূল্য",
+      "currentDesc": "তালিকাভুক্ত মূল্য যেমন আছে",
+      "discount10Name": "১০% ছাড়",
+      "discount10Desc": "ক্রেতাদের জন্য আরও আকর্ষণীয়",
+      "discount20Name": "২০% ছাড়",
+      "discount20Desc": "দ্রুত বিক্রি",
+      "noAssetsName": "সম্পদ ছাড়া (শুধু ৩০%)",
+      "noAssetsDesc": "যারা শুধু সম্পদ চান তাদের জন্য",
+      "installmentName": "কিস্তি (+১৫%)",
+      "installmentDesc": "সহজ পেমেন্টের জন্য বেশি দাম",
+      "transitionName": "৩ মাসের ট্রানজিশন পিরিয়ড সহ",
+      "transitionDesc": "ট্রানজিশন পিরিয়ড কভার করতে বার্ষিক ভাড়ার এক চতুর্থাংশ"
+    }
   },
   "manage": {
     "title": "তালিকা ব্যবস্থাপনা — অবস্থা:",
@@ -236,7 +250,12 @@
     "factorAssetVerification": "সম্পদ যাচাইকরণ",
     "factorPriceLogic": "মূল্য যুক্তি",
     "factorLegalClarity": "আইনি স্পষ্টতা",
-    "factorMediaQuality": "মিডিয়া মান"
+    "factorMediaQuality": "মিডিয়া মান",
+    "confidenceHigh": "উচ্চ আস্থা",
+    "confidenceMedium": "মাঝারি আস্থা",
+    "confidenceLow": "কম আস্থা",
+    "confidenceEstimate": "আনুমানিক",
+    "confidenceNeedsInspection": "পরিদর্শন প্রয়োজন"
   },
   "feasibility": {
     "title": "অর্থনৈতিক সম্ভাব্যতা সমীক্ষা",
