@@ -769,7 +769,8 @@
       "priceLabel": "क़ीमत",
       "editExisting": "मौजूदा सूची संपादित करें",
       "publishAsNew": "नई सूची के रूप में प्रकाशित करें",
-      "cancel": "रद्द करें"
+      "cancel": "रद्द करें",
+      "defaultTitle": "विज्ञापन"
     },
     "publishModal": {
       "titleConfirm": "सूची प्रकाशन की पुष्टि करें",

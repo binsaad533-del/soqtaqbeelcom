@@ -515,8 +515,8 @@ const CreateListingPage = () => {
           setLocalPreviews(prev => ({ ...prev, all: [...(prev.all || []), previewUrl] }));
           const result = await uploadFile(id, prepared, "photos/all");
           if (result.url) { imageUrls.push(result.url); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url: result.url!, previewUrl } : f)); }
-          else { setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || "فشل الرفع" } : f)); }
-        } catch (err) { console.error(`[BulkUpload] Image failed: ${file.name}`, err); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "تعذر تجهيز الملف" } : f)); }
+          else { setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || t("createListing.toasts.upload.uploadFailGeneric") } : f)); }
+        } catch (err) { console.error(`[BulkUpload] Image failed: ${file.name}`, err); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: t("createListing.toasts.upload.photoPrepareFail", { name: file.name }) } : f)); }
         finally { completedCount++; setUploadProgress({ current: completedCount, total: totalFiles }); }
       });
       if (imageUrls.length > 0) {
@@ -765,7 +765,7 @@ const CreateListingPage = () => {
         const sameDealType = currentDealType && rowDealType === currentDealType;
         const matches = [sameCity, sameActivity, sameDealType].filter(Boolean).length;
         if (matches >= 2) {
-          return { id: row.id as string, title: (row.title || row.business_activity || "إعلان") as string, price: row.price ?? null, city: row.city ?? null };
+          return { id: row.id as string, title: (row.title || row.business_activity || t("createListing.duplicate.defaultTitle")) as string, price: row.price ?? null, city: row.city ?? null };
         }
       }
       return null;
@@ -803,7 +803,7 @@ const CreateListingPage = () => {
       const { invokeWithRetry } = await import("@/lib/invokeWithRetry");
       const { data, error: fnError } = await invokeWithRetry("deal-check", { listing: nextListingPayload, perspective: "seller", sellerName, mode: dealCheckResult ? "update" : "create", previousAnalysis: dealCheckResult || null });
       if (fnError) throw new Error(fnError.message);
-      if (!data?.success) throw new Error(data?.error || "فشل التحليل");
+      if (!data?.success) throw new Error(data?.error || t("createListing.toasts.analysis.fetchFail"));
       setDealCheckResult(data.analysis);
       setDealCheckInputKey(nextInputKey);
     } catch (e: any) { console.error("[DealCheck] failed:", e); setDealCheckError(e.message || t("createListing.toasts.analysisFailed")); }
@@ -836,7 +836,7 @@ const CreateListingPage = () => {
       const nextListingPayload = buildListingPayload();
       const { data, error: fnError } = await invokeWithRetry("deal-check", { listing: nextListingPayload, perspective: "seller", sellerName, mode: dealCheckResult ? "update" : "create", previousAnalysis: dealCheckResult || null });
       if (fnError) throw new Error(fnError.message);
-      if (!data?.success) throw new Error(data?.error || "فشل التحليل");
+      if (!data?.success) throw new Error(data?.error || t("createListing.toasts.analysis.fetchFail"));
       setDealCheckResult(data.analysis);
       setDealCheckInputKey(JSON.stringify(nextListingPayload));
     } catch (e: any) { console.error("[DealCheck] Pre-publish failed:", e); setDealCheckError(e.message || t("createListing.toasts.analysisFailed")); }
