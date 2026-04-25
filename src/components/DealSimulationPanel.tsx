@@ -46,7 +46,7 @@ const DealSimulationPanel = ({ listingId }: Props) => {
       {loading ? (
         <div className="flex items-center justify-center py-6">
           <Loader2 className="animate-spin text-primary" size={18} />
-          <span className="text-[10px] text-muted-foreground mr-2">جاري المحاكاة...</span>
+          <span className="text-[10px] text-muted-foreground mr-2">{t("simulation.simulating")}</span>
         </div>
       ) : result ? (
         <div className="space-y-2">
