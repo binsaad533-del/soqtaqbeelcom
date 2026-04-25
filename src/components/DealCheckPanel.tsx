@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import type { UseAnalysisCacheReturn } from "@/hooks/useAnalysisCache";
 import { hasSimulationPhotos } from "@/components/SimulationOverlay";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface AssetBreakdownItem {
   assetName: string;
@@ -298,6 +299,7 @@ const CertifiedValuationFloatingTab = () => {
 };
 
 const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
+  const { t } = useTranslation();
   const {
     cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing,
     assetsCombined, detectedAssetsImages, detectedAssetsFiles, analysisUpdatedAt, saveDetectedAssets,
@@ -479,7 +481,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
             <AiStar size={22} />
           </div>
           <div className="text-start">
-            <h3 className="font-medium text-sm">فحص الصفقة والجدوى المبدئية</h3>
+            <h3 className="font-medium text-sm">{t("listing.dealCheck")}</h3>
             <p className="text-[11px] text-muted-foreground">
               {analysis
                 ? `محدّث: ${cacheAge ? new Date(cacheAge).toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" }) : ""}`
@@ -503,7 +505,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
             <Loader2 size={16} className="animate-spin text-primary" />
           )}
           <span className="text-[11px] px-3 py-1.5 rounded-lg bg-primary/8 text-primary border border-primary/15">
-            {analysis ? "استعرض الفحص" : loading ? "جاري التحليل" : "استعرض الفحص"}
+            {analysis ? t("listing.viewCheck") : loading ? "جاري التحليل" : t("listing.viewCheck")}
           </span>
           {open ? <ChevronUp size={16} strokeWidth={1.3} className="text-muted-foreground" /> : <ChevronDown size={16} strokeWidth={1.3} className="text-muted-foreground" />}
         </div>
@@ -547,18 +549,18 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                   <div className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 flex items-center justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                       <Clock size={11} />
-                      <span>آخر تحديث: {formatCacheAge(updatedDate)}</span>
-                      {isRecent && <span className="text-emerald-600 dark:text-emerald-400 font-medium">• محدّث</span>}
+                      <span>{t("dealCheck.lastUpdate")} {formatCacheAge(updatedDate)}</span>
+                      {isRecent && <span className="text-emerald-600 dark:text-emerald-400 font-medium">• {t("dealCheck.updated")}</span>}
                       {isStale && <span className="text-amber-500 font-medium">• يتم التحديث تلقائياً</span>}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-muted-foreground/60">يُحدّث تلقائياً عند تعديل البيانات</span>
+                      <span className="text-[10px] text-muted-foreground/60">{t("dealCheck.autoUpdate")}</span>
                       {analysis.confidenceLevel && (
                         <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium",
                           CONFIDENCE_BADGE[analysis.confidenceLevel]?.bg || "bg-muted",
                           CONFIDENCE_BADGE[analysis.confidenceLevel]?.text || "text-muted-foreground"
                         )}>
-                          ثقة: {analysis.confidenceLevel}
+                          {t("dealCheck.confidence")} {analysis.confidenceLevel}
                         </span>
                       )}
                     </div>
@@ -571,11 +573,11 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Target size={16} strokeWidth={1.3} className={ratingStyle.text} />
-                    <span className={cn("text-sm font-medium", ratingStyle.text)}>التقييم العام</span>
+                    <span className={cn("text-sm font-medium", ratingStyle.text)}>{t("dealCheck.overallRating")}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-[11px] text-muted-foreground">
-                      عدالة السعر: {FAIRNESS_ICONS[analysis.fairnessVerdict]} {analysis.fairnessVerdict}
+                      {t("dealCheck.priceFairness")} {FAIRNESS_ICONS[analysis.fairnessVerdict]} {analysis.fairnessVerdict}
                     </span>
                   </div>
                 </div>
@@ -596,7 +598,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               {!expanded && (
                 <Button variant="outline" size="sm" onClick={() => setExpanded(true)} className="w-full rounded-xl text-xs gap-1.5">
                   <ChevronDown size={14} />
-                  استعرض الفحص
+                  {t("listing.viewCheck")}
                 </Button>
               )}
 
@@ -606,13 +608,13 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                   <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
                     <div className="flex items-center gap-2 mb-2">
                       <AiStar size={14} animate={false} />
-                      <span className="text-xs font-medium text-primary">التوصية</span>
+                      <span className="text-xs font-medium text-primary">{t("dealCheck.recommendation")}</span>
                     </div>
                     <p className="text-sm leading-relaxed">{analysis.recommendation}</p>
                   </div>
 
-                  <ListSection icon={TrendingUp} title="نقاط القوة" items={analysis.strengths} dotClass="bg-emerald-500/60" iconClass="text-emerald-600" />
-                  <ListSection icon={AlertTriangle} title="المخاطر" items={analysis.risks} dotClass="bg-red-500/50" iconClass="text-red-500/70" />
+                  <ListSection icon={TrendingUp} title={t("dealCheck.strengths")} items={analysis.strengths} dotClass="bg-emerald-500/60" iconClass="text-emerald-600" />
+                  <ListSection icon={AlertTriangle} title={t("dealCheck.risks")} items={analysis.risks} dotClass="bg-red-500/50" iconClass="text-red-500/70" />
 
                   {/* Price Analysis Section */}
                   {priceAnalysis && (
@@ -644,12 +646,12 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                             )}
                             {liveTotals.marketTotal > 0 && liveTotals.marketTotal !== liveTotals.takeoverTotal && (
                               <div className="text-[10px] text-muted-foreground mt-0.5">
-                                القيمة السوقية: <span className="font-medium">{liveTotals.marketTotal.toLocaleString()} ر.س</span>
+                                {t("dealCheck.marketValue")} <span className="font-medium">{liveTotals.marketTotal.toLocaleString()} ر.س</span>
                               </div>
                             )}
                             {priceAnalysis.valuation_confidence && (
                               <div className="text-[10px] text-muted-foreground mt-0.5">
-                                مستوى الثقة: <span className={cn("font-medium",
+                                {t("feasibility.confidenceLevel")} <span className={cn("font-medium",
                                   priceAnalysis.valuation_confidence === "عالي" ? "text-emerald-700" :
                                   priceAnalysis.valuation_confidence === "متوسط" ? "text-amber-700" :
                                   "text-muted-foreground"
@@ -721,7 +723,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                                   </div>
                                   <div className="text-left shrink-0">
                                     {isInspection ? (
-                                      <div className="text-[11px] text-muted-foreground italic">يتطلب معاينة</div>
+                                      <div className="text-[11px] text-muted-foreground italic">{t("dealCheck.requiresInspection")}</div>
                                     ) : (
                                       <>
                                         <div className="text-xs font-medium">{item.total_value?.toLocaleString()} ر.س</div>
@@ -758,15 +760,15 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                     </div>
                   )}
 
-                  <AnalysisSection icon={MapPin} title="تقييم الموقع" content={analysis.locationAssessment} />
-                  <AnalysisSection icon={BarChart3} title="المنافسة والسوق" content={analysis.competitionSnapshot} />
-                  <AnalysisSection icon={ShieldCheck} title="الجاهزية التشغيلية" content={analysis.operationalReadiness} />
+                  <AnalysisSection icon={MapPin} title={t("dealCheck.locationAssessment")} content={analysis.locationAssessment} />
+                  <AnalysisSection icon={BarChart3} title={t("dealCheck.competition")} content={analysis.competitionSnapshot} />
+                  <AnalysisSection icon={ShieldCheck} title={t("dealCheck.operationalReadiness")} content={analysis.operationalReadiness} />
 
                   {analysis.marketComparison && (
                     <div>
                       <h4 className="font-medium text-sm flex items-center gap-2 mb-3">
                         <Store size={15} strokeWidth={1.3} className="text-primary/60" />
-                        مقارنة السوق المستعمل
+                        {t("dealCheck.marketComparison")}
                       </h4>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
@@ -802,26 +804,26 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                    )}
 
                   {analysis.missingInfo.length > 0 && (
-                    <ListSection icon={FileQuestion} title="معلومات ناقصة / توضيحات مطلوبة" items={analysis.missingInfo} dotClass="bg-amber-500/50" iconClass="text-amber-500" />
+                    <ListSection icon={FileQuestion} title={t("dealCheck.missingInfo")} items={analysis.missingInfo} dotClass="bg-amber-500/50" iconClass="text-amber-500" />
                   )}
 
-                  <ListSection icon={MessageCircle} title="إرشادات التفاوض" items={analysis.negotiationGuidance} dotClass="bg-blue-500/50" iconClass="text-blue-500" />
+                  <ListSection icon={MessageCircle} title={t("dealCheck.negotiationTips")} items={analysis.negotiationGuidance} dotClass="bg-blue-500/50" iconClass="text-blue-500" />
 
                   <Button variant="ghost" size="sm" onClick={() => setExpanded(false)} className="w-full text-xs text-muted-foreground hover:text-foreground rounded-xl gap-1.5">
                     <ChevronUp size={14} />
-                    إخفاء التفاصيل
+                    {t("common.hideDetails")}
                   </Button>
                 </>
               )}
 
               <div className="text-[10px] text-muted-foreground/60 text-center pt-2 border-t border-border/20">
-                هذا التحليل استرشادي بمنهجية OLV وفق معايير تقييم السعودية (TAQEEM). ليس بديلاً عن تقييم معتمد.
+                {t("dealCheck.disclaimer")}
               </div>
 
               <div className="flex justify-center pt-1">
                 <Button variant="ghost" size="sm" onClick={() => runDealCheck()} disabled={isSimulation || loading || isRefreshing} className="text-xs text-muted-foreground hover:text-foreground rounded-xl">
                   <Loader2 size={12} strokeWidth={1.5} className="ml-1" />
-                  {isSimulation ? "تحليل محفوظ" : "إعادة التحليل"}
+                  {isSimulation ? "تحليل محفوظ" : t("dealCheck.reanalyze")}
                 </Button>
               </div>
             </div>
