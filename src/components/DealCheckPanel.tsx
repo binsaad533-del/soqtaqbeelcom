@@ -823,7 +823,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                           <div className="text-sm font-medium">{analysis.marketComparison.matchQuality}</div>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2.5 text-center">
-                          <div className="text-xs text-muted-foreground">الموقف السعري</div>
+                          <div className="text-xs text-muted-foreground">{t("dealCheck.pricePosition")}</div>
                           <div className={cn("text-sm font-medium",
                             analysis.marketComparison.marketPosition === "أقل من السوق" ? "text-emerald-600" :
                             analysis.marketComparison.marketPosition === "أعلى من السوق" ? "text-red-500" :
