@@ -440,6 +440,8 @@ ${buildConsistencyRules(mode)}
 أنتج JSON بالهيكل المطلوب. لكل حقل تحليل:
 - إذا كان خارج نطاق الصفقة، اكتب "خارج نطاق هذه الصفقة" بدل تحليل مفصل
 - missingInfo يجب أن تحتوي فقط على معلومات ناقصة ضمن نطاق الصفقة المحدد`;
+
+  return base + languageInstructionFor(language);
 }
 
 function buildPreviousAnalysisReference(previousAnalysis: any): string | null {
