@@ -522,7 +522,7 @@ const CreateListingPage = () => {
       if (imageUrls.length > 0) {
         setPhotos(prev => {
           const updated = { ...prev, all: [...(prev.all || []), ...imageUrls] };
-          updateListing(id, { photos: updated } as never).catch(() => toast.error("تعذّر حفظ الصور."));
+          updateListing(id, { photos: updated } as never).catch(() => toast.error(t("createListing.toasts.upload.photoSaveError")));
           return updated;
         });
       }
@@ -534,14 +534,14 @@ const CreateListingPage = () => {
         try {
           const result = await uploadFile(id, file, "docs/general");
           if (result.url) { docUrls.push(result.url); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url: result.url! } : f)); }
-          else { setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || "فشل الرفع" } : f)); }
-        } catch (err) { console.error(`[BulkUpload] Doc failed: ${file.name}`, err); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "خطأ غير متوقع" } : f)); }
+          else { setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || t("createListing.toasts.upload.uploadFailGeneric") } : f)); }
+        } catch (err) { console.error(`[BulkUpload] Doc failed: ${file.name}`, err); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: t("createListing.toasts.upload.uploadUnexpected") } : f)); }
         finally { completedCount++; setUploadProgress({ current: completedCount, total: totalFiles }); }
       });
       if (docUrls.length > 0) {
         setUploadedDocs(prev => {
           const updated = { ...prev, general: [...(prev.general || []), ...docUrls] };
-          updateListing(id, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch(() => toast.error("تعذّر حفظ المستندات."));
+          updateListing(id, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch(() => toast.error(t("createListing.toasts.upload.docsSaveError")));
           return updated;
         });
         const firstPdfUrl = docUrls.find(url => url.toLowerCase().includes(".pdf"));
@@ -549,9 +549,9 @@ const CreateListingPage = () => {
       }
       const uploadedTotal = imageUrls.length + docUrls.length;
       const failedTotal = totalFiles - uploadedTotal;
-      if (uploadedTotal > 0 && failedTotal === 0) toast.success(`تم رفع ${uploadedTotal} ملف بنجاح`);
-      else if (uploadedTotal > 0 && failedTotal > 0) toast.warning(`تم رفع ${uploadedTotal} ملف — فشل ${failedTotal}`);
-      else if (failedTotal > 0) toast.error(`فشل رفع جميع الملفات (${failedTotal})`);
+      if (uploadedTotal > 0 && failedTotal === 0) toast.success(t("createListing.toasts.upload.filesUploaded", { count: uploadedTotal }));
+      else if (uploadedTotal > 0 && failedTotal > 0) toast.warning(t("createListing.toasts.upload.filesUploadedPartial", { uploaded: uploadedTotal, failed: failedTotal }));
+      else if (failedTotal > 0) toast.error(t("createListing.toasts.upload.filesUploadedAllFailed", { failed: failedTotal }));
     } finally { setSaving(false); setUploadingGroup(null); }
   };
 
