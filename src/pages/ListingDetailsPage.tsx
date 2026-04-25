@@ -1212,6 +1212,7 @@ const CollapsibleList = <T,>({ title, icon, items, threshold, renderItem }: {
   threshold: number;
   renderItem: (item: T, index: number) => React.ReactNode;
 }) => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const needsExpand = items.length > threshold;
   const visibleItems = needsExpand && !expanded ? items.slice(0, threshold) : items;
