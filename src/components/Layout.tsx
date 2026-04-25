@@ -15,7 +15,6 @@ import PushNotificationPrompt from "./PushNotificationPrompt";
 import LaunchBanner from "./LaunchBanner";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -24,7 +23,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut, role } = useAuthContext();
-  const { tx } = useLanguage();
   const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -54,7 +52,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const navLinks = isFinancialManager
     ? [
         { label: t("nav.home"), path: "/" },
-        { label: tx("الإدارة المالية", "Finance"), path: "/admin/finance" },
+        { label: t("layout.finance"), path: "/admin/finance" },
       ]
     : [
         { label: t("nav.home"), path: "/" },
@@ -62,7 +60,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         { label: t("nav.howItWorks"), path: "/how-it-works" },
         { label: t("nav.addListing"), path: "/create-listing?new=1" },
         { label: t("nav.dashboard"), path: "/dashboard" },
-        { label: tx("نماذج PDF", "PDF Templates"), path: "/pdf-preview" },
+        { label: t("layout.pdfTemplates"), path: "/pdf-preview" },
       ];
 
   useEffect(() => {
@@ -89,7 +87,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <div className="container h-full flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg gradient-primary flex items-center justify-center shadow-sm">
-              <img src={logoIcon} alt={tx("سوق تقبيل", "Soq Taqbeel")} className="w-6 h-6 md:w-7 md:h-7 object-contain" />
+              <img src={logoIcon} alt={t("layout.logoAlt")} className="w-6 h-6 md:w-7 md:h-7 object-contain" />
             </div>
           </Link>
 
@@ -132,7 +130,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <Link
                   to="/messages"
                   className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-                  title={tx("المحادثات", "Messages")}
+                  title={t("layout.messages")}
                 >
                   <MessageSquare size={17} strokeWidth={1.5} />
                   {unreadMessages > 0 && (
@@ -144,7 +142,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <Link
                   to="/support"
                   className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-                  title={tx("الدعم الفني", "Support")}
+                  title={t("layout.support")}
                 >
                   <LifeBuoy size={17} strokeWidth={1.5} />
                 </Link>
@@ -152,15 +150,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <button
                   onClick={() => navigate("/dashboard")}
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors text-[12px]"
-                  title={tx("لوحة التحكم", "Dashboard")}
+                  title={t("layout.dashboard")}
                 >
                   <User size={15} strokeWidth={1.5} />
-                  <span className="hidden lg:inline">{tx("لوحة التحكم", "Dashboard")}</span>
+                  <span className="hidden lg:inline">{t("layout.dashboard")}</span>
                 </button>
                 <button
                   onClick={() => navigate("/dashboard")}
                   className="sm:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-                  title={tx("لوحة التحكم", "Dashboard")}
+                  title={t("layout.dashboard")}
                 >
                   <User size={17} strokeWidth={1.5} />
                 </button>
@@ -184,7 +182,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <button
               className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setMobileOpen(!mobileOpen)}
-              title={tx("القائمة", "Menu")}
+              title={t("layout.menu")}
             >
               {mobileOpen ? <X size={18} strokeWidth={1.5} /> : <Menu size={18} strokeWidth={1.5} />}
             </button>
