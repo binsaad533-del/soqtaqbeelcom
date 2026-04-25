@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { InventoryItem } from "./types";
 
 export const ConfirmationCard = ({
@@ -13,6 +14,7 @@ export const ConfirmationCard = ({
   onConfirmSame: () => void;
   onConfirmMultiple: (qty: number) => void;
 }) => {
+  const { t } = useTranslation();
   const [showQtyInput, setShowQtyInput] = useState(false);
   const [tempQty, setTempQty] = useState(item.qty);
 
@@ -27,21 +29,21 @@ export const ConfirmationCard = ({
           ))}
         </div>
       )}
-      <p className="text-xs text-muted-foreground mb-2">هل هذه الصور لنفس الأصل أم لأصول متعددة؟</p>
+      <p className="text-xs text-muted-foreground mb-2">{t("createListing.confirmCard.question")}</p>
       {!showQtyInput ? (
         <div className="flex gap-2">
-          <button onClick={onConfirmSame} className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors active:scale-[0.97]">هذا نفس الأصل</button>
-          <button onClick={() => setShowQtyInput(true)} className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/80 transition-colors active:scale-[0.97]">هذه أصول متعددة</button>
+          <button onClick={onConfirmSame} className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors active:scale-[0.97]">{t("createListing.confirmCard.sameAsset")}</button>
+          <button onClick={() => setShowQtyInput(true)} className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/80 transition-colors active:scale-[0.97]">{t("createListing.confirmCard.multipleAssets")}</button>
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">عدد القطع:</span>
+          <span className="text-xs text-muted-foreground">{t("createListing.confirmCard.qtyLabel")}</span>
           <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-1">
             <button onClick={() => setTempQty((q) => Math.max(2, q - 1))} className="p-1"><Minus size={12} /></button>
             <input type="number" min="2" value={tempQty} onChange={(e) => setTempQty(Math.max(2, parseInt(e.target.value) || 2))} className="w-10 text-center text-xs bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
             <button onClick={() => setTempQty((q) => q + 1)} className="p-1"><Plus size={12} /></button>
           </div>
-          <button onClick={() => onConfirmMultiple(tempQty)} className="text-xs px-3 py-1.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors active:scale-[0.97]">تأكيد</button>
+          <button onClick={() => onConfirmMultiple(tempQty)} className="text-xs px-3 py-1.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors active:scale-[0.97]">{t("createListing.confirmCard.confirm")}</button>
         </div>
       )}
     </div>
