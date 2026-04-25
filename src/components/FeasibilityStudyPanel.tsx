@@ -557,16 +557,20 @@ const resolveFeasibilityStudy = (listing: any, raw?: any): FeasibilityStudy | nu
 
 const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityStudyPanelProps) => {
   const { t, i18n } = useTranslation();
+  const isArabic = (i18n.language || "ar").toLowerCase() === "ar";
   const [study, setStudy] = useState<FeasibilityStudy | null>(() =>
-    resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility),
+    isArabic ? resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility) : null,
   );
   const [loading, setLoading] = useState(false);
   // If we already have a study from initialization, skip loading state entirely
-  const [loadingCache, setLoadingCache] = useState(() => !resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility));
+  const [loadingCache, setLoadingCache] = useState(() =>
+    isArabic ? !resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility) : false,
+  );
   const [error, setError] = useState<string | null>(null);
   const [cachedAt, setCachedAt] = useState<string | null>(analysisCache.cacheAge || null);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(analysisCache.analysisUpdatedAt || analysisCache.cacheAge || null);
   const [copied, setCopied] = useState(false);
+  const [autoTriggered, setAutoTriggered] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     summary: false,
     investment: false,
@@ -589,11 +593,12 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   }, [study]);
 
   useEffect(() => {
+    if (!isArabic) return;
     const immediateStudy = resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility);
     setStudy(immediateStudy);
     setCachedAt(analysisCache.cacheAge || immediateStudy?._meta?.generatedAt || null);
     setLastUpdatedAt(analysisCache.analysisUpdatedAt || analysisCache.cacheAge || immediateStudy?._meta?.generatedAt || null);
-  }, [listing?.id]);
+  }, [listing?.id, isArabic]);
 
   const toggleSection = (key: string) =>
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
