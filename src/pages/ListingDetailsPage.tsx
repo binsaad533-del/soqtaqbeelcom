@@ -45,6 +45,8 @@ import SimulationOverlay, { isSimulationImage, hasSimulationPhotos } from "@/com
 import ReportListingDialog from "@/components/ReportListingDialog";
 import { getOrderedPhotos } from "@/lib/photoOrdering";
 import { mapConditionToKey, mapDealTypeToKey, translateStatusValue, translateLeaseDuration } from "@/lib/condition-utils";
+import { useListingTranslation } from "@/hooks/useListingTranslation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 type ListingDocumentItem = {
