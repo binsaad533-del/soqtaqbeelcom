@@ -22,10 +22,7 @@ const LaunchBanner = () => {
       <div className="flex items-center justify-center gap-2">
         <Rocket size={14} className="shrink-0 animate-pulse" />
         <span>
-          {tx(
-            "🎉 مرحباً بكم في الإطلاق الأول لمنصة سوق تقبيل — نسعد بملاحظاتكم لتطوير تجربتكم",
-            "🎉 Welcome to the first launch of Soq Taqbeel — we value your feedback"
-          )}
+          {t("common.welcomeBanner")}
         </span>
       </div>
       <button
