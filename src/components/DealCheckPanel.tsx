@@ -15,6 +15,7 @@ import type { UseAnalysisCacheReturn } from "@/hooks/useAnalysisCache";
 import { hasSimulationPhotos } from "@/components/SimulationOverlay";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { mapConditionToKey, mapConfidenceToKey } from "@/lib/condition-utils";
 
 interface AssetBreakdownItem {
   assetName: string;
