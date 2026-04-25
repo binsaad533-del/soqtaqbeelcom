@@ -3,24 +3,22 @@ import { safeJsonLd } from "@/lib/security";
 import { Link, useSearchParams } from "react-router-dom";
 import { Calendar, Clock, Tag, Search, Loader2 } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import logoIcon from "@/assets/logo-icon-gold.png";
 
 const BlogPage = () => {
-  const { tx, lang } = useLanguage();
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.resolvedLanguage || i18n.language || "ar").split("-")[0];
   const [searchParams] = useSearchParams();
   const activeTag = searchParams.get("tag");
   const [searchQuery, setSearchQuery] = useState("");
 
   useSEO({
-    title: tx("المدونة", "Blog"),
-    description: tx(
-      "مقالات ونصائح حول تقبيل المشاريع التجارية والتقييم الذكي",
-      "Articles and tips about business transfers and smart valuation"
-    ),
+    title: t("blog.title"),
+    description: t("blog.metaDescription"),
     canonical: "/blog",
   });
 
@@ -55,11 +53,8 @@ const BlogPage = () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    name: tx("مدونة سوق تقبيل", "Soq Taqbeel Blog"),
-    description: tx(
-      "مقالات متخصصة في سوق التقبيل التجاري السعودي",
-      "Expert articles about Saudi business transfer market"
-    ),
+    name: t("blog.jsonLdName"),
+    description: t("blog.jsonLdDescription"),
     url: "https://soqtaqbeel.com/blog",
     publisher: { "@type": "Organization", name: "سوق تقبيل" },
     blogPost: filtered.slice(0, 10).map((p) => ({
@@ -85,13 +80,10 @@ const BlogPage = () => {
             <img src={logoIcon} alt="سوق تقبيل" className="w-[4.5rem] h-[4.5rem] object-contain" />
           </div>
           <h1 className="text-2xl md:text-3xl font-medium mb-3">
-            {tx("المدونة والأخبار", "Blog & News")}
+            {t("blog.headerTitle")}
           </h1>
           <p className="text-muted-foreground max-w-lg mx-auto text-sm">
-            {tx(
-              "مقالات متخصصة، نصائح عملية، وآخر أخبار سوق التقبيل",
-              "Expert articles, practical tips, and latest market news"
-            )}
+            {t("blog.headerSubtitle")}
           </p>
         </div>
 
@@ -99,7 +91,7 @@ const BlogPage = () => {
         <div className="relative mb-6 max-w-md mx-auto">
           <Search size={14} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder={tx("ابحث في المقالات...", "Search articles...")}
+            placeholder={t("blog.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ps-9 text-sm h-9 rounded-xl"
@@ -115,7 +107,7 @@ const BlogPage = () => {
                 !activeTag ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
-              {tx("الكل", "All")}
+              {t("blog.all")}
             </Link>
             {allTags.map((tag) => (
               <Link
@@ -143,7 +135,7 @@ const BlogPage = () => {
         {/* Articles */}
         {!isLoading && filtered.length === 0 && (
           <div className="text-center py-16 text-sm text-muted-foreground">
-            {tx("لا توجد مقالات بعد", "No articles yet")}
+            {t("blog.noArticles")}
           </div>
         )}
 
@@ -211,7 +203,7 @@ const BlogPage = () => {
                       </div>
                       <span className="flex items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
                         <Clock size={9} />
-                        {tx(`${post.read_time_minutes} دقائق`, `${post.read_time_minutes} min`)}
+                        {t("blog.readTimeMin", { count: post.read_time_minutes })}
                       </span>
                     </div>
                   </div>
@@ -224,13 +216,13 @@ const BlogPage = () => {
         {/* CTA */}
         <div className="text-center mt-10 p-6 rounded-2xl gradient-hero">
           <p className="text-sm text-muted-foreground mb-3">
-            {tx("عندك خبرة في السوق؟ شاركنا مقالك!", "Have market expertise? Share your article!")}
+            {t("blog.ctaShare")}
           </p>
           <Link
             to="/contact"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
           >
-            {tx("تواصل معنا", "Contact Us")}
+            {t("blog.contactUs")}
           </Link>
         </div>
       </div>
