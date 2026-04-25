@@ -814,9 +814,9 @@ const ListingDetailsPage = () => {
             {/* محاكاة الصفقة */}
             {!isOwner && listing.price && (
               <SectionAccordion
-                title="محاكاة الصفقة"
+                title={t('listing.dealSimulation')}
                 icon={<Sparkles size={16} strokeWidth={1.4} className="text-primary" />}
-                summary="سيناريوهات السعر والتفاوض"
+                summary={t('listing.priceScenarios')}
               >
                 <DealSimulationPanel listingId={listing.id} />
               </SectionAccordion>
