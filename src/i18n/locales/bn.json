@@ -980,6 +980,226 @@
       "resolving": "লিংক রেজলভ করা হচ্ছে...",
       "shortLinkHint": "অ্যাপের পরিবর্তে ম্যাপস ব্রাউজার থেকে সম্পূর্ণ লিংক কপি করার চেষ্টা করুন",
       "unrecognized": "স্থানাঙ্ক চিহ্নিত করা যায়নি — গুগল ম্যাপস লিংক বা স্থানাঙ্ক পেস্ট করুন, যেমন: 24.7136, 46.6753"
+    },
+    "step3": {
+      "confidence": {
+        "high": "উচ্চ আত্মবিশ্বাস",
+        "medium": "মাঝারি আত্মবিশ্বাস",
+        "low": "নিশ্চিতকরণ প্রয়োজন"
+      },
+      "analyzing": {
+        "excelAndPhotos": "Excel ফাইল ও ছবি বিশ্লেষণ চলছে...",
+        "excelOnly": "Excel ফাইল বিশ্লেষণ চলছে...",
+        "docsOnly": "ডকুমেন্ট বিশ্লেষণ চলছে...",
+        "photosOnly": "AI ছবিগুলো বিশ্লেষণ করছে...",
+        "hintExcel": "{{count}} টি Excel ফাইল পড়া হচ্ছে, প্রতিটি থেকে প্রথম ৫০০ সারি বের করা হচ্ছে",
+        "hintDocs": "আপলোড করা ডকুমেন্ট থেকে ডেটা বের করা হচ্ছে",
+        "hintPhotos": "সম্পদ শনাক্ত ও ছবির কোণ চিহ্নিত করা হচ্ছে",
+        "relax": "কিছু করতে হবে না — AI সামলাচ্ছে"
+      },
+      "intro": {
+        "titleExcelAndPhotos": "ছবি ও Excel এর AI বিশ্লেষণ",
+        "titleExcelOnly": "Excel এর AI বিশ্লেষণ",
+        "titleDocsOnly": "ডকুমেন্টের AI বিশ্লেষণ",
+        "titlePhotosOnly": "ছবির AI বিশ্লেষণ",
+        "hintExcelAndPhotos": "AI Excel ফাইল পড়বে এবং ছবি বিশ্লেষণ করে স্বয়ংক্রিয়ভাবে সম্পদ বের করবে",
+        "hintExcelOnly": "AI Excel ফাইল পড়বে এবং স্বয়ংক্রিয়ভাবে সম্পদ ও ইনভেন্টরি বের করবে",
+        "hintDocsOnly": "AI আপলোড করা ডকুমেন্ট বিশ্লেষণ করে স্বয়ংক্রিয়ভাবে ডেটা বের করবে",
+        "hintPhotosOnly": "AI আপনার ছবি বিশ্লেষণ করে স্বয়ংক্রিয়ভাবে সম্পদ শনাক্ত করবে",
+        "cta": "শুধু বোতামটি চাপুন — বাকিটা আমাদের",
+        "noNeedNotice": "এই ধরনের চুক্তিতে ছবি প্রয়োজন নেই — আপনি চালিয়ে যেতে পারেন অথবা বিশ্লেষণ উন্নত করতে Excel/ডকুমেন্ট আপলোড করতে পারেন",
+        "missingRequired": "অনুগ্রহ করে আগের ধাপে ছবি বা Excel/ডকুমেন্ট আপলোড করুন",
+        "missingOptional": "কোনো ছবি বা ডকুমেন্ট আপলোড হয়নি — চালিয়ে যেতে পারেন বা আপলোড করতে ফিরে যেতে পারেন",
+        "excelDetected": "{{count}} টি Excel ফাইল পাওয়া গেছে — প্রতিটির প্রথম ৫০০ সারি স্বয়ংক্রিয়ভাবে বিশ্লেষিত হবে।",
+        "photosLimit": "আপনার {{count}} টি ছবি আছে — শুধু প্রথম ৩০ টি বিশ্লেষিত হবে। বাকিগুলো সংরক্ষিত হবে কিন্তু বিশ্লেষিত হবে না।"
+      },
+      "analyzeButton": {
+        "excelAndPhotos": "AI বিশ্লেষণ শুরু করুন ({{photos}} ছবি + {{excel}} Excel)",
+        "excelOnly": "Excel বিশ্লেষণ শুরু করুন ({{count}} ফাইল)",
+        "docsOnly": "ডকুমেন্ট বিশ্লেষণ শুরু করুন ({{count}} ফাইল)",
+        "photosOnly": "AI বিশ্লেষণ শুরু করুন ({{total}} এর মধ্যে {{analyzed}} ছবি)"
+      },
+      "results": {
+        "title": "AI বিশ্লেষণ ফলাফল",
+        "dedupTitle": "ডুপ্লিকেট আইটেম স্বয়ংক্রিয়ভাবে মার্জ হয়েছে",
+        "dedupItem": "— {{description}} ({{count}} টি আইটেম)",
+        "pricingMode": "মূল্য নির্ধারণ পদ্ধতি:",
+        "modePerItem": "প্রতিটি আইটেমের মূল্য",
+        "modeBulk": "মোট মূল্য",
+        "bulkPriceLabel": "মোট মূল্য:",
+        "bulkPricePlaceholder": "উদাহরণ: 50000",
+        "includedCount": "{{count}} টি সম্পদ অন্তর্ভুক্ত",
+        "outOfTotal": "মোট {{count}} এর মধ্যে",
+        "addItem": "আইটেম যোগ",
+        "defaultNewItemName": "নতুন আইটেম",
+        "addedManually": "ম্যানুয়ালি যোগ করা হয়েছে",
+        "multipleAngles": "একাধিক কোণ",
+        "pricePlaceholder": "মূল্য",
+        "unitPriceEquals": "= {{value}}"
+      },
+      "conditions": {
+        "new": "নতুন",
+        "almostNew": "প্রায় নতুন",
+        "good": "ভাল",
+        "damaged": "ক্ষতিগ্রস্ত"
+      },
+      "totals": {
+        "pricedSummary": "মূল্য নির্ধারিত সম্পদ ({{priced}}/{{included}}) — {{qty}} টি",
+        "notPriced": "মূল্য নির্ধারণ হয়নি",
+        "unpricedHint": "{{count}} টি আইটেম মূল্য ছাড়া — পরে যোগ করতে পারেন",
+        "bulkTotalLabel": "সম্পদের মোট মূল্য",
+        "bulkNotSet": "নির্ধারিত নয়"
+      }
+    },
+    "step4": {
+      "sectionTitle": "প্রকাশ তথ্য",
+      "crAutoFillTitle": "বাণিজ্যিক নিবন্ধন থেকে ক্ষেত্রগুলি স্বয়ংক্রিয়ভাবে পূরণ হয়েছে",
+      "crAutoFillHint": "তথ্য পরীক্ষা করুন, প্রয়োজনে সম্পাদনা করুন — তারপর মূল্য নির্ধারণ করুন",
+      "disclosuresTitle": "চুক্তির প্রকাশ",
+      "validationTitle": "প্রকাশের আগে আবশ্যক ক্ষেত্রগুলি পূরণ করুন",
+      "validationPhotos": "অন্তত একটি ছবি আবশ্যক",
+      "placeholderSelect": "নির্বাচন করুন...",
+      "fields": {
+        "activityLabel": "ব্যবসার ধরন *",
+        "activityLabelAuto": "ব্যবসার ধরন * ✓ স্বয়ংক্রিয়ভাবে নিষ্কাশিত",
+        "activityPlaceholder": "উদাহরণ: ফাস্ট ফুড রেস্টুরেন্ট",
+        "cityLabel": "শহর *",
+        "cityLabelAuto": "শহর ✓ মানচিত্র থেকে",
+        "cityPlaceholder": "রিয়াদ",
+        "priceLabel": "চাওয়া মূল্য (SAR) *",
+        "pricePlaceholder": "100,000",
+        "annualRentLabel": "বার্ষিক ভাড়া (SAR)",
+        "annualRentPlaceholder": "উদাহরণ: 60000",
+        "leaseDuration": "লিজের মেয়াদ",
+        "leasePaidPeriod": "ভাড়া পরিশোধের অবস্থা",
+        "leaseRemaining": "অবশিষ্ট লিজ মেয়াদ",
+        "liabilities": "আর্থিক দায় (ঋণ / কিস্তি)",
+        "overdueSalaries": "বকেয়া বেতন",
+        "overdueRent": "বকেয়া ভাড়া",
+        "municipalityLicense": "পৌরসভার লাইসেন্স",
+        "civilDefenseLicense": "নাগরিক প্রতিরক্ষা লাইসেন্স",
+        "surveillanceCameras": "নজরদারি ক্যামেরা"
+      },
+      "options": {
+        "leaseDuration": {
+          "سنة": "১ বছর",
+          "سنتين": "২ বছর",
+          "3 سنوات": "৩ বছর",
+          "4 سنوات": "৪ বছর",
+          "5 سنوات": "৫ বছর",
+          "أكثر من 5 سنوات": "৫ বছরের বেশি"
+        },
+        "leasePaidPeriod": {
+          "مسدد بالكامل": "সম্পূর্ণ পরিশোধিত",
+          "متأخر شهر": "১ মাস বকেয়া",
+          "متأخر شهرين": "২ মাস বকেয়া",
+          "متأخر 3 أشهر أو أكثر": "৩ মাস বা বেশি বকেয়া"
+        },
+        "leaseRemaining": {
+          "أقل من 6 أشهر": "৬ মাসের কম",
+          "6-12 شهر": "৬–১২ মাস",
+          "1-2 سنة": "১–২ বছর",
+          "2-3 سنوات": "২–৩ বছর",
+          "أكثر من 3 سنوات": "৩ বছরের বেশি"
+        },
+        "liabilities": {
+          "لا يوجد": "নেই",
+          "أقل من 10,000": "১০,০০০ এর কম",
+          "10,000 - 50,000": "১০,০০০ – ৫০,০০০",
+          "50,000 - 100,000": "৫০,০০০ – ১০০,০০০",
+          "أكثر من 100,000": "১০০,০০০ এর বেশি"
+        },
+        "overdueMonths": {
+          "لا يوجد": "নেই",
+          "شهر واحد": "১ মাস",
+          "شهرين": "২ মাস",
+          "3 أشهر أو أكثر": "৩ মাস বা বেশি"
+        },
+        "licenseStatus": {
+          "سارية": "সক্রিয়",
+          "منتهية": "মেয়াদোত্তীর্ণ",
+          "قيد التجديد": "নবায়ন চলছে",
+          "غير موجودة": "নেই"
+        },
+        "cameras": {
+          "موجودة وتعمل": "স্থাপিত ও সচল",
+          "موجودة لا تعمل": "স্থাপিত কিন্তু অচল",
+          "غير موجودة": "স্থাপিত নয়"
+        }
+      },
+      "mapPickedTitle": "মানচিত্রে অবস্থান নির্ধারিত",
+      "mapPickedHint": "Google Maps এ খুলতে চাপুন →",
+      "dealCheck": {
+        "introTitle": "প্রকাশের আগে চুক্তি যাচাই",
+        "introHint": "AI আপনার তথ্য বিশ্লেষণ করে বিজ্ঞাপন উন্নয়নের পরামর্শ দেয়",
+        "introButton": "চুক্তি যাচাই করুন",
+        "introNote": "যাচাই ছাড়াও আপনি প্রকাশ করতে পারেন",
+        "loading": "চুক্তি যাচাই চলছে...",
+        "errorTitle": "স্বয়ংক্রিয় যাচাই করা যায়নি",
+        "priceFairness": "মূল্যের ন্যায্যতা: {{verdict}}",
+        "recommendation": "সুপারিশ",
+        "risks": "প্রধান ঝুঁকি",
+        "strengths": "শক্তি",
+        "missing": "অনুপস্থিত তথ্য",
+        "afterAdjust": "এই বিশ্লেষণের ভিত্তিতে উপরের তথ্য (যেমন মূল্য বা প্রকাশ) সমন্বয় করে পুনরায় যাচাই করুন — অথবা সরাসরি প্রকাশ করুন।",
+        "rerun": "সম্পাদনার পর পুনঃবিশ্লেষণ"
+      },
+      "summary": {
+        "title": "বিজ্ঞাপন সারাংশ",
+        "subtitle": "প্রকাশের আগে তথ্য পরীক্ষা করুন",
+        "dealStructureTitle": "চুক্তির কাঠামো",
+        "primaryBadge": "প্রধান",
+        "alternateBadge": "বিকল্প {{n}}",
+        "sentenceProject": "প্রকল্প",
+        "sentenceDash": "—",
+        "sentenceTemplate": "{{activity}}, {{district}}, {{city}} এ।",
+        "sentenceStructure": " চুক্তির কাঠামো: {{label}}.",
+        "sentenceAssets": " নিশ্চিত সম্পদ: {{count}} টি আইটেম ({{qty}} টি একক)।",
+        "sentenceAnnualRent": " বার্ষিক ভাড়া {{value}} রিয়াল।",
+        "sentenceLeaseRemaining": " অবশিষ্ট লিজ {{value}}।",
+        "sentencePrice": " চাওয়া মূল্য {{value}} রিয়াল।",
+        "statPhotos": "ছবি",
+        "statAssets": "অন্তর্ভুক্ত সম্পদ",
+        "statDocs": "ডকুমেন্ট",
+        "photosMissingNotice": "অন্তত একটি ছবি আবশ্যক — ছবি ও ডকুমেন্ট ধাপে ফিরে যান",
+        "previewHeader": "ক্রেতারা যেমন দেখবে",
+        "previewActivityFallback": "ব্যবসার নাম",
+        "previewDistrictFallback": "এলাকা",
+        "previewCityFallback": "শহর",
+        "previewPhotos": "{{count}} টি ছবি",
+        "previewAssets": "{{count}} টি সম্পদ",
+        "photoAlt": "বিজ্ঞাপনের ছবি"
+      },
+      "sellerNote": {
+        "label": "ক্রেতাদের জন্য বার্তা (ঐচ্ছিক)",
+        "placeholder": "যদি প্রকল্প সম্পর্কে কিছু বলতে চান, {{name}} ✍️",
+        "fallbackName": "বিজ্ঞাপনদাতা"
+      },
+      "unifiedReview": {
+        "emptyTitle": "আপনি কোনো ফাইল আপলোড করেননি",
+        "emptyHint": "ছবি বা ডকুমেন্ট ছাড়া বিজ্ঞাপন দুর্বল হবে এবং কম দেখা যাবে। আপনি ফিরে গিয়ে আপলোড করতে পারেন।",
+        "needsReviewTitle": "আপনার ফাইল পর্যালোচনার অপেক্ষায়",
+        "needsReviewHint": "{{total}} টি ফাইলের মধ্যে {{unconfirmed}} টি প্রকাশের আগে নিশ্চিতকরণ প্রয়োজন",
+        "reviewNow": "এখনই পর্যালোচনা করুন",
+        "readyTitle": "{{count}} টি ফাইল প্রকাশের জন্য প্রস্তুত"
+      },
+      "publishButton": "বিজ্ঞাপন প্রকাশ করুন",
+      "publishBlockedTitle": "প্রকাশের আগে ফাইল পর্যালোচনা আবশ্যক"
+    },
+    "inventoryDefaults": {
+      "unnamedAsset": "নামহীন সম্পদ",
+      "unclear": "অস্পষ্ট",
+      "otherCategory": "অন্যান্য",
+      "itemFromFiles": "ফাইল থেকে আইটেম",
+      "stockCategory": "ইনভেন্টরি",
+      "extractedFromFile": "সংযুক্ত ফাইল থেকে নিষ্কাশিত",
+      "extractedFromFileWithPrice": "সংযুক্ত ফাইল থেকে নিষ্কাশিত — একক মূল্য: {{price}} রিয়াল"
+    },
+    "dealLabel": {
+      "full_takeover": "পূর্ণ অধিগ্রহণ",
+      "no_liabilities": "ব্যবসা স্থানান্তর (পূর্ব দায়বদ্ধতা ছাড়া)",
+      "assets_setup": "সম্পদ + পরিচালনা সেটআপ (বাণিজ্যিক নিবন্ধন ছাড়া)",
+      "assets_only": "শুধু সম্পদ"
     }
   }
 }

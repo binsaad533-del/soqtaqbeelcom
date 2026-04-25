@@ -628,8 +628,8 @@ const CreateListingPage = () => {
       setAnalyzeProgress(100);
       if (error || !data || (data as { error?: string }).error) throw new Error((data as { error?: string })?.error || error?.message || t("createListing.toasts.analysis.fetchFail"));
       const assets: InventoryItem[] = (((data as any).assets) || []).map((asset: any, i: number) => ({
-        id: String(i + 1), name: String(asset.name || "أصل غير مسمى"), qty: Number(asset.quantity || 1),
-        condition: String(asset.condition || "غير واضح"), category: String(asset.category || "أخرى"),
+        id: String(i + 1), name: String(asset.name || t("createListing.inventoryDefaults.unnamedAsset")), qty: Number(asset.quantity || 1),
+        condition: String(asset.condition || t("createListing.inventoryDefaults.unclear")), category: String(asset.category || t("createListing.inventoryDefaults.otherCategory")),
         included: true, confidence: (asset.confidence as InventoryItem["confidence"]) || "medium",
         detectionNote: String(asset.detection_note || ""), photoIndices: Array.isArray(asset.photo_indices) ? (asset.photo_indices as number[]) : [],
         isSameAssetMultipleAngles: Boolean(asset.is_same_asset_multiple_angles), userConfirmed: asset.confidence === "high",
@@ -637,9 +637,11 @@ const CreateListingPage = () => {
       const extracted = (data as any).extracted_info;
       if (extracted?.inventory_from_files && Array.isArray(extracted.inventory_from_files)) {
         const fileItems: InventoryItem[] = extracted.inventory_from_files.map((item: any, i: number) => ({
-          id: `file-${i + 1}`, name: String(item.item_name || "عنصر من الملفات"), qty: Number(item.quantity || 1),
-          condition: "غير واضح", category: "مخزون", included: true, confidence: "medium" as const,
-          detectionNote: `مستخرج من ملف مرفق${item.unit_price ? ` — سعر الوحدة: ${item.unit_price} ر.س` : ""}`,
+          id: `file-${i + 1}`, name: String(item.item_name || t("createListing.inventoryDefaults.itemFromFiles")), qty: Number(item.quantity || 1),
+          condition: t("createListing.inventoryDefaults.unclear"), category: t("createListing.inventoryDefaults.stockCategory"), included: true, confidence: "medium" as const,
+          detectionNote: item.unit_price
+            ? t("createListing.inventoryDefaults.extractedFromFileWithPrice", { price: item.unit_price })
+            : t("createListing.inventoryDefaults.extractedFromFile"),
           photoIndices: [], isSameAssetMultipleAngles: false, userConfirmed: false,
         }));
         assets.push(...fileItems);

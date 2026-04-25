@@ -980,6 +980,226 @@
       "resolving": "جاري تحويل الرابط...",
       "shortLinkHint": "جرب نسخ الرابط الكامل من متصفح الخرائط بدل التطبيق",
       "unrecognized": "لم يتم التعرف على الإحداثيات — جرب لصق رابط خرائط قوقل أو إحداثيات مثل: 24.7136, 46.6753"
+    },
+    "step3": {
+      "confidence": {
+        "high": "ثقة عالية",
+        "medium": "ثقة متوسطة",
+        "low": "يحتاج تأكيد"
+      },
+      "analyzing": {
+        "excelAndPhotos": "جاري تحليل ملف Excel والصور...",
+        "excelOnly": "جاري تحليل ملف Excel...",
+        "docsOnly": "جاري تحليل المستندات...",
+        "photosOnly": "الذكاء الاصطناعي يحلّل الصور...",
+        "hintExcel": "جاري قراءة {{count}} ملف Excel واستخراج أول 500 صف من كل ملف",
+        "hintDocs": "جاري استخراج البيانات من المستندات المرفوعة",
+        "hintPhotos": "جاري اكتشاف الأصول وتمييز زوايا التصوير",
+        "relax": "لا تحتاج تعمل شيء — الـAI يتكفّل"
+      },
+      "intro": {
+        "titleExcelAndPhotos": "تحليل الصور وExcel بالذكاء الاصطناعي",
+        "titleExcelOnly": "تحليل Excel بالذكاء الاصطناعي",
+        "titleDocsOnly": "تحليل المستندات بالذكاء الاصطناعي",
+        "titlePhotosOnly": "تحليل الصور بالذكاء الاصطناعي",
+        "hintExcelAndPhotos": "سيقوم الـAI بقراءة ملفات Excel وتحليل الصور لاستخراج الأصول تلقائياً",
+        "hintExcelOnly": "سيقوم الـAI بقراءة ملف Excel واستخراج الأصول والمخزون تلقائياً",
+        "hintDocsOnly": "سيقوم الـAI بتحليل المستندات المرفوعة واستخراج البيانات تلقائياً",
+        "hintPhotosOnly": "سيقوم الـAI بتحليل صورك واكتشاف الأصول تلقائياً",
+        "cta": "فقط اضغط الزر — والباقي علينا",
+        "noNeedNotice": "هذا النوع من الصفقات لا يتطلب صوراً — يمكنك المتابعة أو رفع Excel/مستندات لتحسين التحليل",
+        "missingRequired": "يرجى رفع صور أو ملف Excel/مستند في الخطوة السابقة أولاً",
+        "missingOptional": "لم يتم رفع صور أو مستندات — يمكنك المتابعة أو العودة لرفع الملفات",
+        "excelDetected": "تم اكتشاف {{count}} ملف Excel — سيتم تحليل أول 500 صف من كل ملف تلقائياً.",
+        "photosLimit": "لديك {{count}} صورة — سيتم تحليل أول 30 صورة فقط. الصور المتبقية ستُحفظ لكن لن تُحلل."
+      },
+      "analyzeButton": {
+        "excelAndPhotos": "ابدأ التحليل الذكي ({{photos}} صورة + {{excel}} Excel)",
+        "excelOnly": "ابدأ تحليل Excel ({{count}} ملف)",
+        "docsOnly": "ابدأ تحليل المستندات ({{count}} ملف)",
+        "photosOnly": "ابدأ التحليل الذكي ({{analyzed}} من {{total}} صورة)"
+      },
+      "results": {
+        "title": "نتائج التحليل الذكي",
+        "dedupTitle": "تم دمج العناصر المكررة تلقائياً",
+        "dedupItem": "— {{description}} ({{count}} عنصر)",
+        "pricingMode": "طريقة التسعير:",
+        "modePerItem": "تسعير كل عنصر",
+        "modeBulk": "سعر إجمالي",
+        "bulkPriceLabel": "السعر الإجمالي:",
+        "bulkPricePlaceholder": "مثال: 50000",
+        "includedCount": "{{count}} أصل مشمول",
+        "outOfTotal": "من أصل {{count}}",
+        "addItem": "إضافة عنصر",
+        "defaultNewItemName": "عنصر جديد",
+        "addedManually": "أضيف يدوياً",
+        "multipleAngles": "زوايا متعددة",
+        "pricePlaceholder": "السعر",
+        "unitPriceEquals": "= {{value}}"
+      },
+      "conditions": {
+        "new": "جديد",
+        "almostNew": "شبه جديد",
+        "good": "جيد",
+        "damaged": "تالف"
+      },
+      "totals": {
+        "pricedSummary": "إجمالي الأصول المسعّرة ({{priced}} من {{included}}) — {{qty}} قطعة",
+        "notPriced": "لم يتم تحديد أسعار",
+        "unpricedHint": "{{count}} عنصر بدون سعر — يمكنك إضافته لاحقاً",
+        "bulkTotalLabel": "السعر الإجمالي للأصول",
+        "bulkNotSet": "لم يتم التحديد"
+      }
+    },
+    "step4": {
+      "sectionTitle": "بيانات الإفصاح",
+      "crAutoFillTitle": "تم تعبئة الحقول تلقائياً من السجل التجاري",
+      "crAutoFillHint": "راجع البيانات وعدّلها إن لزم الأمر — ثم حدد السعر المطلوب",
+      "disclosuresTitle": "إفصاحات الصفقة",
+      "validationTitle": "يرجى إكمال الحقول المطلوبة قبل النشر",
+      "validationPhotos": "يجب رفع صورة واحدة على الأقل",
+      "placeholderSelect": "اختر...",
+      "fields": {
+        "activityLabel": "نوع النشاط *",
+        "activityLabelAuto": "نوع النشاط * ✓ مستخرج تلقائياً",
+        "activityPlaceholder": "مثال: مطعم وجبات سريعة",
+        "cityLabel": "المدينة *",
+        "cityLabelAuto": "المدينة ✓ من الخريطة",
+        "cityPlaceholder": "الرياض",
+        "priceLabel": "السعر المطلوب (ر.س) *",
+        "pricePlaceholder": "100,000",
+        "annualRentLabel": "الإيجار السنوي (ر.س)",
+        "annualRentPlaceholder": "مثال: 60000",
+        "leaseDuration": "مدة عقد الإيجار",
+        "leasePaidPeriod": "فترة الإيجار المسددة",
+        "leaseRemaining": "المتبقي من عقد الإيجار",
+        "liabilities": "التزامات مالية (ديون / أقساط)",
+        "overdueSalaries": "رواتب متأخرة",
+        "overdueRent": "إيجار متأخر",
+        "municipalityLicense": "رخصة البلدية",
+        "civilDefenseLicense": "رخصة الدفاع المدني",
+        "surveillanceCameras": "كاميرات مراقبة"
+      },
+      "options": {
+        "leaseDuration": {
+          "سنة": "سنة",
+          "سنتين": "سنتين",
+          "3 سنوات": "3 سنوات",
+          "4 سنوات": "4 سنوات",
+          "5 سنوات": "5 سنوات",
+          "أكثر من 5 سنوات": "أكثر من 5 سنوات"
+        },
+        "leasePaidPeriod": {
+          "مسدد بالكامل": "مسدد بالكامل",
+          "متأخر شهر": "متأخر شهر",
+          "متأخر شهرين": "متأخر شهرين",
+          "متأخر 3 أشهر أو أكثر": "متأخر 3 أشهر أو أكثر"
+        },
+        "leaseRemaining": {
+          "أقل من 6 أشهر": "أقل من 6 أشهر",
+          "6-12 شهر": "6-12 شهر",
+          "1-2 سنة": "1-2 سنة",
+          "2-3 سنوات": "2-3 سنوات",
+          "أكثر من 3 سنوات": "أكثر من 3 سنوات"
+        },
+        "liabilities": {
+          "لا يوجد": "لا يوجد",
+          "أقل من 10,000": "أقل من 10,000",
+          "10,000 - 50,000": "10,000 - 50,000",
+          "50,000 - 100,000": "50,000 - 100,000",
+          "أكثر من 100,000": "أكثر من 100,000"
+        },
+        "overdueMonths": {
+          "لا يوجد": "لا يوجد",
+          "شهر واحد": "شهر واحد",
+          "شهرين": "شهرين",
+          "3 أشهر أو أكثر": "3 أشهر أو أكثر"
+        },
+        "licenseStatus": {
+          "سارية": "سارية",
+          "منتهية": "منتهية",
+          "قيد التجديد": "قيد التجديد",
+          "غير موجودة": "غير موجودة"
+        },
+        "cameras": {
+          "موجودة وتعمل": "موجودة وتعمل",
+          "موجودة لا تعمل": "موجودة لا تعمل",
+          "غير موجودة": "غير موجودة"
+        }
+      },
+      "mapPickedTitle": "الموقع محدد على الخريطة",
+      "mapPickedHint": "اضغط للفتح في خرائط قوقل ←",
+      "dealCheck": {
+        "introTitle": "فحص الصفقة قبل النشر",
+        "introHint": "الـAI يحلل بياناتك ويعطيك توصيات لتحسين الإعلان",
+        "introButton": "افحص الصفقة",
+        "introNote": "يمكنك المتابعة بالنشر بدون الفحص",
+        "loading": "جاري فحص الصفقة...",
+        "errorTitle": "تعذّر إجراء الفحص التلقائي",
+        "priceFairness": "عدالة السعر: {{verdict}}",
+        "recommendation": "التوصية",
+        "risks": "المخاطر الرئيسية",
+        "strengths": "نقاط القوة",
+        "missing": "معلومات ناقصة",
+        "afterAdjust": "يمكنك تعديل البيانات أعلاه بناءً على هذا التحليل (مثل السعر أو بيانات الإفصاح) ثم إعادة الفحص — أو المتابعة للنشر مباشرة.",
+        "rerun": "إعادة التحليل بعد التعديل"
+      },
+      "summary": {
+        "title": "ملخص الإعلان",
+        "subtitle": "راجع البيانات قبل النشر",
+        "dealStructureTitle": "هيكل الصفقة",
+        "primaryBadge": "رئيسي",
+        "alternateBadge": "بديل {{n}}",
+        "sentenceProject": "مشروع",
+        "sentenceDash": "—",
+        "sentenceTemplate": "{{activity}} في {{district}}, {{city}}.",
+        "sentenceStructure": " هيكل الصفقة: {{label}}.",
+        "sentenceAssets": " عدد الأصول المؤكّدة: {{count}} عنصر ({{qty}} قطعة).",
+        "sentenceAnnualRent": " الإيجار السنوي {{value}} ريال.",
+        "sentenceLeaseRemaining": " متبقي من العقد {{value}}.",
+        "sentencePrice": " السعر المطلوب {{value}} ريال.",
+        "statPhotos": "صورة",
+        "statAssets": "أصل مشمول",
+        "statDocs": "مستند",
+        "photosMissingNotice": "يجب رفع صورة واحدة على الأقل — عد إلى خطوة الصور والمستندات",
+        "previewHeader": "معاينة الإعلان كما سيظهر للمشترين",
+        "previewActivityFallback": "اسم النشاط",
+        "previewDistrictFallback": "الحي",
+        "previewCityFallback": "المدينة",
+        "previewPhotos": "{{count}} صورة",
+        "previewAssets": "{{count}} أصل",
+        "photoAlt": "صورة الإعلان"
+      },
+      "sellerNote": {
+        "label": "رسالة للمشترين (اختياري)",
+        "placeholder": "إذا في خاطرك شي ودّك تقوله عن المشروع يا {{name}}... ✍️",
+        "fallbackName": "صاحب الإعلان"
+      },
+      "unifiedReview": {
+        "emptyTitle": "لم ترفع أي ملفات",
+        "emptyHint": "إعلانك بدون صور أو مستندات سيكون ضعيفاً ويقل ظهوره. يمكنك العودة لرفع ملفات.",
+        "needsReviewTitle": "تحتاج مراجعة ملفاتك",
+        "needsReviewHint": "{{unconfirmed}} من {{total}} ملف يحتاج تأكيد قبل النشر",
+        "reviewNow": "راجع الآن",
+        "readyTitle": "{{count}} ملف جاهز للنشر"
+      },
+      "publishButton": "نشر الإعلان",
+      "publishBlockedTitle": "يجب مراجعة ملفاتك قبل النشر"
+    },
+    "inventoryDefaults": {
+      "unnamedAsset": "أصل غير مسمى",
+      "unclear": "غير واضح",
+      "otherCategory": "أخرى",
+      "itemFromFiles": "عنصر من الملفات",
+      "stockCategory": "مخزون",
+      "extractedFromFile": "مستخرج من ملف مرفق",
+      "extractedFromFileWithPrice": "مستخرج من ملف مرفق — سعر الوحدة: {{price}} ر.س"
+    },
+    "dealLabel": {
+      "full_takeover": "تقبيل كامل",
+      "no_liabilities": "تقبيل نقل أعمال بدون التزامات سابقة",
+      "assets_setup": "تقبيل أصول + تجهيز تشغيلي (بدون سجل تجاري)",
+      "assets_only": "تقبيل أصول فقط"
     }
   }
 }

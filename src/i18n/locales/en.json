@@ -980,6 +980,226 @@
       "resolving": "Resolving link...",
       "shortLinkHint": "Try copying the full URL from the Maps browser instead of the app",
       "unrecognized": "Coordinates not recognized — try pasting a Google Maps link or coordinates like: 24.7136, 46.6753"
+    },
+    "step3": {
+      "confidence": {
+        "high": "High confidence",
+        "medium": "Medium confidence",
+        "low": "Needs review"
+      },
+      "analyzing": {
+        "excelAndPhotos": "Analyzing Excel files and photos...",
+        "excelOnly": "Analyzing Excel file...",
+        "docsOnly": "Analyzing documents...",
+        "photosOnly": "AI is analyzing the photos...",
+        "hintExcel": "Reading {{count}} Excel file(s) and extracting the first 500 rows from each",
+        "hintDocs": "Extracting data from the uploaded documents",
+        "hintPhotos": "Detecting assets and identifying photo angles",
+        "relax": "Sit back — the AI is handling it"
+      },
+      "intro": {
+        "titleExcelAndPhotos": "AI analysis of photos and Excel",
+        "titleExcelOnly": "AI analysis of the Excel file",
+        "titleDocsOnly": "AI analysis of the documents",
+        "titlePhotosOnly": "AI analysis of the photos",
+        "hintExcelAndPhotos": "The AI will parse the Excel files and analyse the photos to extract assets automatically",
+        "hintExcelOnly": "The AI will parse the Excel file and extract assets and inventory automatically",
+        "hintDocsOnly": "The AI will analyse the uploaded documents and extract the data automatically",
+        "hintPhotosOnly": "The AI will analyse your photos and detect the assets automatically",
+        "cta": "Just press the button — we handle the rest",
+        "noNeedNotice": "This deal type does not require photos — you may continue or upload Excel/documents to improve the analysis",
+        "missingRequired": "Please upload photos or an Excel/document file in the previous step first",
+        "missingOptional": "No photos or documents were uploaded — you may continue or go back to upload files",
+        "excelDetected": "Detected {{count}} Excel file(s) — the first 500 rows of each will be analysed automatically.",
+        "photosLimit": "You have {{count}} photos — only the first 30 will be analysed. The rest will be saved but not analysed."
+      },
+      "analyzeButton": {
+        "excelAndPhotos": "Start AI analysis ({{photos}} photos + {{excel}} Excel)",
+        "excelOnly": "Start Excel analysis ({{count}} file)",
+        "docsOnly": "Start document analysis ({{count}} file)",
+        "photosOnly": "Start AI analysis ({{analyzed}} of {{total}} photos)"
+      },
+      "results": {
+        "title": "AI analysis results",
+        "dedupTitle": "Duplicate items were merged automatically",
+        "dedupItem": "— {{description}} ({{count}} items)",
+        "pricingMode": "Pricing method:",
+        "modePerItem": "Price each item",
+        "modeBulk": "Lump-sum price",
+        "bulkPriceLabel": "Lump-sum price:",
+        "bulkPricePlaceholder": "e.g. 50000",
+        "includedCount": "{{count}} asset(s) included",
+        "outOfTotal": "out of {{count}}",
+        "addItem": "Add item",
+        "defaultNewItemName": "New item",
+        "addedManually": "Added manually",
+        "multipleAngles": "Multiple angles",
+        "pricePlaceholder": "Price",
+        "unitPriceEquals": "= {{value}}"
+      },
+      "conditions": {
+        "new": "New",
+        "almostNew": "Like new",
+        "good": "Good",
+        "damaged": "Damaged"
+      },
+      "totals": {
+        "pricedSummary": "Total priced assets ({{priced}} of {{included}}) — {{qty}} units",
+        "notPriced": "No prices set",
+        "unpricedHint": "{{count}} item(s) without a price — you can add them later",
+        "bulkTotalLabel": "Lump-sum price for the assets",
+        "bulkNotSet": "Not set"
+      }
+    },
+    "step4": {
+      "sectionTitle": "Disclosure information",
+      "crAutoFillTitle": "Fields filled in automatically from the commercial registration",
+      "crAutoFillHint": "Review the data and edit if needed — then set the asking price",
+      "disclosuresTitle": "Deal disclosures",
+      "validationTitle": "Please complete the required fields before publishing",
+      "validationPhotos": "At least one photo is required",
+      "placeholderSelect": "Select...",
+      "fields": {
+        "activityLabel": "Business activity *",
+        "activityLabelAuto": "Business activity * ✓ extracted automatically",
+        "activityPlaceholder": "e.g. Fast-food restaurant",
+        "cityLabel": "City *",
+        "cityLabelAuto": "City ✓ from the map",
+        "cityPlaceholder": "Riyadh",
+        "priceLabel": "Asking price (SAR) *",
+        "pricePlaceholder": "100,000",
+        "annualRentLabel": "Annual rent (SAR)",
+        "annualRentPlaceholder": "e.g. 60000",
+        "leaseDuration": "Lease term",
+        "leasePaidPeriod": "Lease payment status",
+        "leaseRemaining": "Remaining lease term",
+        "liabilities": "Financial liabilities (debts / instalments)",
+        "overdueSalaries": "Overdue salaries",
+        "overdueRent": "Overdue rent",
+        "municipalityLicense": "Municipality licence",
+        "civilDefenseLicense": "Civil defence licence",
+        "surveillanceCameras": "Surveillance cameras"
+      },
+      "options": {
+        "leaseDuration": {
+          "سنة": "1 year",
+          "سنتين": "2 years",
+          "3 سنوات": "3 years",
+          "4 سنوات": "4 years",
+          "5 سنوات": "5 years",
+          "أكثر من 5 سنوات": "More than 5 years"
+        },
+        "leasePaidPeriod": {
+          "مسدد بالكامل": "Paid in full",
+          "متأخر شهر": "1 month overdue",
+          "متأخر شهرين": "2 months overdue",
+          "متأخر 3 أشهر أو أكثر": "3 months or more overdue"
+        },
+        "leaseRemaining": {
+          "أقل من 6 أشهر": "Less than 6 months",
+          "6-12 شهر": "6–12 months",
+          "1-2 سنة": "1–2 years",
+          "2-3 سنوات": "2–3 years",
+          "أكثر من 3 سنوات": "More than 3 years"
+        },
+        "liabilities": {
+          "لا يوجد": "None",
+          "أقل من 10,000": "Less than 10,000",
+          "10,000 - 50,000": "10,000 – 50,000",
+          "50,000 - 100,000": "50,000 – 100,000",
+          "أكثر من 100,000": "More than 100,000"
+        },
+        "overdueMonths": {
+          "لا يوجد": "None",
+          "شهر واحد": "1 month",
+          "شهرين": "2 months",
+          "3 أشهر أو أكثر": "3 months or more"
+        },
+        "licenseStatus": {
+          "سارية": "Active",
+          "منتهية": "Expired",
+          "قيد التجديد": "Under renewal",
+          "غير موجودة": "Not available"
+        },
+        "cameras": {
+          "موجودة وتعمل": "Installed and working",
+          "موجودة لا تعمل": "Installed but not working",
+          "غير موجودة": "Not installed"
+        }
+      },
+      "mapPickedTitle": "Location set on the map",
+      "mapPickedHint": "Tap to open in Google Maps →",
+      "dealCheck": {
+        "introTitle": "Pre-publish deal check",
+        "introHint": "The AI analyses your data and gives recommendations to improve the listing",
+        "introButton": "Run deal check",
+        "introNote": "You can publish without running the check",
+        "loading": "Running deal check...",
+        "errorTitle": "Could not run the automatic check",
+        "priceFairness": "Price fairness: {{verdict}}",
+        "recommendation": "Recommendation",
+        "risks": "Key risks",
+        "strengths": "Strengths",
+        "missing": "Missing information",
+        "afterAdjust": "You can adjust the data above based on this analysis (e.g. price or disclosures) and re-run the check — or proceed straight to publishing.",
+        "rerun": "Re-run analysis after edits"
+      },
+      "summary": {
+        "title": "Listing summary",
+        "subtitle": "Review the data before publishing",
+        "dealStructureTitle": "Deal structure",
+        "primaryBadge": "Primary",
+        "alternateBadge": "Alternative {{n}}",
+        "sentenceProject": "Project",
+        "sentenceDash": "—",
+        "sentenceTemplate": "{{activity}} in {{district}}, {{city}}.",
+        "sentenceStructure": " Deal structure: {{label}}.",
+        "sentenceAssets": " Confirmed assets: {{count}} item(s) ({{qty}} units).",
+        "sentenceAnnualRent": " Annual rent {{value}} SAR.",
+        "sentenceLeaseRemaining": " Remaining lease term {{value}}.",
+        "sentencePrice": " Asking price {{value}} SAR.",
+        "statPhotos": "Photos",
+        "statAssets": "Assets included",
+        "statDocs": "Documents",
+        "photosMissingNotice": "At least one photo is required — go back to the photos & documents step",
+        "previewHeader": "Preview as buyers will see it",
+        "previewActivityFallback": "Business name",
+        "previewDistrictFallback": "District",
+        "previewCityFallback": "City",
+        "previewPhotos": "{{count}} photos",
+        "previewAssets": "{{count}} assets",
+        "photoAlt": "Listing photo"
+      },
+      "sellerNote": {
+        "label": "Message to buyers (optional)",
+        "placeholder": "If there's anything you'd like to say about the project, {{name}}... ✍️",
+        "fallbackName": "owner"
+      },
+      "unifiedReview": {
+        "emptyTitle": "You haven't uploaded any files",
+        "emptyHint": "A listing without photos or documents will be weak and less visible. You can go back to upload files.",
+        "needsReviewTitle": "Your files need review",
+        "needsReviewHint": "{{unconfirmed}} of {{total}} files need confirmation before publishing",
+        "reviewNow": "Review now",
+        "readyTitle": "{{count}} file(s) ready to publish"
+      },
+      "publishButton": "Publish listing",
+      "publishBlockedTitle": "Your files must be reviewed before publishing"
+    },
+    "inventoryDefaults": {
+      "unnamedAsset": "Unnamed asset",
+      "unclear": "Unclear",
+      "otherCategory": "Other",
+      "itemFromFiles": "Item from files",
+      "stockCategory": "Inventory",
+      "extractedFromFile": "Extracted from an attached file",
+      "extractedFromFileWithPrice": "Extracted from an attached file — unit price: {{price}} SAR"
+    },
+    "dealLabel": {
+      "full_takeover": "Full takeover",
+      "no_liabilities": "Business transfer without prior liabilities",
+      "assets_setup": "Assets + operational setup (no commercial registration)",
+      "assets_only": "Assets only"
     }
   }
 }

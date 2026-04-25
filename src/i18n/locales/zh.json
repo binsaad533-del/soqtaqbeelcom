@@ -980,6 +980,226 @@
       "resolving": "正在解析链接……",
       "shortLinkHint": "请尝试从地图浏览器(而非应用)复制完整链接",
       "unrecognized": "无法识别坐标 — 请粘贴谷歌地图链接或坐标,例如:24.7136, 46.6753"
+    },
+    "step3": {
+      "confidence": {
+        "high": "高置信度",
+        "medium": "中等置信度",
+        "low": "需要确认"
+      },
+      "analyzing": {
+        "excelAndPhotos": "正在分析 Excel 文件和照片...",
+        "excelOnly": "正在分析 Excel 文件...",
+        "docsOnly": "正在分析文档...",
+        "photosOnly": "AI 正在分析照片...",
+        "hintExcel": "正在读取 {{count}} 个 Excel 文件,每个文件提取前 500 行",
+        "hintDocs": "正在从上传的文档中提取数据",
+        "hintPhotos": "正在识别资产并标注拍摄角度",
+        "relax": "无需操作 — AI 正在为您处理"
+      },
+      "intro": {
+        "titleExcelAndPhotos": "AI 分析照片与 Excel",
+        "titleExcelOnly": "AI 分析 Excel",
+        "titleDocsOnly": "AI 分析文档",
+        "titlePhotosOnly": "AI 分析照片",
+        "hintExcelAndPhotos": "AI 将读取 Excel 并分析照片以自动提取资产",
+        "hintExcelOnly": "AI 将读取 Excel 并自动提取资产与库存",
+        "hintDocsOnly": "AI 将分析已上传的文档并自动提取数据",
+        "hintPhotosOnly": "AI 将分析您的照片并自动识别资产",
+        "cta": "只需点击按钮 — 其余交给我们",
+        "noNeedNotice": "此类交易无需上传照片 — 您可以继续或上传 Excel / 文档以提升分析效果",
+        "missingRequired": "请先在上一步上传照片或 Excel / 文档",
+        "missingOptional": "尚未上传照片或文档 — 您可继续或返回上传",
+        "excelDetected": "检测到 {{count}} 个 Excel 文件 — 每个文件的前 500 行将自动分析。",
+        "photosLimit": "您有 {{count}} 张照片 — 仅分析前 30 张,其余将保存但不分析。"
+      },
+      "analyzeButton": {
+        "excelAndPhotos": "启动 AI 分析({{photos}} 张照片 + {{excel}} 个 Excel)",
+        "excelOnly": "启动 Excel 分析({{count}} 个文件)",
+        "docsOnly": "启动文档分析({{count}} 个文件)",
+        "photosOnly": "启动 AI 分析(共 {{total}} 张,分析 {{analyzed}} 张)"
+      },
+      "results": {
+        "title": "AI 分析结果",
+        "dedupTitle": "已自动合并重复项",
+        "dedupItem": "— {{description}}({{count}} 项)",
+        "pricingMode": "定价方式:",
+        "modePerItem": "逐项定价",
+        "modeBulk": "整体定价",
+        "bulkPriceLabel": "整体价格:",
+        "bulkPricePlaceholder": "例如:50000",
+        "includedCount": "包含 {{count}} 项资产",
+        "outOfTotal": "共 {{count}} 项",
+        "addItem": "添加项目",
+        "defaultNewItemName": "新项目",
+        "addedManually": "手动添加",
+        "multipleAngles": "多角度",
+        "pricePlaceholder": "价格",
+        "unitPriceEquals": "= {{value}}"
+      },
+      "conditions": {
+        "new": "全新",
+        "almostNew": "近全新",
+        "good": "良好",
+        "damaged": "损坏"
+      },
+      "totals": {
+        "pricedSummary": "已定价资产合计({{priced}}/{{included}})— {{qty}} 件",
+        "notPriced": "未设置价格",
+        "unpricedHint": "{{count}} 项尚未定价 — 可稍后添加",
+        "bulkTotalLabel": "资产整体价格",
+        "bulkNotSet": "未设置"
+      }
+    },
+    "step4": {
+      "sectionTitle": "披露信息",
+      "crAutoFillTitle": "已根据营业执照自动填充字段",
+      "crAutoFillHint": "请检查并按需修改 — 然后设定要价",
+      "disclosuresTitle": "交易披露",
+      "validationTitle": "请在发布前填写必填字段",
+      "validationPhotos": "至少需要上传一张照片",
+      "placeholderSelect": "请选择…",
+      "fields": {
+        "activityLabel": "业务类型 *",
+        "activityLabelAuto": "业务类型 * ✓ 已自动提取",
+        "activityPlaceholder": "例如:快餐店",
+        "cityLabel": "城市 *",
+        "cityLabelAuto": "城市 ✓ 来自地图",
+        "cityPlaceholder": "利雅得",
+        "priceLabel": "要价(沙特里亚尔)*",
+        "pricePlaceholder": "100,000",
+        "annualRentLabel": "年租金(沙特里亚尔)",
+        "annualRentPlaceholder": "例如:60000",
+        "leaseDuration": "租约期限",
+        "leasePaidPeriod": "租金缴纳状态",
+        "leaseRemaining": "剩余租约期限",
+        "liabilities": "财务负债(债务 / 分期)",
+        "overdueSalaries": "拖欠工资",
+        "overdueRent": "拖欠租金",
+        "municipalityLicense": "市政许可证",
+        "civilDefenseLicense": "民防许可证",
+        "surveillanceCameras": "监控摄像头"
+      },
+      "options": {
+        "leaseDuration": {
+          "سنة": "1 年",
+          "سنتين": "2 年",
+          "3 سنوات": "3 年",
+          "4 سنوات": "4 年",
+          "5 سنوات": "5 年",
+          "أكثر من 5 سنوات": "5 年以上"
+        },
+        "leasePaidPeriod": {
+          "مسدد بالكامل": "已全额支付",
+          "متأخر شهر": "拖欠 1 个月",
+          "متأخر شهرين": "拖欠 2 个月",
+          "متأخر 3 أشهر أو أكثر": "拖欠 3 个月或以上"
+        },
+        "leaseRemaining": {
+          "أقل من 6 أشهر": "少于 6 个月",
+          "6-12 شهر": "6–12 个月",
+          "1-2 سنة": "1–2 年",
+          "2-3 سنوات": "2–3 年",
+          "أكثر من 3 سنوات": "3 年以上"
+        },
+        "liabilities": {
+          "لا يوجد": "无",
+          "أقل من 10,000": "少于 10,000",
+          "10,000 - 50,000": "10,000 – 50,000",
+          "50,000 - 100,000": "50,000 – 100,000",
+          "أكثر من 100,000": "超过 100,000"
+        },
+        "overdueMonths": {
+          "لا يوجد": "无",
+          "شهر واحد": "1 个月",
+          "شهرين": "2 个月",
+          "3 أشهر أو أكثر": "3 个月或以上"
+        },
+        "licenseStatus": {
+          "سارية": "有效",
+          "منتهية": "已过期",
+          "قيد التجديد": "续办中",
+          "غير موجودة": "无"
+        },
+        "cameras": {
+          "موجودة وتعمل": "已安装并运行",
+          "موجودة لا تعمل": "已安装但不运行",
+          "غير موجودة": "未安装"
+        }
+      },
+      "mapPickedTitle": "已在地图上确定位置",
+      "mapPickedHint": "点击在谷歌地图打开 →",
+      "dealCheck": {
+        "introTitle": "发布前交易检查",
+        "introHint": "AI 将分析您的数据并提出改进建议",
+        "introButton": "运行交易检查",
+        "introNote": "您也可以不运行检查直接发布",
+        "loading": "正在进行交易检查...",
+        "errorTitle": "无法运行自动检查",
+        "priceFairness": "价格公允度:{{verdict}}",
+        "recommendation": "建议",
+        "risks": "主要风险",
+        "strengths": "优势",
+        "missing": "缺失信息",
+        "afterAdjust": "您可以根据本次分析调整上方数据(如价格或披露内容)后重新检查 — 或直接继续发布。",
+        "rerun": "修改后重新分析"
+      },
+      "summary": {
+        "title": "广告摘要",
+        "subtitle": "发布前请检查信息",
+        "dealStructureTitle": "交易结构",
+        "primaryBadge": "主要",
+        "alternateBadge": "备选 {{n}}",
+        "sentenceProject": "项目",
+        "sentenceDash": "—",
+        "sentenceTemplate": "{{activity}},位于 {{district}}, {{city}}。",
+        "sentenceStructure": " 交易结构:{{label}}。",
+        "sentenceAssets": " 已确认资产:{{count}} 项({{qty}} 件)。",
+        "sentenceAnnualRent": " 年租金 {{value}} 里亚尔。",
+        "sentenceLeaseRemaining": " 剩余租期 {{value}}。",
+        "sentencePrice": " 要价 {{value}} 里亚尔。",
+        "statPhotos": "照片",
+        "statAssets": "包含资产",
+        "statDocs": "文档",
+        "photosMissingNotice": "至少需要一张照片 — 请返回照片与文档步骤",
+        "previewHeader": "预览(买家所见效果)",
+        "previewActivityFallback": "业务名称",
+        "previewDistrictFallback": "区域",
+        "previewCityFallback": "城市",
+        "previewPhotos": "{{count}} 张照片",
+        "previewAssets": "{{count}} 项资产",
+        "photoAlt": "广告照片"
+      },
+      "sellerNote": {
+        "label": "给买家的留言(选填)",
+        "placeholder": "如果有什么想对项目说的,{{name}} 请写在这里... ✍️",
+        "fallbackName": "广告主"
+      },
+      "unifiedReview": {
+        "emptyTitle": "您尚未上传任何文件",
+        "emptyHint": "没有照片或文档的广告会比较薄弱,曝光也较低。可返回上传。",
+        "needsReviewTitle": "您的文件需要确认",
+        "needsReviewHint": "{{total}} 个文件中有 {{unconfirmed}} 个需要在发布前确认",
+        "reviewNow": "立即查看",
+        "readyTitle": "{{count}} 个文件已准备好发布"
+      },
+      "publishButton": "发布广告",
+      "publishBlockedTitle": "请在发布前确认您的文件"
+    },
+    "inventoryDefaults": {
+      "unnamedAsset": "未命名资产",
+      "unclear": "不明",
+      "otherCategory": "其他",
+      "itemFromFiles": "来自文件的项目",
+      "stockCategory": "库存",
+      "extractedFromFile": "提取自附件",
+      "extractedFromFileWithPrice": "提取自附件 — 单价:{{price}} 里亚尔"
+    },
+    "dealLabel": {
+      "full_takeover": "完整接管",
+      "no_liabilities": "业务转让(无历史负债)",
+      "assets_setup": "资产 + 运营装置(不含工商注册)",
+      "assets_only": "仅资产"
     }
   }
 }

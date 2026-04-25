@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
   FolderOpen,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import AiStar from "@/components/AiStar";
@@ -18,6 +19,7 @@ import { FormField, SelectField } from "./FormFields";
 import { isFieldVisible } from "@/lib/dealTypeFieldRules";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
 import { DEAL_TYPE_MAP } from "@/lib/dealStructureConfig";
+import { tDealItemByValue } from "@/lib/dealStructureI18n";
 import type { CreateListingSharedState } from "./sharedState";
 
 interface Props {
@@ -25,13 +27,13 @@ interface Props {
 }
 
 const CreateListingStep4 = ({ state }: Props) => {
+  const { t } = useTranslation();
   const {
     stepDirection,
     dealStructure,
     disclosure,
     setDisclosure,
     inventory,
-    
     uploadedDocs,
     locationLat,
     locationLng,
@@ -65,21 +67,32 @@ const CreateListingStep4 = ({ state }: Props) => {
   const SELLER_NOTE_MAX = 2000;
   const dealTypeForTransparency = dealStructure.primaryType || "full_takeover";
 
+  // Translate primary deal label using dealLabel namespace, fallback to AR label
+  const tDealLabel = (id: string, fallback: string) =>
+    t(`createListing.dealLabel.${id}`, { defaultValue: fallback });
+
+  const translatedPrimaryDealLabel = dealStructure.primaryType
+    ? tDealLabel(dealStructure.primaryType, primaryDealLabel)
+    : primaryDealLabel;
+
+  // Option label maps (value stays AR for DB, label translated)
+  const opt = (group: string) =>
+    t(`createListing.step4.options.${group}`, { returnObjects: true }) as Record<string, string>;
+
   return (
     <div key="step-3" className={`space-y-6 ${stepDirection === "next" ? "animate-step-slide-in-next" : "animate-step-slide-in-prev"}`}>
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-1">
           <ClipboardList size={16} strokeWidth={1.5} className="text-primary" />
-          <h2 className="font-medium text-sm">بيانات الإفصاح</h2>
+          <h2 className="font-medium text-sm">{t("createListing.step4.sectionTitle")}</h2>
         </div>
 
-        {/* CR extraction auto-fill notice */}
         {isCrOnly && crExtractionDone && crExtraction && (
           <div className="bg-success/5 border border-success/20 rounded-xl p-3 flex items-start gap-2 animate-fade-in">
             <Check size={14} className="text-success shrink-0 mt-0.5" />
             <div>
-              <p className="text-xs font-medium text-success">تم تعبئة الحقول تلقائياً من السجل التجاري</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">راجع البيانات وعدّلها إن لزم الأمر — ثم حدد السعر المطلوب</p>
+              <p className="text-xs font-medium text-success">{t("createListing.step4.crAutoFillTitle")}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{t("createListing.step4.crAutoFillHint")}</p>
             </div>
           </div>
         )}
@@ -110,7 +123,7 @@ const CreateListingStep4 = ({ state }: Props) => {
           return (
             <div className="bg-muted/30 border border-border/40 rounded-xl p-3">
               <div className="text-xs font-medium text-foreground/70 mb-2 flex items-center gap-1">
-                <Shield size={12} /> إفصاحات الصفقة
+                <Shield size={12} /> {t("createListing.step4.disclosuresTitle")}
               </div>
               <div className="space-y-1.5">
                 {dealStructure.requiredDisclosures.map((item) => {
@@ -118,7 +131,7 @@ const CreateListingStep4 = ({ state }: Props) => {
                   return (
                     <div key={item} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] ${complete ? "bg-success/5 border border-success/20 text-success" : "bg-muted/30 text-muted-foreground"}`}>
                       {complete ? <Check size={12} className="shrink-0" /> : <span className="w-3 h-3 rounded-full border border-muted-foreground/30 shrink-0" />}
-                      <span>{item}</span>
+                      <span>{tDealItemByValue(t, item)}</span>
                     </div>
                   );
                 })}
@@ -127,14 +140,13 @@ const CreateListingStep4 = ({ state }: Props) => {
           );
         })()}
 
-        {/* Validation error banner */}
         {publishAttempted && !canPublish && (
           <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-start gap-2">
             <AlertTriangle size={16} className="text-destructive shrink-0 mt-0.5" />
             <div>
-              <p className="text-xs font-medium text-destructive">يرجى إكمال الحقول المطلوبة قبل النشر</p>
+              <p className="text-xs font-medium text-destructive">{t("createListing.step4.validationTitle")}</p>
               <ul className="text-[11px] text-destructive/80 mt-1 space-y-0.5 list-disc list-inside">
-                {!photosOk && imageReq === "required" && <li>يجب رفع صورة واحدة على الأقل</li>}
+                {!photosOk && imageReq === "required" && <li>{t("createListing.step4.validationPhotos")}</li>}
                 {Object.entries(disclosureErrors).map(([field, msg]) => (
                   <li key={field}>{msg}</li>
                 ))}
@@ -146,8 +158,8 @@ const CreateListingStep4 = ({ state }: Props) => {
         <div className="space-y-3">
           {isFieldVisible(dealTypeForTransparency, "business_activity") && (
             <FormField
-              label={disclosure.business_activity ? "نوع النشاط * ✓ مستخرج تلقائياً" : "نوع النشاط *"}
-              placeholder="مثال: مطعم وجبات سريعة"
+              label={disclosure.business_activity ? t("createListing.step4.fields.activityLabelAuto") : t("createListing.step4.fields.activityLabel")}
+              placeholder={t("createListing.step4.fields.activityPlaceholder")}
               value={disclosure.business_activity}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, business_activity: v }))}
               error={publishAttempted && disclosureErrors["business_activity"]}
@@ -155,8 +167,8 @@ const CreateListingStep4 = ({ state }: Props) => {
           )}
           {isFieldVisible(dealTypeForTransparency, "city") && (
             <FormField
-              label={disclosure.city ? "المدينة ✓ من الخريطة" : "المدينة *"}
-              placeholder="الرياض"
+              label={disclosure.city ? t("createListing.step4.fields.cityLabelAuto") : t("createListing.step4.fields.cityLabel")}
+              placeholder={t("createListing.step4.fields.cityPlaceholder")}
               value={disclosure.city}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, city: v }))}
               error={publishAttempted && disclosureErrors["city"]}
@@ -170,14 +182,14 @@ const CreateListingStep4 = ({ state }: Props) => {
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-success/5 border border-success/20 hover:bg-success/10 transition-colors"
             >
               <MapPin size={14} className="text-success" />
-              <span className="text-sm text-success">الموقع محدد على الخريطة</span>
-              <span className="text-[10px] text-success/70 mr-auto">اضغط للفتح في خرائط قوقل ←</span>
+              <span className="text-sm text-success">{t("createListing.step4.mapPickedTitle")}</span>
+              <span className="text-[10px] text-success/70 mr-auto">{t("createListing.step4.mapPickedHint")}</span>
             </a>
           )}
           {isFieldVisible(dealTypeForTransparency, "price") && (
             <FormField
-              label="السعر المطلوب (ر.س) *"
-              placeholder="100,000"
+              label={t("createListing.step4.fields.priceLabel")}
+              placeholder={t("createListing.step4.fields.pricePlaceholder")}
               value={disclosure.price}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, price: toEnglishNumerals(v) }))}
               error={publishAttempted && disclosureErrors["price"]}
@@ -185,8 +197,8 @@ const CreateListingStep4 = ({ state }: Props) => {
           )}
           {isFieldVisible(dealTypeForTransparency, "annual_rent") && (
             <FormField
-              label="الإيجار السنوي (ر.س)"
-              placeholder="مثال: 60000"
+              label={t("createListing.step4.fields.annualRentLabel")}
+              placeholder={t("createListing.step4.fields.annualRentPlaceholder")}
               value={disclosure.annual_rent}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, annual_rent: toEnglishNumerals(v) }))}
               error={publishAttempted && disclosureErrors["annual_rent"]}
@@ -194,82 +206,91 @@ const CreateListingStep4 = ({ state }: Props) => {
           )}
           {isFieldVisible(dealTypeForTransparency, "lease_duration") && (
             <SelectField
-              label="مدة عقد الإيجار"
+              label={t("createListing.step4.fields.leaseDuration")}
               value={disclosure.lease_duration}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_duration: v }))}
               options={["سنة", "سنتين", "3 سنوات", "4 سنوات", "5 سنوات", "أكثر من 5 سنوات"]}
+              optionLabels={opt("leaseDuration")}
               error={publishAttempted && disclosureErrors["lease_duration"]}
             />
           )}
           {isFieldVisible(dealTypeForTransparency, "lease_paid_period") && (
             <SelectField
-              label="فترة الإيجار المسددة"
+              label={t("createListing.step4.fields.leasePaidPeriod")}
               value={disclosure.lease_paid_period}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_paid_period: v }))}
               options={["مسدد بالكامل", "متأخر شهر", "متأخر شهرين", "متأخر 3 أشهر أو أكثر"]}
+              optionLabels={opt("leasePaidPeriod")}
               error={publishAttempted && disclosureErrors["lease_paid_period"]}
             />
           )}
           {isFieldVisible(dealTypeForTransparency, "lease_remaining") && (
             <SelectField
-              label="المتبقي من عقد الإيجار"
+              label={t("createListing.step4.fields.leaseRemaining")}
               value={disclosure.lease_remaining}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, lease_remaining: v }))}
               options={["أقل من 6 أشهر", "6-12 شهر", "1-2 سنة", "2-3 سنوات", "أكثر من 3 سنوات"]}
+              optionLabels={opt("leaseRemaining")}
               error={publishAttempted && disclosureErrors["lease_remaining"]}
             />
           )}
           {isFieldVisible(dealTypeForTransparency, "liabilities") && (
             <SelectField
-              label="التزامات مالية (ديون / أقساط)"
+              label={t("createListing.step4.fields.liabilities")}
               value={disclosure.liabilities}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, liabilities: v }))}
               options={["لا يوجد", "أقل من 10,000", "10,000 - 50,000", "50,000 - 100,000", "أكثر من 100,000"]}
+              optionLabels={opt("liabilities")}
               error={publishAttempted && disclosureErrors["liabilities"]}
             />
           )}
           {isFieldVisible(dealTypeForTransparency, "overdue_salaries") && (
             <SelectField
-              label="رواتب متأخرة"
+              label={t("createListing.step4.fields.overdueSalaries")}
               value={disclosure.overdue_salaries}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, overdue_salaries: v }))}
               options={["لا يوجد", "شهر واحد", "شهرين", "3 أشهر أو أكثر"]}
+              optionLabels={opt("overdueMonths")}
               error={publishAttempted && disclosureErrors["overdue_salaries"]}
             />
           )}
           {isFieldVisible(dealTypeForTransparency, "overdue_rent") && (
             <SelectField
-              label="إيجار متأخر"
+              label={t("createListing.step4.fields.overdueRent")}
               value={disclosure.overdue_rent}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, overdue_rent: v }))}
               options={["لا يوجد", "شهر واحد", "شهرين", "3 أشهر أو أكثر"]}
+              optionLabels={opt("overdueMonths")}
               error={publishAttempted && disclosureErrors["overdue_rent"]}
             />
           )}
           {isFieldVisible(dealTypeForTransparency, "municipality_license") && (
             <SelectField
-              label="رخصة البلدية"
+              label={t("createListing.step4.fields.municipalityLicense")}
               value={disclosure.municipality_license}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, municipality_license: v }))}
               options={["سارية", "منتهية", "قيد التجديد", "غير موجودة"]}
+              optionLabels={opt("licenseStatus")}
               error={publishAttempted && disclosureErrors["municipality_license"]}
             />
           )}
           {isFieldVisible(dealTypeForTransparency, "civil_defense_license") && (
             <SelectField
-              label="رخصة الدفاع المدني"
+              label={t("createListing.step4.fields.civilDefenseLicense")}
               value={disclosure.civil_defense_license}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, civil_defense_license: v }))}
               options={["سارية", "منتهية", "قيد التجديد", "غير موجودة"]}
+              optionLabels={opt("licenseStatus")}
               error={publishAttempted && disclosureErrors["civil_defense_license"]}
             />
           )}
           {isFieldVisible(dealTypeForTransparency, "surveillance_cameras") && (
             <SelectField
-              label="كاميرات مراقبة"
+              label={t("createListing.step4.fields.surveillanceCameras")}
               value={disclosure.surveillance_cameras}
               onChange={(v) => setDisclosure((prev) => ({ ...prev, surveillance_cameras: v }))}
               options={["موجودة وتعمل", "موجودة لا تعمل", "غير موجودة"]}
+              optionLabels={opt("cameras")}
               error={publishAttempted && disclosureErrors["surveillance_cameras"]}
             />
           )}
@@ -280,8 +301,8 @@ const CreateListingStep4 = ({ state }: Props) => {
           <div className="border-t border-border/50 pt-4 mt-2">
             <div className="bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/10 rounded-xl p-4 text-center space-y-3">
               <AiStar size={24} />
-              <h3 className="text-sm font-medium">فحص الصفقة قبل النشر</h3>
-              <p className="text-xs text-muted-foreground">الـAI يحلل بياناتك ويعطيك توصيات لتحسين الإعلان</p>
+              <h3 className="text-sm font-medium">{t("createListing.step4.dealCheck.introTitle")}</h3>
+              <p className="text-xs text-muted-foreground">{t("createListing.step4.dealCheck.introHint")}</p>
               <Button
                 onClick={handleRunInlineDealCheck}
                 variant="outline"
@@ -289,9 +310,9 @@ const CreateListingStep4 = ({ state }: Props) => {
                 className="rounded-xl gap-1.5"
               >
                 <Eye size={14} strokeWidth={1.5} />
-                افحص الصفقة <AiInlineStar size={11} />
+                {t("createListing.step4.dealCheck.introButton")} <AiInlineStar size={11} />
               </Button>
-              <p className="text-[10px] text-muted-foreground self-center">يمكنك المتابعة بالنشر بدون الفحص</p>
+              <p className="text-[10px] text-muted-foreground self-center">{t("createListing.step4.dealCheck.introNote")}</p>
             </div>
           </div>
         )}
@@ -302,7 +323,7 @@ const CreateListingStep4 = ({ state }: Props) => {
               <AiStar size={28} />
               <Loader2 size={44} strokeWidth={1} className="absolute -top-2 -left-2 text-primary/30 animate-spin" />
             </div>
-            <p className="text-sm font-medium">جاري فحص الصفقة...</p>
+            <p className="text-sm font-medium">{t("createListing.step4.dealCheck.loading")}</p>
           </div>
         )}
 
@@ -310,7 +331,7 @@ const CreateListingStep4 = ({ state }: Props) => {
           <div className="bg-warning/10 border border-warning/30 rounded-xl p-3 flex items-start gap-2">
             <AlertTriangle size={14} className="text-warning shrink-0 mt-0.5" />
             <div>
-              <p className="text-xs font-medium text-warning">تعذّر إجراء الفحص التلقائي</p>
+              <p className="text-xs font-medium text-warning">{t("createListing.step4.dealCheck.errorTitle")}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">{dealCheckError}</p>
             </div>
           </div>
@@ -333,14 +354,14 @@ const CreateListingStep4 = ({ state }: Props) => {
                   dealCheckResult.ratingColor === "blue" ? "text-blue-700" :
                   "text-foreground"
                 )}>{dealCheckResult.rating}</span>
-                <span className="text-[11px] font-semibold text-muted-foreground">عدالة السعر: {dealCheckResult.fairnessVerdict}</span>
+                <span className="text-[11px] font-semibold text-muted-foreground">{t("createListing.step4.dealCheck.priceFairness", { verdict: dealCheckResult.fairnessVerdict })}</span>
               </div>
             </div>
 
             <div className="bg-primary/5 rounded-xl p-3 border border-primary/10">
               <div className="flex items-center gap-1.5 mb-1">
                 <AiStar size={12} animate={false} />
-                <span className="text-[11px] font-medium text-primary">التوصية</span>
+                <span className="text-[11px] font-medium text-primary">{t("createListing.step4.dealCheck.recommendation")}</span>
               </div>
               <p className="text-xs leading-relaxed">{dealCheckResult.recommendation}</p>
             </div>
@@ -349,7 +370,7 @@ const CreateListingStep4 = ({ state }: Props) => {
               <div>
                 <h4 className="text-xs font-medium flex items-center gap-1.5 mb-2">
                   <AlertTriangle size={12} strokeWidth={1.3} className="text-red-500/70" />
-                  المخاطر الرئيسية
+                  {t("createListing.step4.dealCheck.risks")}
                 </h4>
                 <ul className="space-y-1">
                   {dealCheckResult.risks.slice(0, 4).map((risk: string, i: number) => (
@@ -366,7 +387,7 @@ const CreateListingStep4 = ({ state }: Props) => {
               <div>
                 <h4 className="text-xs font-medium flex items-center gap-1.5 mb-2">
                   <Check size={12} strokeWidth={1.3} className="text-emerald-600" />
-                  نقاط القوة
+                  {t("createListing.step4.dealCheck.strengths")}
                 </h4>
                 <ul className="space-y-1">
                   {dealCheckResult.strengths.slice(0, 4).map((s: string, i: number) => (
@@ -383,7 +404,7 @@ const CreateListingStep4 = ({ state }: Props) => {
               <div>
                 <h4 className="text-xs font-medium flex items-center gap-1.5 mb-2">
                   <AlertTriangle size={12} strokeWidth={1.3} className="text-amber-500" />
-                  معلومات ناقصة
+                  {t("createListing.step4.dealCheck.missing")}
                 </h4>
                 <ul className="space-y-1">
                   {dealCheckResult.missingInfo.map((info: string, i: number) => (
@@ -399,7 +420,7 @@ const CreateListingStep4 = ({ state }: Props) => {
             <div className="bg-accent/30 rounded-xl p-3 flex items-start gap-2">
               <AiStar size={16} animate className="shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground leading-relaxed">
-                يمكنك تعديل البيانات أعلاه بناءً على هذا التحليل (مثل السعر أو بيانات الإفصاح) ثم إعادة الفحص — أو المتابعة للنشر مباشرة.
+                {t("createListing.step4.dealCheck.afterAdjust")}
               </p>
             </div>
 
@@ -411,7 +432,7 @@ const CreateListingStep4 = ({ state }: Props) => {
                 className="text-xs text-muted-foreground hover:text-foreground rounded-xl"
               >
                 <Loader2 size={12} strokeWidth={1.5} className="ml-1" />
-                إعادة التحليل بعد التعديل
+                {t("createListing.step4.dealCheck.rerun")}
               </Button>
             </div>
           </div>
@@ -423,22 +444,22 @@ const CreateListingStep4 = ({ state }: Props) => {
         <div className="flex items-center gap-3">
           <Eye size={20} strokeWidth={1.5} className="text-primary" />
           <div>
-            <h2 className="font-medium text-sm">ملخص الإعلان</h2>
-            <p className="text-[10px] text-muted-foreground">راجع البيانات قبل النشر</p>
+            <h2 className="font-medium text-sm">{t("createListing.step4.summary.title")}</h2>
+            <p className="text-[10px] text-muted-foreground">{t("createListing.step4.summary.subtitle")}</p>
           </div>
         </div>
 
         <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
-          <div className="text-xs font-medium text-primary mb-1">هيكل الصفقة</div>
+          <div className="text-xs font-medium text-primary mb-1">{t("createListing.step4.summary.dealStructureTitle")}</div>
           {dealStructure.selectedTypes.map((typeId, idx) => {
             const type = DEAL_TYPE_MAP[typeId];
             if (!type) return null;
             return (
               <div key={typeId} className="flex items-center gap-2 text-xs">
                 <span className={cn("px-1.5 py-0.5 rounded font-medium", typeId === dealStructure.primaryType ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
-                  {typeId === dealStructure.primaryType ? "رئيسي" : `بديل ${idx}`}
+                  {typeId === dealStructure.primaryType ? t("createListing.step4.summary.primaryBadge") : t("createListing.step4.summary.alternateBadge", { n: idx })}
                 </span>
-                <span>{type.label}</span>
+                <span>{tDealLabel(typeId, type.label)}</span>
               </div>
             );
           })}
@@ -446,14 +467,21 @@ const CreateListingStep4 = ({ state }: Props) => {
 
         <div className="bg-accent/30 rounded-xl p-5">
           <p className="text-sm leading-relaxed text-foreground">
-            {disclosure.business_activity || "مشروع"} في {disclosure.district || "—"}, {disclosure.city || "—"}.
-            {` هيكل الصفقة: ${primaryDealLabel}.`}
-            {" "}عدد الأصول المؤكّدة: {inventory.filter((item) => item.included).length} عنصر ({inventory.filter((item) => item.included).reduce((sum, item) => sum + item.qty, 0)} قطعة).
-            {disclosure.annual_rent && ` الإيجار السنوي ${disclosure.annual_rent} ريال.`}
-            {disclosure.lease_remaining && ` متبقي من العقد ${disclosure.lease_remaining}.`}
-            {disclosure.price && ` السعر المطلوب ${Number(disclosure.price).toLocaleString()} ريال.`}
+            {t("createListing.step4.summary.sentenceTemplate", {
+              activity: disclosure.business_activity || t("createListing.step4.summary.sentenceProject"),
+              district: disclosure.district || t("createListing.step4.summary.sentenceDash"),
+              city: disclosure.city || t("createListing.step4.summary.sentenceDash"),
+            })}
+            {t("createListing.step4.summary.sentenceStructure", { label: translatedPrimaryDealLabel })}
+            {" "}{t("createListing.step4.summary.sentenceAssets", {
+              count: inventory.filter((item) => item.included).length,
+              qty: inventory.filter((item) => item.included).reduce((sum, item) => sum + item.qty, 0),
+            })}
+            {disclosure.annual_rent && t("createListing.step4.summary.sentenceAnnualRent", { value: disclosure.annual_rent })}
+            {disclosure.lease_remaining && t("createListing.step4.summary.sentenceLeaseRemaining", { value: disclosure.lease_remaining })}
+            {disclosure.price && t("createListing.step4.summary.sentencePrice", { value: Number(disclosure.price).toLocaleString() })}
           </p>
-          
+
           {locationLat && locationLng && (
             <a
               href={`https://www.google.com/maps?q=${locationLat},${locationLng}`}
@@ -462,8 +490,8 @@ const CreateListingStep4 = ({ state }: Props) => {
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-success/5 border border-success/20 hover:bg-success/10 transition-colors mt-3"
             >
               <MapPin size={14} className="text-success" />
-              <span className="text-sm text-success">الموقع محدد على الخريطة</span>
-              <span className="text-[10px] text-success/70 mr-auto">اضغط للفتح في خرائط قوقل ←</span>
+              <span className="text-sm text-success">{t("createListing.step4.mapPickedTitle")}</span>
+              <span className="text-[10px] text-success/70 mr-auto">{t("createListing.step4.mapPickedHint")}</span>
             </a>
           )}
         </div>
@@ -471,22 +499,22 @@ const CreateListingStep4 = ({ state }: Props) => {
         <div className="grid grid-cols-3 gap-3 text-center">
           <div className="p-3 rounded-xl bg-muted/50">
             <div className="text-lg font-medium text-foreground">{totalPhotos}</div>
-            <div className="text-[10px] text-muted-foreground">صورة</div>
+            <div className="text-[10px] text-muted-foreground">{t("createListing.step4.summary.statPhotos")}</div>
           </div>
           <div className="p-3 rounded-xl bg-muted/50">
             <div className="text-lg font-medium text-foreground">{inventory.filter((item) => item.included).length}</div>
-            <div className="text-[10px] text-muted-foreground">أصل مشمول</div>
+            <div className="text-[10px] text-muted-foreground">{t("createListing.step4.summary.statAssets")}</div>
           </div>
           <div className="p-3 rounded-xl bg-muted/50">
             <div className="text-lg font-medium text-foreground">{Object.values(uploadedDocs).flat().length}</div>
-            <div className="text-[10px] text-muted-foreground">مستند</div>
+            <div className="text-[10px] text-muted-foreground">{t("createListing.step4.summary.statDocs")}</div>
           </div>
         </div>
 
         {publishAttempted && !photosOk && imageReq === "required" && (
           <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-center gap-2">
             <AlertTriangle size={14} className="text-destructive shrink-0" />
-            <p className="text-xs text-destructive">يجب رفع صورة واحدة على الأقل — عد إلى خطوة الصور والمستندات</p>
+            <p className="text-xs text-destructive">{t("createListing.step4.summary.photosMissingNotice")}</p>
           </div>
         )}
 
@@ -494,13 +522,13 @@ const CreateListingStep4 = ({ state }: Props) => {
         <div className="border border-border/50 rounded-2xl overflow-hidden bg-card transition-all duration-500 ease-out">
           <div className="px-4 py-2.5 bg-muted/30 border-b border-border/30 flex items-center gap-2">
             <Eye size={14} strokeWidth={1.5} className="text-primary" />
-            <span className="text-[11px] font-medium text-muted-foreground">معاينة الإعلان كما سيظهر للمشترين</span>
+            <span className="text-[11px] font-medium text-muted-foreground">{t("createListing.step4.summary.previewHeader")}</span>
           </div>
           <div className="p-4">
             <div className="rounded-xl border border-border/40 overflow-hidden bg-background shadow-soft transition-shadow duration-300 hover:shadow-soft-lg">
               <div className="h-36 overflow-hidden bg-muted/30 transition-all duration-500">
                 {allPhotoUrls.length > 0 ? (
-                  <img src={allPhotoUrls[0]} alt="صورة الإعلان" loading="lazy" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                  <img src={allPhotoUrls[0]} alt={t("createListing.step4.summary.photoAlt")} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <ImageIcon size={32} strokeWidth={1} className="text-muted-foreground/30" />
@@ -510,24 +538,24 @@ const CreateListingStep4 = ({ state }: Props) => {
               <div className="p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium text-foreground truncate transition-all duration-300">
-                    <span className="inline-block animate-fade-in">{disclosure.business_activity || "اسم النشاط"}</span>
+                    <span className="inline-block animate-fade-in">{disclosure.business_activity || t("createListing.step4.summary.previewActivityFallback")}</span>
                   </h3>
                   <span className="text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary font-medium shrink-0 mr-2 transition-all duration-300">
-                    {primaryDealLabel}
+                    {translatedPrimaryDealLabel}
                   </span>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] text-muted-foreground transition-all duration-300">
                   <MapPin size={11} strokeWidth={1.5} />
-                  <span className="inline-block animate-fade-in">{disclosure.district || "الحي"}, {disclosure.city || "المدينة"}</span>
+                  <span className="inline-block animate-fade-in">{disclosure.district || t("createListing.step4.summary.previewDistrictFallback")}, {disclosure.city || t("createListing.step4.summary.previewCityFallback")}</span>
                 </div>
                 <div className="flex items-center justify-between pt-1 border-t border-border/30">
                   <span className="text-base font-semibold text-primary transition-all duration-300">
                     <span className="inline-block animate-fade-in">{disclosure.price ? <>{Number(disclosure.price).toLocaleString()} <SarSymbol size={12} /></> : "—"}</span>
                   </span>
                   <div className="flex items-center gap-2 text-[10px] text-muted-foreground transition-all duration-300">
-                    <span>{totalPhotos} صورة</span>
+                    <span>{t("createListing.step4.summary.previewPhotos", { count: totalPhotos })}</span>
                     <span>·</span>
-                    <span>{inventory.filter(i => i.included).length} أصل</span>
+                    <span>{t("createListing.step4.summary.previewAssets", { count: inventory.filter(i => i.included).length })}</span>
                   </div>
                 </div>
               </div>
@@ -537,14 +565,14 @@ const CreateListingStep4 = ({ state }: Props) => {
 
         {/* Seller Note */}
         <div className="border-t border-border/50 pt-4 mt-2">
-          <label className="block text-sm font-medium mb-2">رسالة للمشترين (اختياري)</label>
+          <label className="block text-sm font-medium mb-2">{t("createListing.step4.sellerNote.label")}</label>
           <div className="relative">
             <textarea
               value={sellerNote}
               onChange={(e) => {
                 if (e.target.value.length <= SELLER_NOTE_MAX) setSellerNote(e.target.value);
               }}
-              placeholder={`إذا في خاطرك شي ودّك تقوله عن المشروع يا ${sellerName || "صاحب الإعلان"}... ✍️`}
+              placeholder={t("createListing.step4.sellerNote.placeholder", { name: sellerName || t("createListing.step4.sellerNote.fallbackName") })}
               rows={8}
               maxLength={SELLER_NOTE_MAX}
               className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 placeholder:text-muted-foreground/50"
@@ -558,16 +586,16 @@ const CreateListingStep4 = ({ state }: Props) => {
           </div>
         </div>
 
-        {/* Commit 5: Unified upload review summary (only for new unified listings) */}
+        {/* Unified upload review summary */}
         {usesUnifiedUpload && (
           <>
             {unifiedFileCount === 0 && (
               <div className="bg-muted/40 border border-border/40 rounded-xl p-3 flex items-start gap-2">
                 <AlertTriangle size={16} className="text-muted-foreground shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-foreground">لم ترفع أي ملفات</p>
+                  <p className="text-xs font-medium text-foreground">{t("createListing.step4.unifiedReview.emptyTitle")}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">
-                    إعلانك بدون صور أو مستندات سيكون ضعيفاً ويقل ظهوره. يمكنك العودة لرفع ملفات.
+                    {t("createListing.step4.unifiedReview.emptyHint")}
                   </p>
                 </div>
               </div>
@@ -578,9 +606,9 @@ const CreateListingStep4 = ({ state }: Props) => {
                 <AlertTriangle size={16} className="text-warning shrink-0 mt-0.5" />
                 <div className="flex-1 space-y-2">
                   <div>
-                    <p className="text-xs font-medium text-warning">تحتاج مراجعة ملفاتك</p>
+                    <p className="text-xs font-medium text-warning">{t("createListing.step4.unifiedReview.needsReviewTitle")}</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {unifiedUnconfirmedCount} من {unifiedFileCount} ملف يحتاج تأكيد قبل النشر
+                      {t("createListing.step4.unifiedReview.needsReviewHint", { unconfirmed: unifiedUnconfirmedCount, total: unifiedFileCount })}
                     </p>
                   </div>
                   <Button
@@ -591,7 +619,7 @@ const CreateListingStep4 = ({ state }: Props) => {
                     className="rounded-lg gap-1.5 h-8 border-warning/40 text-warning hover:bg-warning/10"
                   >
                     <FolderOpen size={13} strokeWidth={1.5} />
-                    راجع الآن
+                    {t("createListing.step4.unifiedReview.reviewNow")}
                   </Button>
                 </div>
               </div>
@@ -601,7 +629,7 @@ const CreateListingStep4 = ({ state }: Props) => {
               <div className="bg-success/5 border border-success/20 rounded-xl p-3 flex items-center gap-2">
                 <Check size={14} className="text-success shrink-0" />
                 <p className="text-xs font-medium text-success">
-                  {unifiedFileCount} ملف جاهز للنشر
+                  {t("createListing.step4.unifiedReview.readyTitle", { count: unifiedFileCount })}
                 </p>
               </div>
             )}
@@ -613,13 +641,13 @@ const CreateListingStep4 = ({ state }: Props) => {
           disabled={saving || loading || (!canPublish && publishAttempted) || (usesUnifiedUpload && unifiedUnconfirmedCount > 0)}
           title={
             usesUnifiedUpload && unifiedUnconfirmedCount > 0
-              ? "يجب مراجعة ملفاتك قبل النشر"
+              ? t("createListing.step4.publishBlockedTitle")
               : undefined
           }
           className="w-full gradient-primary text-primary-foreground rounded-xl active:scale-[0.98]"
         >
           {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} strokeWidth={1.5} />}
-          نشر الإعلان
+          {t("createListing.step4.publishButton")}
         </Button>
       </div>
     </div>
