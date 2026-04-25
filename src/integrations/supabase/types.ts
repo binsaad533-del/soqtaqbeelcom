@@ -710,6 +710,7 @@ export type Database = {
           requested_by: string | null
           status: string
           summary: Json | null
+          translations: Json
           updated_at: string
         }
         Insert: {
@@ -721,6 +722,7 @@ export type Database = {
           requested_by?: string | null
           status?: string
           summary?: Json | null
+          translations?: Json
           updated_at?: string
         }
         Update: {
@@ -732,6 +734,7 @@ export type Database = {
           requested_by?: string | null
           status?: string
           summary?: Json | null
+          translations?: Json
           updated_at?: string
         }
         Relationships: []
@@ -1172,6 +1175,7 @@ export type Database = {
           listing_id: string
           requested_by: string
           study_data: Json
+          translations: Json
         }
         Insert: {
           created_at?: string
@@ -1180,6 +1184,7 @@ export type Database = {
           listing_id: string
           requested_by: string
           study_data?: Json
+          translations?: Json
         }
         Update: {
           created_at?: string
@@ -1188,6 +1193,7 @@ export type Database = {
           listing_id?: string
           requested_by?: string
           study_data?: Json
+          translations?: Json
         }
         Relationships: [
           {

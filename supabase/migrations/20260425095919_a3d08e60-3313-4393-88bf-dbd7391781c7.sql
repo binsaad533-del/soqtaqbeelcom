@@ -1,0 +1,2 @@
+ALTER TABLE public.deal_checks ADD COLUMN IF NOT EXISTS translations jsonb NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE public.feasibility_studies ADD COLUMN IF NOT EXISTS translations jsonb NOT NULL DEFAULT '{}'::jsonb;
