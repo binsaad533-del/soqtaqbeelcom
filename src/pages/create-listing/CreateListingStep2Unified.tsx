@@ -9,6 +9,7 @@ import {
   MapPin,
   FolderOpen,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import GoogleMapPicker from "@/components/GoogleMapPicker";
@@ -24,6 +25,7 @@ interface Props {
 }
 
 const CreateListingStep2Unified = ({ state }: Props) => {
+  const { t } = useTranslation();
   const {
     dealStructure,
     fileStatuses,
@@ -68,13 +70,13 @@ const CreateListingStep2Unified = ({ state }: Props) => {
           <FileText size={20} strokeWidth={1.5} className="text-primary" />
         </div>
         <h2 className="font-semibold text-sm mb-1">
-          ارفع كل ملفاتك مرة واحدة — الـAI يصنّف ويرتّب الباقي ✦
+          {t("createListing.step2.headerTitle")}
         </h2>
         <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed mb-1">
-          صور المعدات والمكان + المستندات (PDF / Excel / Word) — كل شيء في منطقة رفع واحدة
+          {t("createListing.step2.headerSubtitle")}
         </p>
         <p className="text-sm font-semibold text-primary">
-          ومقبل .. طحطوح الصفقات بيكمل الباقي
+          {t("createListing.step2.headerTagline")}
         </p>
       </div>
 
@@ -109,13 +111,13 @@ const CreateListingStep2Unified = ({ state }: Props) => {
           )}
         />
         <h3 className="font-medium text-sm mb-1">
-          اسحب أو اضغط لرفع كل ملفات الإعلان دفعة واحدة
+          {t("createListing.step2.dropzoneTitle")}
         </h3>
         <p className="text-xs text-muted-foreground mb-2">
-          صور (JPG, PNG, HEIC) + مستندات (PDF, Excel, Word) — حتى 200 صورة و 100 مستند
+          {t("createListing.step2.dropzoneHint")}
         </p>
         <p className="text-[10px] text-primary font-medium">
-          ✦ الـAI يصنّف كل ملف تلقائياً (معدات / مكان / فاتورة / وثيقة قانونية)
+          {t("createListing.step2.dropzoneAi")}
         </p>
       </div>
 
@@ -125,9 +127,10 @@ const CreateListingStep2Unified = ({ state }: Props) => {
           <div className="flex items-center gap-2 text-xs font-medium">
             <Loader2 size={14} className="animate-spin text-primary" />
             <span>
-              جاري رفع الملفات (
-              {fileStatuses.filter((f) => f.status === "uploaded").length}/
-              {fileStatuses.length})
+              {t("createListing.step2.uploadingProgress", {
+                current: fileStatuses.filter((f) => f.status === "uploaded").length,
+                total: fileStatuses.length,
+              })}
             </span>
           </div>
           <div className="h-1.5 rounded-full bg-muted overflow-hidden">
@@ -151,8 +154,10 @@ const CreateListingStep2Unified = ({ state }: Props) => {
           <div className="flex items-center gap-2 text-xs font-medium text-primary">
             <Sparkles size={14} className="animate-pulse" />
             <span>
-              جاري تصنيف الملفات بالـAI... ({classifyProgress.current}/
-              {classifyProgress.total})
+              {t("createListing.step2.classifyingProgress", {
+                current: classifyProgress.current,
+                total: classifyProgress.total,
+              })}
             </span>
           </div>
           <div className="h-1.5 rounded-full bg-muted overflow-hidden">
@@ -164,7 +169,7 @@ const CreateListingStep2Unified = ({ state }: Props) => {
             />
           </div>
           <p className="text-[10px] text-muted-foreground text-center">
-            معدات / مكان / فاتورة / وثيقة قانونية — كل ملف يُصنَّف منفصلاً
+            {t("createListing.step2.classifyingHint")}
           </p>
         </div>
       )}
@@ -185,10 +190,10 @@ const CreateListingStep2Unified = ({ state }: Props) => {
             )}
           >
             <FolderOpen size={16} strokeWidth={1.5} />
-            <span>مراجعة الملفات ({unifiedFileCount})</span>
+            <span>{t("createListing.step2.reviewButton", { count: unifiedFileCount })}</span>
             {unifiedUnconfirmedCount > 0 && (
               <span className="text-[10px] font-bold ml-1">
-                — {unifiedUnconfirmedCount} يحتاج مراجعة
+                {t("createListing.step2.reviewNeedsReview", { count: unifiedUnconfirmedCount })}
               </span>
             )}
             {unifiedUnconfirmedCount === 0 && unifiedFileCount > 0 && (
@@ -203,10 +208,10 @@ const CreateListingStep2Unified = ({ state }: Props) => {
               size="sm"
               onClick={handleManualCrExtract}
               className="h-11 gap-1.5 text-xs"
-              title="استخراج بيانات السجل التجاري يدوياً"
+              title={t("createListing.step2.crManualTitle")}
             >
               <FileText size={14} strokeWidth={1.5} />
-              استخراج CR
+              {t("createListing.step2.crManualButton")}
             </Button>
           )}
         </div>
@@ -217,7 +222,7 @@ const CreateListingStep2Unified = ({ state }: Props) => {
         <div className="flex flex-col items-center justify-center py-4 gap-2 animate-fade-in rounded-xl border border-primary/20 bg-primary/5">
           <Loader2 size={24} className="animate-spin text-primary" />
           <p className="text-xs font-medium text-primary">
-            جاري استخراج بيانات السجل التجاري...
+            {t("createListing.step2.crExtractingLabel")}
           </p>
         </div>
       )}
@@ -235,29 +240,29 @@ const CreateListingStep2Unified = ({ state }: Props) => {
         >
           <div className="flex items-center gap-2 text-sm font-medium">
             <Check size={16} className="text-success" />
-            تم استخراج بيانات السجل التجاري
+            {t("createListing.step2.crExtractedTitle")}
           </div>
           {crExtraction.entity_name && (
             <div className="text-xs">
-              <span className="text-muted-foreground">اسم المنشأة:</span>{" "}
+              <span className="text-muted-foreground">{t("createListing.step2.crEntityName")}</span>{" "}
               {crExtraction.entity_name}
             </div>
           )}
           {crExtraction.cr_number && (
             <div className="text-xs">
-              <span className="text-muted-foreground">رقم السجل:</span>{" "}
+              <span className="text-muted-foreground">{t("createListing.step2.crNumber")}</span>{" "}
               {crExtraction.cr_number}
             </div>
           )}
           {crExtraction.business_activity && (
             <div className="text-xs">
-              <span className="text-muted-foreground">النشاط:</span>{" "}
+              <span className="text-muted-foreground">{t("createListing.step2.crActivity")}</span>{" "}
               {crExtraction.business_activity}
             </div>
           )}
           {crExtraction.city && (
             <div className="text-xs">
-              <span className="text-muted-foreground">المدينة:</span> {crExtraction.city}
+              <span className="text-muted-foreground">{t("createListing.step2.crCity")}</span> {crExtraction.city}
             </div>
           )}
         </div>
@@ -267,7 +272,7 @@ const CreateListingStep2Unified = ({ state }: Props) => {
       {unifiedFileCount === 0 && !classifyingFiles && (
         <div className="text-center py-2">
           <p className="text-[11px] text-muted-foreground">
-            ✦ كلما زادت الصور والمستندات، كان التحليل أدق والإعلان أقوى
+            {t("createListing.step2.emptyHint")}
           </p>
         </div>
       )}
@@ -276,8 +281,8 @@ const CreateListingStep2Unified = ({ state }: Props) => {
       <div className="border-t border-border/50 pt-5 space-y-3">
         <div className="flex items-center gap-2">
           <MapPin size={16} strokeWidth={1.5} className="text-primary" />
-          <h3 className="font-medium text-sm">موقع المشروع على الخريطة</h3>
-          <span className="text-[10px] text-destructive font-medium">(مطلوب)</span>
+          <h3 className="font-medium text-sm">{t("createListing.step2.mapTitle")}</h3>
+          <span className="text-[10px] text-destructive font-medium">{t("createListing.step2.mapRequired")}</span>
         </div>
         <GoogleMapPicker
           lat={locationLat}
@@ -303,15 +308,15 @@ const CreateListingStep2Unified = ({ state }: Props) => {
         {getRules(dealStructure.primaryType || "full_takeover").areaRequired && (
           <div className="mt-3">
             <FormField
-              label="مساحة الموقع (م²)"
-              placeholder="مثال: 120"
+              label={t("createListing.step2.areaLabel")}
+              placeholder={t("createListing.step2.areaPlaceholder")}
               value={areaSqm}
               onChange={(v) => setAreaSqm(toEnglishNumerals(v))}
             />
             {areaSqm && (
               <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
                 {Number(areaSqm) > 0 && <AiInlineStar />}
-                {Number(areaSqm) > 0 ? "تم استخراج المساحة تلقائياً — يمكنك تعديلها" : ""}
+                {Number(areaSqm) > 0 ? t("createListing.step2.areaAutoExtracted") : ""}
               </p>
             )}
           </div>
@@ -320,7 +325,7 @@ const CreateListingStep2Unified = ({ state }: Props) => {
         {publishAttempted && !locationOk && (
           <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-center gap-2">
             <AlertTriangle size={14} className="text-destructive shrink-0" />
-            <p className="text-xs text-destructive">يجب تحديد الموقع على الخريطة</p>
+            <p className="text-xs text-destructive">{t("createListing.step2.locationError")}</p>
           </div>
         )}
       </div>
