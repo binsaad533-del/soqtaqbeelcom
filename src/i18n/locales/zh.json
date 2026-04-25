@@ -47,7 +47,9 @@
   "messages": {
     "noMessages": "暂无消息",
     "noConversations": "暂无对话",
-    "searchPlaceholder": "搜索对话..."
+    "searchPlaceholder": "搜索对话...",
+    "user": "用户",
+    "noMessagesYet": "暂无消息"
   },
   "footer": {
     "terms": "服务条款",
@@ -61,7 +63,9 @@
     "support": "技术支持",
     "installApp": "安装应用",
     "pdfTemplates": "PDF 模板",
-    "madeInSaudi": "诞生于沙特阿拉伯,服务沙特市场 🇸🇦"
+    "madeInSaudi": "诞生于沙特阿拉伯,服务沙特市场 🇸🇦",
+    "logoAlt": "Soq Taqbeel",
+    "ownedBy": "本平台由以下公司拥有并运营"
   },
   "nav": {
     "home": "首页",
@@ -406,5 +410,121 @@
   "moqbil": {
     "greeting": "您好!我是 Moqbil,您的智能助手",
     "placeholder": "输入您的消息..."
+  },
+  "home": {
+    "stats": {
+      "active": "活跃机会",
+      "cities": "城市",
+      "disclosure": "完整披露",
+      "completed": "已完成交易"
+    },
+    "logoAlt": "Soq Taqbeel",
+    "tagline1": "首个沙特人工智能平台",
+    "tagline2": "助力企业接管",
+    "definition": "Taqbeel(接管)是将企业所有权从卖方转让给买方 — Soq Taqbeel 正是为此打造的最佳平台",
+    "heroTitle": "上传您的业务照片……",
+    "heroRotating": "餐厅,理发店,美容中心,车间,办公室,家具,加油站",
+    "heroAiHandles": "其余的交给 AI",
+    "heroSub": "盘点、估值、数据提取与谈判——全部自动化,无需输入任何文字。",
+    "heroNote1": "只需上传照片和文档,让 AI",
+    "heroNote2": "为您完成繁重工作。",
+    "ctaList": "刊登您的业务",
+    "ctaBrowse": "浏览机会",
+    "featuredTitle": "精选机会",
+    "featuredSubtitle": "为您精心挑选的机会",
+    "viewAll": "查看全部",
+    "featuredBadge": "精选",
+    "featuredAlt": "精选机会",
+    "businessOpportunity": "商业机会",
+    "priceOnRequest": "价格请咨询",
+    "platformTitle1": "AI 驱动的平台",
+    "platformTitle2": "为成交而生,而非仅是展示",
+    "platformDesc": "评估、展示、谈判和记录交易所需的一切,集中于一个智能、快速、清晰的工作流。",
+    "ctaStartTitle": "30 秒内开始",
+    "ctaStartDesc": "无论您想刊登业务还是发现机会,平台已为您准备就绪",
+    "orgDesc": "首个用于企业接管的沙特 AI 平台",
+    "smart": {
+      "f1Title": "上传照片,让 AI 完成盘点",
+      "f1Desc": "上传店铺或业务照片后,AI 会自动创建资产和设备的完整盘点。",
+      "f2Title": "AI 引导的市场对比估值",
+      "f2Desc": "平台分析业务数据,并通过市场对比为您提供 AI 指导性估值。",
+      "f3Title": "无需填写表格,AI 全包",
+      "f3Desc": "上传照片和文档,AI 自动提取所需数据,无需人工录入。",
+      "f4Title": "平台内智能谈判",
+      "f4Desc": "智能助手协助谈判、提出公平方案,引导双方达成更优交易。",
+      "f5Title": "真实成交,而非仅是广告",
+      "f5Desc": "我们专注于真正达成交易,而不是在拥挤的市场中再发一则广告。",
+      "f6Title": "从头到尾的引导式体验",
+      "f6Desc": "从上传图片到签署协议,一切都清晰有序地集中在一处。"
+    }
+  },
+  "layout": {
+    "logoAlt": "Soq Taqbeel",
+    "finance": "财务",
+    "pdfTemplates": "PDF 模板",
+    "messages": "消息",
+    "support": "支持",
+    "dashboard": "仪表盘",
+    "menu": "菜单"
+  },
+  "blog": {
+    "title": "博客",
+    "metaDescription": "关于企业接管与智能估值的文章和建议",
+    "jsonLdName": "Soq Taqbeel 博客",
+    "jsonLdDescription": "关于沙特企业接管市场的专家文章",
+    "headerTitle": "博客与新闻",
+    "headerSubtitle": "专家文章、实用建议及最新市场动态",
+    "searchPlaceholder": "搜索文章……",
+    "all": "全部",
+    "noArticles": "暂无文章",
+    "ctaShare": "有市场经验?来分享您的文章吧!",
+    "contactUs": "联系我们",
+    "readTimeMin": "{{count}} 分钟",
+    "readTimeFull": "阅读 {{count}} 分钟",
+    "notFound": "未找到文章",
+    "backToBlog": "返回博客",
+    "ctaLooking": "正在寻找可接管的业务?",
+    "browseMarketplace": "浏览市场"
+  },
+  "support": {
+    "metaTickets": "我的工单 — 支持 | Soq Taqbeel",
+    "metaNew": "新建工单 | Soq Taqbeel",
+    "metaDetail": "支持工单 | Soq Taqbeel",
+    "title": "技术支持工单",
+    "newTicket": "新建工单",
+    "filterByStatus": "按状态筛选",
+    "all": "全部",
+    "noTickets": "未找到工单",
+    "newTitle": "新建支持工单",
+    "subject": "主题",
+    "subjectPlaceholder": "请输入工单主题……",
+    "category": "分类",
+    "description": "描述",
+    "descriptionPlaceholder": "请详细描述问题或请求……",
+    "submit": "提交工单",
+    "errSubjectRequired": "主题和描述为必填项",
+    "errSubjectLong": "主题过长(最多 200 个字符)",
+    "errDescLong": "描述过长(最多 2000 个字符)",
+    "submitSuccess": "工单已提交 — 我们将尽快回复",
+    "submitError": "出错了 — 请重试",
+    "notFound": "未找到工单",
+    "closeTicket": "关闭工单",
+    "assignToMe": "指派给我",
+    "resolved": "已解决",
+    "supportTeam": "支持",
+    "user": "用户",
+    "replyPlaceholder": "请输入您的回复……"
+  },
+  "adminRoles": {
+    "metaTitle": "角色管理 | Soq Taqbeel",
+    "title": "角色管理",
+    "searchPlaceholder": "按姓名、邮箱或手机号搜索……",
+    "name": "姓名",
+    "email": "邮箱",
+    "phone": "手机",
+    "role": "角色",
+    "errCannotChangeSelf": "无法更改自己的角色",
+    "errGeneric": "出错了",
+    "assignSuccess": "角色已成功分配"
   }
 }

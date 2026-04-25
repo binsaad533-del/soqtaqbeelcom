@@ -47,7 +47,9 @@
   "messages": {
     "noMessages": "No messages yet",
     "noConversations": "No conversations yet",
-    "searchPlaceholder": "Search conversations..."
+    "searchPlaceholder": "Search conversations...",
+    "user": "User",
+    "noMessagesYet": "No messages yet"
   },
   "footer": {
     "terms": "Terms",
@@ -61,7 +63,9 @@
     "support": "Support",
     "installApp": "Install app",
     "pdfTemplates": "PDF templates",
-    "madeInSaudi": "Made in Saudi Arabia — built for it 🇸🇦"
+    "madeInSaudi": "Made in Saudi Arabia — built for it 🇸🇦",
+    "logoAlt": "Soq Taqbeel",
+    "ownedBy": "This platform is owned and operated by"
   },
   "nav": {
     "home": "Home",
@@ -406,5 +410,121 @@
   "moqbil": {
     "greeting": "Hi there! I'm Moqbil, your smart assistant",
     "placeholder": "Type your message..."
+  },
+  "home": {
+    "stats": {
+      "active": "Active opportunities",
+      "cities": "Cities",
+      "disclosure": "Disclosure complete",
+      "completed": "Completed deals"
+    },
+    "logoAlt": "Soq Taqbeel",
+    "tagline1": "The first Saudi AI-powered platform",
+    "tagline2": "for business transfers",
+    "definition": "Taqbeel is the transfer of business ownership from seller to buyer — Soq Taqbeel is the best place for that",
+    "heroTitle": "Upload your business photos…",
+    "heroRotating": "Restaurant,Barbershop,Beauty Center,Workshop,Office,Furniture,Station",
+    "heroAiHandles": "and AI handles the rest",
+    "heroSub": "Inventory, valuation, data extraction, and negotiation — all automated without writing a single line.",
+    "heroNote1": "Just upload photos and documents and let AI",
+    "heroNote2": "do the heavy lifting.",
+    "ctaList": "List your business",
+    "ctaBrowse": "Browse opportunities",
+    "featuredTitle": "Featured opportunities",
+    "featuredSubtitle": "Curated opportunities for you",
+    "viewAll": "View all",
+    "featuredBadge": "Featured",
+    "featuredAlt": "Featured opportunity",
+    "businessOpportunity": "Business opportunity",
+    "priceOnRequest": "Price on request",
+    "platformTitle1": "An AI-powered platform",
+    "platformTitle2": "built to close deals, not just display listings",
+    "platformDesc": "Everything you need to value, showcase, negotiate, and document deals in one smart, fast, and clear workflow.",
+    "ctaStartTitle": "Get started in 30 seconds",
+    "ctaStartDesc": "Whether you want to list your business or discover an opportunity, the platform is ready for you",
+    "orgDesc": "The first Saudi AI-powered platform for business transfers",
+    "smart": {
+      "f1Title": "Upload photos and let AI inventory everything",
+      "f1Desc": "Once you upload shop or business photos, AI automatically creates a full inventory of assets and equipment.",
+      "f2Title": "AI-guided valuation via market comparisons",
+      "f2Desc": "The platform analyzes business data and gives you an AI-guided indicative valuation through market comparisons.",
+      "f3Title": "No manual forms, AI handles it",
+      "f3Desc": "Upload photos and documents, and AI extracts the required data without manual entry.",
+      "f4Title": "Smart negotiation inside the platform",
+      "f4Desc": "An intelligent assistant helps negotiate, suggests fair solutions, and guides both sides to a better deal.",
+      "f5Title": "Real transactions, not just listings",
+      "f5Desc": "We focus on completing real deals, not just posting another listing in a crowded marketplace.",
+      "f6Title": "A guided journey from start to finish",
+      "f6Desc": "From uploading images to signing the agreement, everything stays clear and organized in one place."
+    }
+  },
+  "layout": {
+    "logoAlt": "Soq Taqbeel",
+    "finance": "Finance",
+    "pdfTemplates": "PDF Templates",
+    "messages": "Messages",
+    "support": "Support",
+    "dashboard": "Dashboard",
+    "menu": "Menu"
+  },
+  "blog": {
+    "title": "Blog",
+    "metaDescription": "Articles and tips about business transfers and smart valuation",
+    "jsonLdName": "Soq Taqbeel Blog",
+    "jsonLdDescription": "Expert articles about Saudi business transfer market",
+    "headerTitle": "Blog & News",
+    "headerSubtitle": "Expert articles, practical tips, and latest market news",
+    "searchPlaceholder": "Search articles...",
+    "all": "All",
+    "noArticles": "No articles yet",
+    "ctaShare": "Have market expertise? Share your article!",
+    "contactUs": "Contact Us",
+    "readTimeMin": "{{count}} min",
+    "readTimeFull": "{{count}} min read",
+    "notFound": "Article not found",
+    "backToBlog": "Back to Blog",
+    "ctaLooking": "Looking for a business to acquire?",
+    "browseMarketplace": "Browse Marketplace"
+  },
+  "support": {
+    "metaTickets": "My Tickets — Support | Soq Taqbeel",
+    "metaNew": "New Ticket | Soq Taqbeel",
+    "metaDetail": "Support Ticket | Soq Taqbeel",
+    "title": "Support Tickets",
+    "newTicket": "New Ticket",
+    "filterByStatus": "Filter by status",
+    "all": "All",
+    "noTickets": "No tickets found",
+    "newTitle": "New Support Ticket",
+    "subject": "Subject",
+    "subjectPlaceholder": "Write ticket subject...",
+    "category": "Category",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the issue in detail...",
+    "submit": "Submit Ticket",
+    "errSubjectRequired": "Subject and description are required",
+    "errSubjectLong": "Subject too long (max 200 chars)",
+    "errDescLong": "Description too long (max 2000 chars)",
+    "submitSuccess": "Ticket submitted — we'll respond soon",
+    "submitError": "Error — please try again",
+    "notFound": "Ticket not found",
+    "closeTicket": "Close Ticket",
+    "assignToMe": "Assign to me",
+    "resolved": "Resolved",
+    "supportTeam": "Support",
+    "user": "User",
+    "replyPlaceholder": "Write your reply..."
+  },
+  "adminRoles": {
+    "metaTitle": "Role Management | Soq Taqbeel",
+    "title": "Role Management",
+    "searchPlaceholder": "Search by name, email, or phone...",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "errCannotChangeSelf": "Cannot change your own role",
+    "errGeneric": "Error",
+    "assignSuccess": "Role assigned successfully"
   }
 }
