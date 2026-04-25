@@ -1,28 +1,33 @@
 import { TrendingUp, TrendingDown, Minus, HelpCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { mapFairnessToKey, mapFairnessLabelToKey } from "@/lib/condition-utils";
 
 interface PriceIndicatorProps {
   fairnessVerdict?: string | null;
   className?: string;
 }
 
-const VERDICT_CONFIG: Record<string, { label: string; icon: typeof TrendingUp; color: string; bg: string }> = {
-  "جذاب": { label: "السعر جذاب", icon: TrendingDown, color: "text-success", bg: "bg-success/10" },
-  "معقول": { label: "السعر معقول", icon: Minus, color: "text-primary", bg: "bg-primary/10" },
-  "مبالغ فيه": { label: "السعر مبالغ فيه", icon: TrendingUp, color: "text-destructive", bg: "bg-destructive/10" },
-  "غير واضح": { label: "السعر غير محدد", icon: HelpCircle, color: "text-muted-foreground", bg: "bg-muted" },
+const VERDICT_VISUAL: Record<string, { icon: typeof TrendingUp; color: string; bg: string }> = {
+  fairness_attractive: { icon: TrendingDown, color: "text-success", bg: "bg-success/10" },
+  fairness_fair: { icon: Minus, color: "text-primary", bg: "bg-primary/10" },
+  fairness_overpriced: { icon: TrendingUp, color: "text-destructive", bg: "bg-destructive/10" },
+  fairness_unclear: { icon: HelpCircle, color: "text-muted-foreground", bg: "bg-muted" },
 };
 
 const PriceIndicator = ({ fairnessVerdict, className }: PriceIndicatorProps) => {
+  const { t } = useTranslation();
   if (!fairnessVerdict) return null;
 
-  const config = VERDICT_CONFIG[fairnessVerdict] || VERDICT_CONFIG["غير واضح"];
-  const Icon = config.icon;
+  const verdictKey = mapFairnessToKey(fairnessVerdict);
+  const visual = VERDICT_VISUAL[verdictKey] || VERDICT_VISUAL.fairness_unclear;
+  const Icon = visual.icon;
+  const label = t(`dealCheck.${mapFairnessLabelToKey(verdictKey)}`);
 
   return (
-    <div className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg", config.bg, className)}>
-      <Icon size={14} className={config.color} />
-      <span className={cn("text-xs font-medium", config.color)}>{config.label}</span>
+    <div className={cn("flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg", visual.bg, className)}>
+      <Icon size={14} className={visual.color} />
+      <span className={cn("text-xs font-medium", visual.color)}>{label}</span>
     </div>
   );
 };
