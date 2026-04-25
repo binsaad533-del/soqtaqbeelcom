@@ -1428,7 +1428,7 @@ const DealSummaryCard = ({ listing }: { listing: any }) => {
         <span className="inline-flex items-center gap-1.5 text-foreground">
           <Wallet size={13} strokeWidth={1.4} className="text-primary" />
           <span className="text-muted-foreground">{t('listing.price')}:</span>
-          <span className="font-semibold">{askingPrice > 0 ? `${fmt(askingPrice)} ر.س` : "—"}</span>
+          <span className="font-semibold">{askingPrice > 0 ? `${fmt(askingPrice)} ${t("common.currency")}` : "—"}</span>
         </span>
         {pricedTotal > 0 && (
           <>
@@ -1436,7 +1436,7 @@ const DealSummaryCard = ({ listing }: { listing: any }) => {
             <span className="inline-flex items-center gap-1.5 text-foreground">
               <Sparkles size={13} strokeWidth={1.4} className="text-primary" />
               <span className="text-muted-foreground">{t('listing.pricedAssetsValue')}:</span>
-              <span className="font-medium">{fmt(pricedTotal)} ر.س</span>
+              <span className="font-medium">{fmt(pricedTotal)} {t("common.currency")}</span>
             </span>
           </>
         )}
