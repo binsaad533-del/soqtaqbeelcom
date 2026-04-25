@@ -313,16 +313,16 @@ const CreateListingPage = () => {
           if (previewUrl) setLocalPreviews((prev) => ({ ...prev, [group]: [...(prev[group] || []), previewUrl] }));
           const result = await uploadFile(id, preparedFile, `photos/${group}`);
           if (result.url) uploadedUrls.push(result.url);
-          else toast.error(`${originalFile.name}: ${result.error || "فشل الرفع"}`);
-        } catch (error) { console.error("photo preparation failed", error); toast.error(`تعذّر تجهيز الصورة ${originalFile.name}`); }
+          else toast.error(`${originalFile.name}: ${result.error || t("createListing.toasts.upload.uploadFailGeneric")}`);
+        } catch (error) { console.error("photo preparation failed", error); toast.error(t("createListing.toasts.upload.photoPrepareFail", { name: originalFile.name })); }
       }
       setPhotos((prev) => {
         const updatedPhotos = { ...prev, [group]: [...(prev[group] || []), ...uploadedUrls] };
-        updateListing(id, { photos: updatedPhotos } as never).catch(() => toast.error("تعذّر حفظ الصور."));
+        updateListing(id, { photos: updatedPhotos } as never).catch(() => toast.error(t("createListing.toasts.upload.photoSaveError")));
         return updatedPhotos;
       });
       if (uploadedUrls.length > 0) {
-        toast.success(`تم تجهيز ورفع ${uploadedUrls.length} ملف بنجاح`);
+        toast.success(t("createListing.toasts.upload.photosUploaded", { count: uploadedUrls.length }));
         if (isCrOnly && group === "cr_doc" && uploadedUrls.length > 0 && !crExtractionDone) handleCrExtraction(uploadedUrls[0]);
       }
     } finally { setSaving(false); setUploadingGroup(null); }
@@ -381,12 +381,12 @@ const CreateListingPage = () => {
       const safeFolder = activeDocType.replace(/[^a-zA-Z0-9_-]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "") || "general";
       const result = await uploadFile(id, file, `docs/${safeFolder}`);
       if (!result.url) {
-        toast.error(`${file.name}: ${result.error || "فشل الرفع"}`);
+        toast.error(`${file.name}: ${result.error || t("createListing.toasts.upload.uploadFailGeneric")}`);
         continue;
       }
       // AI content verification for the three critical doc types
       if (verifierType) {
-        const verifyToast = toast.loading(`🔍 جاري التحقق من "${file.name}" عبر الذكاء الاصطناعي...`);
+        const verifyToast = toast.loading(t("createListing.toasts.cr.verifyToast", { name: file.name }));
         try {
           const { data, error } = await supabase.functions.invoke("verify-document", {
             body: { documentUrl: result.url, expectedType: verifierType },
@@ -401,9 +401,9 @@ const CreateListingPage = () => {
             error?: string;
           };
           if (error || payload.is_valid === false || payload.error) {
-            const reason = payload.rejection_reason || payload.error || "الملف لا يطابق نوع الحقل.";
+          const reason = payload.rejection_reason || payload.error || t("createListing.toasts.cr.rejectionDefault");
             toast.error(
-              `❌ تم رفض "${file.name}"\n${reason}`,
+              t("createListing.toasts.cr.verifyRejected", { name: file.name, reason }),
               { duration: 9000 }
             );
             continue;
@@ -411,22 +411,22 @@ const CreateListingPage = () => {
           // Accepted — branch on confidence
           if (verifierType === "equipment_photos" && payload.confidence === "medium") {
             toast(
-              `⚠ تم قبول "${file.name}" — قد تحتاج معاينة من جساس`,
+              t("createListing.toasts.cr.verifyMediumWarn", { name: file.name }),
               {
                 duration: 7000,
-                description: payload.notes || "الصورة مقبولة لكن قد تحتاج معاينة ميدانية للتأكد من حالة المعدة.",
+                description: payload.notes || t("createListing.toasts.cr.verifyMediumDescDefault"),
                 style: { background: "hsl(var(--warning) / 0.12)", borderColor: "hsl(var(--warning))" },
               }
             );
             setDocConfidence((prev) => ({ ...prev, [result.url!]: "medium" }));
           } else {
-            toast.success(`✓ تم التحقق من "${file.name}"`);
+            toast.success(t("createListing.toasts.cr.verifyAccepted", { name: file.name }));
             setDocConfidence((prev) => ({ ...prev, [result.url!]: "high" }));
           }
         } catch (err) {
           toast.dismiss(verifyToast);
           console.error("verify-document failed", err);
-          toast.error(`تعذّر التحقق من "${file.name}". تم رفض الملف للأمان.`);
+          toast.error(t("createListing.toasts.cr.verifyFail", { name: file.name }));
           continue;
         }
       }
@@ -436,11 +436,11 @@ const CreateListingPage = () => {
     // Notify user about rejected images & offer auto-routing
     if (imagesToReroute.length > 0) {
       toast.error(
-        `حقل "${activeDocType}" يقبل PDF فقط. تم رفض ${imagesToReroute.length} صورة.\nلرفع صور المعدات استخدم حقل "صور المعدات" أو الرفع الجماعي.`,
+        t("createListing.toasts.upload.pdfOnlyReject", { field: activeDocType, count: imagesToReroute.length }),
         {
           duration: 10000,
           action: {
-            label: "نقل تلقائي إلى صور المعدات",
+            label: t("createListing.toasts.upload.rerouteAction"),
             onClick: async () => {
               try {
                 const dt = new DataTransfer();
@@ -448,7 +448,7 @@ const CreateListingPage = () => {
                 await handlePhotoUploadForGroup(dt.files, "equipment");
               } catch (err) {
                 console.error("auto-reroute failed", err);
-                toast.error("تعذّر نقل الصور تلقائياً.");
+                toast.error(t("createListing.toasts.upload.rerouteFail"));
               }
             },
           },
@@ -522,7 +522,7 @@ const CreateListingPage = () => {
       if (imageUrls.length > 0) {
         setPhotos(prev => {
           const updated = { ...prev, all: [...(prev.all || []), ...imageUrls] };
-          updateListing(id, { photos: updated } as never).catch(() => toast.error("تعذّر حفظ الصور."));
+          updateListing(id, { photos: updated } as never).catch(() => toast.error(t("createListing.toasts.upload.photoSaveError")));
           return updated;
         });
       }
@@ -534,14 +534,14 @@ const CreateListingPage = () => {
         try {
           const result = await uploadFile(id, file, "docs/general");
           if (result.url) { docUrls.push(result.url); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "uploaded", url: result.url! } : f)); }
-          else { setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || "فشل الرفع" } : f)); }
-        } catch (err) { console.error(`[BulkUpload] Doc failed: ${file.name}`, err); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: "خطأ غير متوقع" } : f)); }
+          else { setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: result.error || t("createListing.toasts.upload.uploadFailGeneric") } : f)); }
+        } catch (err) { console.error(`[BulkUpload] Doc failed: ${file.name}`, err); setFileStatuses(prev => prev.map(f => f.id === statusId ? { ...f, status: "failed", error: t("createListing.toasts.upload.uploadUnexpected") } : f)); }
         finally { completedCount++; setUploadProgress({ current: completedCount, total: totalFiles }); }
       });
       if (docUrls.length > 0) {
         setUploadedDocs(prev => {
           const updated = { ...prev, general: [...(prev.general || []), ...docUrls] };
-          updateListing(id, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch(() => toast.error("تعذّر حفظ المستندات."));
+          updateListing(id, { documents: Object.entries(updated).map(([type, files]) => ({ type, files })) } as never).catch(() => toast.error(t("createListing.toasts.upload.docsSaveError")));
           return updated;
         });
         const firstPdfUrl = docUrls.find(url => url.toLowerCase().includes(".pdf"));
@@ -549,9 +549,9 @@ const CreateListingPage = () => {
       }
       const uploadedTotal = imageUrls.length + docUrls.length;
       const failedTotal = totalFiles - uploadedTotal;
-      if (uploadedTotal > 0 && failedTotal === 0) toast.success(`تم رفع ${uploadedTotal} ملف بنجاح`);
-      else if (uploadedTotal > 0 && failedTotal > 0) toast.warning(`تم رفع ${uploadedTotal} ملف — فشل ${failedTotal}`);
-      else if (failedTotal > 0) toast.error(`فشل رفع جميع الملفات (${failedTotal})`);
+      if (uploadedTotal > 0 && failedTotal === 0) toast.success(t("createListing.toasts.upload.filesUploaded", { count: uploadedTotal }));
+      else if (uploadedTotal > 0 && failedTotal > 0) toast.warning(t("createListing.toasts.upload.filesUploadedPartial", { uploaded: uploadedTotal, failed: failedTotal }));
+      else if (failedTotal > 0) toast.error(t("createListing.toasts.upload.filesUploadedAllFailed", { failed: failedTotal }));
     } finally { setSaving(false); setUploadingGroup(null); }
   };
 
@@ -580,16 +580,16 @@ const CreateListingPage = () => {
       // Detect explicit validation rejection from edge function (data carries is_valid_cr=false)
       const payload = (data || {}) as CrExtractionResult & { error?: string };
       if (payload.is_valid_cr === false) {
-        const detected = payload.document_type_detected || "غير معروف";
-        const reason = payload.rejection_reason || "هذا الملف ليس سجلاً تجارياً سعودياً.";
-        toast.error(`❌ الملف مرفوض — ليس سجلاً تجارياً\nنوع المستند: ${detected}\n${reason}`, { duration: 9000 });
+        const detected = payload.document_type_detected || t("createListing.toasts.cr.crDetectedUnknown");
+        const reason = payload.rejection_reason || t("createListing.toasts.cr.crRejectionDefault");
+        toast.error(t("createListing.toasts.cr.crRejected", { detected, reason }), { duration: 9000 });
         removeRejectedDoc(documentUrl);
         setCrExtraction(null);
         setCrExtractionDone(false);
         return;
       }
       if (error || !data || payload.error) {
-        throw new Error(payload.error || error?.message || "فشل استخراج البيانات");
+        throw new Error(payload.error || error?.message || t("createListing.toasts.cr.crFetchFail"));
       }
       const result = payload as CrExtractionResult;
       setCrExtraction(result);
@@ -600,25 +600,25 @@ const CreateListingPage = () => {
         ...(result.city && !prev.city ? { city: result.city } : {}),
         ...(result.district && !prev.district ? { district: result.district } : {}),
       }));
-      if (result.extraction_confidence === "high") toast.success("تم التحقق من السجل التجاري واستخراج البيانات بنجاح ✓", { duration: 5000 });
-      else if (result.extraction_confidence === "medium") toast.info("تم التحقق — استُخرجت بعض البيانات، يرجى المراجعة", { duration: 5000 });
-      else toast.warning("تم التحقق لكن جودة الصورة منخفضة — قد تحتاج لرفع صورة أوضح", { duration: 6000 });
+      if (result.extraction_confidence === "high") toast.success(t("createListing.toasts.cr.crSuccess"), { duration: 5000 });
+      else if (result.extraction_confidence === "medium") toast.info(t("createListing.toasts.cr.crMedium"), { duration: 5000 });
+      else toast.warning(t("createListing.toasts.cr.crLow"), { duration: 6000 });
     } catch (err) {
       console.error("CR extraction failed:", err);
-      const msg = err instanceof Error ? err.message : "تعذّر استخراج البيانات من السجل التجاري";
+      const msg = err instanceof Error ? err.message : t("createListing.toasts.cr.crGenericFail");
       toast.error(msg, { duration: 7000 });
       setCrExtractionDone(true);
     } finally { setCrExtracting(false); }
-  }, [removeRejectedDoc]);
+  }, [removeRejectedDoc, t]);
 
   const handleAnalyze = async () => {
     const allPhotoUrlsForAnalysis = Object.values(photos).flat();
     const allDocUrls = Object.values(uploadedDocs).flat();
-    if (allPhotoUrlsForAnalysis.length === 0 && allDocUrls.length === 0) { toast.error("يرجى رفع صور أو ملف Excel/مستند أولاً"); return; }
+    if (allPhotoUrlsForAnalysis.length === 0 && allDocUrls.length === 0) { toast.error(t("createListing.toasts.analysis.noFiles")); return; }
     const unsupportedUrls = allPhotoUrlsForAnalysis.filter((url) => /\.(heic|heif)(\?|$)/i.test(url));
-    if (unsupportedUrls.length > 0) { toast.error("هناك صور قديمة بصيغة HEIC غير قابلة للتحليل"); return; }
+    if (unsupportedUrls.length > 0) { toast.error(t("createListing.toasts.analysis.heicUnsupported")); return; }
     const limitedUrls = allPhotoUrlsForAnalysis.slice(0, 30);
-    if (allPhotoUrlsForAnalysis.length > 30) toast.info(`لديك ${allPhotoUrlsForAnalysis.length} صورة — سيتم تحليل أول 30`);
+    if (allPhotoUrlsForAnalysis.length > 30) toast.info(t("createListing.toasts.analysis.limited", { count: allPhotoUrlsForAnalysis.length }));
     setAnalyzing(true);
     setAnalyzeProgress(10);
     const progressInterval = setInterval(() => setAnalyzeProgress((prev) => Math.min(prev + 8, 85)), 1500);
@@ -626,7 +626,7 @@ const CreateListingPage = () => {
       const { data, error } = await supabase.functions.invoke("analyze-inventory", { body: { photoUrls: limitedUrls, photoGroups: photos, documentUrls: allDocUrls } });
       clearInterval(progressInterval);
       setAnalyzeProgress(100);
-      if (error || !data || (data as { error?: string }).error) throw new Error((data as { error?: string })?.error || error?.message || "فشل التحليل");
+      if (error || !data || (data as { error?: string }).error) throw new Error((data as { error?: string })?.error || error?.message || t("createListing.toasts.analysis.fetchFail"));
       const assets: InventoryItem[] = (((data as any).assets) || []).map((asset: any, i: number) => ({
         id: String(i + 1), name: String(asset.name || "أصل غير مسمى"), qty: Number(asset.quantity || 1),
         condition: String(asset.condition || "غير واضح"), category: String(asset.category || "أخرى"),
@@ -684,8 +684,8 @@ const CreateListingPage = () => {
           setCrExtractionDone(true);
         }
       }
-      toast.success("تم تحليل الملفات المرفوعة واستخراج البيانات بنجاح ✦");
-    } catch (err) { clearInterval(progressInterval); toast.error(err instanceof Error ? err.message : "حدث خطأ أثناء تحليل الملفات"); }
+      toast.success(t("createListing.toasts.analysis.success"));
+    } catch (err) { clearInterval(progressInterval); toast.error(err instanceof Error ? err.message : t("createListing.toasts.analysis.fail")); }
     finally { setAnalyzing(false); }
   };
 
@@ -965,7 +965,7 @@ const CreateListingPage = () => {
       const { data, error } = await supabase.functions.invoke("extract-cr-data", { body: { documentUrl } });
       const payload = (data || {}) as CrExtractionResult & { error?: string };
       if (error || payload.error || payload.is_valid_cr === false) {
-        toast.error("تعذّر استخراج بيانات السجل — يمكنك الاستخراج يدوياً لاحقاً", { duration: 7000 });
+        toast.error(t("createListing.toasts.cr.crUnifiedFail"), { duration: 7000 });
         return;
       }
       const result = payload as CrExtractionResult;
@@ -977,14 +977,14 @@ const CreateListingPage = () => {
         ...(result.city && !prev.city ? { city: result.city } : {}),
         ...(result.district && !prev.district ? { district: result.district } : {}),
       }));
-      toast.success("✨ تم اكتشاف سجلك التجاري واستخراج بياناته تلقائياً");
+      toast.success(t("createListing.toasts.cr.crUnifiedSuccess"));
     } catch (err) {
       console.error("[unified] CR extraction failed:", err);
-      toast.error("تعذّر استخراج بيانات السجل — يمكنك الاستخراج يدوياً لاحقاً", { duration: 7000 });
+      toast.error(t("createListing.toasts.cr.crUnifiedFail"), { duration: 7000 });
     } finally {
       setCrExtracting(false);
     }
-  }, []);
+  }, [t]);
 
   // Helper: classify uploaded files in batches of 3 with 1s delay
   const classifyAfterUpload = useCallback(async (
@@ -1024,8 +1024,8 @@ const CreateListingPage = () => {
     }
 
     setClassifyingFiles(false);
-    toast.success(`تم تصنيف ${uploaded.length} ملف — راجعها قبل النشر`);
-  }, []);
+    toast.success(t("createListing.toasts.classification.classified", { count: uploaded.length }));
+  }, [t]);
 
   // Public handler: unified upload entry point
   const handleUnifiedUpload = useCallback(async (files: FileList) => {
@@ -1036,7 +1036,7 @@ const CreateListingPage = () => {
     try {
       const uploaded = await uploadFilesToStorage(id, files);
       if (uploaded.length === 0) {
-        toast.error("تعذّر رفع الملفات");
+        toast.error(t("createListing.toasts.upload.unifiedFailed"));
         return;
       }
       await classifyAfterUpload(id, uploaded);
@@ -1055,7 +1055,7 @@ const CreateListingPage = () => {
       .eq("listing_id", listingId);
 
     if (error || !data) {
-      toast.error("تعذّر قراءة التصنيفات");
+      toast.error(t("createListing.toasts.classification.readFail"));
       return;
     }
 
@@ -1182,17 +1182,17 @@ const CreateListingPage = () => {
       await updateListing(listingId, { photos: photosByGroup, documents: newDocuments } as never);
     } catch (err) {
       console.error("[unified] save listing failed", err);
-      toast.error("تعذّر حفظ التصنيفات");
+      toast.error(t("createListing.toasts.classification.saveFail"));
       return;
     }
 
     setReviewDialogOpen(false);
-    toast.success("تم حفظ تصنيفات ملفاتك");
+    toast.success(t("createListing.toasts.classification.saved"));
 
     if (crRegisterUrl && !crExtractionDone) {
       await triggerCrExtraction(crRegisterUrl);
     }
-  }, [listingId, updateListing, crExtractionDone, triggerCrExtraction, user?.id]);
+  }, [listingId, updateListing, crExtractionDone, triggerCrExtraction, user?.id, t]);
 
   // Public handler: manual CR re-extraction
   const handleManualCrExtract = useCallback(async () => {
@@ -1207,11 +1207,11 @@ const CreateListingPage = () => {
       .maybeSingle();
 
     if (error || !data?.file_url) {
-      toast.error("لم يتم العثور على سجل تجاري — ارفع سجلك التجاري أولاً");
+      toast.error(t("createListing.toasts.cr.crManualNotFound"));
       return;
     }
     await triggerCrExtraction(data.file_url);
-  }, [listingId, triggerCrExtraction]);
+  }, [listingId, triggerCrExtraction, t]);
 
   // Shared state for step components
   const sharedState: CreateListingSharedState = {

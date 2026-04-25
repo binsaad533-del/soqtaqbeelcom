@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -121,6 +122,7 @@ function FileCard({
   onPreview,
   onToggleProtection,
 }: FilePreviewProps) {
+  const { t } = useTranslation();
   const isImg = isImage(file.file_type);
   const [imgError, setImgError] = useState(false);
   const showProtectionBadge = PROTECTABLE_CATEGORIES.includes(
@@ -160,12 +162,12 @@ function FileCard({
         ) : isImg && imgError ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground px-2">
             <ImageOff className="w-8 h-8 mb-2" />
-            <span className="text-xs text-center">تعذّر تحميل المعاينة</span>
+            <span className="text-xs text-center">{t("createListing.fileReview.previewError")}</span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1 text-muted-foreground">
             <FileText className="w-8 h-8" />
-            <span className="text-xs">{file.file_type || "ملف"}</span>
+            <span className="text-xs">{file.file_type || t("createListing.fileReview.fileGeneric")}</span>
           </div>
         )}
       </div>
@@ -187,14 +189,14 @@ function FileCard({
             className="text-[10px] py-0 px-1.5"
           >
             {file.ai_confidence === "high"
-              ? "موثوق"
+              ? t("createListing.fileReview.confidenceHigh")
               : file.ai_confidence === "medium"
-              ? "متوسط"
-              : "منخفض"}
+              ? t("createListing.fileReview.confidenceMedium")
+              : t("createListing.fileReview.confidenceLow")}
           </Badge>
           {file.is_confirmed && (
             <Badge variant="outline" className="text-[10px] py-0 px-1.5 gap-0.5">
-              <CheckCircle2 className="w-2.5 h-2.5" /> مؤكد
+              <CheckCircle2 className="w-2.5 h-2.5" /> {t("createListing.fileReview.confirmedBadge")}
             </Badge>
           )}
           {showProtectionBadge && (
@@ -212,8 +214,8 @@ function FileCard({
                     )}
                     aria-label={
                       file.is_protected
-                        ? "تبديل إلى عامة"
-                        : "تبديل إلى محمية"
+                        ? t("createListing.fileReview.switchToPublic")
+                        : t("createListing.fileReview.switchToProtected")
                     }
                   >
                     {file.is_protected ? (
@@ -221,14 +223,14 @@ function FileCard({
                     ) : (
                       <Globe className="w-2.5 h-2.5" />
                     )}
-                    <span>{file.is_protected ? "محمية" : "عامة"}</span>
+                    <span>{file.is_protected ? t("createListing.fileReview.protectedLabel") : t("createListing.fileReview.publicLabel")}</span>
                     <ArrowRightLeft className="w-2.5 h-2.5 opacity-70" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-[220px] text-xs">
                   {file.is_protected
-                    ? "محمية: المشترون يطلبون موافقتك للاطلاع عليها"
-                    : "عامة: متاحة لأي شخص يشاهد الإعلان"}
+                    ? t("createListing.fileReview.protectedTooltip")
+                    : t("createListing.fileReview.publicTooltip")}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -248,7 +250,7 @@ function FileCard({
           onValueChange={onUpdateSubcategory}
         >
           <SelectTrigger className="h-7 text-xs mb-2">
-            <SelectValue placeholder="نوع فرعي..." />
+            <SelectValue placeholder={t("createListing.fileReview.subPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {subOptions.map(opt => (
@@ -305,6 +307,7 @@ export function FileReviewDialog({
   onOpenChange,
   onConfirmed,
 }: FileReviewDialogProps) {
+  const { t } = useTranslation();
   const {
     classifications,
     grouped,
@@ -380,10 +383,10 @@ export function FileReviewDialog({
           <DialogHeader className="p-6 pb-4 border-b">
             <DialogTitle className="text-xl flex items-center gap-2">
               <FileText className="w-5 h-5 text-primary" />
-              مراجعة تصنيف ملفاتك ({totalFiles} ملف)
+              {t("createListing.fileReview.title", { count: totalFiles })}
             </DialogTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              راجع تصنيف الذكاء الاصطناعي لملفاتك. يمكنك نقل أي ملف لفئة أخرى أو تعديل النوع الفرعي قبل الحفظ النهائي.
+              {t("createListing.fileReview.subtitle")}
             </p>
           </DialogHeader>
 
@@ -391,11 +394,11 @@ export function FileReviewDialog({
           {selectedIds.size > 0 && (
             <div className="px-6 py-3 bg-primary/5 border-b flex items-center gap-3 flex-wrap">
               <span className="text-sm font-medium">
-                تم اختيار {selectedIds.size} ملف
+                {t("createListing.fileReview.selected", { count: selectedIds.size })}
               </span>
               <Select onValueChange={(v) => handleBulkMove(v as FileCategory)}>
                 <SelectTrigger className="h-8 w-48 text-xs">
-                  <SelectValue placeholder="نقل إلى فئة..." />
+                  <SelectValue placeholder={t("createListing.fileReview.moveToCategory")} />
                 </SelectTrigger>
                 <SelectContent>
                   {CATEGORY_ORDER.map(cat => (
@@ -406,7 +409,7 @@ export function FileReviewDialog({
                 </SelectContent>
               </Select>
               <Button size="sm" variant="ghost" onClick={clearSelection}>
-                إلغاء الاختيار
+                {t("createListing.fileReview.clearSelection")}
               </Button>
             </div>
           )}
@@ -415,14 +418,14 @@ export function FileReviewDialog({
           <div className="flex-1 overflow-y-auto p-6 space-y-3">
             {isLoading && (
               <div className="text-center py-12 text-muted-foreground">
-                جاري التحميل...
+                {t("createListing.fileReview.loading")}
               </div>
             )}
 
             {!isLoading && totalFiles === 0 && (
               <div className="text-center py-12 text-muted-foreground">
                 <FileText className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                <p>لا توجد ملفات مصنّفة بعد</p>
+                <p>{t("createListing.fileReview.empty")}</p>
               </div>
             )}
 
@@ -463,7 +466,7 @@ export function FileReviewDialog({
                             <div className="mb-3 flex items-start gap-2 rounded-md border border-amber-500/20 bg-amber-500/5 p-2.5 text-[11px] leading-relaxed text-amber-700 dark:text-amber-400">
                               <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                               <span>
-                                هذه الوثائق محمية افتراضياً. يمكنك تغيير خصوصية كل ملف على حدة — المشترون سيطلبون موافقتك للاطلاع على المحمية.
+                                {t("createListing.fileReview.protectedNotice")}
                               </span>
                             </div>
                           )}
@@ -497,12 +500,12 @@ export function FileReviewDialog({
           <DialogFooter className="p-4 border-t bg-muted/20 flex-row items-center justify-between sm:justify-between gap-2">
             <div className="text-xs text-muted-foreground">
               {unconfirmedCount > 0
-                ? `${unconfirmedCount} ملف بانتظار التأكيد`
-                : "كل الملفات مؤكدة ✓"}
+                ? t("createListing.fileReview.pendingConfirmation", { count: unconfirmedCount })
+                : t("createListing.fileReview.allConfirmed")}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                إغلاق
+                {t("createListing.fileReview.close")}
               </Button>
               <Button
                 onClick={handleConfirm}
@@ -510,7 +513,7 @@ export function FileReviewDialog({
                 className="gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                {confirming ? "جاري الحفظ..." : "تأكيد وحفظ"}
+                {confirming ? t("createListing.fileReview.confirmingSave") : t("createListing.fileReview.confirmAndSave")}
               </Button>
             </div>
           </DialogFooter>
@@ -544,7 +547,7 @@ export function FileReviewDialog({
                     variant="outline"
                     onClick={() => window.open(previewFile.file_url, "_blank")}
                   >
-                    فتح في تبويب جديد
+                    {t("createListing.fileReview.openInNewTab")}
                   </Button>
                 </div>
               )}
@@ -557,20 +560,20 @@ export function FileReviewDialog({
       <Dialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
         <DialogContent dir="rtl" className="max-w-md">
           <DialogHeader>
-            <DialogTitle>تأكيد الحذف</DialogTitle>
+            <DialogTitle>{t("createListing.fileReview.deleteTitle")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            سيتم حذف هذا التصنيف فقط. الملف الأصلي يبقى محفوظاً في التخزين.
+            {t("createListing.fileReview.deleteMessage")}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
-              إلغاء
+              {t("createListing.fileReview.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
             >
-              حذف
+              {t("createListing.fileReview.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>
