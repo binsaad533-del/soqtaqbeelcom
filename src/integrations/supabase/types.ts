@@ -1617,6 +1617,44 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_translations: {
+        Row: {
+          created_at: string
+          id: string
+          language: string
+          listing_id: string
+          source_hash: string
+          translated_data: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language: string
+          listing_id: string
+          source_hash: string
+          translated_data: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language?: string
+          listing_id?: string
+          source_hash?: string
+          translated_data?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_translations_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_views: {
         Row: {
           created_at: string
