@@ -54,9 +54,22 @@ const ListingOfferForm = ({ listingId, listingPrice, ownerId, className }: Props
     if (!user) { navigate("/login"); return; }
     const numPrice = Number(price);
     if (!numPrice || numPrice <= 0) {
-      toast.error("يرجى إدخال سعر صحيح");
+      toast.error(t("offer.invalidPrice"));
       return;
     }
+
+    if (isRateLimited(`offer:${user.id}`, 5, 60000)) {
+      toast.error(t("offer.rateLimited"));
+      return;
+    }
+
+    const sanitizedMessage = message ? sanitizeInput(message) : null;
+    const result = await submitOffer(listingId, numPrice, sanitizedMessage);
+    if (!result) {
+      toast.error(t("offer.sendFailed"));
+      return;
+    }
+    toast.success(t("offer.sentSuccess"));
 
     // Rate limit: max 5 offers per 10 minutes
     if (isRateLimited(`offer_${user.id}`, 5, 10 * 60 * 1000)) {
