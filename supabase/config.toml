@@ -21,3 +21,5 @@ project_id = "sxvfjtmntdmrlzdetnyg"
     verify_jwt = false
   [functions.supervisor-weekly-report]
     verify_jwt = false
+  [functions.translate-listing-content]
+    verify_jwt = false
