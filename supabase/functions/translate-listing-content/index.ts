@@ -103,15 +103,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 4. Build translation payload
+    // 4. Build translation payload — loop over all whitelisted top-level fields
     const toTranslate: Record<string, string> = {};
-    if (listing.title && typeof listing.title === "string") toTranslate.title = listing.title;
-    if (listing.description && typeof listing.description === "string") {
-      toTranslate.description = listing.description;
-    }
-    if (listing.city && typeof listing.city === "string") toTranslate.city = listing.city;
-    if (listing.district && typeof listing.district === "string") {
-      toTranslate.district = listing.district;
+    for (const field of TRANSLATABLE_LISTING_FIELDS) {
+      const val = listing[field];
+      if (val && typeof val === "string" && val.trim().length > 0) {
+        toTranslate[field] = val;
+      }
     }
 
     const inventory = Array.isArray(listing.inventory) ? listing.inventory : [];
