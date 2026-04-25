@@ -2,25 +2,27 @@ import { Link } from "react-router-dom";
 import SocialIcons from "./SocialIcons";
 import logoIcon from "@/assets/logo-icon-gold.png";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 
 const Footer = () => {
   const { tx } = useLanguage();
+  const { t } = useTranslation();
 
   const footerLinks = [
-    { label: tx("الرئيسية", "Home"), path: "/" },
-    { label: tx("سوق الفرص", "Marketplace"), path: "/marketplace" },
-    { label: tx("أضف فرصة", "Add Listing"), path: "/create-listing?new=1" },
-    { label: tx("الشروط", "Terms"), path: "/terms" },
-    { label: tx("الخصوصية", "Privacy"), path: "/privacy" },
-    { label: tx("من نحن", "About"), path: "/about" },
-    { label: tx("كيف تعمل المنصة", "How it works"), path: "/how-it-works" },
-    { label: tx("تواصل معنا", "Contact"), path: "/contact" },
-    { label: tx("مركز المساعدة", "Help Center"), path: "/help" },
-    { label: tx("المدونة", "Blog"), path: "/blog" },
-    { label: tx("العمولة", "Commission"), path: "/commission" },
+    { label: t("nav.home"), path: "/" },
+    { label: t("nav.marketplace"), path: "/marketplace" },
+    { label: t("nav.addListing"), path: "/create-listing?new=1" },
+    { label: t("footer.terms"), path: "/terms" },
+    { label: t("footer.privacy"), path: "/privacy" },
+    { label: t("footer.about"), path: "/about" },
+    { label: t("footer.howItWorks"), path: "/how-it-works" },
+    { label: t("footer.contact"), path: "/contact" },
+    { label: t("footer.help"), path: "/help" },
+    { label: t("footer.blog"), path: "/blog" },
+    { label: t("footer.commission"), path: "/commission" },
     { label: tx("نماذج PDF", "PDF Templates"), path: "/pdf-preview" },
-    { label: tx("الدعم الفني", "Support"), path: "/support" },
-    { label: tx("تثبيت التطبيق", "Install App"), path: "/install" },
+    { label: t("footer.support"), path: "/support" },
+    { label: t("footer.installApp"), path: "/install" },
   ];
 
   return (
@@ -49,7 +51,7 @@ const Footer = () => {
         <SocialIcons className="justify-center" />
 
         <p className="text-[12px] text-muted-foreground/70">
-          {tx("في المملكة العربية السعودية — صُنع بها ولأجلها 🇸🇦", "Built in Saudi Arabia — for its market 🇸🇦")}
+          {t("footer.madeInSaudi")}
         </p>
 
         <p className="text-[11px] text-muted-foreground/50">
