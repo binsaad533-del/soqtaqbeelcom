@@ -1,11 +1,9 @@
 import { Link } from "react-router-dom";
 import SocialIcons from "./SocialIcons";
 import logoIcon from "@/assets/logo-icon-gold.png";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { useTranslation } from "react-i18next";
 
 const Footer = () => {
-  const { tx } = useLanguage();
   const { t } = useTranslation();
 
   const footerLinks = [
@@ -45,7 +43,7 @@ const Footer = () => {
         </div>
 
         <div className="flex justify-center">
-          <img src={logoIcon} alt={tx("سوق تقبيل", "Soq Taqbeel")} className="h-8 w-auto opacity-60" />
+          <img src={logoIcon} alt={t("footer.logoAlt")} className="h-8 w-auto opacity-60" />
         </div>
 
         <SocialIcons className="justify-center" />
@@ -55,7 +53,7 @@ const Footer = () => {
         </p>
 
         <p className="text-[11px] text-muted-foreground/50">
-          © {new Date().getFullYear()} {tx("المنصة مملوكة ومدارة بواسطة شركة", "This platform is owned and operated by")}{" "}
+          © {new Date().getFullYear()} {t("footer.ownedBy")}{" "}
           <a
             href="https://www.jsaas-group.com/en"
             target="_blank"
