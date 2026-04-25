@@ -1231,7 +1231,7 @@ const CollapsibleList = <T,>({ title, icon, items, threshold, renderItem }: {
           onClick={() => setExpanded(!expanded)}
           className="mt-3 text-xs text-primary hover:text-primary/80 transition-colors"
         >
-          {expanded ? "عرض أقل" : `عرض المزيد (${items.length - threshold}+)`}
+          {expanded ? t("common.showLess") : `${t("common.showMore")} (${items.length - threshold}+)`}
         </button>
       )}
     </div>
@@ -1259,7 +1259,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
       <div className="border border-primary/20 bg-primary/5 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium flex items-center gap-0.5">
-            <Star size={10} fill="currentColor" /> الخيار الرئيسي
+            <Star size={10} fill="currentColor" /> {t("listing.mainOption")}
           </span>
           <span className="text-sm font-medium">{primaryConfig.label}</span>
         </div>
@@ -1268,7 +1268,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
         {primaryConfig.includes.length > 0 && (
           <div className="mb-2">
             <div className="text-[11px] font-medium text-success mb-1 flex items-center gap-1">
-              <Check size={11} /> يشمل
+              <Check size={11} /> {t("listing.includes")}
             </div>
             <div className="flex flex-wrap gap-1">
               {primaryConfig.includes.map((item, i) => (
@@ -1280,7 +1280,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
         {primaryConfig.excludes.length > 0 && (
           <div>
             <div className="text-[11px] font-medium text-destructive mb-1 flex items-center gap-1">
-              <AlertTriangle size={11} /> لا يشمل
+              <AlertTriangle size={11} /> {t("listing.excludes")}
             </div>
             <div className="flex flex-wrap gap-1">
               {primaryConfig.excludes.map((item, i) => (
@@ -1303,7 +1303,7 @@ const DealStructureDisplay = ({ primaryConfig, primaryTypeId, alternatives }: De
       {/* Alternative options */}
       {alternatives.length > 0 && (
         <div className="space-y-2">
-          <div className="text-xs text-muted-foreground font-medium">خيارات بديلة:</div>
+          <div className="text-xs text-muted-foreground font-medium">{t("listing.alternativeOptions")}</div>
           {alternatives.map((alt) => {
             const altConfig = DEAL_TYPE_MAP[alt.type_id];
             if (!altConfig) return null;
