@@ -837,7 +837,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
                       </div>
                       {analysis.marketComparison.observedPriceRange && analysis.marketComparison.observedPriceRange !== "غير متاح" && (
                         <div className="bg-accent/30 rounded-lg p-3 mb-3">
-                          <div className="text-xs text-muted-foreground mb-1">النطاق السعري المرصود</div>
+                          <div className="text-xs text-muted-foreground mb-1">{t("dealCheck.observedRange")}</div>
                           <div className="text-sm font-medium">{analysis.marketComparison.observedPriceRange}</div>
                         </div>
                       )}
