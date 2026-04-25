@@ -18,8 +18,7 @@ import {
   createPdfMount, renderPagesToPdf, paginateSections,
   formatPdfPrice, escapeHtml, PDF_COLORS,
 } from "@/lib/pdfShared";
-
-
+import { useTranslation } from "react-i18next";
 /* ── Types ── */
 interface Scenario {
   monthlyRevenue: number;
@@ -557,6 +556,7 @@ const resolveFeasibilityStudy = (listing: any, raw?: any): FeasibilityStudy | nu
   normalizeFeasibilityStudy(raw, listing) || buildEstimatedFeasibilityStudy(listing);
 
 const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityStudyPanelProps) => {
+  const { t } = useTranslation();
   const [study, setStudy] = useState<FeasibilityStudy | null>(() =>
     resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility),
   );
@@ -856,7 +856,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       >
         <div className="flex items-center gap-2">
           <AiStar size={18} />
-          <h3 className="text-base font-semibold">دراسة الجدوى الاقتصادية</h3>
+          <h3 className="text-base font-semibold">{t("feasibility.title")}</h3>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
           هذي الصفقة من نوع <span className="font-medium text-foreground">"أصول فقط"</span> — أي بيع معدات
@@ -895,7 +895,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       <div ref={panelRef} id="feasibility" className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 space-y-4">
         <div className="flex items-center gap-2">
           <AiStar size={18} />
-          <h3 className="text-base font-semibold">دراسة الجدوى الاقتصادية</h3>
+          <h3 className="text-base font-semibold">{t("feasibility.title")}</h3>
         </div>
         {loading ? (
           <div className="py-8 flex flex-col items-center gap-3">
@@ -931,7 +931,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <AiStar size={18} />
-          <h3 className="text-base font-semibold">دراسة الجدوى الاقتصادية</h3>
+          <h3 className="text-base font-semibold">{t("feasibility.title")}</h3>
           {displayStudy._meta?.hasRealCompetitorData && (
             <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">بيانات Google Maps</span>
           )}
@@ -942,13 +942,13 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
             return (
               <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                 محدّث: {new Date(dateStr!).toLocaleDateString("en-US", { year: "numeric", month: "numeric", day: "numeric" })}
-                <span className="text-muted-foreground/50">• يُحدّث تلقائياً كل أسبوع</span>
+                <span className="text-muted-foreground/50">• {t("feasibility.weeklyUpdate")}</span>
               </span>
             );
           })()}
           <Button variant="outline" size="sm" onClick={shareStudy} className="gap-1.5 text-xs">
             {copied ? <Check size={12} className="text-emerald-500" /> : <Share2 size={12} />}
-            {copied ? "تم النسخ" : "مشاركة"}
+            {copied ? "تم النسخ" : t("common.share")}
           </Button>
           <Button variant="outline" size="sm" onClick={downloadPDF} disabled={pdfLoading} className="gap-1.5 text-xs">
             {pdfLoading ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
@@ -967,11 +967,11 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       <div className={cn("rounded-xl border p-4 flex items-center justify-between", v.bg, v.border)}>
         <div>
           <div className={cn("text-lg font-bold", v.text)}>{displayStudy.verdict}</div>
-          <div className="text-xs text-muted-foreground">مستوى الثقة: {displayStudy.confidenceLevel}</div>
+          <div className="text-xs text-muted-foreground">{t("feasibility.confidenceLevel")} {displayStudy.confidenceLevel}</div>
         </div>
         <div className="text-left">
-          <div className="text-xs text-muted-foreground">فترة الاسترداد (واقعي)</div>
-          <div className={cn("text-xl font-bold", v.text)}>{rs.roiMonths} <span className="text-sm font-normal">شهر</span></div>
+          <div className="text-xs text-muted-foreground">{t("feasibility.paybackPeriod")}</div>
+          <div className={cn("text-xl font-bold", v.text)}>{rs.roiMonths} <span className="text-sm font-normal">{t("common.month")}</span></div>
         </div>
       </div>
 
@@ -995,7 +995,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       <div ref={reportRef} className="space-y-2.5 bg-background">
         {/* Executive Summary */}
         <CollapsibleSection
-          title="الملخص التنفيذي"
+          title={t("feasibility.executiveSummary")}
           icon={<Target size={14} />}
           isOpen={expandedSections.summary}
           onToggle={() => toggleSection("summary")}
@@ -1005,7 +1005,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
 
         {/* Investment Overview */}
         <CollapsibleSection
-          title="هيكل الاستثمار"
+          title={t("feasibility.investmentStructure")}
           icon={<DollarSign size={14} />}
           isOpen={expandedSections.investment}
           onToggle={() => toggleSection("investment")}
@@ -1027,7 +1027,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
 
         {/* Operational Costs */}
         <CollapsibleSection
-          title="التكاليف التشغيلية الشهرية"
+          title={t("feasibility.monthlyCosts")}
           icon={<TrendingDown size={14} />}
           isOpen={expandedSections.costs}
           onToggle={() => toggleSection("costs")}
@@ -1045,7 +1045,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
 
         {/* Revenue Projections */}
         <CollapsibleSection
-          title="سيناريوهات الربحية"
+          title={t("feasibility.profitScenarios")}
           icon={<TrendingUp size={14} />}
           isOpen={expandedSections.revenue}
           onToggle={() => toggleSection("revenue")}
@@ -1059,7 +1059,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
 
         {/* Competitor Analysis */}
         <CollapsibleSection
-          title="تحليل المنافسين"
+          title={t("feasibility.competitors")}
           icon={<Users size={14} />}
           isOpen={expandedSections.competitors}
           onToggle={() => toggleSection("competitors")}
@@ -1081,7 +1081,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
               if (totalDigital === 0 && topCount === 0) {
                 return (
                   <div className="rounded-lg bg-muted/30 p-3 text-center text-xs text-muted-foreground">
-                    لم تتوفر بيانات منافسين رقمية — المنافسة الفعلية تتطلب معاينة ميدانية
+                    {t("feasibility.noCompetitorData")}
                   </div>
                 );
               }
@@ -1147,7 +1147,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
 
         {/* Risk Assessment */}
         <CollapsibleSection
-          title="تقييم المخاطر"
+          title={t("feasibility.riskAssessment")}
           icon={<Shield size={14} />}
           isOpen={expandedSections.risks}
           onToggle={() => toggleSection("risks")}
@@ -1173,7 +1173,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
 
         {/* Recommendations */}
         <CollapsibleSection
-          title="التوصيات"
+          title={t("feasibility.recommendations")}
           icon={<Lightbulb size={14} />}
           isOpen={expandedSections.recommendations}
           onToggle={() => toggleSection("recommendations")}
