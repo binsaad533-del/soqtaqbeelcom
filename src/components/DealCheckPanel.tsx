@@ -329,11 +329,13 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
   const isSimulation = hasSimulationPhotos(listing?.photos as Record<string, unknown> | null | undefined);
 
   // Translate AI-generated analysis into the active UI language (no-op for Arabic).
-  const { translatedAnalysis } = useDealCheckTranslation(
+  const { translatedAnalysis, translatedTrustScore } = useDealCheckTranslation(
     listing?.id,
     analysis as unknown as Record<string, unknown> | null,
+    trustScore as Record<string, unknown> | null,
   );
   const displayAnalysis = (translatedAnalysis as unknown as DealCheckAnalysis | null) || analysis;
+  const displayTrustScore = translatedTrustScore || trustScore;
 
   useEffect(() => {
     if (!useCache) return;
@@ -652,8 +654,8 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
               <InventoryPricingSection listing={listing} />
 
               {/* Trust Score Section */}
-              {trustScore && (
-                <TrustScoreSection trustScore={trustScore} />
+              {displayTrustScore && (
+                <TrustScoreSection trustScore={displayTrustScore} />
               )}
 
               {!expanded && (
