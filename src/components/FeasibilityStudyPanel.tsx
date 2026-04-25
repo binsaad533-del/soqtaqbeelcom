@@ -556,7 +556,7 @@ const resolveFeasibilityStudy = (listing: any, raw?: any): FeasibilityStudy | nu
   normalizeFeasibilityStudy(raw, listing) || buildEstimatedFeasibilityStudy(listing);
 
 const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityStudyPanelProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [study, setStudy] = useState<FeasibilityStudy | null>(() =>
     resolveFeasibilityStudy(listing, analysisCache.cachedFeasibility),
   );
@@ -598,16 +598,26 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
   const toggleSection = (key: string) =>
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  // Check if refresh is allowed (24h cooldown)
+  // Check if refresh is allowed (24h cooldown).
+  // For non-Arabic languages, bypass the cooldown — cached study is Arabic-only,
+  // so the user must be allowed to regenerate in their language.
   const canRefresh = (() => {
+    const lang = (i18n.language || "ar").toLowerCase();
+    if (lang !== "ar") return true;
     if (!lastUpdatedAt) return true;
     const age = Date.now() - new Date(lastUpdatedAt).getTime();
     return age >= 24 * 60 * 60 * 1000;
   })();
 
   // Load cached study on mount - NO edge function call
+  // Bypass cache when user language is not Arabic (cached studies are Arabic-only).
   useEffect(() => {
     if (!listing?.id) { setLoadingCache(false); return; }
+    const lang = (i18n.language || "ar").toLowerCase();
+    if (lang !== "ar") {
+      setLoadingCache(false);
+      return;
+    }
     (async () => {
       try {
         const { data } = await supabase
@@ -624,7 +634,7 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
       } catch { /* ignore */ }
       setLoadingCache(false);
     })();
-  }, [listing?.id]);
+  }, [listing?.id, i18n.language]);
 
   const runStudy = async () => {
     if (isSimulation) {
@@ -640,7 +650,10 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
     setError(null);
     try {
       const { invokeWithRetry } = await import("@/lib/invokeWithRetry");
-      const { data, error: fnError } = await invokeWithRetry("feasibility-study", { listing });
+      const { data, error: fnError } = await invokeWithRetry("feasibility-study", {
+        listing,
+        language: i18n.language || "ar",
+      });
       if (fnError) {
         const response = (fnError as any)?.context;
         let message = "تعذّر إعداد الدراسة حالياً، يرجى المحاولة بعد قليل";

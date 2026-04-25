@@ -307,10 +307,23 @@ function buildConsistencyRules(mode: AnalysisMode): string {
 - إذا تغيّرت بيانات تسعير الأصول (pricing_aggregates) أو أُضيف قسم إجماليات التسعير لأول مرة — يجب إعادة تقييم عدالة السعر والتوصية بناءً على قيمة التقبيل OLV الجديدة، حتى لو باقي المدخلات لم تتغير`; 
 }
 
-function buildSystemPrompt(perspective: AnalysisPerspective, mode: AnalysisMode): string {
+function languageInstructionFor(language: string): string {
+  const map: Record<string, string> = {
+    ar: "Arabic",
+    en: "English",
+    zh: "Simplified Chinese",
+    hi: "Hindi",
+    ur: "Urdu",
+    bn: "Bengali",
+  };
+  const langName = map[language] || "Arabic";
+  return `\n\nIMPORTANT: Respond entirely in ${langName}. All analysis text, recommendations, strengths, risks, descriptions, and any free-form prose fields must be written in ${langName}. Numbers and currency (SAR/ر.س) stay as-is. Asset/brand names (e.g. SCM OLIMPIC K360R) stay as-is. Do not change the JSON structure, field names, or enum values.`;
+}
+
+function buildSystemPrompt(perspective: AnalysisPerspective, mode: AnalysisMode, language: string = "ar"): string {
   const perspectiveBlock = perspective === "seller" ? buildSellerPerspective() : BUYER_PERSPECTIVE;
 
-  return `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية دقيقة وثابتة لكل صفقة.
+  const base = `أنت محلل صفقات تجارية خبير متخصص في السوق السعودي. مهمتك تقديم تقييم جدوى أولية دقيقة وثابتة لكل صفقة.
 
 ## تحليل الوثائق المرفقة:
 - إذا تم إرفاق صور مستندات (سجل تجاري، عقد إيجار، رخص، فواتير)، حلّلها واستخرج منها كل المعلومات المفيدة
@@ -427,6 +440,8 @@ ${buildConsistencyRules(mode)}
 أنتج JSON بالهيكل المطلوب. لكل حقل تحليل:
 - إذا كان خارج نطاق الصفقة، اكتب "خارج نطاق هذه الصفقة" بدل تحليل مفصل
 - missingInfo يجب أن تحتوي فقط على معلومات ناقصة ضمن نطاق الصفقة المحدد`;
+
+  return base + languageInstructionFor(language);
 }
 
 function buildPreviousAnalysisReference(previousAnalysis: any): string | null {
@@ -649,9 +664,10 @@ serve(async (req) => {
   }
 
   try {
-    const { listing, perspective: rawPerspective, sellerName, mode: rawMode, previousAnalysis } = await req.json();
+    const { listing, perspective: rawPerspective, sellerName, mode: rawMode, previousAnalysis, language: rawLanguage } = await req.json();
     const perspective: AnalysisPerspective = rawPerspective === "seller" ? "seller" : "buyer";
     const mode: AnalysisMode = rawMode === "update" ? "update" : "create";
+    const language: string = typeof rawLanguage === "string" && rawLanguage.trim() ? rawLanguage.trim() : "ar";
 
     if (!listing) {
       return new Response(
@@ -685,7 +701,7 @@ serve(async (req) => {
         temperature: 0.1,
         top_p: 0.1,
         messages: [
-          { role: "system", content: buildSystemPrompt(perspective, mode) },
+          { role: "system", content: buildSystemPrompt(perspective, mode, language) },
           { role: "user", content: userContent },
         ],
         tools: [

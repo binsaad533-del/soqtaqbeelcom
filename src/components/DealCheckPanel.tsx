@@ -299,7 +299,7 @@ const CertifiedValuationFloatingTab = () => {
 };
 
 const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     cachedDealCheck, cacheAge, isStale, isRefreshing, saveDealCheck, setRefreshing,
     assetsCombined, detectedAssetsImages, detectedAssetsFiles, analysisUpdatedAt, saveDetectedAssets,
@@ -307,20 +307,26 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
     trustScore, saveTrustScore
   } = analysisCache;
 
+  // Bypass cached deal-check when user's language is not Arabic — cached analysis is Arabic-only.
+  const useCache = ((i18n.language || "ar").toLowerCase() === "ar");
+
   const [open, setOpen] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<DealCheckAnalysis | null>(() => normalizeDealCheckAnalysis(cachedDealCheck, listing));
+  const [analysis, setAnalysis] = useState<DealCheckAnalysis | null>(() =>
+    useCache ? normalizeDealCheckAnalysis(cachedDealCheck, listing) : null
+  );
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
   const isSimulation = hasSimulationPhotos(listing?.photos as Record<string, unknown> | null | undefined);
 
   useEffect(() => {
+    if (!useCache) return;
     const normalized = normalizeDealCheckAnalysis(cachedDealCheck, listing);
     if (normalized) {
       setAnalysis(normalized);
       setOpen(true);
     }
-  }, [cachedDealCheck, listing]);
+  }, [cachedDealCheck, listing, useCache]);
 
   const getAllPhotoUrls = (): string[] => {
     if (!listing?.photos) return [];
@@ -411,6 +417,7 @@ const DealCheckPanel = ({ listing, analysisCache }: DealCheckPanelProps) => {
       const { invokeWithRetry } = await import("@/lib/invokeWithRetry");
       const { data, error: fnError } = await invokeWithRetry("deal-check", {
         listing: listingWithAssets, perspective: "buyer",
+        language: i18n.language || "ar",
       });
 
       if (fnError) throw new Error(fnError.message || "تعذّر إعادة التحليل حالياً");

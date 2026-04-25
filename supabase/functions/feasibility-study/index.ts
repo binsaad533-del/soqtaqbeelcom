@@ -483,13 +483,27 @@ const SYSTEM_PROMPT = `أنت مستشار مالي واقتصادي خبير م
 - إذا لم تتوفر بيانات مالية فعلية (إيرادات، مصاريف)، صرّح بذلك بوضوح ولا تفترض أرقاماً
 - التكاليف التشغيلية يجب أن تستند إلى معايير السوق السعودي لنوع النشاط المحدد مع ذكر المصدر`;
 
+function languageInstructionFor(language: string): string {
+  const map: Record<string, string> = {
+    ar: "Arabic",
+    en: "English",
+    zh: "Simplified Chinese",
+    hi: "Hindi",
+    ur: "Urdu",
+    bn: "Bengali",
+  };
+  const langName = map[language] || "Arabic";
+  return `\n\nIMPORTANT: Respond entirely in ${langName}. All analysis text, executive summary, recommendations, risk descriptions, scenario notes, and any free-form prose fields must be written in ${langName}. Numbers and currency (SAR/ر.س) stay as-is. Asset/brand names stay as-is. Do not change the JSON structure, field names, or enum values.`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { listing } = await req.json();
+    const { listing, language: rawLanguage } = await req.json();
+    const language: string = typeof rawLanguage === "string" && rawLanguage.trim() ? rawLanguage.trim() : "ar";
     if (!listing) {
       return new Response(JSON.stringify({ error: "بيانات الصفقة مطلوبة" }), {
         status: 400,
@@ -574,7 +588,7 @@ serve(async (req) => {
       model: "google/gemini-3-flash-preview",
       temperature: 0.15,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: SYSTEM_PROMPT + languageInstructionFor(language) },
         { role: "user", content: userContent },
       ],
       tools: [
