@@ -398,16 +398,17 @@ const ActionArea = ({
   onRequestClick,
   onLoginClick,
 }: ActionAreaProps) => {
+  const { t } = useTranslation();
   if (status === "guest") {
     return (
       <div className="flex flex-col gap-2 rounded-lg bg-muted/30 p-3">
         <p className="text-xs text-muted-foreground flex items-center gap-1.5">
           <Lock size={11} strokeWidth={1.5} />
-          <GuestLoginText />
+          {t("listing.loginToViewDocs")}
         </p>
         <Button size="sm" variant="outline" onClick={onLoginClick} className="w-fit">
           <LogIn size={13} className="ml-1.5" strokeWidth={1.5} />
-          <LoginButtonText />
+          {t("common.login")}
         </Button>
       </div>
     );
