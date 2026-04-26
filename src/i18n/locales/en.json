@@ -36,7 +36,116 @@
     "sendOtp": "Send verification code",
     "otpCode": "Verification code",
     "verify": "Verify",
-    "createAccount": "Create account"
+    "createAccount": "Create account",
+    "shared": {
+      "trustAi": "AI-powered",
+      "trustFast": "Fast & easy",
+      "trustSecure": "100% secure",
+      "or": "or",
+      "continueWithGoogle": "Continue with Google",
+      "googleRedirecting": "Redirecting...",
+      "googleFailed": "Google sign-in failed",
+      "googleError": "An error occurred during Google sign-in",
+      "secureBadge": "Your account is protected by the highest security standards",
+      "moqbelHelps": "Sign in… and Moqbel helps you every step of the way",
+      "backToHome": "← Back to home",
+      "backToLogin": "← Back to login",
+      "processing": "Processing...",
+      "sending": "Sending...",
+      "verifying": "Verifying...",
+      "updating": "Updating..."
+    },
+    "login": {
+      "seoTitle": "Login",
+      "seoDescription": "Sign in to Souq Taqbeel to manage your listings and business deals",
+      "welcomeBack": "Welcome back",
+      "startJourney": "Start your journey in the world of business takeover",
+      "tabLogin": "Login",
+      "tabRegister": "Create account",
+      "forgotPassword": "Forgot password?",
+      "submit": "Login",
+      "redirectProtected": "To add your opportunity or access the dashboard, please sign in first",
+      "redirectCreateAccount": "Create new account",
+      "redirectAuthRequired": "You must sign in to access this page"
+    },
+    "register": {
+      "submit": "Create new account",
+      "agreeToTerms": "I agree to the",
+      "termsLink": "Terms & Conditions",
+      "and": "and",
+      "privacyLink": "Privacy Policy"
+    },
+    "fields": {
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "Full name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "example@email.com",
+      "phoneLabel": "Mobile number",
+      "phonePlaceholder": "5XXXXXXXX",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Password",
+      "newPasswordLabel": "New password",
+      "newPasswordPlaceholder": "New password",
+      "confirmPasswordLabel": "Confirm password",
+      "confirmPasswordPlaceholder": "Confirm password"
+    },
+    "validation": {
+      "rateLimited": "Too many attempts. Please wait 5 minutes",
+      "phoneInvalid": "Please enter a valid mobile number",
+      "phoneMustStartWith5": "Mobile number must start with 5",
+      "phoneInvalidStartWith5": "Please enter a valid mobile number starting with 5",
+      "fullNameRequired": "Please enter your full name",
+      "passwordWeak": "Password is weak. It must contain at least 8 characters with an uppercase letter, a number and a special symbol",
+      "termsRequired": "You must agree to the Terms & Conditions and Privacy Policy",
+      "invalidCredentials": "Invalid login credentials",
+      "otpInvalidLength": "Verification code must be 6 digits",
+      "passwordsMismatch": "Passwords do not match",
+      "otpIncorrect": "Incorrect code"
+    },
+    "toasts": {
+      "otpSentFailed": "Failed to send verification code, please try again",
+      "genericError": "An error occurred, please try again",
+      "passwordUpdateFailed": "Failed to update password. Please try again."
+    },
+    "mfa": {
+      "title": "Two-factor authentication",
+      "subtitle": "Enter the authentication code from your app",
+      "confirm": "Confirm",
+      "verifying": "Verifying...",
+      "back": "Back to login"
+    },
+    "otp": {
+      "labelChannel": "Verification code sent {{channel}}",
+      "channelSms": "via SMS",
+      "channelCall": "via call",
+      "channelWhatsapp": "via WhatsApp",
+      "changeNumber": "Change number",
+      "resendIn": "Resend in ({{seconds}})",
+      "resend": "Resend code"
+    },
+    "forgotPassword": {
+      "seoTitle": "Reset password",
+      "seoDescription": "Reset your Souq Taqbeel password via mobile number",
+      "title": "Forgot password",
+      "subtitlePhone": "Enter your mobile number and we'll send you a verification code",
+      "subtitleOtp": "Enter the verification code and your new password",
+      "submitPhone": "Send verification code",
+      "submitVerify": "Confirm and change password",
+      "successTitle": "Password changed successfully",
+      "successRedirect": "Redirecting you to the login page..."
+    },
+    "resetPassword": {
+      "seoTitle": "Reset password",
+      "seoDescription": "Reset your password on Souq Taqbeel",
+      "title": "Set a new password",
+      "subtitle": "Enter your new password",
+      "submit": "Set password",
+      "successTitle": "Password changed successfully",
+      "successRedirect": "Redirecting you to the home page...",
+      "invalidLinkTitle": "Invalid link",
+      "invalidLinkBody": "This link is invalid or expired. Please request a new one.",
+      "requestNewLink": "Request new link"
+    }
   },
   "dashboard": {
     "myListings": "My Listings",

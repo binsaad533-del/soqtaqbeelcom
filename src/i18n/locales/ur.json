@@ -36,7 +36,116 @@
     "sendOtp": "تصدیقی کوڈ بھیجیں",
     "otpCode": "تصدیقی کوڈ",
     "verify": "تصدیق کریں",
-    "createAccount": "نیا اکاؤنٹ بنائیں"
+    "createAccount": "نیا اکاؤنٹ بنائیں",
+    "shared": {
+      "trustAi": "AI سے چلنے والا",
+      "trustFast": "تیز اور آسان",
+      "trustSecure": "100% محفوظ",
+      "or": "یا",
+      "continueWithGoogle": "Google کے ساتھ جاری رکھیں",
+      "googleRedirecting": "ری ڈائریکٹ ہو رہا ہے...",
+      "googleFailed": "Google سائن ان ناکام",
+      "googleError": "Google سائن ان کے دوران ایک خرابی پیش آئی",
+      "secureBadge": "آپ کا اکاؤنٹ اعلیٰ ترین سیکیورٹی معیار سے محفوظ ہے",
+      "moqbelHelps": "سائن ان کریں… اور Moqbel ہر قدم پر آپ کی مدد کرے گا",
+      "backToHome": "← ہوم پر واپس",
+      "backToLogin": "← لاگ ان پر واپس",
+      "processing": "پروسیسنگ...",
+      "sending": "بھیج رہا ہے...",
+      "verifying": "تصدیق ہو رہی ہے...",
+      "updating": "اپ ڈیٹ ہو رہا ہے..."
+    },
+    "login": {
+      "seoTitle": "لاگ ان",
+      "seoDescription": "اپنی فہرستوں اور کاروباری معاملات کا انتظام کرنے کے لیے Souq Taqbeel میں سائن ان کریں",
+      "welcomeBack": "واپسی پر خوش آمدید",
+      "startJourney": "کاروباری حصول کی دنیا میں اپنا سفر شروع کریں",
+      "tabLogin": "لاگ ان",
+      "tabRegister": "اکاؤنٹ بنائیں",
+      "forgotPassword": "پاس ورڈ بھول گئے؟",
+      "submit": "لاگ ان",
+      "redirectProtected": "اپنا موقع شامل کرنے یا ڈیش بورڈ تک رسائی کے لیے، براہِ کرم پہلے سائن ان کریں",
+      "redirectCreateAccount": "نیا اکاؤنٹ بنائیں",
+      "redirectAuthRequired": "اس صفحے تک رسائی کے لیے آپ کو سائن ان کرنا ہوگا"
+    },
+    "register": {
+      "submit": "نیا اکاؤنٹ بنائیں",
+      "agreeToTerms": "میں اتفاق کرتا ہوں",
+      "termsLink": "شرائط و ضوابط",
+      "and": "اور",
+      "privacyLink": "رازداری کی پالیسی"
+    },
+    "fields": {
+      "fullNameLabel": "مکمل نام",
+      "fullNamePlaceholder": "مکمل نام",
+      "emailLabel": "ای میل",
+      "emailPlaceholder": "example@email.com",
+      "phoneLabel": "موبائل نمبر",
+      "phonePlaceholder": "5XXXXXXXX",
+      "passwordLabel": "پاس ورڈ",
+      "passwordPlaceholder": "پاس ورڈ",
+      "newPasswordLabel": "نیا پاس ورڈ",
+      "newPasswordPlaceholder": "نیا پاس ورڈ",
+      "confirmPasswordLabel": "پاس ورڈ کی تصدیق",
+      "confirmPasswordPlaceholder": "پاس ورڈ کی تصدیق"
+    },
+    "validation": {
+      "rateLimited": "بہت زیادہ کوششیں۔ براہِ کرم 5 منٹ انتظار کریں",
+      "phoneInvalid": "براہِ کرم درست موبائل نمبر درج کریں",
+      "phoneMustStartWith5": "موبائل نمبر 5 سے شروع ہونا چاہیے",
+      "phoneInvalidStartWith5": "براہِ کرم 5 سے شروع ہونے والا درست موبائل نمبر درج کریں",
+      "fullNameRequired": "براہِ کرم اپنا مکمل نام درج کریں",
+      "passwordWeak": "پاس ورڈ کمزور ہے۔ کم از کم 8 حروف، ایک بڑا حرف، ایک عدد اور ایک خاص علامت ہونی چاہیے",
+      "termsRequired": "آپ کو شرائط و ضوابط اور رازداری کی پالیسی سے اتفاق کرنا ہوگا",
+      "invalidCredentials": "غلط لاگ ان کوائف",
+      "otpInvalidLength": "تصدیقی کوڈ 6 ہندسوں کا ہونا چاہیے",
+      "passwordsMismatch": "پاس ورڈ ملتا نہیں ہے",
+      "otpIncorrect": "غلط کوڈ"
+    },
+    "toasts": {
+      "otpSentFailed": "تصدیقی کوڈ بھیجنے میں ناکامی، دوبارہ کوشش کریں",
+      "genericError": "ایک خرابی پیش آئی، دوبارہ کوشش کریں",
+      "passwordUpdateFailed": "پاس ورڈ اپ ڈیٹ کرنے میں خرابی۔ دوبارہ کوشش کریں۔"
+    },
+    "mfa": {
+      "title": "دو مرحلوں میں تصدیق",
+      "subtitle": "اپنی ایپ سے توثیقی کوڈ درج کریں",
+      "confirm": "تصدیق کریں",
+      "verifying": "تصدیق ہو رہی ہے...",
+      "back": "لاگ ان پر واپس"
+    },
+    "otp": {
+      "labelChannel": "تصدیقی کوڈ بھیجا گیا {{channel}}",
+      "channelSms": "SMS کے ذریعے",
+      "channelCall": "کال کے ذریعے",
+      "channelWhatsapp": "WhatsApp کے ذریعے",
+      "changeNumber": "نمبر تبدیل کریں",
+      "resendIn": "دوبارہ بھیجیں ({{seconds}})",
+      "resend": "کوڈ دوبارہ بھیجیں"
+    },
+    "forgotPassword": {
+      "seoTitle": "پاس ورڈ بازیافت کریں",
+      "seoDescription": "موبائل نمبر کے ذریعے اپنا Souq Taqbeel پاس ورڈ بازیافت کریں",
+      "title": "پاس ورڈ بھول گئے",
+      "subtitlePhone": "اپنا موبائل نمبر درج کریں اور ہم آپ کو تصدیقی کوڈ بھیجیں گے",
+      "subtitleOtp": "تصدیقی کوڈ اور نیا پاس ورڈ درج کریں",
+      "submitPhone": "تصدیقی کوڈ بھیجیں",
+      "submitVerify": "تصدیق کریں اور پاس ورڈ تبدیل کریں",
+      "successTitle": "پاس ورڈ کامیابی سے تبدیل ہو گیا",
+      "successRedirect": "آپ کو لاگ ان پیج پر بھیجا جا رہا ہے..."
+    },
+    "resetPassword": {
+      "seoTitle": "پاس ورڈ ری سیٹ کریں",
+      "seoDescription": "Souq Taqbeel پر اپنا پاس ورڈ ری سیٹ کریں",
+      "title": "نیا پاس ورڈ سیٹ کریں",
+      "subtitle": "نیا پاس ورڈ درج کریں",
+      "submit": "پاس ورڈ سیٹ کریں",
+      "successTitle": "پاس ورڈ کامیابی سے تبدیل ہو گیا",
+      "successRedirect": "آپ کو ہوم پیج پر بھیجا جا رہا ہے...",
+      "invalidLinkTitle": "غلط لنک",
+      "invalidLinkBody": "یہ لنک غلط یا ختم ہو چکا ہے۔ براہِ کرم نیا لنک طلب کریں۔",
+      "requestNewLink": "نیا لنک طلب کریں"
+    }
   },
   "dashboard": {
     "myListings": "میری فہرستیں",
