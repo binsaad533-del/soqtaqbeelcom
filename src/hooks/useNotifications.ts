@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { playNotificationSound } from "@/lib/notificationSound";
+import i18n from "@/i18n";
 
 export interface Notification {
   id: string;
@@ -26,8 +27,8 @@ function showBrowserNotification(n: Notification) {
       icon: "/pwa-icon-192.png",
       badge: "/pwa-icon-192.png",
       tag: n.id,
-      dir: "rtl",
-      lang: "ar",
+      dir: i18n.dir() as "rtl" | "ltr" | "auto",
+      lang: i18n.language,
     });
     notif.onclick = () => {
       window.focus();
