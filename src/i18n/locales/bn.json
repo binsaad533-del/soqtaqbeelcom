@@ -2087,7 +2087,10 @@
       "title": "মোকবিলের সাথে চ্যাট",
       "subtitle": "আপনার স্মার্ট ডিল বিশেষজ্ঞ পরামর্শক",
       "active": "অনলাইন",
-      "interactionCount": "{{count}} ইন্টারঅ্যাকশন"
+      "interactionCount": "{{count}} ইন্টারঅ্যাকশন",
+      "chatTitle": "Moqbil চ্যাট",
+      "interactionShort": "{{count}} ইন্টারঅ্যাকশন",
+      "openSidebar": "সাইডবার খুলুন"
     },
     "welcome": {
       "greeting": "হ্যালো 👋 আমি মোকবিল, আপনার স্মার্ট সহকারী। আজ কী করতে চান?",

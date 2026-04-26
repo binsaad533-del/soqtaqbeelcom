@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Paperclip, Copy, Check, ChevronRight, FileText, Loader2, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Send, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Paperclip, Copy, Check, ChevronRight, FileText, Loader2, ThumbsUp, ThumbsDown, Menu } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
@@ -12,6 +12,9 @@ import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useDirection } from "@/hooks/useDirection";
 import MoqbilAvatar from "@/components/MoqbilAvatar";
 import AiRecommendations from "@/components/AiRecommendations";
 import SmartMatchPanel from "@/components/SmartMatchPanel";
@@ -283,12 +286,15 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
 };
 
 const AiChatPage = () => {
+  const isMobile = useIsMobile();
+  const { isRTL } = useDirection();
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const navigate = useNavigate();
   const _location = useLocation();
@@ -296,6 +302,7 @@ const AiChatPage = () => {
   const { user, role: authRole } = useAuthContext();
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -304,9 +311,15 @@ const AiChatPage = () => {
   const { getMemoryContext, addAiNote, memory, loaded: memoryLoaded } = useAiMemory();
   const { alerts: marketAlerts, markRead: markAlertRead, dismissAlert } = useMarketAlerts();
 
-
-  useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
-  useEffect(() => { inputRef.current?.focus(); }, []);
+  // Auto-scroll to last message
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    } else if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, streaming, loadingFiles]);
+  useEffect(() => { if (!isMobile) inputRef.current?.focus(); }, [isMobile]);
 
   const now = () => new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
@@ -565,157 +578,175 @@ const AiChatPage = () => {
 
   const hasInsights = proactiveInsights.length > 0 || marketAlerts.length > 0;
 
+  const sidebarContent = (
+    <div className="h-full overflow-y-auto p-4 space-y-3">
+      {/* Header */}
+      <div className="flex items-center gap-3 pb-3 border-b border-border/30">
+        <div className="w-11 h-11 rounded-full overflow-hidden">
+          <MoqbilAvatar size={44} />
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold">{t("aiChat.header.title")} {t("aiChat.header.subtitle")}</h2>
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+            <span className="text-[10px] text-success">{t("aiChat.header.active")}</span>
+            {memoryLoaded && memory.interaction_count > 0 && (
+              <span className="text-[9px] text-muted-foreground/60 bg-muted/30 px-1.5 py-0.5 rounded-full mr-1">
+                {t("aiChat.header.interactionShort", { count: memory.interaction_count })}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <p className="text-xs text-muted-foreground leading-relaxed">{greeting}</p>
+
+      {/* Proactive Insights */}
+      {hasInsights && (
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5 px-1">
+            <Bell size={11} className="text-primary" strokeWidth={2} />
+            <span className="text-[10px] font-medium text-primary">{t("aiChat.sidebar.smartAlerts")}</span>
+          </div>
+          {proactiveInsights.map((insight) => (
+            <div key={insight.id} className={cn(
+              "rounded-xl p-2.5 border text-[11px] leading-relaxed",
+              insight.type === "warning" ? "bg-warning/5 border-warning/20" : insight.type === "action" ? "bg-primary/5 border-primary/15" : "bg-muted/30 border-border/30"
+            )}>
+              <div className="flex items-start gap-2">
+                {insight.type === "warning" ? <AlertTriangle size={12} className="text-warning shrink-0 mt-0.5" /> : <Info size={12} className="text-primary shrink-0 mt-0.5" />}
+                <div className="flex-1 min-w-0">
+                  <span className="text-foreground/80">{insight.message}</span>
+                  {insight.actionLabel && (
+                    <button onClick={() => insight.actionPath && navigate(insight.actionPath)} className="flex items-center gap-1 mt-1 text-primary text-[10px] font-medium hover:underline">
+                      {insight.actionLabel} <ArrowRight size={9} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Market Alerts */}
+      {marketAlerts.length > 0 && (
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5 px-1">
+            <Zap size={11} className="text-warning" strokeWidth={2} />
+            <span className="text-[10px] font-medium text-warning">{t("aiChat.sidebar.marketRadar")}</span>
+          </div>
+          {marketAlerts.slice(0, 3).map((alert) => (
+            <div key={alert.id} className={cn(
+              "rounded-xl p-2.5 border text-[11px] leading-relaxed",
+              alert.priority === "high" ? "bg-warning/5 border-warning/20" : alert.priority === "critical" ? "bg-destructive/5 border-destructive/20" : "bg-primary/5 border-primary/15"
+            )}>
+              <div className="flex items-start gap-2">
+                <span className="text-sm shrink-0 mt-0.5">{alert.alert_type === "gold_opportunity" ? "💎" : alert.alert_type === "price_drop" ? "📉" : "🔔"}</span>
+                <div className="flex-1 min-w-0">
+                  <span className="font-medium text-foreground block text-[11px]">{alert.title}</span>
+                  <span className="text-foreground/70 text-[10px]">{alert.message}</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    {alert.reference_id && (
+                      <button onClick={() => { markAlertRead(alert.id); navigate(`/listing/${alert.reference_id}`); setMobileSidebarOpen(false); }} className="text-primary text-[10px] font-medium hover:underline flex items-center gap-0.5">
+                        {t("aiChat.sidebar.viewOpportunity")} <ArrowRight size={8} />
+                      </button>
+                    )}
+                    <button onClick={() => dismissAlert(alert.id)} className="text-muted-foreground text-[9px] hover:text-foreground mr-auto">{t("aiChat.sidebar.dismiss")}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Suggestions */}
+      {suggestions.map((s) => (
+        <button key={s.id} onClick={() => { sendMessage(s.label); setMobileSidebarOpen(false); }} className="w-full text-right rounded-xl border border-border/40 hover:border-primary/20 hover:bg-primary/[0.03] p-3 transition-all group">
+          <div className="flex items-start gap-2.5">
+            <span className="text-lg mt-0.5 shrink-0">{s.icon}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[12px] font-medium text-foreground">{s.label}</span>
+                {s.priority === "high" && <Zap size={10} className="text-warning shrink-0" strokeWidth={2} />}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{s.description}</p>
+            </div>
+          </div>
+        </button>
+      ))}
+
+      <AiRecommendations />
+      <SmartMatchPanel />
+
+      {/* Quick Commands */}
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-1.5 px-1">
+          <Command size={11} className="text-primary" strokeWidth={2} />
+          <span className="text-[10px] font-medium text-primary">{t("aiChat.quickCommands.header")}</span>
+        </div>
+        <div className="grid grid-cols-2 gap-1.5">
+          {quickCommands.map((cmd) => (
+            <button key={cmd.id} onClick={() => { sendMessage(cmd.action); setMobileSidebarOpen(false); }} className="flex items-center gap-2 p-2 rounded-xl border border-border/40 hover:border-primary/20 hover:bg-primary/[0.03] transition-all text-right">
+              <span className="text-sm shrink-0">{cmd.icon}</span>
+              <span className="text-[10px] text-foreground/80 font-medium leading-tight">{cmd.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* File upload */}
+      <button onClick={() => { fileInputRef.current?.click(); setMobileSidebarOpen(false); }} className="w-full py-2.5 rounded-xl border border-dashed border-primary/25 text-xs text-primary hover:bg-primary/[0.03] transition-colors flex items-center justify-center gap-2">
+        <Paperclip size={14} strokeWidth={1.5} />
+        {t("aiChat.sidebar.uploadButton")}
+      </button>
+    </div>
+  );
+
   return (
-    <div className="flex h-[calc(100vh-60px)] overflow-hidden" onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}>
+    <div
+      className="flex h-[calc(100svh-60px)] overflow-hidden relative"
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+    >
       {/* Drag overlay */}
       {isDragging && (
         <div className="absolute inset-0 z-50 bg-primary/10 border-2 border-dashed border-primary/40 rounded-xl flex items-center justify-center pointer-events-none">
           <div className="bg-card/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-lg text-center">
             <Paperclip size={32} className="text-primary mx-auto mb-2" />
-            <p className="text-sm font-medium text-foreground">أفلت الملفات هنا</p>
-            <p className="text-xs text-muted-foreground">أي نوع وأي حجم</p>
+            <p className="text-sm font-medium text-foreground">{t("aiChat.input.dropFilesHere")}</p>
+            <p className="text-xs text-muted-foreground">{t("aiChat.input.anyTypeSize")}</p>
           </div>
         </div>
       )}
       {/* Hidden file input - accept all */}
       <input ref={fileInputRef} type="file" accept="*/*" multiple className="hidden" onChange={handleFileUpload} />
 
-      {/* Sidebar */}
+      {/* Desktop Sidebar (inline) */}
       <div className={cn(
-        "border-l border-border/30 bg-card/50 transition-all duration-300 flex flex-col shrink-0 overflow-hidden",
+        "border-l border-border/30 bg-card/50 transition-all duration-300 flex-col shrink-0 overflow-hidden",
+        "hidden md:flex",
         showSidebar ? "w-[320px]" : "w-0"
       )}>
-        {showSidebar && (
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {/* Header */}
-            <div className="flex items-center gap-3 pb-3 border-b border-border/30">
-              <div className="w-11 h-11 rounded-full overflow-hidden">
-                <MoqbilAvatar size={44} />
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold">{t("aiChat.header.title")} {t("aiChat.header.subtitle")}</h2>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                  <span className="text-[10px] text-success">{t("aiChat.header.active")}</span>
-                  {memoryLoaded && memory.interaction_count > 0 && (
-                    <span className="text-[9px] text-muted-foreground/60 bg-muted/30 px-1.5 py-0.5 rounded-full mr-1">
-                      {memory.interaction_count} تفاعل
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <p className="text-xs text-muted-foreground leading-relaxed">{greeting}</p>
-
-            {/* Proactive Insights */}
-            {hasInsights && (
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1.5 px-1">
-                  <Bell size={11} className="text-primary" strokeWidth={2} />
-                  <span className="text-[10px] font-medium text-primary">تنبيهات ذكية</span>
-                </div>
-                {proactiveInsights.map((insight) => (
-                  <div key={insight.id} className={cn(
-                    "rounded-xl p-2.5 border text-[11px] leading-relaxed",
-                    insight.type === "warning" ? "bg-warning/5 border-warning/20" : insight.type === "action" ? "bg-primary/5 border-primary/15" : "bg-muted/30 border-border/30"
-                  )}>
-                    <div className="flex items-start gap-2">
-                      {insight.type === "warning" ? <AlertTriangle size={12} className="text-warning shrink-0 mt-0.5" /> : <Info size={12} className="text-primary shrink-0 mt-0.5" />}
-                      <div className="flex-1 min-w-0">
-                        <span className="text-foreground/80">{insight.message}</span>
-                        {insight.actionLabel && (
-                          <button onClick={() => insight.actionPath && navigate(insight.actionPath)} className="flex items-center gap-1 mt-1 text-primary text-[10px] font-medium hover:underline">
-                            {insight.actionLabel} <ArrowRight size={9} />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Market Alerts */}
-            {marketAlerts.length > 0 && (
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1.5 px-1">
-                  <Zap size={11} className="text-warning" strokeWidth={2} />
-                  <span className="text-[10px] font-medium text-warning">رادار السوق</span>
-                </div>
-                {marketAlerts.slice(0, 3).map((alert) => (
-                  <div key={alert.id} className={cn(
-                    "rounded-xl p-2.5 border text-[11px] leading-relaxed",
-                    alert.priority === "high" ? "bg-warning/5 border-warning/20" : alert.priority === "critical" ? "bg-destructive/5 border-destructive/20" : "bg-primary/5 border-primary/15"
-                  )}>
-                    <div className="flex items-start gap-2">
-                      <span className="text-sm shrink-0 mt-0.5">{alert.alert_type === "gold_opportunity" ? "💎" : alert.alert_type === "price_drop" ? "📉" : "🔔"}</span>
-                      <div className="flex-1 min-w-0">
-                        <span className="font-medium text-foreground block text-[11px]">{alert.title}</span>
-                        <span className="text-foreground/70 text-[10px]">{alert.message}</span>
-                        <div className="flex items-center gap-2 mt-1">
-                          {alert.reference_id && (
-                            <button onClick={() => { markAlertRead(alert.id); navigate(`/listing/${alert.reference_id}`); }} className="text-primary text-[10px] font-medium hover:underline flex items-center gap-0.5">
-                              عرض الفرصة <ArrowRight size={8} />
-                            </button>
-                          )}
-                          <button onClick={() => dismissAlert(alert.id)} className="text-muted-foreground text-[9px] hover:text-foreground mr-auto">تجاهل</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Suggestions */}
-            {suggestions.map((s) => (
-              <button key={s.id} onClick={() => sendMessage(s.label)} className="w-full text-right rounded-xl border border-border/40 hover:border-primary/20 hover:bg-primary/[0.03] p-3 transition-all group">
-                <div className="flex items-start gap-2.5">
-                  <span className="text-lg mt-0.5 shrink-0">{s.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[12px] font-medium text-foreground">{s.label}</span>
-                      {s.priority === "high" && <Zap size={10} className="text-warning shrink-0" strokeWidth={2} />}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{s.description}</p>
-                  </div>
-                </div>
-              </button>
-            ))}
-
-            <AiRecommendations />
-            <SmartMatchPanel />
-
-            {/* Quick Commands */}
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 px-1">
-                <Command size={11} className="text-primary" strokeWidth={2} />
-                <span className="text-[10px] font-medium text-primary">{t("aiChat.quickCommands.header")}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-1.5">
-                {quickCommands.map((cmd) => (
-                  <button key={cmd.id} onClick={() => sendMessage(cmd.action)} className="flex items-center gap-2 p-2 rounded-xl border border-border/40 hover:border-primary/20 hover:bg-primary/[0.03] transition-all text-right">
-                    <span className="text-sm shrink-0">{cmd.icon}</span>
-                    <span className="text-[10px] text-foreground/80 font-medium leading-tight">{cmd.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* File upload */}
-            <button onClick={() => fileInputRef.current?.click()} className="w-full py-2.5 rounded-xl border border-dashed border-primary/25 text-xs text-primary hover:bg-primary/[0.03] transition-colors flex items-center justify-center gap-2">
-              <Paperclip size={14} strokeWidth={1.5} />
-              ارفع ملفات أو صور وأحللها لك
-            </button>
-          </div>
-        )}
+        {showSidebar && sidebarContent}
       </div>
 
-      {/* Toggle sidebar button */}
+      {/* Mobile Sidebar (Sheet) */}
+      <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
+        <SheetContent
+          side={isRTL ? "right" : "left"}
+          className="p-0 w-[85vw] max-w-[320px] md:hidden"
+        >
+          {sidebarContent}
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop Toggle sidebar button */}
       <button
         onClick={() => setShowSidebar(!showSidebar)}
-        className="absolute top-1/2 -translate-y-1/2 z-10 w-5 h-10 rounded-l-lg bg-card border border-border/40 border-r-0 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+        className="hidden md:flex absolute top-1/2 -translate-y-1/2 z-10 w-5 h-10 rounded-l-lg bg-card border border-border/40 border-r-0 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
         style={{ right: showSidebar ? "320px" : "0px" }}
       >
         <ChevronRight size={12} className={cn("transition-transform", showSidebar ? "" : "rotate-180")} />
@@ -724,21 +755,34 @@ const AiChatPage = () => {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col bg-background min-w-0">
         {/* Chat header */}
-        <div className="px-6 py-3 border-b border-border/30 bg-gradient-to-l from-primary/5 to-transparent flex items-center gap-3 shrink-0">
-          <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground">
+        <div className="px-3 md:px-6 py-3 border-b border-border/30 bg-gradient-to-l from-primary/5 to-transparent flex items-center gap-2 md:gap-3 shrink-0">
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setMobileSidebarOpen(true)}
+            className="md:hidden h-11 w-11 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            aria-label={t("aiChat.header.openSidebar")}
+          >
+            <Menu size={18} strokeWidth={1.5} />
+          </button>
+          {/* Desktop back button */}
+          <button onClick={() => navigate(-1)} className="hidden md:block p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground">
             <ArrowRight size={16} strokeWidth={1.5} />
           </button>
           <div className="w-9 h-9 rounded-full overflow-hidden">
             <MoqbilAvatar size={36} />
           </div>
-          <div>
-            <h1 className="text-sm font-semibold">محادثة مقبل</h1>
-            <p className="text-[10px] text-muted-foreground">{role}</p>
+          <div className="min-w-0">
+            <h1 className="text-sm font-semibold truncate">{t("aiChat.header.chatTitle")}</h1>
+            <p className="text-[10px] text-muted-foreground truncate">{role}</p>
           </div>
         </div>
 
         {/* Messages */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+        >
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center gap-4">
               <div className="w-16 h-16 rounded-full overflow-hidden opacity-80">
@@ -752,9 +796,9 @@ const AiChatPage = () => {
           )}
 
           {messages.map((msg) => (
-            <div key={msg.id} className={cn("max-w-[70%] break-words overflow-hidden", msg.role === "user" ? "mr-auto" : "ml-auto")}>
+            <div key={msg.id} className={cn("max-w-[85%] md:max-w-[70%] break-words overflow-hidden", msg.role === "user" ? "mr-auto" : "ml-auto")}>
               <div className={cn(
-                "rounded-2xl px-4 py-3 text-sm leading-relaxed",
+                "rounded-2xl px-3 md:px-4 py-2.5 md:py-3 text-sm leading-relaxed",
                 msg.role === "user"
                   ? "bg-primary/8 border border-primary/10"
                   : "bg-accent/50 border border-accent-foreground/10"
@@ -763,7 +807,7 @@ const AiChatPage = () => {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-1.5">
                       <MoqbilAvatar size={16} />
-                      <span className="text-[11px] text-accent-foreground font-medium">مقبل</span>
+                      <span className="text-[11px] text-accent-foreground font-medium">{t("aiChat.states.moqbil")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CopyButton text={msg.content} />
@@ -816,11 +860,11 @@ const AiChatPage = () => {
           ))}
 
           {streaming && messages[messages.length - 1]?.role !== "assistant" && (
-            <div className="ml-auto max-w-[70%]">
-              <div className="rounded-2xl px-4 py-3 bg-accent/50 border border-accent-foreground/10">
+            <div className="ml-auto max-w-[85%] md:max-w-[70%]">
+              <div className="rounded-2xl px-3 md:px-4 py-2.5 md:py-3 bg-accent/50 border border-accent-foreground/10">
                 <div className="flex items-center gap-1.5 mb-1">
                   <MoqbilAvatar size={16} />
-                  <span className="text-[11px] text-accent-foreground font-medium">يفكر...</span>
+                  <span className="text-[11px] text-accent-foreground font-medium">{t("aiChat.states.thinking")}</span>
                 </div>
                 <div className="flex gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -830,10 +874,14 @@ const AiChatPage = () => {
               </div>
             </div>
           )}
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Input area */}
-        <div className="p-4 border-t border-border/30 shrink-0 bg-card/30">
+        <div
+          className="p-3 md:p-4 border-t border-border/30 shrink-0 bg-card/30"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
+        >
           {/* Pending files preview */}
           {pendingFiles.length > 0 && (
             <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
@@ -866,8 +914,14 @@ const AiChatPage = () => {
             </div>
           )}
 
-          <div className="flex items-center gap-3 max-w-3xl mx-auto">
-            <button onClick={() => fileInputRef.current?.click()} disabled={streaming || loadingFiles} className="rounded-xl h-10 w-10 flex items-center justify-center transition-all shrink-0 text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30" title={t("aiChat.input.uploadTooltip")}>
+          <div className="flex items-center gap-2 md:gap-3 max-w-3xl mx-auto">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={streaming || loadingFiles}
+              className="rounded-xl h-11 w-11 md:h-10 md:w-10 flex items-center justify-center transition-all shrink-0 text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30"
+              title={t("aiChat.input.uploadTooltip")}
+              aria-label={t("aiChat.input.uploadTooltip")}
+            >
               <Paperclip size={16} strokeWidth={1.5} />
             </button>
             <input
@@ -876,11 +930,21 @@ const AiChatPage = () => {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleSend()}
+              onFocus={() => {
+                // Ensure last message stays visible when keyboard opens on mobile
+                setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 250);
+              }}
               placeholder={pendingFiles.length > 0 ? t("aiChat.input.placeholderWithFiles") : t("aiChat.input.placeholderDefault")}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-border/50 bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-border/50 bg-background text-base md:text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
               disabled={streaming}
             />
-            <Button onClick={handleSend} size="icon" disabled={(streaming && pendingFiles.length === 0) || loadingFiles} className="gradient-primary text-primary-foreground rounded-xl h-10 w-10 active:scale-[0.95]">
+            <Button
+              onClick={handleSend}
+              size="icon"
+              disabled={(streaming && pendingFiles.length === 0) || loadingFiles}
+              className="gradient-primary text-primary-foreground rounded-xl h-11 w-11 md:h-10 md:w-10 active:scale-[0.95] shrink-0"
+              aria-label={t("aiChat.input.send")}
+            >
               <Send size={16} strokeWidth={1.5} />
             </Button>
           </div>

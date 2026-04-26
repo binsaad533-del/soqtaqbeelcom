@@ -2087,7 +2087,10 @@
       "title": "محادثة مقبل",
       "subtitle": "مرشدك الذكي طحطوح الصفقات",
       "active": "نشط",
-      "interactionCount": "{{count}} تفاعل"
+      "interactionCount": "{{count}} تفاعل",
+      "chatTitle": "محادثة مقبل",
+      "interactionShort": "{{count}} تفاعل",
+      "openSidebar": "فتح الشريط الجانبي"
     },
     "welcome": {
       "greeting": "هلا وغلا 👋 أنا مقبل، مساعدك الذكي. وش تبغى نسوي اليوم؟",

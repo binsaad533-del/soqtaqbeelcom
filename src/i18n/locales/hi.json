@@ -2087,7 +2087,10 @@
       "title": "मोक़बिल से चैट",
       "subtitle": "आपके स्मार्ट डील विशेषज्ञ सलाहकार",
       "active": "ऑनलाइन",
-      "interactionCount": "{{count}} बातचीत"
+      "interactionCount": "{{count}} बातचीत",
+      "chatTitle": "Moqbil चैट",
+      "interactionShort": "{{count}} इंटरैक्शन",
+      "openSidebar": "साइडबार खोलें"
     },
     "welcome": {
       "greeting": "नमस्ते 👋 मैं मोक़बिल हूँ, आपका स्मार्ट सहायक। आज क्या करना चाहेंगे?",

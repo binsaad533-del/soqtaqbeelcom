@@ -2087,7 +2087,10 @@
       "title": "与 Moqbil 对话",
       "subtitle": "您的智能交易顾问",
       "active": "在线",
-      "interactionCount": "{{count}} 次互动"
+      "interactionCount": "{{count}} 次互动",
+      "chatTitle": "Moqbil 聊天",
+      "interactionShort": "{{count}} 次互动",
+      "openSidebar": "打开侧边栏"
     },
     "welcome": {
       "greeting": "你好 👋 我是 Moqbil，您的智能助理。今天想做什么？",
