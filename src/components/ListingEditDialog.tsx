@@ -524,7 +524,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
                       className="text-xs gap-1 h-7"
                     >
                       {uploading && activePhotoGroup === group.id ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
-                      إضافة صور
+                      {t("editListing.photos.addBtn")}
                     </Button>
                   </div>
                   {groupPhotos.length > 0 ? (
