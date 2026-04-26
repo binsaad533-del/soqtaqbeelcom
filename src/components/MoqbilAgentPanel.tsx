@@ -135,7 +135,7 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
             view === "settings" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
           )}
         >
-          <Settings size={11} className="inline mr-1" /> {t("moqbilAgent.settings")}
+          <Settings size={11} className="inline mr-1" /> {t("moqbilAgent.settings.label")}
         </button>
         <button
           onClick={() => { setView("history"); loadActions(); }}
