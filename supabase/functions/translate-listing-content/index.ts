@@ -200,7 +200,13 @@ CRITICAL RULES:
 4. For Saudi/Arabic specific terms, use the closest equivalent in ${langName}
 5. Keep the translation natural and professional, not literal
 6. Maintain the same level of detail as the original
-7. For city names, use the standard romanization (e.g., "الطائف" → "Taif", "الرياض" → "Riyadh")
+7. For city and district names, translate them into the NATIVE script of ${langName}, never leave them in Latin/English unless the target language itself uses Latin script:
+   - If target is 'English': use standard English romanization (e.g., "الطائف" → "Taif", "الرياض" → "Riyadh", "جدة" → "Jeddah")
+   - If target is 'Chinese' (中文): use the standard Chinese name (e.g., "الطائف" → "塔伊夫", "الرياض" → "利雅得", "جدة" → "吉达", "مكة" → "麦加", "المدينة المنورة" → "麦地那", "الدمام" → "达曼", "الخبر" → "胡拜尔", "تبوك" → "塔布克", "أبها" → "阿布哈")
+   - If target is 'Hindi' (हिन्दी): use Devanagari script (e.g., "الطائف" → "ताइफ़", "الرياض" → "रियाद", "جدة" → "जेद्दा", "مكة" → "मक्का", "المدينة المنورة" → "मदीना")
+   - If target is 'Urdu' (اردو): keep Arabic-style script natural to Urdu (e.g., "الطائف" → "طائف", "الرياض" → "ریاض", "جدة" → "جدہ", "مكة" → "مکہ")
+   - If target is 'Bengali' (বাংলা): use Bengali script (e.g., "الطائف" → "তায়েফ", "الرياض" → "রিয়াদ", "جدة" → "জেদ্দা", "مكة" → "মক্কা")
+   Apply this rule consistently — INCLUDING when city/district names appear embedded inside title or business_activity fields. Never mix scripts within a single field (e.g., do NOT output "木材厂 • Taif"; output "木材厂 • 塔伊夫").
 8. Return EXACTLY the same JSON keys as the input — do not add, remove, or rename any keys
 
 Return ONLY a valid JSON object with the same keys, where values are the translations. No markdown, no explanations, no code fences.`;
