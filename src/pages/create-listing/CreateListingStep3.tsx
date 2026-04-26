@@ -341,7 +341,15 @@ const CreateListingStep3 = ({ state }: Props) => {
                         {getConfidenceBadge(item.confidence)}
                         {item.isSameAssetMultipleAngles && <span className="text-[10px] px-1 py-0.5 rounded bg-primary/10 text-primary">{t("createListing.step3.results.multipleAngles")}</span>}
                       </div>
-                      {item.detectionNote && <div className="text-[10px] text-muted-foreground mt-0.5 italic leading-tight">{item.detectionNote}</div>}
+                      {item.detectionNote && (
+                        <div className="text-[10px] text-muted-foreground mt-0.5 italic leading-tight">
+                          {isTranslating && translatedById[item.id]?.detectionNote === item.detectionNote && item.id && !item.id.startsWith("manual-") && !item.id.startsWith("file-") ? (
+                            <Skeleton className="h-2.5 w-48" />
+                          ) : (
+                            translatedById[item.id]?.detectionNote ?? item.detectionNote
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <div className="flex items-center bg-muted/50 rounded-md h-7">
