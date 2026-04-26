@@ -44,7 +44,7 @@ const useStatusBadge = () => {
       agreement: { label: t("dashboard.statusBadges.agreement"), cls: "bg-accent text-accent-foreground" },
       cancelled: { label: t("dashboard.statusBadges.cancelled"), cls: "bg-destructive/15 text-destructive" },
     };
-    return (s2: string) => m[s2] || { label: s2, cls: "bg-muted text-muted-foreground" };
+    return m[s] || { label: s, cls: "bg-muted text-muted-foreground" };
   };
 };
 
@@ -54,8 +54,7 @@ const fmtCurrency = (n: number) =>
 const CustomerDashboardPage = () => {
   const { t } = useTranslation();
   useSEO({ title: t("dashboard.seo.title"), description: t("dashboard.seo.description"), canonical: "/dashboard" });
-  const statusBadgeFactory = useStatusBadge();
-  const statusBadge = statusBadgeFactory();
+  const statusBadge = useStatusBadge();
   const { profile, user } = useAuthContext();
   const navigate = useNavigate();
   const { getMyListings, softDeleteListing } = useListings();
