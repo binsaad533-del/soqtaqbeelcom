@@ -30,19 +30,22 @@ import MoqbilDashboard from "@/components/MoqbilDashboard";
 import { useTranslation } from "react-i18next";
 
 /* ── Status helpers ── */
-const statusBadge = (s: string) => {
-  const m: Record<string, { label: string; cls: string }> = {
-    draft: { label: "مسودة", cls: "bg-muted text-muted-foreground" },
-    published: { label: "منشور", cls: "bg-success/15 text-success" },
-    under_review: { label: "مراجعة", cls: "bg-warning/15 text-warning" },
-    negotiating: { label: "تفاوض", cls: "bg-primary/15 text-primary" },
-    completed: { label: "مكتمل", cls: "bg-success/15 text-success" },
-    finalized: { label: "مكتمل", cls: "bg-success/15 text-success" },
-    new: { label: "جديدة", cls: "bg-muted text-muted-foreground" },
-    agreement: { label: "اتفاقية", cls: "bg-accent text-accent-foreground" },
-    cancelled: { label: "ملغية", cls: "bg-destructive/15 text-destructive" },
+const useStatusBadge = () => {
+  const { t } = useTranslation();
+  return (s: string) => {
+    const m: Record<string, { label: string; cls: string }> = {
+      draft: { label: t("dashboard.statusBadges.draft"), cls: "bg-muted text-muted-foreground" },
+      published: { label: t("dashboard.statusBadges.published"), cls: "bg-success/15 text-success" },
+      under_review: { label: t("dashboard.statusBadges.under_review"), cls: "bg-warning/15 text-warning" },
+      negotiating: { label: t("dashboard.statusBadges.negotiating"), cls: "bg-primary/15 text-primary" },
+      completed: { label: t("dashboard.statusBadges.completed"), cls: "bg-success/15 text-success" },
+      finalized: { label: t("dashboard.statusBadges.finalized"), cls: "bg-success/15 text-success" },
+      new: { label: t("dashboard.statusBadges.new"), cls: "bg-muted text-muted-foreground" },
+      agreement: { label: t("dashboard.statusBadges.agreement"), cls: "bg-accent text-accent-foreground" },
+      cancelled: { label: t("dashboard.statusBadges.cancelled"), cls: "bg-destructive/15 text-destructive" },
+    };
+    return (s2: string) => m[s2] || { label: s2, cls: "bg-muted text-muted-foreground" };
   };
-  return m[s] || { label: s, cls: "bg-muted text-muted-foreground" };
 };
 
 const fmtCurrency = (n: number) =>
@@ -50,7 +53,9 @@ const fmtCurrency = (n: number) =>
 
 const CustomerDashboardPage = () => {
   const { t } = useTranslation();
-  useSEO({ title: "لوحة العميل", description: "لوحة تحكم العميل — تابع إعلاناتك وصفقاتك على سوق تقبيل", canonical: "/dashboard" });
+  useSEO({ title: t("dashboard.seo.title"), description: t("dashboard.seo.description"), canonical: "/dashboard" });
+  const statusBadgeFactory = useStatusBadge();
+  const statusBadge = statusBadgeFactory();
   const { profile, user } = useAuthContext();
   const navigate = useNavigate();
   const { getMyListings, softDeleteListing } = useListings();
