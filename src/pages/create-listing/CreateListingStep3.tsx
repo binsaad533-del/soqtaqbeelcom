@@ -308,7 +308,13 @@ const CreateListingStep3 = ({ state }: Props) => {
                           className="text-xs bg-transparent border-b border-primary/30 outline-none w-full"
                         />
                       ) : (
-                        <div className="text-xs font-medium cursor-pointer hover:text-primary transition-colors truncate" onClick={() => setEditingItemId(item.id)}>{item.name}</div>
+                        <div className="text-xs font-medium cursor-pointer hover:text-primary transition-colors truncate" onClick={() => setEditingItemId(item.id)}>
+                          {isTranslating && translatedById[item.id]?.name === item.name && item.id && !item.id.startsWith("manual-") && !item.id.startsWith("file-") ? (
+                            <Skeleton className="h-3 w-32 inline-block align-middle" />
+                          ) : (
+                            translatedById[item.id]?.name ?? item.name
+                          )}
+                        </div>
                       )}
                       <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                         <span className="text-[10px] text-muted-foreground">{item.category}</span>
