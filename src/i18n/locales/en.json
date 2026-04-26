@@ -2087,7 +2087,10 @@
       "title": "Chat with Moqbil",
       "subtitle": "Your smart deal expert advisor",
       "active": "Active",
-      "interactionCount": "{{count}} interactions"
+      "interactionCount": "{{count}} interactions",
+      "chatTitle": "Moqbil Chat",
+      "interactionShort": "{{count}} interactions",
+      "openSidebar": "Open sidebar"
     },
     "welcome": {
       "greeting": "Hey there 👋 I'm Moqbil, your smart assistant. What would you like to do today?",

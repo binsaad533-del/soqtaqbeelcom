@@ -2087,7 +2087,10 @@
       "title": "مقبل سے گفتگو",
       "subtitle": "آپ کا اسمارٹ ڈیل ماہر مشیر",
       "active": "آن لائن",
-      "interactionCount": "{{count}} گفتگو"
+      "interactionCount": "{{count}} گفتگو",
+      "chatTitle": "مقبل چیٹ",
+      "interactionShort": "{{count}} تعاملات",
+      "openSidebar": "سائیڈبار کھولیں"
     },
     "welcome": {
       "greeting": "السلام علیکم 👋 میں مقبل ہوں، آپ کا اسمارٹ معاون۔ آج کیا کرنا چاہیں گے؟",
