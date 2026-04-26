@@ -643,7 +643,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
 
             <Button type="button" variant="outline" onClick={addInventoryItem} className="w-full gap-1 rounded-xl text-xs">
               <Plus size={14} />
-              إضافة عنصر
+              {t("editListing.inventory.addItem")}
             </Button>
           </TabsContent>
         </Tabs>
