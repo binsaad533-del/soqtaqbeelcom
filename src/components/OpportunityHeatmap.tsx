@@ -26,21 +26,27 @@ const OpportunityHeatmap = () => {
     const fetch = async () => {
       const { data: listings } = await supabase
         .from("listings")
-        .select("city, price, business_activity")
+        .select("id, city, price, business_activity")
         .eq("status", "published")
         .is("deleted_at", null);
 
       if (!listings) { setLoading(false); return; }
 
-      const cityMap: Record<string, { count: number; prices: number[]; activities: Record<string, number> }> = {};
+      const cityMap: Record<string, { count: number; prices: number[]; activities: Record<string, number>; representativeId: string | null }> = {};
 
       listings.forEach(l => {
         const city = l.city || t("marketplace.heatmap.unspecifiedCity");
-        if (!cityMap[city]) cityMap[city] = { count: 0, prices: [], activities: {} };
+        if (!cityMap[city]) cityMap[city] = { count: 0, prices: [], activities: {}, representativeId: null };
         cityMap[city].count++;
         if (l.price) cityMap[city].prices.push(l.price);
         const act = l.business_activity || t("marketplace.heatmap.general");
         cityMap[city].activities[act] = (cityMap[city].activities[act] || 0) + 1;
+        // Pick the first listing with a non-empty city as the representative
+        // for translation. This lets us reuse the listing-translation cache
+        // instead of building a separate city-translation pipeline.
+        if (!cityMap[city].representativeId && l.city && l.id) {
+          cityMap[city].representativeId = l.id;
+        }
       });
 
       const maxCount = Math.max(...Object.values(cityMap).map(c => c.count));
@@ -53,7 +59,7 @@ const OpportunityHeatmap = () => {
           const topActivity = Object.entries(data.activities).sort((a, b) => b[1] - a[1])[0]?.[0] || t("marketplace.heatmap.general");
           const ratio = data.count / maxCount;
           const heat: CityHeat["heat"] = ratio > 0.6 ? "hot" : ratio > 0.3 ? "warm" : "cool";
-          return { city, count: data.count, avgPrice, topActivity, heat };
+          return { city, representativeListingId: data.representativeId, count: data.count, avgPrice, topActivity, heat };
         })
         .sort((a, b) => b.count - a.count)
         .slice(0, 12);
