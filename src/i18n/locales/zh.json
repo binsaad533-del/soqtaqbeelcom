@@ -39,10 +39,227 @@
     "createAccount": "注册账号"
   },
   "dashboard": {
-    "myListings": "我的商铺信息",
-    "myOffers": "我的出价",
+    "myListings": "我的列表",
+    "myOffers": "我的报价",
     "myMessages": "我的消息",
-    "myDeals": "我的交易"
+    "myDeals": "我的交易",
+    "seo": {
+      "title": "客户仪表板",
+      "description": "客户仪表板 — 跟踪您在Souq Taqbeel上的列表和交易",
+      "simpleTitle": "仪表板",
+      "simpleDescription": "通过Souq Taqbeel仪表板管理您的列表和交易",
+      "h1": "客户仪表板"
+    },
+    "headerTitle": "仪表板",
+    "welcome": "欢迎 — 这是您的活动摘要",
+    "alerts": "提醒",
+    "loadFailedPrefix": "加载失败:",
+    "retry": "重试",
+    "loadingItems": {
+      "listings": "列表",
+      "deals": "交易"
+    },
+    "profileBanner": {
+      "completeProfile": "完善您的资料以提升信任度",
+      "missingPrefix": "缺少:",
+      "missing": {
+        "name": "姓名",
+        "phone": "电话",
+        "avatar": "头像",
+        "email": "邮箱",
+        "phoneVerified": "电话验证"
+      }
+    },
+    "profile": {
+      "settingsTooltip": "账户设置",
+      "verified": "已验证",
+      "unverified": "未验证",
+      "addName": "添加您的姓名",
+      "email": "邮箱",
+      "addEmail": "添加您的邮箱",
+      "phone": "电话号码",
+      "addPhone": "添加您的电话",
+      "registeredOn": "注册日期",
+      "lastLogin": "上次登录",
+      "avatarMaxSize": "最大5 MB",
+      "avatarUpdated": "头像已更新",
+      "avatarUploadFailed": "上传失败",
+      "emailVerifySent": "验证链接已发送至您的新邮箱",
+      "phoneUpdated": "电话已更新",
+      "updated": "已更新",
+      "updateFailed": "更新失败"
+    },
+    "notifications": {
+      "title": "通知",
+      "markAllRead": "全部标为已读",
+      "empty": "无通知"
+    },
+    "messagesCard": {
+      "viewAll": "查看所有对话"
+    },
+    "feed": {
+      "title": "实时活动",
+      "live": "实时",
+      "empty": "目前无活动"
+    },
+    "kpi": {
+      "activeDeals": "活跃交易",
+      "waiting": "等待回复",
+      "completed": "已完成",
+      "totalValue": "总价值",
+      "commission": "佣金 (1%)"
+    },
+    "charts": {
+      "monthlyDeals": "月度交易",
+      "dealValue": "交易价值 (SAR)",
+      "statusDistribution": "状态分布",
+      "noData": "无数据",
+      "total": "总计",
+      "completed": "已完成",
+      "value": "价值"
+    },
+    "statusGroups": {
+      "active": "活跃",
+      "waiting": "等待中",
+      "completed": "已完成",
+      "cancelled": "已取消"
+    },
+    "months": {
+      "jan": "1月",
+      "feb": "2月",
+      "mar": "3月",
+      "apr": "4月",
+      "may": "5月",
+      "jun": "6月",
+      "jul": "7月",
+      "aug": "8月",
+      "sep": "9月",
+      "oct": "10月",
+      "nov": "11月",
+      "dec": "12月"
+    },
+    "suggestions": {
+      "negotiating": "您有交易等待回复",
+      "createFirst": "创建您的第一个列表",
+      "publishDrafts": "您有草稿列表 — 发布它们",
+      "agreementsArchive": "协议存档"
+    },
+    "tabs": {
+      "myDeals": "我的交易",
+      "myListings": "我的列表",
+      "myOffers": "我的报价",
+      "saved": "已保存",
+      "notifications": "通知",
+      "agent": "Moqbil代理",
+      "intelligence": "Moqbil智能",
+      "security": "安全",
+      "account": "我的账户",
+      "desc": {
+        "myDeals": "跟踪所有进行中和已完成的交易",
+        "myListings": "管理您的列表和草稿",
+        "myOffers": "您在其他列表上提交的报价",
+        "saved": "您稍后保存的列表",
+        "notifications": "提醒和通知偏好",
+        "agent": "代您工作的AI助手",
+        "intelligence": "为您的交易提供智能分析和建议",
+        "security": "账户安全和保护设置",
+        "account": "编辑您的个人信息和密码"
+      }
+    },
+    "search": {
+      "deals": "搜索交易...",
+      "listings": "搜索列表...",
+      "offers": "搜索报价...",
+      "saved": "搜索已保存..."
+    },
+    "filters": {
+      "all": "全部",
+      "active": "活跃",
+      "waiting": "等待中",
+      "completed": "已完成",
+      "cancelled": "已取消",
+      "draft": "草稿",
+      "published": "已发布",
+      "underReview": "审核中",
+      "pending": "待处理",
+      "accepted": "已接受",
+      "rejected": "已拒绝"
+    },
+    "statusBadges": {
+      "draft": "草稿",
+      "published": "已发布",
+      "under_review": "审核中",
+      "negotiating": "谈判中",
+      "completed": "已完成",
+      "finalized": "已完成",
+      "new": "新",
+      "agreement": "协议",
+      "cancelled": "已取消",
+      "completeListing": "完成列表"
+    },
+    "deals": {
+      "empty": "暂无交易",
+      "noResults": "无结果",
+      "browseMarket": "浏览市场并开始您的第一笔交易",
+      "dealNumber": "交易 #",
+      "noPrice": "无价格"
+    },
+    "listings": {
+      "empty": "无列表",
+      "noResults": "无结果",
+      "createFirst": "创建您的第一个列表",
+      "noTitle": "无标题",
+      "editTooltip": "编辑列表",
+      "deleteTooltip": "删除列表",
+      "deleteConfirm": "删除 \"{{title}}\"?",
+      "deleteFailedPrefix": "删除失败:",
+      "deleteRetry": "请重试",
+      "deleteSuccess": "列表已成功删除",
+      "deleteUnexpectedError": "删除时出现意外错误 — 请刷新并重试"
+    },
+    "agent": {
+      "noPublished": "无已发布列表",
+      "noPublishedHint": "Moqbil代理独立处理每个已发布列表"
+    },
+    "buyerOffers": {
+      "empty": "您尚未提交任何报价",
+      "noResults": "无结果",
+      "browseAndOffer": "浏览机会并提交您的第一个报价",
+      "opportunityFallback": "收购机会",
+      "yourOffer": "您的报价:",
+      "sellerReply": "卖家回复:",
+      "status": {
+        "pending": "等待回复",
+        "accepted": "已接受",
+        "rejected": "已拒绝",
+        "withdrawn": "已撤回"
+      }
+    },
+    "saved": {
+      "empty": "您尚未保存任何列表",
+      "noResults": "无结果",
+      "browseAndSave": "浏览机会并保存您喜欢的",
+      "removed": "列表已从已保存中移除",
+      "removeTooltip": "从已保存中移除",
+      "priceOnContact": "联系询价",
+      "opportunityFallback": "收购机会"
+    },
+    "simple": {
+      "tabs": {
+        "myListings": "我的列表",
+        "drafts": "草稿",
+        "negotiations": "谈判",
+        "agreements": "协议"
+      },
+      "stats": {
+        "myListings": "我的列表",
+        "uploadedPhotos": "已上传照片",
+        "activeNegotiations": "活跃谈判",
+        "alerts": "提醒"
+      },
+      "disclosure": "披露",
+      "awaitingConfirmation": "等待确认"
+    }
   },
   "messages": {
     "noMessages": "暂无消息",

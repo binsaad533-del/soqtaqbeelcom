@@ -42,7 +42,224 @@
     "myListings": "আমার লিস্টিং",
     "myOffers": "আমার অফার",
     "myMessages": "আমার বার্তা",
-    "myDeals": "আমার চুক্তি"
+    "myDeals": "আমার ডিল",
+    "seo": {
+      "title": "গ্রাহক ড্যাশবোর্ড",
+      "description": "গ্রাহক ড্যাশবোর্ড — Souq Taqbeel-এ আপনার লিস্টিং এবং ডিল ট্র্যাক করুন",
+      "simpleTitle": "ড্যাশবোর্ড",
+      "simpleDescription": "Souq Taqbeel ড্যাশবোর্ড থেকে আপনার লিস্টিং এবং ডিল পরিচালনা করুন",
+      "h1": "গ্রাহক ড্যাশবোর্ড"
+    },
+    "headerTitle": "ড্যাশবোর্ড",
+    "welcome": "স্বাগতম — এখানে আপনার কার্যকলাপের সারসংক্ষেপ",
+    "alerts": "সতর্কতা",
+    "loadFailedPrefix": "লোড করতে ব্যর্থ:",
+    "retry": "পুনরায় চেষ্টা",
+    "loadingItems": {
+      "listings": "লিস্টিং",
+      "deals": "ডিল"
+    },
+    "profileBanner": {
+      "completeProfile": "বিশ্বাস বাড়াতে আপনার প্রোফাইল সম্পূর্ণ করুন",
+      "missingPrefix": "অনুপস্থিত:",
+      "missing": {
+        "name": "নাম",
+        "phone": "ফোন",
+        "avatar": "প্রোফাইল ছবি",
+        "email": "ইমেইল",
+        "phoneVerified": "ফোন যাচাই"
+      }
+    },
+    "profile": {
+      "settingsTooltip": "অ্যাকাউন্ট সেটিংস",
+      "verified": "যাচাইকৃত",
+      "unverified": "অযাচাইকৃত",
+      "addName": "আপনার নাম যোগ করুন",
+      "email": "ইমেইল",
+      "addEmail": "আপনার ইমেইল যোগ করুন",
+      "phone": "ফোন নম্বর",
+      "addPhone": "আপনার ফোন যোগ করুন",
+      "registeredOn": "নিবন্ধনের তারিখ",
+      "lastLogin": "শেষ লগইন",
+      "avatarMaxSize": "সর্বোচ্চ 5 MB",
+      "avatarUpdated": "ছবি আপডেট হয়েছে",
+      "avatarUploadFailed": "আপলোড ব্যর্থ",
+      "emailVerifySent": "যাচাইকরণ লিঙ্ক আপনার নতুন ইমেইলে পাঠানো হয়েছে",
+      "phoneUpdated": "ফোন আপডেট হয়েছে",
+      "updated": "আপডেট হয়েছে",
+      "updateFailed": "আপডেট ব্যর্থ"
+    },
+    "notifications": {
+      "title": "বিজ্ঞপ্তি",
+      "markAllRead": "সব পঠিত হিসেবে চিহ্নিত করুন",
+      "empty": "কোন বিজ্ঞপ্তি নেই"
+    },
+    "messagesCard": {
+      "viewAll": "সমস্ত কথোপকথন দেখুন"
+    },
+    "feed": {
+      "title": "লাইভ কার্যকলাপ",
+      "live": "লাইভ",
+      "empty": "এখন কোন কার্যকলাপ নেই"
+    },
+    "kpi": {
+      "activeDeals": "সক্রিয় ডিল",
+      "waiting": "উত্তরের অপেক্ষায়",
+      "completed": "সম্পন্ন",
+      "totalValue": "মোট মূল্য",
+      "commission": "কমিশন (1%)"
+    },
+    "charts": {
+      "monthlyDeals": "মাসিক ডিল",
+      "dealValue": "ডিলের মূল্য (SAR)",
+      "statusDistribution": "স্ট্যাটাস বিতরণ",
+      "noData": "কোন ডেটা নেই",
+      "total": "মোট",
+      "completed": "সম্পন্ন",
+      "value": "মূল্য"
+    },
+    "statusGroups": {
+      "active": "সক্রিয়",
+      "waiting": "অপেক্ষমাণ",
+      "completed": "সম্পন্ন",
+      "cancelled": "বাতিল"
+    },
+    "months": {
+      "jan": "জানুয়ারি",
+      "feb": "ফেব্রুয়ারি",
+      "mar": "মার্চ",
+      "apr": "এপ্রিল",
+      "may": "মে",
+      "jun": "জুন",
+      "jul": "জুলাই",
+      "aug": "আগস্ট",
+      "sep": "সেপ্টেম্বর",
+      "oct": "অক্টোবর",
+      "nov": "নভেম্বর",
+      "dec": "ডিসেম্বর"
+    },
+    "suggestions": {
+      "negotiating": "আপনার উত্তরের অপেক্ষায় ডিল আছে",
+      "createFirst": "আপনার প্রথম লিস্টিং তৈরি করুন",
+      "publishDrafts": "আপনার ড্রাফট লিস্টিং আছে — সেগুলি প্রকাশ করুন",
+      "agreementsArchive": "চুক্তি সংরক্ষণাগার"
+    },
+    "tabs": {
+      "myDeals": "আমার ডিল",
+      "myListings": "আমার লিস্টিং",
+      "myOffers": "আমার অফার",
+      "saved": "সংরক্ষিত",
+      "notifications": "বিজ্ঞপ্তি",
+      "agent": "Moqbil এজেন্ট",
+      "intelligence": "Moqbil ইন্টেলিজেন্স",
+      "security": "নিরাপত্তা",
+      "account": "আমার অ্যাকাউন্ট",
+      "desc": {
+        "myDeals": "আপনার সমস্ত চলমান এবং সম্পন্ন ডিল ট্র্যাক করুন",
+        "myListings": "আপনার লিস্টিং এবং ড্রাফট পরিচালনা করুন",
+        "myOffers": "অন্যান্য লিস্টিংয়ে আপনার জমা দেওয়া অফার",
+        "saved": "পরে দেখার জন্য আপনার সংরক্ষিত লিস্টিং",
+        "notifications": "সতর্কতা এবং বিজ্ঞপ্তি পছন্দ",
+        "agent": "আপনার পক্ষে কাজ করা AI সহকারী",
+        "intelligence": "আপনার ডিলের জন্য স্মার্ট বিশ্লেষণ এবং সুপারিশ",
+        "security": "অ্যাকাউন্ট নিরাপত্তা এবং সুরক্ষা সেটিংস",
+        "account": "আপনার ব্যক্তিগত তথ্য এবং পাসওয়ার্ড সম্পাদনা করুন"
+      }
+    },
+    "search": {
+      "deals": "ডিল অনুসন্ধান...",
+      "listings": "লিস্টিং অনুসন্ধান...",
+      "offers": "অফার অনুসন্ধান...",
+      "saved": "সংরক্ষিত অনুসন্ধান..."
+    },
+    "filters": {
+      "all": "সব",
+      "active": "সক্রিয়",
+      "waiting": "অপেক্ষমাণ",
+      "completed": "সম্পন্ন",
+      "cancelled": "বাতিল",
+      "draft": "ড্রাফট",
+      "published": "প্রকাশিত",
+      "underReview": "পর্যালোচনাধীন",
+      "pending": "মুলতুবি",
+      "accepted": "গৃহীত",
+      "rejected": "প্রত্যাখ্যাত"
+    },
+    "statusBadges": {
+      "draft": "ড্রাফট",
+      "published": "প্রকাশিত",
+      "under_review": "পর্যালোচনাধীন",
+      "negotiating": "আলোচনা",
+      "completed": "সম্পন্ন",
+      "finalized": "সম্পন্ন",
+      "new": "নতুন",
+      "agreement": "চুক্তি",
+      "cancelled": "বাতিল",
+      "completeListing": "লিস্টিং সম্পূর্ণ করুন"
+    },
+    "deals": {
+      "empty": "এখনো কোন ডিল নেই",
+      "noResults": "কোন ফলাফল নেই",
+      "browseMarket": "মার্কেটপ্লেস ব্রাউজ করুন এবং আপনার প্রথম ডিল শুরু করুন",
+      "dealNumber": "ডিল #",
+      "noPrice": "মূল্য নেই"
+    },
+    "listings": {
+      "empty": "কোন লিস্টিং নেই",
+      "noResults": "কোন ফলাফল নেই",
+      "createFirst": "আপনার প্রথম লিস্টিং তৈরি করুন",
+      "noTitle": "শিরোনামহীন",
+      "editTooltip": "লিস্টিং সম্পাদনা",
+      "deleteTooltip": "লিস্টিং মুছুন",
+      "deleteConfirm": "\"{{title}}\" মুছবেন?",
+      "deleteFailedPrefix": "মুছতে ব্যর্থ:",
+      "deleteRetry": "অনুগ্রহ করে আবার চেষ্টা করুন",
+      "deleteSuccess": "লিস্টিং সফলভাবে মুছে ফেলা হয়েছে",
+      "deleteUnexpectedError": "মোছার সময় অপ্রত্যাশিত ত্রুটি — অনুগ্রহ করে রিফ্রেশ করে আবার চেষ্টা করুন"
+    },
+    "agent": {
+      "noPublished": "কোন প্রকাশিত লিস্টিং নেই",
+      "noPublishedHint": "Moqbil এজেন্ট প্রতিটি প্রকাশিত লিস্টিংয়ে স্বাধীনভাবে কাজ করে"
+    },
+    "buyerOffers": {
+      "empty": "আপনি এখনো কোন অফার দেননি",
+      "noResults": "কোন ফলাফল নেই",
+      "browseAndOffer": "সুযোগ ব্রাউজ করুন এবং আপনার প্রথম অফার দিন",
+      "opportunityFallback": "অধিগ্রহণ সুযোগ",
+      "yourOffer": "আপনার অফার:",
+      "sellerReply": "বিক্রেতার উত্তর:",
+      "status": {
+        "pending": "উত্তরের অপেক্ষায়",
+        "accepted": "গৃহীত",
+        "rejected": "প্রত্যাখ্যাত",
+        "withdrawn": "প্রত্যাহৃত"
+      }
+    },
+    "saved": {
+      "empty": "আপনি এখনো কোন লিস্টিং সংরক্ষণ করেননি",
+      "noResults": "কোন ফলাফল নেই",
+      "browseAndSave": "সুযোগ ব্রাউজ করুন এবং যা পছন্দ হয় সংরক্ষণ করুন",
+      "removed": "লিস্টিং সংরক্ষিত থেকে সরানো হয়েছে",
+      "removeTooltip": "সংরক্ষিত থেকে সরান",
+      "priceOnContact": "অনুরোধে মূল্য",
+      "opportunityFallback": "অধিগ্রহণ সুযোগ"
+    },
+    "simple": {
+      "tabs": {
+        "myListings": "আমার লিস্টিং",
+        "drafts": "ড্রাফট",
+        "negotiations": "আলোচনা",
+        "agreements": "চুক্তি"
+      },
+      "stats": {
+        "myListings": "আমার লিস্টিং",
+        "uploadedPhotos": "আপলোড করা ছবি",
+        "activeNegotiations": "সক্রিয় আলোচনা",
+        "alerts": "সতর্কতা"
+      },
+      "disclosure": "প্রকাশ",
+      "awaitingConfirmation": "নিশ্চিতকরণের অপেক্ষায়"
+    }
   },
   "messages": {
     "noMessages": "এখনও কোনো বার্তা নেই",

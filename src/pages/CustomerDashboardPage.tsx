@@ -30,19 +30,22 @@ import MoqbilDashboard from "@/components/MoqbilDashboard";
 import { useTranslation } from "react-i18next";
 
 /* ── Status helpers ── */
-const statusBadge = (s: string) => {
-  const m: Record<string, { label: string; cls: string }> = {
-    draft: { label: "مسودة", cls: "bg-muted text-muted-foreground" },
-    published: { label: "منشور", cls: "bg-success/15 text-success" },
-    under_review: { label: "مراجعة", cls: "bg-warning/15 text-warning" },
-    negotiating: { label: "تفاوض", cls: "bg-primary/15 text-primary" },
-    completed: { label: "مكتمل", cls: "bg-success/15 text-success" },
-    finalized: { label: "مكتمل", cls: "bg-success/15 text-success" },
-    new: { label: "جديدة", cls: "bg-muted text-muted-foreground" },
-    agreement: { label: "اتفاقية", cls: "bg-accent text-accent-foreground" },
-    cancelled: { label: "ملغية", cls: "bg-destructive/15 text-destructive" },
+const useStatusBadge = () => {
+  const { t } = useTranslation();
+  return (s: string) => {
+    const m: Record<string, { label: string; cls: string }> = {
+      draft: { label: t("dashboard.statusBadges.draft"), cls: "bg-muted text-muted-foreground" },
+      published: { label: t("dashboard.statusBadges.published"), cls: "bg-success/15 text-success" },
+      under_review: { label: t("dashboard.statusBadges.under_review"), cls: "bg-warning/15 text-warning" },
+      negotiating: { label: t("dashboard.statusBadges.negotiating"), cls: "bg-primary/15 text-primary" },
+      completed: { label: t("dashboard.statusBadges.completed"), cls: "bg-success/15 text-success" },
+      finalized: { label: t("dashboard.statusBadges.finalized"), cls: "bg-success/15 text-success" },
+      new: { label: t("dashboard.statusBadges.new"), cls: "bg-muted text-muted-foreground" },
+      agreement: { label: t("dashboard.statusBadges.agreement"), cls: "bg-accent text-accent-foreground" },
+      cancelled: { label: t("dashboard.statusBadges.cancelled"), cls: "bg-destructive/15 text-destructive" },
+    };
+    return m[s] || { label: s, cls: "bg-muted text-muted-foreground" };
   };
-  return m[s] || { label: s, cls: "bg-muted text-muted-foreground" };
 };
 
 const fmtCurrency = (n: number) =>
@@ -50,7 +53,8 @@ const fmtCurrency = (n: number) =>
 
 const CustomerDashboardPage = () => {
   const { t } = useTranslation();
-  useSEO({ title: "لوحة العميل", description: "لوحة تحكم العميل — تابع إعلاناتك وصفقاتك على سوق تقبيل", canonical: "/dashboard" });
+  useSEO({ title: t("dashboard.seo.title"), description: t("dashboard.seo.description"), canonical: "/dashboard" });
+  const statusBadge = useStatusBadge();
   const { profile, user } = useAuthContext();
   const navigate = useNavigate();
   const { getMyListings, softDeleteListing } = useListings();
@@ -139,7 +143,7 @@ const CustomerDashboardPage = () => {
     try { l = await getMyListings(); } catch { errs.push("الإعلانات"); }
     try { d = await getMyDeals(); } catch { errs.push("الصفقات"); }
     setListings(l); setDeals(d);
-    if (errs.length) setLoadError(`فشل تحميل: ${errs.join("، ")}`);
+    if (errs.length) setLoadError(t("dashboard.loadFailedPrefix") + errs.join("، "));
     setLoading(false);
   }, [getMyListings, getMyDeals]);
 
@@ -161,13 +165,13 @@ const CustomerDashboardPage = () => {
   const profileMissing = useMemo(() => {
     if (!profile) return [];
     const missing: string[] = [];
-    if (!profile.full_name) missing.push("الاسم");
-    if (!profile.phone) missing.push("رقم الجوال");
-    if (!profile.avatar_url) missing.push("صورة شخصية");
-    if (!hasRealEmail) missing.push("بريد إلكتروني");
-    if (!isPhoneVerified) missing.push("توثيق الجوال");
+    if (!profile.full_name) missing.push(t("dashboard.profileBanner.missing.name"));
+    if (!profile.phone) missing.push(t("dashboard.profileBanner.missing.phone"));
+    if (!profile.avatar_url) missing.push(t("dashboard.profileBanner.missing.avatar"));
+    if (!hasRealEmail) missing.push(t("dashboard.profileBanner.missing.email"));
+    if (!isPhoneVerified) missing.push(t("dashboard.profileBanner.missing.phoneVerified"));
     return missing;
-  }, [profile, hasRealEmail, isPhoneVerified]);
+  }, [profile, hasRealEmail, isPhoneVerified, t]);
 
   const profileCompleteness = useMemo(() => {
     if (!profile) return 0;
@@ -204,7 +208,7 @@ const CustomerDashboardPage = () => {
   }, [listings, listingStatusFilter, searchQuery]);
 
   const monthlyChart = useMemo(() => {
-    const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+    const months = [t("dashboard.months.jan"), t("dashboard.months.feb"), t("dashboard.months.mar"), t("dashboard.months.apr"), t("dashboard.months.may"), t("dashboard.months.jun"), t("dashboard.months.jul"), t("dashboard.months.aug"), t("dashboard.months.sep"), t("dashboard.months.oct"), t("dashboard.months.nov"), t("dashboard.months.dec")];
     const now = new Date();
     const data: { name: string; total: number; completed: number; value: number }[] = [];
     for (let i = 5; i >= 0; i--) {
@@ -221,10 +225,10 @@ const CustomerDashboardPage = () => {
   /* ── Pie chart data ── */
   const statusPie = useMemo(() => {
     const groups: Record<string, { label: string; color: string }> = {
-      active: { label: "نشطة", color: "hsl(var(--primary))" },
-      waiting: { label: "بانتظار", color: "hsl(var(--warning))" },
-      completed: { label: "مكتملة", color: "hsl(var(--success))" },
-      cancelled: { label: "ملغية", color: "hsl(var(--destructive))" },
+      active: { label: t("dashboard.statusGroups.active"), color: "hsl(var(--primary))" },
+      waiting: { label: t("dashboard.statusGroups.waiting"), color: "hsl(var(--warning))" },
+      completed: { label: t("dashboard.statusGroups.completed"), color: "hsl(var(--success))" },
+      cancelled: { label: t("dashboard.statusGroups.cancelled"), color: "hsl(var(--destructive))" },
     };
     const counts = {
       active: deals.filter(d => ["negotiating", "new"].includes(d.status)).length,
@@ -241,22 +245,22 @@ const CustomerDashboardPage = () => {
   const suggestions = useMemo(() => {
     const s: { text: string; link: string; icon: any; priority: "high" | "medium" }[] = [];
     
-    if (deals.some(d => d.status === "negotiating")) s.push({ text: "لديك صفقات بانتظار ردك", link: "#", icon: MessageSquare, priority: "high" });
-    if (listings.length === 0) s.push({ text: "أنشئ أول إعلان لك", link: "/create-listing", icon: Plus, priority: "medium" });
-    if (listings.some(l => l.status === "draft")) s.push({ text: "لديك إعلانات مسودة - انشرها", link: "#", icon: FileText, priority: "medium" });
-    if (stats.completed > 0) s.push({ text: "أرشيف الاتفاقيات", link: "/agreements-archive", icon: FileText, priority: "medium" });
+    if (deals.some(d => d.status === "negotiating")) s.push({ text: t("dashboard.suggestions.negotiating"), link: "#", icon: MessageSquare, priority: "high" });
+    if (listings.length === 0) s.push({ text: t("dashboard.suggestions.createFirst"), link: "/create-listing", icon: Plus, priority: "medium" });
+    if (listings.some(l => l.status === "draft")) s.push({ text: t("dashboard.suggestions.publishDrafts"), link: "#", icon: FileText, priority: "medium" });
+    if (stats.completed > 0) s.push({ text: t("dashboard.suggestions.agreementsArchive"), link: "/agreements-archive", icon: FileText, priority: "medium" });
     return s.slice(0, 4);
   }, [profileCompleteness, deals, listings, stats.completed]);
 
   const handleDeleteListing = useCallback(async (e: React.MouseEvent, id: string, title: string | null) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm(`هل تريد حذف "${title || "بدون عنوان"}"؟`)) return;
+    if (!confirm(t("dashboard.listings.deleteConfirm", { title: title || t("dashboard.listings.noTitle") }))) return;
     try {
       const { error } = await softDeleteListing(id);
       if (error) {
         console.error("[Dashboard] Delete failed:", error);
-        toast.error(`فشل حذف الإعلان: ${error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى"}`);
+        toast.error(t("dashboard.listings.deleteFailedPrefix") + (error instanceof Error ? error.message : t("dashboard.listings.deleteRetry")));
         return;
       }
       toast.success("تم حذف الإعلان بنجاح");
@@ -279,7 +283,7 @@ const CustomerDashboardPage = () => {
         {loadError && (
           <div className="p-3 rounded-xl bg-destructive/10 flex items-center justify-between mb-4">
             <div className="flex items-center gap-2"><AlertCircle size={14} className="text-destructive" /><span className="text-xs text-destructive">{loadError}</span></div>
-            <button onClick={loadData} className="text-xs text-destructive hover:underline">إعادة المحاولة</button>
+            <button onClick={loadData} className="text-xs text-destructive hover:underline">{t("dashboard.retry")}</button>
           </div>
         )}
 
@@ -295,9 +299,9 @@ const CustomerDashboardPage = () => {
               <UserCheck size={15} className="text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-primary">أكمل ملفك الشخصي لزيادة الثقة</p>
+              <p className="text-xs font-medium text-primary">{t("dashboard.profileBanner.completeProfile")}</p>
               <p className="text-[10px] text-muted-foreground">
-                ينقصك: {profileMissing.join(" · ")}
+                {t("dashboard.profileBanner.missingPrefix")}{profileMissing.join(" · ")}
               </p>
             </div>
             <div className="w-16 h-1.5 rounded-full bg-primary/10 shrink-0 overflow-hidden">
@@ -308,7 +312,7 @@ const CustomerDashboardPage = () => {
         )}
 
         {/* ═══ PROFILE & QUICK INFO BAR ═══ */}
-        <h1 className="sr-only">لوحة تحكم العميل</h1>
+        <h1 className="sr-only">{t("dashboard.seo.h1")}</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6 animate-reveal" style={{ animationDelay: '80ms' }}>
           {/* Personal Info Card */}
           <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30 sm:col-span-2 lg:col-span-1 relative">
@@ -316,7 +320,7 @@ const CustomerDashboardPage = () => {
             <button
               onClick={() => { setActiveTab("account"); setSearchQuery(""); }}
               className="absolute top-3 left-3 p-1.5 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
-              title="إعدادات الحساب"
+              title=t("dashboard.profile.settingsTooltip")
             >
               <Settings size={15} />
             </button>
@@ -340,7 +344,7 @@ const CustomerDashboardPage = () => {
                   </div>
                 ) : (
                   <button onClick={() => startEdit("full_name", profile?.full_name || "")} className="flex items-center gap-1.5 group/name">
-                    <span className="text-sm font-semibold truncate">{profile?.full_name || "أضف اسمك"}</span>
+                    <span className="text-sm font-semibold truncate">{profile?.full_name || t("dashboard.profile.addName")}</span>
                     <Pencil size={10} className="text-muted-foreground opacity-0 group-hover/name:opacity-60 transition-opacity shrink-0" />
                   </button>
                 )}
@@ -349,8 +353,8 @@ const CustomerDashboardPage = () => {
                   (isPhoneVerified && hasRealEmail) ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
                 )}>
                   {(isPhoneVerified && hasRealEmail)
-                    ? <><UserCheck size={11} /> موثّق</>
-                    : <><Shield size={11} /> غير موثّق</>}
+                    ? <><UserCheck size={11} /> {t("dashboard.profile.verified")}</>
+                    : <><Shield size={11} /> {t("dashboard.profile.unverified")}</>}
                 </span>
               </div>
             </div>
@@ -363,7 +367,7 @@ const CustomerDashboardPage = () => {
                   <Mail size={13} className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] text-muted-foreground mb-0.5">البريد الإلكتروني</div>
+                  <div className="text-[10px] text-muted-foreground mb-0.5">{t("dashboard.profile.email")}</div>
                   {editingField === "email" ? (
                     <div className="flex items-center gap-1.5">
                       <input type="email" dir="ltr" lang="en" className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toEnglishNumerals(e.target.value))} autoFocus />
@@ -374,7 +378,7 @@ const CustomerDashboardPage = () => {
                     <button onClick={() => startEdit("email", hasRealEmail ? (userEmail || "") : "")} className="flex items-center gap-1.5 group/email text-xs" dir="ltr">
                       {hasRealEmail
                         ? <span className="truncate max-w-[180px]">{userEmail}</span>
-                        : <span className="text-warning">أضف بريدك الإلكتروني</span>}
+                        : <span className="text-warning">{t("dashboard.profile.addEmail")}</span>}
                       <Pencil size={9} className="text-muted-foreground opacity-0 group-hover/email:opacity-60 transition-opacity shrink-0" />
                       {hasRealEmail && <CheckCircle size={11} className="text-success shrink-0" />}
                     </button>
@@ -388,7 +392,7 @@ const CustomerDashboardPage = () => {
                   <Phone size={13} className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] text-muted-foreground mb-0.5">رقم الجوال</div>
+                  <div className="text-[10px] text-muted-foreground mb-0.5">{t("dashboard.profile.phone")}</div>
                   {editingField === "phone" ? (
                     <div className="flex items-center gap-1.5">
                       <input dir="ltr" lang="en" inputMode="numeric" className="bg-muted/50 rounded-lg px-2 py-1 w-full border border-border/50 text-xs focus:outline-none focus:ring-1 focus:ring-primary" value={editValue} onChange={e => setEditValue(toDigitsOnly(e.target.value))} autoFocus />
@@ -400,7 +404,7 @@ const CustomerDashboardPage = () => {
                       <button onClick={() => startEdit("phone", profile?.phone || "")} className="flex items-center gap-1.5 group/phone text-xs" dir="ltr">
                         {profile?.phone
                           ? <span>{toEnglishNumerals(profile.phone)}</span>
-                          : <span className="text-warning">أضف رقم جوالك</span>}
+                          : <span className="text-warning">{t("dashboard.profile.addPhone")}</span>}
                         <Pencil size={9} className="text-muted-foreground opacity-0 group-hover/phone:opacity-60 transition-opacity shrink-0" />
                       </button>
                       {isPhoneVerified && <CheckCircle size={11} className="text-success shrink-0" />}
@@ -424,7 +428,7 @@ const CustomerDashboardPage = () => {
                   <Clock size={13} className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] text-muted-foreground mb-0.5">تاريخ التسجيل</div>
+                  <div className="text-[10px] text-muted-foreground mb-0.5">{t("dashboard.profile.registeredOn")}</div>
                   <span className="text-xs" dir="ltr">
                     {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—"}
                   </span>
@@ -437,7 +441,7 @@ const CustomerDashboardPage = () => {
                   <Activity size={13} className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] text-muted-foreground mb-0.5">آخر دخول</div>
+                  <div className="text-[10px] text-muted-foreground mb-0.5">{t("dashboard.profile.lastLogin")}</div>
                   <span className="text-xs" dir="ltr">
                     {profile?.last_activity
                       ? new Date(profile.last_activity).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
@@ -452,13 +456,13 @@ const CustomerDashboardPage = () => {
           <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold flex items-center gap-1.5">
-                <Bell size={13} /> الإشعارات
+                <Bell size={13} /> {t("dashboard.notifications.title")}
                 {unreadCount > 0 && <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{unreadCount}</span>}
               </h3>
-              {unreadCount > 0 && <button onClick={markAllAsRead} className="text-[10px] text-primary hover:underline">قراءة الكل</button>}
+              {unreadCount > 0 && <button onClick={markAllAsRead} className="text-[10px] text-primary hover:underline">{t("dashboard.notifications.markAllRead")}</button>}
             </div>
             {notifications.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground text-center py-4">لا توجد إشعارات</p>
+              <p className="text-[11px] text-muted-foreground text-center py-4">{t("dashboard.notifications.empty")}</p>
             ) : (
               <div className="space-y-2">
                 {notifications.slice(0, 5).map(n => (
@@ -481,7 +485,7 @@ const CustomerDashboardPage = () => {
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-xs font-semibold">{t("dashboard.myMessages")}</h3>
-              <p className="text-[10px] text-muted-foreground">عرض جميع المحادثات</p>
+              <p className="text-[10px] text-muted-foreground">{t("dashboard.messagesCard.viewAll")}</p>
             </div>
             <ChevronLeft size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
           </Link>
@@ -490,15 +494,15 @@ const CustomerDashboardPage = () => {
           <div className="bg-card rounded-2xl p-5 shadow-soft border border-border/30">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold flex items-center gap-1.5">
-                <Activity size={13} className="text-success" /> النشاط المباشر
+                <Activity size={13} className="text-success" /> {t("dashboard.feed.title")}
               </h3>
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                <span className="text-[9px] text-muted-foreground">مباشر</span>
+                <span className="text-[9px] text-muted-foreground">{t("dashboard.feed.live")}</span>
               </span>
             </div>
             {feed.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground text-center py-4">لا يوجد نشاط حالياً</p>
+              <p className="text-[11px] text-muted-foreground text-center py-4">{t("dashboard.feed.empty")}</p>
             ) : (
               <div className="space-y-2.5">
                 {feed.slice(0, 5).map(f => (
@@ -516,11 +520,11 @@ const CustomerDashboardPage = () => {
         {/* ═══ KPI ROW ═══ */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
           {[
-            { label: "صفقات نشطة", value: stats.active, icon: TrendingUp, accent: "text-primary" },
-            { label: "بانتظار الرد", value: stats.waiting, icon: Clock, accent: "text-warning" },
-            { label: "مكتملة", value: stats.completed, icon: CheckCircle, accent: "text-success" },
-            { label: "إجمالي القيمة", value: fmtCurrency(stats.totalVal), icon: Wallet, accent: "text-primary", sub: "﷼" },
-            { label: "العمولة (1%)", value: fmtCurrency(stats.commission), icon: DollarSign, accent: "text-muted-foreground", sub: "﷼" },
+            { label: t("dashboard.kpi.activeDeals"), value: stats.active, icon: TrendingUp, accent: "text-primary" },
+            { label: t("dashboard.kpi.waiting"), value: stats.waiting, icon: Clock, accent: "text-warning" },
+            { label: t("dashboard.kpi.completed"), value: stats.completed, icon: CheckCircle, accent: "text-success" },
+            { label: t("dashboard.kpi.totalValue"), value: fmtCurrency(stats.totalVal), icon: Wallet, accent: "text-primary", sub: "﷼" },
+            { label: t("dashboard.kpi.commission"), value: fmtCurrency(stats.commission), icon: DollarSign, accent: "text-muted-foreground", sub: "﷼" },
           ].map((kpi, i) => (
             <div key={i} className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-200 animate-reveal" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="flex items-center justify-between mb-3">
@@ -541,7 +545,7 @@ const CustomerDashboardPage = () => {
         <div className="bg-card rounded-2xl p-4 shadow-soft border border-border/30 mb-6 animate-reveal" style={{ animationDelay: '320ms' }}>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <h3 className="text-[10px] font-medium text-muted-foreground mb-2">الصفقات الشهرية</h3>
+              <h3 className="text-[10px] font-medium text-muted-foreground mb-2">{t("dashboard.charts.monthlyDeals")}</h3>
               <div className="h-[110px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={monthlyChart} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
@@ -565,7 +569,7 @@ const CustomerDashboardPage = () => {
               </div>
             </div>
             <div>
-              <h3 className="text-[10px] font-medium text-muted-foreground mb-2">قيمة الصفقات (﷼)</h3>
+              <h3 className="text-[10px] font-medium text-muted-foreground mb-2">{t("dashboard.charts.dealValue")}</h3>
               <div className="h-[110px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={monthlyChart} margin={{ top: 0, right: 0, left: -15, bottom: 0 }}>
@@ -584,10 +588,10 @@ const CustomerDashboardPage = () => {
               </div>
             </div>
             <div className="flex flex-col items-center">
-              <h3 className="text-[10px] font-medium text-muted-foreground mb-2 self-end">توزيع الحالات</h3>
+              <h3 className="text-[10px] font-medium text-muted-foreground mb-2 self-end">{t("dashboard.charts.statusDistribution")}</h3>
               <div className="h-[90px] w-[90px]">
                 {statusPie.length === 0 ? (
-                  <p className="text-[10px] text-muted-foreground text-center pt-8">لا توجد</p>
+                  <p className="text-[10px] text-muted-foreground text-center pt-8">{t("dashboard.charts.noData")}</p>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -636,15 +640,15 @@ const CustomerDashboardPage = () => {
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="flex gap-1 bg-muted/40 rounded-xl p-1 w-fit overflow-x-auto max-w-full scrollbar-hide">
                 {[
-                  { id: "deals" as const, label: t("dashboard.myDeals"), icon: Briefcase, count: deals.length, desc: "تابع جميع صفقاتك الجارية والمكتملة" },
-                  { id: "listings" as const, label: t("dashboard.myListings"), icon: Store, count: listings.length, desc: "إدارة إعلاناتك ومسوداتك" },
-                  { id: "offers" as const, label: t("dashboard.myOffers"), icon: ShoppingCart, count: undefined, desc: "العروض التي قدمتها على إعلانات أخرى" },
-                  { id: "saved" as const, label: "المحفوظة", icon: Heart, count: undefined, desc: "الإعلانات التي حفظتها للمراجعة لاحقاً" },
-                  { id: "notifications" as const, label: "الإشعارات", icon: Bell, count: undefined, desc: "تفضيلات التنبيهات والإشعارات" },
-                  { id: "agent" as const, label: "وكيل مقبل", icon: Bot, count: undefined, desc: "مساعدك الذكي الذي يعمل بالنيابة عنك" },
-                  { id: "intelligence" as const, label: "ذكاء مقبل", icon: Brain, count: undefined, desc: "تحليلات وتوصيات ذكية لصفقاتك" },
-                  { id: "security" as const, label: "الأمان", icon: Shield, count: undefined, desc: "إعدادات الحماية وأمان الحساب" },
-                  { id: "account" as const, label: "حسابي", icon: User, count: undefined, desc: "تعديل بياناتك الشخصية وكلمة المرور" },
+                  { id: "deals" as const, label: t("dashboard.myDeals"), icon: Briefcase, count: deals.length, desc: t("dashboard.tabs.desc.myDeals") },
+                  { id: "listings" as const, label: t("dashboard.myListings"), icon: Store, count: listings.length, desc: t("dashboard.tabs.desc.myListings") },
+                  { id: "offers" as const, label: t("dashboard.myOffers"), icon: ShoppingCart, count: undefined, desc: t("dashboard.tabs.desc.myOffers") },
+                  { id: "saved" as const, label: t("dashboard.tabs.saved"), icon: Heart, count: undefined, desc: t("dashboard.tabs.desc.saved") },
+                  { id: "notifications" as const, label: t("dashboard.tabs.notifications"), icon: Bell, count: undefined, desc: t("dashboard.tabs.desc.notifications") },
+                  { id: "agent" as const, label: t("dashboard.tabs.agent"), icon: Bot, count: undefined, desc: t("dashboard.tabs.desc.agent") },
+                  { id: "intelligence" as const, label: t("dashboard.tabs.intelligence"), icon: Brain, count: undefined, desc: t("dashboard.tabs.desc.intelligence") },
+                  { id: "security" as const, label: t("dashboard.tabs.security"), icon: Shield, count: undefined, desc: t("dashboard.tabs.desc.security") },
+                  { id: "account" as const, label: t("dashboard.tabs.account"), icon: User, count: undefined, desc: t("dashboard.tabs.desc.account") },
                 ].map(tab => (
                   <button key={tab.id} onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }} title={tab.desc} className={cn(
                     "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs transition-all",
@@ -663,7 +667,7 @@ const CustomerDashboardPage = () => {
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder={activeTab === "deals" ? "ابحث في الصفقات..." : "ابحث في الإعلانات..."}
+                  placeholder={activeTab === "deals" ? t("dashboard.search.deals") : t("dashboard.search.listings")}
                   className="w-full bg-muted/40 border-0 rounded-lg py-2 pr-9 pl-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
                 />
               </div>
@@ -674,11 +678,11 @@ const CustomerDashboardPage = () => {
             {activeTab === "deals" && (
               <div className="flex gap-1.5 overflow-x-auto pb-1">
                 {[
-                  { id: "all", label: "الكل" },
-                  { id: "active", label: "نشطة" },
-                  { id: "waiting", label: "بانتظار" },
-                  { id: "completed", label: "مكتملة" },
-                  { id: "cancelled", label: "ملغية" },
+                  { id: "all", label: t("dashboard.filters.all") },
+                  { id: "active", label: t("dashboard.filters.active") },
+                  { id: "waiting", label: t("dashboard.filters.waiting") },
+                  { id: "completed", label: t("dashboard.filters.completed") },
+                  { id: "cancelled", label: t("dashboard.filters.cancelled") },
                 ].map(f => (
                   <button key={f.id} onClick={() => setDealStatusFilter(f.id)} className={cn(
                     "px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all",
@@ -690,10 +694,10 @@ const CustomerDashboardPage = () => {
             {activeTab === "listings" && (
               <div className="flex gap-1.5 overflow-x-auto pb-1">
                 {[
-                  { id: "all", label: "الكل" },
-                  { id: "draft", label: "مسودة" },
-                  { id: "published", label: "منشور" },
-                  { id: "under_review", label: "مراجعة" },
+                  { id: "all", label: t("dashboard.filters.all") },
+                  { id: "draft", label: t("dashboard.filters.draft") },
+                  { id: "published", label: t("dashboard.filters.published") },
+                  { id: "under_review", label: t("dashboard.filters.underReview") },
                 ].map(f => (
                   <button key={f.id} onClick={() => setListingStatusFilter(f.id)} className={cn(
                     "px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all",
@@ -709,8 +713,8 @@ const CustomerDashboardPage = () => {
                 {filteredDeals.length === 0 ? (
                   <div className="bg-card rounded-2xl p-12 shadow-soft border border-border/30 text-center">
                     <MessageSquare size={32} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
-                    <p className="text-sm text-muted-foreground mb-2">{deals.length === 0 ? "لا توجد صفقات بعد" : "لا توجد نتائج"}</p>
-                    {deals.length === 0 && <Link to="/marketplace" className="text-xs text-primary hover:underline">تصفح السوق وابدأ أول صفقة</Link>}
+                    <p className="text-sm text-muted-foreground mb-2">{deals.length === 0 ? t("dashboard.deals.empty") : t("dashboard.deals.noResults")}</p>
+                    {deals.length === 0 && <Link to="/marketplace" className="text-xs text-primary hover:underline">{t("dashboard.deals.browseMarket")}</Link>}
                   </div>
                 ) : (
                   filteredDeals.map(deal => {
@@ -722,9 +726,9 @@ const CustomerDashboardPage = () => {
                             <Briefcase size={16} className="text-muted-foreground" strokeWidth={1.3} />
                           </div>
                           <div>
-                            <div className="text-sm font-medium group-hover:text-primary transition-colors">صفقة #{deal.id.slice(0, 6)}</div>
+                            <div className="text-sm font-medium group-hover:text-primary transition-colors">{t("dashboard.deals.dealNumber")}{deal.id.slice(0, 6)}</div>
                             <div className="text-[11px] text-muted-foreground mt-0.5">
-                              {deal.agreed_price ? <>{Number(deal.agreed_price).toLocaleString("en-US")} <SarSymbol size={9} /></> : "بدون سعر"}
+                              {deal.agreed_price ? <>{Number(deal.agreed_price).toLocaleString("en-US")} <SarSymbol size={9} /></> : t("dashboard.deals.noPrice")}
                               {" · "}
                               {new Date(deal.updated_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                             </div>
@@ -747,8 +751,8 @@ const CustomerDashboardPage = () => {
                 {filteredListings.length === 0 ? (
                   <div className="bg-card rounded-2xl p-12 shadow-soft border border-border/30 text-center">
                     <Store size={32} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
-                    <p className="text-sm text-muted-foreground mb-2">{listings.length === 0 ? "لا توجد إعلانات" : "لا توجد نتائج"}</p>
-                    {listings.length === 0 && <Link to="/create-listing?new=1" className="text-xs text-primary hover:underline">أنشئ أول إعلان</Link>}
+                    <p className="text-sm text-muted-foreground mb-2">{listings.length === 0 ? t("dashboard.listings.empty") : t("dashboard.listings.noResults")}</p>
+                    {listings.length === 0 && <Link to="/create-listing?new=1" className="text-xs text-primary hover:underline">{t("dashboard.listings.createFirst")}</Link>}
                   </div>
                 ) : (
                   filteredListings.map(listing => {
@@ -764,7 +768,7 @@ const CustomerDashboardPage = () => {
                             <Store size={16} className={isDraft ? "text-primary" : "text-muted-foreground"} strokeWidth={1.3} />
                           </div>
                           <div>
-                            <div className="text-sm font-medium group-hover:text-primary transition-colors">{listing.title || listing.business_activity || "بدون عنوان"}</div>
+                            <div className="text-sm font-medium group-hover:text-primary transition-colors">{listing.title || listing.business_activity || t("dashboard.listings.noTitle")}</div>
                             <div className="text-[11px] text-muted-foreground mt-0.5">
                               {listing.city || "—"}
                               {listing.price ? <> · {Number(listing.price).toLocaleString("en-US")} <SarSymbol size={9} /></> : ""}
@@ -780,7 +784,7 @@ const CustomerDashboardPage = () => {
                                 navigate(`/listing/${listing.id}?edit=1`);
                               }}
                               className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
-                              title="تعديل الإعلان"
+                              title={t("dashboard.listings.editTooltip")}
                             >
                               <Edit3 size={14} strokeWidth={1.5} />
                             </button>
@@ -789,13 +793,13 @@ const CustomerDashboardPage = () => {
                             <button
                               onClick={(e) => handleDeleteListing(e, listing.id, listing.title || listing.business_activity || null)}
                               className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                              title="حذف الإعلان"
+                              title={t("dashboard.listings.deleteTooltip")}
                             >
                               <Trash2 size={14} strokeWidth={1.5} />
                             </button>
                           )}
                           {isDraft ? (
-                            <span className="text-[10px] px-2.5 py-1 rounded-lg font-medium bg-primary/10 text-primary">أكمل الإعلان</span>
+                            <span className="text-[10px] px-2.5 py-1 rounded-lg font-medium bg-primary/10 text-primary">{t("dashboard.statusBadges.completeListing")}</span>
                           ) : (
                             <span className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium", st.cls)}>{st.label}</span>
                           )}
@@ -815,15 +819,15 @@ const CustomerDashboardPage = () => {
                 {listings.filter(l => l.status === "published").length === 0 ? (
                   <div className="bg-card rounded-2xl p-12 shadow-soft border border-border/30 text-center">
                     <Bot size={32} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
-                    <p className="text-sm text-muted-foreground mb-1">لا توجد إعلانات منشورة</p>
-                    <p className="text-[11px] text-muted-foreground">وكيل مقبل يعمل على كل إعلان منشور بشكل مستقل</p>
+                    <p className="text-sm text-muted-foreground mb-1">{t("dashboard.agent.noPublished")}</p>
+                    <p className="text-[11px] text-muted-foreground">{t("dashboard.agent.noPublishedHint")}</p>
                   </div>
                 ) : (
                   listings.filter(l => l.status === "published").map(listing => (
                     <div key={listing.id} className="bg-card rounded-2xl p-4 shadow-soft border border-border/30">
                       <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/20">
                         <Store size={14} className="text-primary" strokeWidth={1.3} />
-                        <span className="text-xs font-medium">{listing.title || listing.business_activity || "بدون عنوان"}</span>
+                        <span className="text-xs font-medium">{listing.title || listing.business_activity || t("dashboard.listings.noTitle")}</span>
                         {listing.city && <span className="text-[10px] text-muted-foreground">· {listing.city}</span>}
                       </div>
                       <MoqbilAgentPanel listingId={listing.id} />

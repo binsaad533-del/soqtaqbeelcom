@@ -39,10 +39,227 @@
     "createAccount": "نیا اکاؤنٹ بنائیں"
   },
   "dashboard": {
-    "myListings": "میری لسٹنگز",
-    "myOffers": "میری پیشکشیں",
+    "myListings": "میری فہرستیں",
+    "myOffers": "میرے پیشکشیں",
     "myMessages": "میرے پیغامات",
-    "myDeals": "میرے سودے"
+    "myDeals": "میرے سودے",
+    "seo": {
+      "title": "صارف ڈیش بورڈ",
+      "description": "صارف ڈیش بورڈ — Souq Taqbeel پر اپنی فہرستیں اور سودوں کو ٹریک کریں",
+      "simpleTitle": "ڈیش بورڈ",
+      "simpleDescription": "Souq Taqbeel ڈیش بورڈ سے اپنی فہرستیں اور سودوں کا انتظام کریں",
+      "h1": "صارف ڈیش بورڈ"
+    },
+    "headerTitle": "ڈیش بورڈ",
+    "welcome": "خوش آمدید — یہ آپ کی سرگرمی کا خلاصہ ہے",
+    "alerts": "انتباہات",
+    "loadFailedPrefix": "لوڈ کرنے میں ناکامی:",
+    "retry": "دوبارہ کوشش کریں",
+    "loadingItems": {
+      "listings": "فہرستیں",
+      "deals": "سودے"
+    },
+    "profileBanner": {
+      "completeProfile": "اعتماد بڑھانے کے لیے اپنا پروفائل مکمل کریں",
+      "missingPrefix": "غائب:",
+      "missing": {
+        "name": "نام",
+        "phone": "فون",
+        "avatar": "پروفائل تصویر",
+        "email": "ای میل",
+        "phoneVerified": "فون کی تصدیق"
+      }
+    },
+    "profile": {
+      "settingsTooltip": "اکاؤنٹ کی ترتیبات",
+      "verified": "تصدیق شدہ",
+      "unverified": "غیر تصدیق شدہ",
+      "addName": "اپنا نام شامل کریں",
+      "email": "ای میل",
+      "addEmail": "اپنا ای میل شامل کریں",
+      "phone": "فون نمبر",
+      "addPhone": "اپنا فون شامل کریں",
+      "registeredOn": "رجسٹریشن کی تاریخ",
+      "lastLogin": "آخری لاگ ان",
+      "avatarMaxSize": "زیادہ سے زیادہ 5 MB",
+      "avatarUpdated": "تصویر اپ ڈیٹ ہو گئی",
+      "avatarUploadFailed": "اپ لوڈ ناکام",
+      "emailVerifySent": "تصدیقی لنک آپ کے نئے ای میل پر بھیج دیا گیا",
+      "phoneUpdated": "فون اپ ڈیٹ ہو گیا",
+      "updated": "اپ ڈیٹ ہو گیا",
+      "updateFailed": "اپ ڈیٹ ناکام"
+    },
+    "notifications": {
+      "title": "اطلاعات",
+      "markAllRead": "سب کو پڑھا ہوا نشان زد کریں",
+      "empty": "کوئی اطلاع نہیں"
+    },
+    "messagesCard": {
+      "viewAll": "تمام گفتگو دیکھیں"
+    },
+    "feed": {
+      "title": "لائیو سرگرمی",
+      "live": "لائیو",
+      "empty": "ابھی کوئی سرگرمی نہیں"
+    },
+    "kpi": {
+      "activeDeals": "فعال سودے",
+      "waiting": "جواب کا انتظار",
+      "completed": "مکمل",
+      "totalValue": "کل قیمت",
+      "commission": "کمیشن (1%)"
+    },
+    "charts": {
+      "monthlyDeals": "ماہانہ سودے",
+      "dealValue": "سودے کی قیمت (SAR)",
+      "statusDistribution": "حیثیت کی تقسیم",
+      "noData": "کوئی ڈیٹا نہیں",
+      "total": "کل",
+      "completed": "مکمل",
+      "value": "قیمت"
+    },
+    "statusGroups": {
+      "active": "فعال",
+      "waiting": "منتظر",
+      "completed": "مکمل",
+      "cancelled": "منسوخ"
+    },
+    "months": {
+      "jan": "جنوری",
+      "feb": "فروری",
+      "mar": "مارچ",
+      "apr": "اپریل",
+      "may": "مئی",
+      "jun": "جون",
+      "jul": "جولائی",
+      "aug": "اگست",
+      "sep": "ستمبر",
+      "oct": "اکتوبر",
+      "nov": "نومبر",
+      "dec": "دسمبر"
+    },
+    "suggestions": {
+      "negotiating": "آپ کے پاس جواب کے منتظر سودے ہیں",
+      "createFirst": "اپنی پہلی فہرست بنائیں",
+      "publishDrafts": "آپ کے پاس مسودہ فہرستیں ہیں — انہیں شائع کریں",
+      "agreementsArchive": "معاہدوں کا آرکائیو"
+    },
+    "tabs": {
+      "myDeals": "میرے سودے",
+      "myListings": "میری فہرستیں",
+      "myOffers": "میرے پیشکشیں",
+      "saved": "محفوظ شدہ",
+      "notifications": "اطلاعات",
+      "agent": "Moqbil ایجنٹ",
+      "intelligence": "Moqbil انٹیلیجنس",
+      "security": "سیکیورٹی",
+      "account": "میرا اکاؤنٹ",
+      "desc": {
+        "myDeals": "اپنے تمام جاری اور مکمل سودوں کو ٹریک کریں",
+        "myListings": "اپنی فہرستیں اور مسودے کا انتظام کریں",
+        "myOffers": "دیگر فہرستوں پر آپ کی جانب سے پیش کردہ پیشکشیں",
+        "saved": "بعد میں جائزے کے لیے محفوظ کردہ فہرستیں",
+        "notifications": "انتباہ اور اطلاع کی ترجیحات",
+        "agent": "آپ کی جانب سے کام کرنے والا AI معاون",
+        "intelligence": "آپ کے سودوں کے لیے ذہین تجزیہ اور سفارشات",
+        "security": "اکاؤنٹ سیکیورٹی اور تحفظ کی ترتیبات",
+        "account": "اپنی ذاتی معلومات اور پاس ورڈ میں ترمیم کریں"
+      }
+    },
+    "search": {
+      "deals": "سودے تلاش کریں...",
+      "listings": "فہرستیں تلاش کریں...",
+      "offers": "پیشکشیں تلاش کریں...",
+      "saved": "محفوظ شدہ تلاش کریں..."
+    },
+    "filters": {
+      "all": "سب",
+      "active": "فعال",
+      "waiting": "منتظر",
+      "completed": "مکمل",
+      "cancelled": "منسوخ",
+      "draft": "مسودہ",
+      "published": "شائع شدہ",
+      "underReview": "زیر جائزہ",
+      "pending": "زیر التواء",
+      "accepted": "قبول شدہ",
+      "rejected": "مسترد"
+    },
+    "statusBadges": {
+      "draft": "مسودہ",
+      "published": "شائع شدہ",
+      "under_review": "زیر جائزہ",
+      "negotiating": "بات چیت",
+      "completed": "مکمل",
+      "finalized": "مکمل",
+      "new": "نیا",
+      "agreement": "معاہدہ",
+      "cancelled": "منسوخ",
+      "completeListing": "فہرست مکمل کریں"
+    },
+    "deals": {
+      "empty": "ابھی کوئی سودا نہیں",
+      "noResults": "کوئی نتیجہ نہیں",
+      "browseMarket": "مارکیٹ براؤز کریں اور اپنا پہلا سودا شروع کریں",
+      "dealNumber": "سودا #",
+      "noPrice": "بغیر قیمت"
+    },
+    "listings": {
+      "empty": "کوئی فہرست نہیں",
+      "noResults": "کوئی نتیجہ نہیں",
+      "createFirst": "اپنی پہلی فہرست بنائیں",
+      "noTitle": "بغیر عنوان",
+      "editTooltip": "فہرست میں ترمیم کریں",
+      "deleteTooltip": "فہرست حذف کریں",
+      "deleteConfirm": "\"{{title}}\" حذف کریں؟",
+      "deleteFailedPrefix": "حذف ناکام:",
+      "deleteRetry": "براہ کرم دوبارہ کوشش کریں",
+      "deleteSuccess": "فہرست کامیابی سے حذف ہو گئی",
+      "deleteUnexpectedError": "حذف کے دوران غیر متوقع خرابی — براہ کرم تازہ کریں اور دوبارہ کوشش کریں"
+    },
+    "agent": {
+      "noPublished": "کوئی شائع شدہ فہرست نہیں",
+      "noPublishedHint": "Moqbil ایجنٹ ہر شائع شدہ فہرست پر آزادانہ کام کرتا ہے"
+    },
+    "buyerOffers": {
+      "empty": "آپ نے ابھی تک کوئی پیشکش نہیں کی",
+      "noResults": "کوئی نتیجہ نہیں",
+      "browseAndOffer": "مواقع براؤز کریں اور اپنی پہلی پیشکش دیں",
+      "opportunityFallback": "حصول کا موقع",
+      "yourOffer": "آپ کی پیشکش:",
+      "sellerReply": "بیچنے والے کا جواب:",
+      "status": {
+        "pending": "جواب کا انتظار",
+        "accepted": "قبول شدہ",
+        "rejected": "مسترد",
+        "withdrawn": "واپس لیا گیا"
+      }
+    },
+    "saved": {
+      "empty": "آپ نے ابھی تک کوئی فہرست محفوظ نہیں کی",
+      "noResults": "کوئی نتیجہ نہیں",
+      "browseAndSave": "مواقع براؤز کریں اور جو پسند آئے محفوظ کریں",
+      "removed": "فہرست محفوظ شدہ سے ہٹا دی گئی",
+      "removeTooltip": "محفوظ شدہ سے ہٹائیں",
+      "priceOnContact": "درخواست پر قیمت",
+      "opportunityFallback": "حصول کا موقع"
+    },
+    "simple": {
+      "tabs": {
+        "myListings": "میری فہرستیں",
+        "drafts": "مسودے",
+        "negotiations": "بات چیت",
+        "agreements": "معاہدے"
+      },
+      "stats": {
+        "myListings": "میری فہرستیں",
+        "uploadedPhotos": "اپ لوڈ کردہ تصاویر",
+        "activeNegotiations": "فعال بات چیت",
+        "alerts": "انتباہات"
+      },
+      "disclosure": "انکشاف",
+      "awaitingConfirmation": "تصدیق کا انتظار"
+    }
   },
   "messages": {
     "noMessages": "ابھی کوئی پیغام نہیں",
