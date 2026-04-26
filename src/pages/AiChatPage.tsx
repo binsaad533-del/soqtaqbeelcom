@@ -74,6 +74,8 @@ async function streamChat({
   context,
   role,
   user_id,
+  errorTexts,
+  fallbackText,
   onDelta,
   onDone,
   onError,
@@ -82,6 +84,8 @@ async function streamChat({
   context?: string;
   role?: string;
   user_id?: string;
+  errorTexts: { unknown: string; noResponse: string; connectionFailed: string };
+  fallbackText: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (msg: string) => void;
@@ -100,12 +104,12 @@ async function streamChat({
     });
 
     if (!resp.ok) {
-      const err = await resp.json().catch(() => ({ error: "خطأ غير معروف" }));
-      onError(err.error || "حدث خطأ");
+      const err = await resp.json().catch(() => ({ error: errorTexts.unknown }));
+      onError(err.error || errorTexts.unknown);
       return;
     }
 
-    if (!resp.body) { onError("لا يوجد استجابة"); return; }
+    if (!resp.body) { onError(errorTexts.noResponse); return; }
 
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
@@ -127,13 +131,13 @@ async function streamChat({
         try {
           const parsed = JSON.parse(json);
           const c = parsed.choices?.[0]?.delta?.content;
-          if (c) onDelta(sanitizeAssistantContent(c));
+          if (c) onDelta(sanitizeAssistantContent(c, fallbackText));
         } catch { /* partial */ }
       }
     }
     onDone();
   } catch {
-    onError("فشل الاتصال بالمساعد الذكي");
+    onError(errorTexts.connectionFailed);
   }
 }
 
