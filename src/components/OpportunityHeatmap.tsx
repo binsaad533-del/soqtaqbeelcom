@@ -4,9 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { MapPin, Flame, TrendingUp, Loader2 } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import SarSymbol from "@/components/SarSymbol";
+import { useListingTranslation } from "@/hooks/useListingTranslation";
 
 interface CityHeat {
   city: string;
+  // One listing id per city → used to fetch translated city/activity labels
+  // via translate-listing-content cache. AR users get original (no calls).
+  representativeListingId: string | null;
   count: number;
   avgPrice: number;
   topActivity: string;
