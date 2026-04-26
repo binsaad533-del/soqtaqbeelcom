@@ -62,8 +62,8 @@ const SmartMatchPanel = () => {
     return (
       <div className="text-center py-4 text-xs text-muted-foreground">
         <Target size={20} className="mx-auto mb-2 text-muted-foreground/50" />
-        <p>لم يتم العثور على فرص مطابقة بعد</p>
-        <p className="text-[10px] mt-1">تصفّح المزيد من الإعلانات ليتعرف مقبل على اهتماماتك</p>
+        <p>{t("aiChat.emptyState.noMatches")}</p>
+        <p className="text-[10px] mt-1">{t("aiChat.emptyState.browseMore")}</p>
       </div>
     );
   }
