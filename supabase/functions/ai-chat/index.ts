@@ -2917,8 +2917,11 @@ Deno.serve(async (req) => {
     const MAX_ITERATIONS = 5;
     let toolsUsed: string[] = [];
 
-    // DEFAULT: force tool execution. Only pure greetings get "auto"
-    const initialToolChoice = isConversationalOnly ? "auto" : "required";
+    // NOTE: Gemini rejects tool_choice:"required" when the tool registry is large
+    // (>~30 tools) with: "schema produces a constraint that has too much branching".
+    // We keep "auto" — the system prompt + intent detection already steer tool usage.
+    const initialToolChoice = "auto";
+    void isConversationalOnly;
 
     while (iterations < MAX_ITERATIONS) {
       console.log(`[moqbil] Tool loop iteration ${iterations}, tools: ${tools.length}, toolChoice: ${iterations === 0 ? initialToolChoice : "auto"}`);
