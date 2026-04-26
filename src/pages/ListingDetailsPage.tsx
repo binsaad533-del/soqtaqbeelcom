@@ -850,7 +850,7 @@ const ListingDetailsPage = () => {
                       onClick={() => setEditDialogOpen(true)}
                       className="flex-1 rounded-xl text-xs"
                     >
-                      <Edit3 size={14} /> تعديل الإعلان
+                      <Edit3 size={14} /> {t("listing.editListing")}
                     </Button>
                   )}
                 </div>
