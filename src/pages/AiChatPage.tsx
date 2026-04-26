@@ -373,7 +373,7 @@ const AiChatPage = () => {
             toast.success(t("aiChat.toasts.uploadSuccess", { name: file.name }));
           } catch (err) {
             console.error("Upload failed:", err);
-            toast.error(`فشل رفع ${file.name}`);
+            toast.error(t("aiChat.toasts.uploadFailed", { name: file.name }));
             continue;
           }
         }
