@@ -627,7 +627,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
                     <input type="text" value={item.name || ""} onChange={(e) => updateInventoryItem(i, "name", e.target.value)} className={cn(inputCls, "text-xs py-1.5")} />
                   </div>
                   <div>
-                    <label className="text-[10px] text-muted-foreground mb-0.5 block">العدد</label>
+                    <label className="text-[10px] text-muted-foreground mb-0.5 block">{t("editListing.inventory.quantity")}</label>
                     <input type="number" value={item.quantity || ""} onChange={(e) => updateInventoryItem(i, "quantity", e.target.value)} className={cn(inputCls, "text-xs py-1.5")} dir="ltr" />
                   </div>
                   <div>
