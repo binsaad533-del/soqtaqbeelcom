@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -22,19 +23,20 @@ type Offer = {
   listing_activity?: string;
 };
 
-const statusMap: Record<string, { label: string; cls: string }> = {
-  pending: { label: "بانتظار الرد", cls: "bg-warning/15 text-warning" },
-  accepted: { label: "مقبول", cls: "bg-success/15 text-success" },
-  rejected: { label: "مرفوض", cls: "bg-destructive/15 text-destructive" },
-  withdrawn: { label: "ملغي", cls: "bg-muted text-muted-foreground" },
-};
-
 export default function BuyerOffersTab() {
+  const { t } = useTranslation();
   const { user } = useAuthContext();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+
+  const statusMap: Record<string, { label: string; cls: string }> = useMemo(() => ({
+    pending: { label: t("dashboard.buyerOffers.status.pending"), cls: "bg-warning/15 text-warning" },
+    accepted: { label: t("dashboard.buyerOffers.status.accepted"), cls: "bg-success/15 text-success" },
+    rejected: { label: t("dashboard.buyerOffers.status.rejected"), cls: "bg-destructive/15 text-destructive" },
+    withdrawn: { label: t("dashboard.buyerOffers.status.withdrawn"), cls: "bg-muted text-muted-foreground" },
+  }), [t]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -48,7 +50,6 @@ export default function BuyerOffersTab() {
 
       if (!data) { setLoading(false); return; }
 
-      // Fetch listing details
       const listingIds = [...new Set(data.map(o => o.listing_id))];
       const { data: listings } = await supabase
         .from("listings")
@@ -90,7 +91,6 @@ export default function BuyerOffersTab() {
 
   return (
     <div className="space-y-3">
-      {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-xs">
           <Search size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -98,7 +98,7 @@ export default function BuyerOffersTab() {
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="ابحث في العروض..."
+            placeholder={t("dashboard.search.offers")}
             className="w-full bg-muted/40 border-0 rounded-lg py-2 pr-9 pl-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
           />
         </div>
@@ -106,10 +106,10 @@ export default function BuyerOffersTab() {
 
       <div className="flex gap-1.5 overflow-x-auto pb-1">
         {[
-          { id: "all", label: "الكل" },
-          { id: "pending", label: "بانتظار" },
-          { id: "accepted", label: "مقبول" },
-          { id: "rejected", label: "مرفوض" },
+          { id: "all", label: t("dashboard.filters.all") },
+          { id: "pending", label: t("dashboard.filters.pending") },
+          { id: "accepted", label: t("dashboard.filters.accepted") },
+          { id: "rejected", label: t("dashboard.filters.rejected") },
         ].map(f => (
           <button key={f.id} onClick={() => setFilter(f.id)} className={cn(
             "px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all",
@@ -118,15 +118,14 @@ export default function BuyerOffersTab() {
         ))}
       </div>
 
-      {/* Offers list */}
       {filtered.length === 0 ? (
         <div className="bg-card rounded-2xl p-12 shadow-soft border border-border/30 text-center">
           <ShoppingCart size={32} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
           <p className="text-sm text-muted-foreground mb-2">
-            {offers.length === 0 ? "لم تقدم أي عروض بعد" : "لا توجد نتائج"}
+            {offers.length === 0 ? t("dashboard.buyerOffers.empty") : t("dashboard.buyerOffers.noResults")}
           </p>
           {offers.length === 0 && (
-            <Link to="/marketplace" className="text-xs text-primary hover:underline">تصفح الفرص وقدّم أول عرض</Link>
+            <Link to="/marketplace" className="text-xs text-primary hover:underline">{t("dashboard.buyerOffers.browseAndOffer")}</Link>
           )}
         </div>
       ) : (
@@ -148,18 +147,18 @@ export default function BuyerOffersTab() {
                 </div>
                 <div>
                   <div className="text-sm font-medium group-hover:text-primary transition-colors">
-                    {offer.listing_title || "فرصة تقبيل"}
+                    {offer.listing_title || t("dashboard.buyerOffers.opportunityFallback")}
                   </div>
                   <div className="text-[11px] text-muted-foreground mt-0.5">
                     {offer.listing_city || "—"}
                     {" · "}
-                    عرضك: {Number(offer.offered_price).toLocaleString("en-US")} <SarSymbol size={9} />
+                    {t("dashboard.buyerOffers.yourOffer")} {Number(offer.offered_price).toLocaleString("en-US")} <SarSymbol size={9} />
                     {" · "}
                     {new Date(offer.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                   </div>
                   {offer.seller_response && (
                     <div className="text-[10px] text-muted-foreground/70 mt-0.5 truncate max-w-[300px]">
-                      رد البائع: {offer.seller_response}
+                      {t("dashboard.buyerOffers.sellerReply")} {offer.seller_response}
                     </div>
                   )}
                 </div>
