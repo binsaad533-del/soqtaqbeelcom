@@ -50,7 +50,7 @@ const INTERNAL_RESPONSE_PATTERNS = [
   /\b(?:create_listing|edit_my_listing|cancel_my_listing|submit_offer|respond_to_offer|get_listing_status|approve_listing_publish|valuate_business|analyze_location|generate_[a-z_]+|check_[a-z_]+|quick_feasibility|post_deal_followup|mediate_dispute|schedule_meeting|generate_handover_checklist|generate_listing_card)\b/gi,
 ];
 
-function sanitizeAssistantContent(text: string): string {
+function sanitizeAssistantContent(text: string, fallback: string = "تم."): string {
   if (!text) return "";
 
   let cleaned = text;
@@ -66,7 +66,7 @@ function sanitizeAssistantContent(text: string): string {
     .replace(/[ \t]{2,}/g, " ")
     .trim();
 
-  return cleaned || "تم.";
+  return cleaned || fallback;
 }
 
 async function streamChat({
