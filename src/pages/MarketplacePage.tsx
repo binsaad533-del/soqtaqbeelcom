@@ -45,7 +45,7 @@ interface EnrichedListing extends Listing {
 
 const MarketplacePage = () => {
   const { t } = useTranslation();
-  useSEO({ title: "سوق الفرص — تصفح مشاريع وفرص تجارية للبيع في السعودية", description: "تصفح فرص تقبيل المشاريع التجارية المتاحة في السعودية — مطاعم، محلات، ورش، مراكز تجميل والمزيد", canonical: "/marketplace" });
+  useSEO({ title: t("marketplace.seo.title"), description: t("marketplace.seo.description"), canonical: "/marketplace" });
   const { data: listings = [], isLoading: listingsLoading } = usePublishedListingsQuery();
   const { data: profiles = [], isLoading: profilesLoading } = useAllProfilesQuery();
   const { getLikesAndViews, toggleLike } = useListingSocial();
@@ -83,7 +83,7 @@ const MarketplacePage = () => {
       const exists = prev.find(i => i.id === listing.id);
       if (exists) return prev.filter(i => i.id !== listing.id);
       if (prev.length >= 4) {
-        toast.error("يمكنك مقارنة 4 إعلانات كحد أقصى");
+        toast.error(t("marketplace.compareLimitToast"));
         return prev;
       }
       const item: CompareItem = {
@@ -103,7 +103,7 @@ const MarketplacePage = () => {
       };
       return [...prev, item];
     });
-  }, []);
+  }, [t]);
 
   const removeCompare = useCallback((id: string) => {
     setCompareItems(prev => prev.filter(i => i.id !== id));
@@ -113,7 +113,7 @@ const MarketplacePage = () => {
 
   const handleToggleLike = useCallback(async (listingId: string) => {
     if (!user) {
-      toast.error("سجّل دخولك أولاً للإعجاب");
+      toast.error(t("marketplace.loginToLikeToast"));
       return;
     }
     const liked = await toggleLike(listingId);
@@ -126,7 +126,7 @@ const MarketplacePage = () => {
       ...prev,
       [listingId]: (prev[listingId] || 0) + (liked ? 1 : -1),
     }));
-  }, [user, toggleLike]);
+  }, [user, toggleLike, t]);
 
   const enrichedListings = useMemo((): EnrichedListing[] => {
     const profileMap = new Map(profiles.map(p => [p.user_id, p]));
@@ -235,15 +235,15 @@ const MarketplacePage = () => {
   const itemListJsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "سوق الفرص — فرص تقبيل مشاريع تجارية",
-    description: "قائمة بفرص تقبيل المشاريع التجارية المتاحة في السعودية",
+    name: t("marketplace.seo.jsonLdName"),
+    description: t("marketplace.seo.jsonLdDescription"),
     url: "https://soqtaqbeel.com/marketplace",
     numberOfItems: filtered.length,
     itemListElement: pagination.paginatedItems.slice(0, 10).map((item, i) => ({
       "@type": "ListItem",
       position: i + 1,
       url: `https://soqtaqbeel.com/listing/${item.id}`,
-      name: item.title || item.business_activity || "فرصة تقبيل",
+      name: item.title || item.business_activity || t("marketplace.card.opportunityFallback"),
     })),
   };
 
@@ -306,14 +306,14 @@ const MarketplacePage = () => {
             ) : filtered.length === 0 && similarResults.length === 0 ? (
               <div className="text-center py-16">
                 <AiStar size={32} className="mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">لا توجد نتائج مطابقة</p>
+                <p className="text-sm text-muted-foreground">{t("marketplace.noResults")}</p>
               </div>
             ) : (
               <>
                 {/* Results count */}
                 {filtered.length > 0 && (
                   <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
-                    <span>عرض {pagination.startIndex}–{pagination.endIndex} من {pagination.totalItems} نتيجة</span>
+                    <span>{t("marketplace.showingRange", { start: pagination.startIndex, end: pagination.endIndex, total: pagination.totalItems })}</span>
                   </div>
                 )}
 
@@ -373,7 +373,7 @@ const MarketplacePage = () => {
                 {filtered.length === 0 && similarResults.length > 0 && (
                   <div className="text-center py-8">
                     <AiStar size={28} className="mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground">لا توجد نتائج مطابقة تماماً لبحثك</p>
+                    <p className="text-sm text-muted-foreground">{t("marketplace.noExactResults")}</p>
                   </div>
                 )}
 
@@ -382,7 +382,7 @@ const MarketplacePage = () => {
                     <div className="flex items-center gap-2 mb-3 px-1">
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Lightbulb size={14} className="text-amber-500" />
-                        <span className="text-xs font-medium">فرص مشابهة قد تهمّك</span>
+                        <span className="text-xs font-medium">{t("marketplace.similarOpportunities")}</span>
                       </div>
                       <div className="flex-1 h-px bg-border/50" />
                     </div>
