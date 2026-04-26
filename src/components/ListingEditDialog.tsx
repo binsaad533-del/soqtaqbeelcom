@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Check, Edit3, Camera, MapPin, Package, FileText, Plus, X, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,8 +11,7 @@ import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 import { isFieldRelevant } from "@/lib/transparencyScore";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
-import GoogleMapPicker, { type PlaceDetails } from "@/components/GoogleMapPicker";
+import GoogleMapPicker from "@/components/GoogleMapPicker";
 import ListingEditErrorBoundary from "@/components/ListingEditErrorBoundary";
 import { invokeWithRetry } from "@/lib/invokeWithRetry";
 import { buildTitle } from "@/lib/title-utils";
@@ -28,6 +28,7 @@ const shouldShow = (dealType: string, field: string) =>
   isFieldRelevant(dealType, field) || ["business_activity", "city", "district", "price"].includes(field);
 
 const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDeleted }: ListingEditDialogProps) => {
+  const { t } = useTranslation();
   const dealType = listing.primary_deal_type || listing.deal_type || "full_takeover";
   const { updateListing, uploadFile, softDeleteListing } = useListings();
   const queryClient = useQueryClient();
@@ -114,11 +115,11 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
     setFields((prev) => ({ ...prev, [field]: value }));
 
   const photoGroups = [
-    { id: "interior", label: "داخلي" },
-    { id: "exterior", label: "خارجي" },
-    { id: "signage", label: "اللوحة" },
-    { id: "equipment", label: "معدات" },
-    { id: "other", label: "أخرى" },
+    { id: "interior", label: t("editListing.photos.groups.interior") },
+    { id: "exterior", label: t("editListing.photos.groups.exterior") },
+    { id: "signage", label: t("editListing.photos.groups.signage") },
+    { id: "equipment", label: t("editListing.photos.groups.equipment") },
+    { id: "other", label: t("editListing.photos.groups.other") },
   ];
 
   // ── Photo upload (click + drag) ──
@@ -131,7 +132,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
         const result = await uploadFile(listing.id, file, `photos/${group}`);
         if (result.url) uploadedUrls.push(result.url);
       } catch {
-        toast.error(`فشل رفع ${file.name}`);
+        toast.error(t("editListing.toasts.uploadFailed", { name: file.name }));
       }
     }
 
@@ -140,7 +141,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
         ...prev,
         [group]: [...(prev[group] || []), ...uploadedUrls],
       }));
-      toast.success(`تم رفع ${uploadedUrls.length} صورة`);
+      toast.success(t("editListing.toasts.photosUploaded", { count: uploadedUrls.length }));
     }
     setUploading(false);
   };
@@ -183,13 +184,13 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
           });
         }
       } catch {
-        toast.error(`فشل رفع ${file.name}`);
+        toast.error(t("editListing.toasts.uploadFailed", { name: file.name }));
       }
     }
 
     if (newDocs.length > 0) {
       setDocuments(prev => [...prev, ...newDocs]);
-      toast.success(`تم رفع ${newDocs.length} مستند`);
+      toast.success(t("editListing.toasts.docsUploaded", { count: newDocs.length }));
     }
     setUploadingDocs(false);
   };
@@ -229,14 +230,14 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
   // ── Save + auto re-analyze ──
   const handleSave = async () => {
     if (!fields.business_activity.trim() || !fields.city.trim() || !fields.price.trim() || Number(fields.price) <= 0) {
-      toast.error("يرجى إكمال الحقول المطلوبة: النشاط، المدينة، والسعر");
+      toast.error(t("editListing.toasts.requiredFields"));
       return;
     }
 
     const generatedTitle = fields.title.trim()
       ? fields.title
       : buildTitle([
-          fields.business_activity || "مشروع",
+          fields.business_activity || t("editListing.inventory.defaultProject"),
           fields.district,
           fields.city,
         ]);
@@ -287,7 +288,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
     } else {
       await queryClient.invalidateQueries({ queryKey: ["listing", listing.id] });
       await queryClient.invalidateQueries({ queryKey: ["listings"] });
-      toast.success("تم حفظ التعديلات بنجاح");
+      toast.success(t("editListing.toasts.saved"));
       onOpenChange(false);
 
       // ── Auto re-analyze in background ──
@@ -299,25 +300,37 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
 
   const triggerReAnalysis = async (listingId: string) => {
     try {
-      toast("جاري إعادة التحليل الذكي...", { duration: 4000 });
+      toast(t("editListing.toasts.reanalyzing"), { duration: 4000 });
       await invokeWithRetry("auto-analyze-listing", { listingId });
       // Refresh listing data to pick up new analysis
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ["listing", listingId] });
       }, 5000);
-      toast.success("تم تحديث التحليل الذكي بنجاح");
+      toast.success(t("editListing.toasts.reanalyzed"));
     } catch (e) {
       console.error("Re-analysis failed:", e);
     }
   };
 
   const inputCls = "w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20";
-  const selectOpts = (options: string[]) => (
+  const selectOpts = (options: { value: string; label: string }[]) => (
     <>
-      <option value="">اختر...</option>
-      {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      <option value="">{t("editListing.selectPlaceholder")}</option>
+      {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </>
   );
+
+  // DB enum values stay Arabic for backward compat; only labels are translated
+  const licenseOptions = [
+    { value: "سارية", label: t("editListing.licenseStatus.active") },
+    { value: "منتهية", label: t("editListing.licenseStatus.expired") },
+    { value: "غير متوفرة", label: t("editListing.licenseStatus.unavailable") },
+  ];
+  const cameraOptions = [
+    { value: "متوفرة ومطابقة", label: t("editListing.cameraStatus.availableCompliant") },
+    { value: "متوفرة غير مطابقة", label: t("editListing.cameraStatus.availableNonCompliant") },
+    { value: "غير متوفرة", label: t("editListing.cameraStatus.unavailable") },
+  ];
 
   const totalPhotos = Object.values(photos).reduce((sum, arr) => sum + (arr?.length || 0), 0);
   const totalDocs = documents.length;
@@ -328,10 +341,10 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Edit3 size={18} className="text-primary" />
-            تعديل الإعلان
+            {t("editListing.title")}
           </DialogTitle>
           <DialogDescription className="text-xs">
-            عدّل البيانات واحفظ — سيتم إعادة تحليل الصفقة تلقائياً بعد الحفظ
+            {t("editListing.desc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -339,76 +352,76 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
           <TabsList className="grid grid-cols-5 w-full">
             <TabsTrigger value="basic" className="text-xs gap-1">
               <FileText size={14} />
-              بيانات
+              {t("editListing.tabs.basic")}
             </TabsTrigger>
             <TabsTrigger value="photos" className="text-xs gap-1">
               <Camera size={14} />
-              صور
+              {t("editListing.tabs.photos")}
               {totalPhotos > 0 && <span className="text-[10px] bg-primary/20 text-primary rounded-full px-1.5">{totalPhotos}</span>}
             </TabsTrigger>
             <TabsTrigger value="docs" className="text-xs gap-1">
               <Upload size={14} />
-              مستندات
+              {t("editListing.tabs.docs")}
               {totalDocs > 0 && <span className="text-[10px] bg-primary/20 text-primary rounded-full px-1.5">{totalDocs}</span>}
             </TabsTrigger>
             <TabsTrigger value="location" className="text-xs gap-1">
               <MapPin size={14} />
-              موقع
+              {t("editListing.tabs.location")}
             </TabsTrigger>
             <TabsTrigger value="inventory" className="text-xs gap-1">
               <Package size={14} />
-              مخزون
+              {t("editListing.tabs.inventory")}
               {inventory.length > 0 && <span className="text-[10px] bg-primary/20 text-primary rounded-full px-1.5">{inventory.length}</span>}
             </TabsTrigger>
           </TabsList>
 
-          {/* ══════ TAB: بيانات أساسية ══════ */}
+          {/* ══════ TAB: Basic data ══════ */}
           <TabsContent value="basic" className="space-y-3 mt-3">
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">عنوان الإعلان</label>
-              <input type="text" value={fields.title} onChange={(e) => set("title", e.target.value)} placeholder="عنوان مخصص (اختياري)" className={inputCls} />
+              <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.listingTitle")}</label>
+              <input type="text" value={fields.title} onChange={(e) => set("title", e.target.value)} placeholder={t("editListing.fields.titlePlaceholder")} className={inputCls} />
             </div>
 
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">الوصف</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.description")}</label>
               <textarea
                 value={fields.description}
                 onChange={(e) => set("description", e.target.value)}
-                placeholder="وصف تفصيلي عن المشروع..."
+                placeholder={t("editListing.fields.descriptionPlaceholder")}
                 rows={3}
                 className={cn(inputCls, "resize-none")}
               />
             </div>
 
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">نوع النشاط *</label>
-              <input type="text" value={fields.business_activity} onChange={(e) => set("business_activity", e.target.value)} placeholder="مطعم وجبات سريعة" className={inputCls} />
+              <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.businessActivity")}</label>
+              <input type="text" value={fields.business_activity} onChange={(e) => set("business_activity", e.target.value)} placeholder={t("editListing.fields.businessActivityPlaceholder")} className={inputCls} />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">المدينة *</label>
-                <input type="text" value={fields.city} onChange={(e) => set("city", e.target.value)} placeholder="الرياض" className={inputCls} />
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.city")}</label>
+                <input type="text" value={fields.city} onChange={(e) => set("city", e.target.value)} placeholder={t("editListing.fields.cityPlaceholder")} className={inputCls} />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">المساحة (م²)</label>
-                <input type="number" value={fields.area_sqm} onChange={(e) => set("area_sqm", e.target.value)} placeholder="150" className={inputCls} dir="ltr" />
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.areaSqm")}</label>
+                <input type="number" value={fields.area_sqm} onChange={(e) => set("area_sqm", e.target.value)} placeholder={t("editListing.fields.areaPlaceholder")} className={inputCls} dir="ltr" />
               </div>
             </div>
 
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">السعر المطلوب *</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.price")}</label>
               <div className="relative">
-                <input type="number" value={fields.price} onChange={(e) => set("price", e.target.value)} placeholder="180000" className={inputCls} />
+                <input type="number" value={fields.price} onChange={(e) => set("price", e.target.value)} placeholder={t("editListing.fields.pricePlaceholder")} className={inputCls} />
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground"><SarSymbol size={12} /></span>
               </div>
             </div>
 
             {shouldShow(dealType, "annual_rent") && (
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">الإيجار السنوي</label>
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.annualRent")}</label>
                 <div className="relative">
-                  <input type="number" value={fields.annual_rent} onChange={(e) => set("annual_rent", e.target.value)} placeholder="45000" className={inputCls} />
+                  <input type="number" value={fields.annual_rent} onChange={(e) => set("annual_rent", e.target.value)} placeholder={t("editListing.fields.annualRentPlaceholder")} className={inputCls} />
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground"><SarSymbol size={12} /></span>
                 </div>
               </div>
@@ -418,14 +431,14 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
               <div className="grid grid-cols-2 gap-3">
                 {shouldShow(dealType, "lease_duration") && (
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">مدة العقد</label>
-                    <input type="text" value={fields.lease_duration} onChange={(e) => set("lease_duration", e.target.value)} placeholder="3 سنوات" className={inputCls} />
+                    <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.leaseDuration")}</label>
+                    <input type="text" value={fields.lease_duration} onChange={(e) => set("lease_duration", e.target.value)} placeholder={t("editListing.fields.leaseDurationPlaceholder")} className={inputCls} />
                   </div>
                 )}
                 {shouldShow(dealType, "lease_remaining") && (
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">المتبقي من العقد</label>
-                    <input type="text" value={fields.lease_remaining} onChange={(e) => set("lease_remaining", e.target.value)} placeholder="1.5 سنة" className={inputCls} />
+                    <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.leaseRemaining")}</label>
+                    <input type="text" value={fields.lease_remaining} onChange={(e) => set("lease_remaining", e.target.value)} placeholder={t("editListing.fields.leaseRemainingPlaceholder")} className={inputCls} />
                   </div>
                 )}
               </div>
@@ -433,22 +446,22 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
 
             {shouldShow(dealType, "liabilities") && (
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">الالتزامات المالية</label>
-                <input type="text" value={fields.liabilities} onChange={(e) => set("liabilities", e.target.value)} placeholder="لا توجد" className={inputCls} />
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.liabilities")}</label>
+                <input type="text" value={fields.liabilities} onChange={(e) => set("liabilities", e.target.value)} placeholder={t("editListing.fields.liabilitiesPlaceholder")} className={inputCls} />
               </div>
             )}
 
             {shouldShow(dealType, "overdue_salaries") && (
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">رواتب متأخرة</label>
-                <input type="text" value={fields.overdue_salaries} onChange={(e) => set("overdue_salaries", e.target.value)} placeholder="لا يوجد" className={inputCls} />
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.overdueSalaries")}</label>
+                <input type="text" value={fields.overdue_salaries} onChange={(e) => set("overdue_salaries", e.target.value)} placeholder={t("editListing.fields.overdueSalariesPlaceholder")} className={inputCls} />
               </div>
             )}
 
             {shouldShow(dealType, "overdue_rent") && (
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">إيجار متأخر</label>
-                <input type="text" value={fields.overdue_rent} onChange={(e) => set("overdue_rent", e.target.value)} placeholder="لا يوجد" className={inputCls} />
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.overdueRent")}</label>
+                <input type="text" value={fields.overdue_rent} onChange={(e) => set("overdue_rent", e.target.value)} placeholder={t("editListing.fields.overdueRentPlaceholder")} className={inputCls} />
               </div>
             )}
 
@@ -456,17 +469,17 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
               <div className="grid grid-cols-2 gap-3">
                 {shouldShow(dealType, "municipality_license") && (
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">رخصة البلدية</label>
+                    <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.municipalityLicense")}</label>
                     <select value={fields.municipality_license} onChange={(e) => set("municipality_license", e.target.value)} className={inputCls}>
-                      {selectOpts(["سارية", "منتهية", "غير متوفرة"])}
+                      {selectOpts(licenseOptions)}
                     </select>
                   </div>
                 )}
                 {shouldShow(dealType, "civil_defense_license") && (
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">الدفاع المدني</label>
+                    <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.civilDefenseLicense")}</label>
                     <select value={fields.civil_defense_license} onChange={(e) => set("civil_defense_license", e.target.value)} className={inputCls}>
-                      {selectOpts(["سارية", "منتهية", "غير متوفرة"])}
+                      {selectOpts(licenseOptions)}
                     </select>
                   </div>
                 )}
@@ -475,9 +488,9 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
 
             {shouldShow(dealType, "surveillance_cameras") && (
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">كاميرات مراقبة</label>
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.surveillanceCameras")}</label>
                 <select value={fields.surveillance_cameras} onChange={(e) => set("surveillance_cameras", e.target.value)} className={inputCls}>
-                  {selectOpts(["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"])}
+                  {selectOpts(cameraOptions)}
                 </select>
               </div>
             )}
@@ -510,7 +523,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
                       className="text-xs gap-1 h-7"
                     >
                       {uploading && activePhotoGroup === group.id ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
-                      إضافة صور
+                      {t("editListing.photos.addBtn")}
                     </Button>
                   </div>
                   {groupPhotos.length > 0 ? (
@@ -529,7 +542,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
                     </div>
                   ) : (
                     <div className="text-xs text-muted-foreground/60 py-4 text-center border border-dashed border-border/30 rounded-lg">
-                      اسحب الصور هنا أو اضغط "إضافة صور"
+                      {t("editListing.photos.dropHint")}
                     </div>
                   )}
                 </div>
@@ -552,8 +565,8 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
               ) : (
                 <>
                   <Upload size={24} className="mx-auto text-muted-foreground/50 mb-2" />
-                  <p className="text-xs text-muted-foreground">اسحب المستندات هنا أو اضغط للاختيار</p>
-                  <p className="text-[10px] text-muted-foreground/50 mt-1">PDF, Excel, صور، وغيرها</p>
+                  <p className="text-xs text-muted-foreground">{t("editListing.docs.dropHint")}</p>
+                  <p className="text-[10px] text-muted-foreground/50 mt-1">{t("editListing.docs.types")}</p>
                 </>
               )}
             </div>
@@ -561,14 +574,14 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
             {documents.length > 0 && (
               <div className="space-y-2">
                 {documents.map((doc, i) => {
-                  const docName = doc?.name || doc?.label || doc?.type || `مستند ${i + 1}`;
+                  const docName = doc?.name || doc?.label || doc?.type || t("editListing.docs.defaultName", { n: i + 1 });
                   const docFiles = Array.isArray(doc?.files) ? doc.files : (doc?.url ? [doc.url] : []);
                   return (
                     <div key={i} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg border border-border/20">
                       <FileText size={14} className="text-primary shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium truncate">{docName}</p>
-                        <p className="text-[10px] text-muted-foreground">{docFiles.length} ملف</p>
+                        <p className="text-[10px] text-muted-foreground">{t("editListing.docs.filesCount", { count: docFiles.length })}</p>
                       </div>
                       <button onClick={() => removeDocument(i)} className="text-destructive/60 hover:text-destructive transition-colors">
                         <X size={14} />
@@ -593,7 +606,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
               }}
             />
             <p className="text-[11px] text-muted-foreground/60">
-              ابحث عن الموقع أو اضغط على الخريطة أو اسحب الدبوس لتحديد الموقع الدقيق
+              {t("editListing.location.hint")}
             </p>
           </TabsContent>
 
@@ -601,7 +614,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
           <TabsContent value="inventory" className="space-y-3 mt-3">
             {inventory.length === 0 && (
               <div className="text-center text-sm text-muted-foreground/60 py-6 border border-dashed border-border/30 rounded-xl">
-                لا توجد عناصر في المخزون
+                {t("editListing.inventory.empty")}
               </div>
             )}
 
@@ -609,15 +622,15 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
               <div key={i} className="flex gap-2 items-start p-3 bg-muted/30 rounded-xl border border-border/20">
                 <div className="flex-1 grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-[10px] text-muted-foreground mb-0.5 block">الاسم</label>
+                    <label className="text-[10px] text-muted-foreground mb-0.5 block">{t("editListing.inventory.name")}</label>
                     <input type="text" value={item.name || ""} onChange={(e) => updateInventoryItem(i, "name", e.target.value)} className={cn(inputCls, "text-xs py-1.5")} />
                   </div>
                   <div>
-                    <label className="text-[10px] text-muted-foreground mb-0.5 block">العدد</label>
+                    <label className="text-[10px] text-muted-foreground mb-0.5 block">{t("editListing.inventory.quantity")}</label>
                     <input type="number" value={item.quantity || ""} onChange={(e) => updateInventoryItem(i, "quantity", e.target.value)} className={cn(inputCls, "text-xs py-1.5")} dir="ltr" />
                   </div>
                   <div>
-                    <label className="text-[10px] text-muted-foreground mb-0.5 block">السعر</label>
+                    <label className="text-[10px] text-muted-foreground mb-0.5 block">{t("editListing.inventory.price")}</label>
                     <input type="number" value={item.unit_price || ""} onChange={(e) => updateInventoryItem(i, "unit_price", e.target.value)} className={cn(inputCls, "text-xs py-1.5")} dir="ltr" />
                   </div>
                 </div>
@@ -629,7 +642,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
 
             <Button type="button" variant="outline" onClick={addInventoryItem} className="w-full gap-1 rounded-xl text-xs">
               <Plus size={14} />
-              إضافة عنصر
+              {t("editListing.inventory.addItem")}
             </Button>
           </TabsContent>
         </Tabs>
@@ -638,13 +651,13 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
           <Button
             variant="destructive"
             onClick={async () => {
-              if (!confirm("هل أنت متأكد من حذف هذا الإعلان؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+              if (!confirm(t("editListing.toasts.deleteConfirm"))) return;
               setDeleting(true);
               const { error } = await softDeleteListing(listing.id);
               setDeleting(false);
-              if (error) { toast.error("فشل حذف الإعلان"); return; }
+              if (error) { toast.error(t("editListing.toasts.deleteFailed")); return; }
               await queryClient.invalidateQueries({ queryKey: ["listings"] });
-              toast.success("تم حذف الإعلان بنجاح");
+              toast.success(t("editListing.toasts.deleted"));
               onOpenChange(false);
               onDeleted?.();
             }}
@@ -652,15 +665,15 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
             className="rounded-xl gap-1"
           >
             {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-            حذف
+            {t("editListing.actions.delete")}
           </Button>
           <div className="flex-1" />
           <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl px-6">
-            إلغاء
+            {t("editListing.actions.cancel")}
           </Button>
           <Button onClick={handleSave} disabled={saving || uploading || uploadingDocs} className="gradient-primary text-primary-foreground rounded-xl px-6">
             {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
-            حفظ التعديلات
+            {t("editListing.actions.save")}
           </Button>
         </div>
       </DialogContent>
