@@ -142,7 +142,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
         ...prev,
         [group]: [...(prev[group] || []), ...uploadedUrls],
       }));
-      toast.success(`تم رفع ${uploadedUrls.length} صورة`);
+      toast.success(t("editListing.toasts.photosUploaded", { count: uploadedUrls.length }));
     }
     setUploading(false);
   };
