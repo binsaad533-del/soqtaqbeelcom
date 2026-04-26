@@ -206,6 +206,7 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
   onFeedback: (rating: "positive" | "negative") => void;
 }) => {
   const { user } = useAuthContext();
+  const { t } = useTranslation();
   const [showComment, setShowComment] = useState(false);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -214,8 +215,6 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
     if (!user) return;
     setSubmitting(true);
     try {
-      // First try to save to ai_chat_messages to get a real DB ID, then save feedback
-      // Since messageId is a client-side timestamp, we save snapshots instead
       await supabase.from("ai_chat_feedback" as any).insert({
         user_id: user.id,
         rating,
@@ -226,9 +225,9 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
       });
       onFeedback(rating);
       setShowComment(false);
-      toast.success(rating === "positive" ? "شكراً على تقييمك!" : "شكراً، سنتحسن!");
+      toast.success(rating === "positive" ? t("aiChat.toasts.feedbackThanksPositive") : t("aiChat.toasts.feedbackThanksNegative"));
     } catch {
-      toast.error("فشل حفظ التقييم");
+      toast.error(t("aiChat.toasts.feedbackFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -247,16 +246,16 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
       <button
         onClick={() => submit("positive")}
         disabled={submitting}
-        className="text-muted-foreground/60 hover:text-green-500 transition-colors p-1 rounded-md hover:bg-green-500/10"
-        title="رد مفيد"
+        className="text-muted-foreground/60 hover:text-success transition-colors p-1 rounded-md hover:bg-success/10"
+        title={t("aiChat.feedback.helpful")}
       >
         <ThumbsUp size={14} />
       </button>
       <button
         onClick={() => setShowComment(true)}
         disabled={submitting}
-        className="text-muted-foreground/60 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-red-500/10"
-        title="رد غير مفيد"
+        className="text-muted-foreground/60 hover:text-destructive transition-colors p-1 rounded-md hover:bg-destructive/10"
+        title={t("aiChat.feedback.notHelpful")}
       >
         <ThumbsDown size={14} />
       </button>
@@ -266,7 +265,7 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
             type="text"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="وش المشكلة؟"
+            placeholder={t("aiChat.feedback.issuePlaceholder")}
             className="text-[10px] px-2 py-0.5 rounded border border-border/50 bg-background w-32"
             onKeyDown={(e) => e.key === "Enter" && submit("negative", comment)}
           />
@@ -275,7 +274,7 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
             disabled={submitting}
             className="text-[10px] text-destructive hover:underline"
           >
-            إرسال
+            {t("aiChat.feedback.submit")}
           </button>
         </div>
       )}
