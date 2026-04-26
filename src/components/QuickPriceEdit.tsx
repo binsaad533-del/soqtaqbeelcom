@@ -26,16 +26,16 @@ const QuickPriceEdit = ({ listingId, currentPrice, onUpdated, className }: Quick
   const handleSave = async () => {
     const numPrice = Number(price);
     if (!price || isNaN(numPrice) || numPrice <= 0) {
-      toast.error("يرجى إدخال سعر صالح");
+      toast.error(t("listing.priceUpdate.invalidPrice"));
       return;
     }
     setSaving(true);
     const { error } = await updateListing(listingId, { price: numPrice } as never);
     setSaving(false);
     if (error) {
-      toast.error("فشل تحديث السعر");
+      toast.error(t("listing.priceUpdate.updateFailed"));
     } else {
-      toast.success("تم تحديث السعر بنجاح");
+      toast.success(t("listing.priceUpdate.updateSuccess"));
       setEditing(false);
       queryClient.invalidateQueries({ queryKey: ["listing", listingId] });
       queryClient.invalidateQueries({ queryKey: ["listings"] });
