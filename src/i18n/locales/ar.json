@@ -132,7 +132,13 @@
     "area": "المساحة:",
     "sqm": "م²",
     "editPrice": "تعديل السعر",
-    "editListing": "تعديل الإعلان"
+    "editListing": "تعديل الإعلان",
+    "priceUpdate": {
+      "invalidPrice": "يرجى إدخال سعر صالح",
+      "updateFailed": "فشل تحديث السعر",
+      "updateSuccess": "تم تحديث السعر بنجاح",
+      "newPricePlaceholder": "السعر الجديد"
+    }
   },
   "deal": {
     "mainOption": "الخيار الرئيسي",
@@ -1209,7 +1215,33 @@
     "title": "وكيل مقبل",
     "statusInactive": "غير مفعّل لهذا الإعلان",
     "statusActive": "نشط — يعمل على هذا الإعلان",
-    "settings": "الإعدادات",
+    "settings": {
+      "label": "الإعدادات",
+      "autoReplyTitle": "الرد التلقائي على الاستفسارات",
+      "autoReplyDesc": "مقبل يرد على الرسائل بالنيابة عنك",
+      "autoEvaluateTitle": "تقييم العروض تلقائياً",
+      "autoEvaluateDesc": "مقبل يحلل كل عرض ويعطيك توصية",
+      "minPriceLabel": "الحد الأدنى المقبول (ر.س)",
+      "minPricePlaceholder": "مثال: 100000",
+      "autoRejectTitle": "رفض تلقائي تحت الحد الأدنى",
+      "autoRejectDesc": "رفض العروض الأقل من الحد بشكل تلقائي",
+      "dailySummaryTitle": "ملخص يومي",
+      "dailySummaryDesc": "مقبل يرسلك ملخص كل يوم",
+      "replyToneLabel": "أسلوب الرد",
+      "tone": {
+        "professional": "مهني واحترافي",
+        "friendly": "ودود وبسيط",
+        "formal": "رسمي",
+        "brief": "مختصر ومباشر"
+      },
+      "noActions": "لا توجد إجراءات بعد",
+      "successResult": "تم بنجاح",
+      "actionLabels": {
+        "auto_reply": "رد تلقائي",
+        "evaluate_offer": "تقييم عرض",
+        "daily_summary": "ملخص يومي"
+      }
+    },
     "decisionLog": "سجل القرارات",
     "toasts": {
       "saveFailed": "فشل حفظ الإعدادات",
@@ -1355,6 +1387,167 @@
       "noMeeting": "💬 أفضل إتمام التفاوض إلكترونياً",
       "firstMessage": "مرحباً، أنا مهتم بهذه الفرصة وأود معرفة المزيد من التفاصيل.",
       "shortFirstMessage": "مرحباً، أنا مهتم بهذه الفرصة"
+    },
+    "activeDealBadge": "لديك صفقة جارية على هذا الإعلان",
+    "goToNegotiation": "الانتقال للمفاوضات",
+    "dealStatusNegotiating": "جاري التفاوض",
+    "dealStatusFinalized": "مُقفل",
+    "authDialogTitle": "سجّل حسابك",
+    "authDialogDesc": "سجّل حسابك لتتواصل مع البائع مباشرة",
+    "authLogin": "تسجيل الدخول",
+    "authRegister": "إنشاء حساب جديد",
+    "interestDialogDesc": "أرسل رسالتك الأولى للبائع وابدأ التفاوض",
+    "firstMessageLabel": "رسالتك الأولى",
+    "seoDefaultTitle": "تفاصيل الإعلان",
+    "seoDefaultDesc": "عرض تفاصيل فرصة تقبيل على سوق تقبيل",
+    "seoBuilderSuffix": "تصفح التفاصيل وقدّم عرضك على سوق تقبيل",
+    "seoBuilderInPrefix": "في",
+    "seoBuilderPriced": "بسعر",
+    "seoCurrencyLabel": "ر.س",
+    "sellerSchemaName": "سوق تقبيل",
+    "defaultCity": "السعودية",
+    "deleteConfirm": "هل تريد حذف \"{{title}}\"؟ لن يمكن استرجاعه من هنا.",
+    "deleteThisListing": "هذا الإعلان",
+    "statusToggleFailed": "تعذّر تغيير حالة الإعلان",
+    "listingPaused": "تم إيقاف الإعلان مؤقتاً",
+    "listingResumed": "تم إعادة تفعيل الإعلان",
+    "deleteFailedFallback": "تعذّر حذف الإعلان",
+    "deleteSuccess": "تم حذف الإعلان"
+  },
+  "editListing": {
+    "title": "تعديل الإعلان",
+    "desc": "عدّل البيانات واحفظ — سيتم إعادة تحليل الصفقة تلقائياً بعد الحفظ",
+    "tabs": {
+      "basic": "بيانات",
+      "photos": "صور",
+      "docs": "مستندات",
+      "location": "موقع",
+      "inventory": "مخزون"
+    },
+    "fields": {
+      "listingTitle": "عنوان الإعلان",
+      "titlePlaceholder": "عنوان مخصص (اختياري)",
+      "description": "الوصف",
+      "descriptionPlaceholder": "وصف تفصيلي عن المشروع...",
+      "businessActivity": "نوع النشاط *",
+      "businessActivityPlaceholder": "مطعم وجبات سريعة",
+      "city": "المدينة *",
+      "cityPlaceholder": "الرياض",
+      "areaSqm": "المساحة (م²)",
+      "areaPlaceholder": "150",
+      "price": "السعر المطلوب *",
+      "pricePlaceholder": "180000",
+      "annualRent": "الإيجار السنوي",
+      "annualRentPlaceholder": "45000",
+      "leaseDuration": "مدة العقد",
+      "leaseDurationPlaceholder": "3 سنوات",
+      "leaseRemaining": "المتبقي من العقد",
+      "leaseRemainingPlaceholder": "1.5 سنة",
+      "liabilities": "الالتزامات المالية",
+      "liabilitiesPlaceholder": "لا توجد",
+      "overdueSalaries": "رواتب متأخرة",
+      "overdueSalariesPlaceholder": "لا يوجد",
+      "overdueRent": "إيجار متأخر",
+      "overdueRentPlaceholder": "لا يوجد",
+      "municipalityLicense": "رخصة البلدية",
+      "civilDefenseLicense": "الدفاع المدني",
+      "surveillanceCameras": "كاميرات مراقبة"
+    },
+    "selectPlaceholder": "اختر...",
+    "licenseStatus": {
+      "active": "سارية",
+      "expired": "منتهية",
+      "unavailable": "غير متوفرة"
+    },
+    "cameraStatus": {
+      "availableCompliant": "متوفرة ومطابقة",
+      "availableNonCompliant": "متوفرة غير مطابقة",
+      "unavailable": "غير متوفرة"
+    },
+    "photos": {
+      "groups": {
+        "interior": "داخلي",
+        "exterior": "خارجي",
+        "signage": "اللوحة",
+        "equipment": "معدات",
+        "other": "أخرى"
+      },
+      "addBtn": "إضافة صور",
+      "dropHint": "اسحب الصور هنا أو اضغط \"إضافة صور\""
+    },
+    "docs": {
+      "dropHint": "اسحب المستندات هنا أو اضغط للاختيار",
+      "types": "PDF, Excel, صور، وغيرها",
+      "filesCount": "{{count}} ملف",
+      "defaultName": "مستند {{n}}"
+    },
+    "location": {
+      "hint": "ابحث عن الموقع أو اضغط على الخريطة أو اسحب الدبوس لتحديد الموقع الدقيق"
+    },
+    "inventory": {
+      "empty": "لا توجد عناصر في المخزون",
+      "name": "الاسم",
+      "quantity": "العدد",
+      "price": "السعر",
+      "addItem": "إضافة عنصر",
+      "defaultProject": "مشروع"
+    },
+    "actions": {
+      "delete": "حذف",
+      "cancel": "إلغاء",
+      "save": "حفظ التعديلات"
+    },
+    "toasts": {
+      "requiredFields": "يرجى إكمال الحقول المطلوبة: النشاط، المدينة، والسعر",
+      "uploadFailed": "فشل رفع {{name}}",
+      "photosUploaded": "تم رفع {{count}} صورة",
+      "docsUploaded": "تم رفع {{count}} مستند",
+      "saved": "تم حفظ التعديلات بنجاح",
+      "reanalyzing": "جاري إعادة التحليل الذكي...",
+      "reanalyzed": "تم تحديث التحليل الذكي بنجاح",
+      "deleteConfirm": "هل أنت متأكد من حذف هذا الإعلان؟ لا يمكن التراجع عن هذا الإجراء.",
+      "deleteFailed": "فشل حذف الإعلان",
+      "deleted": "تم حذف الإعلان بنجاح"
+    }
+  },
+  "promoteListing": {
+    "title": "ترقية الإعلان",
+    "desc": "اجعل \"{{title}}\" يظهر في أعلى السوق مع شارة \"مميز\"",
+    "defaultTitle": "إعلانك",
+    "duration": {
+      "days3": "3 أيام",
+      "days7": "أسبوع",
+      "days30": "شهر كامل"
+    },
+    "benefits": {
+      "top": "يظهر إعلانك في أعلى نتائج السوق",
+      "badge": "شارة \"مميز\" ذهبية على الإعلان",
+      "priority": "أولوية في نتائج البحث الذكي"
+    },
+    "cancel": "إلغاء",
+    "promoteNow": "ترقية الآن",
+    "promoting": "جاري الترقية...",
+    "success": "تم ترقية الإعلان لمدة {{label}}",
+    "failed": "فشلت عملية الترقية"
+  },
+  "sellerOffers": {
+    "title": "عروض الأسعار ({{count}})",
+    "newBadge": "{{count}} جديد",
+    "activeDeal": "صفقة جارية",
+    "highest": "أعلى",
+    "acceptedTag": "مقبول — صفقة جارية",
+    "goToNegotiation": "الانتقال للمفاوضات",
+    "pendingHint": "العروض الأخرى في الانتظار حتى اكتمال الصفقة الحالية أو إلغائها. إذا لم تتم الصفقة يمكنك العودة وقبول عرض آخر.",
+    "pending": "في الانتظار",
+    "acceptStart": "قبول وبدء التفاوض",
+    "reject": "رفض",
+    "rejected": "مرفوض",
+    "toasts": {
+      "alreadyAccepted": "يوجد عرض مقبول بالفعل — أكمل الصفقة الحالية أو ألغها أولاً",
+      "acceptFailed": "فشل قبول العرض",
+      "accepted": "تم قبول العرض ✅",
+      "rejectFailed": "فشل رفض العرض",
+      "rejectedToast": "تم رفض العرض"
     }
   }
 }

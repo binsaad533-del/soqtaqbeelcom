@@ -132,7 +132,13 @@
     "area": "আয়তন:",
     "sqm": "বর্গ মিটার",
     "editPrice": "মূল্য সম্পাদনা করুন",
-    "editListing": "তালিকা সম্পাদনা করুন"
+    "editListing": "তালিকা সম্পাদনা করুন",
+    "priceUpdate": {
+      "invalidPrice": "অনুগ্রহ করে বৈধ মূল্য লিখুন",
+      "updateFailed": "মূল্য আপডেট ব্যর্থ",
+      "updateSuccess": "মূল্য সফলভাবে আপডেট",
+      "newPricePlaceholder": "নতুন মূল্য"
+    }
   },
   "deal": {
     "mainOption": "প্রধান বিকল্প",
@@ -1209,7 +1215,33 @@
     "title": "Moqbil এজেন্ট",
     "statusInactive": "এই তালিকার জন্য সক্রিয় নয়",
     "statusActive": "সক্রিয় — এই তালিকায় কাজ করছে",
-    "settings": "সেটিংস",
+    "settings": {
+      "label": "সেটিংস",
+      "autoReplyTitle": "অনুসন্ধানের স্বয়ংক্রিয় উত্তর",
+      "autoReplyDesc": "Moqbil আপনার পক্ষ থেকে বার্তার উত্তর দেয়",
+      "autoEvaluateTitle": "অফারের স্বয়ংক্রিয় মূল্যায়ন",
+      "autoEvaluateDesc": "Moqbil প্রতিটি অফার বিশ্লেষণ করে সুপারিশ দেয়",
+      "minPriceLabel": "ন্যূনতম গ্রহণযোগ্য মূল্য (SAR)",
+      "minPricePlaceholder": "উদাহরণ: 100000",
+      "autoRejectTitle": "ন্যূনতমের নিচে স্বয়ংক্রিয় প্রত্যাখ্যান",
+      "autoRejectDesc": "ন্যূনতমের নিচের অফার স্বয়ংক্রিয়ভাবে প্রত্যাখ্যান",
+      "dailySummaryTitle": "দৈনিক সারাংশ",
+      "dailySummaryDesc": "Moqbil আপনাকে প্রতিদিন সারাংশ পাঠায়",
+      "replyToneLabel": "উত্তরের ধরন",
+      "tone": {
+        "professional": "পেশাদার",
+        "friendly": "বন্ধুত্বপূর্ণ ও সরল",
+        "formal": "আনুষ্ঠানিক",
+        "brief": "সংক্ষিপ্ত ও সরাসরি"
+      },
+      "noActions": "এখনও কোনো কর্ম নেই",
+      "successResult": "সফল",
+      "actionLabels": {
+        "auto_reply": "স্বয়ংক্রিয় উত্তর",
+        "evaluate_offer": "অফার মূল্যায়ন",
+        "daily_summary": "দৈনিক সারাংশ"
+      }
+    },
     "decisionLog": "সিদ্ধান্ত লগ",
     "toasts": {
       "saveFailed": "সেটিংস সংরক্ষণ ব্যর্থ",
@@ -1355,6 +1387,167 @@
       "noMeeting": "💬 আমি অনলাইন আলোচনা পছন্দ করি",
       "firstMessage": "নমস্কার, আমি এই সুযোগে আগ্রহী এবং আরও জানতে চাই।",
       "shortFirstMessage": "নমস্কার, আমি এই সুযোগে আগ্রহী"
+    },
+    "activeDealBadge": "এই তালিকায় আপনার একটি চলমান চুক্তি রয়েছে",
+    "goToNegotiation": "আলোচনায় যান",
+    "dealStatusNegotiating": "আলোচনা চলছে",
+    "dealStatusFinalized": "লক করা",
+    "authDialogTitle": "সাইন ইন করুন",
+    "authDialogDesc": "বিক্রেতার সাথে সরাসরি যোগাযোগের জন্য সাইন ইন করুন",
+    "authLogin": "লগ ইন",
+    "authRegister": "নতুন অ্যাকাউন্ট তৈরি করুন",
+    "interestDialogDesc": "বিক্রেতাকে আপনার প্রথম বার্তা পাঠান এবং আলোচনা শুরু করুন",
+    "firstMessageLabel": "আপনার প্রথম বার্তা",
+    "seoDefaultTitle": "তালিকার বিস্তারিত",
+    "seoDefaultDesc": "Souq Taqbeel-এ অধিগ্রহণ সুযোগের বিস্তারিত দেখুন",
+    "seoBuilderSuffix": "বিস্তারিত দেখুন এবং Souq Taqbeel-এ আপনার অফার দিন",
+    "seoBuilderInPrefix": "এ",
+    "seoBuilderPriced": "মূল্য",
+    "seoCurrencyLabel": "SAR",
+    "sellerSchemaName": "Souq Taqbeel",
+    "defaultCity": "সৌদি আরব",
+    "deleteConfirm": "\"{{title}}\" মুছবেন? এখান থেকে পুনরুদ্ধার করা যাবে না।",
+    "deleteThisListing": "এই তালিকা",
+    "statusToggleFailed": "তালিকার অবস্থা পরিবর্তন করা যায়নি",
+    "listingPaused": "তালিকা সাময়িকভাবে স্থগিত",
+    "listingResumed": "তালিকা পুনরায় সক্রিয়",
+    "deleteFailedFallback": "তালিকা মুছে ফেলা যায়নি",
+    "deleteSuccess": "তালিকা মুছে ফেলা হয়েছে"
+  },
+  "editListing": {
+    "title": "তালিকা সম্পাদনা করুন",
+    "desc": "ডেটা সম্পাদনা করে সংরক্ষণ করুন — সংরক্ষণের পর চুক্তি স্বয়ংক্রিয়ভাবে পুনরায় বিশ্লেষণ হবে",
+    "tabs": {
+      "basic": "ডেটা",
+      "photos": "ছবি",
+      "docs": "নথি",
+      "location": "অবস্থান",
+      "inventory": "ইনভেন্টরি"
+    },
+    "fields": {
+      "listingTitle": "তালিকার শিরোনাম",
+      "titlePlaceholder": "কাস্টম শিরোনাম (ঐচ্ছিক)",
+      "description": "বিবরণ",
+      "descriptionPlaceholder": "প্রকল্পের বিস্তারিত বিবরণ...",
+      "businessActivity": "ব্যবসায়িক কার্যকলাপ *",
+      "businessActivityPlaceholder": "ফাস্ট ফুড রেস্তোরাঁ",
+      "city": "শহর *",
+      "cityPlaceholder": "রিয়াদ",
+      "areaSqm": "আয়তন (m²)",
+      "areaPlaceholder": "150",
+      "price": "চাওয়া মূল্য *",
+      "pricePlaceholder": "180000",
+      "annualRent": "বার্ষিক ভাড়া",
+      "annualRentPlaceholder": "45000",
+      "leaseDuration": "ইজারার মেয়াদ",
+      "leaseDurationPlaceholder": "3 বছর",
+      "leaseRemaining": "ইজারার অবশিষ্ট",
+      "leaseRemainingPlaceholder": "1.5 বছর",
+      "liabilities": "আর্থিক দায়",
+      "liabilitiesPlaceholder": "নেই",
+      "overdueSalaries": "বকেয়া বেতন",
+      "overdueSalariesPlaceholder": "নেই",
+      "overdueRent": "বকেয়া ভাড়া",
+      "overdueRentPlaceholder": "নেই",
+      "municipalityLicense": "পৌরসভার লাইসেন্স",
+      "civilDefenseLicense": "সিভিল ডিফেন্স",
+      "surveillanceCameras": "নজরদারি ক্যামেরা"
+    },
+    "selectPlaceholder": "নির্বাচন করুন...",
+    "licenseStatus": {
+      "active": "বৈধ",
+      "expired": "মেয়াদোত্তীর্ণ",
+      "unavailable": "অনুপলব্ধ"
+    },
+    "cameraStatus": {
+      "availableCompliant": "উপলব্ধ ও সম্মত",
+      "availableNonCompliant": "উপলব্ধ, অসম্মত",
+      "unavailable": "অনুপলব্ধ"
+    },
+    "photos": {
+      "groups": {
+        "interior": "অভ্যন্তরীণ",
+        "exterior": "বহিরাংশ",
+        "signage": "সাইনবোর্ড",
+        "equipment": "সরঞ্জাম",
+        "other": "অন্যান্য"
+      },
+      "addBtn": "ছবি যোগ করুন",
+      "dropHint": "ছবি এখানে টেনে আনুন বা \"ছবি যোগ করুন\" চাপুন"
+    },
+    "docs": {
+      "dropHint": "নথি এখানে টেনে আনুন বা নির্বাচন করতে চাপুন",
+      "types": "PDF, Excel, ছবি ইত্যাদি",
+      "filesCount": "{{count}} ফাইল",
+      "defaultName": "নথি {{n}}"
+    },
+    "location": {
+      "hint": "অবস্থান অনুসন্ধান করুন বা মানচিত্রে চাপুন বা সঠিক অবস্থান নির্ধারণে পিন টানুন"
+    },
+    "inventory": {
+      "empty": "ইনভেন্টরিতে কোনো আইটেম নেই",
+      "name": "নাম",
+      "quantity": "পরিমাণ",
+      "price": "মূল্য",
+      "addItem": "আইটেম যোগ করুন",
+      "defaultProject": "প্রকল্প"
+    },
+    "actions": {
+      "delete": "মুছুন",
+      "cancel": "বাতিল",
+      "save": "পরিবর্তন সংরক্ষণ করুন"
+    },
+    "toasts": {
+      "requiredFields": "অনুগ্রহ করে প্রয়োজনীয় ক্ষেত্র পূরণ করুন: কার্যকলাপ, শহর এবং মূল্য",
+      "uploadFailed": "{{name}} আপলোড ব্যর্থ",
+      "photosUploaded": "{{count}} ছবি আপলোড হয়েছে",
+      "docsUploaded": "{{count}} নথি আপলোড হয়েছে",
+      "saved": "পরিবর্তন সফলভাবে সংরক্ষিত",
+      "reanalyzing": "স্মার্ট পুনঃবিশ্লেষণ চলছে...",
+      "reanalyzed": "স্মার্ট বিশ্লেষণ সফলভাবে আপডেট",
+      "deleteConfirm": "আপনি কি নিশ্চিত এই তালিকা মুছতে চান? এই কাজ পূর্বাবস্থায় ফেরানো যাবে না।",
+      "deleteFailed": "তালিকা মুছতে ব্যর্থ",
+      "deleted": "তালিকা সফলভাবে মুছে ফেলা হয়েছে"
+    }
+  },
+  "promoteListing": {
+    "title": "তালিকা প্রচার করুন",
+    "desc": "\"{{title}}\" কে মার্কেটপ্লেসের শীর্ষে \"ফিচার্ড\" ব্যাজসহ দেখান",
+    "defaultTitle": "আপনার তালিকা",
+    "duration": {
+      "days3": "3 দিন",
+      "days7": "1 সপ্তাহ",
+      "days30": "পুরো মাস"
+    },
+    "benefits": {
+      "top": "আপনার তালিকা মার্কেটপ্লেস ফলাফলের শীর্ষে দেখা যায়",
+      "badge": "তালিকায় সোনালি \"ফিচার্ড\" ব্যাজ",
+      "priority": "স্মার্ট অনুসন্ধান ফলাফলে অগ্রাধিকার"
+    },
+    "cancel": "বাতিল",
+    "promoteNow": "এখন প্রচার করুন",
+    "promoting": "প্রচার করা হচ্ছে...",
+    "success": "তালিকা {{label}} এর জন্য প্রচারিত",
+    "failed": "প্রচার ব্যর্থ"
+  },
+  "sellerOffers": {
+    "title": "মূল্য অফার ({{count}})",
+    "newBadge": "{{count}} নতুন",
+    "activeDeal": "চলমান চুক্তি",
+    "highest": "সর্বোচ্চ",
+    "acceptedTag": "গৃহীত — চলমান চুক্তি",
+    "goToNegotiation": "আলোচনায় যান",
+    "pendingHint": "অন্য অফারগুলি বর্তমান চুক্তি সম্পন্ন বা বাতিল না হওয়া পর্যন্ত অপেক্ষমাণ। চুক্তি না হলে আপনি ফিরে এসে অন্য অফার গ্রহণ করতে পারেন।",
+    "pending": "অপেক্ষমাণ",
+    "acceptStart": "গ্রহণ করুন এবং আলোচনা শুরু করুন",
+    "reject": "প্রত্যাখ্যান",
+    "rejected": "প্রত্যাখ্যাত",
+    "toasts": {
+      "alreadyAccepted": "একটি অফার ইতিমধ্যে গৃহীত — প্রথমে বর্তমান চুক্তি সম্পন্ন বা বাতিল করুন",
+      "acceptFailed": "অফার গ্রহণ ব্যর্থ",
+      "accepted": "অফার গৃহীত ✅",
+      "rejectFailed": "অফার প্রত্যাখ্যান ব্যর্থ",
+      "rejectedToast": "অফার প্রত্যাখ্যাত"
     }
   }
 }
