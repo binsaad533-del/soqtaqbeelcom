@@ -607,7 +607,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
               }}
             />
             <p className="text-[11px] text-muted-foreground/60">
-              ابحث عن الموقع أو اضغط على الخريطة أو اسحب الدبوس لتحديد الموقع الدقيق
+              {t("editListing.location.hint")}
             </p>
           </TabsContent>
 
