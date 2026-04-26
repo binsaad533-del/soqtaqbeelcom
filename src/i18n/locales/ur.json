@@ -2081,5 +2081,113 @@
       "rejectFailed": "پیشکش رد کرنے میں ناکام",
       "rejectedToast": "پیشکش رد ہو گئی"
     }
+  },
+  "aiChat": {
+    "header": {
+      "title": "مقبل سے گفتگو",
+      "subtitle": "آپ کا اسمارٹ ڈیل ماہر مشیر",
+      "active": "آن لائن",
+      "interactionCount": "{{count}} گفتگو"
+    },
+    "welcome": {
+      "greeting": "السلام علیکم 👋 میں مقبل ہوں، آپ کا اسمارٹ معاون۔ آج کیا کرنا چاہیں گے؟",
+      "emptyTitle": "ہیلو، میں مقبل ہوں — آپ کا اسمارٹ ڈیل مشیر",
+      "emptySubtitle": "سوق تقبیل پر آپ کا اسمارٹ معاون۔ ڈیلز، مواقع یا مارکیٹ تجزیے کے بارے میں کچھ بھی پوچھیں، یا تصاویر اور فائلیں اپلوڈ کریں۔"
+    },
+    "quickActions": {
+      "browse": {
+        "label": "مواقع دکھائیں",
+        "description": "آپ کے لیے بہترین مواقع تلاش کروں گا"
+      },
+      "create": {
+        "label": "موقع شامل کریں",
+        "description": "چند منٹوں میں پیشہ ور لسٹنگ بنانے میں مدد"
+      },
+      "analyze": {
+        "label": "مارکیٹ کا تجزیہ",
+        "description": "شہر اور سرگرمی کے لحاظ سے سمارٹ نظر"
+      },
+      "trends": {
+        "label": "مارکیٹ رجحانات",
+        "description": "کون سی سرگرمیاں اور شہر سب سے زیادہ مقبول ہیں؟"
+      },
+      "howworks": {
+        "label": "ڈیل کیسے ہوتی ہے؟",
+        "description": "شروع سے آخر تک ہر قدم بتاؤں گا"
+      }
+    },
+    "quickCommands": {
+      "header": "فوری کمانڈز",
+      "dailySummary": "آج کا خلاصہ",
+      "analyzeListing": "اس لسٹنگ کا تجزیہ",
+      "smartPrice": "اسمارٹ قیمت",
+      "fraudCheck": "حفاظتی جانچ",
+      "calcCommission": "کمیشن حساب",
+      "dealPredict": "ڈیل کامیابی کا امکان",
+      "mediate": "اسمارٹ ثالثی",
+      "marketTrends": "مارکیٹ رجحانات",
+      "improveAd": "میری لسٹنگ بہتر بنائیں",
+      "writeDesc": "تفصیل لکھیں",
+      "feasibility": "فزیبلٹی اسٹڈی",
+      "compare": "مواقع کا موازنہ",
+      "simulate": "کیا اگر مشق",
+      "financial": "مالی تجزیہ",
+      "autoNegotiate": "میری طرف سے مذاکرات",
+      "lawyer": "معاہدہ شقیں بنائیں",
+      "sellerRep": "بیچنے والے کی جانچ",
+      "fullReport": "مکمل رپورٹ"
+    },
+    "sidebar": {
+      "smartAlerts": "اسمارٹ انتباہات",
+      "marketRadar": "مارکیٹ ریڈار",
+      "viewOpportunity": "موقع دیکھیں",
+      "dismiss": "نظر انداز",
+      "uploadButton": "فائلیں یا تصاویر اپلوڈ کریں — میں تجزیہ کروں گا"
+    },
+    "emptyState": {
+      "noMatches": "ابھی کوئی مماثل موقع نہیں ملا",
+      "browseMore": "مزید لسٹنگز دیکھیں تاکہ مقبل آپ کی دلچسپیاں سیکھ سکے"
+    },
+    "input": {
+      "placeholderDefault": "مقبل سے کچھ بھی پوچھیں یا فائل اپلوڈ کریں...",
+      "placeholderWithFiles": "تفصیل شامل کریں یا براہ راست بھیجیں...",
+      "uploadTooltip": "فائل یا تصویر اپلوڈ کریں",
+      "send": "بھیجیں",
+      "preparingFiles": "فائلیں تیار کی جا رہی ہیں...",
+      "filesReady_image": "{{count}} تصویر تیار",
+      "filesReady_file": "{{count}} فائل تیار",
+      "filesReady_mixed": "{{count}} فائل/تصویر تیار",
+      "dropFilesHere": "فائلیں یہاں چھوڑیں",
+      "anyTypeSize": "کوئی بھی قسم، کوئی بھی سائز"
+    },
+    "states": {
+      "thinking": "سوچ رہا ہے...",
+      "moqbil": "مقبل",
+      "errorPrefix": "کچھ غلط ہوا، براہ کرم دوبارہ کوشش کریں",
+      "noResponse": "کوئی جواب نہیں آیا",
+      "connectionFailed": "معاون سے رابطہ ناکام",
+      "fallbackResponse": "ہو گیا۔"
+    },
+    "toasts": {
+      "feedbackThanksPositive": "آپ کی رائے کا شکریہ!",
+      "feedbackThanksNegative": "شکریہ — ہم بہتری لائیں گے!",
+      "feedbackFailed": "رائے محفوظ کرنے میں ناکام",
+      "uploadSuccess": "{{name}} اپلوڈ ہو گئی",
+      "uploadFailed": "{{name}} اپلوڈ ناکام",
+      "fileReadFailed": "فائل پڑھنے میں ناکام: {{name}}",
+      "fileTruncated": "[فائل مختصر کی گئی - اصل سائز: {{size}}]"
+    },
+    "feedback": {
+      "helpful": "مفید جواب",
+      "notHelpful": "مفید نہیں",
+      "issuePlaceholder": "کیا مسئلہ تھا؟",
+      "submit": "بھیجیں",
+      "copy": "کاپی"
+    },
+    "autoMessages": {
+      "analyzeFilesAndImages": "ان فائلوں اور تصاویر کا تجزیہ کریں",
+      "analyzeImages": "ان تصاویر کا تجزیہ کریں",
+      "analyzeFiles": "ان فائلوں کا تجزیہ کریں"
+    }
   }
 }

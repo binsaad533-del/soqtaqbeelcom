@@ -2081,5 +2081,113 @@
       "rejectFailed": "Failed to reject offer",
       "rejectedToast": "Offer rejected"
     }
+  },
+  "aiChat": {
+    "header": {
+      "title": "Chat with Moqbil",
+      "subtitle": "Your smart deal expert advisor",
+      "active": "Active",
+      "interactionCount": "{{count}} interactions"
+    },
+    "welcome": {
+      "greeting": "Hey there 👋 I'm Moqbil, your smart assistant. What would you like to do today?",
+      "emptyTitle": "Hi, I'm Moqbil — your smart deal advisor",
+      "emptySubtitle": "Your smart assistant on Souq Taqbeel. Ask me anything about deals, opportunities, or market analysis — or upload images and files and I'll analyze them for you."
+    },
+    "quickActions": {
+      "browse": {
+        "label": "Show me opportunities",
+        "description": "I'll find the best opportunities that match you"
+      },
+      "create": {
+        "label": "I want to list an opportunity",
+        "description": "I'll help you create a professional listing in minutes"
+      },
+      "analyze": {
+        "label": "Analyze the market",
+        "description": "A smart look at the market by city and activity"
+      },
+      "trends": {
+        "label": "Market trends",
+        "description": "Which activities and cities are most in demand?"
+      },
+      "howworks": {
+        "label": "How does a deal work?",
+        "description": "I'll walk you through every step from start to finish"
+      }
+    },
+    "quickCommands": {
+      "header": "Quick commands",
+      "dailySummary": "Today's summary",
+      "analyzeListing": "Analyze this listing",
+      "smartPrice": "Smart pricing",
+      "fraudCheck": "Safety check",
+      "calcCommission": "Calculate commission",
+      "dealPredict": "Deal success odds",
+      "mediate": "Smart mediation",
+      "marketTrends": "Market trends",
+      "improveAd": "Improve my listing",
+      "writeDesc": "Write a description",
+      "feasibility": "Feasibility study",
+      "compare": "Compare opportunities",
+      "simulate": "What-if simulation",
+      "financial": "Financial analysis",
+      "autoNegotiate": "Negotiate for me",
+      "lawyer": "Draft contract clauses",
+      "sellerRep": "Check the seller",
+      "fullReport": "Full report"
+    },
+    "sidebar": {
+      "smartAlerts": "Smart alerts",
+      "marketRadar": "Market radar",
+      "viewOpportunity": "View opportunity",
+      "dismiss": "Dismiss",
+      "uploadButton": "Upload files or images and I'll analyze them"
+    },
+    "emptyState": {
+      "noMatches": "No matching opportunities found yet",
+      "browseMore": "Browse more listings so Moqbil can learn your interests"
+    },
+    "input": {
+      "placeholderDefault": "Ask Moqbil anything or upload a file...",
+      "placeholderWithFiles": "Add a description or send directly...",
+      "uploadTooltip": "Upload a file or image",
+      "send": "Send",
+      "preparingFiles": "Preparing files...",
+      "filesReady_image": "{{count}} image ready",
+      "filesReady_file": "{{count}} file ready",
+      "filesReady_mixed": "{{count}} file/image ready",
+      "dropFilesHere": "Drop files here",
+      "anyTypeSize": "Any type, any size"
+    },
+    "states": {
+      "thinking": "Thinking...",
+      "moqbil": "Moqbil",
+      "errorPrefix": "Something went wrong, please try again",
+      "noResponse": "No response received",
+      "connectionFailed": "Failed to connect to the assistant",
+      "fallbackResponse": "Done."
+    },
+    "toasts": {
+      "feedbackThanksPositive": "Thanks for your feedback!",
+      "feedbackThanksNegative": "Thanks — we'll improve!",
+      "feedbackFailed": "Failed to save feedback",
+      "uploadSuccess": "Uploaded {{name}}",
+      "uploadFailed": "Failed to upload {{name}}",
+      "fileReadFailed": "Failed to read file: {{name}}",
+      "fileTruncated": "[File truncated - original size: {{size}}]"
+    },
+    "feedback": {
+      "helpful": "Helpful response",
+      "notHelpful": "Not helpful",
+      "issuePlaceholder": "What was wrong?",
+      "submit": "Send",
+      "copy": "Copy"
+    },
+    "autoMessages": {
+      "analyzeFilesAndImages": "Analyze these files and images",
+      "analyzeImages": "Analyze these images",
+      "analyzeFiles": "Analyze these files"
+    }
   }
 }

@@ -2081,5 +2081,113 @@
       "rejectFailed": "অফার প্রত্যাখ্যান ব্যর্থ",
       "rejectedToast": "অফার প্রত্যাখ্যাত"
     }
+  },
+  "aiChat": {
+    "header": {
+      "title": "মোকবিলের সাথে চ্যাট",
+      "subtitle": "আপনার স্মার্ট ডিল বিশেষজ্ঞ পরামর্শক",
+      "active": "অনলাইন",
+      "interactionCount": "{{count}} ইন্টারঅ্যাকশন"
+    },
+    "welcome": {
+      "greeting": "হ্যালো 👋 আমি মোকবিল, আপনার স্মার্ট সহকারী। আজ কী করতে চান?",
+      "emptyTitle": "হ্যালো, আমি মোকবিল — আপনার স্মার্ট ডিল পরামর্শক",
+      "emptySubtitle": "সুক তাকবিলে আপনার স্মার্ট সহকারী। ডিল, সুযোগ বা বাজার বিশ্লেষণ সম্পর্কে যেকোনো প্রশ্ন করুন, অথবা ছবি ও ফাইল আপলোড করুন — আমি বিশ্লেষণ করব।"
+    },
+    "quickActions": {
+      "browse": {
+        "label": "সুযোগ দেখান",
+        "description": "আপনার জন্য সেরা সুযোগগুলো খুঁজে দেব"
+      },
+      "create": {
+        "label": "সুযোগ যুক্ত করতে চাই",
+        "description": "মিনিটেই পেশাদার লিস্টিং তৈরিতে সহায়তা"
+      },
+      "analyze": {
+        "label": "বাজার বিশ্লেষণ",
+        "description": "শহর ও কার্যকলাপ অনুসারে স্মার্ট দৃষ্টিভঙ্গি"
+      },
+      "trends": {
+        "label": "বাজার প্রবণতা",
+        "description": "কোন কার্যকলাপ ও শহর সবচেয়ে চাহিদাসম্পন্ন?"
+      },
+      "howworks": {
+        "label": "ডিল কীভাবে হয়?",
+        "description": "শুরু থেকে শেষ পর্যন্ত প্রতিটি ধাপ ব্যাখ্যা করব"
+      }
+    },
+    "quickCommands": {
+      "header": "দ্রুত কমান্ড",
+      "dailySummary": "আজকের সারসংক্ষেপ",
+      "analyzeListing": "এই লিস্টিং বিশ্লেষণ",
+      "smartPrice": "স্মার্ট মূল্য",
+      "fraudCheck": "নিরাপত্তা যাচাই",
+      "calcCommission": "কমিশন হিসাব",
+      "dealPredict": "ডিল সফলতার সম্ভাবনা",
+      "mediate": "স্মার্ট মধ্যস্থতা",
+      "marketTrends": "বাজার প্রবণতা",
+      "improveAd": "আমার লিস্টিং উন্নত করুন",
+      "writeDesc": "বিবরণ লিখুন",
+      "feasibility": "সম্ভাব্যতা সমীক্ষা",
+      "compare": "সুযোগের তুলনা",
+      "simulate": "কী-যদি সিমুলেশন",
+      "financial": "আর্থিক বিশ্লেষণ",
+      "autoNegotiate": "আমার পক্ষে আলোচনা",
+      "lawyer": "চুক্তির ধারা প্রস্তুত করুন",
+      "sellerRep": "বিক্রেতা যাচাই",
+      "fullReport": "সম্পূর্ণ প্রতিবেদন"
+    },
+    "sidebar": {
+      "smartAlerts": "স্মার্ট সতর্কতা",
+      "marketRadar": "বাজার রাডার",
+      "viewOpportunity": "সুযোগ দেখুন",
+      "dismiss": "উপেক্ষা",
+      "uploadButton": "ফাইল বা ছবি আপলোড করুন — আমি বিশ্লেষণ করব"
+    },
+    "emptyState": {
+      "noMatches": "এখনো কোনো মিলে যাওয়া সুযোগ পাওয়া যায়নি",
+      "browseMore": "আরও লিস্টিং দেখুন যাতে মোকবিল আপনার আগ্রহ শিখতে পারে"
+    },
+    "input": {
+      "placeholderDefault": "মোকবিলকে কিছু জিজ্ঞাসা করুন বা ফাইল আপলোড করুন...",
+      "placeholderWithFiles": "বিবরণ যোগ করুন বা সরাসরি পাঠান...",
+      "uploadTooltip": "ফাইল বা ছবি আপলোড",
+      "send": "পাঠান",
+      "preparingFiles": "ফাইল প্রস্তুত হচ্ছে...",
+      "filesReady_image": "{{count}} ছবি প্রস্তুত",
+      "filesReady_file": "{{count}} ফাইল প্রস্তুত",
+      "filesReady_mixed": "{{count}} ফাইল/ছবি প্রস্তুত",
+      "dropFilesHere": "ফাইল এখানে ছাড়ুন",
+      "anyTypeSize": "যেকোনো ধরন, যেকোনো আকার"
+    },
+    "states": {
+      "thinking": "ভাবছে...",
+      "moqbil": "মোকবিল",
+      "errorPrefix": "কিছু ভুল হয়েছে, আবার চেষ্টা করুন",
+      "noResponse": "কোনো প্রতিক্রিয়া আসেনি",
+      "connectionFailed": "সহকারীর সাথে সংযোগ ব্যর্থ",
+      "fallbackResponse": "সম্পন্ন।"
+    },
+    "toasts": {
+      "feedbackThanksPositive": "আপনার মতামতের জন্য ধন্যবাদ!",
+      "feedbackThanksNegative": "ধন্যবাদ — আমরা উন্নতি করব!",
+      "feedbackFailed": "মতামত সংরক্ষণ ব্যর্থ",
+      "uploadSuccess": "{{name}} আপলোড হয়েছে",
+      "uploadFailed": "{{name}} আপলোড ব্যর্থ",
+      "fileReadFailed": "ফাইল পড়তে ব্যর্থ: {{name}}",
+      "fileTruncated": "[ফাইল সংক্ষিপ্ত - মূল আকার: {{size}}]"
+    },
+    "feedback": {
+      "helpful": "সহায়ক উত্তর",
+      "notHelpful": "সহায়ক নয়",
+      "issuePlaceholder": "কী সমস্যা ছিল?",
+      "submit": "পাঠান",
+      "copy": "কপি"
+    },
+    "autoMessages": {
+      "analyzeFilesAndImages": "এই ফাইল ও ছবিগুলি বিশ্লেষণ করুন",
+      "analyzeImages": "এই ছবিগুলি বিশ্লেষণ করুন",
+      "analyzeFiles": "এই ফাইলগুলি বিশ্লেষণ করুন"
+    }
   }
 }

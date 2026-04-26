@@ -2081,5 +2081,113 @@
       "rejectFailed": "拒绝报价失败",
       "rejectedToast": "报价已拒绝"
     }
+  },
+  "aiChat": {
+    "header": {
+      "title": "与 Moqbil 对话",
+      "subtitle": "您的智能交易顾问",
+      "active": "在线",
+      "interactionCount": "{{count}} 次互动"
+    },
+    "welcome": {
+      "greeting": "你好 👋 我是 Moqbil，您的智能助理。今天想做什么？",
+      "emptyTitle": "您好，我是 Moqbil — 您的智能交易顾问",
+      "emptySubtitle": "Souq Taqbeel 上的智能助理。可以咨询任何关于交易、商机或市场分析的问题，也可以上传图片和文件让我分析。"
+    },
+    "quickActions": {
+      "browse": {
+        "label": "查看商机",
+        "description": "为您匹配最合适的商机"
+      },
+      "create": {
+        "label": "我想发布商机",
+        "description": "几分钟内为您创建专业列表"
+      },
+      "analyze": {
+        "label": "分析市场",
+        "description": "按城市和行业洞察市场"
+      },
+      "trends": {
+        "label": "市场趋势",
+        "description": "哪些行业和城市最受欢迎？"
+      },
+      "howworks": {
+        "label": "交易如何进行？",
+        "description": "为您介绍每一个步骤"
+      }
+    },
+    "quickCommands": {
+      "header": "快捷指令",
+      "dailySummary": "今日摘要",
+      "analyzeListing": "分析此商机",
+      "smartPrice": "智能定价",
+      "fraudCheck": "安全检查",
+      "calcCommission": "计算佣金",
+      "dealPredict": "成交概率",
+      "mediate": "智能调解",
+      "marketTrends": "市场趋势",
+      "improveAd": "优化我的商机",
+      "writeDesc": "撰写描述",
+      "feasibility": "可行性研究",
+      "compare": "对比商机",
+      "simulate": "情景模拟",
+      "financial": "财务分析",
+      "autoNegotiate": "代我谈判",
+      "lawyer": "起草合同条款",
+      "sellerRep": "核查卖家",
+      "fullReport": "完整报告"
+    },
+    "sidebar": {
+      "smartAlerts": "智能提醒",
+      "marketRadar": "市场雷达",
+      "viewOpportunity": "查看商机",
+      "dismiss": "忽略",
+      "uploadButton": "上传文件或图片，我来为您分析"
+    },
+    "emptyState": {
+      "noMatches": "尚未找到匹配的商机",
+      "browseMore": "浏览更多商机，让 Moqbil 了解您的偏好"
+    },
+    "input": {
+      "placeholderDefault": "向 Moqbil 提问或上传文件...",
+      "placeholderWithFiles": "添加说明或直接发送...",
+      "uploadTooltip": "上传文件或图片",
+      "send": "发送",
+      "preparingFiles": "正在准备文件...",
+      "filesReady_image": "{{count}} 张图片就绪",
+      "filesReady_file": "{{count}} 个文件就绪",
+      "filesReady_mixed": "{{count}} 个文件/图片就绪",
+      "dropFilesHere": "将文件拖放至此",
+      "anyTypeSize": "任意类型、任意大小"
+    },
+    "states": {
+      "thinking": "思考中...",
+      "moqbil": "Moqbil",
+      "errorPrefix": "出错了，请重试",
+      "noResponse": "未收到回复",
+      "connectionFailed": "连接智能助理失败",
+      "fallbackResponse": "完成。"
+    },
+    "toasts": {
+      "feedbackThanksPositive": "感谢您的反馈！",
+      "feedbackThanksNegative": "感谢您，我们会改进！",
+      "feedbackFailed": "保存反馈失败",
+      "uploadSuccess": "已上传 {{name}}",
+      "uploadFailed": "上传 {{name}} 失败",
+      "fileReadFailed": "读取文件失败：{{name}}",
+      "fileTruncated": "[文件已截断 - 原始大小：{{size}}]"
+    },
+    "feedback": {
+      "helpful": "有帮助",
+      "notHelpful": "无帮助",
+      "issuePlaceholder": "哪里出了问题？",
+      "submit": "发送",
+      "copy": "复制"
+    },
+    "autoMessages": {
+      "analyzeFilesAndImages": "分析这些文件和图片",
+      "analyzeImages": "分析这些图片",
+      "analyzeFiles": "分析这些文件"
+    }
   }
 }

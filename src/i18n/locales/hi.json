@@ -2081,5 +2081,113 @@
       "rejectFailed": "पेशकश अस्वीकार करने में विफल",
       "rejectedToast": "पेशकश अस्वीकृत"
     }
+  },
+  "aiChat": {
+    "header": {
+      "title": "मोक़बिल से चैट",
+      "subtitle": "आपके स्मार्ट डील विशेषज्ञ सलाहकार",
+      "active": "ऑनलाइन",
+      "interactionCount": "{{count}} बातचीत"
+    },
+    "welcome": {
+      "greeting": "नमस्ते 👋 मैं मोक़बिल हूँ, आपका स्मार्ट सहायक। आज क्या करना चाहेंगे?",
+      "emptyTitle": "नमस्ते, मैं मोक़बिल — आपका स्मार्ट डील सलाहकार",
+      "emptySubtitle": "सूक़ तक़बील पर आपका स्मार्ट सहायक। डील, अवसरों या बाज़ार विश्लेषण के बारे में कुछ भी पूछें, या तस्वीरें और फ़ाइलें अपलोड करें — मैं विश्लेषण करूँगा।"
+    },
+    "quickActions": {
+      "browse": {
+        "label": "अवसर दिखाएं",
+        "description": "आपके लिए सबसे उपयुक्त अवसर ढूँढूँगा"
+      },
+      "create": {
+        "label": "अवसर सूचीबद्ध करें",
+        "description": "मिनटों में पेशेवर लिस्टिंग बनाने में मदद"
+      },
+      "analyze": {
+        "label": "बाज़ार का विश्लेषण",
+        "description": "शहर और गतिविधि के अनुसार स्मार्ट दृष्टि"
+      },
+      "trends": {
+        "label": "बाज़ार रुझान",
+        "description": "किन गतिविधियों और शहरों की माँग सबसे अधिक है?"
+      },
+      "howworks": {
+        "label": "डील कैसे होती है?",
+        "description": "शुरू से अंत तक हर कदम समझाऊँगा"
+      }
+    },
+    "quickCommands": {
+      "header": "त्वरित कमांड",
+      "dailySummary": "आज का सारांश",
+      "analyzeListing": "इस लिस्टिंग का विश्लेषण",
+      "smartPrice": "स्मार्ट कीमत",
+      "fraudCheck": "सुरक्षा जाँच",
+      "calcCommission": "कमीशन गणना",
+      "dealPredict": "डील सफलता संभावना",
+      "mediate": "स्मार्ट मध्यस्थता",
+      "marketTrends": "बाज़ार रुझान",
+      "improveAd": "लिस्टिंग सुधारें",
+      "writeDesc": "विवरण लिखें",
+      "feasibility": "व्यवहार्यता अध्ययन",
+      "compare": "अवसरों की तुलना",
+      "simulate": "क्या-होगा सिमुलेशन",
+      "financial": "वित्तीय विश्लेषण",
+      "autoNegotiate": "मेरी ओर से बातचीत",
+      "lawyer": "अनुबंध खंड बनाएँ",
+      "sellerRep": "विक्रेता की जाँच",
+      "fullReport": "पूर्ण रिपोर्ट"
+    },
+    "sidebar": {
+      "smartAlerts": "स्मार्ट अलर्ट",
+      "marketRadar": "बाज़ार रडार",
+      "viewOpportunity": "अवसर देखें",
+      "dismiss": "खारिज करें",
+      "uploadButton": "फ़ाइलें या तस्वीरें अपलोड करें — मैं विश्लेषण करूँगा"
+    },
+    "emptyState": {
+      "noMatches": "अभी कोई मेल खाता अवसर नहीं मिला",
+      "browseMore": "और लिस्टिंग देखें ताकि मोक़बिल आपकी रुचियाँ सीखे"
+    },
+    "input": {
+      "placeholderDefault": "मोक़बिल से कुछ भी पूछें या फ़ाइल अपलोड करें...",
+      "placeholderWithFiles": "विवरण जोड़ें या सीधे भेजें...",
+      "uploadTooltip": "फ़ाइल या तस्वीर अपलोड करें",
+      "send": "भेजें",
+      "preparingFiles": "फ़ाइलें तैयार हो रही हैं...",
+      "filesReady_image": "{{count}} तस्वीर तैयार",
+      "filesReady_file": "{{count}} फ़ाइल तैयार",
+      "filesReady_mixed": "{{count}} फ़ाइल/तस्वीर तैयार",
+      "dropFilesHere": "फ़ाइलें यहाँ छोड़ें",
+      "anyTypeSize": "कोई भी प्रकार, कोई भी आकार"
+    },
+    "states": {
+      "thinking": "सोच रहा है...",
+      "moqbil": "मोक़बिल",
+      "errorPrefix": "कुछ गलत हुआ, कृपया पुनः प्रयास करें",
+      "noResponse": "कोई प्रतिक्रिया नहीं मिली",
+      "connectionFailed": "सहायक से कनेक्ट नहीं हो सका",
+      "fallbackResponse": "हो गया।"
+    },
+    "toasts": {
+      "feedbackThanksPositive": "आपकी प्रतिक्रिया के लिए धन्यवाद!",
+      "feedbackThanksNegative": "धन्यवाद — हम सुधारेंगे!",
+      "feedbackFailed": "प्रतिक्रिया सहेजने में विफल",
+      "uploadSuccess": "{{name}} अपलोड हो गया",
+      "uploadFailed": "{{name}} अपलोड विफल",
+      "fileReadFailed": "फ़ाइल पढ़ने में विफल: {{name}}",
+      "fileTruncated": "[फ़ाइल छोटी की गई - मूल आकार: {{size}}]"
+    },
+    "feedback": {
+      "helpful": "उपयोगी उत्तर",
+      "notHelpful": "उपयोगी नहीं",
+      "issuePlaceholder": "क्या समस्या थी?",
+      "submit": "भेजें",
+      "copy": "कॉपी"
+    },
+    "autoMessages": {
+      "analyzeFilesAndImages": "इन फ़ाइलों और तस्वीरों का विश्लेषण करें",
+      "analyzeImages": "इन तस्वीरों का विश्लेषण करें",
+      "analyzeFiles": "इन फ़ाइलों का विश्लेषण करें"
+    }
   }
 }

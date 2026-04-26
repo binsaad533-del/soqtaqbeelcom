@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface AiSuggestion {
@@ -193,10 +194,52 @@ export const QUICK_COMMANDS: QuickCommand[] = [
 
 export function useAiContext() {
   const location = useLocation();
+  const { t } = useTranslation();
   const [proactiveInsights, setProactiveInsights] = useState<ProactiveInsight[]>([]);
   const [proactiveMessage, setProactiveMessage] = useState<string | null>(null);
   const insightsFetched = useRef(false);
   const pathname = location.pathname;
+
+  // Translated context for the home/default page (also used as fallback for /ai-chat etc.)
+  const getTranslatedHomeContext = useCallback(() => ({
+    greeting: t("aiChat.welcome.greeting"),
+    role: t("aiChat.header.subtitle"),
+    suggestions: [
+      { id: "browse", icon: "🔍", label: t("aiChat.quickActions.browse.label"), description: t("aiChat.quickActions.browse.description"), priority: "high" as const },
+      { id: "create", icon: "📝", label: t("aiChat.quickActions.create.label"), description: t("aiChat.quickActions.create.description"), priority: "high" as const },
+      { id: "analyze", icon: "📊", label: t("aiChat.quickActions.analyze.label"), description: t("aiChat.quickActions.analyze.description"), priority: "medium" as const },
+      { id: "trends", icon: "📈", label: t("aiChat.quickActions.trends.label"), description: t("aiChat.quickActions.trends.description"), priority: "medium" as const },
+      { id: "howworks", icon: "💡", label: t("aiChat.quickActions.howworks.label"), description: t("aiChat.quickActions.howworks.description"), priority: "low" as const },
+    ],
+  }), [t]);
+
+  // Translated quick commands (labels translated, action stays as the AR prompt sent to AI which auto-replies in user language)
+  const getTranslatedQuickCommands = useCallback((): QuickCommand[] => {
+    const map: Record<string, string> = {
+      "daily-summary": "aiChat.quickCommands.dailySummary",
+      "analyze-listing": "aiChat.quickCommands.analyzeListing",
+      "smart-price": "aiChat.quickCommands.smartPrice",
+      "fraud-check": "aiChat.quickCommands.fraudCheck",
+      "calc-commission": "aiChat.quickCommands.calcCommission",
+      "deal-predict": "aiChat.quickCommands.dealPredict",
+      "mediate": "aiChat.quickCommands.mediate",
+      "market-trends": "aiChat.quickCommands.marketTrends",
+      "improve-ad": "aiChat.quickCommands.improveAd",
+      "write-desc": "aiChat.quickCommands.writeDesc",
+      "feasibility": "aiChat.quickCommands.feasibility",
+      "compare": "aiChat.quickCommands.compare",
+      "simulate": "aiChat.quickCommands.simulate",
+      "financial": "aiChat.quickCommands.financial",
+      "auto-negotiate": "aiChat.quickCommands.autoNegotiate",
+      "lawyer": "aiChat.quickCommands.lawyer",
+      "seller-rep": "aiChat.quickCommands.sellerRep",
+      "full-report": "aiChat.quickCommands.fullReport",
+    };
+    return QUICK_COMMANDS.map(cmd => ({
+      ...cmd,
+      label: map[cmd.id] ? t(map[cmd.id]) : cmd.label,
+    }));
+  }, [t]);
 
   // Determine context based on current page
   const getContext = useCallback(() => {
@@ -243,8 +286,10 @@ export function useAiContext() {
     }
 
     const base = pathname.split("?")[0];
-    return pageContextMap[base] || pageContextMap["/"];
-  }, [pathname]);
+    // For the home page and the dedicated AI chat page, use translated content.
+    if (base === "/" || base === "/ai-chat") return getTranslatedHomeContext();
+    return pageContextMap[base] || getTranslatedHomeContext();
+  }, [pathname, getTranslatedHomeContext]);
 
   // Fetch proactive insights with preference matching
   useEffect(() => {
@@ -399,13 +444,14 @@ export function useAiContext() {
   }, []);
 
   const context = getContext();
+  const translatedQuickCommands = getTranslatedQuickCommands();
 
   return {
     ...context,
     proactiveInsights,
     proactiveMessage,
     dismissProactive: () => setProactiveMessage(null),
-    quickCommands: QUICK_COMMANDS,
+    quickCommands: translatedQuickCommands,
     pathname,
   };
 }

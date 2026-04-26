@@ -2081,5 +2081,113 @@
       "rejectFailed": "فشل رفض العرض",
       "rejectedToast": "تم رفض العرض"
     }
+  },
+  "aiChat": {
+    "header": {
+      "title": "محادثة مقبل",
+      "subtitle": "مرشدك الذكي طحطوح الصفقات",
+      "active": "نشط",
+      "interactionCount": "{{count}} تفاعل"
+    },
+    "welcome": {
+      "greeting": "هلا وغلا 👋 أنا مقبل، مساعدك الذكي. وش تبغى نسوي اليوم؟",
+      "emptyTitle": "مرحباً، أنا مقبل مرشدك الذكي طحطوح الصفقات",
+      "emptySubtitle": "مساعدك الذكي في سوق تقبيل. اسألني أي سؤال عن الصفقات أو الفرص أو تحليل السوق، أو ارفع صور وملفات وأحللها لك."
+    },
+    "quickActions": {
+      "browse": {
+        "label": "وريني الفرص",
+        "description": "أدوّرلك على أفضل الفرص اللي تناسبك"
+      },
+      "create": {
+        "label": "أبغى أضيف فرصة",
+        "description": "أساعدك تسوي إعلان احترافي بدقايق"
+      },
+      "analyze": {
+        "label": "حلل لي السوق",
+        "description": "نظرة ذكية على السوق حسب المدينة والنشاط"
+      },
+      "trends": {
+        "label": "اتجاهات السوق",
+        "description": "وش أكثر الأنشطة طلباً والمدن النشطة؟"
+      },
+      "howworks": {
+        "label": "كيف تتم الصفقة؟",
+        "description": "أشرح لك الخطوات من البداية للنهاية"
+      }
+    },
+    "quickCommands": {
+      "header": "أوامر سريعة",
+      "dailySummary": "ملخص اليوم",
+      "analyzeListing": "حلل لي هالإعلان",
+      "smartPrice": "سعّر ذكي",
+      "fraudCheck": "فحص أمان",
+      "calcCommission": "احسب العمولة",
+      "dealPredict": "احتمال نجاح الصفقة",
+      "mediate": "وساطة ذكية",
+      "marketTrends": "اتجاهات السوق",
+      "improveAd": "حسّن إعلاني",
+      "writeDesc": "اكتب وصف",
+      "feasibility": "دراسة جدوى",
+      "compare": "قارن الفرص",
+      "simulate": "محاكاة ماذا لو؟",
+      "financial": "تحليل مالي",
+      "autoNegotiate": "فاوض بدالي",
+      "lawyer": "صيغ بنود",
+      "sellerRep": "شيّك على البائع",
+      "fullReport": "تقرير شامل"
+    },
+    "sidebar": {
+      "smartAlerts": "تنبيهات ذكية",
+      "marketRadar": "رادار السوق",
+      "viewOpportunity": "عرض الفرصة",
+      "dismiss": "تجاهل",
+      "uploadButton": "ارفع ملفات أو صور وأحللها لك"
+    },
+    "emptyState": {
+      "noMatches": "لم يتم العثور على فرص مطابقة بعد",
+      "browseMore": "تصفّح المزيد من الإعلانات ليتعرف مقبل على اهتماماتك"
+    },
+    "input": {
+      "placeholderDefault": "اسأل مقبل أي شي أو ارفع ملف...",
+      "placeholderWithFiles": "أضف وصف أو أرسل مباشرة...",
+      "uploadTooltip": "ارفع ملف أو صورة",
+      "send": "إرسال",
+      "preparingFiles": "جاري تجهيز الملفات...",
+      "filesReady_image": "{{count}} صورة جاهزة",
+      "filesReady_file": "{{count}} ملف جاهز",
+      "filesReady_mixed": "{{count}} ملف/صورة جاهزة",
+      "dropFilesHere": "أفلت الملفات هنا",
+      "anyTypeSize": "أي نوع وأي حجم"
+    },
+    "states": {
+      "thinking": "يفكر...",
+      "moqbil": "مقبل",
+      "errorPrefix": "حدث خطأ، حاول مرة أخرى",
+      "noResponse": "لا يوجد استجابة",
+      "connectionFailed": "فشل الاتصال بالمساعد الذكي",
+      "fallbackResponse": "تم."
+    },
+    "toasts": {
+      "feedbackThanksPositive": "شكراً على تقييمك!",
+      "feedbackThanksNegative": "شكراً، سنتحسن!",
+      "feedbackFailed": "فشل حفظ التقييم",
+      "uploadSuccess": "تم رفع {{name}}",
+      "uploadFailed": "فشل رفع {{name}}",
+      "fileReadFailed": "فشل قراءة الملف: {{name}}",
+      "fileTruncated": "[تم اختصار الملف - الحجم الأصلي: {{size}}]"
+    },
+    "feedback": {
+      "helpful": "رد مفيد",
+      "notHelpful": "رد غير مفيد",
+      "issuePlaceholder": "وش المشكلة؟",
+      "submit": "إرسال",
+      "copy": "نسخ"
+    },
+    "autoMessages": {
+      "analyzeFilesAndImages": "حلل هذه الملفات والصور",
+      "analyzeImages": "حلل هذه الصور",
+      "analyzeFiles": "حلل هذه الملفات"
+    }
   }
 }

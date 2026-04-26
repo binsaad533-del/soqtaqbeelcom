@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Send, Zap, Command, ArrowRight, AlertTriangle, Info, Bell, Paperclip, Copy, Check, ChevronRight, FileText, Loader2, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAiContext, type AiSuggestion, type QuickCommand } from "@/hooks/useAiContext";
 import { usePageData } from "@/hooks/usePageData";
 import { useAiMemory } from "@/hooks/useAiMemory";
@@ -49,7 +50,7 @@ const INTERNAL_RESPONSE_PATTERNS = [
   /\b(?:create_listing|edit_my_listing|cancel_my_listing|submit_offer|respond_to_offer|get_listing_status|approve_listing_publish|valuate_business|analyze_location|generate_[a-z_]+|check_[a-z_]+|quick_feasibility|post_deal_followup|mediate_dispute|schedule_meeting|generate_handover_checklist|generate_listing_card)\b/gi,
 ];
 
-function sanitizeAssistantContent(text: string): string {
+function sanitizeAssistantContent(text: string, fallback: string = "تم."): string {
   if (!text) return "";
 
   let cleaned = text;
@@ -65,7 +66,7 @@ function sanitizeAssistantContent(text: string): string {
     .replace(/[ \t]{2,}/g, " ")
     .trim();
 
-  return cleaned || "تم.";
+  return cleaned || fallback;
 }
 
 async function streamChat({
@@ -73,6 +74,8 @@ async function streamChat({
   context,
   role,
   user_id,
+  errorTexts,
+  fallbackText,
   onDelta,
   onDone,
   onError,
@@ -81,6 +84,8 @@ async function streamChat({
   context?: string;
   role?: string;
   user_id?: string;
+  errorTexts: { unknown: string; noResponse: string; connectionFailed: string };
+  fallbackText: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (msg: string) => void;
@@ -99,12 +104,12 @@ async function streamChat({
     });
 
     if (!resp.ok) {
-      const err = await resp.json().catch(() => ({ error: "خطأ غير معروف" }));
-      onError(err.error || "حدث خطأ");
+      const err = await resp.json().catch(() => ({ error: errorTexts.unknown }));
+      onError(err.error || errorTexts.unknown);
       return;
     }
 
-    if (!resp.body) { onError("لا يوجد استجابة"); return; }
+    if (!resp.body) { onError(errorTexts.noResponse); return; }
 
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
@@ -126,17 +131,18 @@ async function streamChat({
         try {
           const parsed = JSON.parse(json);
           const c = parsed.choices?.[0]?.delta?.content;
-          if (c) onDelta(sanitizeAssistantContent(c));
+          if (c) onDelta(sanitizeAssistantContent(c, fallbackText));
         } catch { /* partial */ }
       }
     }
     onDone();
   } catch {
-    onError("فشل الاتصال بالمساعد الذكي");
+    onError(errorTexts.connectionFailed);
   }
 }
 
 const CopyButton = ({ text }: { text: string }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -144,7 +150,7 @@ const CopyButton = ({ text }: { text: string }) => {
     setTimeout(() => setCopied(false), 2000);
   };
   return (
-    <button onClick={handleCopy} className="text-muted-foreground/50 hover:text-foreground transition-colors" title="نسخ">
+    <button onClick={handleCopy} className="text-muted-foreground/50 hover:text-foreground transition-colors" title={t("aiChat.feedback.copy")}>
       {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
     </button>
   );
@@ -200,6 +206,7 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
   onFeedback: (rating: "positive" | "negative") => void;
 }) => {
   const { user } = useAuthContext();
+  const { t } = useTranslation();
   const [showComment, setShowComment] = useState(false);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -208,8 +215,6 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
     if (!user) return;
     setSubmitting(true);
     try {
-      // First try to save to ai_chat_messages to get a real DB ID, then save feedback
-      // Since messageId is a client-side timestamp, we save snapshots instead
       await supabase.from("ai_chat_feedback" as any).insert({
         user_id: user.id,
         rating,
@@ -220,9 +225,9 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
       });
       onFeedback(rating);
       setShowComment(false);
-      toast.success(rating === "positive" ? "شكراً على تقييمك!" : "شكراً، سنتحسن!");
+      toast.success(rating === "positive" ? t("aiChat.toasts.feedbackThanksPositive") : t("aiChat.toasts.feedbackThanksNegative"));
     } catch {
-      toast.error("فشل حفظ التقييم");
+      toast.error(t("aiChat.toasts.feedbackFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -241,16 +246,16 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
       <button
         onClick={() => submit("positive")}
         disabled={submitting}
-        className="text-muted-foreground/60 hover:text-green-500 transition-colors p-1 rounded-md hover:bg-green-500/10"
-        title="رد مفيد"
+        className="text-muted-foreground/60 hover:text-success transition-colors p-1 rounded-md hover:bg-success/10"
+        title={t("aiChat.feedback.helpful")}
       >
         <ThumbsUp size={14} />
       </button>
       <button
         onClick={() => setShowComment(true)}
         disabled={submitting}
-        className="text-muted-foreground/60 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-red-500/10"
-        title="رد غير مفيد"
+        className="text-muted-foreground/60 hover:text-destructive transition-colors p-1 rounded-md hover:bg-destructive/10"
+        title={t("aiChat.feedback.notHelpful")}
       >
         <ThumbsDown size={14} />
       </button>
@@ -260,7 +265,7 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
             type="text"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="وش المشكلة؟"
+            placeholder={t("aiChat.feedback.issuePlaceholder")}
             className="text-[10px] px-2 py-0.5 rounded border border-border/50 bg-background w-32"
             onKeyDown={(e) => e.key === "Enter" && submit("negative", comment)}
           />
@@ -269,7 +274,7 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
             disabled={submitting}
             className="text-[10px] text-destructive hover:underline"
           >
-            إرسال
+            {t("aiChat.feedback.submit")}
           </button>
         </div>
       )}
@@ -287,6 +292,7 @@ const AiChatPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const navigate = useNavigate();
   const _location = useLocation();
+  const { t } = useTranslation();
   const { user, role: authRole } = useAuthContext();
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -348,7 +354,7 @@ const AiChatPage = () => {
           try {
             textContent = await fileToText(file);
             if (textContent.length > 50000) {
-              textContent = textContent.slice(0, 50000) + "\n\n... [تم اختصار الملف - الحجم الأصلي: " + formatFileSize(file.size) + "]";
+              textContent = textContent.slice(0, 50000) + "\n\n... " + t("aiChat.toasts.fileTruncated", { size: formatFileSize(file.size) });
             }
           } catch { /* fallback */ }
           // Small text files don't need storage upload
@@ -364,7 +370,7 @@ const AiChatPage = () => {
           try {
             storageUrl = await uploadToStorage(file);
             uploaded = true;
-            toast.success(`تم رفع ${file.name}`);
+            toast.success(t("aiChat.toasts.uploadSuccess", { name: file.name }));
           } catch (err) {
             console.error("Upload failed:", err);
             toast.error(`فشل رفع ${file.name}`);
