@@ -116,11 +116,11 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
     setFields((prev) => ({ ...prev, [field]: value }));
 
   const photoGroups = [
-    { id: "interior", label: "داخلي" },
-    { id: "exterior", label: "خارجي" },
-    { id: "signage", label: "اللوحة" },
-    { id: "equipment", label: "معدات" },
-    { id: "other", label: "أخرى" },
+    { id: "interior", label: t("editListing.photos.groups.interior") },
+    { id: "exterior", label: t("editListing.photos.groups.exterior") },
+    { id: "signage", label: t("editListing.photos.groups.signage") },
+    { id: "equipment", label: t("editListing.photos.groups.equipment") },
+    { id: "other", label: t("editListing.photos.groups.other") },
   ];
 
   // ── Photo upload (click + drag) ──
