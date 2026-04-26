@@ -623,7 +623,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
               <div key={i} className="flex gap-2 items-start p-3 bg-muted/30 rounded-xl border border-border/20">
                 <div className="flex-1 grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-[10px] text-muted-foreground mb-0.5 block">الاسم</label>
+                    <label className="text-[10px] text-muted-foreground mb-0.5 block">{t("editListing.inventory.name")}</label>
                     <input type="text" value={item.name || ""} onChange={(e) => updateInventoryItem(i, "name", e.target.value)} className={cn(inputCls, "text-xs py-1.5")} />
                   </div>
                   <div>
