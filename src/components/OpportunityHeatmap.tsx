@@ -90,38 +90,7 @@ const OpportunityHeatmap = () => {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
         {cities.map(c => (
-          <div
-            key={c.city}
-            className={`rounded-xl p-3 border transition-all hover:scale-[1.02] ${
-              c.heat === "hot"
-                ? "bg-destructive/5 border-destructive/20"
-                : c.heat === "warm"
-                  ? "bg-warning/5 border-warning/20"
-                  : "bg-muted/30 border-border/30"
-            }`}
-          >
-            <div className="flex items-center gap-1.5 mb-1">
-              {c.heat === "hot" ? (
-                <Flame size={12} className="text-destructive" />
-              ) : c.heat === "warm" ? (
-                <TrendingUp size={12} className="text-warning" />
-              ) : (
-                <MapPin size={12} className="text-muted-foreground" />
-              )}
-              <span className="text-xs font-semibold">{c.city}</span>
-            </div>
-            <div className="text-[10px] text-muted-foreground space-y-0.5">
-              <div>{t("marketplace.heatmap.opportunities", { count: c.count })}</div>
-              {c.avgPrice > 0 && (
-                <div className="flex items-center gap-0.5">
-                  <span>{t("marketplace.heatmap.averageLabel")}</span>
-                  <SarSymbol size={8} />
-                  <span>{(c.avgPrice / 1000).toFixed(0)}K</span>
-                </div>
-              )}
-              <div className="text-[9px] text-foreground/60 truncate">{c.topActivity}</div>
-            </div>
-          </div>
+          <HeatmapCard key={c.city} city={c} />
         ))}
       </div>
 
