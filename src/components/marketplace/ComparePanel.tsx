@@ -161,7 +161,7 @@ const ComparePanel = ({ items, onRemove, onClear }: Props) => {
                             )}
                           </div>
                           <Link to={`/listing/${item.id}`} className="text-xs font-medium text-primary hover:underline">
-                            {item.title || item.business_activity || t("marketplace.compare.opportunityFallback")}
+                            <CompareItemTitle item={item} fallback={t("marketplace.compare.opportunityFallback")} />
                           </Link>
                         </div>
                       </th>
@@ -176,11 +176,11 @@ const ComparePanel = ({ items, onRemove, onClear }: Props) => {
                   )} highlight="lowest-price" />
                   <CompareRow label={t("marketplace.compare.rowCity")} bestLabel={t("marketplace.compare.best")} items={items} render={item => (
                     <span className="flex items-center justify-center gap-1 text-muted-foreground">
-                      <MapPin size={11} /> {item.city || "—"}
+                      <MapPin size={11} /> <CompareItemCity item={item} />
                     </span>
                   )} />
                   <CompareRow label={t("marketplace.compare.rowDistrict")} bestLabel={t("marketplace.compare.best")} items={items} render={item => (
-                    <span className="text-muted-foreground">{item.district || "—"}</span>
+                    <span className="text-muted-foreground"><CompareItemDistrict item={item} /></span>
                   )} />
                   <CompareRow label={t("marketplace.compare.rowDealType")} bestLabel={t("marketplace.compare.best")} items={items} render={item => (
                     <span className="text-[11px] px-2 py-0.5 rounded-md bg-primary/10 text-primary inline-block">
