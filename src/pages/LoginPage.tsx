@@ -25,7 +25,7 @@ const COUNTRY_CODES = [
 
 const LoginPage = () => {
   const { t } = useTranslation();
-  useSEO({ title: "تسجيل الدخول", description: "سجّل دخولك إلى سوق تقبيل لإدارة إعلاناتك وصفقاتك التجارية", canonical: "/login" });
+  useSEO({ title: t("auth.login.seoTitle"), description: t("auth.login.seoDescription"), canonical: "/login" });
   const [isLogin, setIsLogin] = useState(true);
   const [loginMethod, setLoginMethod] = useState<"phone" | "email">("phone");
   const [phone, setPhone] = useState("");
@@ -83,15 +83,14 @@ const LoginPage = () => {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
-        setError("فشل تسجيل الدخول بحساب Google");
+        setError(t("auth.shared.googleFailed"));
         setGoogleLoading(false);
         return;
       }
       if (result.redirected) return;
-      // Session set successfully
       navigate("/");
     } catch {
-      setError("حدث خطأ أثناء تسجيل الدخول بحساب Google");
+      setError(t("auth.shared.googleError"));
       setGoogleLoading(false);
     }
   };
@@ -105,19 +104,19 @@ const LoginPage = () => {
     const authEmail = loginMethod === "phone" ? phoneToEmail(phone, countryCode) : email;
 
     if (isLogin && isRateLimited(`login_${authEmail}`, 5, 5 * 60 * 1000)) {
-      setError("تم تجاوز عدد المحاولات المسموح بها. يرجى الانتظار 5 دقائق");
+      setError(t("auth.validation.rateLimited"));
       setLoading(false);
       return;
     }
 
     if (loginMethod === "phone" && phone.length < 9) {
-      setError("الرجاء إدخال رقم جوال صحيح");
+      setError(t("auth.validation.phoneInvalid"));
       setLoading(false);
       return;
     }
 
     if (loginMethod === "phone" && !phone.startsWith("5")) {
-      setError("رقم الجوال يجب أن يبدأ بالرقم 5");
+      setError(t("auth.validation.phoneMustStartWith5"));
       setLoading(false);
       return;
     }
@@ -125,7 +124,7 @@ const LoginPage = () => {
     if (isLogin) {
       const { error } = await signIn(authEmail, password);
       if (error) {
-        if (error.message?.includes("mfa") || (error as any).status === 400) {
+        if (error.message?.includes("mfa") || (error as { status?: number }).status === 400) {
           const { data: factorsData } = await supabase.auth.mfa.listFactors();
           const verified = factorsData?.totp?.filter(f => f.status === "verified") || [];
           if (verified.length > 0) {
@@ -138,7 +137,7 @@ const LoginPage = () => {
         reportFailedLogin(authEmail);
         setError(
           error.message === "Invalid login credentials"
-            ? "بيانات الدخول غير صحيحة"
+            ? t("auth.validation.invalidCredentials")
             : error.message
         );
       } else {
@@ -154,17 +153,17 @@ const LoginPage = () => {
       }
     } else {
       if (!fullName.trim()) {
-        setError("الرجاء إدخال الاسم الكامل");
+        setError(t("auth.validation.fullNameRequired"));
         setLoading(false);
         return;
       }
       if (!checkPasswordStrength(password).valid) {
-        setError("كلمة المرور ضعيفة. يجب أن تحتوي على 8 أحرف على الأقل مع حرف كبير ورقم ورمز خاص");
+        setError(t("auth.validation.passwordWeak"));
         setLoading(false);
         return;
       }
       if (!agreedToTerms) {
-        setError("يجب الموافقة على الشروط والأحكام وسياسة الخصوصية");
+        setError(t("auth.validation.termsRequired"));
         setLoading(false);
         return;
       }
@@ -191,35 +190,35 @@ const LoginPage = () => {
             <span className="text-xs md:text-sm font-semibold tracking-[0.25em] text-foreground/70 mt-1.5 uppercase">SOQ TAQBEEL</span>
           </div>
           <h1 className="text-sm text-muted-foreground mt-1">
-            {isLogin ? "أهلاً بعودتك" : "ابدأ رحلتك في عالم التقبيل"}
+            {isLogin ? t("auth.login.welcomeBack") : t("auth.login.startJourney")}
           </h1>
         </div>
 
         {/* Trust badges */}
-        <div className="flex items-center justify-center gap-4 mb-5 text-[11px] text-muted-foreground" dir="rtl">
+        <div className="flex items-center justify-center gap-4 mb-5 text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1">
             <Sparkles size={12} strokeWidth={1.4} className="text-primary/60" />
-            ذكاء اصطناعي
+            {t("auth.shared.trustAi")}
           </span>
           <span className="w-px h-3 bg-border/60" />
           <span className="flex items-center gap-1">
             <Zap size={12} strokeWidth={1.4} className="text-primary/60" />
-            سهل وسريع
+            {t("auth.shared.trustFast")}
           </span>
           <span className="w-px h-3 bg-border/60" />
           <span className="flex items-center gap-1">
             <ShieldCheck size={12} strokeWidth={1.4} className="text-primary/60" />
-            آمن 100%
+            {t("auth.shared.trustSecure")}
           </span>
         </div>
 
         <div className="bg-card rounded-2xl p-6 shadow-soft border border-border/20">
           {mfaRequired ? (
-            <div className="space-y-4" dir="rtl">
+            <div className="space-y-4">
               <div className="text-center space-y-2">
                 <ShieldCheck size={32} className="mx-auto text-primary" />
-                <h2 className="text-base font-medium text-foreground">التحقق بخطوتين</h2>
-                <p className="text-xs text-muted-foreground">أدخل رمز المصادقة من تطبيقك</p>
+                <h2 className="text-base font-medium text-foreground">{t("auth.mfa.title")}</h2>
+                <p className="text-xs text-muted-foreground">{t("auth.mfa.subtitle")}</p>
               </div>
               <input
                 type="text"
@@ -241,7 +240,7 @@ const LoginPage = () => {
                   const { data: challenge, error: chalErr } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
                   if (chalErr) { setError(chalErr.message); setMfaVerifying(false); return; }
                   const { error: verErr } = await supabase.auth.mfa.verify({ factorId: mfaFactorId, challengeId: challenge.id, code: mfaCode });
-                  if (verErr) { setError("رمز غير صحيح"); setMfaVerifying(false); return; }
+                  if (verErr) { setError(t("auth.validation.otpIncorrect")); setMfaVerifying(false); return; }
                   setMfaVerifying(false);
                   navigate("/");
                 }}
@@ -249,10 +248,10 @@ const LoginPage = () => {
                 className="w-full py-3 rounded-xl text-sm font-medium text-primary-foreground transition-all disabled:opacity-50"
                 style={{ background: "var(--gradient-primary)" }}
               >
-                {mfaVerifying ? "جاري التحقق..." : "تأكيد"}
+                {mfaVerifying ? t("auth.mfa.verifying") : t("auth.mfa.confirm")}
               </button>
               <button onClick={() => { setMfaRequired(false); setMfaCode(""); setError(""); }} className="w-full text-xs text-muted-foreground hover:text-foreground">
-                العودة لتسجيل الدخول
+                {t("auth.mfa.back")}
               </button>
             </div>
           ) : (
@@ -273,13 +272,13 @@ const LoginPage = () => {
                     <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                   </svg>
                 )}
-                <span>{googleLoading ? "جاري التحويل..." : "المتابعة بحساب Google"}</span>
+                <span>{googleLoading ? t("auth.shared.googleRedirecting") : t("auth.shared.continueWithGoogle")}</span>
               </button>
 
               {/* Divider */}
               <div className="flex items-center gap-3 my-5">
                 <div className="flex-1 h-px bg-border/50" />
-                <span className="text-[11px] text-muted-foreground">أو</span>
+                <span className="text-[11px] text-muted-foreground">{t("auth.shared.or")}</span>
                 <div className="flex-1 h-px bg-border/50" />
               </div>
 
@@ -291,7 +290,7 @@ const LoginPage = () => {
                     isLogin ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground"
                   }`}
                 >
-                  {t("common.login")}
+                  {t("auth.login.tabLogin")}
                 </button>
                 <button
                   onClick={() => { setIsLogin(false); setError(""); setSuccess(""); }}
@@ -299,7 +298,7 @@ const LoginPage = () => {
                     !isLogin ? "bg-card shadow-sm text-foreground font-medium" : "text-muted-foreground"
                   }`}
                 >
-                  {t("auth.createAccount")}
+                  {t("auth.login.tabRegister")}
                 </button>
               </div>
 
@@ -315,7 +314,7 @@ const LoginPage = () => {
                   }`}
                 >
                   <Phone size={13} strokeWidth={1.3} />
-                  {t("auth.phoneNumber")}
+                  {t("auth.fields.phoneLabel")}
                 </button>
                 <button
                   type="button"
@@ -327,7 +326,7 @@ const LoginPage = () => {
                   }`}
                 >
                   <Mail size={13} strokeWidth={1.3} />
-                  البريد الإلكتروني
+                  {t("auth.fields.emailLabel")}
                 </button>
               </div>
 
@@ -338,11 +337,10 @@ const LoginPage = () => {
                     <UserIcon size={15} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                     <input
                       type="text"
-                      placeholder="الاسم الكامل"
+                      placeholder={t("auth.fields.fullNamePlaceholder")}
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors"
-                      dir="rtl"
                     />
                   </div>
                 )}
@@ -387,7 +385,7 @@ const LoginPage = () => {
                       <input
                         type="tel"
                         inputMode="numeric"
-                        placeholder="5XXXXXXXX"
+                        placeholder={t("auth.fields.phonePlaceholder")}
                         value={phone}
                         onChange={(e) => handlePhoneChange(e.target.value)}
                         className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors tracking-wider text-left"
@@ -407,7 +405,7 @@ const LoginPage = () => {
                     <input
                       type="email"
                       inputMode="email"
-                      placeholder="example@email.com"
+                      placeholder={t("auth.fields.emailPlaceholder")}
                       value={email}
                       onChange={(e) => setEmail(toEnglishNumerals(e.target.value))}
                       className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors text-left"
@@ -425,7 +423,7 @@ const LoginPage = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     inputMode="text"
-                    placeholder="كلمة المرور"
+                    placeholder={t("auth.fields.passwordPlaceholder")}
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     className="w-full pr-10 pl-10 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors text-left"
@@ -447,7 +445,7 @@ const LoginPage = () => {
 
                 {/* Terms agreement (register only) */}
                 {!isLogin && (
-                  <label className="flex items-start gap-2 cursor-pointer select-none" dir="rtl">
+                  <label className="flex items-start gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={agreedToTerms}
@@ -455,10 +453,10 @@ const LoginPage = () => {
                       className="mt-1 w-4 h-4 rounded border-border accent-primary shrink-0"
                     />
                     <span className="text-xs text-muted-foreground leading-relaxed">
-                      أوافق على{" "}
-                      <Link to="/terms" target="_blank" className="text-primary hover:underline font-medium">الشروط والأحكام</Link>
-                      {" "}و{" "}
-                      <Link to="/privacy" target="_blank" className="text-primary hover:underline font-medium">سياسة الخصوصية</Link>
+                      {t("auth.register.agreeToTerms")}{" "}
+                      <Link to="/terms" target="_blank" className="text-primary hover:underline font-medium">{t("auth.register.termsLink")}</Link>
+                      {" "}{t("auth.register.and")}{" "}
+                      <Link to="/privacy" target="_blank" className="text-primary hover:underline font-medium">{t("auth.register.privacyLink")}</Link>
                     </span>
                   </label>
                 )}
@@ -468,10 +466,10 @@ const LoginPage = () => {
                   <div className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs p-3 rounded-xl flex items-center justify-between gap-2 border border-blue-200 dark:border-blue-800">
                     <div className="flex items-center gap-2">
                       <Info className="h-4 w-4 shrink-0" />
-                      <span>لإضافة فرصتك أو الوصول للوحة التحكم، يرجى تسجيل الدخول أولاً</span>
+                      <span>{t("auth.login.redirectProtected")}</span>
                     </div>
                     <button type="button" onClick={() => setIsLogin(false)} className="shrink-0 text-[10px] font-semibold bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors">
-                      إنشاء حساب جديد
+                      {t("auth.login.redirectCreateAccount")}
                     </button>
                   </div>
                 )}
@@ -479,7 +477,7 @@ const LoginPage = () => {
                 {redirectReason === "auth_required" && !isFromProtectedPage && !error && !success && (
                   <div className="bg-primary/5 text-primary text-xs p-3 rounded-xl flex items-center gap-2 border border-primary/10">
                     <ShieldCheck className="h-4 w-4 shrink-0" />
-                    <span>يجب تسجيل الدخول للوصول إلى هذه الصفحة</span>
+                    <span>{t("auth.login.redirectAuthRequired")}</span>
                   </div>
                 )}
 
@@ -495,14 +493,14 @@ const LoginPage = () => {
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      جاري المعالجة...
+                      {t("auth.shared.processing")}
                     </span>
-                  ) : isLogin ? t("common.login") : t("auth.createAccount")}
+                  ) : isLogin ? t("auth.login.submit") : t("auth.register.submit")}
                 </button>
 
                 {isLogin && (
                   <p className="text-center">
-                    <Link to="/forgot-password" className="text-xs text-primary hover:underline">نسيت كلمة المرور؟</Link>
+                    <Link to="/forgot-password" className="text-xs text-primary hover:underline">{t("auth.login.forgotPassword")}</Link>
                   </p>
                 )}
               </form>
@@ -514,13 +512,13 @@ const LoginPage = () => {
         <div className="mt-4 mx-auto max-w-xs text-center">
           <p className="text-[11px] text-muted-foreground/70 leading-relaxed">
             <Sparkles size={11} strokeWidth={1.3} className="inline-block ml-1 text-primary/50 -mt-0.5" />
-            سجّل دخولك… ومقبل يساعدك في كل خطوة
+            {t("auth.shared.moqbelHelps")}
           </p>
         </div>
 
         <div className="flex flex-col items-center gap-3 mt-3">
           <p className="text-xs text-muted-foreground">
-            <Link to="/" className="hover:text-foreground transition-colors">← العودة للرئيسية</Link>
+            <Link to="/" className="hover:text-foreground transition-colors">{t("auth.shared.backToHome")}</Link>
           </p>
         </div>
       </div>

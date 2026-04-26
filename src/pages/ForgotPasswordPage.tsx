@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import logoIconGold from "@/assets/logo-icon-gold.png";
 import { Phone, ChevronDown, Sparkles, Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
@@ -22,7 +23,8 @@ const COUNTRY_CODES = [
 type Step = "phone" | "otp" | "password" | "success";
 
 const ForgotPasswordPage = () => {
-  useSEO({ title: "استعادة كلمة المرور", description: "استعد كلمة مرورك في سوق تقبيل عبر رقم الجوال", canonical: "/forgot-password" });
+  const { t } = useTranslation();
+  useSEO({ title: t("auth.forgotPassword.seoTitle"), description: t("auth.forgotPassword.seoDescription"), canonical: "/forgot-password" });
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+966");
   const [showCountryCodes, setShowCountryCodes] = useState(false);
@@ -57,7 +59,7 @@ const ForgotPasswordPage = () => {
     setError("");
 
     if (phone.length < 9 || !phone.startsWith("5")) {
-      setError("الرجاء إدخال رقم جوال صحيح يبدأ بالرقم 5");
+      setError(t("auth.validation.phoneInvalidStartWith5"));
       return;
     }
 
@@ -69,7 +71,7 @@ const ForgotPasswordPage = () => {
     });
 
     if (fnError) {
-      setError("فشل إرسال رمز التحقق، حاول مرة أخرى");
+      setError(t("auth.toasts.otpSentFailed"));
     } else if (data?.error) {
       setError(data.error);
     } else {
@@ -85,17 +87,17 @@ const ForgotPasswordPage = () => {
     setError("");
 
     if (otpCode.length !== 6) {
-      setError("رمز التحقق يتكون من 6 أرقام");
+      setError(t("auth.validation.otpInvalidLength"));
       return;
     }
 
     if (!checkPasswordStrength(password).valid) {
-      setError("كلمة المرور ضعيفة. يجب أن تحتوي على 8 أحرف على الأقل مع حرف كبير ورقم ورمز خاص");
+      setError(t("auth.validation.passwordWeak"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("كلمتا المرور غير متطابقتين");
+      setError(t("auth.validation.passwordsMismatch"));
       return;
     }
 
@@ -107,7 +109,7 @@ const ForgotPasswordPage = () => {
     });
 
     if (fnError) {
-      setError("حدث خطأ، حاول مرة أخرى");
+      setError(t("auth.toasts.genericError"));
     } else if (data?.error) {
       setError(data.error);
     } else {
@@ -118,6 +120,12 @@ const ForgotPasswordPage = () => {
   };
 
   const selectedCountry = COUNTRY_CODES.find((c) => c.code === countryCode);
+
+  const channelLabel = channel === "call"
+    ? t("auth.otp.channelCall")
+    : channel === "whatsapp"
+    ? t("auth.otp.channelWhatsapp")
+    : t("auth.otp.channelSms");
 
   // Success
   if (step === "success") {
@@ -131,9 +139,9 @@ const ForgotPasswordPage = () => {
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-50 flex items-center justify-center">
               <CheckCircle size={28} strokeWidth={1.3} className="text-green-600" />
             </div>
-            <h2 className="text-lg font-medium text-foreground mb-2">تم تغيير كلمة المرور بنجاح</h2>
+            <h2 className="text-lg font-medium text-foreground mb-2">{t("auth.forgotPassword.successTitle")}</h2>
             <p className="text-sm text-muted-foreground">
-              سيتم توجيهك لصفحة تسجيل الدخول خلال لحظات...
+              {t("auth.forgotPassword.successRedirect")}
             </p>
           </div>
         </div>
@@ -148,10 +156,10 @@ const ForgotPasswordPage = () => {
           <div className="flex justify-center mb-4">
             <img src={logoIconGold} alt="سوق تقبيل" className="h-14 md:h-16 w-auto mx-auto" />
           </div>
-          <h1 className="text-2xl font-medium gradient-text">نسيت كلمة المرور</h1>
+          <h1 className="text-2xl font-medium gradient-text">{t("auth.forgotPassword.title")}</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            {step === "phone" && "أدخل رقم جوالك وسنرسل لك رمز تحقق"}
-            {step === "otp" && "أدخل رمز التحقق وكلمة المرور الجديدة"}
+            {step === "phone" && t("auth.forgotPassword.subtitlePhone")}
+            {step === "otp" && t("auth.forgotPassword.subtitleOtp")}
           </p>
         </div>
 
@@ -196,7 +204,7 @@ const ForgotPasswordPage = () => {
                   <input
                     type="tel"
                     inputMode="numeric"
-                    placeholder="5XXXXXXXX"
+                    placeholder={t("auth.fields.phonePlaceholder")}
                     value={phone}
                     onChange={(e) => handlePhoneChange(e.target.value)}
                     className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors tracking-wider text-left"
@@ -220,10 +228,10 @@ const ForgotPasswordPage = () => {
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    جاري الإرسال...
+                    {t("auth.shared.sending")}
                   </span>
                 ) : (
-                  "إرسال رمز التحقق"
+                  t("auth.forgotPassword.submitPhone")
                 )}
               </button>
             </form>
@@ -233,8 +241,8 @@ const ForgotPasswordPage = () => {
             <form onSubmit={handleVerifyAndReset} className="space-y-4">
               {/* OTP input */}
               <div>
-                <label className="block text-xs text-muted-foreground mb-1.5 text-right">
-                  رمز التحقق المرسل {channel === "call" ? "عبر مكالمة" : channel === "whatsapp" ? "عبر واتساب" : "عبر SMS"}
+                <label className="block text-xs text-muted-foreground mb-1.5">
+                  {t("auth.otp.labelChannel", { channel: channelLabel })}
                 </label>
                 <input
                   type="tel"
@@ -251,13 +259,13 @@ const ForgotPasswordPage = () => {
 
               {/* New password */}
               <div>
-                <label className="block text-xs text-muted-foreground mb-1.5 text-right">كلمة المرور الجديدة</label>
+                <label className="block text-xs text-muted-foreground mb-1.5">{t("auth.fields.newPasswordLabel")}</label>
                 <div className="relative">
                   <Lock size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type={showPassword ? "text" : "password"}
                     inputMode="text"
-                    placeholder="كلمة المرور الجديدة"
+                    placeholder={t("auth.fields.newPasswordPlaceholder")}
                     value={password}
                     onChange={(e) => setPassword(toEnglishNumerals(e.target.value))}
                     className="w-full pr-10 pl-10 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors text-left"
@@ -280,13 +288,13 @@ const ForgotPasswordPage = () => {
 
               {/* Confirm password */}
               <div>
-                <label className="block text-xs text-muted-foreground mb-1.5 text-right">تأكيد كلمة المرور</label>
+                <label className="block text-xs text-muted-foreground mb-1.5">{t("auth.fields.confirmPasswordLabel")}</label>
                 <div className="relative">
                   <Lock size={16} strokeWidth={1.3} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type={showPassword ? "text" : "password"}
                     inputMode="text"
-                    placeholder="تأكيد كلمة المرور"
+                    placeholder={t("auth.fields.confirmPasswordPlaceholder")}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(toEnglishNumerals(e.target.value))}
                     className="w-full pr-10 pl-4 py-3 bg-muted/50 rounded-xl text-sm border border-border/50 focus:border-primary/50 focus:outline-none transition-colors text-left"
@@ -312,10 +320,10 @@ const ForgotPasswordPage = () => {
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    جاري التحقق...
+                    {t("auth.shared.verifying")}
                   </span>
                 ) : (
-                  "تأكيد وتغيير كلمة المرور"
+                  t("auth.forgotPassword.submitVerify")
                 )}
               </button>
 
@@ -325,17 +333,17 @@ const ForgotPasswordPage = () => {
                   onClick={() => { setStep("phone"); setOtpCode(""); setError(""); }}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  تغيير الرقم
+                  {t("auth.otp.changeNumber")}
                 </button>
                 {resendTimer > 0 ? (
-                  <span className="text-muted-foreground">إعادة الإرسال ({resendTimer})</span>
+                  <span className="text-muted-foreground">{t("auth.otp.resendIn", { seconds: resendTimer })}</span>
                 ) : (
                   <button
                     type="button"
                     onClick={() => handleSendOtp()}
                     className="text-primary hover:underline"
                   >
-                    إعادة إرسال الرمز
+                    {t("auth.otp.resend")}
                   </button>
                 )}
               </div>
@@ -346,10 +354,10 @@ const ForgotPasswordPage = () => {
         <div className="flex flex-col items-center gap-3 mt-6">
           <p className="text-[11px] text-muted-foreground/70">
             <Sparkles size={11} strokeWidth={1.3} className="inline-block ml-1 text-primary/50 -mt-0.5" />
-            حسابك محمي بأعلى معايير الأمان
+            {t("auth.shared.secureBadge")}
           </p>
           <p className="text-xs text-muted-foreground">
-            <Link to="/login" className="hover:text-foreground transition-colors">← العودة لتسجيل الدخول</Link>
+            <Link to="/login" className="hover:text-foreground transition-colors">{t("auth.shared.backToLogin")}</Link>
           </p>
         </div>
       </div>
