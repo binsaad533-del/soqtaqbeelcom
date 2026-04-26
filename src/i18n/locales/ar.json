@@ -36,7 +36,116 @@
     "sendOtp": "إرسال رمز التحقق",
     "otpCode": "رمز التحقق",
     "verify": "تحقق",
-    "createAccount": "حساب جديد"
+    "createAccount": "حساب جديد",
+    "shared": {
+      "trustAi": "ذكاء اصطناعي",
+      "trustFast": "سهل وسريع",
+      "trustSecure": "آمن 100%",
+      "or": "أو",
+      "continueWithGoogle": "المتابعة بحساب Google",
+      "googleRedirecting": "جاري التحويل...",
+      "googleFailed": "فشل تسجيل الدخول بحساب Google",
+      "googleError": "حدث خطأ أثناء تسجيل الدخول بحساب Google",
+      "secureBadge": "حسابك محمي بأعلى معايير الأمان",
+      "moqbelHelps": "سجّل دخولك… ومقبل يساعدك في كل خطوة",
+      "backToHome": "← العودة للرئيسية",
+      "backToLogin": "← العودة لتسجيل الدخول",
+      "processing": "جاري المعالجة...",
+      "sending": "جاري الإرسال...",
+      "verifying": "جاري التحقق...",
+      "updating": "جاري التحديث..."
+    },
+    "login": {
+      "seoTitle": "تسجيل الدخول",
+      "seoDescription": "سجّل دخولك إلى سوق تقبيل لإدارة إعلاناتك وصفقاتك التجارية",
+      "welcomeBack": "أهلاً بعودتك",
+      "startJourney": "ابدأ رحلتك في عالم التقبيل",
+      "tabLogin": "تسجيل الدخول",
+      "tabRegister": "حساب جديد",
+      "forgotPassword": "نسيت كلمة المرور؟",
+      "submit": "تسجيل الدخول",
+      "redirectProtected": "لإضافة فرصتك أو الوصول للوحة التحكم، يرجى تسجيل الدخول أولاً",
+      "redirectCreateAccount": "إنشاء حساب جديد",
+      "redirectAuthRequired": "يجب تسجيل الدخول للوصول إلى هذه الصفحة"
+    },
+    "register": {
+      "submit": "إنشاء حساب جديد",
+      "agreeToTerms": "أوافق على",
+      "termsLink": "الشروط والأحكام",
+      "and": "و",
+      "privacyLink": "سياسة الخصوصية"
+    },
+    "fields": {
+      "fullNameLabel": "الاسم الكامل",
+      "fullNamePlaceholder": "الاسم الكامل",
+      "emailLabel": "البريد الإلكتروني",
+      "emailPlaceholder": "example@email.com",
+      "phoneLabel": "رقم الجوال",
+      "phonePlaceholder": "5XXXXXXXX",
+      "passwordLabel": "كلمة المرور",
+      "passwordPlaceholder": "كلمة المرور",
+      "newPasswordLabel": "كلمة المرور الجديدة",
+      "newPasswordPlaceholder": "كلمة المرور الجديدة",
+      "confirmPasswordLabel": "تأكيد كلمة المرور",
+      "confirmPasswordPlaceholder": "تأكيد كلمة المرور"
+    },
+    "validation": {
+      "rateLimited": "تم تجاوز عدد المحاولات المسموح بها. يرجى الانتظار 5 دقائق",
+      "phoneInvalid": "الرجاء إدخال رقم جوال صحيح",
+      "phoneMustStartWith5": "رقم الجوال يجب أن يبدأ بالرقم 5",
+      "phoneInvalidStartWith5": "الرجاء إدخال رقم جوال صحيح يبدأ بالرقم 5",
+      "fullNameRequired": "الرجاء إدخال الاسم الكامل",
+      "passwordWeak": "كلمة المرور ضعيفة. يجب أن تحتوي على 8 أحرف على الأقل مع حرف كبير ورقم ورمز خاص",
+      "termsRequired": "يجب الموافقة على الشروط والأحكام وسياسة الخصوصية",
+      "invalidCredentials": "بيانات الدخول غير صحيحة",
+      "otpInvalidLength": "رمز التحقق يتكون من 6 أرقام",
+      "passwordsMismatch": "كلمتا المرور غير متطابقتين",
+      "otpIncorrect": "رمز غير صحيح"
+    },
+    "toasts": {
+      "otpSentFailed": "فشل إرسال رمز التحقق، حاول مرة أخرى",
+      "genericError": "حدث خطأ، حاول مرة أخرى",
+      "passwordUpdateFailed": "حدث خطأ أثناء تحديث كلمة المرور. حاول مرة أخرى."
+    },
+    "mfa": {
+      "title": "التحقق بخطوتين",
+      "subtitle": "أدخل رمز المصادقة من تطبيقك",
+      "confirm": "تأكيد",
+      "verifying": "جاري التحقق...",
+      "back": "العودة لتسجيل الدخول"
+    },
+    "otp": {
+      "labelChannel": "رمز التحقق المرسل {{channel}}",
+      "channelSms": "عبر SMS",
+      "channelCall": "عبر مكالمة",
+      "channelWhatsapp": "عبر واتساب",
+      "changeNumber": "تغيير الرقم",
+      "resendIn": "إعادة الإرسال ({{seconds}})",
+      "resend": "إعادة إرسال الرمز"
+    },
+    "forgotPassword": {
+      "seoTitle": "استعادة كلمة المرور",
+      "seoDescription": "استعد كلمة مرورك في سوق تقبيل عبر رقم الجوال",
+      "title": "نسيت كلمة المرور",
+      "subtitlePhone": "أدخل رقم جوالك وسنرسل لك رمز تحقق",
+      "subtitleOtp": "أدخل رمز التحقق وكلمة المرور الجديدة",
+      "submitPhone": "إرسال رمز التحقق",
+      "submitVerify": "تأكيد وتغيير كلمة المرور",
+      "successTitle": "تم تغيير كلمة المرور بنجاح",
+      "successRedirect": "سيتم توجيهك لصفحة تسجيل الدخول خلال لحظات..."
+    },
+    "resetPassword": {
+      "seoTitle": "إعادة تعيين كلمة المرور",
+      "seoDescription": "أعد تعيين كلمة مرورك في سوق تقبيل",
+      "title": "تعيين كلمة مرور جديدة",
+      "subtitle": "أدخل كلمة المرور الجديدة",
+      "submit": "تعيين كلمة المرور",
+      "successTitle": "تم تغيير كلمة المرور بنجاح",
+      "successRedirect": "سيتم توجيهك للصفحة الرئيسية خلال لحظات...",
+      "invalidLinkTitle": "رابط غير صالح",
+      "invalidLinkBody": "هذا الرابط غير صالح أو منتهي الصلاحية. يرجى طلب رابط جديد.",
+      "requestNewLink": "طلب رابط جديد"
+    }
   },
   "dashboard": {
     "myListings": "إعلاناتي",

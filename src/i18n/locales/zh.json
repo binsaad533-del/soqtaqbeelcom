@@ -36,7 +36,116 @@
     "sendOtp": "发送验证码",
     "otpCode": "验证码",
     "verify": "验证",
-    "createAccount": "注册账号"
+    "createAccount": "注册账号",
+    "shared": {
+      "trustAi": "AI 驱动",
+      "trustFast": "快速简便",
+      "trustSecure": "100% 安全",
+      "or": "或",
+      "continueWithGoogle": "使用 Google 继续",
+      "googleRedirecting": "正在跳转...",
+      "googleFailed": "Google 登录失败",
+      "googleError": "Google 登录时发生错误",
+      "secureBadge": "您的账号受到最高安全标准的保护",
+      "moqbelHelps": "登录后…Moqbel 将为您提供全程协助",
+      "backToHome": "← 返回首页",
+      "backToLogin": "← 返回登录",
+      "processing": "处理中...",
+      "sending": "发送中...",
+      "verifying": "验证中...",
+      "updating": "更新中..."
+    },
+    "login": {
+      "seoTitle": "登录",
+      "seoDescription": "登录 Souq Taqbeel,管理您的列表和商业交易",
+      "welcomeBack": "欢迎回来",
+      "startJourney": "开启您的商业接管之旅",
+      "tabLogin": "登录",
+      "tabRegister": "创建账号",
+      "forgotPassword": "忘记密码?",
+      "submit": "登录",
+      "redirectProtected": "要添加您的机会或访问控制面板,请先登录",
+      "redirectCreateAccount": "创建新账号",
+      "redirectAuthRequired": "您必须登录才能访问此页面"
+    },
+    "register": {
+      "submit": "创建新账号",
+      "agreeToTerms": "我同意",
+      "termsLink": "条款与条件",
+      "and": "和",
+      "privacyLink": "隐私政策"
+    },
+    "fields": {
+      "fullNameLabel": "全名",
+      "fullNamePlaceholder": "全名",
+      "emailLabel": "电子邮件",
+      "emailPlaceholder": "example@email.com",
+      "phoneLabel": "手机号码",
+      "phonePlaceholder": "5XXXXXXXX",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "密码",
+      "newPasswordLabel": "新密码",
+      "newPasswordPlaceholder": "新密码",
+      "confirmPasswordLabel": "确认密码",
+      "confirmPasswordPlaceholder": "确认密码"
+    },
+    "validation": {
+      "rateLimited": "尝试次数过多。请等待 5 分钟",
+      "phoneInvalid": "请输入有效的手机号码",
+      "phoneMustStartWith5": "手机号码必须以 5 开头",
+      "phoneInvalidStartWith5": "请输入以 5 开头的有效手机号码",
+      "fullNameRequired": "请输入您的全名",
+      "passwordWeak": "密码强度不足。至少 8 个字符,包含大写字母、数字和特殊符号",
+      "termsRequired": "您必须同意条款与条件以及隐私政策",
+      "invalidCredentials": "登录凭据无效",
+      "otpInvalidLength": "验证码必须为 6 位数字",
+      "passwordsMismatch": "两次密码不一致",
+      "otpIncorrect": "验证码不正确"
+    },
+    "toasts": {
+      "otpSentFailed": "发送验证码失败,请重试",
+      "genericError": "发生错误,请重试",
+      "passwordUpdateFailed": "更新密码时出错。请重试。"
+    },
+    "mfa": {
+      "title": "两步验证",
+      "subtitle": "请输入您应用中的验证码",
+      "confirm": "确认",
+      "verifying": "验证中...",
+      "back": "返回登录"
+    },
+    "otp": {
+      "labelChannel": "验证码已发送 {{channel}}",
+      "channelSms": "通过短信",
+      "channelCall": "通过电话",
+      "channelWhatsapp": "通过 WhatsApp",
+      "changeNumber": "更改号码",
+      "resendIn": "重新发送 ({{seconds}})",
+      "resend": "重新发送验证码"
+    },
+    "forgotPassword": {
+      "seoTitle": "找回密码",
+      "seoDescription": "通过手机号找回您的 Souq Taqbeel 密码",
+      "title": "忘记密码",
+      "subtitlePhone": "请输入您的手机号,我们会发送验证码",
+      "subtitleOtp": "请输入验证码和新密码",
+      "submitPhone": "发送验证码",
+      "submitVerify": "确认并修改密码",
+      "successTitle": "密码修改成功",
+      "successRedirect": "即将跳转到登录页面..."
+    },
+    "resetPassword": {
+      "seoTitle": "重置密码",
+      "seoDescription": "在 Souq Taqbeel 上重置您的密码",
+      "title": "设置新密码",
+      "subtitle": "请输入新密码",
+      "submit": "设置密码",
+      "successTitle": "密码修改成功",
+      "successRedirect": "即将跳转到首页...",
+      "invalidLinkTitle": "链接无效",
+      "invalidLinkBody": "此链接无效或已过期。请重新请求。",
+      "requestNewLink": "请求新链接"
+    }
   },
   "dashboard": {
     "myListings": "我的列表",

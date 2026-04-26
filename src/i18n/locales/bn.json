@@ -36,7 +36,116 @@
     "sendOtp": "যাচাইকরণ কোড পাঠান",
     "otpCode": "যাচাইকরণ কোড",
     "verify": "যাচাই করুন",
-    "createAccount": "নতুন অ্যাকাউন্ট খুলুন"
+    "createAccount": "নতুন অ্যাকাউন্ট খুলুন",
+    "shared": {
+      "trustAi": "AI চালিত",
+      "trustFast": "দ্রুত ও সহজ",
+      "trustSecure": "১০০% নিরাপদ",
+      "or": "অথবা",
+      "continueWithGoogle": "Google দিয়ে চালিয়ে যান",
+      "googleRedirecting": "রিডিরেক্ট হচ্ছে...",
+      "googleFailed": "Google সাইন-ইন ব্যর্থ হয়েছে",
+      "googleError": "Google সাইন-ইনের সময় একটি ত্রুটি ঘটেছে",
+      "secureBadge": "আপনার অ্যাকাউন্ট সর্বোচ্চ নিরাপত্তা মানদণ্ড দ্বারা সুরক্ষিত",
+      "moqbelHelps": "সাইন ইন করুন… এবং Moqbel প্রতিটি ধাপে আপনাকে সাহায্য করবে",
+      "backToHome": "← হোমে ফিরুন",
+      "backToLogin": "← লগইনে ফিরুন",
+      "processing": "প্রক্রিয়াকরণ চলছে...",
+      "sending": "পাঠানো হচ্ছে...",
+      "verifying": "যাচাই করা হচ্ছে...",
+      "updating": "আপডেট হচ্ছে..."
+    },
+    "login": {
+      "seoTitle": "লগইন",
+      "seoDescription": "আপনার লিস্টিং এবং ব্যবসায়িক চুক্তি পরিচালনা করতে Souq Taqbeel-এ সাইন ইন করুন",
+      "welcomeBack": "ফিরে আসায় স্বাগতম",
+      "startJourney": "ব্যবসা অধিগ্রহণের জগতে আপনার যাত্রা শুরু করুন",
+      "tabLogin": "লগইন",
+      "tabRegister": "অ্যাকাউন্ট খুলুন",
+      "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?",
+      "submit": "লগইন",
+      "redirectProtected": "আপনার সুযোগ যোগ করতে বা ড্যাশবোর্ডে প্রবেশ করতে, অনুগ্রহ করে প্রথমে সাইন ইন করুন",
+      "redirectCreateAccount": "নতুন অ্যাকাউন্ট খুলুন",
+      "redirectAuthRequired": "এই পৃষ্ঠায় প্রবেশ করতে আপনাকে সাইন ইন করতে হবে"
+    },
+    "register": {
+      "submit": "নতুন অ্যাকাউন্ট খুলুন",
+      "agreeToTerms": "আমি সম্মত",
+      "termsLink": "শর্তাবলী",
+      "and": "এবং",
+      "privacyLink": "গোপনীয়তা নীতি"
+    },
+    "fields": {
+      "fullNameLabel": "পূর্ণ নাম",
+      "fullNamePlaceholder": "পূর্ণ নাম",
+      "emailLabel": "ইমেইল",
+      "emailPlaceholder": "example@email.com",
+      "phoneLabel": "মোবাইল নম্বর",
+      "phonePlaceholder": "5XXXXXXXX",
+      "passwordLabel": "পাসওয়ার্ড",
+      "passwordPlaceholder": "পাসওয়ার্ড",
+      "newPasswordLabel": "নতুন পাসওয়ার্ড",
+      "newPasswordPlaceholder": "নতুন পাসওয়ার্ড",
+      "confirmPasswordLabel": "পাসওয়ার্ড নিশ্চিত করুন",
+      "confirmPasswordPlaceholder": "পাসওয়ার্ড নিশ্চিত করুন"
+    },
+    "validation": {
+      "rateLimited": "অত্যধিক প্রচেষ্টা। অনুগ্রহ করে ৫ মিনিট অপেক্ষা করুন",
+      "phoneInvalid": "অনুগ্রহ করে একটি বৈধ মোবাইল নম্বর লিখুন",
+      "phoneMustStartWith5": "মোবাইল নম্বর 5 দিয়ে শুরু হতে হবে",
+      "phoneInvalidStartWith5": "অনুগ্রহ করে 5 দিয়ে শুরু হওয়া বৈধ মোবাইল নম্বর লিখুন",
+      "fullNameRequired": "অনুগ্রহ করে আপনার পূর্ণ নাম লিখুন",
+      "passwordWeak": "পাসওয়ার্ড দুর্বল। কমপক্ষে ৮ অক্ষর হতে হবে, একটি বড় হাতের অক্ষর, একটি সংখ্যা ও একটি বিশেষ চিহ্ন",
+      "termsRequired": "আপনাকে শর্তাবলী এবং গোপনীয়তা নীতিতে সম্মত হতে হবে",
+      "invalidCredentials": "অবৈধ লগইন তথ্য",
+      "otpInvalidLength": "যাচাইকরণ কোড ৬ অঙ্কের হতে হবে",
+      "passwordsMismatch": "পাসওয়ার্ড মিলছে না",
+      "otpIncorrect": "ভুল কোড"
+    },
+    "toasts": {
+      "otpSentFailed": "যাচাইকরণ কোড পাঠাতে ব্যর্থ, আবার চেষ্টা করুন",
+      "genericError": "একটি ত্রুটি ঘটেছে, আবার চেষ্টা করুন",
+      "passwordUpdateFailed": "পাসওয়ার্ড আপডেট করতে ত্রুটি। আবার চেষ্টা করুন।"
+    },
+    "mfa": {
+      "title": "দুই-ধাপ যাচাইকরণ",
+      "subtitle": "আপনার অ্যাপ থেকে প্রমাণীকরণ কোড লিখুন",
+      "confirm": "নিশ্চিত করুন",
+      "verifying": "যাচাই করা হচ্ছে...",
+      "back": "লগইনে ফিরুন"
+    },
+    "otp": {
+      "labelChannel": "যাচাইকরণ কোড পাঠানো হয়েছে {{channel}}",
+      "channelSms": "SMS-এর মাধ্যমে",
+      "channelCall": "কলের মাধ্যমে",
+      "channelWhatsapp": "WhatsApp-এর মাধ্যমে",
+      "changeNumber": "নম্বর পরিবর্তন করুন",
+      "resendIn": "পুনরায় পাঠান ({{seconds}})",
+      "resend": "কোড পুনরায় পাঠান"
+    },
+    "forgotPassword": {
+      "seoTitle": "পাসওয়ার্ড পুনরুদ্ধার",
+      "seoDescription": "মোবাইল নম্বরের মাধ্যমে আপনার Souq Taqbeel পাসওয়ার্ড পুনরুদ্ধার করুন",
+      "title": "পাসওয়ার্ড ভুলে গেছেন",
+      "subtitlePhone": "আপনার মোবাইল নম্বর লিখুন এবং আমরা আপনাকে যাচাইকরণ কোড পাঠাব",
+      "subtitleOtp": "যাচাইকরণ কোড এবং নতুন পাসওয়ার্ড লিখুন",
+      "submitPhone": "যাচাইকরণ কোড পাঠান",
+      "submitVerify": "নিশ্চিত করুন এবং পাসওয়ার্ড পরিবর্তন করুন",
+      "successTitle": "পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে",
+      "successRedirect": "আপনাকে লগইন পৃষ্ঠায় রিডিরেক্ট করা হচ্ছে..."
+    },
+    "resetPassword": {
+      "seoTitle": "পাসওয়ার্ড রিসেট করুন",
+      "seoDescription": "Souq Taqbeel-এ আপনার পাসওয়ার্ড রিসেট করুন",
+      "title": "নতুন পাসওয়ার্ড সেট করুন",
+      "subtitle": "নতুন পাসওয়ার্ড লিখুন",
+      "submit": "পাসওয়ার্ড সেট করুন",
+      "successTitle": "পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে",
+      "successRedirect": "আপনাকে হোম পৃষ্ঠায় রিডিরেক্ট করা হচ্ছে...",
+      "invalidLinkTitle": "অবৈধ লিঙ্ক",
+      "invalidLinkBody": "এই লিঙ্কটি অবৈধ বা মেয়াদোত্তীর্ণ। অনুগ্রহ করে নতুন একটি অনুরোধ করুন।",
+      "requestNewLink": "নতুন লিঙ্ক অনুরোধ করুন"
+    }
   },
   "dashboard": {
     "myListings": "আমার লিস্টিং",
