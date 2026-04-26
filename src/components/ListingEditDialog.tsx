@@ -342,10 +342,10 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Edit3 size={18} className="text-primary" />
-            تعديل الإعلان
+            {t("editListing.title")}
           </DialogTitle>
           <DialogDescription className="text-xs">
-            عدّل البيانات واحفظ — سيتم إعادة تحليل الصفقة تلقائياً بعد الحفظ
+            {t("editListing.desc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -353,76 +353,76 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
           <TabsList className="grid grid-cols-5 w-full">
             <TabsTrigger value="basic" className="text-xs gap-1">
               <FileText size={14} />
-              بيانات
+              {t("editListing.tabs.basic")}
             </TabsTrigger>
             <TabsTrigger value="photos" className="text-xs gap-1">
               <Camera size={14} />
-              صور
+              {t("editListing.tabs.photos")}
               {totalPhotos > 0 && <span className="text-[10px] bg-primary/20 text-primary rounded-full px-1.5">{totalPhotos}</span>}
             </TabsTrigger>
             <TabsTrigger value="docs" className="text-xs gap-1">
               <Upload size={14} />
-              مستندات
+              {t("editListing.tabs.docs")}
               {totalDocs > 0 && <span className="text-[10px] bg-primary/20 text-primary rounded-full px-1.5">{totalDocs}</span>}
             </TabsTrigger>
             <TabsTrigger value="location" className="text-xs gap-1">
               <MapPin size={14} />
-              موقع
+              {t("editListing.tabs.location")}
             </TabsTrigger>
             <TabsTrigger value="inventory" className="text-xs gap-1">
               <Package size={14} />
-              مخزون
+              {t("editListing.tabs.inventory")}
               {inventory.length > 0 && <span className="text-[10px] bg-primary/20 text-primary rounded-full px-1.5">{inventory.length}</span>}
             </TabsTrigger>
           </TabsList>
 
-          {/* ══════ TAB: بيانات أساسية ══════ */}
+          {/* ══════ TAB: Basic data ══════ */}
           <TabsContent value="basic" className="space-y-3 mt-3">
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">عنوان الإعلان</label>
-              <input type="text" value={fields.title} onChange={(e) => set("title", e.target.value)} placeholder="عنوان مخصص (اختياري)" className={inputCls} />
+              <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.listingTitle")}</label>
+              <input type="text" value={fields.title} onChange={(e) => set("title", e.target.value)} placeholder={t("editListing.fields.titlePlaceholder")} className={inputCls} />
             </div>
 
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">الوصف</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.description")}</label>
               <textarea
                 value={fields.description}
                 onChange={(e) => set("description", e.target.value)}
-                placeholder="وصف تفصيلي عن المشروع..."
+                placeholder={t("editListing.fields.descriptionPlaceholder")}
                 rows={3}
                 className={cn(inputCls, "resize-none")}
               />
             </div>
 
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">نوع النشاط *</label>
-              <input type="text" value={fields.business_activity} onChange={(e) => set("business_activity", e.target.value)} placeholder="مطعم وجبات سريعة" className={inputCls} />
+              <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.businessActivity")}</label>
+              <input type="text" value={fields.business_activity} onChange={(e) => set("business_activity", e.target.value)} placeholder={t("editListing.fields.businessActivityPlaceholder")} className={inputCls} />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">المدينة *</label>
-                <input type="text" value={fields.city} onChange={(e) => set("city", e.target.value)} placeholder="الرياض" className={inputCls} />
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.city")}</label>
+                <input type="text" value={fields.city} onChange={(e) => set("city", e.target.value)} placeholder={t("editListing.fields.cityPlaceholder")} className={inputCls} />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">المساحة (م²)</label>
-                <input type="number" value={fields.area_sqm} onChange={(e) => set("area_sqm", e.target.value)} placeholder="150" className={inputCls} dir="ltr" />
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.areaSqm")}</label>
+                <input type="number" value={fields.area_sqm} onChange={(e) => set("area_sqm", e.target.value)} placeholder={t("editListing.fields.areaPlaceholder")} className={inputCls} dir="ltr" />
               </div>
             </div>
 
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">السعر المطلوب *</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.price")}</label>
               <div className="relative">
-                <input type="number" value={fields.price} onChange={(e) => set("price", e.target.value)} placeholder="180000" className={inputCls} />
+                <input type="number" value={fields.price} onChange={(e) => set("price", e.target.value)} placeholder={t("editListing.fields.pricePlaceholder")} className={inputCls} />
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground"><SarSymbol size={12} /></span>
               </div>
             </div>
 
             {shouldShow(dealType, "annual_rent") && (
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">الإيجار السنوي</label>
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.annualRent")}</label>
                 <div className="relative">
-                  <input type="number" value={fields.annual_rent} onChange={(e) => set("annual_rent", e.target.value)} placeholder="45000" className={inputCls} />
+                  <input type="number" value={fields.annual_rent} onChange={(e) => set("annual_rent", e.target.value)} placeholder={t("editListing.fields.annualRentPlaceholder")} className={inputCls} />
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground"><SarSymbol size={12} /></span>
                 </div>
               </div>
@@ -432,14 +432,14 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
               <div className="grid grid-cols-2 gap-3">
                 {shouldShow(dealType, "lease_duration") && (
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">مدة العقد</label>
-                    <input type="text" value={fields.lease_duration} onChange={(e) => set("lease_duration", e.target.value)} placeholder="3 سنوات" className={inputCls} />
+                    <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.leaseDuration")}</label>
+                    <input type="text" value={fields.lease_duration} onChange={(e) => set("lease_duration", e.target.value)} placeholder={t("editListing.fields.leaseDurationPlaceholder")} className={inputCls} />
                   </div>
                 )}
                 {shouldShow(dealType, "lease_remaining") && (
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">المتبقي من العقد</label>
-                    <input type="text" value={fields.lease_remaining} onChange={(e) => set("lease_remaining", e.target.value)} placeholder="1.5 سنة" className={inputCls} />
+                    <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.leaseRemaining")}</label>
+                    <input type="text" value={fields.lease_remaining} onChange={(e) => set("lease_remaining", e.target.value)} placeholder={t("editListing.fields.leaseRemainingPlaceholder")} className={inputCls} />
                   </div>
                 )}
               </div>
@@ -447,22 +447,22 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
 
             {shouldShow(dealType, "liabilities") && (
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">الالتزامات المالية</label>
-                <input type="text" value={fields.liabilities} onChange={(e) => set("liabilities", e.target.value)} placeholder="لا توجد" className={inputCls} />
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.liabilities")}</label>
+                <input type="text" value={fields.liabilities} onChange={(e) => set("liabilities", e.target.value)} placeholder={t("editListing.fields.liabilitiesPlaceholder")} className={inputCls} />
               </div>
             )}
 
             {shouldShow(dealType, "overdue_salaries") && (
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">رواتب متأخرة</label>
-                <input type="text" value={fields.overdue_salaries} onChange={(e) => set("overdue_salaries", e.target.value)} placeholder="لا يوجد" className={inputCls} />
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.overdueSalaries")}</label>
+                <input type="text" value={fields.overdue_salaries} onChange={(e) => set("overdue_salaries", e.target.value)} placeholder={t("editListing.fields.overdueSalariesPlaceholder")} className={inputCls} />
               </div>
             )}
 
             {shouldShow(dealType, "overdue_rent") && (
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">إيجار متأخر</label>
-                <input type="text" value={fields.overdue_rent} onChange={(e) => set("overdue_rent", e.target.value)} placeholder="لا يوجد" className={inputCls} />
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.overdueRent")}</label>
+                <input type="text" value={fields.overdue_rent} onChange={(e) => set("overdue_rent", e.target.value)} placeholder={t("editListing.fields.overdueRentPlaceholder")} className={inputCls} />
               </div>
             )}
 
