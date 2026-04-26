@@ -246,13 +246,195 @@
     "showMore": "查看更多"
   },
   "marketplace": {
-    "title": "商业机会市场",
+    "title": "商机市场",
     "subtitle": "浏览可接管的商业机会",
     "available": "项可选",
     "dealType": "交易类型",
     "city": "城市",
     "activity": "行业",
-    "aiSearch": "您在寻找什么?让 AI 帮您找…"
+    "price": "价格",
+    "aiSearch": "您在寻找什么?让 AI 帮您找…",
+    "reset": "重置",
+    "searchCity": "搜索城市...",
+    "locating": "定位中...",
+    "showMore": "更多",
+    "showLess": "收起",
+    "hideSimulation": "隐藏演示列表",
+    "filterTitle": "筛选商机",
+    "filterCta": "筛选",
+    "showResultsCta": "显示 {{count}} 条结果",
+    "noResults": "没有匹配的结果",
+    "noExactResults": "没有完全匹配的结果",
+    "similarOpportunities": "您可能感兴趣的相似商机",
+    "showingRange": "显示第 {{start}}–{{end}} 条，共 {{total}} 条",
+    "compareLimitToast": "最多可对比 4 条列表",
+    "loginToLikeToast": "请先登录以收藏",
+    "linkCopied": "链接已复制",
+    "linkCopyFailed": "复制链接失败，请手动复制",
+    "geoPermissionToast": "请在浏览器设置中允许访问位置信息",
+    "geoFailedToast": "无法检测您的位置，请重试",
+    "geoSuccessToast": "📍 已定位至 {{city}} 附近",
+    "seo": {
+      "title": "商机市场 — 浏览沙特阿拉伯待售的商业机会",
+      "description": "浏览沙特阿拉伯可接管的商业机会 — 餐厅、商店、工作坊、美容中心等",
+      "jsonLdName": "商机市场 — 商业接管机会",
+      "jsonLdDescription": "沙特阿拉伯可用商业接管机会列表"
+    },
+    "card": {
+      "featured": "精选",
+      "sellerFallback": "卖家",
+      "online": "在线",
+      "offline": "离线",
+      "onlineTitle": "当前在线",
+      "offlineTitle": "离线",
+      "opportunityFallback": "商业机会",
+      "assetCount": "{{count}} 项资产",
+      "yearlyRent": "租金 {{amount}}/年",
+      "operationalReady": "可立即运营",
+      "transparencyTitle": "列表透明度：{{score}}%",
+      "transparencyMedium": "⚠ 中等",
+      "transparencyWeak": "⚠ 较弱",
+      "transparencyMissing": "✗ 缺失",
+      "compareAdd": "对比",
+      "compareRemove": "从对比中移除",
+      "like": "收藏",
+      "share": "分享"
+    },
+    "filters": {
+      "nearbyOption": "📍 附近",
+      "dealTypes": {
+        "all": "全部",
+        "fullTakeover": "完全收购",
+        "transferNoLiabilities": "无负债业务转让",
+        "assetsSetup": "资产 + 运营配置（无营业执照）",
+        "assetsOnly": "仅资产",
+        "transferShort": "无负债转让",
+        "assetsSetupShort": "资产与配置"
+      },
+      "cities": {
+        "riyadh": "利雅得",
+        "jeddah": "吉达",
+        "dammam": "达曼",
+        "makkah": "麦加",
+        "madinah": "麦地那"
+      },
+      "industries": {
+        "restaurants": "餐厅",
+        "cafes": "咖啡馆",
+        "salons": "美容沙龙",
+        "workshops": "维修车间",
+        "shops": "商店",
+        "groceries": "食品杂货",
+        "offices": "办公室",
+        "warehouses": "仓库",
+        "pharmacies": "药房",
+        "laundries": "洗衣店",
+        "bakeries": "面包店"
+      }
+    },
+    "ticker": {
+      "live": "实时",
+      "listings": "可用商机",
+      "deals": "活跃交易",
+      "completed": "已完成",
+      "avgPrice": "平均价格",
+      "highPrice": "最高价",
+      "lowPrice": "最低价",
+      "marketActivity": "市场活跃度",
+      "demand": "需求",
+      "todayOpportunities": "今日商机",
+      "users": "用户",
+      "successRate": "成功率",
+      "verifiedSellers": "已认证卖家",
+      "tradingVolume": "交易量",
+      "active": "活跃",
+      "moderate": "中等",
+      "quiet": "平静",
+      "high": "高",
+      "stable": "稳定",
+      "priority": "优先"
+    },
+    "heatmap": {
+      "title": "商机热力图",
+      "opportunities": "{{count}} 个机会",
+      "averageLabel": "平均",
+      "hot": "热门",
+      "warm": "温和",
+      "cool": "平静",
+      "unspecifiedCity": "未指定",
+      "general": "综合"
+    },
+    "compare": {
+      "panelTitle": "对比 ({{count}}/4)",
+      "clear": "清除",
+      "close": "关闭",
+      "compareNow": "立即对比",
+      "addAtLeast": "再添加 {{count}} 项以进行对比",
+      "criterion": "对比项",
+      "opportunityFallback": "机会",
+      "rowPrice": "价格",
+      "rowCity": "城市",
+      "rowDistrict": "区域",
+      "rowDealType": "交易类型",
+      "rowTransparency": "透明度",
+      "rowAiRating": "AI 评级",
+      "rowSellerTrust": "卖家信任度",
+      "viewDetails": "查看详情",
+      "aiRecommendation": "AI 推荐",
+      "bestChoice": "✓ 最佳选择",
+      "bestChoiceReason": "基于价格、透明度和卖家信任度",
+      "best": "✓ 最佳"
+    },
+    "search": {
+      "noResultsAlertTemplate": "目前没有匹配您搜索的结果。别担心 — 启用提醒后，一旦有匹配的商机发布，我们将通过邮件和短信通知您 📧📱",
+      "tryAgain": "抱歉，请重试",
+      "loginForAlert": "请先登录以启用提醒",
+      "alertSavedToast": "提醒已启用！我们将通过邮件和短信通知您 📧📱",
+      "alertSaveError": "出错了，请重试",
+      "notifyMeCta": "通过邮件和短信通知我",
+      "alertActive": "邮件和短信提醒已启用 ✓",
+      "appliedPrefix": "已应用：",
+      "customPriceRange": "自定义价格区间",
+      "suggestions": {
+        "1": "吉达的咖啡馆",
+        "2": "利雅得的餐厅",
+        "3": "实惠的工作坊",
+        "4": "可接管的沙龙",
+        "5": "达曼的商店"
+      }
+    }
+  },
+  "notifications": {
+    "shell": {
+      "title": "通知",
+      "unreadBadge": "{{count}} 条新通知",
+      "markAllRead": "全部标为已读"
+    },
+    "filters": {
+      "all": "全部",
+      "unread": "未读",
+      "deals": "交易",
+      "offers": "报价",
+      "messages": "消息",
+      "documents": "文件"
+    },
+    "empty": {
+      "all": "暂无通知",
+      "unread": "没有未读通知"
+    },
+    "groups": {
+      "today": "今天",
+      "yesterday": "昨天"
+    },
+    "time": {
+      "now": "刚刚",
+      "minutes_one": "1 分钟",
+      "minutes_other": "{{count}} 分钟",
+      "hours_one": "1 小时",
+      "hours_other": "{{count}} 小时",
+      "days_one": "1 天",
+      "days_other": "{{count}} 天"
+    }
   },
   "dealCheck": {
     "alibabaDisclaimer": "来自全球来源（阿里巴巴）的估算价格——由于运费、关税和中间商，可能与沙特市场有所不同。如需准确评估，建议通过Jasaas进行专业检查",

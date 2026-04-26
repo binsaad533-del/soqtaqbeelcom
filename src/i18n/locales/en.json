@@ -252,7 +252,189 @@
     "dealType": "Deal type",
     "city": "City",
     "activity": "Industry",
-    "aiSearch": "What are you looking for? AI can help…"
+    "price": "Price",
+    "aiSearch": "What are you looking for? AI can help…",
+    "reset": "Reset",
+    "searchCity": "Search for a city...",
+    "locating": "Locating...",
+    "showMore": "More",
+    "showLess": "Less",
+    "hideSimulation": "Hide demo listings",
+    "filterTitle": "Filter listings",
+    "filterCta": "Filters",
+    "showResultsCta": "Show {{count}} results",
+    "noResults": "No matching results",
+    "noExactResults": "No exact matches for your search",
+    "similarOpportunities": "Similar opportunities you may like",
+    "showingRange": "Showing {{start}}–{{end}} of {{total}} results",
+    "compareLimitToast": "You can compare up to 4 listings",
+    "loginToLikeToast": "Sign in first to like listings",
+    "linkCopied": "Link copied",
+    "linkCopyFailed": "Couldn't copy the link, please copy it manually",
+    "geoPermissionToast": "Please allow location access from your browser settings",
+    "geoFailedToast": "Couldn't detect your location, please try again",
+    "geoSuccessToast": "📍 Location detected near {{city}}",
+    "seo": {
+      "title": "Marketplace — Browse business opportunities for sale in Saudi Arabia",
+      "description": "Browse available business takeover opportunities in Saudi Arabia — restaurants, shops, workshops, beauty centers and more",
+      "jsonLdName": "Marketplace — Business takeover opportunities",
+      "jsonLdDescription": "List of business takeover opportunities available in Saudi Arabia"
+    },
+    "card": {
+      "featured": "Featured",
+      "sellerFallback": "Seller",
+      "online": "Online",
+      "offline": "Offline",
+      "onlineTitle": "Online now",
+      "offlineTitle": "Offline",
+      "opportunityFallback": "Business opportunity",
+      "assetCount": "{{count}} assets",
+      "yearlyRent": "Rent {{amount}}/yr",
+      "operationalReady": "Ready to operate",
+      "transparencyTitle": "Listing transparency: {{score}}%",
+      "transparencyMedium": "⚠ Medium",
+      "transparencyWeak": "⚠ Weak",
+      "transparencyMissing": "✗ Missing",
+      "compareAdd": "Compare",
+      "compareRemove": "Remove from comparison",
+      "like": "Like",
+      "share": "Share"
+    },
+    "filters": {
+      "nearbyOption": "📍 Near me",
+      "dealTypes": {
+        "all": "All",
+        "fullTakeover": "Full Takeover",
+        "transferNoLiabilities": "Business Transfer Without Prior Liabilities",
+        "assetsSetup": "Assets + Operational Setup (No CR)",
+        "assetsOnly": "Assets Only",
+        "transferShort": "Transfer Without Liabilities",
+        "assetsSetupShort": "Assets & Setup"
+      },
+      "cities": {
+        "riyadh": "Riyadh",
+        "jeddah": "Jeddah",
+        "dammam": "Dammam",
+        "makkah": "Makkah",
+        "madinah": "Madinah"
+      },
+      "industries": {
+        "restaurants": "Restaurants",
+        "cafes": "Cafés",
+        "salons": "Salons",
+        "workshops": "Workshops",
+        "shops": "Shops",
+        "groceries": "Groceries",
+        "offices": "Offices",
+        "warehouses": "Warehouses",
+        "pharmacies": "Pharmacies",
+        "laundries": "Laundries",
+        "bakeries": "Bakeries"
+      }
+    },
+    "ticker": {
+      "live": "LIVE",
+      "listings": "Available listings",
+      "deals": "Active deals",
+      "completed": "Completed",
+      "avgPrice": "Avg. price",
+      "highPrice": "Highest price",
+      "lowPrice": "Lowest price",
+      "marketActivity": "Market activity",
+      "demand": "Demand",
+      "todayOpportunities": "Today's opportunities",
+      "users": "Users",
+      "successRate": "Success rate",
+      "verifiedSellers": "Verified sellers",
+      "tradingVolume": "Trading volume",
+      "active": "Active",
+      "moderate": "Moderate",
+      "quiet": "Quiet",
+      "high": "High",
+      "stable": "Stable",
+      "priority": "Priority"
+    },
+    "heatmap": {
+      "title": "Opportunities Heatmap",
+      "opportunities": "{{count}} opportunities",
+      "averageLabel": "Avg.",
+      "hot": "Hot",
+      "warm": "Warm",
+      "cool": "Quiet",
+      "unspecifiedCity": "Unspecified",
+      "general": "General"
+    },
+    "compare": {
+      "panelTitle": "Comparison ({{count}}/4)",
+      "clear": "Clear",
+      "close": "Close",
+      "compareNow": "Compare now",
+      "addAtLeast": "Add {{count}} more to compare",
+      "criterion": "Criterion",
+      "opportunityFallback": "Opportunity",
+      "rowPrice": "Price",
+      "rowCity": "City",
+      "rowDistrict": "District",
+      "rowDealType": "Deal type",
+      "rowTransparency": "Transparency",
+      "rowAiRating": "AI rating",
+      "rowSellerTrust": "Seller trust",
+      "viewDetails": "View details",
+      "aiRecommendation": "AI recommendation",
+      "bestChoice": "✓ Best choice",
+      "bestChoiceReason": "Based on price, transparency, and seller trust",
+      "best": "✓ Best"
+    },
+    "search": {
+      "noResultsAlertTemplate": "No results match your search right now. Don't worry — turn on the alert and we'll notify you by email and SMS as soon as a matching listing is published 📧📱",
+      "tryAgain": "Sorry, please try again",
+      "loginForAlert": "Sign in first to enable the alert",
+      "alertSavedToast": "Alert enabled! We'll notify you by email and SMS 📧📱",
+      "alertSaveError": "Something went wrong, please try again",
+      "notifyMeCta": "Notify me by email and SMS",
+      "alertActive": "Email & SMS alert enabled ✓",
+      "appliedPrefix": "Applied:",
+      "customPriceRange": "Custom price range",
+      "suggestions": {
+        "1": "Café in Jeddah",
+        "2": "Restaurant in Riyadh",
+        "3": "Affordable workshop",
+        "4": "Salon ready for takeover",
+        "5": "Shop in Dammam"
+      }
+    }
+  },
+  "notifications": {
+    "shell": {
+      "title": "Notifications",
+      "unreadBadge": "{{count}} new",
+      "markAllRead": "Mark all read"
+    },
+    "filters": {
+      "all": "All",
+      "unread": "Unread",
+      "deals": "Deals",
+      "offers": "Offers",
+      "messages": "Messages",
+      "documents": "Documents"
+    },
+    "empty": {
+      "all": "No notifications",
+      "unread": "No unread notifications"
+    },
+    "groups": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "time": {
+      "now": "now",
+      "minutes_one": "1 min",
+      "minutes_other": "{{count}} mins",
+      "hours_one": "1 hr",
+      "hours_other": "{{count}} hrs",
+      "days_one": "1 day",
+      "days_other": "{{count}} days"
+    }
   },
   "dealCheck": {
     "alibabaDisclaimer": "Estimated price from global sources (Alibaba) — may differ from Saudi market due to shipping, customs, and intermediaries. For accurate valuation, we recommend a specialized inspection via Jasaas Valuation",

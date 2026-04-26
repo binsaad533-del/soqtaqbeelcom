@@ -1,24 +1,49 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { Search, MapPin, RotateCcw, ChevronDown, ChevronUp, Loader2, EyeOff } from "lucide-react";
+import { MapPin, RotateCcw, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { requestGeolocation, findNearestCity, getNearbyCities } from "@/lib/saudiCities";
 import { toast } from "sonner";
 import SarSymbol from "@/components/SarSymbol";
 
-const dealTypes = [
-  { id: "الكل", label: "الكل" },
-  { id: "full_takeover", label: "تقبيل كامل" },
-  { id: "transfer_no_liabilities", label: "تقبيل نقل أعمال بدون التزامات سابقة" },
-  { id: "assets_setup", label: "تقبيل أصول + تجهيز تشغيلي (بدون سجل تجاري)" },
-  { id: "assets_only", label: "تقبيل أصول فقط" },
+// dbValue stays Arabic (DB stored value). id used in React. labelKey -> i18n.
+const DEAL_TYPES = [
+  { id: "all", dbValue: "الكل", labelKey: "marketplace.filters.dealTypes.all" },
+  { id: "full_takeover", dbValue: "تقبيل كامل", labelKey: "marketplace.filters.dealTypes.fullTakeover" },
+  { id: "transfer_no_liabilities", dbValue: "تقبيل نقل أعمال بدون التزامات سابقة", labelKey: "marketplace.filters.dealTypes.transferNoLiabilities" },
+  { id: "assets_setup", dbValue: "تقبيل أصول + تجهيز تشغيلي (بدون سجل تجاري)", labelKey: "marketplace.filters.dealTypes.assetsSetup" },
+  { id: "assets_only", dbValue: "تقبيل أصول فقط", labelKey: "marketplace.filters.dealTypes.assetsOnly" },
 ];
 
-const cities = ["الكل", "📍 بالقرب مني", "الرياض", "جدة", "الدمام", "مكة", "المدينة"];
+const NEAR_ME_VALUE = "📍 بالقرب مني";
 
-const activities = ["الكل", "مطاعم", "كافيهات", "صالونات", "ورش", "محلات", "بقالات", "مكاتب", "مستودعات", "صيدليات", "مغاسل", "مخابز"];
+const CITIES = [
+  { dbValue: "الكل", labelKey: "marketplace.filters.dealTypes.all" },
+  { dbValue: NEAR_ME_VALUE, labelKey: "marketplace.filters.nearbyOption" },
+  { dbValue: "الرياض", labelKey: "marketplace.filters.cities.riyadh" },
+  { dbValue: "جدة", labelKey: "marketplace.filters.cities.jeddah" },
+  { dbValue: "الدمام", labelKey: "marketplace.filters.cities.dammam" },
+  { dbValue: "مكة", labelKey: "marketplace.filters.cities.makkah" },
+  { dbValue: "المدينة", labelKey: "marketplace.filters.cities.madinah" },
+];
+
+const ACTIVITIES = [
+  { dbValue: "الكل", labelKey: "marketplace.filters.dealTypes.all" },
+  { dbValue: "مطاعم", labelKey: "marketplace.filters.industries.restaurants" },
+  { dbValue: "كافيهات", labelKey: "marketplace.filters.industries.cafes" },
+  { dbValue: "صالونات", labelKey: "marketplace.filters.industries.salons" },
+  { dbValue: "ورش", labelKey: "marketplace.filters.industries.workshops" },
+  { dbValue: "محلات", labelKey: "marketplace.filters.industries.shops" },
+  { dbValue: "بقالات", labelKey: "marketplace.filters.industries.groceries" },
+  { dbValue: "مكاتب", labelKey: "marketplace.filters.industries.offices" },
+  { dbValue: "مستودعات", labelKey: "marketplace.filters.industries.warehouses" },
+  { dbValue: "صيدليات", labelKey: "marketplace.filters.industries.pharmacies" },
+  { dbValue: "مغاسل", labelKey: "marketplace.filters.industries.laundries" },
+  { dbValue: "مخابز", labelKey: "marketplace.filters.industries.bakeries" },
+];
+
 const INITIAL_ACTIVITIES_SHOWN = 5;
 
 export interface FilterState {
@@ -64,25 +89,25 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
       const { latitude, longitude } = pos.coords;
       const nearest = findNearestCity(latitude, longitude);
       const nearby = getNearbyCities(latitude, longitude, 150);
-      onChange({ ...filters, city: "📍 بالقرب مني", nearbyCities: nearby.length > 0 ? nearby : [nearest.name] });
-      toast.success(`📍 تم تحديد موقعك بالقرب من ${nearest.name}`);
+      onChange({ ...filters, city: NEAR_ME_VALUE, nearbyCities: nearby.length > 0 ? nearby : [nearest.name] });
+      toast.success(t("marketplace.geoSuccessToast", { city: nearest.name }));
     } catch (err: unknown) {
       const geoErr = err as GeolocationPositionError;
       if (geoErr?.code === 1) {
-        toast.error("يرجى السماح بالوصول إلى الموقع من إعدادات المتصفح");
+        toast.error(t("marketplace.geoPermissionToast"));
       } else {
-        toast.error("تعذر تحديد موقعك، حاول مرة أخرى");
+        toast.error(t("marketplace.geoFailedToast"));
       }
     } finally {
       setGeoLoading(false);
     }
-  }, [filters, onChange]);
+  }, [filters, onChange, t]);
 
-  const handleCityClick = useCallback((city: string) => {
-    if (city === "📍 بالقرب مني") {
+  const handleCityClick = useCallback((dbValue: string) => {
+    if (dbValue === NEAR_ME_VALUE) {
       handleNearMe();
     } else {
-      onChange({ ...filters, city, nearbyCities: undefined });
+      onChange({ ...filters, city: dbValue, nearbyCities: undefined });
     }
   }, [handleNearMe, filters, onChange]);
 
@@ -96,17 +121,15 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
     filters.priceRange[1] === 3000000 &&
     filters.search === "";
 
-  const filteredCities = citySearch
-    ? cities.filter(c => c !== "الكل" && c.includes(citySearch))
-    : cities;
+  const filteredCities = useMemo(() => {
+    if (!citySearch) return CITIES;
+    return CITIES.filter(c => c.dbValue !== "الكل" && (c.dbValue.includes(citySearch) || t(c.labelKey).includes(citySearch)));
+  }, [citySearch, t]);
 
-  const visibleActivities = showAllActivities
-    ? activities
-    : activities.slice(0, INITIAL_ACTIVITIES_SHOWN);
+  const visibleActivities = showAllActivities ? ACTIVITIES : ACTIVITIES.slice(0, INITIAL_ACTIVITIES_SHOWN);
 
   return (
     <div className="space-y-5">
-      {/* Result count */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{resultCount}</span> {t("marketplace.available")}
@@ -117,22 +140,21 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <RotateCcw size={12} />
-            إعادة تعيين
+            {t("marketplace.reset")}
           </button>
         )}
       </div>
 
-
       {/* Deal Type Tabs */}
       <Section label={t("marketplace.dealType")}>
         <div className="flex flex-col gap-1.5">
-          {dealTypes.map(dt => (
+          {DEAL_TYPES.map(dt => (
             <TabChip
               key={dt.id}
-              active={filters.dealType === dt.id}
-              onClick={() => set("dealType", dt.id)}
+              active={filters.dealType === dt.dbValue}
+              onClick={() => set("dealType", dt.dbValue)}
             >
-              {dt.label}
+              {t(dt.labelKey)}
             </TabChip>
           ))}
         </div>
@@ -145,22 +167,22 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
           <input
             value={citySearch}
             onChange={e => setCitySearch(e.target.value)}
-            placeholder="ابحث عن مدينة..."
+            placeholder={t("marketplace.searchCity")}
             className="w-full pr-8 pl-3 py-1.5 rounded-lg border border-border/40 bg-background text-xs focus:outline-none focus:border-primary/30"
           />
         </div>
         <div className="flex flex-wrap gap-1.5">
           {filteredCities.map(c => (
-            <Chip key={c} active={filters.city === c} onClick={() => handleCityClick(c)}>
-              {c === "📍 بالقرب مني" && geoLoading ? (
+            <Chip key={c.dbValue} active={filters.city === c.dbValue} onClick={() => handleCityClick(c.dbValue)}>
+              {c.dbValue === NEAR_ME_VALUE && geoLoading ? (
                 <span className="flex items-center gap-1">
                   <Loader2 size={11} className="animate-spin" />
-                  جاري التحديد...
+                  {t("marketplace.locating")}
                 </span>
-              ) : c === "📍 بالقرب مني" && filters.city === c && filters.nearbyCities?.length ? (
+              ) : c.dbValue === NEAR_ME_VALUE && filters.city === c.dbValue && filters.nearbyCities?.length ? (
                 <span>📍 {filters.nearbyCities[0]}</span>
               ) : (
-                c
+                t(c.labelKey)
               )}
             </Chip>
           ))}
@@ -171,19 +193,19 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
       <Section label={t("marketplace.activity")}>
         <div className="flex flex-wrap gap-1.5">
           {visibleActivities.map(a => (
-            <Chip key={a} active={filters.activity === a} onClick={() => set("activity", a)}>
-              {a}
+            <Chip key={a.dbValue} active={filters.activity === a.dbValue} onClick={() => set("activity", a.dbValue)}>
+              {t(a.labelKey)}
             </Chip>
           ))}
-          {activities.length > INITIAL_ACTIVITIES_SHOWN && (
+          {ACTIVITIES.length > INITIAL_ACTIVITIES_SHOWN && (
             <button
               onClick={() => setShowAllActivities(v => !v)}
               className="flex items-center gap-0.5 text-[11px] text-primary hover:text-primary/80 transition-colors px-2 py-1"
             >
               {showAllActivities ? (
-                <>أقل <ChevronUp size={12} /></>
+                <>{t("marketplace.showLess")} <ChevronUp size={12} /></>
               ) : (
-                <>المزيد <ChevronDown size={12} /></>
+                <>{t("marketplace.showMore")} <ChevronDown size={12} /></>
               )}
             </button>
           )}
@@ -191,7 +213,7 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
       </Section>
 
       {/* Price Range */}
-      <Section label="السعر">
+      <Section label={t("marketplace.price")}>
         <div className="px-1">
           <Slider
             min={0}
@@ -208,7 +230,6 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
         </div>
       </Section>
 
-      {/* Hide simulation toggle */}
       <label htmlFor="hide-sim" className="flex items-center gap-2 pt-3 mt-1 border-t border-border/30 cursor-pointer select-none group">
         <Switch
           id="hide-sim"
@@ -218,7 +239,7 @@ const MarketplaceFilters = ({ filters, onChange, resultCount }: Props) => {
           className="h-4 w-7 shrink-0 [&>span]:h-3 [&>span]:w-3 data-[state=checked]:[&>span]:translate-x-3"
         />
         <span className="text-[11px] text-muted-foreground group-hover:text-foreground transition-colors">
-          إخفاء الإعلانات التجريبية
+          {t("marketplace.hideSimulation")}
         </span>
       </label>
     </div>

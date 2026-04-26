@@ -252,7 +252,189 @@
     "dealType": "نوع العملية",
     "city": "المدينة",
     "activity": "النشاط",
-    "aiSearch": "وش تدور عليه؟ الـAI يساعدك…"
+    "price": "السعر",
+    "aiSearch": "وش تدور عليه؟ الـAI يساعدك…",
+    "reset": "إعادة تعيين",
+    "searchCity": "ابحث عن مدينة...",
+    "locating": "جاري التحديد...",
+    "showMore": "المزيد",
+    "showLess": "أقل",
+    "hideSimulation": "إخفاء الإعلانات التجريبية",
+    "filterTitle": "فلترة المشاريع",
+    "filterCta": "فلترة",
+    "showResultsCta": "عرض {{count}} نتيجة",
+    "noResults": "لا توجد نتائج مطابقة",
+    "noExactResults": "لا توجد نتائج مطابقة تماماً لبحثك",
+    "similarOpportunities": "فرص مشابهة قد تهمّك",
+    "showingRange": "عرض {{start}}–{{end}} من {{total}} نتيجة",
+    "compareLimitToast": "يمكنك مقارنة 4 إعلانات كحد أقصى",
+    "loginToLikeToast": "سجّل دخولك أولاً للإعجاب",
+    "linkCopied": "تم نسخ الرابط",
+    "linkCopyFailed": "لم يتم نسخ الرابط، انسخه يدوياً",
+    "geoPermissionToast": "يرجى السماح بالوصول إلى الموقع من إعدادات المتصفح",
+    "geoFailedToast": "تعذر تحديد موقعك، حاول مرة أخرى",
+    "geoSuccessToast": "📍 تم تحديد موقعك بالقرب من {{city}}",
+    "seo": {
+      "title": "سوق الفرص — تصفح مشاريع وفرص تجارية للبيع في السعودية",
+      "description": "تصفح فرص تقبيل المشاريع التجارية المتاحة في السعودية — مطاعم، محلات، ورش، مراكز تجميل والمزيد",
+      "jsonLdName": "سوق الفرص — فرص تقبيل مشاريع تجارية",
+      "jsonLdDescription": "قائمة بفرص تقبيل المشاريع التجارية المتاحة في السعودية"
+    },
+    "card": {
+      "featured": "مميز",
+      "sellerFallback": "بائع",
+      "online": "متواجد",
+      "offline": "غير متواجد",
+      "onlineTitle": "متواجد الآن",
+      "offlineTitle": "غير متواجد",
+      "opportunityFallback": "فرصة تقبيل",
+      "assetCount": "{{count}} أصل",
+      "yearlyRent": "إيجار {{amount}}/سنة",
+      "operationalReady": "جاهز للتشغيل",
+      "transparencyTitle": "شفافية الإعلان: {{score}}%",
+      "transparencyMedium": "⚠ متوسط",
+      "transparencyWeak": "⚠ ضعيف",
+      "transparencyMissing": "✗ ناقص",
+      "compareAdd": "مقارنة",
+      "compareRemove": "إزالة من المقارنة",
+      "like": "إعجاب",
+      "share": "مشاركة"
+    },
+    "filters": {
+      "nearbyOption": "📍 بالقرب مني",
+      "dealTypes": {
+        "all": "الكل",
+        "fullTakeover": "تقبيل كامل",
+        "transferNoLiabilities": "تقبيل نقل أعمال بدون التزامات سابقة",
+        "assetsSetup": "تقبيل أصول + تجهيز تشغيلي (بدون سجل تجاري)",
+        "assetsOnly": "تقبيل أصول فقط",
+        "transferShort": "تقبيل بدون التزامات",
+        "assetsSetupShort": "تقبيل أصول وتجهيزات"
+      },
+      "cities": {
+        "riyadh": "الرياض",
+        "jeddah": "جدة",
+        "dammam": "الدمام",
+        "makkah": "مكة",
+        "madinah": "المدينة"
+      },
+      "industries": {
+        "restaurants": "مطاعم",
+        "cafes": "كافيهات",
+        "salons": "صالونات",
+        "workshops": "ورش",
+        "shops": "محلات",
+        "groceries": "بقالات",
+        "offices": "مكاتب",
+        "warehouses": "مستودعات",
+        "pharmacies": "صيدليات",
+        "laundries": "مغاسل",
+        "bakeries": "مخابز"
+      }
+    },
+    "ticker": {
+      "live": "مباشر",
+      "listings": "الفرص المتاحة",
+      "deals": "صفقات نشطة",
+      "completed": "مكتملة",
+      "avgPrice": "متوسط السعر",
+      "highPrice": "أعلى سعر",
+      "lowPrice": "أقل سعر",
+      "marketActivity": "حركة السوق",
+      "demand": "الطلب",
+      "todayOpportunities": "فرص اليوم",
+      "users": "المستخدمين",
+      "successRate": "نسبة الإتمام",
+      "verifiedSellers": "بائعون موثّقون",
+      "tradingVolume": "حجم التداول",
+      "active": "نشط",
+      "moderate": "متوسط",
+      "quiet": "هادئ",
+      "high": "مرتفع",
+      "stable": "مستقر",
+      "priority": "أولوية"
+    },
+    "heatmap": {
+      "title": "خريطة الفرص الحرارية",
+      "opportunities": "{{count}} فرصة",
+      "averageLabel": "متوسط",
+      "hot": "ساخن",
+      "warm": "دافئ",
+      "cool": "هادئ",
+      "unspecifiedCity": "غير محدد",
+      "general": "عام"
+    },
+    "compare": {
+      "panelTitle": "المقارنة ({{count}}/4)",
+      "clear": "مسح",
+      "close": "إغلاق",
+      "compareNow": "قارن الآن",
+      "addAtLeast": "أضف {{count}} على الأقل للمقارنة",
+      "criterion": "المعيار",
+      "opportunityFallback": "فرصة",
+      "rowPrice": "السعر",
+      "rowCity": "المدينة",
+      "rowDistrict": "الحي",
+      "rowDealType": "نوع التقبيل",
+      "rowTransparency": "الشفافية",
+      "rowAiRating": "تقييم AI",
+      "rowSellerTrust": "ثقة البائع",
+      "viewDetails": "عرض التفاصيل",
+      "aiRecommendation": "توصية AI",
+      "bestChoice": "✓ الخيار الأفضل",
+      "bestChoiceReason": "بناءً على السعر والشفافية وثقة البائع",
+      "best": "✓ الأفضل"
+    },
+    "search": {
+      "noResultsAlertTemplate": "ما لقيت نتائج تطابق بحثك الحين.. بس لا تشيل هم! فعّل التنبيه وأنا أرسل لك إشعار على الإيميل والجوال فور ما ينزل عرض يناسبك 📧📱",
+      "tryAgain": "عذرًا، حاول مرة ثانية",
+      "loginForAlert": "سجّل دخولك أولاً لتفعيل التنبيه",
+      "alertSavedToast": "تم تفعيل التنبيه! راح ننبّهك على الإيميل والجوال 📧📱",
+      "alertSaveError": "حصل خطأ، حاول مرة ثانية",
+      "notifyMeCta": "نبّهني على الإيميل والجوال",
+      "alertActive": "تم تفعيل التنبيه على الإيميل والجوال ✓",
+      "appliedPrefix": "تم تطبيق:",
+      "customPriceRange": "نطاق سعري محدد",
+      "suggestions": {
+        "1": "كوفي في جدة",
+        "2": "مطعم في الرياض",
+        "3": "ورشة بسعر مناسب",
+        "4": "صالون جاهز للتقبيل",
+        "5": "محل في الدمام"
+      }
+    }
+  },
+  "notifications": {
+    "shell": {
+      "title": "الإشعارات",
+      "unreadBadge": "{{count}} جديد",
+      "markAllRead": "قراءة الكل"
+    },
+    "filters": {
+      "all": "الكل",
+      "unread": "غير مقروء",
+      "deals": "صفقات",
+      "offers": "عروض",
+      "messages": "رسائل",
+      "documents": "وثائق"
+    },
+    "empty": {
+      "all": "لا توجد إشعارات",
+      "unread": "لا توجد إشعارات غير مقروءة"
+    },
+    "groups": {
+      "today": "اليوم",
+      "yesterday": "أمس"
+    },
+    "time": {
+      "now": "الآن",
+      "minutes_one": "دقيقة",
+      "minutes_other": "{{count}}د",
+      "hours_one": "ساعة",
+      "hours_other": "{{count}}س",
+      "days_one": "يوم",
+      "days_other": "{{count}}ي"
+    }
   },
   "dealCheck": {
     "alibabaDisclaimer": "سعر تقديري من مصادر عالمية (Alibaba) — قد يختلف عن السوق السعودي بسبب الشحن والجمارك والوسطاء. للتقييم الدقيق، ننصح بمعاينة متخصصة عبر جساس للتقييم",
