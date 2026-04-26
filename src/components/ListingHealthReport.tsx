@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Activity, Eye, Heart, FileText, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ interface ReportData {
 }
 
 const ListingHealthReport = ({ listingId }: HealthReportProps) => {
+  const { t } = useTranslation();
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -48,11 +50,11 @@ const ListingHealthReport = ({ listingId }: HealthReportProps) => {
       <div className="rounded-xl border border-border/40 p-4 bg-card">
         <div className="flex items-center gap-2 mb-3">
           <Activity size={16} className="text-primary" strokeWidth={1.5} />
-          <h3 className="text-sm font-medium">تقرير صحة الإعلان</h3>
+          <h3 className="text-sm font-medium">{t("listingHealth.title")}</h3>
         </div>
-        <p className="text-xs text-muted-foreground mb-3">تقييم شامل لأداء إعلانك مع توصيات للتحسين</p>
+        <p className="text-xs text-muted-foreground mb-3">{t("listingHealth.subtitle")}</p>
         <Button onClick={generate} size="sm" variant="outline" className="w-full text-xs">
-          إنشاء التقرير
+          {t("listingHealth.generateButton")}
         </Button>
       </div>
     );
@@ -62,7 +64,7 @@ const ListingHealthReport = ({ listingId }: HealthReportProps) => {
     return (
       <div className="rounded-xl border border-border/40 p-4 bg-card flex items-center justify-center gap-2 py-8">
         <Loader2 size={16} className="animate-spin text-primary" />
-        <span className="text-xs text-muted-foreground">جاري إنشاء التقرير...</span>
+        <span className="text-xs text-muted-foreground">{t("listingHealth.generating")}</span>
       </div>
     );
   }
@@ -72,7 +74,7 @@ const ListingHealthReport = ({ listingId }: HealthReportProps) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Activity size={16} className="text-primary" strokeWidth={1.5} />
-          <h3 className="text-sm font-medium">تقرير صحة الإعلان</h3>
+          <h3 className="text-sm font-medium">{t("listingHealth.title")}</h3>
         </div>
         <button onClick={generate} className="text-muted-foreground hover:text-foreground">
           <RefreshCw size={12} />

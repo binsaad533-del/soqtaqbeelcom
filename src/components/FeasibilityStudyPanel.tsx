@@ -902,20 +902,19 @@ const FeasibilityStudyPanel = ({ listing, analysisCache, isOwner }: FeasibilityS
           <h3 className="text-base font-semibold">{t("feasibility.title")}</h3>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          هذي الصفقة من نوع <span className="font-medium text-foreground">"أصول فقط"</span> — أي بيع معدات
-          أو أصول دون نشاط تشغيلي. لذلك، دراسة الجدوى الاقتصادية لا تنطبق.
+          {t("feasibility.assetsOnlyDesc")}
         </p>
         <div className="rounded-lg bg-background/60 border border-border/40 p-3 space-y-1.5">
           <div className="text-xs font-medium text-muted-foreground mb-1">
-            بدائل أنسب لتقييم هذه الصفقة:
+            {t("feasibility.assetsOnlyAlternatives")}
           </div>
           <div className="flex items-start gap-2 text-sm">
             <span className="text-blue-500 mt-0.5">•</span>
-            <span><span className="font-medium">تقييم الأصل:</span> راجع قسم <span className="text-primary">"فحص الصفقة"</span></span>
+            <span>{t("feasibility.assetsOnlyAltAssetCheck")}</span>
           </div>
           <div className="flex items-start gap-2 text-sm">
             <span className="text-blue-500 mt-0.5">•</span>
-            <span><span className="font-medium">مقارنة السوق:</span> راجع قسم <span className="text-primary">"تقييم الأصول"</span></span>
+            <span>{t("feasibility.assetsOnlyAltMarket")}</span>
           </div>
         </div>
       </div>

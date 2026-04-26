@@ -130,7 +130,9 @@
     "years": "years",
     "year": "year",
     "area": "Area:",
-    "sqm": "sqm"
+    "sqm": "sqm",
+    "editPrice": "Edit price",
+    "editListing": "Edit listing"
   },
   "deal": {
     "mainOption": "Primary option",
@@ -1202,5 +1204,22 @@
       "assets_setup": "Assets + operational setup (no commercial registration)",
       "assets_only": "Assets only"
     }
+  },
+  "moqbilAgent": {
+    "title": "Moqbil Agent",
+    "statusInactive": "Not enabled for this listing",
+    "statusActive": "Active — running on this listing",
+    "settings": "Settings",
+    "decisionLog": "Decision log",
+    "toasts": {
+      "saveFailed": "Failed to save settings",
+      "saveSuccess": "Settings saved"
+    }
+  },
+  "listingHealth": {
+    "title": "Listing health report",
+    "subtitle": "A complete assessment of your listing's performance with improvement recommendations",
+    "generateButton": "Generate report",
+    "generating": "Generating report..."
   }
 }
