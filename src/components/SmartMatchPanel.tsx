@@ -73,9 +73,9 @@ const SmartMatchPanel = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <Target size={14} className="text-primary" />
-          <span className="text-xs font-medium">فرص مطابقة لك</span>
+          <span className="text-xs font-medium">{t("aiChat.emptyState.matchesForYou")}</span>
           <Badge variant="secondary" className="text-[9px] px-1.5 py-0">
-            {matches.length} من {totalAnalyzed}
+            {matches.length} {t("aiChat.emptyState.ofTotal")} {totalAnalyzed}
           </Badge>
         </div>
         <button onClick={findMatches} className="text-muted-foreground hover:text-foreground">
