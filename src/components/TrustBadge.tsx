@@ -1,4 +1,4 @@
-import { Shield, ShieldCheck, ShieldAlert, ShieldX, Award, Star } from "lucide-react";
+import { Shield, ShieldCheck, ShieldAlert, Award, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,16 @@ export const getTrustLevel = (score: number) => {
   if (score >= 70) return { key: "trusted", color: "text-emerald-600", bg: "bg-emerald-600/10", Icon: ShieldCheck };
   if (score >= 50) return { key: "medium", color: "text-muted-foreground", bg: "bg-muted/50", Icon: Shield };
   return { key: "low", color: "text-foreground/50", bg: "bg-muted/30", Icon: ShieldAlert };
+};
+
+// Backward-compat helper. Prefer using t(`trustBadge.verification.${level}`) directly in components.
+export const getVerificationLabel = (level: string) => {
+  switch (level) {
+    case "full": return "موثق بالكامل";
+    case "basic": return "توثيق أساسي";
+    case "phone": return "رقم موثق";
+    default: return "غير موثق";
+  }
 };
 
 export const SELLER_BADGE_KEYS: Record<string, { tKey: string; icon: typeof Award }> = {

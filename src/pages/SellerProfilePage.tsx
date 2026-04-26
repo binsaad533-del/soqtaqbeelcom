@@ -5,7 +5,7 @@ import { useListings, type Listing } from "@/hooks/useListings";
 import { useSellerReviews, type SellerReview } from "@/hooks/useSellerReviews";
 import { useListingSocial } from "@/hooks/useListingSocial";
 import { useAuthContext } from "@/contexts/AuthContext";
-import TrustBadge, { getSellerBadges, getVerificationLabel } from "@/components/TrustBadge";
+import TrustBadge, { getSellerBadges } from "@/components/TrustBadge";
 import SellerReviewsSummary from "@/components/SellerReviewsSummary";
 import SellerRatingDisplay from "@/components/SellerRatingDisplay";
 import SupervisorPermissionsDialog from "@/components/SupervisorPermissionsDialog";
