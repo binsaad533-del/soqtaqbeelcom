@@ -381,33 +381,53 @@ CRITICAL RULES:
 8. Return EXACTLY the same JSON keys as the input — do not add, remove, or rename keys.
 9. Output ONLY valid JSON. No markdown, no code fences.`;
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: JSON.stringify(fields, null, 2) },
-      ],
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TRANSLATION_TIMEOUT_MS);
 
-  if (response.status === 429) throw new Error("Rate limit exceeded, please try again later");
-  if (response.status === 402) throw new Error("AI credits exhausted, please add funds");
+  let response: Response;
+  try {
+    response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: JSON.stringify(fields, null, 2) },
+        ],
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+      }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if ((err as Error)?.name === "AbortError") {
+      throw new TranslationError("timeout", "Translation request timed out");
+    }
+    throw new TranslationError("unknown", (err as Error)?.message ?? "Network error");
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  if (response.status === 429) {
+    const retryAfterHeader = response.headers.get("retry-after");
+    const retryAfterMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : 2000;
+    throw new TranslationError("rate_limited", "Rate limit exceeded", retryAfterMs);
+  }
+  if (response.status === 402) {
+    throw new TranslationError("quota_exceeded", "AI credits exhausted");
+  }
   if (!response.ok) {
     const errText = await response.text().catch(() => "");
-    throw new Error(`Gemini API error ${response.status}: ${errText}`);
+    throw new TranslationError("unknown", `Gemini API error ${response.status}: ${errText}`);
   }
 
   const result = await response.json();
   const content = result?.choices?.[0]?.message?.content;
-  if (!content) throw new Error("Empty translation response");
+  if (!content) throw new TranslationError("unknown", "Empty translation response");
 
   try {
     return JSON.parse(content);
