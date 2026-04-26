@@ -29,6 +29,7 @@ const shouldShow = (dealType: string, field: string) =>
   isFieldRelevant(dealType, field) || ["business_activity", "city", "district", "price"].includes(field);
 
 const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDeleted }: ListingEditDialogProps) => {
+  const { t } = useTranslation();
   const dealType = listing.primary_deal_type || listing.deal_type || "full_takeover";
   const { updateListing, uploadFile, softDeleteListing } = useListings();
   const queryClient = useQueryClient();
