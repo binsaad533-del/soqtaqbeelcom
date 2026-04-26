@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ type SavedListing = {
 };
 
 export default function SavedListingsTab() {
+  const { t } = useTranslation();
   const { user } = useAuthContext();
   const [items, setItems] = useState<SavedListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +77,7 @@ export default function SavedListingsTab() {
     const { error } = await supabase.from("listing_likes").delete().eq("id", likeId);
     if (!error) {
       setItems(prev => prev.filter(i => i.like_id !== likeId));
-      toast.success("تم إزالة الإعلان من المحفوظات");
+      toast.success(t("dashboard.saved.removed"));
     }
     setRemoving(null);
   };
@@ -102,7 +104,7 @@ export default function SavedListingsTab() {
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="ابحث في المحفوظات..."
+          placeholder={t("dashboard.search.saved")}
           className="w-full bg-muted/40 border-0 rounded-lg py-2 pr-9 pl-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
         />
       </div>
@@ -111,10 +113,10 @@ export default function SavedListingsTab() {
         <div className="bg-card rounded-2xl p-12 shadow-soft border border-border/30 text-center">
           <Heart size={32} className="mx-auto mb-3 text-muted-foreground/20" strokeWidth={1} />
           <p className="text-sm text-muted-foreground mb-2">
-            {items.length === 0 ? "لم تحفظ أي إعلان بعد" : "لا توجد نتائج"}
+            {items.length === 0 ? t("dashboard.saved.empty") : t("dashboard.saved.noResults")}
           </p>
           {items.length === 0 && (
-            <Link to="/marketplace" className="text-xs text-primary hover:underline">تصفح الفرص واحفظ ما يعجبك</Link>
+            <Link to="/marketplace" className="text-xs text-primary hover:underline">{t("dashboard.saved.browseAndSave")}</Link>
           )}
         </div>
       ) : (
@@ -133,14 +135,14 @@ export default function SavedListingsTab() {
                   </div>
                   <div className="p-3">
                     <div className="text-sm font-medium mb-1 group-hover:text-primary transition-colors truncate">
-                      {item.title || item.business_activity || "فرصة تقبيل"}
+                      {item.title || item.business_activity || t("dashboard.saved.opportunityFallback")}
                     </div>
                     <div className="flex items-center gap-1 text-[11px] text-muted-foreground mb-2">
                       <MapPin size={11} strokeWidth={1.3} />
                       {item.district && `${item.district}، `}{item.city || "—"}
                     </div>
                     <div className="text-sm font-medium text-primary">
-                      {item.price ? <PriceDisplay amount={item.price} size={10} /> : "السعر عند التواصل"}
+                      {item.price ? <PriceDisplay amount={item.price} size={10} /> : t("dashboard.saved.priceOnContact")}
                     </div>
                   </div>
                 </Link>
@@ -148,7 +150,7 @@ export default function SavedListingsTab() {
                   onClick={(e) => { e.preventDefault(); removeLike(item.like_id); }}
                   disabled={removing === item.like_id}
                   className="absolute top-2 left-2 w-7 h-7 rounded-full bg-card/80 backdrop-blur flex items-center justify-center text-destructive hover:bg-destructive/10 transition-colors"
-                  title="إزالة من المحفوظات"
+                  title={t("dashboard.saved.removeTooltip")}
                 >
                   {removing === item.like_id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
                 </button>
