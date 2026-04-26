@@ -98,9 +98,9 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
   };
 
   const actionLabels: Record<string, string> = {
-    auto_reply: "رد تلقائي",
-    evaluate_offer: "تقييم عرض",
-    daily_summary: "ملخص يومي",
+    auto_reply: t("moqbilAgent.settings.actionLabels.auto_reply"),
+    evaluate_offer: t("moqbilAgent.settings.actionLabels.evaluate_offer"),
+    daily_summary: t("moqbilAgent.settings.actionLabels.daily_summary"),
   };
 
   return (
