@@ -130,7 +130,9 @@
     "years": "年",
     "year": "年",
     "area": "面积:",
-    "sqm": "平方米"
+    "sqm": "平方米",
+    "editPrice": "编辑价格",
+    "editListing": "编辑列表"
   },
   "deal": {
     "mainOption": "主要选项",
@@ -1202,5 +1204,22 @@
       "assets_setup": "资产 + 运营装置(不含工商注册)",
       "assets_only": "仅资产"
     }
+  },
+  "moqbilAgent": {
+    "title": "Moqbil 代理",
+    "statusInactive": "未为此列表启用",
+    "statusActive": "活跃 — 正在为此列表运行",
+    "settings": "设置",
+    "decisionLog": "决策日志",
+    "toasts": {
+      "saveFailed": "保存设置失败",
+      "saveSuccess": "设置已保存"
+    }
+  },
+  "listingHealth": {
+    "title": "列表健康报告",
+    "subtitle": "对您列表表现的全面评估及改进建议",
+    "generateButton": "生成报告",
+    "generating": "正在生成报告..."
   }
 }

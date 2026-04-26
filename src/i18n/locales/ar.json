@@ -130,7 +130,9 @@
     "years": "سنوات",
     "year": "سنة",
     "area": "المساحة:",
-    "sqm": "م²"
+    "sqm": "م²",
+    "editPrice": "تعديل السعر",
+    "editListing": "تعديل الإعلان"
   },
   "deal": {
     "mainOption": "الخيار الرئيسي",
@@ -1202,5 +1204,22 @@
       "assets_setup": "تقبيل أصول + تجهيز تشغيلي (بدون سجل تجاري)",
       "assets_only": "تقبيل أصول فقط"
     }
+  },
+  "moqbilAgent": {
+    "title": "وكيل مقبل",
+    "statusInactive": "غير مفعّل لهذا الإعلان",
+    "statusActive": "نشط — يعمل على هذا الإعلان",
+    "settings": "الإعدادات",
+    "decisionLog": "سجل القرارات",
+    "toasts": {
+      "saveFailed": "فشل حفظ الإعدادات",
+      "saveSuccess": "تم حفظ الإعدادات"
+    }
+  },
+  "listingHealth": {
+    "title": "تقرير صحة الإعلان",
+    "subtitle": "تقييم شامل لأداء إعلانك مع توصيات للتحسين",
+    "generateButton": "إنشاء التقرير",
+    "generating": "جاري إنشاء التقرير..."
   }
 }
