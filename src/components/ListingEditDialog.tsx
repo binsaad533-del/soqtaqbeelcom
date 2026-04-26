@@ -652,13 +652,13 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
           <Button
             variant="destructive"
             onClick={async () => {
-              if (!confirm("هل أنت متأكد من حذف هذا الإعلان؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+              if (!confirm(t("editListing.toasts.deleteConfirm"))) return;
               setDeleting(true);
               const { error } = await softDeleteListing(listing.id);
               setDeleting(false);
-              if (error) { toast.error("فشل حذف الإعلان"); return; }
+              if (error) { toast.error(t("editListing.toasts.deleteFailed")); return; }
               await queryClient.invalidateQueries({ queryKey: ["listings"] });
-              toast.success("تم حذف الإعلان بنجاح");
+              toast.success(t("editListing.toasts.deleted"));
               onOpenChange(false);
               onDeleted?.();
             }}
@@ -666,15 +666,15 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
             className="rounded-xl gap-1"
           >
             {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-            حذف
+            {t("editListing.actions.delete")}
           </Button>
           <div className="flex-1" />
           <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl px-6">
-            إلغاء
+            {t("editListing.actions.cancel")}
           </Button>
           <Button onClick={handleSave} disabled={saving || uploading || uploadingDocs} className="gradient-primary text-primary-foreground rounded-xl px-6">
             {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
-            حفظ التعديلات
+            {t("editListing.actions.save")}
           </Button>
         </div>
       </DialogContent>
