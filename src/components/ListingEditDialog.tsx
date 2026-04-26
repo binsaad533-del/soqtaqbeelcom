@@ -566,8 +566,8 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
               ) : (
                 <>
                   <Upload size={24} className="mx-auto text-muted-foreground/50 mb-2" />
-                  <p className="text-xs text-muted-foreground">اسحب المستندات هنا أو اضغط للاختيار</p>
-                  <p className="text-[10px] text-muted-foreground/50 mt-1">PDF, Excel, صور، وغيرها</p>
+                  <p className="text-xs text-muted-foreground">{t("editListing.docs.dropHint")}</p>
+                  <p className="text-[10px] text-muted-foreground/50 mt-1">{t("editListing.docs.types")}</p>
                 </>
               )}
             </div>
