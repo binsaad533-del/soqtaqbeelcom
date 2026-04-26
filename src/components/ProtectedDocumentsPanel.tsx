@@ -37,20 +37,14 @@ interface Props {
 }
 
 /** Friendly label for a single classification row. */
-function fileLabel(c: FileClassification): string {
+function fileLabel(c: FileClassification, t: (k: string) => string): string {
   if (c.final_subcategory) {
-    const map: Record<string, string> = {
-      commercial_register: "سجل تجاري",
-      lease_contract: "عقد إيجار",
-      municipality_license: "رخصة بلدية",
-      civil_defense: "رخصة دفاع مدني",
-      other: "وثيقة أخرى",
-    };
-    if (map[c.final_subcategory]) return map[c.final_subcategory];
+    const subKeys = ["commercial_register", "lease_contract", "municipality_license", "civil_defense", "other"];
+    if (subKeys.includes(c.final_subcategory)) return t(`protectedDocs.subcategory.${c.final_subcategory}`);
   }
-  if (c.final_category === "legal_document") return "وثيقة قانونية";
-  if (c.final_category === "invoice_document") return "فاتورة / عرض سعر";
-  return c.file_name || "مستند";
+  if (c.final_category === "legal_document") return t("protectedDocs.category.legal_document");
+  if (c.final_category === "invoice_document") return t("protectedDocs.category.invoice_document");
+  return c.file_name || t("protectedDocs.category.fallback");
 }
 
 const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props) => {
