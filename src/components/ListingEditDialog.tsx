@@ -615,7 +615,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
           <TabsContent value="inventory" className="space-y-3 mt-3">
             {inventory.length === 0 && (
               <div className="text-center text-sm text-muted-foreground/60 py-6 border border-dashed border-border/30 rounded-xl">
-                لا توجد عناصر في المخزون
+                {t("editListing.inventory.empty")}
               </div>
             )}
 
