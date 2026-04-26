@@ -20,6 +20,7 @@ interface MatchResult {
 }
 
 const SmartMatchPanel = () => {
+  const { t } = useTranslation();
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const [matches, setMatches] = useState<MatchResult[]>([]);
