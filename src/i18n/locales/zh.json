@@ -1412,7 +1412,31 @@
     "listingPaused": "项目已暂停",
     "listingResumed": "项目已重新激活",
     "deleteFailedFallback": "无法删除项目",
-    "deleteSuccess": "项目已删除"
+    "deleteSuccess": "项目已删除",
+    "loading": "正在加载列表...",
+    "notFound": "未找到列表",
+    "backToMarketplace": "返回市场",
+    "tryAgain": "重试",
+    "continueNegotiationBtn": "继续谈判",
+    "usersInterested": "{{count}} 位用户表示了兴趣",
+    "firstMessagePlaceholder": "您好,我对此机会感兴趣,想了解更多详情...",
+    "meetingQuestion": "您想安排会面吗?",
+    "yesMeeting": "✅ 是,我想会面",
+    "noMeeting": "💬 不,仅在线",
+    "sendMyInterest": "发送我的兴趣",
+    "sold": "已售出",
+    "cannotEditDuringFinalize": "在最终协议期间无法编辑列表",
+    "schemaCity": "城市",
+    "schemaDistrict": "地区",
+    "tryThisOpportunity": "对此机会表示兴趣",
+    "simulation": {
+      "title": "⚠️ 演示列表 — 非真实机会",
+      "subtitle": "此列表仅为模拟,用于演示 Souq Taqbeel 平台的运作方式。此处显示的所有数据、照片和价格均为虚构。",
+      "bullet1": "您无法在此列表上进行谈判或完成交易",
+      "bullet2": "目的是向您介绍机会的展示和谈判方式",
+      "bullet3": "当添加来自经过验证的卖家的真实机会时,将不会显示此提醒",
+      "cta": "立即添加您的机会"
+    }
   },
   "editListing": {
     "title": "编辑项目",

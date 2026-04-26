@@ -142,11 +142,11 @@ const ListingDetailsPage = () => {
   const listing = (translatedListing ?? originalListing) as Listing | null;
 
   // Dynamic SEO with OG tags for smart social sharing
-  const listingTitle = listing ? (listing.title || listing.business_activity || "فرصة تقبيل") : "تفاصيل الإعلان";
-  const ogTitle = listing ? `${listingTitle} — ${listing.city || "السعودية"}` : "تفاصيل الإعلان";
+  const listingTitle = listing ? (listing.title || listing.business_activity || t("listingDetails.opportunityFallback")) : t("listingDetails.seoDefaultTitle");
+  const ogTitle = listing ? `${listingTitle} — ${listing.city || t("listingDetails.defaultCity")}` : t("listingDetails.seoDefaultTitle");
   const ogDesc = listing
-    ? `${listing.business_activity || "فرصة تقبيل"} في ${listing.city || "السعودية"}${listing.price ? ` بسعر ${Number(listing.price).toLocaleString("en-US")} ر.س` : ""} — تصفح التفاصيل وقدّم عرضك على سوق تقبيل`
-    : "عرض تفاصيل فرصة تقبيل على سوق تقبيل";
+    ? `${listing.business_activity || t("listingDetails.opportunityFallback")} ${t("listingDetails.seoBuilderInPrefix")} ${listing.city || t("listingDetails.defaultCity")}${listing.price ? ` ${t("listingDetails.seoBuilderPriced")} ${Number(listing.price).toLocaleString("en-US")} ${t("listingDetails.seoCurrencyLabel")}` : ""} — ${t("listingDetails.seoBuilderSuffix")}`
+    : t("listingDetails.seoDefaultDesc");
   const ogPhotos = listing?.photos as Record<string, string[]> | null;
   const ogImage = ogPhotos ? (Object.values(ogPhotos).flat()[0] as string | undefined) : undefined;
   useSEO({
@@ -231,7 +231,7 @@ const ListingDetailsPage = () => {
     } catch (err: any) {
       if (signal?.aborted) return;
       console.error("[ListingDetails] Load failed:", { id, error: err?.message });
-      setLoadError("فشل تحميل الإعلان — يرجى المحاولة مرة أخرى");
+      setLoadError(t("listingDetails.toasts.loadFailed"));
     } finally {
       if (!signal?.aborted) {
         setLoading(false);
@@ -282,7 +282,7 @@ const ListingDetailsPage = () => {
     if (!user) { setShowAuthDialog(true); return; }
     if (!listing) return;
     if (user.id === listing.owner_id) {
-      toast.error("لا يمكنك إبداء الاهتمام بإعلانك الخاص");
+      toast.error(t("listingDetails.toasts.cannotInterestOwnListing"));
       return;
     }
     const myDeals = await getMyDeals();
@@ -297,7 +297,7 @@ const ListingDetailsPage = () => {
     try {
       const { data, error } = await createDeal(listing.id, listing.owner_id);
       if (error) {
-        const msg = error?.message?.includes("Rate limit") ? "تم تجاوز الحد المسموح، حاول لاحقاً" : "حدث خطأ أثناء بدء التفاوض. يرجى إعادة المحاولة";
+        const msg = error?.message?.includes("Rate limit") ? t("listingDetails.toasts.rateLimitReached") : t("listingDetails.toasts.negotiationError");
         toast.error(msg);
         setSubmittingInterest(false);
         return;
@@ -305,9 +305,9 @@ const ListingDetailsPage = () => {
       if (data) {
         const msgParts: string[] = [];
         if (interestMessage.trim()) msgParts.push(interestMessage.trim());
-        if (wantsMeeting === true) msgParts.push("🤝 أرغب بترتيب مقابلة للاطلاع على الفرصة");
-        if (wantsMeeting === false) msgParts.push("💬 أفضل إتمام التفاوض إلكترونياً");
-        const fullMsg = msgParts.length > 0 ? msgParts.join("\n\n") : "مرحباً، أنا مهتم بهذه الفرصة وأود معرفة المزيد من التفاصيل.";
+        if (wantsMeeting === true) msgParts.push(t("listingDetails.defaultMessages.wantsMeeting"));
+        if (wantsMeeting === false) msgParts.push(t("listingDetails.defaultMessages.noMeeting"));
+        const fullMsg = msgParts.length > 0 ? msgParts.join("\n\n") : t("listingDetails.defaultMessages.firstMessage");
 
         await supabase.from("negotiation_messages").insert({
           deal_id: data.id,
@@ -317,7 +317,7 @@ const ListingDetailsPage = () => {
         });
 
         const conversationId = crypto.randomUUID();
-        const defaultFirstMsg = "مرحباً، أنا مهتم بهذه الفرصة";
+        const defaultFirstMsg = t("listingDetails.defaultMessages.shortFirstMessage");
         await supabase.from("conversations").insert({
           id: conversationId,
           listing_id: listing.id,
@@ -338,12 +338,12 @@ const ListingDetailsPage = () => {
         setShowInterestForm(false);
         setInterestMessage("");
         setWantsMeeting(null);
-        toast.success("تم إرسال اهتمامك بنجاح!");
+        toast.success(t("listingDetails.toasts.interestSent"));
         navigate(`/negotiate/${data.id}`);
       }
     } catch (err: any) {
       console.error("[ListingDetails] submitInterest failed:", err?.message);
-      toast.error("تعذر إرسال الاهتمام. تحقق من اتصالك بالإنترنت وأعد المحاولة");
+      toast.error(t("listingDetails.toasts.interestFailed"));
     } finally {
       setSubmittingInterest(false);
     }
@@ -354,7 +354,7 @@ const ListingDetailsPage = () => {
       <div className="py-20 flex flex-col items-center gap-4">
         <AiStar size={32} />
         <Loader2 size={24} className="text-primary animate-spin" />
-        <p className="text-sm text-muted-foreground">جاري تحميل الإعلان...</p>
+        <p className="text-sm text-muted-foreground">{t("listingDetails.loading")}</p>
       </div>
     );
   }
@@ -364,7 +364,7 @@ const ListingDetailsPage = () => {
       <div className="py-20 text-center">
         <AlertTriangle size={32} className="mx-auto mb-4 text-destructive" />
         <p className="text-sm text-destructive mb-3">{loadError}</p>
-        <Button onClick={() => loadListing(true)} variant="outline" className="rounded-xl">إعادة المحاولة</Button>
+        <Button onClick={() => loadListing(true)} variant="outline" className="rounded-xl">{t("listingDetails.tryAgain")}</Button>
       </div>
     );
   }
@@ -373,9 +373,9 @@ const ListingDetailsPage = () => {
     return (
       <div className="py-20 text-center">
         <AiStar size={32} className="mx-auto mb-4" />
-        <p className="text-sm text-muted-foreground">الإعلان غير موجود</p>
+        <p className="text-sm text-muted-foreground">{t("listingDetails.notFound")}</p>
         <Button asChild variant="outline" className="mt-4 rounded-xl">
-          <Link to="/marketplace">العودة للسوق</Link>
+          <Link to="/marketplace">{t("listingDetails.backToMarketplace")}</Link>
         </Button>
       </div>
     );
@@ -398,13 +398,13 @@ const ListingDetailsPage = () => {
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: listing.title || "فرصة تقبيل",
+    name: listing.title || t("listingDetails.opportunityFallback"),
     description: listing.description || "",
     url: `https://soqtaqbeel.com/listing/${listing.id}`,
     image: photos.length > 0 ? photos[0] : undefined,
     brand: {
       "@type": "Organization",
-      name: "سوق تقبيل",
+      name: t("listingDetails.sellerSchemaName"),
     },
     offers: listing.price
       ? {
@@ -419,8 +419,8 @@ const ListingDetailsPage = () => {
       : undefined,
     category: listing.category || listing.business_activity || undefined,
     additionalProperty: [
-      listing.city ? { "@type": "PropertyValue", name: "المدينة", value: listing.city } : null,
-      listing.district ? { "@type": "PropertyValue", name: "الحي", value: listing.district } : null,
+      listing.city ? { "@type": "PropertyValue", name: t("listingDetails.schemaCity"), value: listing.city } : null,
+      listing.district ? { "@type": "PropertyValue", name: t("listingDetails.schemaDistrict"), value: listing.district } : null,
     ].filter(Boolean),
   };
 
@@ -455,10 +455,10 @@ const ListingDetailsPage = () => {
                 onClick={() => {
                   const url = `${window.location.origin}/listing/${listing.id}`;
                   if (navigator.share) {
-                    navigator.share({ title: listing.title || "فرصة تقبيل", url }).catch(() => {});
+                    navigator.share({ title: listing.title || t("listingDetails.opportunityFallback"), url }).catch(() => {});
                   } else {
                     navigator.clipboard.writeText(url);
-                    toast.success("تم نسخ رابط الإعلان");
+                    toast.success(t("listingDetails.linkCopied"));
                   }
                 }}
               >
@@ -477,12 +477,12 @@ const ListingDetailsPage = () => {
                     const { error } = await updateListing(listing.id, { status: newStatus });
                     setStatusToggling(false);
                     if (error) {
-                      toast.error("تعذّر تغيير حالة الإعلان");
+                      toast.error(t("listingDetails.statusToggleFailed"));
                       return;
                     }
                     setListing((prev) => prev ? { ...prev, status: newStatus } as Listing : prev);
                     listingDetailsStateCache.delete(listing.id);
-                    toast.success(newStatus === "suspended" ? "تم إيقاف الإعلان مؤقتاً" : "تم إعادة تفعيل الإعلان");
+                    toast.success(newStatus === "suspended" ? t("listingDetails.listingPaused") : t("listingDetails.listingResumed"));
                   }}
                 >
                   {statusToggling ? (
@@ -515,16 +515,16 @@ const ListingDetailsPage = () => {
                 className="rounded-xl text-xs h-8 text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/30"
                 onClick={async () => {
                   if (!listing) return;
-                  if (!confirm(`هل تريد حذف "${listing.title || "هذا الإعلان"}"؟ لن يمكن استرجاعه من هنا.`)) return;
+                  if (!confirm(t("listingDetails.deleteConfirm", { title: listing.title || t("listingDetails.deleteThisListing") }))) return;
                   setDeleting(true);
                   const { error } = await softDeleteListing(listing.id);
                   setDeleting(false);
                   if (error) {
-                    toast.error((error as Error).message || "تعذّر حذف الإعلان");
+                    toast.error((error as Error).message || t("listingDetails.deleteFailedFallback"));
                     return;
                   }
                   listingDetailsStateCache.delete(listing.id);
-                  toast.success("تم حذف الإعلان");
+                  toast.success(t("listingDetails.deleteSuccess"));
                   navigate("/dashboard");
                 }}
               >
@@ -539,16 +539,16 @@ const ListingDetailsPage = () => {
             <div className="flex items-center gap-2">
               <MessageCircle size={14} className="text-primary" />
               <span className="text-xs text-foreground font-medium">
-                لديك صفقة جارية على هذا الإعلان
+                {t("listingDetails.activeDealBadge")}
               </span>
               <span className="text-[10px] text-muted-foreground">
-                ({myActiveDeal.status === "negotiating" ? "جاري التفاوض" : myActiveDeal.status === "finalized" ? "مُقفل" : myActiveDeal.status})
+                ({myActiveDeal.status === "negotiating" ? t("listingDetails.dealStatusNegotiating") : myActiveDeal.status === "finalized" ? t("listingDetails.dealStatusFinalized") : myActiveDeal.status})
               </span>
             </div>
             <Button asChild size="sm" className="rounded-xl text-xs gap-1.5">
               <Link to={`/negotiate/${myActiveDeal.id}`}>
                 <ArrowLeft size={12} />
-                الانتقال للمفاوضات
+                {t("listingDetails.goToNegotiation")}
               </Link>
             </Button>
           </div>
@@ -561,31 +561,31 @@ const ListingDetailsPage = () => {
                 <AlertTriangle size={20} className="text-amber-600" />
               </div>
               <div>
-                <p className="text-base font-semibold text-amber-900 mb-1">⚠️ عرض توضيحي — ليس إعلاناً حقيقياً</p>
+                <p className="text-base font-semibold text-amber-900 mb-1">{t("listingDetails.simulation.title")}</p>
                 <p className="text-sm text-amber-800 leading-relaxed">
-                  هذا الإعلان مجرد <strong>محاكاة</strong> لتوضيح كيف تعمل منصة سوق تقبيل. جميع البيانات والصور والأسعار المعروضة هنا <strong>وهمية وغير حقيقية</strong>.
+                  {t("listingDetails.simulation.subtitle")}
                 </p>
               </div>
             </div>
             <div className="mr-[52px] space-y-2">
               <div className="flex items-center gap-2 text-sm text-amber-700">
                 <span className="shrink-0">🚫</span>
-                <span>لا يمكن التفاوض أو إتمام صفقة على هذا الإعلان</span>
+                <span>{t("listingDetails.simulation.bullet1")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-amber-700">
                 <span className="shrink-0">📋</span>
-                <span>الهدف هو تعريفك بآلية عرض الفرص والتفاوض عليها</span>
+                <span>{t("listingDetails.simulation.bullet2")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-amber-700">
                 <span className="shrink-0">✅</span>
-                <span>عند إضافة فرص حقيقية من بائعين موثقين، ستظهر بدون هذا التنبيه</span>
+                <span>{t("listingDetails.simulation.bullet3")}</span>
               </div>
               <div className="mt-3">
                 <Link 
                   to="/create-listing?new=1" 
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-l from-primary to-primary/70 text-primary-foreground text-sm font-medium hover:opacity-90 transition-all"
                 >
-                  أضف فرصتك الآن
+                  {t("listingDetails.simulation.cta")}
                 </Link>
               </div>
             </div>
@@ -726,14 +726,14 @@ const ListingDetailsPage = () => {
                     if (!listing) return;
                     const url = `${window.location.origin}/listing/${listing.id}`;
                     if (navigator.share) {
-                      navigator.share({ title: listing.title || "فرصة تقبيل", url });
+                      navigator.share({ title: listing.title || t("listingDetails.opportunityFallback"), url });
                     } else {
                       navigator.clipboard.writeText(url);
-                      toast.success("تم نسخ رابط الإعلان");
+                      toast.success(t("listingDetails.linkCopied"));
                     }
                   }}
                   className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
-                  title="مشاركة"
+                  title={t("listingDetails.shareTitle")}
                 >
                   <Share2 size={14} strokeWidth={1.5} />
                 </button>
@@ -841,7 +841,7 @@ const ListingDetailsPage = () => {
                 <div className="flex gap-2 mb-4">
                   {myActiveDeal && (myActiveDeal.status === "finalized" || myActiveDeal.status === "completed") ? (
                     <div className="flex-1 text-center text-xs text-muted-foreground bg-muted/50 rounded-xl py-2 px-3">
-                      لا يمكن تعديل الإعلان أثناء الاتفاق النهائي
+                      {t("listingDetails.cannotEditDuringFinalize")}
                     </div>
                   ) : (
                     <Button
@@ -859,21 +859,21 @@ const ListingDetailsPage = () => {
               {listing.status === "sold" && (
                 <div className="inline-flex items-center gap-1.5 bg-destructive/10 text-destructive border border-destructive/20 rounded-md px-3 py-1.5 text-sm font-bold mb-2">
                   <Check size={16} />
-                  تم البيع
+                  {t("listingDetails.sold")}
                 </div>
               )}
 
               {isTranslating ? (
                 <Skeleton className="h-7 w-3/4 mb-2" />
               ) : (
-                <h1 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || "فرصة تقبيل"}</h1>
+                <h1 className="text-xl font-medium mb-1">{listing.title || listing.business_activity || t("listingDetails.opportunityFallback")}</h1>
               )}
               {sellerProfile && (
                 <Link to={`/seller/${sellerProfile.user_id}`} className="flex items-center gap-1.5 mb-1 group/seller">
                   <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary">
                     {sellerProfile.full_name?.charAt(0) || "?"}
                   </div>
-                  <span className="text-xs text-muted-foreground group-hover/seller:text-primary transition-colors">{sellerProfile.full_name || "بائع"}</span>
+                  <span className="text-xs text-muted-foreground group-hover/seller:text-primary transition-colors">{sellerProfile.full_name || t("listingDetails.sellerFallback")}</span>
                   <VerifiedSellerBadge userId={sellerProfile.user_id} size="sm" />
                 </Link>
               )}
@@ -951,10 +951,10 @@ const ListingDetailsPage = () => {
                       <div className="flex items-center gap-2">
                         {role === "platform_owner" ? (
                           <Link to={`/dashboard/view-customer/${sellerProfile.user_id}`} className="text-sm font-medium truncate text-primary hover:underline">
-                            {sellerProfile.full_name || "بائع"}
+                            {sellerProfile.full_name || t("listingDetails.sellerFallback")}
                           </Link>
                         ) : (
-                          <span className="text-sm font-medium truncate">{sellerProfile.full_name || "بائع"}</span>
+                          <span className="text-sm font-medium truncate">{sellerProfile.full_name || t("listingDetails.sellerFallback")}</span>
                         )}
                         <VerifiedSellerBadge userId={sellerProfile.user_id} size="md" />
                       </div>
@@ -1009,7 +1009,7 @@ const ListingDetailsPage = () => {
                       variant="secondary"
                     >
                       <MessageCircle size={18} strokeWidth={1.5} />
-                      متابعة التفاوض
+                      {t("listingDetails.continueNegotiationBtn")}
                     </Button>
                   )}
 
@@ -1041,14 +1041,14 @@ const ListingDetailsPage = () => {
                   className="w-full rounded-xl text-base h-12 active:scale-[0.98]"
                 >
                   {startingDeal ? <Loader2 size={18} className="animate-spin" /> : <Heart size={18} strokeWidth={1.5} />}
-                  أبدِ اهتمامك بهذه الفرصة
+                  {t("listingDetails.tryThisOpportunity")}
                 </Button>
               )}
 
               {interestCount > 0 && (
                 <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground mt-2">
                   <Users size={15} />
-                  <span>{interestCount} مستخدمين أبدوا اهتمامهم</span>
+                  <span>{t("listingDetails.usersInterested", { count: interestCount })}</span>
                 </div>
               )}
 
@@ -1097,7 +1097,7 @@ const ListingDetailsPage = () => {
           open={promoteDialogOpen}
           onOpenChange={setPromoteDialogOpen}
           listingId={listing.id}
-          listingTitle={listing.title || "هذا الإعلان"}
+          listingTitle={listing.title || t("listingDetails.deleteThisListing")}
         />
       )}
 
@@ -1108,17 +1108,17 @@ const ListingDetailsPage = () => {
             <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
               <MessageCircle className="h-7 w-7 text-primary" />
             </div>
-            <DialogTitle className="text-lg">سجّل حسابك</DialogTitle>
+            <DialogTitle className="text-lg">{t("listingDetails.authDialogTitle")}</DialogTitle>
             <DialogDescription className="text-sm">
-              سجّل حسابك لتتواصل مع البائع مباشرة
+              {t("listingDetails.authDialogDesc")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-col gap-2 sm:flex-col mt-2">
             <Button className="w-full rounded-xl h-11" onClick={() => navigate("/login")}>
-              تسجيل الدخول
+              {t("listingDetails.authLogin")}
             </Button>
             <Button variant="outline" className="w-full rounded-xl h-11" onClick={() => navigate("/login?tab=register")}>
-              إنشاء حساب جديد
+              {t("listingDetails.authRegister")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1133,7 +1133,7 @@ const ListingDetailsPage = () => {
             </div>
             <DialogTitle className="text-lg">{t('listing.showInterest')}</DialogTitle>
             <DialogDescription className="text-sm">
-              أرسل رسالتك الأولى للبائع وابدأ التفاوض
+              {t("listingDetails.interestDialogDesc")}
             </DialogDescription>
           </DialogHeader>
 
@@ -1142,10 +1142,10 @@ const ListingDetailsPage = () => {
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground flex items-center gap-1.5">
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                رسالتك الأولى
+                {t("listingDetails.firstMessageLabel")}
               </label>
               <Textarea
-                placeholder="مرحباً، أنا مهتم بهذه الفرصة وأود معرفة المزيد..."
+                placeholder={t("listingDetails.firstMessagePlaceholder")}
                 value={interestMessage}
                 onChange={(e) => setInterestMessage(e.target.value)}
                 className="min-h-[80px] resize-none rounded-xl"
@@ -1156,7 +1156,7 @@ const ListingDetailsPage = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground flex items-center gap-1.5">
                 <CalendarCheck className="h-4 w-4 text-muted-foreground" />
-                هل ترغب بترتيب مقابلة؟
+                {t("listingDetails.meetingQuestion")}
               </label>
               <div className="flex gap-2">
                 <button
@@ -1169,7 +1169,7 @@ const ListingDetailsPage = () => {
                       : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50"
                   )}
                 >
-                  ✅ نعم، أرغب بمقابلة
+                  {t("listingDetails.yesMeeting")}
                 </button>
                 <button
                   type="button"
@@ -1181,7 +1181,7 @@ const ListingDetailsPage = () => {
                       : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50"
                   )}
                 >
-                  💬 لا، إلكترونياً
+                  {t("listingDetails.noMeeting")}
                 </button>
               </div>
             </div>
@@ -1194,7 +1194,7 @@ const ListingDetailsPage = () => {
               disabled={submittingInterest}
             >
               {submittingInterest ? <Loader2 size={16} className="animate-spin" /> : <Heart size={16} />}
-              إرسال اهتمامي
+              {t("listingDetails.sendMyInterest")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1418,7 +1418,7 @@ const DealSummaryCard = ({ listing }: { listing: any }) => {
       <div className="flex items-center gap-2 flex-wrap text-sm sm:text-base font-semibold text-foreground">
         <Building2 size={16} strokeWidth={1.4} className="text-primary shrink-0" />
         <span className="truncate">
-          {listing?.business_activity || listing?.title || "فرصة تقبيل"}
+          {listing?.business_activity || listing?.title || t("listingDetails.opportunityFallback")}
         </span>
         <span className="text-muted-foreground/60 font-normal">·</span>
         <span className="inline-flex items-center gap-1 text-muted-foreground font-normal">

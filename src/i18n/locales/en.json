@@ -1412,7 +1412,31 @@
     "listingPaused": "Listing paused temporarily",
     "listingResumed": "Listing reactivated",
     "deleteFailedFallback": "Could not delete listing",
-    "deleteSuccess": "Listing deleted"
+    "deleteSuccess": "Listing deleted",
+    "loading": "Loading listing...",
+    "notFound": "Listing not found",
+    "backToMarketplace": "Back to marketplace",
+    "tryAgain": "Try again",
+    "continueNegotiationBtn": "Continue negotiation",
+    "usersInterested": "{{count}} users showed interest",
+    "firstMessagePlaceholder": "Hi, I'm interested in this opportunity and would like more details...",
+    "meetingQuestion": "Would you like to arrange a meeting?",
+    "yesMeeting": "✅ Yes, I want a meeting",
+    "noMeeting": "💬 No, online only",
+    "sendMyInterest": "Send my interest",
+    "sold": "Sold",
+    "cannotEditDuringFinalize": "Listing cannot be edited during final agreement",
+    "schemaCity": "City",
+    "schemaDistrict": "District",
+    "tryThisOpportunity": "Show interest in this opportunity",
+    "simulation": {
+      "title": "⚠️ Demo listing — not a real opportunity",
+      "subtitle": "This listing is a simulation to demonstrate how Souq Taqbeel works. All data, photos, and prices shown here are fictitious.",
+      "bullet1": "You cannot negotiate or complete a deal on this listing",
+      "bullet2": "The goal is to introduce you to how opportunities are presented and negotiated",
+      "bullet3": "When real verified opportunities are added, they will appear without this notice",
+      "cta": "Add your opportunity now"
+    }
   },
   "editListing": {
     "title": "Edit listing",
