@@ -867,7 +867,7 @@ const AiChatPage = () => {
           )}
 
           <div className="flex items-center gap-3 max-w-3xl mx-auto">
-            <button onClick={() => fileInputRef.current?.click()} disabled={streaming || loadingFiles} className="rounded-xl h-10 w-10 flex items-center justify-center transition-all shrink-0 text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30" title="ارفع ملف أو صورة">
+            <button onClick={() => fileInputRef.current?.click()} disabled={streaming || loadingFiles} className="rounded-xl h-10 w-10 flex items-center justify-center transition-all shrink-0 text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30" title={t("aiChat.input.uploadTooltip")}>
               <Paperclip size={16} strokeWidth={1.5} />
             </button>
             <input
