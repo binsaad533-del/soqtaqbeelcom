@@ -401,7 +401,7 @@ const AiChatPage = () => {
           uploaded,
         });
       } catch {
-        toast.error(`فشل قراءة الملف: ${file.name}`);
+        toast.error(t("aiChat.toasts.fileReadFailed", { name: file.name }));
       }
     }
 
