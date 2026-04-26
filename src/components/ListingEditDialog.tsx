@@ -289,7 +289,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
     } else {
       await queryClient.invalidateQueries({ queryKey: ["listing", listing.id] });
       await queryClient.invalidateQueries({ queryKey: ["listings"] });
-      toast.success("تم حفظ التعديلات بنجاح");
+      toast.success(t("editListing.toasts.saved"));
       onOpenChange(false);
 
       // ── Auto re-analyze in background ──
