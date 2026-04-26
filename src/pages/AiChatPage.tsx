@@ -142,6 +142,7 @@ async function streamChat({
 }
 
 const CopyButton = ({ text }: { text: string }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -149,7 +150,7 @@ const CopyButton = ({ text }: { text: string }) => {
     setTimeout(() => setCopied(false), 2000);
   };
   return (
-    <button onClick={handleCopy} className="text-muted-foreground/50 hover:text-foreground transition-colors" title="نسخ">
+    <button onClick={handleCopy} className="text-muted-foreground/50 hover:text-foreground transition-colors" title={t("aiChat.feedback.copy")}>
       {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
     </button>
   );
