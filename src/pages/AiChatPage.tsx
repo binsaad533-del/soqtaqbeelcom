@@ -593,10 +593,10 @@ const AiChatPage = () => {
                 <MoqbilAvatar size={44} />
               </div>
               <div>
-                <h2 className="text-sm font-semibold">مقبل مرشدك الذكي طحطوح الصفقات</h2>
+                <h2 className="text-sm font-semibold">{t("aiChat.header.title")} {t("aiChat.header.subtitle")}</h2>
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                  <span className="text-[10px] text-success">نشط</span>
+                  <span className="text-[10px] text-success">{t("aiChat.header.active")}</span>
                   {memoryLoaded && memory.interaction_count > 0 && (
                     <span className="text-[9px] text-muted-foreground/60 bg-muted/30 px-1.5 py-0.5 rounded-full mr-1">
                       {memory.interaction_count} تفاعل
