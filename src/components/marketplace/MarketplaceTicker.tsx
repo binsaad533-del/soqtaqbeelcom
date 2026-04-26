@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -31,6 +32,7 @@ const ITEM_GAP = 24;
 const SPEED_PX_PER_SEC = 60;
 
 const MarketplaceTicker = () => {
+  const { t } = useTranslation();
   const [items, setItems] = useState<TickerItem[]>([]);
   const [repeatCount, setRepeatCount] = useState(3);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -108,24 +110,24 @@ const MarketplaceTicker = () => {
       };
 
       setItems([
-        { id: "listings", label: "الفرص المتاحة", value: String(totalListings || 0), change: listingsChange, icon: <Store size={12} />, pulse: (thisWeekListings || 0) > 0 },
-        { id: "deals", label: "صفقات نشطة", value: String(activeDeals || 0), change: dealsChange, icon: <Handshake size={12} />, pulse: (thisWeekDeals || 0) > 0 },
-        { id: "completed", label: "مكتملة", value: String(completedDeals || 0), change: 0, icon: <BarChart3 size={12} /> },
-        { id: "avg_price", label: "متوسط السعر", value: avgPrice > 0 ? formatPrice(avgPrice) : "—", change: priceChange, icon: <DollarSign size={12} /> },
-        { id: "high_price", label: "أعلى سعر", value: highPrice > 0 ? formatPrice(highPrice) : "—", change: 0, icon: <TrendingUp size={12} /> },
-        { id: "low_price", label: "أقل سعر", value: lowPrice > 0 ? formatPrice(lowPrice) : "—", change: 0, icon: <ArrowDownRight size={12} /> },
-        { id: "activity", label: "حركة السوق", value: weeklyVolume > 3 ? "نشط" : weeklyVolume > 0 ? "متوسط" : "هادئ", change: volumeChange, icon: <Activity size={12} />, pulse: true },
-        { id: "demand", label: "الطلب", value: (thisWeekDeals || 0) > (lastWeekDeals || 0) ? "مرتفع" : "مستقر", change: dealsChange, icon: <Flame size={12} /> },
-        { id: "today", label: "فرص اليوم", value: String(todayListings || 0), change: 0, icon: <Clock size={12} />, pulse: (todayListings || 0) > 0 },
-        { id: "users", label: "المستخدمين", value: String(totalProfiles || 0), change: 0, icon: <Eye size={12} /> },
-        { id: "success_rate", label: "نسبة الإتمام", value: `${successRate}%`, change: successRate > 50 ? 1 : successRate > 0 ? -1 : 0, icon: <Percent size={12} /> },
-        { id: "trust", label: "بائعون موثّقون", value: "أولوية", change: 1, icon: <ShieldCheck size={12} /> },
-        { id: "volume", label: "حجم التداول", value: String(weeklyVolume), change: volumeChange, icon: <Star size={12} />, pulse: weeklyVolume > 0 },
+        { id: "listings", label: t("marketplace.ticker.listings"), value: String(totalListings || 0), change: listingsChange, icon: <Store size={12} />, pulse: (thisWeekListings || 0) > 0 },
+        { id: "deals", label: t("marketplace.ticker.deals"), value: String(activeDeals || 0), change: dealsChange, icon: <Handshake size={12} />, pulse: (thisWeekDeals || 0) > 0 },
+        { id: "completed", label: t("marketplace.ticker.completed"), value: String(completedDeals || 0), change: 0, icon: <BarChart3 size={12} /> },
+        { id: "avg_price", label: t("marketplace.ticker.avgPrice"), value: avgPrice > 0 ? formatPrice(avgPrice) : "—", change: priceChange, icon: <DollarSign size={12} /> },
+        { id: "high_price", label: t("marketplace.ticker.highPrice"), value: highPrice > 0 ? formatPrice(highPrice) : "—", change: 0, icon: <TrendingUp size={12} /> },
+        { id: "low_price", label: t("marketplace.ticker.lowPrice"), value: lowPrice > 0 ? formatPrice(lowPrice) : "—", change: 0, icon: <ArrowDownRight size={12} /> },
+        { id: "activity", label: t("marketplace.ticker.marketActivity"), value: weeklyVolume > 3 ? t("marketplace.ticker.active") : weeklyVolume > 0 ? t("marketplace.ticker.moderate") : t("marketplace.ticker.quiet"), change: volumeChange, icon: <Activity size={12} />, pulse: true },
+        { id: "demand", label: t("marketplace.ticker.demand"), value: (thisWeekDeals || 0) > (lastWeekDeals || 0) ? t("marketplace.ticker.high") : t("marketplace.ticker.stable"), change: dealsChange, icon: <Flame size={12} /> },
+        { id: "today", label: t("marketplace.ticker.todayOpportunities"), value: String(todayListings || 0), change: 0, icon: <Clock size={12} />, pulse: (todayListings || 0) > 0 },
+        { id: "users", label: t("marketplace.ticker.users"), value: String(totalProfiles || 0), change: 0, icon: <Eye size={12} /> },
+        { id: "success_rate", label: t("marketplace.ticker.successRate"), value: `${successRate}%`, change: successRate > 50 ? 1 : successRate > 0 ? -1 : 0, icon: <Percent size={12} /> },
+        { id: "trust", label: t("marketplace.ticker.verifiedSellers"), value: t("marketplace.ticker.priority"), change: 1, icon: <ShieldCheck size={12} /> },
+        { id: "volume", label: t("marketplace.ticker.tradingVolume"), value: String(weeklyVolume), change: volumeChange, icon: <Star size={12} />, pulse: weeklyVolume > 0 },
       ]);
     } catch (error) {
       console.error("Ticker fetch error:", error);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchStats();
@@ -244,7 +246,7 @@ const MarketplaceTicker = () => {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
         </span>
-        <span className="text-[8px] font-semibold text-emerald-100 bg-emerald-600/80 px-1.5 py-0.5 rounded">LIVE</span>
+        <span className="text-[8px] font-semibold text-emerald-100 bg-emerald-600/80 px-1.5 py-0.5 rounded">{t("marketplace.ticker.live")}</span>
       </div>
 
       <div className="py-2.5 px-8 overflow-hidden" dir="ltr">

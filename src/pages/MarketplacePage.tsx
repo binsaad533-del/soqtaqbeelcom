@@ -45,7 +45,7 @@ interface EnrichedListing extends Listing {
 
 const MarketplacePage = () => {
   const { t } = useTranslation();
-  useSEO({ title: "سوق الفرص — تصفح مشاريع وفرص تجارية للبيع في السعودية", description: "تصفح فرص تقبيل المشاريع التجارية المتاحة في السعودية — مطاعم، محلات، ورش، مراكز تجميل والمزيد", canonical: "/marketplace" });
+  useSEO({ title: t("marketplace.seo.title"), description: t("marketplace.seo.description"), canonical: "/marketplace" });
   const { data: listings = [], isLoading: listingsLoading } = usePublishedListingsQuery();
   const { data: profiles = [], isLoading: profilesLoading } = useAllProfilesQuery();
   const { getLikesAndViews, toggleLike } = useListingSocial();
@@ -83,7 +83,7 @@ const MarketplacePage = () => {
       const exists = prev.find(i => i.id === listing.id);
       if (exists) return prev.filter(i => i.id !== listing.id);
       if (prev.length >= 4) {
-        toast.error("يمكنك مقارنة 4 إعلانات كحد أقصى");
+        toast.error(t("marketplace.compareLimitToast"));
         return prev;
       }
       const item: CompareItem = {
@@ -103,7 +103,7 @@ const MarketplacePage = () => {
       };
       return [...prev, item];
     });
-  }, []);
+  }, [t]);
 
   const removeCompare = useCallback((id: string) => {
     setCompareItems(prev => prev.filter(i => i.id !== id));
@@ -113,7 +113,7 @@ const MarketplacePage = () => {
 
   const handleToggleLike = useCallback(async (listingId: string) => {
     if (!user) {
-      toast.error("سجّل دخولك أولاً للإعجاب");
+      toast.error(t("marketplace.loginToLikeToast"));
       return;
     }
     const liked = await toggleLike(listingId);
@@ -126,7 +126,7 @@ const MarketplacePage = () => {
       ...prev,
       [listingId]: (prev[listingId] || 0) + (liked ? 1 : -1),
     }));
-  }, [user, toggleLike]);
+  }, [user, toggleLike, t]);
 
   const enrichedListings = useMemo((): EnrichedListing[] => {
     const profileMap = new Map(profiles.map(p => [p.user_id, p]));
@@ -235,15 +235,15 @@ const MarketplacePage = () => {
   const itemListJsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "سوق الفرص — فرص تقبيل مشاريع تجارية",
-    description: "قائمة بفرص تقبيل المشاريع التجارية المتاحة في السعودية",
+    name: t("marketplace.seo.jsonLdName"),
+    description: t("marketplace.seo.jsonLdDescription"),
     url: "https://soqtaqbeel.com/marketplace",
     numberOfItems: filtered.length,
     itemListElement: pagination.paginatedItems.slice(0, 10).map((item, i) => ({
       "@type": "ListItem",
       position: i + 1,
       url: `https://soqtaqbeel.com/listing/${item.id}`,
-      name: item.title || item.business_activity || "فرصة تقبيل",
+      name: item.title || item.business_activity || t("marketplace.card.opportunityFallback"),
     })),
   };
 
@@ -306,14 +306,14 @@ const MarketplacePage = () => {
             ) : filtered.length === 0 && similarResults.length === 0 ? (
               <div className="text-center py-16">
                 <AiStar size={32} className="mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">لا توجد نتائج مطابقة</p>
+                <p className="text-sm text-muted-foreground">{t("marketplace.noResults")}</p>
               </div>
             ) : (
               <>
                 {/* Results count */}
                 {filtered.length > 0 && (
                   <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
-                    <span>عرض {pagination.startIndex}–{pagination.endIndex} من {pagination.totalItems} نتيجة</span>
+                    <span>{t("marketplace.showingRange", { start: pagination.startIndex, end: pagination.endIndex, total: pagination.totalItems })}</span>
                   </div>
                 )}
 
@@ -373,7 +373,7 @@ const MarketplacePage = () => {
                 {filtered.length === 0 && similarResults.length > 0 && (
                   <div className="text-center py-8">
                     <AiStar size={28} className="mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground">لا توجد نتائج مطابقة تماماً لبحثك</p>
+                    <p className="text-sm text-muted-foreground">{t("marketplace.noExactResults")}</p>
                   </div>
                 )}
 
@@ -382,7 +382,7 @@ const MarketplacePage = () => {
                     <div className="flex items-center gap-2 mb-3 px-1">
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Lightbulb size={14} className="text-amber-500" />
-                        <span className="text-xs font-medium">فرص مشابهة قد تهمّك</span>
+                        <span className="text-xs font-medium">{t("marketplace.similarOpportunities")}</span>
                       </div>
                       <div className="flex-1 h-px bg-border/50" />
                     </div>
@@ -435,13 +435,13 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
     e.preventDefault();
     e.stopPropagation();
     const url = `${window.location.origin}/listing/${listing.id}`;
-    const title = listing.title || listing.business_activity || "فرصة تقبيل";
+    const title = listing.title || listing.business_activity || t("marketplace.card.opportunityFallback");
     try {
       if (navigator.share) {
         await navigator.share({ title, url });
       } else {
         await navigator.clipboard.writeText(url);
-        toast.success("تم نسخ الرابط");
+        toast.success(t("marketplace.linkCopied"));
       }
     } catch {
       try {
@@ -453,9 +453,9 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
         textarea.select();
         document.execCommand("copy");
         document.body.removeChild(textarea);
-        toast.success("تم نسخ الرابط");
+        toast.success(t("marketplace.linkCopied"));
       } catch {
-        toast.error("لم يتم نسخ الرابط، انسخه يدوياً");
+        toast.error(t("marketplace.linkCopyFailed"));
       }
     }
   };
@@ -473,7 +473,7 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
       )}
       {listing.featured && (
         <div className="absolute top-2 left-2 z-10 bg-amber-500/90 text-white text-[9px] px-2 py-0.5 rounded-md flex items-center gap-1">
-          ★ مميز
+          ★ {t("marketplace.card.featured")}
         </div>
       )}
 
@@ -520,24 +520,24 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
                 <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary shrink-0">
                   {seller.full_name?.charAt(0) || "?"}
                 </div>
-                <span className="text-[11px] text-foreground font-medium truncate max-w-[120px]">{seller.full_name || "بائع"}</span>
+                <span className="text-[11px] text-foreground font-medium truncate max-w-[120px]">{seller.full_name || t("marketplace.card.sellerFallback")}</span>
                 <VerifiedSellerBadge userId={seller.user_id} size="sm" />
                 <TrustBadge score={seller.trust_score} verificationLevel={seller.verification_level} size="sm" showScore showBadges badges={badges.slice(0, 2)} />
               </div>
-              <div className="flex items-center gap-1" title={isOnline ? "متواجد الآن" : "غير متواجد"}>
+              <div className="flex items-center gap-1" title={isOnline ? t("marketplace.card.onlineTitle") : t("marketplace.card.offlineTitle")}>
                 <span className={cn(
                   "w-1.5 h-1.5 rounded-full",
                   isOnline ? "bg-emerald-500" : "bg-red-400"
                 )} />
                 <span className="text-[8px] text-muted-foreground/70">
-                  {isOnline ? "متواجد" : "غير متواجد"}
+                  {isOnline ? t("marketplace.card.online") : t("marketplace.card.offline")}
                 </span>
               </div>
             </Link>
           )}
 
           <div className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">
-            {listing.title || listing.business_activity || "فرصة تقبيل"}
+            {listing.title || listing.business_activity || t("marketplace.card.opportunityFallback")}
           </div>
           {(() => {
             const inv = Array.isArray(listing.inventory) ? listing.inventory : [];
@@ -547,9 +547,9 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
             const hasLease = !!listing.lease_remaining;
             const isOperational = invCount > 0 && hasLicense && hasLease;
             const parts: string[] = [];
-            if (invCount > 0) parts.push(`${invCount} أصل`);
-            if (rent && rent > 0) parts.push(`إيجار ${rent.toLocaleString()}/سنة`);
-            if (isOperational) parts.push("جاهز للتشغيل");
+            if (invCount > 0) parts.push(t("marketplace.card.assetCount", { count: invCount }));
+            if (rent && rent > 0) parts.push(t("marketplace.card.yearlyRent", { amount: rent.toLocaleString() }));
+            if (isOperational) parts.push(t("marketplace.card.operationalReady"));
             if (parts.length === 0) return null;
             return (
               <div className="text-xs text-muted-foreground mb-1 truncate" title={parts.join(" · ")}>
@@ -581,9 +581,9 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
               const tr = calculateTransparency(listing);
               const badgeColor = tr.score >= 80 ? "text-success" : tr.score >= 60 ? "text-yellow-600 dark:text-yellow-400" : tr.score >= 40 ? "text-orange-600 dark:text-orange-400" : "text-destructive";
               const barColor = tr.score >= 80 ? "bg-success" : tr.score >= 60 ? "bg-yellow-500" : tr.score >= 40 ? "bg-orange-500" : "bg-destructive";
-              const badgeLabel = tr.score >= 80 ? `✓ ${t("listing.verified")}` : tr.score >= 60 ? "⚠ متوسط" : tr.score >= 40 ? "⚠ ضعيف" : "✗ ناقص";
+              const badgeLabel = tr.score >= 80 ? `✓ ${t("listing.verified")}` : tr.score >= 60 ? t("marketplace.card.transparencyMedium") : tr.score >= 40 ? t("marketplace.card.transparencyWeak") : t("marketplace.card.transparencyMissing");
               return (
-                <div className="flex items-center gap-1.5" title={`شفافية الإعلان: ${tr.score}%`}>
+                <div className="flex items-center gap-1.5" title={t("marketplace.card.transparencyTitle", { score: tr.score })}>
                   <span className={cn("text-[9px] font-semibold", badgeColor)}>{badgeLabel}</span>
                   <div className="w-8 h-1.5 rounded-full bg-muted overflow-hidden">
                     <div className={cn("h-full rounded-full", barColor)} style={{ width: `${tr.score}%` }} />
@@ -612,7 +612,7 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
                   "w-5 h-5 rounded flex items-center justify-center transition-all",
                   isComparing ? "text-primary" : "text-muted-foreground/50 hover:text-primary"
                 )}
-                title={isComparing ? "إزالة من المقارنة" : "مقارنة"}
+                title={isComparing ? t("marketplace.card.compareRemove") : t("marketplace.card.compareAdd")}
               >
                 {isComparing ? <Check size={10} strokeWidth={2} /> : <GitCompareArrows size={10} strokeWidth={1.5} />}
               </button>
@@ -622,14 +622,14 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
                   "w-5 h-5 rounded flex items-center justify-center transition-all",
                   isLiked ? "text-red-500" : "text-muted-foreground/50 hover:text-red-500"
                 )}
-                title="إعجاب"
+                title={t("marketplace.card.like")}
               >
                 <Heart size={10} strokeWidth={1.5} fill={isLiked ? "currentColor" : "none"} />
               </button>
               <button
                 onClick={handleShare}
                 className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/50 hover:text-primary transition-all"
-                title="مشاركة"
+                title={t("marketplace.card.share")}
               >
                 <Share2 size={10} strokeWidth={1.5} />
               </button>

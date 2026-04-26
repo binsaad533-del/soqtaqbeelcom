@@ -2,18 +2,18 @@ import { useState, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Loader2, X, Bell, Mail, Phone } from "lucide-react";
+import { Loader2, X, Bell, Mail, Phone } from "lucide-react";
 import { sanitizeForSearch } from "@/lib/security";
 import type { FilterState } from "./MarketplaceFilters";
 import AiStar from "@/components/AiStar";
 import { toast } from "sonner";
 
-const suggestions = [
-  "كوفي في جدة",
-  "مطعم في الرياض",
-  "ورشة بسعر مناسب",
-  "صالون جاهز للتقبيل",
-  "محل في الدمام",
+const SUGGESTION_KEYS = [
+  "marketplace.search.suggestions.1",
+  "marketplace.search.suggestions.2",
+  "marketplace.search.suggestions.3",
+  "marketplace.search.suggestions.4",
+  "marketplace.search.suggestions.5",
 ];
 
 interface Props {
@@ -34,6 +34,8 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
   const [lastFilters, setLastFilters] = useState<Partial<FilterState>>({});
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const suggestions = useMemo(() => SUGGESTION_KEYS.map(k => t(k)), [t]);
+
   const filteredSuggestions = query
     ? suggestions.filter(s => s.includes(query))
     : suggestions;
@@ -44,10 +46,10 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
   const displayMessage = useMemo(() => {
     if (!hasSearched || !aiMessage) return aiMessage;
     if (noResults) {
-      return "ما لقيت نتائج تطابق بحثك الحين.. بس لا تشيل هم! فعّل التنبيه وأنا أرسل لك إشعار على الإيميل والجوال فور ما ينزل عرض يناسبك 📧📱";
+      return t("marketplace.search.noResultsAlertTemplate");
     }
     return aiMessage;
-  }, [aiMessage, resultCount, hasSearched, noResults]);
+  }, [aiMessage, hasSearched, noResults, t]);
 
   const handleSearch = async (text?: string) => {
     const q = sanitizeForSearch(text || query);
@@ -82,15 +84,15 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
       if (data.city !== "الكل") parts.push(data.city);
       if (data.activity !== "الكل") parts.push(data.activity);
       if (data.dealType !== "الكل") parts.push(data.dealType.replace("_", " "));
-      if (data.priceMax < 5000000 || data.priceMin > 0) parts.push("نطاق سعري محدد");
-      if (parts.length > 0) setAppliedLabel(`تم تطبيق: ${parts.join(" + ")}`);
+      if (data.priceMax < 5000000 || data.priceMin > 0) parts.push(t("marketplace.search.customPriceRange"));
+      if (parts.length > 0) setAppliedLabel(`${t("marketplace.search.appliedPrefix")} ${parts.join(" + ")}`);
 
       setAiMessage(data.message || "");
       setHasSearched(true);
       onApplyFilters(filters, data.message, data.similarActivities || []);
     } catch (e) {
       console.error("Smart search error:", e);
-      setAiMessage("عذرًا، حاول مرة ثانية");
+      setAiMessage(t("marketplace.search.tryAgain"));
       setHasSearched(true);
     } finally {
       setLoading(false);
@@ -100,7 +102,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
   const handleSetAlert = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      toast.error("سجّل دخولك أولاً لتفعيل التنبيه");
+      toast.error(t("marketplace.search.loginForAlert"));
       return;
     }
 
@@ -122,10 +124,10 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
       if (error) throw error;
 
       setAlertSaved(true);
-      toast.success("تم تفعيل التنبيه! راح ننبّهك على الإيميل والجوال 📧📱");
+      toast.success(t("marketplace.search.alertSavedToast"));
     } catch (e) {
       console.error("Alert save error:", e);
-      toast.error("حصل خطأ، حاول مرة ثانية");
+      toast.error(t("marketplace.search.alertSaveError"));
     } finally {
       setAlertSaving(false);
     }
@@ -234,7 +236,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
               )}
               <Mail size={12} />
               <Phone size={12} />
-              نبّهني على الإيميل والجوال
+              {t("marketplace.search.notifyMeCta")}
             </button>
           )}
 
@@ -242,7 +244,7 @@ const SmartSearchBar = ({ onApplyFilters, resultCount }: Props) => {
           {noResults && alertSaved && (
             <div className="flex items-center gap-1.5 mr-5 text-[11px] text-success font-medium">
               <Bell size={12} />
-              تم تفعيل التنبيه على الإيميل والجوال ✓
+              {t("marketplace.search.alertActive")}
             </div>
           )}
         </div>

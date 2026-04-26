@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Bell, Check, MessageCircle, DollarSign, FileText, Shield, Info, Filter, FileLock2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Bell, Check, MessageCircle, DollarSign, FileText, Shield, Info, FileLock2 } from "lucide-react";
 import { useNotifications, type Notification } from "@/hooks/useNotifications";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ function getNotifIcon(type: string, refType: string | null) {
 }
 
 const NotificationBell = () => {
+  const { t, i18n } = useTranslation();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<NotifFilter>("all");
@@ -49,6 +51,20 @@ const NotificationBell = () => {
     return items.slice(0, 30);
   }, [notifications, filter]);
 
+  // Map current i18n language to a date locale that's widely supported by Intl
+  const dateLocale = useMemo(() => {
+    const lng = i18n.language || "ar";
+    const map: Record<string, string> = {
+      ar: "ar-SA",
+      en: "en-US",
+      zh: "zh-CN",
+      hi: "hi-IN",
+      ur: "ur-PK",
+      bn: "bn-BD",
+    };
+    return map[lng] || lng;
+  }, [i18n.language]);
+
   // Group by date
   const grouped = useMemo(() => {
     const groups: { label: string; items: Notification[] }[] = [];
@@ -64,9 +80,9 @@ const NotificationBell = () => {
     for (const n of filtered) {
       const dateStr = new Date(n.created_at).toDateString();
       let label: string;
-      if (dateStr === todayStr) label = "اليوم";
-      else if (dateStr === yesterdayStr) label = "أمس";
-      else label = new Date(n.created_at).toLocaleDateString("ar-SA", { day: "numeric", month: "short" });
+      if (dateStr === todayStr) label = t("notifications.groups.today");
+      else if (dateStr === yesterdayStr) label = t("notifications.groups.yesterday");
+      else label = new Date(n.created_at).toLocaleDateString(dateLocale, { day: "numeric", month: "short" });
 
       if (label !== currentLabel) {
         if (currentItems.length > 0) groups.push({ label: currentLabel, items: currentItems });
@@ -78,7 +94,7 @@ const NotificationBell = () => {
     }
     if (currentItems.length > 0) groups.push({ label: currentLabel, items: currentItems });
     return groups;
-  }, [filtered]);
+  }, [filtered, t, dateLocale]);
 
   const handleClick = (n: Notification) => {
     if (!n.is_read) markAsRead(n.id);
@@ -93,20 +109,20 @@ const NotificationBell = () => {
   const timeAgo = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "الآن";
-    if (mins < 60) return `${mins}د`;
+    if (mins < 1) return t("notifications.time.now");
+    if (mins < 60) return t("notifications.time.minutes", { count: mins });
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}س`;
-    return `${Math.floor(hrs / 24)}ي`;
+    if (hrs < 24) return t("notifications.time.hours", { count: hrs });
+    return t("notifications.time.days", { count: Math.floor(hrs / 24) });
   };
 
-  const filters: { key: NotifFilter; label: string }[] = [
-    { key: "all", label: "الكل" },
-    { key: "unread", label: "غير مقروء" },
-    { key: "deals", label: "صفقات" },
-    { key: "offers", label: "عروض" },
-    { key: "messages", label: "رسائل" },
-    { key: "documents", label: "وثائق" },
+  const filters: { key: NotifFilter; labelKey: string }[] = [
+    { key: "all", labelKey: "notifications.filters.all" },
+    { key: "unread", labelKey: "notifications.filters.unread" },
+    { key: "deals", labelKey: "notifications.filters.deals" },
+    { key: "offers", labelKey: "notifications.filters.offers" },
+    { key: "messages", labelKey: "notifications.filters.messages" },
+    { key: "documents", labelKey: "notifications.filters.documents" },
   ];
 
   return (
@@ -114,6 +130,7 @@ const NotificationBell = () => {
       <button
         onClick={() => setOpen(!open)}
         className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+        aria-label={t("notifications.shell.title")}
       >
         <Bell size={17} strokeWidth={1.5} />
         {unreadCount > 0 && (
@@ -129,10 +146,10 @@ const NotificationBell = () => {
           <div className="px-4 pt-4 pb-2">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">الإشعارات</span>
+                <span className="text-sm font-semibold">{t("notifications.shell.title")}</span>
                 {unreadCount > 0 && (
                   <span className="text-[10px] font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
-                    {unreadCount} جديد
+                    {t("notifications.shell.unreadBadge", { count: unreadCount })}
                   </span>
                 )}
               </div>
@@ -142,7 +159,7 @@ const NotificationBell = () => {
                   className="text-[11px] text-primary hover:text-primary/80 transition-colors flex items-center gap-1 font-medium"
                 >
                   <Check size={12} />
-                  قراءة الكل
+                  {t("notifications.shell.markAllRead")}
                 </button>
               )}
             </div>
@@ -160,7 +177,7 @@ const NotificationBell = () => {
                       : "bg-muted/50 text-muted-foreground hover:bg-muted"
                   )}
                 >
-                  {f.label}
+                  {t(f.labelKey)}
                 </button>
               ))}
             </div>
@@ -172,7 +189,7 @@ const NotificationBell = () => {
               <div className="py-12 text-center">
                 <Bell size={24} className="mx-auto mb-2 text-muted-foreground/30" />
                 <p className="text-xs text-muted-foreground">
-                  {filter === "unread" ? "لا توجد إشعارات غير مقروءة" : "لا توجد إشعارات"}
+                  {filter === "unread" ? t("notifications.empty.unread") : t("notifications.empty.all")}
                 </p>
               </div>
             ) : (
