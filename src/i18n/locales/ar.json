@@ -42,7 +42,224 @@
     "myListings": "إعلاناتي",
     "myOffers": "عروضي",
     "myMessages": "رسائلي",
-    "myDeals": "صفقاتي"
+    "myDeals": "صفقاتي",
+    "seo": {
+      "title": "لوحة العميل",
+      "description": "لوحة تحكم العميل — تابع إعلاناتك وصفقاتك على سوق تقبيل",
+      "simpleTitle": "لوحة التحكم",
+      "simpleDescription": "أدِر إعلاناتك وصفقاتك من لوحة تحكم سوق تقبيل",
+      "h1": "لوحة تحكم العميل"
+    },
+    "headerTitle": "لوحة التحكم",
+    "welcome": "مرحباً بك — إليك ملخص نشاطك",
+    "alerts": "التنبيهات",
+    "loadFailedPrefix": "فشل تحميل: ",
+    "retry": "إعادة المحاولة",
+    "loadingItems": {
+      "listings": "الإعلانات",
+      "deals": "الصفقات"
+    },
+    "profileBanner": {
+      "completeProfile": "أكمل ملفك الشخصي لزيادة الثقة",
+      "missingPrefix": "ينقصك: ",
+      "missing": {
+        "name": "الاسم",
+        "phone": "رقم الجوال",
+        "avatar": "صورة شخصية",
+        "email": "بريد إلكتروني",
+        "phoneVerified": "توثيق الجوال"
+      }
+    },
+    "profile": {
+      "settingsTooltip": "إعدادات الحساب",
+      "verified": "موثّق",
+      "unverified": "غير موثّق",
+      "addName": "أضف اسمك",
+      "email": "البريد الإلكتروني",
+      "addEmail": "أضف بريدك الإلكتروني",
+      "phone": "رقم الجوال",
+      "addPhone": "أضف رقم جوالك",
+      "registeredOn": "تاريخ التسجيل",
+      "lastLogin": "آخر دخول",
+      "avatarMaxSize": "الحد الأقصى 5 ميغا",
+      "avatarUpdated": "تم تحديث الصورة",
+      "avatarUploadFailed": "فشل الرفع",
+      "emailVerifySent": "تم إرسال رابط التحقق إلى بريدك الجديد",
+      "phoneUpdated": "تم تحديث رقم الجوال",
+      "updated": "تم التحديث",
+      "updateFailed": "فشل التحديث"
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "markAllRead": "قراءة الكل",
+      "empty": "لا توجد إشعارات"
+    },
+    "messagesCard": {
+      "viewAll": "عرض جميع المحادثات"
+    },
+    "feed": {
+      "title": "النشاط المباشر",
+      "live": "مباشر",
+      "empty": "لا يوجد نشاط حالياً"
+    },
+    "kpi": {
+      "activeDeals": "صفقات نشطة",
+      "waiting": "بانتظار الرد",
+      "completed": "مكتملة",
+      "totalValue": "إجمالي القيمة",
+      "commission": "العمولة (1%)"
+    },
+    "charts": {
+      "monthlyDeals": "الصفقات الشهرية",
+      "dealValue": "قيمة الصفقات (﷼)",
+      "statusDistribution": "توزيع الحالات",
+      "noData": "لا توجد",
+      "total": "إجمالي",
+      "completed": "مكتملة",
+      "value": "القيمة"
+    },
+    "statusGroups": {
+      "active": "نشطة",
+      "waiting": "بانتظار",
+      "completed": "مكتملة",
+      "cancelled": "ملغية"
+    },
+    "months": {
+      "jan": "يناير",
+      "feb": "فبراير",
+      "mar": "مارس",
+      "apr": "أبريل",
+      "may": "مايو",
+      "jun": "يونيو",
+      "jul": "يوليو",
+      "aug": "أغسطس",
+      "sep": "سبتمبر",
+      "oct": "أكتوبر",
+      "nov": "نوفمبر",
+      "dec": "ديسمبر"
+    },
+    "suggestions": {
+      "negotiating": "لديك صفقات بانتظار ردك",
+      "createFirst": "أنشئ أول إعلان لك",
+      "publishDrafts": "لديك إعلانات مسودة - انشرها",
+      "agreementsArchive": "أرشيف الاتفاقيات"
+    },
+    "tabs": {
+      "myDeals": "صفقاتي",
+      "myListings": "إعلاناتي",
+      "myOffers": "عروضي",
+      "saved": "المحفوظة",
+      "notifications": "الإشعارات",
+      "agent": "وكيل مقبل",
+      "intelligence": "ذكاء مقبل",
+      "security": "الأمان",
+      "account": "حسابي",
+      "desc": {
+        "myDeals": "تابع جميع صفقاتك الجارية والمكتملة",
+        "myListings": "إدارة إعلاناتك ومسوداتك",
+        "myOffers": "العروض التي قدمتها على إعلانات أخرى",
+        "saved": "الإعلانات التي حفظتها للمراجعة لاحقاً",
+        "notifications": "تفضيلات التنبيهات والإشعارات",
+        "agent": "مساعدك الذكي الذي يعمل بالنيابة عنك",
+        "intelligence": "تحليلات وتوصيات ذكية لصفقاتك",
+        "security": "إعدادات الحماية وأمان الحساب",
+        "account": "تعديل بياناتك الشخصية وكلمة المرور"
+      }
+    },
+    "search": {
+      "deals": "ابحث في الصفقات...",
+      "listings": "ابحث في الإعلانات...",
+      "offers": "ابحث في العروض...",
+      "saved": "ابحث في المحفوظات..."
+    },
+    "filters": {
+      "all": "الكل",
+      "active": "نشطة",
+      "waiting": "بانتظار",
+      "completed": "مكتملة",
+      "cancelled": "ملغية",
+      "draft": "مسودة",
+      "published": "منشور",
+      "underReview": "مراجعة",
+      "pending": "بانتظار",
+      "accepted": "مقبول",
+      "rejected": "مرفوض"
+    },
+    "statusBadges": {
+      "draft": "مسودة",
+      "published": "منشور",
+      "under_review": "مراجعة",
+      "negotiating": "تفاوض",
+      "completed": "مكتمل",
+      "finalized": "مكتمل",
+      "new": "جديدة",
+      "agreement": "اتفاقية",
+      "cancelled": "ملغية",
+      "completeListing": "أكمل الإعلان"
+    },
+    "deals": {
+      "empty": "لا توجد صفقات بعد",
+      "noResults": "لا توجد نتائج",
+      "browseMarket": "تصفح السوق وابدأ أول صفقة",
+      "dealNumber": "صفقة #",
+      "noPrice": "بدون سعر"
+    },
+    "listings": {
+      "empty": "لا توجد إعلانات",
+      "noResults": "لا توجد نتائج",
+      "createFirst": "أنشئ أول إعلان",
+      "noTitle": "بدون عنوان",
+      "editTooltip": "تعديل الإعلان",
+      "deleteTooltip": "حذف الإعلان",
+      "deleteConfirm": "هل تريد حذف \"{{title}}\"؟",
+      "deleteFailedPrefix": "فشل حذف الإعلان: ",
+      "deleteRetry": "يرجى المحاولة مرة أخرى",
+      "deleteSuccess": "تم حذف الإعلان بنجاح",
+      "deleteUnexpectedError": "حدث خطأ غير متوقع أثناء الحذف — يرجى تحديث الصفحة والمحاولة مرة أخرى"
+    },
+    "agent": {
+      "noPublished": "لا توجد إعلانات منشورة",
+      "noPublishedHint": "وكيل مقبل يعمل على كل إعلان منشور بشكل مستقل"
+    },
+    "buyerOffers": {
+      "empty": "لم تقدم أي عروض بعد",
+      "noResults": "لا توجد نتائج",
+      "browseAndOffer": "تصفح الفرص وقدّم أول عرض",
+      "opportunityFallback": "فرصة تقبيل",
+      "yourOffer": "عرضك:",
+      "sellerReply": "رد البائع:",
+      "status": {
+        "pending": "بانتظار الرد",
+        "accepted": "مقبول",
+        "rejected": "مرفوض",
+        "withdrawn": "ملغي"
+      }
+    },
+    "saved": {
+      "empty": "لم تحفظ أي إعلان بعد",
+      "noResults": "لا توجد نتائج",
+      "browseAndSave": "تصفح الفرص واحفظ ما يعجبك",
+      "removed": "تم إزالة الإعلان من المحفوظات",
+      "removeTooltip": "إزالة من المحفوظات",
+      "priceOnContact": "السعر عند التواصل",
+      "opportunityFallback": "فرصة تقبيل"
+    },
+    "simple": {
+      "tabs": {
+        "myListings": "إعلاناتي",
+        "drafts": "المسودات",
+        "negotiations": "التفاوضات",
+        "agreements": "الاتفاقيات"
+      },
+      "stats": {
+        "myListings": "إعلاناتي",
+        "uploadedPhotos": "صور مرفوعة",
+        "activeNegotiations": "تفاوضات نشطة",
+        "alerts": "تنبيهات"
+      },
+      "disclosure": "إفصاح",
+      "awaitingConfirmation": "بانتظار التأكيد"
+    }
   },
   "messages": {
     "noMessages": "لا توجد رسائل",
