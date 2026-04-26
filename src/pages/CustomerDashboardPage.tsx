@@ -320,7 +320,7 @@ const CustomerDashboardPage = () => {
             <button
               onClick={() => { setActiveTab("account"); setSearchQuery(""); }}
               className="absolute top-3 left-3 p-1.5 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
-              title=t("dashboard.profile.settingsTooltip")
+              title={t("dashboard.profile.settingsTooltip")}
             >
               <Settings size={15} />
             </button>
