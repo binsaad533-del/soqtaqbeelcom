@@ -246,13 +246,195 @@
     "showMore": "مزید دیکھیں"
   },
   "marketplace": {
-    "title": "کاروباری مارکیٹ پلیس",
+    "title": "تجارتی مارکیٹ",
     "subtitle": "دستیاب کاروباری مواقع دیکھیں",
     "available": "دستیاب",
     "dealType": "سودے کی قسم",
     "city": "شہر",
     "activity": "صنعت",
-    "aiSearch": "آپ کیا تلاش کر رہے ہیں؟ AI مدد کر سکتا ہے…"
+    "price": "قیمت",
+    "aiSearch": "آپ کیا تلاش کر رہے ہیں؟ AI مدد کر سکتا ہے…",
+    "reset": "ری سیٹ",
+    "searchCity": "شہر تلاش کریں...",
+    "locating": "مقام کا تعین کیا جا رہا ہے...",
+    "showMore": "مزید",
+    "showLess": "کم کریں",
+    "hideSimulation": "ڈیمو لسٹنگز چھپائیں",
+    "filterTitle": "لسٹنگز فلٹر کریں",
+    "filterCta": "فلٹر",
+    "showResultsCta": "{{count}} نتائج دکھائیں",
+    "noResults": "کوئی مماثل نتیجہ نہیں",
+    "noExactResults": "آپ کی تلاش سے بالکل مماثل نہیں",
+    "similarOpportunities": "آپ کے لیے ملتے جلتے مواقع",
+    "showingRange": "{{total}} میں سے {{start}}–{{end}} دکھایا جا رہا ہے",
+    "compareLimitToast": "آپ زیادہ سے زیادہ 4 لسٹنگز کا موازنہ کر سکتے ہیں",
+    "loginToLikeToast": "پسند کرنے کے لیے پہلے سائن ان کریں",
+    "linkCopied": "لنک کاپی ہو گیا",
+    "linkCopyFailed": "لنک کاپی نہیں ہو سکا، براہ کرم دستی طور پر کاپی کریں",
+    "geoPermissionToast": "براہ کرم براؤزر سیٹنگز سے مقام تک رسائی کی اجازت دیں",
+    "geoFailedToast": "آپ کا مقام معلوم نہیں ہو سکا، دوبارہ کوشش کریں",
+    "geoSuccessToast": "📍 مقام {{city}} کے قریب ملا",
+    "seo": {
+      "title": "مارکیٹ پلیس — سعودی عرب میں فروخت کے لیے کاروباری مواقع",
+      "description": "سعودی عرب میں دستیاب کاروباری ٹیک اوور مواقع دیکھیں — ریستوران، دکانیں، ورکشاپس، بیوٹی سینٹرز اور بہت کچھ",
+      "jsonLdName": "مارکیٹ پلیس — کاروباری ٹیک اوور مواقع",
+      "jsonLdDescription": "سعودی عرب میں دستیاب کاروباری ٹیک اوور مواقع کی فہرست"
+    },
+    "card": {
+      "featured": "نمایاں",
+      "sellerFallback": "بیچنے والا",
+      "online": "آن لائن",
+      "offline": "آف لائن",
+      "onlineTitle": "ابھی آن لائن",
+      "offlineTitle": "آف لائن",
+      "opportunityFallback": "کاروباری موقع",
+      "assetCount": "{{count}} اثاثے",
+      "yearlyRent": "کرایہ {{amount}}/سال",
+      "operationalReady": "آپریشن کے لیے تیار",
+      "transparencyTitle": "لسٹنگ کی شفافیت: {{score}}%",
+      "transparencyMedium": "⚠ درمیانہ",
+      "transparencyWeak": "⚠ کمزور",
+      "transparencyMissing": "✗ نامکمل",
+      "compareAdd": "موازنہ",
+      "compareRemove": "موازنہ سے ہٹائیں",
+      "like": "پسند",
+      "share": "شیئر کریں"
+    },
+    "filters": {
+      "nearbyOption": "📍 میرے قریب",
+      "dealTypes": {
+        "all": "سب",
+        "fullTakeover": "مکمل ٹیک اوور",
+        "transferNoLiabilities": "بغیر سابقہ ذمہ داریوں کے کاروبار کی منتقلی",
+        "assetsSetup": "اثاثے + آپریشنل سیٹ اپ (بغیر CR)",
+        "assetsOnly": "صرف اثاثے",
+        "transferShort": "ذمہ داریوں کے بغیر منتقلی",
+        "assetsSetupShort": "اثاثے اور سیٹ اپ"
+      },
+      "cities": {
+        "riyadh": "ریاض",
+        "jeddah": "جدہ",
+        "dammam": "دمام",
+        "makkah": "مکہ",
+        "madinah": "مدینہ"
+      },
+      "industries": {
+        "restaurants": "ریستوران",
+        "cafes": "کیفے",
+        "salons": "سیلون",
+        "workshops": "ورکشاپس",
+        "shops": "دکانیں",
+        "groceries": "گروسری",
+        "offices": "دفاتر",
+        "warehouses": "گودام",
+        "pharmacies": "فارمیسیاں",
+        "laundries": "لانڈری",
+        "bakeries": "بیکریاں"
+      }
+    },
+    "ticker": {
+      "live": "براہ راست",
+      "listings": "دستیاب لسٹنگز",
+      "deals": "فعال سودے",
+      "completed": "مکمل",
+      "avgPrice": "اوسط قیمت",
+      "highPrice": "بلند ترین قیمت",
+      "lowPrice": "کم ترین قیمت",
+      "marketActivity": "مارکیٹ کی سرگرمی",
+      "demand": "طلب",
+      "todayOpportunities": "آج کے مواقع",
+      "users": "صارفین",
+      "successRate": "کامیابی کی شرح",
+      "verifiedSellers": "تصدیق شدہ بیچنے والے",
+      "tradingVolume": "تجارتی حجم",
+      "active": "فعال",
+      "moderate": "درمیانی",
+      "quiet": "پرسکون",
+      "high": "اعلیٰ",
+      "stable": "مستحکم",
+      "priority": "ترجیح"
+    },
+    "heatmap": {
+      "title": "مواقع کا ہیٹ میپ",
+      "opportunities": "{{count}} مواقع",
+      "averageLabel": "اوسط",
+      "hot": "گرم",
+      "warm": "نیم گرم",
+      "cool": "پرسکون",
+      "unspecifiedCity": "غیر متعین",
+      "general": "عمومی"
+    },
+    "compare": {
+      "panelTitle": "موازنہ ({{count}}/4)",
+      "clear": "صاف کریں",
+      "close": "بند کریں",
+      "compareNow": "ابھی موازنہ کریں",
+      "addAtLeast": "موازنہ کے لیے {{count}} مزید شامل کریں",
+      "criterion": "معیار",
+      "opportunityFallback": "موقع",
+      "rowPrice": "قیمت",
+      "rowCity": "شہر",
+      "rowDistrict": "علاقہ",
+      "rowDealType": "سودے کی قسم",
+      "rowTransparency": "شفافیت",
+      "rowAiRating": "AI درجہ بندی",
+      "rowSellerTrust": "بیچنے والے پر اعتماد",
+      "viewDetails": "تفصیلات دیکھیں",
+      "aiRecommendation": "AI تجویز",
+      "bestChoice": "✓ بہترین انتخاب",
+      "bestChoiceReason": "قیمت، شفافیت اور بیچنے والے کے اعتماد کی بنیاد پر",
+      "best": "✓ بہترین"
+    },
+    "search": {
+      "noResultsAlertTemplate": "اس وقت آپ کی تلاش سے مماثل کوئی نتیجہ نہیں۔ پریشان نہ ہوں — الرٹ آن کریں اور جیسے ہی کوئی مماثل لسٹنگ شائع ہوگی ہم آپ کو ای میل اور SMS پر اطلاع دیں گے 📧📱",
+      "tryAgain": "معذرت، براہ کرم دوبارہ کوشش کریں",
+      "loginForAlert": "الرٹ فعال کرنے کے لیے پہلے سائن ان کریں",
+      "alertSavedToast": "الرٹ فعال! ہم آپ کو ای میل اور SMS پر اطلاع دیں گے 📧📱",
+      "alertSaveError": "کچھ غلط ہو گیا، براہ کرم دوبارہ کوشش کریں",
+      "notifyMeCta": "ای میل اور SMS پر اطلاع دیں",
+      "alertActive": "ای میل اور SMS الرٹ فعال ✓",
+      "appliedPrefix": "لاگو:",
+      "customPriceRange": "اپنی مرضی کی قیمت کی حد",
+      "suggestions": {
+        "1": "جدہ میں کیفے",
+        "2": "ریاض میں ریستوران",
+        "3": "مناسب قیمت کی ورکشاپ",
+        "4": "ٹیک اوور کے لیے تیار سیلون",
+        "5": "دمام میں دکان"
+      }
+    }
+  },
+  "notifications": {
+    "shell": {
+      "title": "اطلاعات",
+      "unreadBadge": "{{count}} نئی",
+      "markAllRead": "سب پڑھ لیا"
+    },
+    "filters": {
+      "all": "سب",
+      "unread": "غیر پڑھی",
+      "deals": "سودے",
+      "offers": "پیشکشیں",
+      "messages": "پیغامات",
+      "documents": "دستاویزات"
+    },
+    "empty": {
+      "all": "کوئی اطلاع نہیں",
+      "unread": "کوئی غیر پڑھی اطلاع نہیں"
+    },
+    "groups": {
+      "today": "آج",
+      "yesterday": "کل"
+    },
+    "time": {
+      "now": "ابھی",
+      "minutes_one": "1 منٹ",
+      "minutes_other": "{{count}} منٹ",
+      "hours_one": "1 گھنٹہ",
+      "hours_other": "{{count}} گھنٹے",
+      "days_one": "1 دن",
+      "days_other": "{{count}} دن"
+    }
   },
   "dealCheck": {
     "alibabaDisclaimer": "عالمی ذرائع (علی بابا) سے تخمینی قیمت — شپنگ، کسٹمز اور بیچولیوں کی وجہ سے سعودی مارکیٹ سے مختلف ہو سکتی ہے۔ درست تشخیص کے لیے، جساس کے ذریعے ماہرانہ معائنے کی سفارش کی جاتی ہے",

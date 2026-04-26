@@ -246,13 +246,195 @@
     "showMore": "और दिखाएँ"
   },
   "marketplace": {
-    "title": "व्यवसाय मार्केटप्लेस",
+    "title": "व्यावसायिक मार्केटप्लेस",
     "subtitle": "उपलब्ध व्यावसायिक अवसर देखें",
     "available": "उपलब्ध",
     "dealType": "सौदे का प्रकार",
     "city": "शहर",
     "activity": "उद्योग",
-    "aiSearch": "आप क्या ढूँढ रहे हैं? AI मदद कर सकता है…"
+    "price": "कीमत",
+    "aiSearch": "आप क्या ढूँढ रहे हैं? AI मदद कर सकता है…",
+    "reset": "रीसेट",
+    "searchCity": "शहर खोजें...",
+    "locating": "स्थान का पता लगाया जा रहा है...",
+    "showMore": "और देखें",
+    "showLess": "कम दिखाएं",
+    "hideSimulation": "डेमो लिस्टिंग छिपाएं",
+    "filterTitle": "लिस्टिंग फ़िल्टर करें",
+    "filterCta": "फ़िल्टर",
+    "showResultsCta": "{{count}} परिणाम दिखाएं",
+    "noResults": "कोई मेल खाने वाला परिणाम नहीं",
+    "noExactResults": "आपकी खोज से बिल्कुल मेल नहीं खाता",
+    "similarOpportunities": "आपके लिए समान अवसर",
+    "showingRange": "{{total}} में से {{start}}–{{end}} दिखा रहा है",
+    "compareLimitToast": "आप अधिकतम 4 लिस्टिंग की तुलना कर सकते हैं",
+    "loginToLikeToast": "पसंद करने के लिए पहले साइन इन करें",
+    "linkCopied": "लिंक कॉपी हो गया",
+    "linkCopyFailed": "लिंक कॉपी नहीं हो सका, कृपया मैन्युअल रूप से कॉपी करें",
+    "geoPermissionToast": "कृपया ब्राउज़र सेटिंग्स से स्थान की अनुमति दें",
+    "geoFailedToast": "आपका स्थान पता नहीं चला, कृपया पुनः प्रयास करें",
+    "geoSuccessToast": "📍 स्थान {{city}} के पास पाया गया",
+    "seo": {
+      "title": "मार्केटप्लेस — सऊदी अरब में बिक्री के लिए व्यावसायिक अवसर",
+      "description": "सऊदी अरब में उपलब्ध व्यावसायिक अधिग्रहण के अवसर ब्राउज़ करें — रेस्तरां, दुकानें, कार्यशालाएँ, ब्यूटी सेंटर और बहुत कुछ",
+      "jsonLdName": "मार्केटप्लेस — व्यावसायिक अधिग्रहण के अवसर",
+      "jsonLdDescription": "सऊदी अरब में उपलब्ध व्यावसायिक अधिग्रहण अवसरों की सूची"
+    },
+    "card": {
+      "featured": "विशेष",
+      "sellerFallback": "विक्रेता",
+      "online": "ऑनलाइन",
+      "offline": "ऑफ़लाइन",
+      "onlineTitle": "अभी ऑनलाइन",
+      "offlineTitle": "ऑफ़लाइन",
+      "opportunityFallback": "व्यावसायिक अवसर",
+      "assetCount": "{{count}} संपत्तियां",
+      "yearlyRent": "किराया {{amount}}/वर्ष",
+      "operationalReady": "संचालन के लिए तैयार",
+      "transparencyTitle": "लिस्टिंग पारदर्शिता: {{score}}%",
+      "transparencyMedium": "⚠ मध्यम",
+      "transparencyWeak": "⚠ कमज़ोर",
+      "transparencyMissing": "✗ अधूरा",
+      "compareAdd": "तुलना",
+      "compareRemove": "तुलना से हटाएं",
+      "like": "पसंद",
+      "share": "साझा करें"
+    },
+    "filters": {
+      "nearbyOption": "📍 मेरे पास",
+      "dealTypes": {
+        "all": "सभी",
+        "fullTakeover": "पूर्ण अधिग्रहण",
+        "transferNoLiabilities": "बिना पूर्व देनदारियों के व्यवसाय हस्तांतरण",
+        "assetsSetup": "संपत्ति + परिचालन सेटअप (बिना CR)",
+        "assetsOnly": "केवल संपत्ति",
+        "transferShort": "बिना देनदारियों का हस्तांतरण",
+        "assetsSetupShort": "संपत्ति और सेटअप"
+      },
+      "cities": {
+        "riyadh": "रियाद",
+        "jeddah": "जेद्दा",
+        "dammam": "दम्माम",
+        "makkah": "मक्का",
+        "madinah": "मदीना"
+      },
+      "industries": {
+        "restaurants": "रेस्तरां",
+        "cafes": "कैफ़े",
+        "salons": "सैलून",
+        "workshops": "कार्यशालाएँ",
+        "shops": "दुकानें",
+        "groceries": "किराना",
+        "offices": "कार्यालय",
+        "warehouses": "गोदाम",
+        "pharmacies": "फार्मेसियाँ",
+        "laundries": "लॉन्ड्री",
+        "bakeries": "बेकरी"
+      }
+    },
+    "ticker": {
+      "live": "लाइव",
+      "listings": "उपलब्ध लिस्टिंग",
+      "deals": "सक्रिय सौदे",
+      "completed": "पूरे",
+      "avgPrice": "औसत कीमत",
+      "highPrice": "उच्चतम कीमत",
+      "lowPrice": "न्यूनतम कीमत",
+      "marketActivity": "बाज़ार गतिविधि",
+      "demand": "माँग",
+      "todayOpportunities": "आज के अवसर",
+      "users": "उपयोगकर्ता",
+      "successRate": "सफलता दर",
+      "verifiedSellers": "सत्यापित विक्रेता",
+      "tradingVolume": "व्यापार मात्रा",
+      "active": "सक्रिय",
+      "moderate": "मध्यम",
+      "quiet": "शांत",
+      "high": "उच्च",
+      "stable": "स्थिर",
+      "priority": "प्राथमिकता"
+    },
+    "heatmap": {
+      "title": "अवसर हीटमैप",
+      "opportunities": "{{count}} अवसर",
+      "averageLabel": "औसत",
+      "hot": "हॉट",
+      "warm": "गरम",
+      "cool": "शांत",
+      "unspecifiedCity": "अनिर्दिष्ट",
+      "general": "सामान्य"
+    },
+    "compare": {
+      "panelTitle": "तुलना ({{count}}/4)",
+      "clear": "साफ़ करें",
+      "close": "बंद करें",
+      "compareNow": "अभी तुलना करें",
+      "addAtLeast": "तुलना के लिए {{count}} और जोड़ें",
+      "criterion": "मानदंड",
+      "opportunityFallback": "अवसर",
+      "rowPrice": "कीमत",
+      "rowCity": "शहर",
+      "rowDistrict": "क्षेत्र",
+      "rowDealType": "सौदे का प्रकार",
+      "rowTransparency": "पारदर्शिता",
+      "rowAiRating": "AI रेटिंग",
+      "rowSellerTrust": "विक्रेता विश्वास",
+      "viewDetails": "विवरण देखें",
+      "aiRecommendation": "AI सिफ़ारिश",
+      "bestChoice": "✓ सर्वोत्तम विकल्प",
+      "bestChoiceReason": "कीमत, पारदर्शिता और विक्रेता विश्वास के आधार पर",
+      "best": "✓ सर्वश्रेष्ठ"
+    },
+    "search": {
+      "noResultsAlertTemplate": "अभी आपकी खोज से मेल खाने वाला कोई परिणाम नहीं है। चिंता न करें — अलर्ट चालू करें और हम आपको ईमेल और SMS पर सूचित करेंगे जैसे ही कोई मेल खाने वाली लिस्टिंग प्रकाशित होगी 📧📱",
+      "tryAgain": "क्षमा करें, कृपया पुनः प्रयास करें",
+      "loginForAlert": "अलर्ट सक्षम करने के लिए पहले साइन इन करें",
+      "alertSavedToast": "अलर्ट सक्षम! हम आपको ईमेल और SMS द्वारा सूचित करेंगे 📧📱",
+      "alertSaveError": "कुछ गड़बड़ हो गई, कृपया पुनः प्रयास करें",
+      "notifyMeCta": "ईमेल और SMS द्वारा सूचित करें",
+      "alertActive": "ईमेल और SMS अलर्ट सक्षम ✓",
+      "appliedPrefix": "लागू:",
+      "customPriceRange": "कस्टम मूल्य सीमा",
+      "suggestions": {
+        "1": "जेद्दा में कैफ़े",
+        "2": "रियाद में रेस्तरां",
+        "3": "किफायती कार्यशाला",
+        "4": "अधिग्रहण के लिए तैयार सैलून",
+        "5": "दम्माम में दुकान"
+      }
+    }
+  },
+  "notifications": {
+    "shell": {
+      "title": "सूचनाएँ",
+      "unreadBadge": "{{count}} नई",
+      "markAllRead": "सभी पढ़ी हुई"
+    },
+    "filters": {
+      "all": "सभी",
+      "unread": "अपठित",
+      "deals": "सौदे",
+      "offers": "प्रस्ताव",
+      "messages": "संदेश",
+      "documents": "दस्तावेज़"
+    },
+    "empty": {
+      "all": "कोई सूचना नहीं",
+      "unread": "कोई अपठित सूचना नहीं"
+    },
+    "groups": {
+      "today": "आज",
+      "yesterday": "कल"
+    },
+    "time": {
+      "now": "अभी",
+      "minutes_one": "1 मिनट",
+      "minutes_other": "{{count}} मिनट",
+      "hours_one": "1 घंटा",
+      "hours_other": "{{count}} घंटे",
+      "days_one": "1 दिन",
+      "days_other": "{{count}} दिन"
+    }
   },
   "dealCheck": {
     "alibabaDisclaimer": "वैश्विक स्रोतों (अलीबाबा) से अनुमानित मूल्य — शिपिंग, सीमा शुल्क और मध्यस्थों के कारण सऊदी बाजार से भिन्न हो सकता है। सटीक मूल्यांकन के लिए, Jasaas के माध्यम से विशेष निरीक्षण की सिफारिश की जाती है",

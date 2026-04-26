@@ -246,13 +246,195 @@
     "showMore": "আরও দেখুন"
   },
   "marketplace": {
-    "title": "ব্যবসা মার্কেটপ্লেস",
+    "title": "ব্যবসায়িক বাজার",
     "subtitle": "উপলব্ধ ব্যবসায়িক সুযোগগুলি দেখুন",
     "available": "উপলব্ধ",
     "dealType": "চুক্তির ধরন",
     "city": "শহর",
     "activity": "শিল্প",
-    "aiSearch": "আপনি কী খুঁজছেন? AI সাহায্য করতে পারে…"
+    "price": "মূল্য",
+    "aiSearch": "আপনি কী খুঁজছেন? AI সাহায্য করতে পারে…",
+    "reset": "রিসেট",
+    "searchCity": "শহর খুঁজুন...",
+    "locating": "অবস্থান নির্ধারণ করা হচ্ছে...",
+    "showMore": "আরও",
+    "showLess": "কম দেখান",
+    "hideSimulation": "ডেমো লিস্টিং লুকান",
+    "filterTitle": "লিস্টিং ফিল্টার করুন",
+    "filterCta": "ফিল্টার",
+    "showResultsCta": "{{count}} ফলাফল দেখান",
+    "noResults": "কোনো মিলে যাওয়া ফলাফল নেই",
+    "noExactResults": "আপনার অনুসন্ধানের সাথে ঠিক মিল নেই",
+    "similarOpportunities": "আপনার পছন্দ হতে পারে এমন অনুরূপ সুযোগ",
+    "showingRange": "{{total}} এর মধ্যে {{start}}–{{end}} দেখানো হচ্ছে",
+    "compareLimitToast": "আপনি সর্বাধিক 4টি লিস্টিং তুলনা করতে পারেন",
+    "loginToLikeToast": "পছন্দ করতে প্রথমে সাইন ইন করুন",
+    "linkCopied": "লিংক কপি হয়েছে",
+    "linkCopyFailed": "লিংক কপি করা যায়নি, দয়া করে ম্যানুয়ালি কপি করুন",
+    "geoPermissionToast": "ব্রাউজার সেটিংস থেকে অবস্থানের অনুমতি দিন",
+    "geoFailedToast": "আপনার অবস্থান নির্ধারণ করা যায়নি, আবার চেষ্টা করুন",
+    "geoSuccessToast": "📍 অবস্থান {{city}} এর কাছে পাওয়া গেছে",
+    "seo": {
+      "title": "মার্কেটপ্লেস — সৌদি আরবে বিক্রয়ের জন্য ব্যবসায়িক সুযোগ",
+      "description": "সৌদি আরবে উপলব্ধ ব্যবসায়িক টেকওভার সুযোগগুলি ব্রাউজ করুন — রেস্টুরেন্ট, দোকান, কর্মশালা, বিউটি সেন্টার এবং আরও অনেক কিছু",
+      "jsonLdName": "মার্কেটপ্লেস — ব্যবসায়িক টেকওভার সুযোগ",
+      "jsonLdDescription": "সৌদি আরবে উপলব্ধ ব্যবসায়িক টেকওভার সুযোগের তালিকা"
+    },
+    "card": {
+      "featured": "ফিচার্ড",
+      "sellerFallback": "বিক্রেতা",
+      "online": "অনলাইন",
+      "offline": "অফলাইন",
+      "onlineTitle": "এখন অনলাইন",
+      "offlineTitle": "অফলাইন",
+      "opportunityFallback": "ব্যবসায়িক সুযোগ",
+      "assetCount": "{{count}}টি সম্পদ",
+      "yearlyRent": "ভাড়া {{amount}}/বছর",
+      "operationalReady": "পরিচালনার জন্য প্রস্তুত",
+      "transparencyTitle": "লিস্টিং স্বচ্ছতা: {{score}}%",
+      "transparencyMedium": "⚠ মাঝারি",
+      "transparencyWeak": "⚠ দুর্বল",
+      "transparencyMissing": "✗ অসম্পূর্ণ",
+      "compareAdd": "তুলনা",
+      "compareRemove": "তুলনা থেকে সরান",
+      "like": "পছন্দ",
+      "share": "শেয়ার"
+    },
+    "filters": {
+      "nearbyOption": "📍 আমার কাছে",
+      "dealTypes": {
+        "all": "সব",
+        "fullTakeover": "সম্পূর্ণ টেকওভার",
+        "transferNoLiabilities": "পূর্ববর্তী দায় ছাড়া ব্যবসা স্থানান্তর",
+        "assetsSetup": "সম্পদ + অপারেশনাল সেটআপ (CR ছাড়া)",
+        "assetsOnly": "শুধু সম্পদ",
+        "transferShort": "দায় ছাড়া স্থানান্তর",
+        "assetsSetupShort": "সম্পদ ও সেটআপ"
+      },
+      "cities": {
+        "riyadh": "রিয়াদ",
+        "jeddah": "জেদ্দা",
+        "dammam": "দাম্মাম",
+        "makkah": "মক্কা",
+        "madinah": "মদিনা"
+      },
+      "industries": {
+        "restaurants": "রেস্টুরেন্ট",
+        "cafes": "ক্যাফে",
+        "salons": "সেলুন",
+        "workshops": "কর্মশালা",
+        "shops": "দোকান",
+        "groceries": "মুদি দোকান",
+        "offices": "অফিস",
+        "warehouses": "গুদাম",
+        "pharmacies": "ফার্মেসি",
+        "laundries": "লন্ড্রি",
+        "bakeries": "বেকারি"
+      }
+    },
+    "ticker": {
+      "live": "লাইভ",
+      "listings": "উপলব্ধ লিস্টিং",
+      "deals": "সক্রিয় চুক্তি",
+      "completed": "সম্পন্ন",
+      "avgPrice": "গড় মূল্য",
+      "highPrice": "সর্বোচ্চ মূল্য",
+      "lowPrice": "সর্বনিম্ন মূল্য",
+      "marketActivity": "বাজার কার্যকলাপ",
+      "demand": "চাহিদা",
+      "todayOpportunities": "আজকের সুযোগ",
+      "users": "ব্যবহারকারী",
+      "successRate": "সফলতার হার",
+      "verifiedSellers": "যাচাইকৃত বিক্রেতা",
+      "tradingVolume": "ট্রেডিং ভলিউম",
+      "active": "সক্রিয়",
+      "moderate": "মাঝারি",
+      "quiet": "শান্ত",
+      "high": "উচ্চ",
+      "stable": "স্থিতিশীল",
+      "priority": "অগ্রাধিকার"
+    },
+    "heatmap": {
+      "title": "সুযোগের হিটম্যাপ",
+      "opportunities": "{{count}}টি সুযোগ",
+      "averageLabel": "গড়",
+      "hot": "হট",
+      "warm": "উষ্ণ",
+      "cool": "শান্ত",
+      "unspecifiedCity": "অনির্দিষ্ট",
+      "general": "সাধারণ"
+    },
+    "compare": {
+      "panelTitle": "তুলনা ({{count}}/4)",
+      "clear": "মুছুন",
+      "close": "বন্ধ",
+      "compareNow": "এখন তুলনা করুন",
+      "addAtLeast": "তুলনার জন্য আরও {{count}}টি যোগ করুন",
+      "criterion": "মাপকাঠি",
+      "opportunityFallback": "সুযোগ",
+      "rowPrice": "মূল্য",
+      "rowCity": "শহর",
+      "rowDistrict": "এলাকা",
+      "rowDealType": "চুক্তির ধরন",
+      "rowTransparency": "স্বচ্ছতা",
+      "rowAiRating": "AI রেটিং",
+      "rowSellerTrust": "বিক্রেতা বিশ্বাস",
+      "viewDetails": "বিস্তারিত দেখুন",
+      "aiRecommendation": "AI সুপারিশ",
+      "bestChoice": "✓ সেরা পছন্দ",
+      "bestChoiceReason": "মূল্য, স্বচ্ছতা এবং বিক্রেতার বিশ্বাসের ভিত্তিতে",
+      "best": "✓ সেরা"
+    },
+    "search": {
+      "noResultsAlertTemplate": "এই মুহূর্তে আপনার অনুসন্ধানের সাথে কোনো ফলাফল মিলছে না। চিন্তা করবেন না — অ্যালার্ট চালু করুন এবং কোনো মিলে যাওয়া লিস্টিং প্রকাশিত হলে আমরা আপনাকে ইমেল ও SMS দ্বারা জানাব 📧📱",
+      "tryAgain": "দুঃখিত, আবার চেষ্টা করুন",
+      "loginForAlert": "অ্যালার্ট সক্ষম করতে প্রথমে সাইন ইন করুন",
+      "alertSavedToast": "অ্যালার্ট সক্ষম! আমরা ইমেল ও SMS দ্বারা জানাব 📧📱",
+      "alertSaveError": "কিছু ভুল হয়েছে, আবার চেষ্টা করুন",
+      "notifyMeCta": "ইমেল ও SMS দ্বারা জানান",
+      "alertActive": "ইমেল ও SMS অ্যালার্ট সক্ষম ✓",
+      "appliedPrefix": "প্রয়োগ:",
+      "customPriceRange": "কাস্টম মূল্য পরিসীমা",
+      "suggestions": {
+        "1": "জেদ্দায় ক্যাফে",
+        "2": "রিয়াদে রেস্টুরেন্ট",
+        "3": "সাশ্রয়ী কর্মশালা",
+        "4": "টেকওভারের জন্য প্রস্তুত সেলুন",
+        "5": "দাম্মামে দোকান"
+      }
+    }
+  },
+  "notifications": {
+    "shell": {
+      "title": "বিজ্ঞপ্তি",
+      "unreadBadge": "{{count}}টি নতুন",
+      "markAllRead": "সব পঠিত হিসেবে চিহ্নিত করুন"
+    },
+    "filters": {
+      "all": "সব",
+      "unread": "অপঠিত",
+      "deals": "চুক্তি",
+      "offers": "অফার",
+      "messages": "বার্তা",
+      "documents": "ডকুমেন্ট"
+    },
+    "empty": {
+      "all": "কোনো বিজ্ঞপ্তি নেই",
+      "unread": "কোনো অপঠিত বিজ্ঞপ্তি নেই"
+    },
+    "groups": {
+      "today": "আজ",
+      "yesterday": "গতকাল"
+    },
+    "time": {
+      "now": "এখন",
+      "minutes_one": "1 মিনিট",
+      "minutes_other": "{{count}} মিনিট",
+      "hours_one": "1 ঘণ্টা",
+      "hours_other": "{{count}} ঘণ্টা",
+      "days_one": "1 দিন",
+      "days_other": "{{count}} দিন"
+    }
   },
   "dealCheck": {
     "alibabaDisclaimer": "বৈশ্বিক উৎস (আলিবাবা) থেকে আনুমানিক মূল্য — শিপিং, শুল্ক এবং মধ্যস্থতাকারীদের কারণে সৌদি বাজার থেকে ভিন্ন হতে পারে। সঠিক মূল্যায়নের জন্য, Jasaas-এর মাধ্যমে বিশেষজ্ঞ পরিদর্শনের সুপারিশ করা হয়",
