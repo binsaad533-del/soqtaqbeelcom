@@ -314,12 +314,24 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
   };
 
   const inputCls = "w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20";
-  const selectOpts = (options: string[]) => (
+  const selectOpts = (options: { value: string; label: string }[]) => (
     <>
-      <option value="">اختر...</option>
-      {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      <option value="">{t("editListing.selectPlaceholder")}</option>
+      {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </>
   );
+
+  // DB enum values stay Arabic for backward compat; only labels are translated
+  const licenseOptions = [
+    { value: "سارية", label: t("editListing.licenseStatus.active") },
+    { value: "منتهية", label: t("editListing.licenseStatus.expired") },
+    { value: "غير متوفرة", label: t("editListing.licenseStatus.unavailable") },
+  ];
+  const cameraOptions = [
+    { value: "متوفرة ومطابقة", label: t("editListing.cameraStatus.availableCompliant") },
+    { value: "متوفرة غير مطابقة", label: t("editListing.cameraStatus.availableNonCompliant") },
+    { value: "غير متوفرة", label: t("editListing.cameraStatus.unavailable") },
+  ];
 
   const totalPhotos = Object.values(photos).reduce((sum, arr) => sum + (arr?.length || 0), 0);
   const totalDocs = documents.length;
