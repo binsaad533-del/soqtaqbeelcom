@@ -143,7 +143,7 @@ const CustomerDashboardPage = () => {
     try { l = await getMyListings(); } catch { errs.push("الإعلانات"); }
     try { d = await getMyDeals(); } catch { errs.push("الصفقات"); }
     setListings(l); setDeals(d);
-    if (errs.length) setLoadError(`فشل تحميل: ${errs.join("، ")}`);
+    if (errs.length) setLoadError(t("dashboard.loadFailedPrefix") + errs.join("، "));
     setLoading(false);
   }, [getMyListings, getMyDeals]);
 
