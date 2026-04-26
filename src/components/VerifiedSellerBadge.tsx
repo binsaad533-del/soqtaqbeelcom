@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,7 @@ export function useVerifiedSellers(userIds: string[]) {
 }
 
 const VerifiedSellerBadge = ({ userId, size = "sm", className }: Props) => {
+  const { t } = useTranslation();
   const [isVerified, setIsVerified] = useState<boolean | null>(verifiedCache.get(userId) ?? null);
 
   useEffect(() => {
@@ -70,7 +72,7 @@ const VerifiedSellerBadge = ({ userId, size = "sm", className }: Props) => {
 
   return (
     <span
-      title="جوال موثّق ✓"
+      title={t("verifiedSeller.phoneVerified")}
       className={cn("inline-flex items-center text-primary", className)}
     >
       <Phone size={iconSize} className="text-primary" />

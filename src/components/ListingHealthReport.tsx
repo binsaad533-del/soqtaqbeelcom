@@ -43,7 +43,7 @@ const ListingHealthReport = ({ listingId }: HealthReportProps) => {
     score >= 70 ? "text-success" : score >= 40 ? "text-warning" : "text-destructive";
 
   const scoreLabel = (score: number) =>
-    score >= 70 ? "ممتاز" : score >= 40 ? "يحتاج تحسين" : "ضعيف";
+    score >= 70 ? t("listingHealth.scoreLevels.excellent") : score >= 40 ? t("listingHealth.scoreLevels.needsImprovement") : t("listingHealth.scoreLevels.weak");
 
   if (!data && !loading) {
     return (
@@ -94,7 +94,7 @@ const ListingHealthReport = ({ listingId }: HealthReportProps) => {
       {/* Completeness */}
       <div>
         <div className="flex items-center justify-between text-xs mb-1">
-          <span className="text-muted-foreground">اكتمال البيانات</span>
+          <span className="text-muted-foreground">{t("listingHealth.dataCompleteness")}</span>
           <span className="font-medium">{data!.completeness_score}%</span>
         </div>
         <Progress value={data!.completeness_score} className="h-1.5" />
@@ -103,10 +103,10 @@ const ListingHealthReport = ({ listingId }: HealthReportProps) => {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-2">
         {[
-          { icon: <Eye size={11} />, label: "مشاهدات", value: data!.stats.total_views, sub: `${data!.stats.recent_views} هذا الأسبوع` },
-          { icon: <Heart size={11} />, label: "إعجابات", value: data!.stats.likes },
-          { icon: <FileText size={11} />, label: "عروض", value: data!.stats.offers },
-          { icon: <Activity size={11} />, label: "تفاعل", value: `${data!.stats.engagement_rate}%` },
+          { icon: <Eye size={11} />, label: t("listingHealth.stats.views"), value: data!.stats.total_views, sub: `${data!.stats.recent_views} ${t("listingHealth.stats.thisWeek")}` },
+          { icon: <Heart size={11} />, label: t("listingHealth.stats.likes"), value: data!.stats.likes },
+          { icon: <FileText size={11} />, label: t("listingHealth.stats.offers"), value: data!.stats.offers },
+          { icon: <Activity size={11} />, label: t("listingHealth.stats.engagement"), value: `${data!.stats.engagement_rate}%` },
         ].map((stat) => (
           <div key={stat.label} className="rounded-lg bg-muted/30 p-2">
             <div className="flex items-center gap-1 text-muted-foreground mb-0.5">
@@ -122,7 +122,7 @@ const ListingHealthReport = ({ listingId }: HealthReportProps) => {
       {/* Recommendations */}
       {data!.recommendations.length > 0 && (
         <div className="space-y-1.5">
-          <p className="text-[10px] font-medium text-primary">توصيات التحسين</p>
+          <p className="text-[10px] font-medium text-primary">{t("listingHealth.recommendationsTitle")}</p>
           {data!.recommendations.map((rec, i) => (
             <div key={i} className="flex items-start gap-1.5 text-xs text-foreground/80">
               <AlertCircle size={10} className="text-warning shrink-0 mt-0.5" />
