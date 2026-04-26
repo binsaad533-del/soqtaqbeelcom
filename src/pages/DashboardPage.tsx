@@ -1,39 +1,49 @@
 import { Link } from "react-router-dom";
-import { FileText, Image, MessageCircle, AlertCircle, Check, Clock, ChevronLeft } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { FileText, Image, MessageCircle, AlertCircle, Clock, ChevronLeft } from "lucide-react";
 import AiStar from "@/components/AiStar";
 import { cn } from "@/lib/utils";
 import { useSEO } from "@/hooks/useSEO";
 
-const tabs = ["إعلاناتي", "المسودات", "التفاوضات", "الاتفاقيات"];
-
-const myListings = [
-  { id: "1", title: "مطعم شاورما مجهّز بالكامل", status: "نشط", disclosure: 92, city: "الرياض" },
-  { id: "2", title: "كافيه متخصص — جدة", status: "مسودة", disclosure: 45, city: "جدة" },
-];
-
-const negotiations = [
-  { id: "1", listing: "مطعم شاورما مجهّز بالكامل", lastMessage: "أقترح 150,000 ريال", time: "قبل 2 ساعة", unread: true },
-];
-
-const notifications = [
-  { text: "تم اكتمال تحليل الصور لإعلان كافيه جدة", type: "success" as const },
-  { text: "مستند رخصة البلدية مطلوب لإكمال الإفصاح", type: "warning" as const },
-  { text: "عرض تفاوض جديد على مطعم شاورما", type: "info" as const },
-];
-
-import { useState } from "react";
-
 const DashboardPage = () => {
-  useSEO({ title: "لوحة التحكم", description: "أدِر إعلاناتك وصفقاتك من لوحة تحكم سوق تقبيل", canonical: "/dashboard" });
+  const { t } = useTranslation();
+  useSEO({
+    title: t("dashboard.seo.simpleTitle"),
+    description: t("dashboard.seo.simpleDescription"),
+    canonical: "/dashboard",
+  });
   const [activeTab, setActiveTab] = useState(0);
+
+  const tabs = [
+    t("dashboard.simple.tabs.myListings"),
+    t("dashboard.simple.tabs.drafts"),
+    t("dashboard.simple.tabs.negotiations"),
+    t("dashboard.simple.tabs.agreements"),
+  ];
+
+  const myListings = [
+    { id: "1", title: "مطعم شاورما مجهّز بالكامل", status: "active", statusLabel: t("dashboard.statusGroups.active"), disclosure: 92, city: "الرياض" },
+    { id: "2", title: "كافيه متخصص — جدة", status: "draft", statusLabel: t("dashboard.statusBadges.draft"), disclosure: 45, city: "جدة" },
+  ];
+
+  const negotiations = [
+    { id: "1", listing: "مطعم شاورما مجهّز بالكامل", lastMessage: "أقترح 150,000 ريال", time: "قبل 2 ساعة", unread: true },
+  ];
+
+  const notifications = [
+    { text: "تم اكتمال تحليل الصور لإعلان كافيه جدة", type: "success" as const },
+    { text: "مستند رخصة البلدية مطلوب لإكمال الإفصاح", type: "warning" as const },
+    { text: "عرض تفاوض جديد على مطعم شاورما", type: "info" as const },
+  ];
 
   return (
     <div className="py-8">
       <div className="container">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-medium">لوحة التحكم</h1>
-            <p className="text-sm text-muted-foreground">مرحباً بك — إليك ملخص نشاطك</p>
+            <h1 className="text-2xl font-medium">{t("dashboard.headerTitle")}</h1>
+            <p className="text-sm text-muted-foreground">{t("dashboard.welcome")}</p>
           </div>
           <AiStar size={28} />
         </div>
@@ -41,10 +51,10 @@ const DashboardPage = () => {
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "إعلاناتي", value: "2", icon: FileText },
-            { label: "صور مرفوعة", value: "24", icon: Image },
-            { label: "تفاوضات نشطة", value: "1", icon: MessageCircle },
-            { label: "تنبيهات", value: "3", icon: AlertCircle },
+            { label: t("dashboard.simple.stats.myListings"), value: "2", icon: FileText },
+            { label: t("dashboard.simple.stats.uploadedPhotos"), value: "24", icon: Image },
+            { label: t("dashboard.simple.stats.activeNegotiations"), value: "1", icon: MessageCircle },
+            { label: t("dashboard.simple.stats.alerts"), value: "3", icon: AlertCircle },
           ].map((stat, i) => (
             <div key={i} className="bg-card rounded-xl p-4 shadow-soft">
               <div className="flex items-center gap-2 mb-2">
@@ -58,7 +68,7 @@ const DashboardPage = () => {
 
         {/* Notifications */}
         <div className="bg-card rounded-2xl p-5 shadow-soft mb-8">
-          <h2 className="font-medium text-sm mb-3">التنبيهات</h2>
+          <h2 className="font-medium text-sm mb-3">{t("dashboard.alerts")}</h2>
           <div className="space-y-2">
             {notifications.map((n, i) => (
               <div key={i} className={cn(
@@ -95,7 +105,7 @@ const DashboardPage = () => {
         {activeTab <= 1 && (
           <div className="space-y-3">
             {myListings
-              .filter(l => activeTab === 0 ? l.status === "نشط" : l.status === "مسودة")
+              .filter(l => activeTab === 0 ? l.status === "active" : l.status === "draft")
               .map((listing) => (
               <Link
                 key={listing.id}
@@ -104,14 +114,14 @@ const DashboardPage = () => {
               >
                 <div>
                   <div className="font-medium text-sm">{listing.title}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{listing.city} — إفصاح {listing.disclosure}%</div>
+                  <div className="text-xs text-muted-foreground mt-1">{listing.city} — {t("dashboard.simple.disclosure")} {listing.disclosure}%</div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={cn(
                     "text-xs px-2 py-0.5 rounded-md",
-                    listing.status === "نشط" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
+                    listing.status === "active" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
                   )}>
-                    {listing.status}
+                    {listing.statusLabel}
                   </span>
                   <ChevronLeft size={16} strokeWidth={1.3} className="text-muted-foreground" />
                 </div>
@@ -151,7 +161,7 @@ const DashboardPage = () => {
             >
               <div>
                 <div className="font-medium text-sm">مطعم شاورما مجهّز بالكامل</div>
-                <div className="text-xs text-muted-foreground mt-1">بانتظار التأكيد</div>
+                <div className="text-xs text-muted-foreground mt-1">{t("dashboard.simple.awaitingConfirmation")}</div>
               </div>
               <div className="flex items-center gap-2">
                 <Clock size={14} strokeWidth={1.3} className="text-warning" />
