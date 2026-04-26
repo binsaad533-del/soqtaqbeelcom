@@ -250,7 +250,7 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
                 <p className="text-muted-foreground">
                   {action.action_type === "auto_reply" && action.action_details?.reply?.slice(0, 80)}
                   {action.action_type === "evaluate_offer" && action.action_details?.recommendation}
-                  {action.action_type === "daily_summary" && `${t("listing.priceUpdate.newPricePlaceholder").length > 0 ? "" : ""}${action.action_details?.new_offers || 0} | ${action.action_details?.new_messages || 0}`}
+                  {action.action_type === "daily_summary" && `${action.action_details?.new_offers || 0} / ${action.action_details?.new_messages || 0}`}
                 </p>
                 <span className={cn(
                   "text-[9px] px-1.5 py-0.5 rounded-full mt-1 inline-block",
