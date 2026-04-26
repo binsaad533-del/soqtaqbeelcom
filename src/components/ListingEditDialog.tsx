@@ -575,14 +575,14 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
             {documents.length > 0 && (
               <div className="space-y-2">
                 {documents.map((doc, i) => {
-                  const docName = doc?.name || doc?.label || doc?.type || `مستند ${i + 1}`;
+                  const docName = doc?.name || doc?.label || doc?.type || t("editListing.docs.defaultName", { n: i + 1 });
                   const docFiles = Array.isArray(doc?.files) ? doc.files : (doc?.url ? [doc.url] : []);
                   return (
                     <div key={i} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg border border-border/20">
                       <FileText size={14} className="text-primary shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium truncate">{docName}</p>
-                        <p className="text-[10px] text-muted-foreground">{docFiles.length} ملف</p>
+                        <p className="text-[10px] text-muted-foreground">{t("editListing.docs.filesCount", { count: docFiles.length })}</p>
                       </div>
                       <button onClick={() => removeDocument(i)} className="text-destructive/60 hover:text-destructive transition-colors">
                         <X size={14} />
