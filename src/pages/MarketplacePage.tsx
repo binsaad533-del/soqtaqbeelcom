@@ -435,13 +435,13 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
     e.preventDefault();
     e.stopPropagation();
     const url = `${window.location.origin}/listing/${listing.id}`;
-    const title = listing.title || listing.business_activity || "فرصة تقبيل";
+    const title = listing.title || listing.business_activity || t("marketplace.card.opportunityFallback");
     try {
       if (navigator.share) {
         await navigator.share({ title, url });
       } else {
         await navigator.clipboard.writeText(url);
-        toast.success("تم نسخ الرابط");
+        toast.success(t("marketplace.linkCopied"));
       }
     } catch {
       try {
@@ -453,9 +453,9 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
         textarea.select();
         document.execCommand("copy");
         document.body.removeChild(textarea);
-        toast.success("تم نسخ الرابط");
+        toast.success(t("marketplace.linkCopied"));
       } catch {
-        toast.error("لم يتم نسخ الرابط، انسخه يدوياً");
+        toast.error(t("marketplace.linkCopyFailed"));
       }
     }
   };
