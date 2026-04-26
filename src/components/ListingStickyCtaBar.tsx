@@ -64,7 +64,7 @@ export default function ListingStickyCtaBar({
   if (!visible) return null;
 
   const price = listing.price ? Number(listing.price).toLocaleString("en-US") : null;
-  const activity = listing.business_activity || listing.title || "فرصة تقبيل";
+  const activity = listing.business_activity || listing.title || t("listingDetails.opportunityFallback");
 
   // ─── تحديد الأزرار حسب الحالة ───
   const renderActions = () => {
@@ -80,7 +80,7 @@ export default function ListingStickyCtaBar({
           ) : (
             <Sparkles size={16} strokeWidth={1.5} />
           )}
-          جرّب الفرصة
+          {t("listingDetails.tryOpportunity")}
         </Button>
       );
     }
@@ -94,7 +94,7 @@ export default function ListingStickyCtaBar({
           className="h-11 rounded-xl px-4 active:scale-[0.98] shrink-0"
         >
           <MessageCircle size={16} strokeWidth={1.5} />
-          متابعة التفاوض
+          {t("listingDetails.continueNegotiation")}
         </Button>
       );
     }
@@ -116,7 +116,7 @@ export default function ListingStickyCtaBar({
             className="rounded-t-2xl max-h-[85vh] overflow-y-auto"
           >
             <SheetHeader className="text-right mb-4">
-              <SheetTitle>قدّم عرض سعرك</SheetTitle>
+              <SheetTitle>{t("listingDetails.submitYourOffer")}</SheetTitle>
             </SheetHeader>
             <ListingOfferForm
               listingId={listing.id}
@@ -152,7 +152,7 @@ export default function ListingStickyCtaBar({
         "pb-[env(safe-area-inset-bottom)]"
       )}
       role="region"
-      aria-label="إجراءات سريعة على الإعلان"
+      aria-label={t("listingDetails.quickActionsAria")}
       dir="rtl"
     >
       <div className="container flex items-center justify-between gap-3 px-4 py-3">

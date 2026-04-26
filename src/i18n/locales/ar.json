@@ -1220,6 +1220,141 @@
     "title": "تقرير صحة الإعلان",
     "subtitle": "تقييم شامل لأداء إعلانك مع توصيات للتحسين",
     "generateButton": "إنشاء التقرير",
-    "generating": "جاري إنشاء التقرير..."
+    "generating": "جاري إنشاء التقرير...",
+    "dataCompleteness": "اكتمال البيانات",
+    "recommendationsTitle": "توصيات التحسين",
+    "scoreLevels": {
+      "excellent": "ممتاز",
+      "needsImprovement": "يحتاج تحسين",
+      "weak": "ضعيف"
+    },
+    "stats": {
+      "views": "مشاهدات",
+      "likes": "إعجابات",
+      "offers": "عروض",
+      "engagement": "تفاعل",
+      "thisWeek": "هذا الأسبوع"
+    }
+  },
+  "trustBadge": {
+    "level": {
+      "veryTrusted": "موثوق جداً",
+      "trusted": "موثوق",
+      "medium": "متوسط",
+      "low": "منخفض"
+    },
+    "verification": {
+      "full": "موثق بالكامل",
+      "basic": "توثيق أساسي",
+      "phone": "رقم موثق",
+      "none": "غير موثق"
+    },
+    "sellerBadges": {
+      "trustedSeller": "بائع موثوق",
+      "commissionPaid": "ملتزم بالسداد",
+      "completeData": "بيانات مكتملة",
+      "successfulDeals": "صفقات ناجحة"
+    }
+  },
+  "sellerReviews": {
+    "title": "تقييمات المشترين",
+    "reviewsCount": "تقييم",
+    "criteria": {
+      "listingAccuracy": "دقة الإعلان",
+      "honesty": "الأمانة",
+      "responsiveness": "الاستجابة",
+      "experience": "التجربة"
+    }
+  },
+  "verifiedSeller": {
+    "phoneVerified": "جوال موثّق ✓"
+  },
+  "protectedDocs": {
+    "subcategory": {
+      "commercial_register": "سجل تجاري",
+      "lease_contract": "عقد إيجار",
+      "municipality_license": "رخصة بلدية",
+      "civil_defense": "رخصة دفاع مدني",
+      "other": "وثيقة أخرى"
+    },
+    "category": {
+      "legal_document": "وثيقة قانونية",
+      "invoice_document": "فاتورة / عرض سعر",
+      "fallback": "مستند"
+    },
+    "ownerNote": "مستند — ظاهرة لك لأنك مالك الإعلان",
+    "protected": "محمية",
+    "public": "عامة",
+    "open": "فتح",
+    "protectedSuffix": "محمية",
+    "toasts": {
+      "openFailed": "تعذّر فتح الملف"
+    },
+    "status": {
+      "approved": "تم الاعتماد",
+      "pending": "قيد المراجعة",
+      "rejected": "تم الرفض",
+      "expired": "انتهت الصلاحية"
+    },
+    "action": {
+      "pendingReview": "طلبك قيد مراجعة البائع",
+      "sentAt": "تم الإرسال {{time}}",
+      "rejected": "تم رفض طلبك السابق",
+      "reason": "السبب",
+      "resubmit": "إعادة الطلب",
+      "expired": "انتهت صلاحية وصولك لهذه الوثائق",
+      "requestNew": "طلب وصول جديد"
+    },
+    "relative": {
+      "now": "الآن",
+      "minutes": "منذ {{count}} دقيقة",
+      "hours": "منذ {{count}} ساعة",
+      "days": "منذ {{count}} يوم"
+    }
+  },
+  "reportListing": {
+    "title": "الإبلاغ عن إعلان مخالف",
+    "chooseReason": "اختر سبب البلاغ:",
+    "detailsPlaceholder": "تفاصيل إضافية (اختياري)...",
+    "submit": "إرسال البلاغ",
+    "reasons": {
+      "misleading": "معلومات مضللة",
+      "fraud": "احتيال أو نصب",
+      "duplicate": "إعلان مكرر",
+      "inappropriate": "محتوى غير لائق",
+      "wrong_category": "تصنيف خاطئ",
+      "other": "سبب آخر"
+    },
+    "toasts": {
+      "loginRequired": "يجب تسجيل الدخول أولاً",
+      "chooseReason": "يرجى اختيار سبب البلاغ",
+      "rateLimited": "تم تجاوز الحد المسموح من البلاغات. يرجى الانتظار",
+      "success": "تم إرسال البلاغ بنجاح، شكراً لمساهمتك",
+      "failed": "حدث خطأ أثناء إرسال البلاغ"
+    }
+  },
+  "listingDetails": {
+    "opportunityFallback": "فرصة تقبيل",
+    "tryOpportunity": "جرّب الفرصة",
+    "continueNegotiation": "متابعة التفاوض",
+    "submitYourOffer": "قدّم عرض سعرك",
+    "quickActionsAria": "إجراءات سريعة على الإعلان",
+    "shareTitle": "مشاركة",
+    "linkCopied": "تم نسخ رابط الإعلان",
+    "sellerFallback": "بائع",
+    "toasts": {
+      "cannotInterestOwnListing": "لا يمكنك إبداء الاهتمام بإعلانك الخاص",
+      "rateLimitReached": "تم تجاوز الحد المسموح، حاول لاحقاً",
+      "negotiationError": "حدث خطأ أثناء بدء التفاوض. يرجى إعادة المحاولة",
+      "interestSent": "تم إرسال اهتمامك بنجاح!",
+      "interestFailed": "تعذر إرسال الاهتمام. تحقق من اتصالك بالإنترنت وأعد المحاولة",
+      "loadFailed": "فشل تحميل الإعلان — يرجى المحاولة مرة أخرى"
+    },
+    "defaultMessages": {
+      "wantsMeeting": "🤝 أرغب بترتيب مقابلة للاطلاع على الفرصة",
+      "noMeeting": "💬 أفضل إتمام التفاوض إلكترونياً",
+      "firstMessage": "مرحباً، أنا مهتم بهذه الفرصة وأود معرفة المزيد من التفاصيل.",
+      "shortFirstMessage": "مرحباً، أنا مهتم بهذه الفرصة"
+    }
   }
 }

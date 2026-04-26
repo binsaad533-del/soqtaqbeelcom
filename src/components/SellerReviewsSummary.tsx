@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 interface Review {
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const SellerReviewsSummary = ({ reviews, className }: Props) => {
+  const { t } = useTranslation();
   if (reviews.length === 0) return null;
 
   const avg = (key: keyof Pick<Review, "listing_accuracy" | "honesty" | "responsiveness" | "overall_experience">) =>
@@ -28,9 +30,9 @@ const SellerReviewsSummary = ({ reviews, className }: Props) => {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Star size={14} className="text-primary" fill="currentColor" />
-          <h3 className="text-sm font-medium">تقييمات المشترين</h3>
+          <h3 className="text-sm font-medium">{t("sellerReviews.title")}</h3>
         </div>
-        <span className="text-xs text-muted-foreground">{reviews.length} تقييم</span>
+        <span className="text-xs text-muted-foreground">{reviews.length} {t("sellerReviews.reviewsCount")}</span>
       </div>
 
       <div className="flex items-center gap-2 mb-4">
@@ -48,13 +50,13 @@ const SellerReviewsSummary = ({ reviews, className }: Props) => {
 
       <div className="space-y-1.5">
         {[
-          { label: "دقة الإعلان", value: avg("listing_accuracy") },
-          { label: "الأمانة", value: avg("honesty") },
-          { label: "الاستجابة", value: avg("responsiveness") },
-          { label: "التجربة", value: avg("overall_experience") },
+          { key: "listingAccuracy", value: avg("listing_accuracy") },
+          { key: "honesty", value: avg("honesty") },
+          { key: "responsiveness", value: avg("responsiveness") },
+          { key: "experience", value: avg("overall_experience") },
         ].map(item => (
-          <div key={item.label} className="flex items-center gap-2 text-xs">
-            <span className="text-muted-foreground w-16 shrink-0">{item.label}</span>
+          <div key={item.key} className="flex items-center gap-2 text-xs">
+            <span className="text-muted-foreground w-16 shrink-0">{t(`sellerReviews.criteria.${item.key}`)}</span>
             <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full bg-primary transition-all"

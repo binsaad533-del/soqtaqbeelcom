@@ -37,20 +37,14 @@ interface Props {
 }
 
 /** Friendly label for a single classification row. */
-function fileLabel(c: FileClassification): string {
+function fileLabel(c: FileClassification, t: (k: string) => string): string {
   if (c.final_subcategory) {
-    const map: Record<string, string> = {
-      commercial_register: "سجل تجاري",
-      lease_contract: "عقد إيجار",
-      municipality_license: "رخصة بلدية",
-      civil_defense: "رخصة دفاع مدني",
-      other: "وثيقة أخرى",
-    };
-    if (map[c.final_subcategory]) return map[c.final_subcategory];
+    const subKeys = ["commercial_register", "lease_contract", "municipality_license", "civil_defense", "other"];
+    if (subKeys.includes(c.final_subcategory)) return t(`protectedDocs.subcategory.${c.final_subcategory}`);
   }
-  if (c.final_category === "legal_document") return "وثيقة قانونية";
-  if (c.final_category === "invoice_document") return "فاتورة / عرض سعر";
-  return c.file_name || "مستند";
+  if (c.final_category === "legal_document") return t("protectedDocs.category.legal_document");
+  if (c.final_category === "invoice_document") return t("protectedDocs.category.invoice_document");
+  return c.file_name || t("protectedDocs.category.fallback");
 }
 
 const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props) => {
@@ -120,7 +114,7 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
       window.open(res.url, "_blank", "noopener,noreferrer");
     } catch (err) {
       const e = err as Error;
-      toast.error(e.message || "تعذّر فتح الملف");
+      toast.error(e.message || t("protectedDocs.toasts.openFailed"));
     } finally {
       setDownloadingId(null);
     }
@@ -136,7 +130,7 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
         c.final_category === "invoice_document" ||
         c.final_category === "asset_list"
       ) {
-        ownerDocs.push({ id: c.id, label: fileLabel(c), isProtected: c.is_protected });
+        ownerDocs.push({ id: c.id, label: fileLabel(c, t), isProtected: c.is_protected });
       }
     }
     if (ownerDocs.length === 0 && legacyDocuments.length > 0) {
@@ -155,7 +149,7 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
           <Shield size={12} />
-          <span>{ownerDocs.length} مستند — ظاهرة لك لأنك مالك الإعلان</span>
+          <span>{ownerDocs.length} {t("protectedDocs.ownerNote", { count: ownerDocs.length })}</span>
         </div>
         <div className="space-y-2">
           {ownerDocs.map((doc) => (
@@ -169,12 +163,12 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
                 {doc.isProtected ? (
                   <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[10px] text-amber-600">
                     <Lock size={9} strokeWidth={1.5} />
-                    محمية
+                    {t("protectedDocs.protected")}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                     <Globe size={9} strokeWidth={1.5} />
-                    عامة
+                    {t("protectedDocs.public")}
                   </span>
                 )}
               </div>
@@ -185,7 +179,7 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-primary shrink-0 hover:underline"
                 >
-                  فتح
+                  {t("protectedDocs.open")}
                   <ExternalLink size={12} />
                 </a>
               ) : (
@@ -198,7 +192,7 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
                     <Loader2 size={12} className="animate-spin" />
                   ) : (
                     <>
-                      فتح
+                      {t("protectedDocs.open")}
                       <ExternalLink size={12} />
                     </>
                   )}
@@ -230,7 +224,7 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
             <span className="text-sm font-medium text-foreground">
               {t("listing.documents")}
               {hasProtected && (
-                <span className="text-muted-foreground"> ({totalProtected} محمية)</span>
+                <span className="text-muted-foreground"> ({totalProtected} {t("protectedDocs.protectedSuffix")})</span>
               )}
             </span>
           </div>
@@ -249,7 +243,7 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
               >
                 <div className="flex min-w-0 items-center gap-2">
                   <Globe size={11} className="shrink-0 text-muted-foreground" />
-                  <span className="truncate">{fileLabel(c)}</span>
+                  <span className="truncate">{fileLabel(c, t)}</span>
                 </div>
                 {downloadingId === c.id ? (
                   <Loader2 size={12} className="animate-spin text-primary" />
@@ -273,7 +267,7 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted text-[11px] text-muted-foreground"
                       >
                         <Lock size={10} strokeWidth={1.5} />
-                        {fileLabel(c)}
+                        {fileLabel(c, t)}
                       </span>
                     ))
                   : legacyDocuments.map((doc) => (
@@ -299,7 +293,7 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
                   >
                     <div className="flex min-w-0 items-center gap-2">
                       <FileText size={12} className="shrink-0 text-emerald-600" />
-                      <span className="truncate">{fileLabel(c)}</span>
+                      <span className="truncate">{fileLabel(c, t)}</span>
                     </div>
                     {downloadingId === c.id ? (
                       <Loader2 size={12} className="animate-spin text-emerald-600" />
@@ -339,27 +333,28 @@ const ProtectedDocumentsPanel = ({ listingId, ownerId, legacyDocuments }: Props)
 // ─────────────────────────────────────────────────────────────
 
 const StatusBadge = ({ status }: { status: string }) => {
+  const { t } = useTranslation();
   const config: Record<
     string,
-    { label: string; className: string; Icon: typeof Lock } | null
+    { labelKey: string; className: string; Icon: typeof Lock } | null
   > = {
     approved: {
-      label: "تم الاعتماد",
+      labelKey: "protectedDocs.status.approved",
       className: "bg-emerald-500/10 text-emerald-600",
       Icon: CheckCircle2,
     },
     pending: {
-      label: "قيد المراجعة",
+      labelKey: "protectedDocs.status.pending",
       className: "bg-amber-500/10 text-amber-600",
       Icon: Clock,
     },
     rejected: {
-      label: "تم الرفض",
+      labelKey: "protectedDocs.status.rejected",
       className: "bg-destructive/10 text-destructive",
       Icon: XCircle,
     },
     expired: {
-      label: "انتهت الصلاحية",
+      labelKey: "protectedDocs.status.expired",
       className: "bg-muted text-muted-foreground",
       Icon: Clock,
     },
@@ -378,7 +373,7 @@ const StatusBadge = ({ status }: { status: string }) => {
       )}
     >
       <Icon size={10} strokeWidth={1.5} />
-      {c.label}
+      {t(c.labelKey)}
     </span>
   );
 };
@@ -435,14 +430,14 @@ const ActionArea = ({
   }
 
   if (status === "pending" && accessRequest) {
-    const sentAt = formatRelativeArabic(accessRequest.created_at);
+    const sentAt = formatRelative(accessRequest.created_at, t);
     return (
       <div className="rounded-lg bg-amber-500/5 border border-amber-500/20 p-3">
         <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
           <Clock size={11} strokeWidth={1.5} />
-          طلبك قيد مراجعة البائع
+          {t("protectedDocs.action.pendingReview")}
         </p>
-        <p className="text-[11px] text-muted-foreground mt-1">تم الإرسال {sentAt}</p>
+        <p className="text-[11px] text-muted-foreground mt-1">{t("protectedDocs.action.sentAt", { time: sentAt })}</p>
       </div>
     );
   }
@@ -452,16 +447,16 @@ const ActionArea = ({
       <div className="rounded-lg bg-destructive/5 border border-destructive/20 p-3 space-y-2">
         <p className="text-xs text-destructive flex items-center gap-1.5">
           <XCircle size={11} strokeWidth={1.5} />
-          تم رفض طلبك السابق
+          {t("protectedDocs.action.rejected")}
         </p>
         {accessRequest.rejection_reason && (
           <p className="text-[11px] text-muted-foreground">
-            السبب: {accessRequest.rejection_reason}
+            {t("protectedDocs.action.reason")}: {accessRequest.rejection_reason}
           </p>
         )}
         <Button size="sm" variant="outline" onClick={onRequestClick} disabled={loading}>
           <RefreshCw size={12} className="ml-1.5" strokeWidth={1.5} />
-          إعادة الطلب
+          {t("protectedDocs.action.resubmit")}
         </Button>
       </div>
     );
@@ -472,11 +467,11 @@ const ActionArea = ({
       <div className="rounded-lg bg-muted/30 p-3 space-y-2">
         <p className="text-xs text-muted-foreground flex items-center gap-1.5">
           <Clock size={11} strokeWidth={1.5} />
-          انتهت صلاحية وصولك لهذه الوثائق
+          {t("protectedDocs.action.expired")}
         </p>
         <Button size="sm" variant="outline" onClick={onRequestClick} disabled={loading}>
           <RefreshCw size={12} className="ml-1.5" strokeWidth={1.5} />
-          طلب وصول جديد
+          {t("protectedDocs.action.requestNew")}
         </Button>
       </div>
     );
@@ -485,16 +480,16 @@ const ActionArea = ({
   return null;
 };
 
-// Lightweight Arabic relative time
-function formatRelativeArabic(iso: string): string {
+// Lightweight i18n-aware relative time
+function formatRelative(iso: string, t: (k: string, v?: any) => string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return "الآن";
-  if (mins < 60) return `منذ ${mins} دقيقة`;
+  if (mins < 1) return t("protectedDocs.relative.now");
+  if (mins < 60) return t("protectedDocs.relative.minutes", { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `منذ ${hours} ساعة`;
+  if (hours < 24) return t("protectedDocs.relative.hours", { count: hours });
   const days = Math.floor(hours / 24);
-  return `منذ ${days} يوم`;
+  return t("protectedDocs.relative.days", { count: days });
 }
 
 export default ProtectedDocumentsPanel;

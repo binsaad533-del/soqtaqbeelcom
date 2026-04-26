@@ -1220,6 +1220,141 @@
     "title": "তালিকা স্বাস্থ্য প্রতিবেদন",
     "subtitle": "উন্নতির সুপারিশসহ আপনার তালিকার কর্মক্ষমতার সম্পূর্ণ মূল্যায়ন",
     "generateButton": "প্রতিবেদন তৈরি করুন",
-    "generating": "প্রতিবেদন তৈরি হচ্ছে..."
+    "generating": "প্রতিবেদন তৈরি হচ্ছে...",
+    "dataCompleteness": "তথ্য সম্পূর্ণতা",
+    "recommendationsTitle": "উন্নতির পরামর্শ",
+    "scoreLevels": {
+      "excellent": "চমৎকার",
+      "needsImprovement": "উন্নতি প্রয়োজন",
+      "weak": "দুর্বল"
+    },
+    "stats": {
+      "views": "ভিউ",
+      "likes": "লাইক",
+      "offers": "অফার",
+      "engagement": "সম্পৃক্ততা",
+      "thisWeek": "এই সপ্তাহে"
+    }
+  },
+  "trustBadge": {
+    "level": {
+      "veryTrusted": "অত্যন্ত নির্ভরযোগ্য",
+      "trusted": "নির্ভরযোগ্য",
+      "medium": "মাঝারি",
+      "low": "কম"
+    },
+    "verification": {
+      "full": "সম্পূর্ণ যাচাইকৃত",
+      "basic": "মৌলিক যাচাই",
+      "phone": "ফোন যাচাইকৃত",
+      "none": "অযাচাইকৃত"
+    },
+    "sellerBadges": {
+      "trustedSeller": "বিশ্বস্ত বিক্রেতা",
+      "commissionPaid": "কমিশন প্রদত্ত",
+      "completeData": "সম্পূর্ণ তথ্য",
+      "successfulDeals": "সফল চুক্তি"
+    }
+  },
+  "sellerReviews": {
+    "title": "ক্রেতাদের পর্যালোচনা",
+    "reviewsCount": "পর্যালোচনা",
+    "criteria": {
+      "listingAccuracy": "বিজ্ঞাপন নির্ভুলতা",
+      "honesty": "সততা",
+      "responsiveness": "প্রতিক্রিয়া",
+      "experience": "অভিজ্ঞতা"
+    }
+  },
+  "verifiedSeller": {
+    "phoneVerified": "ফোন যাচাইকৃত ✓"
+  },
+  "protectedDocs": {
+    "subcategory": {
+      "commercial_register": "বাণিজ্যিক নিবন্ধন",
+      "lease_contract": "লিজ চুক্তি",
+      "municipality_license": "পৌরসভা লাইসেন্স",
+      "civil_defense": "সিভিল ডিফেন্স অনুমতি",
+      "other": "অন্যান্য নথি"
+    },
+    "category": {
+      "legal_document": "আইনি নথি",
+      "invoice_document": "চালান / কোটেশন",
+      "fallback": "নথি"
+    },
+    "ownerNote": "টি নথি — মালিক হিসেবে আপনার কাছে দৃশ্যমান",
+    "protected": "সুরক্ষিত",
+    "public": "সর্বজনীন",
+    "open": "খুলুন",
+    "protectedSuffix": "সুরক্ষিত",
+    "toasts": {
+      "openFailed": "ফাইল খোলা যায়নি"
+    },
+    "status": {
+      "approved": "অনুমোদিত",
+      "pending": "পর্যালোচনাধীন",
+      "rejected": "প্রত্যাখ্যাত",
+      "expired": "মেয়াদোত্তীর্ণ"
+    },
+    "action": {
+      "pendingReview": "আপনার অনুরোধ বিক্রেতার পর্যালোচনায় রয়েছে",
+      "sentAt": "প্রেরিত {{time}}",
+      "rejected": "আপনার পূর্ববর্তী অনুরোধ প্রত্যাখ্যাত হয়েছে",
+      "reason": "কারণ",
+      "resubmit": "পুনরায় জমা",
+      "expired": "এই নথিগুলিতে আপনার প্রবেশাধিকার শেষ",
+      "requestNew": "নতুন প্রবেশাধিকারের অনুরোধ"
+    },
+    "relative": {
+      "now": "এইমাত্র",
+      "minutes": "{{count}} মিনিট আগে",
+      "hours": "{{count}} ঘন্টা আগে",
+      "days": "{{count}} দিন আগে"
+    }
+  },
+  "reportListing": {
+    "title": "বিজ্ঞাপন রিপোর্ট করুন",
+    "chooseReason": "রিপোর্টের কারণ নির্বাচন করুন:",
+    "detailsPlaceholder": "অতিরিক্ত বিবরণ (ঐচ্ছিক)...",
+    "submit": "রিপোর্ট পাঠান",
+    "reasons": {
+      "misleading": "বিভ্রান্তিকর তথ্য",
+      "fraud": "প্রতারণা",
+      "duplicate": "ডুপ্লিকেট বিজ্ঞাপন",
+      "inappropriate": "অনুপযুক্ত বিষয়বস্তু",
+      "wrong_category": "ভুল শ্রেণী",
+      "other": "অন্যান্য কারণ"
+    },
+    "toasts": {
+      "loginRequired": "অনুগ্রহ করে প্রথমে লগ ইন করুন",
+      "chooseReason": "অনুগ্রহ করে কারণ নির্বাচন করুন",
+      "rateLimited": "রিপোর্ট সীমা অতিক্রম। অপেক্ষা করুন",
+      "success": "রিপোর্ট সফলভাবে পাঠানো হয়েছে। ধন্যবাদ",
+      "failed": "রিপোর্ট পাঠাতে ত্রুটি"
+    }
+  },
+  "listingDetails": {
+    "opportunityFallback": "ব্যবসায়িক সুযোগ",
+    "tryOpportunity": "সুযোগটি চেষ্টা করুন",
+    "continueNegotiation": "আলোচনা চালিয়ে যান",
+    "submitYourOffer": "আপনার অফার জমা দিন",
+    "quickActionsAria": "বিজ্ঞাপনে দ্রুত কর্ম",
+    "shareTitle": "শেয়ার",
+    "linkCopied": "বিজ্ঞাপন লিঙ্ক কপি হয়েছে",
+    "sellerFallback": "বিক্রেতা",
+    "toasts": {
+      "cannotInterestOwnListing": "আপনি নিজের বিজ্ঞাপনে আগ্রহ দেখাতে পারবেন না",
+      "rateLimitReached": "সীমা অতিক্রম, পরে চেষ্টা করুন",
+      "negotiationError": "আলোচনা শুরুতে ত্রুটি। পুনরায় চেষ্টা করুন",
+      "interestSent": "আপনার আগ্রহ সফলভাবে পাঠানো হয়েছে!",
+      "interestFailed": "আগ্রহ পাঠানো যায়নি। সংযোগ পরীক্ষা করুন",
+      "loadFailed": "বিজ্ঞাপন লোড ব্যর্থ — আবার চেষ্টা করুন"
+    },
+    "defaultMessages": {
+      "wantsMeeting": "🤝 আমি সুযোগটি দেখতে মিটিং চাই",
+      "noMeeting": "💬 আমি অনলাইন আলোচনা পছন্দ করি",
+      "firstMessage": "নমস্কার, আমি এই সুযোগে আগ্রহী এবং আরও জানতে চাই।",
+      "shortFirstMessage": "নমস্কার, আমি এই সুযোগে আগ্রহী"
+    }
   }
 }

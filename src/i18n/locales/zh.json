@@ -1220,6 +1220,141 @@
     "title": "列表健康报告",
     "subtitle": "对您列表表现的全面评估及改进建议",
     "generateButton": "生成报告",
-    "generating": "正在生成报告..."
+    "generating": "正在生成报告...",
+    "dataCompleteness": "资料完整度",
+    "recommendationsTitle": "优化建议",
+    "scoreLevels": {
+      "excellent": "优秀",
+      "needsImprovement": "需要改进",
+      "weak": "较弱"
+    },
+    "stats": {
+      "views": "浏览",
+      "likes": "点赞",
+      "offers": "出价",
+      "engagement": "互动",
+      "thisWeek": "本周"
+    }
+  },
+  "trustBadge": {
+    "level": {
+      "veryTrusted": "高度可信",
+      "trusted": "可信",
+      "medium": "中等",
+      "low": "较低"
+    },
+    "verification": {
+      "full": "完全验证",
+      "basic": "基础验证",
+      "phone": "手机已验证",
+      "none": "未验证"
+    },
+    "sellerBadges": {
+      "trustedSeller": "可信卖家",
+      "commissionPaid": "已付佣金",
+      "completeData": "资料完整",
+      "successfulDeals": "成功交易"
+    }
+  },
+  "sellerReviews": {
+    "title": "买家评价",
+    "reviewsCount": "条评价",
+    "criteria": {
+      "listingAccuracy": "信息准确度",
+      "honesty": "诚信度",
+      "responsiveness": "响应度",
+      "experience": "整体体验"
+    }
+  },
+  "verifiedSeller": {
+    "phoneVerified": "手机已验证 ✓"
+  },
+  "protectedDocs": {
+    "subcategory": {
+      "commercial_register": "商业登记",
+      "lease_contract": "租赁合同",
+      "municipality_license": "市政许可证",
+      "civil_defense": "民防许可",
+      "other": "其他文件"
+    },
+    "category": {
+      "legal_document": "法律文件",
+      "invoice_document": "发票 / 报价单",
+      "fallback": "文件"
+    },
+    "ownerNote": "份文件 — 仅您作为业主可见",
+    "protected": "受保护",
+    "public": "公开",
+    "open": "打开",
+    "protectedSuffix": "受保护",
+    "toasts": {
+      "openFailed": "无法打开文件"
+    },
+    "status": {
+      "approved": "已批准",
+      "pending": "审核中",
+      "rejected": "已拒绝",
+      "expired": "已过期"
+    },
+    "action": {
+      "pendingReview": "您的请求正在卖家审核中",
+      "sentAt": "发送时间 {{time}}",
+      "rejected": "您之前的请求已被拒绝",
+      "reason": "原因",
+      "resubmit": "重新提交",
+      "expired": "您对这些文件的访问已过期",
+      "requestNew": "请求新的访问权限"
+    },
+    "relative": {
+      "now": "刚刚",
+      "minutes": "{{count}} 分钟前",
+      "hours": "{{count}} 小时前",
+      "days": "{{count}} 天前"
+    }
+  },
+  "reportListing": {
+    "title": "举报违规广告",
+    "chooseReason": "选择举报原因:",
+    "detailsPlaceholder": "其他详情(可选)...",
+    "submit": "提交举报",
+    "reasons": {
+      "misleading": "误导信息",
+      "fraud": "欺诈",
+      "duplicate": "重复广告",
+      "inappropriate": "不当内容",
+      "wrong_category": "分类错误",
+      "other": "其他原因"
+    },
+    "toasts": {
+      "loginRequired": "请先登录",
+      "chooseReason": "请选择举报原因",
+      "rateLimited": "举报次数已达上限,请稍后再试",
+      "success": "举报已发送,感谢您的参与",
+      "failed": "发送举报时出错"
+    }
+  },
+  "listingDetails": {
+    "opportunityFallback": "商业机会",
+    "tryOpportunity": "试用该机会",
+    "continueNegotiation": "继续协商",
+    "submitYourOffer": "提交您的出价",
+    "quickActionsAria": "广告快速操作",
+    "shareTitle": "分享",
+    "linkCopied": "已复制广告链接",
+    "sellerFallback": "卖家",
+    "toasts": {
+      "cannotInterestOwnListing": "您不能对自己的广告表示兴趣",
+      "rateLimitReached": "已超过限制,请稍后再试",
+      "negotiationError": "开始协商时出错,请重试",
+      "interestSent": "您的兴趣已发送!",
+      "interestFailed": "无法发送兴趣。请检查网络并重试",
+      "loadFailed": "加载广告失败 — 请再试一次"
+    },
+    "defaultMessages": {
+      "wantsMeeting": "🤝 我希望安排会面以了解机会",
+      "noMeeting": "💬 我更喜欢线上协商",
+      "firstMessage": "您好,我对这个机会感兴趣,想了解更多详情。",
+      "shortFirstMessage": "您好,我对这个机会感兴趣"
+    }
   }
 }

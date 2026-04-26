@@ -1220,6 +1220,141 @@
     "title": "Listing health report",
     "subtitle": "A complete assessment of your listing's performance with improvement recommendations",
     "generateButton": "Generate report",
-    "generating": "Generating report..."
+    "generating": "Generating report...",
+    "dataCompleteness": "Data completeness",
+    "recommendationsTitle": "Improvement tips",
+    "scoreLevels": {
+      "excellent": "Excellent",
+      "needsImprovement": "Needs improvement",
+      "weak": "Weak"
+    },
+    "stats": {
+      "views": "Views",
+      "likes": "Likes",
+      "offers": "Offers",
+      "engagement": "Engagement",
+      "thisWeek": "this week"
+    }
+  },
+  "trustBadge": {
+    "level": {
+      "veryTrusted": "Highly trusted",
+      "trusted": "Trusted",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "verification": {
+      "full": "Fully verified",
+      "basic": "Basic verification",
+      "phone": "Phone verified",
+      "none": "Not verified"
+    },
+    "sellerBadges": {
+      "trustedSeller": "Trusted seller",
+      "commissionPaid": "Commission paid",
+      "completeData": "Complete data",
+      "successfulDeals": "Successful deals"
+    }
+  },
+  "sellerReviews": {
+    "title": "Buyer reviews",
+    "reviewsCount": "reviews",
+    "criteria": {
+      "listingAccuracy": "Listing accuracy",
+      "honesty": "Honesty",
+      "responsiveness": "Responsiveness",
+      "experience": "Experience"
+    }
+  },
+  "verifiedSeller": {
+    "phoneVerified": "Phone verified ✓"
+  },
+  "protectedDocs": {
+    "subcategory": {
+      "commercial_register": "Commercial registration",
+      "lease_contract": "Lease contract",
+      "municipality_license": "Municipality license",
+      "civil_defense": "Civil defense permit",
+      "other": "Other document"
+    },
+    "category": {
+      "legal_document": "Legal document",
+      "invoice_document": "Invoice / quotation",
+      "fallback": "Document"
+    },
+    "ownerNote": "documents — visible to you as the listing owner",
+    "protected": "Protected",
+    "public": "Public",
+    "open": "Open",
+    "protectedSuffix": "protected",
+    "toasts": {
+      "openFailed": "Could not open the file"
+    },
+    "status": {
+      "approved": "Approved",
+      "pending": "Under review",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    },
+    "action": {
+      "pendingReview": "Your request is under seller review",
+      "sentAt": "Sent {{time}}",
+      "rejected": "Your previous request was rejected",
+      "reason": "Reason",
+      "resubmit": "Resubmit",
+      "expired": "Your access to these documents has expired",
+      "requestNew": "Request new access"
+    },
+    "relative": {
+      "now": "just now",
+      "minutes": "{{count}} min ago",
+      "hours": "{{count}} hr ago",
+      "days": "{{count}} day(s) ago"
+    }
+  },
+  "reportListing": {
+    "title": "Report a listing",
+    "chooseReason": "Choose a reason:",
+    "detailsPlaceholder": "Additional details (optional)...",
+    "submit": "Send report",
+    "reasons": {
+      "misleading": "Misleading info",
+      "fraud": "Fraud or scam",
+      "duplicate": "Duplicate listing",
+      "inappropriate": "Inappropriate content",
+      "wrong_category": "Wrong category",
+      "other": "Other"
+    },
+    "toasts": {
+      "loginRequired": "Please log in first",
+      "chooseReason": "Please choose a reason",
+      "rateLimited": "Report limit exceeded. Please wait",
+      "success": "Report sent successfully. Thank you",
+      "failed": "An error occurred while sending the report"
+    }
+  },
+  "listingDetails": {
+    "opportunityFallback": "Opportunity",
+    "tryOpportunity": "Try this opportunity",
+    "continueNegotiation": "Continue negotiation",
+    "submitYourOffer": "Submit your offer",
+    "quickActionsAria": "Quick actions on the listing",
+    "shareTitle": "Share",
+    "linkCopied": "Listing link copied",
+    "sellerFallback": "Seller",
+    "toasts": {
+      "cannotInterestOwnListing": "You cannot show interest in your own listing",
+      "rateLimitReached": "Rate limit reached, try again later",
+      "negotiationError": "An error occurred starting negotiation. Please retry",
+      "interestSent": "Your interest was sent successfully!",
+      "interestFailed": "Could not send interest. Check your connection and retry",
+      "loadFailed": "Failed to load the listing — please try again"
+    },
+    "defaultMessages": {
+      "wantsMeeting": "🤝 I'd like to schedule a meeting to view the opportunity",
+      "noMeeting": "💬 I prefer to negotiate online",
+      "firstMessage": "Hello, I'm interested in this opportunity and would like to know more.",
+      "shortFirstMessage": "Hello, I'm interested in this opportunity"
+    }
   }
 }

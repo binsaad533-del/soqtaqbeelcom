@@ -1220,6 +1220,141 @@
     "title": "اشتہار کی صحت کی رپورٹ",
     "subtitle": "بہتری کی سفارشات کے ساتھ آپ کے اشتہار کی کارکردگی کا جامع جائزہ",
     "generateButton": "رپورٹ بنائیں",
-    "generating": "رپورٹ بنائی جا رہی ہے..."
+    "generating": "رپورٹ بنائی جا رہی ہے...",
+    "dataCompleteness": "ڈیٹا مکمل",
+    "recommendationsTitle": "بہتری کی تجاویز",
+    "scoreLevels": {
+      "excellent": "بہترین",
+      "needsImprovement": "بہتری درکار",
+      "weak": "کمزور"
+    },
+    "stats": {
+      "views": "مشاہدات",
+      "likes": "پسند",
+      "offers": "پیشکشیں",
+      "engagement": "مصروفیت",
+      "thisWeek": "اس ہفتے"
+    }
+  },
+  "trustBadge": {
+    "level": {
+      "veryTrusted": "انتہائی قابل اعتماد",
+      "trusted": "قابل اعتماد",
+      "medium": "درمیانہ",
+      "low": "کم"
+    },
+    "verification": {
+      "full": "مکمل تصدیق شدہ",
+      "basic": "بنیادی تصدیق",
+      "phone": "فون تصدیق شدہ",
+      "none": "غیر تصدیق شدہ"
+    },
+    "sellerBadges": {
+      "trustedSeller": "قابل اعتماد فروخت کنندہ",
+      "commissionPaid": "کمیشن ادا",
+      "completeData": "مکمل ڈیٹا",
+      "successfulDeals": "کامیاب سودے"
+    }
+  },
+  "sellerReviews": {
+    "title": "خریداروں کی رائے",
+    "reviewsCount": "جائزے",
+    "criteria": {
+      "listingAccuracy": "اشتہار کی درستگی",
+      "honesty": "ایمانداری",
+      "responsiveness": "جوابدہی",
+      "experience": "تجربہ"
+    }
+  },
+  "verifiedSeller": {
+    "phoneVerified": "فون تصدیق شدہ ✓"
+  },
+  "protectedDocs": {
+    "subcategory": {
+      "commercial_register": "تجارتی رجسٹریشن",
+      "lease_contract": "لیز معاہدہ",
+      "municipality_license": "میونسپلٹی لائسنس",
+      "civil_defense": "سول ڈیفنس اجازت",
+      "other": "دیگر دستاویز"
+    },
+    "category": {
+      "legal_document": "قانونی دستاویز",
+      "invoice_document": "رسید / کوٹیشن",
+      "fallback": "دستاویز"
+    },
+    "ownerNote": "دستاویزات — آپ مالک ہونے کی وجہ سے دیکھ سکتے ہیں",
+    "protected": "محفوظ",
+    "public": "عوامی",
+    "open": "کھولیں",
+    "protectedSuffix": "محفوظ",
+    "toasts": {
+      "openFailed": "فائل نہیں کھل سکی"
+    },
+    "status": {
+      "approved": "منظور شدہ",
+      "pending": "زیر جائزہ",
+      "rejected": "مسترد",
+      "expired": "ختم"
+    },
+    "action": {
+      "pendingReview": "آپ کی درخواست فروخت کنندہ کے زیر جائزہ ہے",
+      "sentAt": "بھیجا گیا {{time}}",
+      "rejected": "آپ کی پچھلی درخواست مسترد ہو گئی",
+      "reason": "وجہ",
+      "resubmit": "دوبارہ بھیجیں",
+      "expired": "ان دستاویزات تک آپ کی رسائی ختم ہو چکی",
+      "requestNew": "نئی رسائی کی درخواست"
+    },
+    "relative": {
+      "now": "ابھی",
+      "minutes": "{{count}} منٹ پہلے",
+      "hours": "{{count}} گھنٹے پہلے",
+      "days": "{{count}} دن پہلے"
+    }
+  },
+  "reportListing": {
+    "title": "اشتہار کی شکایت",
+    "chooseReason": "شکایت کی وجہ منتخب کریں:",
+    "detailsPlaceholder": "اضافی تفصیلات (اختیاری)...",
+    "submit": "شکایت بھیجیں",
+    "reasons": {
+      "misleading": "گمراہ کن معلومات",
+      "fraud": "دھوکہ دہی",
+      "duplicate": "نقلی اشتہار",
+      "inappropriate": "نامناسب مواد",
+      "wrong_category": "غلط زمرہ",
+      "other": "دیگر وجہ"
+    },
+    "toasts": {
+      "loginRequired": "براہ کرم پہلے لاگ ان کریں",
+      "chooseReason": "براہ کرم وجہ منتخب کریں",
+      "rateLimited": "شکایت کی حد ختم ہو گئی۔ انتظار کریں",
+      "success": "شکایت کامیابی سے بھیج دی گئی۔ شکریہ",
+      "failed": "شکایت بھیجنے میں خرابی"
+    }
+  },
+  "listingDetails": {
+    "opportunityFallback": "کاروباری موقع",
+    "tryOpportunity": "موقع آزمائیں",
+    "continueNegotiation": "گفتگو جاری رکھیں",
+    "submitYourOffer": "اپنی پیشکش دیں",
+    "quickActionsAria": "اشتہار پر فوری اقدامات",
+    "shareTitle": "شیئر کریں",
+    "linkCopied": "اشتہار کا لنک کاپی ہو گیا",
+    "sellerFallback": "فروخت کنندہ",
+    "toasts": {
+      "cannotInterestOwnListing": "آپ اپنے اشتہار میں دلچسپی ظاہر نہیں کر سکتے",
+      "rateLimitReached": "حد سے تجاوز، بعد میں دوبارہ کوشش کریں",
+      "negotiationError": "گفتگو شروع کرنے میں خرابی۔ دوبارہ کوشش کریں",
+      "interestSent": "آپ کی دلچسپی کامیابی سے بھیج دی گئی!",
+      "interestFailed": "دلچسپی نہیں بھیجی جا سکی۔ کنکشن چیک کریں",
+      "loadFailed": "اشتہار لوڈ نہیں ہوا — دوبارہ کوشش کریں"
+    },
+    "defaultMessages": {
+      "wantsMeeting": "🤝 میں موقع دیکھنے کے لیے ملاقات چاہتا ہوں",
+      "noMeeting": "💬 مجھے آن لائن گفتگو پسند ہے",
+      "firstMessage": "السلام علیکم، مجھے اس موقع میں دلچسپی ہے اور میں مزید جاننا چاہتا ہوں۔",
+      "shortFirstMessage": "السلام علیکم، مجھے اس موقع میں دلچسپی ہے"
+    }
   }
 }

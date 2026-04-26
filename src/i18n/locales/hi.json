@@ -1220,6 +1220,141 @@
     "title": "लिस्टिंग स्वास्थ्य रिपोर्ट",
     "subtitle": "आपकी लिस्टिंग के प्रदर्शन का व्यापक मूल्यांकन और सुधार की सिफारिशें",
     "generateButton": "रिपोर्ट बनाएँ",
-    "generating": "रिपोर्ट बनाई जा रही है..."
+    "generating": "रिपोर्ट बनाई जा रही है...",
+    "dataCompleteness": "डेटा पूर्णता",
+    "recommendationsTitle": "सुधार सुझाव",
+    "scoreLevels": {
+      "excellent": "उत्कृष्ट",
+      "needsImprovement": "सुधार चाहिए",
+      "weak": "कमज़ोर"
+    },
+    "stats": {
+      "views": "व्यू",
+      "likes": "लाइक",
+      "offers": "ऑफ़र",
+      "engagement": "जुड़ाव",
+      "thisWeek": "इस सप्ताह"
+    }
+  },
+  "trustBadge": {
+    "level": {
+      "veryTrusted": "अत्यधिक भरोसेमंद",
+      "trusted": "भरोसेमंद",
+      "medium": "मध्यम",
+      "low": "कम"
+    },
+    "verification": {
+      "full": "पूर्ण सत्यापित",
+      "basic": "बुनियादी सत्यापन",
+      "phone": "फोन सत्यापित",
+      "none": "असत्यापित"
+    },
+    "sellerBadges": {
+      "trustedSeller": "विश्वसनीय विक्रेता",
+      "commissionPaid": "कमीशन चुकाया",
+      "completeData": "पूर्ण डेटा",
+      "successfulDeals": "सफल सौदे"
+    }
+  },
+  "sellerReviews": {
+    "title": "खरीदारों की समीक्षा",
+    "reviewsCount": "समीक्षा",
+    "criteria": {
+      "listingAccuracy": "विज्ञापन सटीकता",
+      "honesty": "ईमानदारी",
+      "responsiveness": "प्रतिक्रिया",
+      "experience": "अनुभव"
+    }
+  },
+  "verifiedSeller": {
+    "phoneVerified": "फोन सत्यापित ✓"
+  },
+  "protectedDocs": {
+    "subcategory": {
+      "commercial_register": "व्यावसायिक पंजीकरण",
+      "lease_contract": "लीज अनुबंध",
+      "municipality_license": "नगर पालिका लाइसेंस",
+      "civil_defense": "नागरिक सुरक्षा परमिट",
+      "other": "अन्य दस्तावेज़"
+    },
+    "category": {
+      "legal_document": "कानूनी दस्तावेज़",
+      "invoice_document": "चालान / कोटेशन",
+      "fallback": "दस्तावेज़"
+    },
+    "ownerNote": "दस्तावेज़ — विज्ञापन स्वामी के रूप में आपको दिखाई दे रहे हैं",
+    "protected": "सुरक्षित",
+    "public": "सार्वजनिक",
+    "open": "खोलें",
+    "protectedSuffix": "सुरक्षित",
+    "toasts": {
+      "openFailed": "फ़ाइल नहीं खुल सकी"
+    },
+    "status": {
+      "approved": "स्वीकृत",
+      "pending": "समीक्षाधीन",
+      "rejected": "अस्वीकृत",
+      "expired": "समाप्त"
+    },
+    "action": {
+      "pendingReview": "आपका अनुरोध विक्रेता की समीक्षा में है",
+      "sentAt": "भेजा गया {{time}}",
+      "rejected": "आपका पिछला अनुरोध अस्वीकृत हुआ",
+      "reason": "कारण",
+      "resubmit": "पुनः अनुरोध",
+      "expired": "इन दस्तावेज़ों तक आपकी पहुंच समाप्त हो गई",
+      "requestNew": "नई पहुंच का अनुरोध"
+    },
+    "relative": {
+      "now": "अभी",
+      "minutes": "{{count}} मिनट पहले",
+      "hours": "{{count}} घंटे पहले",
+      "days": "{{count}} दिन पहले"
+    }
+  },
+  "reportListing": {
+    "title": "विज्ञापन की रिपोर्ट करें",
+    "chooseReason": "रिपोर्ट का कारण चुनें:",
+    "detailsPlaceholder": "अतिरिक्त विवरण (वैकल्पिक)...",
+    "submit": "रिपोर्ट भेजें",
+    "reasons": {
+      "misleading": "भ्रामक जानकारी",
+      "fraud": "धोखाधड़ी",
+      "duplicate": "डुप्लीकेट विज्ञापन",
+      "inappropriate": "अनुचित सामग्री",
+      "wrong_category": "गलत श्रेणी",
+      "other": "अन्य कारण"
+    },
+    "toasts": {
+      "loginRequired": "कृपया पहले लॉगिन करें",
+      "chooseReason": "कृपया रिपोर्ट का कारण चुनें",
+      "rateLimited": "रिपोर्ट सीमा पार हो गई। कृपया प्रतीक्षा करें",
+      "success": "रिपोर्ट सफलतापूर्वक भेजी गई। धन्यवाद",
+      "failed": "रिपोर्ट भेजते समय त्रुटि हुई"
+    }
+  },
+  "listingDetails": {
+    "opportunityFallback": "व्यावसायिक अवसर",
+    "tryOpportunity": "अवसर आज़माएं",
+    "continueNegotiation": "बातचीत जारी रखें",
+    "submitYourOffer": "अपनी पेशकश दें",
+    "quickActionsAria": "विज्ञापन पर त्वरित कार्रवाई",
+    "shareTitle": "साझा करें",
+    "linkCopied": "विज्ञापन लिंक कॉपी हुआ",
+    "sellerFallback": "विक्रेता",
+    "toasts": {
+      "cannotInterestOwnListing": "आप अपने विज्ञापन में रुचि नहीं दिखा सकते",
+      "rateLimitReached": "सीमा पार हो गई, बाद में पुनः प्रयास करें",
+      "negotiationError": "बातचीत शुरू करते समय त्रुटि। कृपया पुनः प्रयास करें",
+      "interestSent": "आपकी रुचि सफलतापूर्वक भेजी गई!",
+      "interestFailed": "रुचि नहीं भेजी जा सकी। कनेक्शन जांचें और पुनः प्रयास करें",
+      "loadFailed": "विज्ञापन लोड नहीं हुआ — कृपया पुनः प्रयास करें"
+    },
+    "defaultMessages": {
+      "wantsMeeting": "🤝 मैं अवसर देखने के लिए मीटिंग चाहता हूं",
+      "noMeeting": "💬 मुझे ऑनलाइन बातचीत बेहतर लगती है",
+      "firstMessage": "नमस्ते, मुझे इस अवसर में रुचि है और मैं अधिक जानना चाहता हूं।",
+      "shortFirstMessage": "नमस्ते, मुझे इस अवसर में रुचि है"
+    }
   }
 }
