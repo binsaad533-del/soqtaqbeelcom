@@ -854,7 +854,7 @@ const AiChatPage = () => {
                 </div>
               ))}
               <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                {pendingFiles.length} {pendingFiles.every(f => f.isImage) ? "صورة" : pendingFiles.every(f => !f.isImage) ? "ملف" : "ملف/صورة"} جاهزة
+                {pendingFiles.length} {pendingFiles.every(f => f.isImage) ? t("aiChat.input.filesReady_image") : pendingFiles.every(f => !f.isImage) ? t("aiChat.input.filesReady_file") : t("aiChat.input.filesReady_mixed")}
               </span>
             </div>
           )}
