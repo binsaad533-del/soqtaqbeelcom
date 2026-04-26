@@ -2146,7 +2146,11 @@
     },
     "emptyState": {
       "noMatches": "No matching opportunities found yet",
-      "browseMore": "Browse more listings so Moqbil can learn your interests"
+      "browseMore": "Browse more listings so Moqbil can learn your interests",
+      "searching": "Searching for matching opportunities...",
+      "matchesForYou": "Matches for you",
+      "ofTotal": "of",
+      "matchPercent": "match"
     },
     "input": {
       "placeholderDefault": "Ask Moqbil anything or upload a file...",

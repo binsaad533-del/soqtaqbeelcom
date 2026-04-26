@@ -2146,7 +2146,11 @@
     },
     "emptyState": {
       "noMatches": "尚未找到匹配的商机",
-      "browseMore": "浏览更多商机，让 Moqbil 了解您的偏好"
+      "browseMore": "浏览更多商机，让 Moqbil 了解您的偏好",
+      "searching": "正在搜索匹配的商机...",
+      "matchesForYou": "为您匹配的商机",
+      "ofTotal": "共",
+      "matchPercent": "匹配"
     },
     "input": {
       "placeholderDefault": "向 Moqbil 提问或上传文件...",
