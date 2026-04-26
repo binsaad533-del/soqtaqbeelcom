@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -16,16 +17,17 @@ interface Props {
   listingTitle: string | null;
 }
 
-const plans = [
-  { id: "3days", label: "3 أيام", price: 49, days: 3, icon: Sparkles },
-  { id: "7days", label: "أسبوع", price: 99, days: 7, icon: Clock },
-  { id: "30days", label: "شهر كامل", price: 299, days: 30, icon: Crown },
-];
-
 const PromoteListingDialog = ({ open, onOpenChange, listingId, listingTitle }: Props) => {
+  const { t } = useTranslation();
   const { user } = useAuthContext();
   const [selected, setSelected] = useState("7days");
   const [submitting, setSubmitting] = useState(false);
+
+  const plans = [
+    { id: "3days", label: t("promoteListing.duration.days3"), price: 49, days: 3, icon: Sparkles },
+    { id: "7days", label: t("promoteListing.duration.days7"), price: 99, days: 7, icon: Clock },
+    { id: "30days", label: t("promoteListing.duration.days30"), price: 299, days: 30, icon: Crown },
+  ];
 
   const handlePromote = async () => {
     if (!user) return;
@@ -44,11 +46,11 @@ const PromoteListingDialog = ({ open, onOpenChange, listingId, listingTitle }: P
       });
 
       if (error) throw error;
-      toast.success(`تم ترقية الإعلان لمدة ${plan.label}`);
+      toast.success(`${t("promoteListing.success")} — ${plan.label}`);
       onOpenChange(false);
     } catch (err) {
       console.error("[Promote] error", err);
-      toast.error("فشلت عملية الترقية");
+      toast.error(t("promoteListing.failed"));
     } finally {
       setSubmitting(false);
     }
@@ -60,10 +62,10 @@ const PromoteListingDialog = ({ open, onOpenChange, listingId, listingTitle }: P
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles size={16} className="text-amber-500" />
-            ترقية الإعلان
+            {t("promoteListing.title")}
           </DialogTitle>
           <DialogDescription>
-            اجعل "{listingTitle || "إعلانك"}" يظهر في أعلى السوق مع شارة "مميز"
+            {t("promoteListing.desc", { title: listingTitle || t("promoteListing.defaultTitle") })}
           </DialogDescription>
         </DialogHeader>
 
@@ -87,15 +89,15 @@ const PromoteListingDialog = ({ open, onOpenChange, listingId, listingTitle }: P
         </RadioGroup>
 
         <div className="bg-muted/50 rounded-xl p-3 text-xs text-muted-foreground space-y-1">
-          <p>• يظهر إعلانك في أعلى نتائج السوق</p>
-          <p>• شارة "مميز" ذهبية على الإعلان</p>
-          <p>• أولوية في نتائج البحث الذكي</p>
+          <p>• {t("promoteListing.benefits.top")}</p>
+          <p>• {t("promoteListing.benefits.badge")}</p>
+          <p>• {t("promoteListing.benefits.priority")}</p>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} size="sm">إلغاء</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} size="sm">{t("promoteListing.cancel")}</Button>
           <Button onClick={handlePromote} disabled={submitting} size="sm">
-            {submitting ? "جاري الترقية..." : "ترقية الآن"}
+            {submitting ? t("promoteListing.promoting") : t("promoteListing.promoteNow")}
           </Button>
         </DialogFooter>
       </DialogContent>

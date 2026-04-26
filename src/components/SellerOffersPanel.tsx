@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp, Check, X, MessageSquare, Loader2, TrendingUp, Clock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ interface Props {
 }
 
 const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { getSellerOffers, respondToOffer, loading } = useListingOffers();
   const { createDeal } = useDeals();
@@ -35,18 +37,18 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
 
   const handleAccept = async (offer: ListingOffer) => {
     if (hasAccepted) {
-      toast.error("يوجد عرض مقبول بالفعل — أكمل الصفقة الحالية أو ألغها أولاً");
+      toast.error(t("sellerOffers.toasts.alreadyAccepted"));
       return;
     }
     setRespondingId(offer.id);
     const { error } = await respondToOffer(offer.id, "accepted");
     if (error) {
-      toast.error("فشل قبول العرض");
+      toast.error(t("sellerOffers.toasts.acceptFailed"));
       setRespondingId(null);
       return;
     }
 
-    toast.success("تم قبول العرض ✅");
+    toast.success(t("sellerOffers.toasts.accepted"));
 
     // Send email notification to buyer (server looks up email)
     sendNotificationEmail({
@@ -89,9 +91,9 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
     setRespondingId(offer.id);
     const { error } = await respondToOffer(offer.id, "rejected");
     if (error) {
-      toast.error("فشل رفض العرض");
+      toast.error(t("sellerOffers.toasts.rejectFailed"));
     } else {
-      toast.success("تم رفض العرض");
+      toast.success(t("sellerOffers.toasts.rejectedToast"));
       setOffers(prev => prev.map(o => o.id === offer.id ? { ...o, status: "rejected" } : o));
 
       // Send email notification to buyer about rejection
@@ -132,22 +134,22 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
         <div className="flex items-center gap-2">
           <TrendingUp size={14} className="text-primary" />
           <span className="text-xs font-semibold text-foreground">
-            عروض الأسعار ({offers.length})
+            {t("sellerOffers.title")} ({offers.length})
           </span>
           {pendingOffers.length > 0 && !hasAccepted && (
             <span className="text-[10px] bg-primary text-primary-foreground rounded-full px-1.5 py-0.5">
-              {pendingOffers.length} جديد
+              {pendingOffers.length} {t("sellerOffers.newBadge")}
             </span>
           )}
           {hasAccepted && (
             <span className="text-[10px] bg-success/15 text-success rounded-full px-1.5 py-0.5 font-medium">
-              صفقة جارية
+              {t("sellerOffers.activeDeal")}
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[11px] text-muted-foreground">
-            أعلى: {offers.length > 0 ? <>{Math.max(...offers.map(o => Number(o.offered_price))).toLocaleString("en-US")} <SarSymbol size={9} /></> : "—"}
+            {t("sellerOffers.highest")}: {offers.length > 0 ? <>{Math.max(...offers.map(o => Number(o.offered_price))).toLocaleString("en-US")} <SarSymbol size={9} /></> : "—"}
           </span>
           {expanded ? <ChevronUp size={14} className="text-muted-foreground" /> : <ChevronDown size={14} className="text-muted-foreground" />}
         </div>
@@ -163,7 +165,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
                   {Number(acceptedOffer.offered_price).toLocaleString("en-US")} <SarSymbol size={11} />
                 </span>
                 <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-success/15 text-success">
-                  مقبول — صفقة جارية
+                  {t("sellerOffers.acceptedTag")}
                 </span>
               </div>
               {acceptedOffer.deal_id && (
@@ -174,7 +176,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
                 >
                   <Link to={`/negotiate/${acceptedOffer.deal_id}`}>
                     <ArrowLeft size={12} />
-                    الانتقال للمفاوضات
+                    {t("sellerOffers.goToNegotiation")}
                   </Link>
                 </Button>
               )}
@@ -186,7 +188,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
             <div className="p-2.5 bg-warning/5 rounded-lg border border-warning/15 flex items-start gap-2">
               <Clock size={12} className="text-warning shrink-0 mt-0.5" />
               <p className="text-[10px] text-muted-foreground leading-relaxed">
-                العروض الأخرى في الانتظار حتى اكتمال الصفقة الحالية أو إلغائها. إذا لم تتم الصفقة يمكنك العودة وقبول عرض آخر.
+                {t("sellerOffers.pendingHint")}
               </p>
             </div>
           )}
@@ -204,7 +206,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
                 <div className="flex items-center gap-2">
                   {hasAccepted && (
                     <span className="text-[9px] text-warning font-medium px-1.5 py-0.5 rounded bg-warning/10">
-                      في الانتظار
+                      {t("sellerOffers.pending")}
                     </span>
                   )}
                   <span className="text-[10px] text-muted-foreground">
@@ -227,7 +229,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
                     className="flex-1 rounded-xl text-xs gap-1 bg-success hover:bg-success/90 text-success-foreground"
                   >
                     {respondingId === offer.id ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
-                    قبول وبدء التفاوض
+                    {t("sellerOffers.acceptStart")}
                   </Button>
                   <Button
                     size="sm"
@@ -237,7 +239,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
                     className="rounded-xl text-xs gap-1"
                   >
                     <X size={12} />
-                    رفض
+                    {t("sellerOffers.reject")}
                   </Button>
                 </div>
               )}
@@ -252,7 +254,7 @@ const SellerOffersPanel = ({ listingId, listingOwnerId, className }: Props) => {
                   {Number(offer.offered_price).toLocaleString("en-US")} <SarSymbol size={10} />
                 </span>
                 <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
-                  مرفوض
+                  {t("sellerOffers.rejected")}
                 </span>
               </div>
             </div>
