@@ -481,7 +481,17 @@ const SYSTEM_PROMPT = `أنت مستشار مالي واقتصادي خبير م
 - أسعار الأصول مبنية على عروض أسعار من الموردين — وليست فواتير شراء فعلية
 - في هيكل الاستثمار، قيمة التقبيل = السعر المطلوب من البائع (وليس قيمة الأصول)
 - إذا لم تتوفر بيانات مالية فعلية (إيرادات، مصاريف)، صرّح بذلك بوضوح ولا تفترض أرقاماً
-- التكاليف التشغيلية يجب أن تستند إلى معايير السوق السعودي لنوع النشاط المحدد مع ذكر المصدر`;
+- التكاليف التشغيلية يجب أن تستند إلى معايير السوق السعودي لنوع النشاط المحدد مع ذكر المصدر
+
+## ⚖️ قاعدة التوازن (نبرة الخبير المالي المحترف):
+- النبرة المطلوبة: **مستشار مالي محترف متوازن** — لا "محامي حذر مفرط"
+- لكل مخاطرة في riskFactors، اذكر مقابلها فرصة أو نقطة قوة في opportunities/strengths
+- opportunities array يجب ألا يكون فارغاً — كل صفقة لها نقاط جذب يمكن استثمارها
+- التوصيات يجب أن تكون **بنّاءة وعملية** (كيف نُحسّن الأداء؟ كيف نخفف المخاطر؟) لا **تشاؤمية**
+- استخدم لغة مهنية متوازنة: "يستحق التحقق"، "يحتاج تخطيطاً"، "يستدعي متابعة" — بدل: "خطر كبير"، "تحذير"، "احتمال فشل"
+- التوازن لا يعني إخفاء حقائق سلبية — يعني عرضها مع السياق والحلول الممكنة
+- الهدف: تمكين المستثمر من قرار مدروس، لا إحباطه أو دفعه للتراجع بدون مبرر
+- في غياب البيانات المالية: اذكر أنها "تقديرات استرشادية تحتاج تحقق ميداني" بدل تخفيض الثقة بشكل قسري`;
 
 function languageInstructionFor(language: string): string {
   const map: Record<string, string> = {
@@ -776,29 +786,33 @@ serve(async (req) => {
 
     const result = JSON.parse(toolCall.function.arguments);
 
-    // Post-process for assets_setup: hard-guarantee the warning prefix and low confidence
-    // even if the model failed to follow the instruction.
+    // Post-process for assets_setup: keep an informational notice in summary,
+    // but trust the model's verdict instead of forcing it down to yellow/low.
     if (isAssetsSetup) {
-      const ASSETS_SETUP_WARNING = `⚠️ تحذير مهم: هذي دراسة جدوى تقديرية مبنية على افتراضات تشغيلية. المشتري مسؤول عن:
+      const ASSETS_SETUP_NOTICE = `ℹ️ ملاحظة مهنية: هذه دراسة جدوى تقديرية مبنية على افتراضات تشغيلية لصفقة "أصول + تجهيز تشغيلي". المشتري مسؤول عن:
 - استخراج سجل تجاري جديد
 - ترخيص النشاط
 - توظيف الكوادر
 - تطوير قاعدة العملاء
-الأرقام المذكورة توضيحية ولا تمثل ضماناً للأداء الفعلي.
+الأرقام المذكورة استرشادية، ويُنصح بالتحقق الميداني قبل اتخاذ القرار النهائي.
 
 `;
       const existingSummary = typeof result.executiveSummary === "string" ? result.executiveSummary : "";
-      if (!existingSummary.startsWith("⚠️ تحذير مهم")) {
-        result.executiveSummary = ASSETS_SETUP_WARNING + existingSummary;
+      if (!existingSummary.startsWith("ℹ️ ملاحظة مهنية") && !existingSummary.startsWith("⚠️ تحذير مهم")) {
+        result.executiveSummary = ASSETS_SETUP_NOTICE + existingSummary;
       }
-      result.confidenceLevel = "منخفض";
-      if (result.verdictColor === "green" || result.verdictColor === "blue") {
-        result.verdictColor = "yellow";
+      // Allow medium confidence for assets_setup deals — only cap "high" down to "medium"
+      if (result.confidenceLevel === "عالي" || result.confidenceLevel === "high") {
+        result.confidenceLevel = "متوسط";
       }
+      // Removed: forcing verdictColor down from green/blue to yellow.
+      // Trust the model's balanced verdict.
     }
 
-    if (!hasFinancials) {
-      result.confidenceLevel = "منخفض";
+    // For deals without financials: mark as medium confidence (not low),
+    // since the model already has competitor/market context to work with.
+    if (!hasFinancials && (result.confidenceLevel === "عالي" || result.confidenceLevel === "high")) {
+      result.confidenceLevel = "متوسط";
     }
 
     const study = {
