@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Target, Loader2, RefreshCw } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ interface MatchResult {
 }
 
 const SmartMatchPanel = () => {
+  const { t } = useTranslation();
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const [matches, setMatches] = useState<MatchResult[]>([]);
@@ -51,7 +53,7 @@ const SmartMatchPanel = () => {
     return (
       <div className="flex items-center justify-center gap-2 py-6">
         <Loader2 size={14} className="animate-spin text-primary" />
-        <span className="text-xs text-muted-foreground">جاري البحث عن فرص مطابقة...</span>
+        <span className="text-xs text-muted-foreground">{t("aiChat.emptyState.searching")}</span>
       </div>
     );
   }
@@ -60,8 +62,8 @@ const SmartMatchPanel = () => {
     return (
       <div className="text-center py-4 text-xs text-muted-foreground">
         <Target size={20} className="mx-auto mb-2 text-muted-foreground/50" />
-        <p>لم يتم العثور على فرص مطابقة بعد</p>
-        <p className="text-[10px] mt-1">تصفّح المزيد من الإعلانات ليتعرف مقبل على اهتماماتك</p>
+        <p>{t("aiChat.emptyState.noMatches")}</p>
+        <p className="text-[10px] mt-1">{t("aiChat.emptyState.browseMore")}</p>
       </div>
     );
   }
@@ -71,9 +73,9 @@ const SmartMatchPanel = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <Target size={14} className="text-primary" />
-          <span className="text-xs font-medium">فرص مطابقة لك</span>
+          <span className="text-xs font-medium">{t("aiChat.emptyState.matchesForYou")}</span>
           <Badge variant="secondary" className="text-[9px] px-1.5 py-0">
-            {matches.length} من {totalAnalyzed}
+            {matches.length} {t("aiChat.emptyState.ofTotal")} {totalAnalyzed}
           </Badge>
         </div>
         <button onClick={findMatches} className="text-muted-foreground hover:text-foreground">
@@ -103,7 +105,7 @@ const SmartMatchPanel = () => {
             </div>
             <div className="text-left shrink-0">
               <Badge className={cn("text-[10px] px-1.5 py-0.5", scoreColor(match.match_score))}>
-                {match.match_score}% توافق
+                {match.match_score}% {t("aiChat.emptyState.matchPercent")}
               </Badge>
               {match.price > 0 && (
                 <div className="mt-1">

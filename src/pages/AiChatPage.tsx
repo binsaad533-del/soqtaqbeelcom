@@ -593,10 +593,10 @@ const AiChatPage = () => {
                 <MoqbilAvatar size={44} />
               </div>
               <div>
-                <h2 className="text-sm font-semibold">مقبل مرشدك الذكي طحطوح الصفقات</h2>
+                <h2 className="text-sm font-semibold">{t("aiChat.header.title")} {t("aiChat.header.subtitle")}</h2>
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                  <span className="text-[10px] text-success">نشط</span>
+                  <span className="text-[10px] text-success">{t("aiChat.header.active")}</span>
                   {memoryLoaded && memory.interaction_count > 0 && (
                     <span className="text-[9px] text-muted-foreground/60 bg-muted/30 px-1.5 py-0.5 rounded-full mr-1">
                       {memory.interaction_count} تفاعل
@@ -691,7 +691,7 @@ const AiChatPage = () => {
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 px-1">
                 <Command size={11} className="text-primary" strokeWidth={2} />
-                <span className="text-[10px] font-medium text-primary">أوامر سريعة</span>
+                <span className="text-[10px] font-medium text-primary">{t("aiChat.quickCommands.header")}</span>
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 {quickCommands.map((cmd) => (
@@ -745,8 +745,8 @@ const AiChatPage = () => {
                 <MoqbilAvatar size={64} />
               </div>
               <div>
-                <h3 className="text-sm font-medium text-foreground/70">مرحباً، أنا مقبل مرشدك الذكي طحطوح الصفقات</h3>
-                <p className="text-xs text-muted-foreground mt-1 max-w-sm">مساعدك الذكي في سوق تقبيل. اسألني أي سؤال عن الصفقات أو الفرص أو تحليل السوق، أو ارفع صور وملفات وأحللها لك.</p>
+                <h3 className="text-sm font-medium text-foreground/70">{t("aiChat.welcome.emptyTitle")}</h3>
+                <p className="text-xs text-muted-foreground mt-1 max-w-sm">{t("aiChat.welcome.emptySubtitle")}</p>
               </div>
             </div>
           )}
