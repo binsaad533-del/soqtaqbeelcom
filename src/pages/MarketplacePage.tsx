@@ -28,6 +28,7 @@ import { getArabicDealType } from "@/lib/translations";
 import { usePublishedListingsQuery } from "@/hooks/useListingsQuery";
 import { useAllProfilesQuery } from "@/hooks/useProfilesQuery";
 import { usePagination } from "@/hooks/usePagination";
+import { useListingTranslation } from "@/hooks/useListingTranslation";
 import {
   Pagination,
   PaginationContent,
