@@ -133,7 +133,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
         const result = await uploadFile(listing.id, file, `photos/${group}`);
         if (result.url) uploadedUrls.push(result.url);
       } catch {
-        toast.error(`فشل رفع ${file.name}`);
+        toast.error(t("editListing.toasts.uploadFailed", { name: file.name }));
       }
     }
 
