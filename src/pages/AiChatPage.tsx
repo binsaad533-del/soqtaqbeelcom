@@ -286,12 +286,15 @@ const FeedbackButtons = ({ messageId, currentFeedback, userMessage, aiResponse, 
 };
 
 const AiChatPage = () => {
+  const isMobile = useIsMobile();
+  const { isRTL } = useDirection();
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const navigate = useNavigate();
   const _location = useLocation();
@@ -299,6 +302,7 @@ const AiChatPage = () => {
   const { user, role: authRole } = useAuthContext();
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -307,9 +311,15 @@ const AiChatPage = () => {
   const { getMemoryContext, addAiNote, memory, loaded: memoryLoaded } = useAiMemory();
   const { alerts: marketAlerts, markRead: markAlertRead, dismissAlert } = useMarketAlerts();
 
-
-  useEffect(() => { scrollRef.current && (scrollRef.current.scrollTop = scrollRef.current.scrollHeight); }, [messages, streaming]);
-  useEffect(() => { inputRef.current?.focus(); }, []);
+  // Auto-scroll to last message
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    } else if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, streaming, loadingFiles]);
+  useEffect(() => { if (!isMobile) inputRef.current?.focus(); }, [isMobile]);
 
   const now = () => new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
