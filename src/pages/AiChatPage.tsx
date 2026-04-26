@@ -876,7 +876,7 @@ const AiChatPage = () => {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleSend()}
-              placeholder={pendingFiles.length > 0 ? "أضف وصف أو أرسل مباشرة..." : "اسأل مقبل أي شي أو ارفع ملف..."}
+              placeholder={pendingFiles.length > 0 ? t("aiChat.input.placeholderWithFiles") : t("aiChat.input.placeholderDefault")}
               className="flex-1 px-4 py-2.5 rounded-xl border border-border/50 bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
               disabled={streaming}
             />
