@@ -191,7 +191,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
 
     if (newDocs.length > 0) {
       setDocuments(prev => [...prev, ...newDocs]);
-      toast.success(`تم رفع ${newDocs.length} مستند`);
+      toast.success(t("editListing.toasts.docsUploaded", { count: newDocs.length }));
     }
     setUploadingDocs(false);
   };
