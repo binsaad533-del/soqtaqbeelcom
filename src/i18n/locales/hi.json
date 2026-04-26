@@ -2158,7 +2158,10 @@
       "filesReady_file": "{{count}} फ़ाइल तैयार",
       "filesReady_mixed": "{{count}} फ़ाइल/तस्वीर तैयार",
       "dropFilesHere": "फ़ाइलें यहाँ छोड़ें",
-      "anyTypeSize": "कोई भी प्रकार, कोई भी आकार"
+      "anyTypeSize": "कोई भी प्रकार, कोई भी आकार",
+      "analyzeFilesAndImages": "इन फ़ाइलों और छवियों का विश्लेषण करें",
+      "analyzeImages": "इन छवियों का विश्लेषण करें",
+      "analyzeFiles": "इन फ़ाइलों का विश्लेषण करें"
     },
     "states": {
       "thinking": "सोच रहा है...",

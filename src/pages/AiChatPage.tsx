@@ -373,7 +373,7 @@ const AiChatPage = () => {
             toast.success(t("aiChat.toasts.uploadSuccess", { name: file.name }));
           } catch (err) {
             console.error("Upload failed:", err);
-            toast.error(`فشل رفع ${file.name}`);
+            toast.error(t("aiChat.toasts.uploadFailed", { name: file.name }));
             continue;
           }
         }
@@ -382,10 +382,10 @@ const AiChatPage = () => {
           try {
             storageUrl = await uploadToStorage(file);
             uploaded = true;
-            toast.success(`تم رفع ${file.name}`);
+            toast.success(t("aiChat.toasts.uploadSuccess", { name: file.name }));
           } catch (err) {
             console.error("Upload failed:", err);
-            toast.error(`فشل رفع ${file.name}`);
+            toast.error(t("aiChat.toasts.uploadFailed", { name: file.name }));
             continue;
           }
         }
@@ -401,7 +401,7 @@ const AiChatPage = () => {
           uploaded,
         });
       } catch {
-        toast.error(`فشل قراءة الملف: ${file.name}`);
+        toast.error(t("aiChat.toasts.fileReadFailed", { name: file.name }));
       }
     }
 
@@ -552,9 +552,9 @@ const AiChatPage = () => {
 
     let text = hasText ? input : "";
     if (!hasText && hasFiles) {
-      if (hasImages && hasDocuments) text = "حلل هذه الملفات والصور";
-      else if (hasImages) text = "حلل هذه الصور";
-      else text = "حلل هذه الملفات";
+      if (hasImages && hasDocuments) text = t("aiChat.input.analyzeFilesAndImages");
+      else if (hasImages) text = t("aiChat.input.analyzeImages");
+      else text = t("aiChat.input.analyzeFiles");
     }
 
     const files = hasFiles ? [...pendingFiles] : undefined;
@@ -854,7 +854,7 @@ const AiChatPage = () => {
                 </div>
               ))}
               <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                {pendingFiles.length} {pendingFiles.every(f => f.isImage) ? "صورة" : pendingFiles.every(f => !f.isImage) ? "ملف" : "ملف/صورة"} جاهزة
+                {pendingFiles.length} {pendingFiles.every(f => f.isImage) ? t("aiChat.input.filesReady_image") : pendingFiles.every(f => !f.isImage) ? t("aiChat.input.filesReady_file") : t("aiChat.input.filesReady_mixed")}
               </span>
             </div>
           )}
@@ -862,12 +862,12 @@ const AiChatPage = () => {
           {loadingFiles && (
             <div className="flex items-center justify-center gap-2 mb-3 py-2 rounded-lg bg-primary/5 border border-primary/15">
               <Loader2 size={14} className="animate-spin text-primary" />
-              <span className="text-xs text-primary font-medium">جاري تجهيز الملفات...</span>
+              <span className="text-xs text-primary font-medium">{t("aiChat.input.preparingFiles")}</span>
             </div>
           )}
 
           <div className="flex items-center gap-3 max-w-3xl mx-auto">
-            <button onClick={() => fileInputRef.current?.click()} disabled={streaming || loadingFiles} className="rounded-xl h-10 w-10 flex items-center justify-center transition-all shrink-0 text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30" title="ارفع ملف أو صورة">
+            <button onClick={() => fileInputRef.current?.click()} disabled={streaming || loadingFiles} className="rounded-xl h-10 w-10 flex items-center justify-center transition-all shrink-0 text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/30" title={t("aiChat.input.uploadTooltip")}>
               <Paperclip size={16} strokeWidth={1.5} />
             </button>
             <input
@@ -876,7 +876,7 @@ const AiChatPage = () => {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleSend()}
-              placeholder={pendingFiles.length > 0 ? "أضف وصف أو أرسل مباشرة..." : "اسأل مقبل أي شي أو ارفع ملف..."}
+              placeholder={pendingFiles.length > 0 ? t("aiChat.input.placeholderWithFiles") : t("aiChat.input.placeholderDefault")}
               className="flex-1 px-4 py-2.5 rounded-xl border border-border/50 bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/30 focus:ring-1 focus:ring-primary/20"
               disabled={streaming}
             />

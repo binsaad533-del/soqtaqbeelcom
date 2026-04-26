@@ -2158,7 +2158,10 @@
       "filesReady_file": "{{count}} ملف جاهز",
       "filesReady_mixed": "{{count}} ملف/صورة جاهزة",
       "dropFilesHere": "أفلت الملفات هنا",
-      "anyTypeSize": "أي نوع وأي حجم"
+      "anyTypeSize": "أي نوع وأي حجم",
+      "analyzeFilesAndImages": "حلل هذه الملفات والصور",
+      "analyzeImages": "حلل هذه الصور",
+      "analyzeFiles": "حلل هذه الملفات"
     },
     "states": {
       "thinking": "يفكر...",

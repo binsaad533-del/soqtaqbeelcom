@@ -2158,7 +2158,10 @@
       "filesReady_file": "{{count}} 个文件就绪",
       "filesReady_mixed": "{{count}} 个文件/图片就绪",
       "dropFilesHere": "将文件拖放至此",
-      "anyTypeSize": "任意类型、任意大小"
+      "anyTypeSize": "任意类型、任意大小",
+      "analyzeFilesAndImages": "分析这些文件和图片",
+      "analyzeImages": "分析这些图片",
+      "analyzeFiles": "分析这些文件"
     },
     "states": {
       "thinking": "思考中...",
