@@ -354,7 +354,7 @@ const AiChatPage = () => {
           try {
             textContent = await fileToText(file);
             if (textContent.length > 50000) {
-              textContent = textContent.slice(0, 50000) + "\n\n... [تم اختصار الملف - الحجم الأصلي: " + formatFileSize(file.size) + "]";
+              textContent = textContent.slice(0, 50000) + "\n\n... " + t("aiChat.toasts.fileTruncated", { size: formatFileSize(file.size) });
             }
           } catch { /* fallback */ }
           // Small text files don't need storage upload
