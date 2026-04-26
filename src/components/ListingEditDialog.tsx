@@ -543,7 +543,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
                     </div>
                   ) : (
                     <div className="text-xs text-muted-foreground/60 py-4 text-center border border-dashed border-border/30 rounded-lg">
-                      اسحب الصور هنا أو اضغط "إضافة صور"
+                      {t("editListing.photos.dropHint")}
                     </div>
                   )}
                 </div>
