@@ -862,7 +862,7 @@ const AiChatPage = () => {
           {loadingFiles && (
             <div className="flex items-center justify-center gap-2 mb-3 py-2 rounded-lg bg-primary/5 border border-primary/15">
               <Loader2 size={14} className="animate-spin text-primary" />
-              <span className="text-xs text-primary font-medium">جاري تجهيز الملفات...</span>
+              <span className="text-xs text-primary font-medium">{t("aiChat.input.preparingFiles")}</span>
             </div>
           )}
 
