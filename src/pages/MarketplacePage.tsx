@@ -540,7 +540,7 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
           )}
 
           <div className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">
-            {listing.title || listing.business_activity || t("marketplace.card.opportunityFallback")}
+            {tListing.title || tListing.business_activity || t("marketplace.card.opportunityFallback")}
           </div>
           {(() => {
             const inv = Array.isArray(listing.inventory) ? listing.inventory : [];
@@ -567,12 +567,12 @@ const ListingCard = memo(({ listing, isComparing, onToggleCompare, likeCount, vi
               className="flex items-center gap-1 text-xs text-primary hover:underline mb-2 cursor-pointer bg-transparent border-none p-0"
             >
               <MapPin size={12} strokeWidth={1.3} />
-              {listing.district && `${listing.district}, `}{listing.city || "—"}
+              {tListing.district && `${tListing.district}, `}{tListing.city || "—"}
             </button>
           ) : (
             <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
               <MapPin size={12} strokeWidth={1.3} />
-              {listing.district && `${listing.district}, `}{listing.city || "—"}
+              {tListing.district && `${tListing.district}, `}{tListing.city || "—"}
             </div>
           )}
 
