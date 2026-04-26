@@ -444,13 +444,14 @@ export function useAiContext() {
   }, []);
 
   const context = getContext();
+  const translatedQuickCommands = getTranslatedQuickCommands();
 
   return {
     ...context,
     proactiveInsights,
     proactiveMessage,
     dismissProactive: () => setProactiveMessage(null),
-    quickCommands: QUICK_COMMANDS,
+    quickCommands: translatedQuickCommands,
     pathname,
   };
 }
