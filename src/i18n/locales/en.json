@@ -2158,7 +2158,10 @@
       "filesReady_file": "{{count}} file ready",
       "filesReady_mixed": "{{count}} file/image ready",
       "dropFilesHere": "Drop files here",
-      "anyTypeSize": "Any type, any size"
+      "anyTypeSize": "Any type, any size",
+      "analyzeFilesAndImages": "Analyze these files and images",
+      "analyzeImages": "Analyze these images",
+      "analyzeFiles": "Analyze these files"
     },
     "states": {
       "thinking": "Thinking...",

@@ -2158,7 +2158,10 @@
       "filesReady_file": "{{count}} ফাইল প্রস্তুত",
       "filesReady_mixed": "{{count}} ফাইল/ছবি প্রস্তুত",
       "dropFilesHere": "ফাইল এখানে ছাড়ুন",
-      "anyTypeSize": "যেকোনো ধরন, যেকোনো আকার"
+      "anyTypeSize": "যেকোনো ধরন, যেকোনো আকার",
+      "analyzeFilesAndImages": "এই ফাইল ও ছবি বিশ্লেষণ করুন",
+      "analyzeImages": "এই ছবিগুলি বিশ্লেষণ করুন",
+      "analyzeFiles": "এই ফাইলগুলি বিশ্লেষণ করুন"
     },
     "states": {
       "thinking": "ভাবছে...",
