@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { X, GitCompareArrows, MapPin, Eye, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
 import AiStar from "@/components/AiStar";
+import { useListingTranslation } from "@/hooks/useListingTranslation";
 
 export interface CompareItem {
   id: string;
