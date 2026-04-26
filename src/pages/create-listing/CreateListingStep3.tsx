@@ -77,6 +77,25 @@ const CreateListingStep3 = ({ state }: Props) => {
     setEditingItemId,
   } = state;
 
+  // Translate AI-generated inventory output (analysisSummary, dedup descriptions, item.name, item.detectionNote).
+  // For Arabic: pass-through. For other languages: fetch translation, fall back to AR on any error.
+  const {
+    analysisSummary: displaySummary,
+    dedupActions: displayDedup,
+    inventory: displayInventory,
+    isTranslating,
+  } = useInventoryAnalysisTranslation({
+    analysisSummary: analyzed ? analysisSummary : null,
+    dedupActions: analyzed ? dedupActions : [],
+    inventory: analyzed ? inventory : [],
+  });
+
+  // Quick lookup for translated names/notes by item id, since edits / qty changes still operate on raw `inventory`.
+  const translatedById = displayInventory.reduce<Record<string, { name: string; detectionNote: string }>>((acc, it) => {
+    acc[it.id] = { name: it.name, detectionNote: it.detectionNote };
+    return acc;
+  }, {});
+
   const allDocumentUrls = Object.values(uploadedDocs).flat();
   const excelDocumentCount = allDocumentUrls.filter((url) => ["xls", "xlsx", "xlsm", "xlsb"].includes(getUrlExtension(url))).length;
   const hasDocuments = allDocumentUrls.length > 0;
