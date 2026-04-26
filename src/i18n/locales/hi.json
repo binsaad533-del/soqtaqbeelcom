@@ -40,9 +40,226 @@
   },
   "dashboard": {
     "myListings": "मेरी लिस्टिंग",
-    "myOffers": "मेरे ऑफ़र",
+    "myOffers": "मेरे ऑफर",
     "myMessages": "मेरे संदेश",
-    "myDeals": "मेरे सौदे"
+    "myDeals": "मेरे सौदे",
+    "seo": {
+      "title": "ग्राहक डैशबोर्ड",
+      "description": "ग्राहक डैशबोर्ड — Souq Taqbeel पर अपनी लिस्टिंग और सौदों को ट्रैक करें",
+      "simpleTitle": "डैशबोर्ड",
+      "simpleDescription": "Souq Taqbeel डैशबोर्ड से अपनी लिस्टिंग और सौदों को प्रबंधित करें",
+      "h1": "ग्राहक डैशबोर्ड"
+    },
+    "headerTitle": "डैशबोर्ड",
+    "welcome": "स्वागत है — यहाँ आपकी गतिविधि का सारांश है",
+    "alerts": "अलर्ट",
+    "loadFailedPrefix": "लोड करने में विफल:",
+    "retry": "पुनः प्रयास करें",
+    "loadingItems": {
+      "listings": "लिस्टिंग",
+      "deals": "सौदे"
+    },
+    "profileBanner": {
+      "completeProfile": "विश्वास बढ़ाने के लिए अपनी प्रोफ़ाइल पूरी करें",
+      "missingPrefix": "गायब:",
+      "missing": {
+        "name": "नाम",
+        "phone": "फोन",
+        "avatar": "प्रोफ़ाइल फोटो",
+        "email": "ईमेल",
+        "phoneVerified": "फोन सत्यापन"
+      }
+    },
+    "profile": {
+      "settingsTooltip": "खाता सेटिंग्स",
+      "verified": "सत्यापित",
+      "unverified": "असत्यापित",
+      "addName": "अपना नाम जोड़ें",
+      "email": "ईमेल",
+      "addEmail": "अपना ईमेल जोड़ें",
+      "phone": "फोन नंबर",
+      "addPhone": "अपना फोन जोड़ें",
+      "registeredOn": "पंजीकरण तिथि",
+      "lastLogin": "अंतिम लॉगिन",
+      "avatarMaxSize": "अधिकतम 5 MB",
+      "avatarUpdated": "फोटो अपडेट हो गया",
+      "avatarUploadFailed": "अपलोड विफल",
+      "emailVerifySent": "सत्यापन लिंक आपके नए ईमेल पर भेजा गया",
+      "phoneUpdated": "फोन अपडेट हो गया",
+      "updated": "अपडेट हो गया",
+      "updateFailed": "अपडेट विफल"
+    },
+    "notifications": {
+      "title": "सूचनाएं",
+      "markAllRead": "सभी पढ़ा हुआ चिह्नित करें",
+      "empty": "कोई सूचना नहीं"
+    },
+    "messagesCard": {
+      "viewAll": "सभी बातचीत देखें"
+    },
+    "feed": {
+      "title": "लाइव गतिविधि",
+      "live": "लाइव",
+      "empty": "अभी कोई गतिविधि नहीं"
+    },
+    "kpi": {
+      "activeDeals": "सक्रिय सौदे",
+      "waiting": "उत्तर की प्रतीक्षा",
+      "completed": "पूर्ण",
+      "totalValue": "कुल मूल्य",
+      "commission": "कमीशन (1%)"
+    },
+    "charts": {
+      "monthlyDeals": "मासिक सौदे",
+      "dealValue": "सौदा मूल्य (SAR)",
+      "statusDistribution": "स्थिति वितरण",
+      "noData": "कोई डेटा नहीं",
+      "total": "कुल",
+      "completed": "पूर्ण",
+      "value": "मूल्य"
+    },
+    "statusGroups": {
+      "active": "सक्रिय",
+      "waiting": "प्रतीक्षारत",
+      "completed": "पूर्ण",
+      "cancelled": "रद्द"
+    },
+    "months": {
+      "jan": "जनवरी",
+      "feb": "फरवरी",
+      "mar": "मार्च",
+      "apr": "अप्रैल",
+      "may": "मई",
+      "jun": "जून",
+      "jul": "जुलाई",
+      "aug": "अगस्त",
+      "sep": "सितंबर",
+      "oct": "अक्टूबर",
+      "nov": "नवंबर",
+      "dec": "दिसंबर"
+    },
+    "suggestions": {
+      "negotiating": "आपके पास उत्तर की प्रतीक्षा में सौदे हैं",
+      "createFirst": "अपनी पहली लिस्टिंग बनाएं",
+      "publishDrafts": "आपके पास ड्राफ्ट लिस्टिंग हैं — उन्हें प्रकाशित करें",
+      "agreementsArchive": "समझौता संग्रह"
+    },
+    "tabs": {
+      "myDeals": "मेरे सौदे",
+      "myListings": "मेरी लिस्टिंग",
+      "myOffers": "मेरे ऑफर",
+      "saved": "सहेजे गए",
+      "notifications": "सूचनाएं",
+      "agent": "Moqbil एजेंट",
+      "intelligence": "Moqbil इंटेलिजेंस",
+      "security": "सुरक्षा",
+      "account": "मेरा खाता",
+      "desc": {
+        "myDeals": "अपने सभी चालू और पूर्ण सौदों को ट्रैक करें",
+        "myListings": "अपनी लिस्टिंग और ड्राफ्ट प्रबंधित करें",
+        "myOffers": "अन्य लिस्टिंग पर आपके द्वारा प्रस्तुत ऑफर",
+        "saved": "बाद के लिए सहेजी गई लिस्टिंग",
+        "notifications": "अलर्ट और सूचना प्राथमिकताएं",
+        "agent": "आपकी ओर से काम करने वाला AI सहायक",
+        "intelligence": "आपके सौदों के लिए स्मार्ट विश्लेषण और सुझाव",
+        "security": "खाता सुरक्षा और सुरक्षा सेटिंग्स",
+        "account": "अपनी व्यक्तिगत जानकारी और पासवर्ड संपादित करें"
+      }
+    },
+    "search": {
+      "deals": "सौदे खोजें...",
+      "listings": "लिस्टिंग खोजें...",
+      "offers": "ऑफर खोजें...",
+      "saved": "सहेजे गए खोजें..."
+    },
+    "filters": {
+      "all": "सभी",
+      "active": "सक्रिय",
+      "waiting": "प्रतीक्षारत",
+      "completed": "पूर्ण",
+      "cancelled": "रद्द",
+      "draft": "ड्राफ्ट",
+      "published": "प्रकाशित",
+      "underReview": "समीक्षाधीन",
+      "pending": "लंबित",
+      "accepted": "स्वीकृत",
+      "rejected": "अस्वीकृत"
+    },
+    "statusBadges": {
+      "draft": "ड्राफ्ट",
+      "published": "प्रकाशित",
+      "under_review": "समीक्षाधीन",
+      "negotiating": "बातचीत",
+      "completed": "पूर्ण",
+      "finalized": "पूर्ण",
+      "new": "नया",
+      "agreement": "समझौता",
+      "cancelled": "रद्द",
+      "completeListing": "लिस्टिंग पूर्ण करें"
+    },
+    "deals": {
+      "empty": "अभी कोई सौदा नहीं",
+      "noResults": "कोई परिणाम नहीं",
+      "browseMarket": "बाज़ार ब्राउज़ करें और अपना पहला सौदा शुरू करें",
+      "dealNumber": "सौदा #",
+      "noPrice": "कोई कीमत नहीं"
+    },
+    "listings": {
+      "empty": "कोई लिस्टिंग नहीं",
+      "noResults": "कोई परिणाम नहीं",
+      "createFirst": "अपनी पहली लिस्टिंग बनाएं",
+      "noTitle": "बिना शीर्षक",
+      "editTooltip": "लिस्टिंग संपादित करें",
+      "deleteTooltip": "लिस्टिंग हटाएं",
+      "deleteConfirm": "\"{{title}}\" हटाएं?",
+      "deleteFailedPrefix": "हटाने में विफल:",
+      "deleteRetry": "कृपया पुनः प्रयास करें",
+      "deleteSuccess": "लिस्टिंग सफलतापूर्वक हटा दी गई",
+      "deleteUnexpectedError": "हटाने के दौरान अप्रत्याशित त्रुटि — कृपया रीफ़्रेश करें और पुनः प्रयास करें"
+    },
+    "agent": {
+      "noPublished": "कोई प्रकाशित लिस्टिंग नहीं",
+      "noPublishedHint": "Moqbil एजेंट प्रत्येक प्रकाशित लिस्टिंग पर स्वतंत्र रूप से काम करता है"
+    },
+    "buyerOffers": {
+      "empty": "आपने अभी तक कोई ऑफर नहीं दिया",
+      "noResults": "कोई परिणाम नहीं",
+      "browseAndOffer": "अवसर ब्राउज़ करें और अपना पहला ऑफर दें",
+      "opportunityFallback": "अधिग्रहण अवसर",
+      "yourOffer": "आपका ऑफर:",
+      "sellerReply": "विक्रेता उत्तर:",
+      "status": {
+        "pending": "उत्तर की प्रतीक्षा",
+        "accepted": "स्वीकृत",
+        "rejected": "अस्वीकृत",
+        "withdrawn": "वापस लिया गया"
+      }
+    },
+    "saved": {
+      "empty": "आपने अभी तक कोई लिस्टिंग सहेजी नहीं है",
+      "noResults": "कोई परिणाम नहीं",
+      "browseAndSave": "अवसर ब्राउज़ करें और जो पसंद आए उसे सहेजें",
+      "removed": "लिस्टिंग सहेजे गए से हटा दी गई",
+      "removeTooltip": "सहेजे गए से हटाएं",
+      "priceOnContact": "अनुरोध पर कीमत",
+      "opportunityFallback": "अधिग्रहण अवसर"
+    },
+    "simple": {
+      "tabs": {
+        "myListings": "मेरी लिस्टिंग",
+        "drafts": "ड्राफ्ट",
+        "negotiations": "बातचीत",
+        "agreements": "समझौते"
+      },
+      "stats": {
+        "myListings": "मेरी लिस्टिंग",
+        "uploadedPhotos": "अपलोड की गई फोटो",
+        "activeNegotiations": "सक्रिय बातचीत",
+        "alerts": "अलर्ट"
+      },
+      "disclosure": "प्रकटीकरण",
+      "awaitingConfirmation": "पुष्टि की प्रतीक्षा"
+    }
   },
   "messages": {
     "noMessages": "अभी कोई संदेश नहीं",

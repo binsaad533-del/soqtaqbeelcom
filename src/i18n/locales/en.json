@@ -39,10 +39,227 @@
     "createAccount": "Create account"
   },
   "dashboard": {
-    "myListings": "My listings",
-    "myOffers": "My offers",
-    "myMessages": "My messages",
-    "myDeals": "My deals"
+    "myListings": "My Listings",
+    "myOffers": "My Offers",
+    "myMessages": "My Messages",
+    "myDeals": "My Deals",
+    "seo": {
+      "title": "Customer Dashboard",
+      "description": "Customer dashboard — track your listings and deals on Souq Taqbeel",
+      "simpleTitle": "Dashboard",
+      "simpleDescription": "Manage your listings and deals from the Souq Taqbeel dashboard",
+      "h1": "Customer Dashboard"
+    },
+    "headerTitle": "Dashboard",
+    "welcome": "Welcome — here's a summary of your activity",
+    "alerts": "Alerts",
+    "loadFailedPrefix": "Failed to load: ",
+    "retry": "Retry",
+    "loadingItems": {
+      "listings": "listings",
+      "deals": "deals"
+    },
+    "profileBanner": {
+      "completeProfile": "Complete your profile to boost trust",
+      "missingPrefix": "Missing: ",
+      "missing": {
+        "name": "Name",
+        "phone": "Phone",
+        "avatar": "Profile photo",
+        "email": "Email",
+        "phoneVerified": "Phone verification"
+      }
+    },
+    "profile": {
+      "settingsTooltip": "Account settings",
+      "verified": "Verified",
+      "unverified": "Unverified",
+      "addName": "Add your name",
+      "email": "Email",
+      "addEmail": "Add your email",
+      "phone": "Phone number",
+      "addPhone": "Add your phone",
+      "registeredOn": "Registered on",
+      "lastLogin": "Last login",
+      "avatarMaxSize": "Max 5 MB",
+      "avatarUpdated": "Photo updated",
+      "avatarUploadFailed": "Upload failed",
+      "emailVerifySent": "Verification link sent to your new email",
+      "phoneUpdated": "Phone updated",
+      "updated": "Updated",
+      "updateFailed": "Update failed"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAllRead": "Mark all read",
+      "empty": "No notifications"
+    },
+    "messagesCard": {
+      "viewAll": "View all conversations"
+    },
+    "feed": {
+      "title": "Live activity",
+      "live": "Live",
+      "empty": "No activity right now"
+    },
+    "kpi": {
+      "activeDeals": "Active deals",
+      "waiting": "Awaiting reply",
+      "completed": "Completed",
+      "totalValue": "Total value",
+      "commission": "Commission (1%)"
+    },
+    "charts": {
+      "monthlyDeals": "Monthly deals",
+      "dealValue": "Deal value (SAR)",
+      "statusDistribution": "Status breakdown",
+      "noData": "No data",
+      "total": "Total",
+      "completed": "Completed",
+      "value": "Value"
+    },
+    "statusGroups": {
+      "active": "Active",
+      "waiting": "Waiting",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aug",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Dec"
+    },
+    "suggestions": {
+      "negotiating": "You have deals awaiting your reply",
+      "createFirst": "Create your first listing",
+      "publishDrafts": "You have draft listings — publish them",
+      "agreementsArchive": "Agreements archive"
+    },
+    "tabs": {
+      "myDeals": "My Deals",
+      "myListings": "My Listings",
+      "myOffers": "My Offers",
+      "saved": "Saved",
+      "notifications": "Notifications",
+      "agent": "Moqbil Agent",
+      "intelligence": "Moqbil Intelligence",
+      "security": "Security",
+      "account": "My Account",
+      "desc": {
+        "myDeals": "Track all your ongoing and completed deals",
+        "myListings": "Manage your listings and drafts",
+        "myOffers": "Offers you submitted on other listings",
+        "saved": "Listings you saved for later",
+        "notifications": "Alert and notification preferences",
+        "agent": "Your AI assistant working on your behalf",
+        "intelligence": "Smart analytics and recommendations for your deals",
+        "security": "Account security and protection settings",
+        "account": "Edit your personal information and password"
+      }
+    },
+    "search": {
+      "deals": "Search deals...",
+      "listings": "Search listings...",
+      "offers": "Search offers...",
+      "saved": "Search saved..."
+    },
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "waiting": "Waiting",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "draft": "Draft",
+      "published": "Published",
+      "underReview": "Under review",
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "rejected": "Rejected"
+    },
+    "statusBadges": {
+      "draft": "Draft",
+      "published": "Published",
+      "under_review": "Under review",
+      "negotiating": "Negotiating",
+      "completed": "Completed",
+      "finalized": "Completed",
+      "new": "New",
+      "agreement": "Agreement",
+      "cancelled": "Cancelled",
+      "completeListing": "Complete listing"
+    },
+    "deals": {
+      "empty": "No deals yet",
+      "noResults": "No results",
+      "browseMarket": "Browse the marketplace and start your first deal",
+      "dealNumber": "Deal #",
+      "noPrice": "No price"
+    },
+    "listings": {
+      "empty": "No listings",
+      "noResults": "No results",
+      "createFirst": "Create your first listing",
+      "noTitle": "Untitled",
+      "editTooltip": "Edit listing",
+      "deleteTooltip": "Delete listing",
+      "deleteConfirm": "Delete \"{{title}}\"?",
+      "deleteFailedPrefix": "Failed to delete: ",
+      "deleteRetry": "Please try again",
+      "deleteSuccess": "Listing deleted successfully",
+      "deleteUnexpectedError": "Unexpected error during deletion — please refresh and try again"
+    },
+    "agent": {
+      "noPublished": "No published listings",
+      "noPublishedHint": "Moqbil Agent works on each published listing independently"
+    },
+    "buyerOffers": {
+      "empty": "You haven't made any offers yet",
+      "noResults": "No results",
+      "browseAndOffer": "Browse opportunities and place your first offer",
+      "opportunityFallback": "Takeover opportunity",
+      "yourOffer": "Your offer:",
+      "sellerReply": "Seller reply:",
+      "status": {
+        "pending": "Awaiting reply",
+        "accepted": "Accepted",
+        "rejected": "Rejected",
+        "withdrawn": "Withdrawn"
+      }
+    },
+    "saved": {
+      "empty": "You haven't saved any listing yet",
+      "noResults": "No results",
+      "browseAndSave": "Browse opportunities and save what you like",
+      "removed": "Listing removed from saved",
+      "removeTooltip": "Remove from saved",
+      "priceOnContact": "Price on request",
+      "opportunityFallback": "Takeover opportunity"
+    },
+    "simple": {
+      "tabs": {
+        "myListings": "My Listings",
+        "drafts": "Drafts",
+        "negotiations": "Negotiations",
+        "agreements": "Agreements"
+      },
+      "stats": {
+        "myListings": "My Listings",
+        "uploadedPhotos": "Uploaded photos",
+        "activeNegotiations": "Active negotiations",
+        "alerts": "Alerts"
+      },
+      "disclosure": "Disclosure",
+      "awaitingConfirmation": "Awaiting confirmation"
+    }
   },
   "messages": {
     "noMessages": "No messages yet",
