@@ -691,7 +691,7 @@ const AiChatPage = () => {
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 px-1">
                 <Command size={11} className="text-primary" strokeWidth={2} />
-                <span className="text-[10px] font-medium text-primary">أوامر سريعة</span>
+                <span className="text-[10px] font-medium text-primary">{t("aiChat.quickCommands.header")}</span>
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 {quickCommands.map((cmd) => (
