@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Target, Loader2, RefreshCw } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
