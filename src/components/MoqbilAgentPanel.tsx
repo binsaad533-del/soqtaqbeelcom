@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Bot, Settings, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -41,6 +42,7 @@ interface Props {
 }
 
 const MoqbilAgentPanel = ({ listingId, className }: Props) => {
+  const { t } = useTranslation();
   const { user } = useAuthContext();
   const [settings, setSettings] = useState<AgentSettings>(defaultSettings);
   const [actions, setActions] = useState<AgentAction[]>([]);
@@ -88,9 +90,9 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
       } as any, { onConflict: "listing_id" });
 
     if (error) {
-      toast.error("فشل حفظ الإعدادات");
+      toast.error(t("moqbilAgent.toasts.saveFailed"));
     } else {
-      toast.success("تم حفظ الإعدادات");
+      toast.success(t("moqbilAgent.toasts.saveSuccess"));
     }
     setSaving(false);
   };
@@ -113,9 +115,9 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
             <Bot size={16} className={settings.is_active ? "text-success" : "text-muted-foreground"} />
           </div>
           <div>
-            <h3 className="text-sm font-medium">وكيل مقبل</h3>
+            <h3 className="text-sm font-medium">{t("moqbilAgent.title")}</h3>
             <p className="text-[10px] text-muted-foreground">
-              {settings.is_active ? "نشط — يعمل على هذا الإعلان" : "غير مفعّل لهذا الإعلان"}
+              {settings.is_active ? t("moqbilAgent.statusActive") : t("moqbilAgent.statusInactive")}
             </p>
           </div>
         </div>
@@ -133,7 +135,7 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
             view === "settings" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
           )}
         >
-          <Settings size={11} className="inline mr-1" /> الإعدادات
+          <Settings size={11} className="inline mr-1" /> {t("moqbilAgent.settings")}
         </button>
         <button
           onClick={() => { setView("history"); loadActions(); }}
@@ -141,7 +143,7 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
             view === "history" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
           )}
         >
-          <History size={11} className="inline mr-1" /> سجل القرارات
+          <History size={11} className="inline mr-1" /> {t("moqbilAgent.decisionLog")}
         </button>
       </div>
 

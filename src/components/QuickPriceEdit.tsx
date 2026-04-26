@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Check, X, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ interface QuickPriceEditProps {
 }
 
 const QuickPriceEdit = ({ listingId, currentPrice, onUpdated, className }: QuickPriceEditProps) => {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [price, setPrice] = useState(currentPrice ? String(currentPrice) : "");
   const [saving, setSaving] = useState(false);
@@ -47,7 +49,7 @@ const QuickPriceEdit = ({ listingId, currentPrice, onUpdated, className }: Quick
         onClick={() => setEditing(true)}
         className={cn("flex items-center gap-1 text-xs text-primary hover:underline", className)}
       >
-        <Edit3 size={12} /> تعديل السعر
+        <Edit3 size={12} /> {t("listing.editPrice")}
       </button>
     );
   }
