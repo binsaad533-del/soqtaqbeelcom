@@ -296,4 +296,24 @@ const CompareRow = ({ label, bestLabel, items, render, highlight }: CompareRowPr
   );
 };
 
+// Sub-components: each calls useListingTranslation for a single item.
+// Falls back silently to original Arabic on AR/error/loading.
+const CompareItemTitle = ({ item, fallback }: { item: CompareItem; fallback: string }) => {
+  const { translatedListing } = useListingTranslation(item as unknown as { id?: string; inventory?: unknown });
+  const t = (translatedListing as unknown as CompareItem) || item;
+  return <>{t.title || t.business_activity || fallback}</>;
+};
+
+const CompareItemCity = ({ item }: { item: CompareItem }) => {
+  const { translatedListing } = useListingTranslation(item as unknown as { id?: string; inventory?: unknown });
+  const t = (translatedListing as unknown as CompareItem) || item;
+  return <>{t.city || "—"}</>;
+};
+
+const CompareItemDistrict = ({ item }: { item: CompareItem }) => {
+  const { translatedListing } = useListingTranslation(item as unknown as { id?: string; inventory?: unknown });
+  const t = (translatedListing as unknown as CompareItem) || item;
+  return <>{t.district || "—"}</>;
+};
+
 export default ComparePanel;
