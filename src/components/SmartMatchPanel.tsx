@@ -105,7 +105,7 @@ const SmartMatchPanel = () => {
             </div>
             <div className="text-left shrink-0">
               <Badge className={cn("text-[10px] px-1.5 py-0.5", scoreColor(match.match_score))}>
-                {match.match_score}% توافق
+                {match.match_score}% {t("aiChat.emptyState.matchPercent")}
               </Badge>
               {match.price > 0 && (
                 <div className="mt-1">
