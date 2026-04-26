@@ -514,6 +514,12 @@ const AiChatPage = () => {
       context: buildContext(),
       role: authRole || "customer",
       user_id: user?.id,
+      errorTexts: {
+        unknown: t("aiChat.states.errorPrefix"),
+        noResponse: t("aiChat.states.noResponse"),
+        connectionFailed: t("aiChat.states.connectionFailed"),
+      },
+      fallbackText: t("aiChat.states.fallbackResponse"),
       onDelta: (chunk) => {
         assistantText += chunk;
         const visibleText = sanitizeAssistantContent(assistantText);
