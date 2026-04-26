@@ -292,6 +292,7 @@ const AiChatPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const navigate = useNavigate();
   const _location = useLocation();
+  const { t } = useTranslation();
   const { user, role: authRole } = useAuthContext();
 
   const scrollRef = useRef<HTMLDivElement>(null);
