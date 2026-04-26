@@ -203,15 +203,30 @@ const CreateListingStep3 = ({ state }: Props) => {
               <Sparkles size={16} strokeWidth={1.5} className="text-primary" />
               <h2 className="font-medium text-sm">{t("createListing.step3.results.title")}</h2>
             </div>
-            {analysisSummary && <p className="text-xs text-muted-foreground leading-relaxed">{analysisSummary}</p>}
+            {isTranslating && analysisSummary ? (
+              <div className="space-y-1.5">
+                <Skeleton className="h-3 w-3/4 mx-auto" />
+                <Skeleton className="h-3 w-2/3 mx-auto" />
+              </div>
+            ) : (
+              displaySummary && <p className="text-xs text-muted-foreground leading-relaxed">{displaySummary}</p>
+            )}
           </div>
 
           {dedupActions.length > 0 && (
             <div className="bg-success/5 border border-success/20 rounded-xl p-3 space-y-1 animate-fade-in">
               <div className="text-xs font-medium text-success flex items-center gap-1.5"><Check size={14} /> {t("createListing.step3.results.dedupTitle")}</div>
-              {dedupActions.map((action, i) => (
-                <p key={i} className="text-[11px] text-success/80">{t("createListing.step3.results.dedupItem", { description: action.description, count: action.merged_count })}</p>
-              ))}
+              {isTranslating ? (
+                <div className="space-y-1.5 pt-1">
+                  {dedupActions.map((_, i) => (
+                    <Skeleton key={i} className="h-3 w-2/3" />
+                  ))}
+                </div>
+              ) : (
+                displayDedup.map((action, i) => (
+                  <p key={i} className="text-[11px] text-success/80">{t("createListing.step3.results.dedupItem", { description: action.description, count: action.merged_count })}</p>
+                ))
+              )}
             </div>
           )}
 
