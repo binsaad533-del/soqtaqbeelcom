@@ -103,4 +103,51 @@ const OpportunityHeatmap = () => {
   );
 };
 
+// HeatmapCard renders a single city tile. It pulls the translation for that
+// city's representative listing so the city name and top activity localize
+// in non-Arabic UI. Falls back silently to original Arabic on AR/error.
+const HeatmapCard = ({ city }: { city: CityHeat }) => {
+  const { t } = useTranslation();
+  const { translatedListing } = useListingTranslation(
+    city.representativeListingId ? { id: city.representativeListingId } : null,
+  );
+  const tr = translatedListing as { city?: string | null; business_activity?: string | null } | null;
+  const cityLabel = tr?.city || city.city;
+  const activityLabel = tr?.business_activity || city.topActivity;
+
+  return (
+    <div
+      className={`rounded-xl p-3 border transition-all hover:scale-[1.02] ${
+        city.heat === "hot"
+          ? "bg-destructive/5 border-destructive/20"
+          : city.heat === "warm"
+            ? "bg-warning/5 border-warning/20"
+            : "bg-muted/30 border-border/30"
+      }`}
+    >
+      <div className="flex items-center gap-1.5 mb-1">
+        {city.heat === "hot" ? (
+          <Flame size={12} className="text-destructive" />
+        ) : city.heat === "warm" ? (
+          <TrendingUp size={12} className="text-warning" />
+        ) : (
+          <MapPin size={12} className="text-muted-foreground" />
+        )}
+        <span className="text-xs font-semibold">{cityLabel}</span>
+      </div>
+      <div className="text-[10px] text-muted-foreground space-y-0.5">
+        <div>{t("marketplace.heatmap.opportunities", { count: city.count })}</div>
+        {city.avgPrice > 0 && (
+          <div className="flex items-center gap-0.5">
+            <span>{t("marketplace.heatmap.averageLabel")}</span>
+            <SarSymbol size={8} />
+            <span>{(city.avgPrice / 1000).toFixed(0)}K</span>
+          </div>
+        )}
+        <div className="text-[9px] text-foreground/60 truncate">{activityLabel}</div>
+      </div>
+    </div>
+  );
+};
+
 export default OpportunityHeatmap;
