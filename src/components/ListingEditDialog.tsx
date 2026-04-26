@@ -301,13 +301,13 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
 
   const triggerReAnalysis = async (listingId: string) => {
     try {
-      toast("جاري إعادة التحليل الذكي...", { duration: 4000 });
+      toast(t("editListing.toasts.reanalyzing"), { duration: 4000 });
       await invokeWithRetry("auto-analyze-listing", { listingId });
       // Refresh listing data to pick up new analysis
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ["listing", listingId] });
       }, 5000);
-      toast.success("تم تحديث التحليل الذكي بنجاح");
+      toast.success(t("editListing.toasts.reanalyzed"));
     } catch (e) {
       console.error("Re-analysis failed:", e);
     }
