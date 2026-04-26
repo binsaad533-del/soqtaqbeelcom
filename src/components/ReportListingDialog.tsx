@@ -9,14 +9,7 @@ import { toast } from "sonner";
 import { sanitizeInput, isRateLimited } from "@/lib/security";
 import { useTranslation } from "react-i18next";
 
-const REPORT_REASONS = [
-  { value: "misleading", label: "معلومات مضللة" },
-  { value: "fraud", label: "احتيال أو نصب" },
-  { value: "duplicate", label: "إعلان مكرر" },
-  { value: "inappropriate", label: "محتوى غير لائق" },
-  { value: "wrong_category", label: "تصنيف خاطئ" },
-  { value: "other", label: "سبب آخر" },
-];
+const REPORT_REASON_VALUES = ["misleading", "fraud", "duplicate", "inappropriate", "wrong_category", "other"] as const;
 
 interface ReportListingDialogProps {
   listingId: string;
@@ -33,17 +26,17 @@ const ReportListingDialog = ({ listingId, className }: ReportListingDialogProps)
 
   const handleSubmit = async () => {
     if (!user) {
-      toast.error("يجب تسجيل الدخول أولاً");
+      toast.error(t("reportListing.toasts.loginRequired"));
       return;
     }
     if (!reason) {
-      toast.error("يرجى اختيار سبب البلاغ");
+      toast.error(t("reportListing.toasts.chooseReason"));
       return;
     }
 
     // Rate limit: max 3 reports per 30 minutes
     if (isRateLimited(`report_${user.id}`, 3, 30 * 60 * 1000)) {
-      toast.error("تم تجاوز الحد المسموح من البلاغات. يرجى الانتظار");
+      toast.error(t("reportListing.toasts.rateLimited"));
       return;
     }
 
@@ -57,12 +50,12 @@ const ReportListingDialog = ({ listingId, className }: ReportListingDialogProps)
         details: safeDetails || null,
       } as any);
       if (error) throw error;
-      toast.success("تم إرسال البلاغ بنجاح، شكراً لمساهمتك");
+      toast.success(t("reportListing.toasts.success"));
       setOpen(false);
       setReason("");
       setDetails("");
     } catch {
-      toast.error("حدث خطأ أثناء إرسال البلاغ");
+      toast.error(t("reportListing.toasts.failed"));
     } finally {
       setSubmitting(false);
     }
@@ -78,29 +71,29 @@ const ReportListingDialog = ({ listingId, className }: ReportListingDialogProps)
       </DialogTrigger>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>الإبلاغ عن إعلان مخالف</DialogTitle>
+          <DialogTitle>{t("reportListing.title")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">اختر سبب البلاغ:</p>
+            <p className="text-sm text-muted-foreground">{t("reportListing.chooseReason")}</p>
             <div className="grid grid-cols-2 gap-2">
-              {REPORT_REASONS.map((r) => (
+              {REPORT_REASON_VALUES.map((value) => (
                 <button
-                  key={r.value}
-                  onClick={() => setReason(r.value)}
+                  key={value}
+                  onClick={() => setReason(value)}
                   className={`text-xs px-3 py-2 rounded-lg border transition-colors text-right ${
-                    reason === r.value
+                    reason === value
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border text-muted-foreground hover:border-primary/50"
                   }`}
                 >
-                  {r.label}
+                  {t(`reportListing.reasons.${value}`)}
                 </button>
               ))}
             </div>
           </div>
           <Textarea
-            placeholder="تفاصيل إضافية (اختياري)..."
+            placeholder={t("reportListing.detailsPlaceholder")}
             value={details}
             onChange={(e) => setDetails(e.target.value)}
             maxLength={500}
@@ -112,7 +105,7 @@ const ReportListingDialog = ({ listingId, className }: ReportListingDialogProps)
             className="w-full gap-1.5"
           >
             {submitting ? <Loader2 size={14} className="animate-spin" /> : <Flag size={14} />}
-            إرسال البلاغ
+            {t("reportListing.submit")}
           </Button>
         </div>
       </DialogContent>
