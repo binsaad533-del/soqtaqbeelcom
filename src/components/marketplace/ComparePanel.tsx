@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { X, GitCompareArrows, MapPin, Eye, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import SarSymbol from "@/components/SarSymbol";
 import AiStar from "@/components/AiStar";
+import { useListingTranslation } from "@/hooks/useListingTranslation";
 
 export interface CompareItem {
   id: string;
@@ -31,6 +32,9 @@ interface Props {
 const ComparePanel = ({ items, onRemove, onClear }: Props) => {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+
+  // Translate each item via the shared hook (Arabic short-circuits, others use cache).
+  // We render via sub-components so each row/header uses translated text.
 
   // Map DB-stored deal type values (Arabic or snake_case) to translated labels
   const dealTypeLabel = (dt: string | null): string => {
@@ -157,7 +161,7 @@ const ComparePanel = ({ items, onRemove, onClear }: Props) => {
                             )}
                           </div>
                           <Link to={`/listing/${item.id}`} className="text-xs font-medium text-primary hover:underline">
-                            {item.title || item.business_activity || t("marketplace.compare.opportunityFallback")}
+                            <CompareItemTitle item={item} fallback={t("marketplace.compare.opportunityFallback")} />
                           </Link>
                         </div>
                       </th>
@@ -172,11 +176,11 @@ const ComparePanel = ({ items, onRemove, onClear }: Props) => {
                   )} highlight="lowest-price" />
                   <CompareRow label={t("marketplace.compare.rowCity")} bestLabel={t("marketplace.compare.best")} items={items} render={item => (
                     <span className="flex items-center justify-center gap-1 text-muted-foreground">
-                      <MapPin size={11} /> {item.city || "—"}
+                      <MapPin size={11} /> <CompareItemCity item={item} />
                     </span>
                   )} />
                   <CompareRow label={t("marketplace.compare.rowDistrict")} bestLabel={t("marketplace.compare.best")} items={items} render={item => (
-                    <span className="text-muted-foreground">{item.district || "—"}</span>
+                    <span className="text-muted-foreground"><CompareItemDistrict item={item} /></span>
                   )} />
                   <CompareRow label={t("marketplace.compare.rowDealType")} bestLabel={t("marketplace.compare.best")} items={items} render={item => (
                     <span className="text-[11px] px-2 py-0.5 rounded-md bg-primary/10 text-primary inline-block">
@@ -290,6 +294,26 @@ const CompareRow = ({ label, bestLabel, items, render, highlight }: CompareRowPr
       ))}
     </tr>
   );
+};
+
+// Sub-components: each calls useListingTranslation for a single item.
+// Falls back silently to original Arabic on AR/error/loading.
+const CompareItemTitle = ({ item, fallback }: { item: CompareItem; fallback: string }) => {
+  const { translatedListing } = useListingTranslation(item as unknown as { id?: string; inventory?: unknown });
+  const t = (translatedListing as unknown as CompareItem) || item;
+  return <>{t.title || t.business_activity || fallback}</>;
+};
+
+const CompareItemCity = ({ item }: { item: CompareItem }) => {
+  const { translatedListing } = useListingTranslation(item as unknown as { id?: string; inventory?: unknown });
+  const t = (translatedListing as unknown as CompareItem) || item;
+  return <>{t.city || "—"}</>;
+};
+
+const CompareItemDistrict = ({ item }: { item: CompareItem }) => {
+  const { translatedListing } = useListingTranslation(item as unknown as { id?: string; inventory?: unknown });
+  const t = (translatedListing as unknown as CompareItem) || item;
+  return <>{t.district || "—"}</>;
 };
 
 export default ComparePanel;
