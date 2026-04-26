@@ -33,6 +33,9 @@ const ComparePanel = ({ items, onRemove, onClear }: Props) => {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
+  // Translate each item via the shared hook (Arabic short-circuits, others use cache).
+  // We render via sub-components so each row/header uses translated text.
+
   // Map DB-stored deal type values (Arabic or snake_case) to translated labels
   const dealTypeLabel = (dt: string | null): string => {
     if (!dt) return "—";
