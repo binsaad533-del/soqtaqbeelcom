@@ -470,17 +470,17 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
               <div className="grid grid-cols-2 gap-3">
                 {shouldShow(dealType, "municipality_license") && (
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">رخصة البلدية</label>
+                    <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.municipalityLicense")}</label>
                     <select value={fields.municipality_license} onChange={(e) => set("municipality_license", e.target.value)} className={inputCls}>
-                      {selectOpts(["سارية", "منتهية", "غير متوفرة"])}
+                      {selectOpts(licenseOptions)}
                     </select>
                   </div>
                 )}
                 {shouldShow(dealType, "civil_defense_license") && (
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">الدفاع المدني</label>
+                    <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.civilDefenseLicense")}</label>
                     <select value={fields.civil_defense_license} onChange={(e) => set("civil_defense_license", e.target.value)} className={inputCls}>
-                      {selectOpts(["سارية", "منتهية", "غير متوفرة"])}
+                      {selectOpts(licenseOptions)}
                     </select>
                   </div>
                 )}
@@ -489,9 +489,9 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
 
             {shouldShow(dealType, "surveillance_cameras") && (
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">كاميرات مراقبة</label>
+                <label className="text-xs text-muted-foreground mb-1 block">{t("editListing.fields.surveillanceCameras")}</label>
                 <select value={fields.surveillance_cameras} onChange={(e) => set("surveillance_cameras", e.target.value)} className={inputCls}>
-                  {selectOpts(["متوفرة ومطابقة", "متوفرة غير مطابقة", "غير متوفرة"])}
+                  {selectOpts(cameraOptions)}
                 </select>
               </div>
             )}
