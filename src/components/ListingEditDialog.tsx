@@ -231,14 +231,14 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
   // ── Save + auto re-analyze ──
   const handleSave = async () => {
     if (!fields.business_activity.trim() || !fields.city.trim() || !fields.price.trim() || Number(fields.price) <= 0) {
-      toast.error("يرجى إكمال الحقول المطلوبة: النشاط، المدينة، والسعر");
+      toast.error(t("editListing.toasts.requiredFields"));
       return;
     }
 
     const generatedTitle = fields.title.trim()
       ? fields.title
       : buildTitle([
-          fields.business_activity || "مشروع",
+          fields.business_activity || t("editListing.inventory.defaultProject"),
           fields.district,
           fields.city,
         ]);
