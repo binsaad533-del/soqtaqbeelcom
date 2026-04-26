@@ -1,6 +1,8 @@
+import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 type TranslatedFields = Record<string, string>;
 
@@ -39,6 +41,12 @@ const MARKET_COMPARISON_STRING_FIELDS = [
  * Translates AI-generated deal_check content (and ai_trust_score) into the active UI language.
  * For Arabic, returns the original objects untouched.
  * For other languages, fetches translations via the translate-ai-content edge function and merges them.
+ *
+ * Error handling:
+ *   - 429 → React Query retries once after 2s; then falls back to AR silently
+ *   - 402 → falls back to AR + one-time toast.info("الترجمة غير متاحة مؤقتاً")
+ *   - 504 → falls back to AR silently
+ *   - any other error → falls back to AR silently
  */
 export function useDealCheckTranslation<T extends Record<string, unknown> | null | undefined>(
   listingId: string | null | undefined,
@@ -48,6 +56,8 @@ export function useDealCheckTranslation<T extends Record<string, unknown> | null
   const { i18n } = useTranslation();
   const language = i18n.resolvedLanguage || i18n.language || "ar";
   const enabled = !!listingId && (!!analysis || !!trustScore) && language !== "ar";
+
+  const quotaToastShownRef = useRef(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["deal-check-translation", listingId, language],
@@ -59,13 +69,35 @@ export function useDealCheckTranslation<T extends Record<string, unknown> | null
           target_language: language,
         },
       });
-      if (error) throw error;
+      if (error) {
+        const ctx = (error as { context?: Response }).context;
+        const status = ctx?.status;
+        if (status === 429) {
+          throw Object.assign(new Error("rate_limited"), { code: "rate_limited", status });
+        }
+        if (status === 402) {
+          if (!quotaToastShownRef.current) {
+            quotaToastShownRef.current = true;
+            toast.info("الترجمة غير متاحة مؤقتاً", { duration: 4000 });
+          }
+          throw Object.assign(new Error("quota_exceeded"), { code: "quota_exceeded", status });
+        }
+        if (status === 504) {
+          throw Object.assign(new Error("timeout"), { code: "timeout", status });
+        }
+        throw error;
+      }
       return (data?.translated || {}) as TranslatedFields;
     },
     enabled,
     staleTime: 1000 * 60 * 60,
     gcTime: 1000 * 60 * 60 * 24,
-    retry: 1,
+    retry: (failureCount, err) => {
+      const code = (err as { code?: string })?.code;
+      if (code === "rate_limited" && failureCount < 1) return true;
+      return false;
+    },
+    retryDelay: 2000,
   });
 
   if (!enabled || !data) {

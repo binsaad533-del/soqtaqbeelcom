@@ -59,6 +59,15 @@ const FEASIBILITY_STRING_FIELDS = [
 ];
 const FEASIBILITY_ARRAY_FIELDS = ["recommendations", "strengths", "risks", "opportunities"];
 
+// Custom error class so we can map AI-gateway HTTP statuses → outer HTTP statuses
+class TranslationError extends Error {
+  constructor(public code: "rate_limited" | "quota_exceeded" | "timeout" | "unknown", message: string, public retryAfterMs?: number) {
+    super(message);
+  }
+}
+
+const TRANSLATION_TIMEOUT_MS = 30_000;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -66,23 +75,45 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { listing_id, content_type, target_language } = body as {
+    const { listing_id, content_type, target_language, payload } = body as {
       listing_id?: string;
-      content_type?: "deal_check" | "feasibility";
+      content_type?: "deal_check" | "feasibility" | "inline";
       target_language?: string;
+      payload?: Record<string, string>;
     };
 
     if (
-      !listing_id ||
       !content_type ||
       !target_language ||
       !ALLOWED_LANGUAGES.has(target_language) ||
-      !["deal_check", "feasibility"].includes(content_type)
+      !["deal_check", "feasibility", "inline"].includes(content_type)
     ) {
-      return new Response(
-        JSON.stringify({ error: "Invalid params" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return jsonResponse({ error: "Invalid params" }, 400);
+    }
+
+    // inline mode: translate an arbitrary flat string→string map without any DB lookup or persistence.
+    if (content_type === "inline") {
+      if (!payload || typeof payload !== "object") {
+        return jsonResponse({ error: "Missing payload" }, 400);
+      }
+      // Filter out empty / non-string values
+      const clean: Record<string, string> = {};
+      for (const [k, v] of Object.entries(payload)) {
+        if (typeof v === "string" && v.trim().length > 0) clean[k] = v;
+      }
+      if (Object.keys(clean).length === 0) {
+        return jsonResponse({ translated: {}, from_cache: false });
+      }
+      try {
+        const translated = await translateWithGemini(clean, target_language);
+        return jsonResponse({ translated, from_cache: false });
+      } catch (err) {
+        return mapTranslationError(err);
+      }
+    }
+
+    if (!listing_id) {
+      return jsonResponse({ error: "Missing listing_id" }, 400);
     }
 
     const supabase = createClient(
@@ -90,22 +121,38 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // For deal_check we read from listings.ai_analysis_cache.dealCheck (or ai_structure_validation legacy).
-    // For feasibility we read from feasibility_studies.study_data and persist back to that table's translations column.
-    if (content_type === "deal_check") {
-      return await handleDealCheck(supabase, listing_id, target_language);
-    } else {
-      return await handleFeasibility(supabase, listing_id, target_language);
+    try {
+      if (content_type === "deal_check") {
+        return await handleDealCheck(supabase, listing_id, target_language);
+      } else {
+        return await handleFeasibility(supabase, listing_id, target_language);
+      }
+    } catch (err) {
+      return mapTranslationError(err);
     }
   } catch (error) {
     console.error("translate-ai-content error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: message }, 500);
   }
 });
+
+function mapTranslationError(err: unknown): Response {
+  if (err instanceof TranslationError) {
+    if (err.code === "rate_limited") {
+      return jsonResponse({ error: "rate_limited", retry_after_ms: err.retryAfterMs ?? 2000 }, 429);
+    }
+    if (err.code === "quota_exceeded") {
+      return jsonResponse({ error: "quota_exceeded" }, 402);
+    }
+    if (err.code === "timeout") {
+      return jsonResponse({ error: "timeout" }, 504);
+    }
+  }
+  console.error("translate-ai-content unmapped error:", err);
+  const message = err instanceof Error ? err.message : "Unknown error";
+  return jsonResponse({ error: message }, 500);
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleDealCheck(supabase: any, listingId: string, lang: string) {
@@ -334,33 +381,53 @@ CRITICAL RULES:
 8. Return EXACTLY the same JSON keys as the input — do not add, remove, or rename keys.
 9. Output ONLY valid JSON. No markdown, no code fences.`;
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: JSON.stringify(fields, null, 2) },
-      ],
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TRANSLATION_TIMEOUT_MS);
 
-  if (response.status === 429) throw new Error("Rate limit exceeded, please try again later");
-  if (response.status === 402) throw new Error("AI credits exhausted, please add funds");
+  let response: Response;
+  try {
+    response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: JSON.stringify(fields, null, 2) },
+        ],
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+      }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if ((err as Error)?.name === "AbortError") {
+      throw new TranslationError("timeout", "Translation request timed out");
+    }
+    throw new TranslationError("unknown", (err as Error)?.message ?? "Network error");
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  if (response.status === 429) {
+    const retryAfterHeader = response.headers.get("retry-after");
+    const retryAfterMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : 2000;
+    throw new TranslationError("rate_limited", "Rate limit exceeded", retryAfterMs);
+  }
+  if (response.status === 402) {
+    throw new TranslationError("quota_exceeded", "AI credits exhausted");
+  }
   if (!response.ok) {
     const errText = await response.text().catch(() => "");
-    throw new Error(`Gemini API error ${response.status}: ${errText}`);
+    throw new TranslationError("unknown", `Gemini API error ${response.status}: ${errText}`);
   }
 
   const result = await response.json();
   const content = result?.choices?.[0]?.message?.content;
-  if (!content) throw new Error("Empty translation response");
+  if (!content) throw new TranslationError("unknown", "Empty translation response");
 
   try {
     return JSON.parse(content);

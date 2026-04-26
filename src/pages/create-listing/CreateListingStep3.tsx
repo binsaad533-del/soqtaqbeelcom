@@ -9,10 +9,12 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import AiStar from "@/components/AiStar";
 import SarSymbol from "@/components/SarSymbol";
 import { toEnglishNumerals } from "@/lib/arabicNumerals";
+import { useInventoryAnalysisTranslation } from "@/hooks/useInventoryAnalysisTranslation";
 import type { CreateListingSharedState } from "./sharedState";
 
 const getUrlExtension = (url: string) => {
@@ -74,6 +76,25 @@ const CreateListingStep3 = ({ state }: Props) => {
     editingItemId,
     setEditingItemId,
   } = state;
+
+  // Translate AI-generated inventory output (analysisSummary, dedup descriptions, item.name, item.detectionNote).
+  // For Arabic: pass-through. For other languages: fetch translation, fall back to AR on any error.
+  const {
+    analysisSummary: displaySummary,
+    dedupActions: displayDedup,
+    inventory: displayInventory,
+    isTranslating,
+  } = useInventoryAnalysisTranslation({
+    analysisSummary: analyzed ? analysisSummary : null,
+    dedupActions: analyzed ? dedupActions : [],
+    inventory: analyzed ? inventory : [],
+  });
+
+  // Quick lookup for translated names/notes by item id, since edits / qty changes still operate on raw `inventory`.
+  const translatedById = displayInventory.reduce<Record<string, { name: string; detectionNote: string }>>((acc, it) => {
+    acc[it.id] = { name: it.name, detectionNote: it.detectionNote };
+    return acc;
+  }, {});
 
   const allDocumentUrls = Object.values(uploadedDocs).flat();
   const excelDocumentCount = allDocumentUrls.filter((url) => ["xls", "xlsx", "xlsm", "xlsb"].includes(getUrlExtension(url))).length;
@@ -182,15 +203,30 @@ const CreateListingStep3 = ({ state }: Props) => {
               <Sparkles size={16} strokeWidth={1.5} className="text-primary" />
               <h2 className="font-medium text-sm">{t("createListing.step3.results.title")}</h2>
             </div>
-            {analysisSummary && <p className="text-xs text-muted-foreground leading-relaxed">{analysisSummary}</p>}
+            {isTranslating && analysisSummary ? (
+              <div className="space-y-1.5">
+                <Skeleton className="h-3 w-3/4 mx-auto" />
+                <Skeleton className="h-3 w-2/3 mx-auto" />
+              </div>
+            ) : (
+              displaySummary && <p className="text-xs text-muted-foreground leading-relaxed">{displaySummary}</p>
+            )}
           </div>
 
           {dedupActions.length > 0 && (
             <div className="bg-success/5 border border-success/20 rounded-xl p-3 space-y-1 animate-fade-in">
               <div className="text-xs font-medium text-success flex items-center gap-1.5"><Check size={14} /> {t("createListing.step3.results.dedupTitle")}</div>
-              {dedupActions.map((action, i) => (
-                <p key={i} className="text-[11px] text-success/80">{t("createListing.step3.results.dedupItem", { description: action.description, count: action.merged_count })}</p>
-              ))}
+              {isTranslating ? (
+                <div className="space-y-1.5 pt-1">
+                  {dedupActions.map((_, i) => (
+                    <Skeleton key={i} className="h-3 w-2/3" />
+                  ))}
+                </div>
+              ) : (
+                displayDedup.map((action, i) => (
+                  <p key={i} className="text-[11px] text-success/80">{t("createListing.step3.results.dedupItem", { description: action.description, count: action.merged_count })}</p>
+                ))
+              )}
             </div>
           )}
 
@@ -272,7 +308,13 @@ const CreateListingStep3 = ({ state }: Props) => {
                           className="text-xs bg-transparent border-b border-primary/30 outline-none w-full"
                         />
                       ) : (
-                        <div className="text-xs font-medium cursor-pointer hover:text-primary transition-colors truncate" onClick={() => setEditingItemId(item.id)}>{item.name}</div>
+                        <div className="text-xs font-medium cursor-pointer hover:text-primary transition-colors truncate" onClick={() => setEditingItemId(item.id)}>
+                          {isTranslating && translatedById[item.id]?.name === item.name && item.id && !item.id.startsWith("manual-") && !item.id.startsWith("file-") ? (
+                            <Skeleton className="h-3 w-32 inline-block align-middle" />
+                          ) : (
+                            translatedById[item.id]?.name ?? item.name
+                          )}
+                        </div>
                       )}
                       <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                         <span className="text-[10px] text-muted-foreground">{item.category}</span>
@@ -299,7 +341,15 @@ const CreateListingStep3 = ({ state }: Props) => {
                         {getConfidenceBadge(item.confidence)}
                         {item.isSameAssetMultipleAngles && <span className="text-[10px] px-1 py-0.5 rounded bg-primary/10 text-primary">{t("createListing.step3.results.multipleAngles")}</span>}
                       </div>
-                      {item.detectionNote && <div className="text-[10px] text-muted-foreground mt-0.5 italic leading-tight">{item.detectionNote}</div>}
+                      {item.detectionNote && (
+                        <div className="text-[10px] text-muted-foreground mt-0.5 italic leading-tight">
+                          {isTranslating && translatedById[item.id]?.detectionNote === item.detectionNote && item.id && !item.id.startsWith("manual-") && !item.id.startsWith("file-") ? (
+                            <Skeleton className="h-2.5 w-48" />
+                          ) : (
+                            translatedById[item.id]?.detectionNote ?? item.detectionNote
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <div className="flex items-center bg-muted/50 rounded-md h-7">
