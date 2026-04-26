@@ -185,7 +185,7 @@ const ListingEditDialogInner = ({ listing, open, onOpenChange, onUpdated, onDele
           });
         }
       } catch {
-        toast.error(`فشل رفع ${file.name}`);
+        toast.error(t("editListing.toasts.uploadFailed", { name: file.name }));
       }
     }
 
