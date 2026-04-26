@@ -552,9 +552,9 @@ const AiChatPage = () => {
 
     let text = hasText ? input : "";
     if (!hasText && hasFiles) {
-      if (hasImages && hasDocuments) text = "حلل هذه الملفات والصور";
-      else if (hasImages) text = "حلل هذه الصور";
-      else text = "حلل هذه الملفات";
+      if (hasImages && hasDocuments) text = t("aiChat.input.analyzeFilesAndImages");
+      else if (hasImages) text = t("aiChat.input.analyzeImages");
+      else text = t("aiChat.input.analyzeFiles");
     }
 
     const files = hasFiles ? [...pendingFiles] : undefined;
