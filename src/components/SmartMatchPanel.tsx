@@ -53,7 +53,7 @@ const SmartMatchPanel = () => {
     return (
       <div className="flex items-center justify-center gap-2 py-6">
         <Loader2 size={14} className="animate-spin text-primary" />
-        <span className="text-xs text-muted-foreground">جاري البحث عن فرص مطابقة...</span>
+        <span className="text-xs text-muted-foreground">{t("aiChat.emptyState.searching")}</span>
       </div>
     );
   }
