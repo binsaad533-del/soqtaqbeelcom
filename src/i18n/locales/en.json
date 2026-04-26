@@ -132,7 +132,13 @@
     "area": "Area:",
     "sqm": "sqm",
     "editPrice": "Edit price",
-    "editListing": "Edit listing"
+    "editListing": "Edit listing",
+    "priceUpdate": {
+      "invalidPrice": "Please enter a valid price",
+      "updateFailed": "Failed to update price",
+      "updateSuccess": "Price updated successfully",
+      "newPricePlaceholder": "New price"
+    }
   },
   "deal": {
     "mainOption": "Primary option",
@@ -1209,7 +1215,33 @@
     "title": "Moqbil Agent",
     "statusInactive": "Not enabled for this listing",
     "statusActive": "Active — running on this listing",
-    "settings": "Settings",
+    "settings": {
+      "label": "Settings",
+      "autoReplyTitle": "Auto-reply to inquiries",
+      "autoReplyDesc": "Moqbil replies to messages on your behalf",
+      "autoEvaluateTitle": "Auto-evaluate offers",
+      "autoEvaluateDesc": "Moqbil analyzes each offer and gives a recommendation",
+      "minPriceLabel": "Minimum acceptable price (SAR)",
+      "minPricePlaceholder": "e.g., 100000",
+      "autoRejectTitle": "Auto-reject below minimum",
+      "autoRejectDesc": "Automatically reject offers under the minimum",
+      "dailySummaryTitle": "Daily summary",
+      "dailySummaryDesc": "Moqbil sends you a daily summary",
+      "replyToneLabel": "Reply tone",
+      "tone": {
+        "professional": "Professional",
+        "friendly": "Friendly & simple",
+        "formal": "Formal",
+        "brief": "Brief & direct"
+      },
+      "noActions": "No actions yet",
+      "successResult": "Successful",
+      "actionLabels": {
+        "auto_reply": "Auto reply",
+        "evaluate_offer": "Offer evaluation",
+        "daily_summary": "Daily summary"
+      }
+    },
     "decisionLog": "Decision log",
     "toasts": {
       "saveFailed": "Failed to save settings",
@@ -1355,6 +1387,167 @@
       "noMeeting": "💬 I prefer to negotiate online",
       "firstMessage": "Hello, I'm interested in this opportunity and would like to know more.",
       "shortFirstMessage": "Hello, I'm interested in this opportunity"
+    },
+    "activeDealBadge": "You have an ongoing deal on this listing",
+    "goToNegotiation": "Go to negotiation",
+    "dealStatusNegotiating": "Negotiating",
+    "dealStatusFinalized": "Locked",
+    "authDialogTitle": "Sign in",
+    "authDialogDesc": "Sign in to contact the seller directly",
+    "authLogin": "Log in",
+    "authRegister": "Create new account",
+    "interestDialogDesc": "Send your first message to the seller and start negotiating",
+    "firstMessageLabel": "Your first message",
+    "seoDefaultTitle": "Listing details",
+    "seoDefaultDesc": "View Taqbeel opportunity details on Souq Taqbeel",
+    "seoBuilderSuffix": "Browse details and submit your offer on Souq Taqbeel",
+    "seoBuilderInPrefix": "in",
+    "seoBuilderPriced": "priced at",
+    "seoCurrencyLabel": "SAR",
+    "sellerSchemaName": "Souq Taqbeel",
+    "defaultCity": "Saudi Arabia",
+    "deleteConfirm": "Delete \"{{title}}\"? It cannot be recovered from here.",
+    "deleteThisListing": "this listing",
+    "statusToggleFailed": "Could not change listing status",
+    "listingPaused": "Listing paused temporarily",
+    "listingResumed": "Listing reactivated",
+    "deleteFailedFallback": "Could not delete listing",
+    "deleteSuccess": "Listing deleted"
+  },
+  "editListing": {
+    "title": "Edit listing",
+    "desc": "Edit the data and save — the deal will be re-analyzed automatically after saving",
+    "tabs": {
+      "basic": "Data",
+      "photos": "Photos",
+      "docs": "Documents",
+      "location": "Location",
+      "inventory": "Inventory"
+    },
+    "fields": {
+      "listingTitle": "Listing title",
+      "titlePlaceholder": "Custom title (optional)",
+      "description": "Description",
+      "descriptionPlaceholder": "Detailed description of the project...",
+      "businessActivity": "Business activity *",
+      "businessActivityPlaceholder": "Fast food restaurant",
+      "city": "City *",
+      "cityPlaceholder": "Riyadh",
+      "areaSqm": "Area (m²)",
+      "areaPlaceholder": "150",
+      "price": "Asking price *",
+      "pricePlaceholder": "180000",
+      "annualRent": "Annual rent",
+      "annualRentPlaceholder": "45000",
+      "leaseDuration": "Lease duration",
+      "leaseDurationPlaceholder": "3 years",
+      "leaseRemaining": "Remaining on lease",
+      "leaseRemainingPlaceholder": "1.5 years",
+      "liabilities": "Financial liabilities",
+      "liabilitiesPlaceholder": "None",
+      "overdueSalaries": "Overdue salaries",
+      "overdueSalariesPlaceholder": "None",
+      "overdueRent": "Overdue rent",
+      "overdueRentPlaceholder": "None",
+      "municipalityLicense": "Municipality license",
+      "civilDefenseLicense": "Civil defense",
+      "surveillanceCameras": "Surveillance cameras"
+    },
+    "selectPlaceholder": "Select...",
+    "licenseStatus": {
+      "active": "Valid",
+      "expired": "Expired",
+      "unavailable": "Not available"
+    },
+    "cameraStatus": {
+      "availableCompliant": "Available & compliant",
+      "availableNonCompliant": "Available, non-compliant",
+      "unavailable": "Not available"
+    },
+    "photos": {
+      "groups": {
+        "interior": "Interior",
+        "exterior": "Exterior",
+        "signage": "Signage",
+        "equipment": "Equipment",
+        "other": "Other"
+      },
+      "addBtn": "Add photos",
+      "dropHint": "Drag photos here or click \"Add photos\""
+    },
+    "docs": {
+      "dropHint": "Drag documents here or click to choose",
+      "types": "PDF, Excel, images, and more",
+      "filesCount": "{{count}} file(s)",
+      "defaultName": "Document {{n}}"
+    },
+    "location": {
+      "hint": "Search for the location or tap the map or drag the pin to set the exact location"
+    },
+    "inventory": {
+      "empty": "No items in inventory",
+      "name": "Name",
+      "quantity": "Qty",
+      "price": "Price",
+      "addItem": "Add item",
+      "defaultProject": "Project"
+    },
+    "actions": {
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "save": "Save changes"
+    },
+    "toasts": {
+      "requiredFields": "Please complete required fields: activity, city, and price",
+      "uploadFailed": "Failed to upload {{name}}",
+      "photosUploaded": "Uploaded {{count}} photo(s)",
+      "docsUploaded": "Uploaded {{count}} document(s)",
+      "saved": "Changes saved successfully",
+      "reanalyzing": "Running smart re-analysis...",
+      "reanalyzed": "Smart analysis updated successfully",
+      "deleteConfirm": "Are you sure you want to delete this listing? This action cannot be undone.",
+      "deleteFailed": "Failed to delete listing",
+      "deleted": "Listing deleted successfully"
+    }
+  },
+  "promoteListing": {
+    "title": "Promote listing",
+    "desc": "Make \"{{title}}\" appear at the top of the marketplace with a \"Featured\" badge",
+    "defaultTitle": "your listing",
+    "duration": {
+      "days3": "3 days",
+      "days7": "1 week",
+      "days30": "Full month"
+    },
+    "benefits": {
+      "top": "Your listing shows at the top of marketplace results",
+      "badge": "Gold \"Featured\" badge on the listing",
+      "priority": "Priority in smart-search results"
+    },
+    "cancel": "Cancel",
+    "promoteNow": "Promote now",
+    "promoting": "Promoting...",
+    "success": "Listing promoted for {{label}}",
+    "failed": "Promotion failed"
+  },
+  "sellerOffers": {
+    "title": "Price offers ({{count}})",
+    "newBadge": "{{count}} new",
+    "activeDeal": "Active deal",
+    "highest": "Highest",
+    "acceptedTag": "Accepted — active deal",
+    "goToNegotiation": "Go to negotiation",
+    "pendingHint": "Other offers are on hold until the current deal closes or is cancelled. If it falls through, you can come back and accept another offer.",
+    "pending": "On hold",
+    "acceptStart": "Accept & start negotiation",
+    "reject": "Reject",
+    "rejected": "Rejected",
+    "toasts": {
+      "alreadyAccepted": "An offer is already accepted — close or cancel the current deal first",
+      "acceptFailed": "Failed to accept offer",
+      "accepted": "Offer accepted ✅",
+      "rejectFailed": "Failed to reject offer",
+      "rejectedToast": "Offer rejected"
     }
   }
 }

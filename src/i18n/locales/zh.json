@@ -132,7 +132,13 @@
     "area": "面积:",
     "sqm": "平方米",
     "editPrice": "编辑价格",
-    "editListing": "编辑列表"
+    "editListing": "编辑列表",
+    "priceUpdate": {
+      "invalidPrice": "请输入有效价格",
+      "updateFailed": "价格更新失败",
+      "updateSuccess": "价格更新成功",
+      "newPricePlaceholder": "新价格"
+    }
   },
   "deal": {
     "mainOption": "主要选项",
@@ -1209,7 +1215,33 @@
     "title": "Moqbil 代理",
     "statusInactive": "未为此列表启用",
     "statusActive": "活跃 — 正在为此列表运行",
-    "settings": "设置",
+    "settings": {
+      "label": "设置",
+      "autoReplyTitle": "自动回复咨询",
+      "autoReplyDesc": "Moqbil 代您回复消息",
+      "autoEvaluateTitle": "自动评估报价",
+      "autoEvaluateDesc": "Moqbil 分析每个报价并提供建议",
+      "minPriceLabel": "最低可接受价格 (SAR)",
+      "minPricePlaceholder": "例如:100000",
+      "autoRejectTitle": "自动拒绝低于最低价的报价",
+      "autoRejectDesc": "自动拒绝低于最低限度的报价",
+      "dailySummaryTitle": "每日摘要",
+      "dailySummaryDesc": "Moqbil 每天向您发送摘要",
+      "replyToneLabel": "回复语气",
+      "tone": {
+        "professional": "专业",
+        "friendly": "友好简洁",
+        "formal": "正式",
+        "brief": "简短直接"
+      },
+      "noActions": "暂无操作",
+      "successResult": "成功",
+      "actionLabels": {
+        "auto_reply": "自动回复",
+        "evaluate_offer": "报价评估",
+        "daily_summary": "每日摘要"
+      }
+    },
     "decisionLog": "决策日志",
     "toasts": {
       "saveFailed": "保存设置失败",
@@ -1355,6 +1387,167 @@
       "noMeeting": "💬 我更喜欢线上协商",
       "firstMessage": "您好,我对这个机会感兴趣,想了解更多详情。",
       "shortFirstMessage": "您好,我对这个机会感兴趣"
+    },
+    "activeDealBadge": "您在此项目上有进行中的交易",
+    "goToNegotiation": "前往谈判",
+    "dealStatusNegotiating": "谈判中",
+    "dealStatusFinalized": "已锁定",
+    "authDialogTitle": "登录账户",
+    "authDialogDesc": "登录账户以直接联系卖家",
+    "authLogin": "登录",
+    "authRegister": "创建新账户",
+    "interestDialogDesc": "向卖家发送第一条消息并开始谈判",
+    "firstMessageLabel": "您的第一条消息",
+    "seoDefaultTitle": "项目详情",
+    "seoDefaultDesc": "在 Souq Taqbeel 查看接管机会详情",
+    "seoBuilderSuffix": "浏览详情并在 Souq Taqbeel 提交报价",
+    "seoBuilderInPrefix": "位于",
+    "seoBuilderPriced": "价格",
+    "seoCurrencyLabel": "SAR",
+    "sellerSchemaName": "Souq Taqbeel",
+    "defaultCity": "沙特阿拉伯",
+    "deleteConfirm": "删除\"{{title}}\"?将无法从此处恢复。",
+    "deleteThisListing": "此项目",
+    "statusToggleFailed": "无法更改项目状态",
+    "listingPaused": "项目已暂停",
+    "listingResumed": "项目已重新激活",
+    "deleteFailedFallback": "无法删除项目",
+    "deleteSuccess": "项目已删除"
+  },
+  "editListing": {
+    "title": "编辑项目",
+    "desc": "编辑数据并保存 — 保存后将自动重新分析交易",
+    "tabs": {
+      "basic": "数据",
+      "photos": "图片",
+      "docs": "文件",
+      "location": "位置",
+      "inventory": "库存"
+    },
+    "fields": {
+      "listingTitle": "项目标题",
+      "titlePlaceholder": "自定义标题(可选)",
+      "description": "描述",
+      "descriptionPlaceholder": "项目详细描述...",
+      "businessActivity": "经营活动 *",
+      "businessActivityPlaceholder": "快餐店",
+      "city": "城市 *",
+      "cityPlaceholder": "利雅得",
+      "areaSqm": "面积 (m²)",
+      "areaPlaceholder": "150",
+      "price": "要价 *",
+      "pricePlaceholder": "180000",
+      "annualRent": "年租金",
+      "annualRentPlaceholder": "45000",
+      "leaseDuration": "租期",
+      "leaseDurationPlaceholder": "3 年",
+      "leaseRemaining": "剩余租期",
+      "leaseRemainingPlaceholder": "1.5 年",
+      "liabilities": "财务负债",
+      "liabilitiesPlaceholder": "无",
+      "overdueSalaries": "拖欠工资",
+      "overdueSalariesPlaceholder": "无",
+      "overdueRent": "拖欠租金",
+      "overdueRentPlaceholder": "无",
+      "municipalityLicense": "市政许可证",
+      "civilDefenseLicense": "民防许可",
+      "surveillanceCameras": "监控摄像头"
+    },
+    "selectPlaceholder": "选择...",
+    "licenseStatus": {
+      "active": "有效",
+      "expired": "已过期",
+      "unavailable": "无"
+    },
+    "cameraStatus": {
+      "availableCompliant": "可用且合规",
+      "availableNonCompliant": "可用但不合规",
+      "unavailable": "无"
+    },
+    "photos": {
+      "groups": {
+        "interior": "室内",
+        "exterior": "室外",
+        "signage": "招牌",
+        "equipment": "设备",
+        "other": "其他"
+      },
+      "addBtn": "添加图片",
+      "dropHint": "将图片拖至此处或点击\"添加图片\""
+    },
+    "docs": {
+      "dropHint": "将文件拖至此处或点击选择",
+      "types": "PDF、Excel、图片等",
+      "filesCount": "{{count}} 个文件",
+      "defaultName": "文件 {{n}}"
+    },
+    "location": {
+      "hint": "搜索位置、点击地图或拖动图钉以设置精确位置"
+    },
+    "inventory": {
+      "empty": "库存中无项目",
+      "name": "名称",
+      "quantity": "数量",
+      "price": "价格",
+      "addItem": "添加项目",
+      "defaultProject": "项目"
+    },
+    "actions": {
+      "delete": "删除",
+      "cancel": "取消",
+      "save": "保存更改"
+    },
+    "toasts": {
+      "requiredFields": "请填写必填字段:活动、城市和价格",
+      "uploadFailed": "上传 {{name}} 失败",
+      "photosUploaded": "已上传 {{count}} 张图片",
+      "docsUploaded": "已上传 {{count}} 个文件",
+      "saved": "更改已成功保存",
+      "reanalyzing": "正在进行智能重新分析...",
+      "reanalyzed": "智能分析已成功更新",
+      "deleteConfirm": "确定要删除此项目吗?此操作无法撤销。",
+      "deleteFailed": "删除项目失败",
+      "deleted": "项目已成功删除"
+    }
+  },
+  "promoteListing": {
+    "title": "推广项目",
+    "desc": "让\"{{title}}\"出现在市场顶部并带有\"精选\"徽章",
+    "defaultTitle": "您的项目",
+    "duration": {
+      "days3": "3 天",
+      "days7": "1 周",
+      "days30": "整月"
+    },
+    "benefits": {
+      "top": "您的项目显示在市场结果顶部",
+      "badge": "项目上的金色\"精选\"徽章",
+      "priority": "智能搜索结果中的优先权"
+    },
+    "cancel": "取消",
+    "promoteNow": "立即推广",
+    "promoting": "推广中...",
+    "success": "项目已推广 {{label}}",
+    "failed": "推广失败"
+  },
+  "sellerOffers": {
+    "title": "价格报价 ({{count}})",
+    "newBadge": "{{count}} 新",
+    "activeDeal": "进行中的交易",
+    "highest": "最高",
+    "acceptedTag": "已接受 — 进行中",
+    "goToNegotiation": "前往谈判",
+    "pendingHint": "其他报价将等待至当前交易完成或取消。如果交易未完成,您可以返回接受其他报价。",
+    "pending": "待定",
+    "acceptStart": "接受并开始谈判",
+    "reject": "拒绝",
+    "rejected": "已拒绝",
+    "toasts": {
+      "alreadyAccepted": "已有接受的报价 — 请先完成或取消当前交易",
+      "acceptFailed": "接受报价失败",
+      "accepted": "报价已接受 ✅",
+      "rejectFailed": "拒绝报价失败",
+      "rejectedToast": "报价已拒绝"
     }
   }
 }

@@ -132,7 +132,13 @@
     "area": "क्षेत्रफल:",
     "sqm": "वर्ग मीटर",
     "editPrice": "मूल्य संपादित करें",
-    "editListing": "लिस्टिंग संपादित करें"
+    "editListing": "लिस्टिंग संपादित करें",
+    "priceUpdate": {
+      "invalidPrice": "कृपया मान्य मूल्य दर्ज करें",
+      "updateFailed": "मूल्य अपडेट विफल",
+      "updateSuccess": "मूल्य सफलतापूर्वक अपडेट",
+      "newPricePlaceholder": "नया मूल्य"
+    }
   },
   "deal": {
     "mainOption": "मुख्य विकल्प",
@@ -1209,7 +1215,33 @@
     "title": "Moqbil एजेंट",
     "statusInactive": "इस लिस्टिंग के लिए सक्रिय नहीं",
     "statusActive": "सक्रिय — इस लिस्टिंग पर कार्यरत",
-    "settings": "सेटिंग्स",
+    "settings": {
+      "label": "सेटिंग्स",
+      "autoReplyTitle": "पूछताछ का स्वतः उत्तर",
+      "autoReplyDesc": "Moqbil आपकी ओर से संदेशों का उत्तर देता है",
+      "autoEvaluateTitle": "पेशकशों का स्वतः मूल्यांकन",
+      "autoEvaluateDesc": "Moqbil हर पेशकश का विश्लेषण कर अनुशंसा देता है",
+      "minPriceLabel": "न्यूनतम स्वीकार्य मूल्य (SAR)",
+      "minPricePlaceholder": "उदाहरण: 100000",
+      "autoRejectTitle": "न्यूनतम से कम पर स्वतः अस्वीकार",
+      "autoRejectDesc": "न्यूनतम से कम पेशकशें स्वतः अस्वीकार करें",
+      "dailySummaryTitle": "दैनिक सारांश",
+      "dailySummaryDesc": "Moqbil आपको रोज़ सारांश भेजता है",
+      "replyToneLabel": "उत्तर शैली",
+      "tone": {
+        "professional": "पेशेवर",
+        "friendly": "मैत्रीपूर्ण और सरल",
+        "formal": "औपचारिक",
+        "brief": "संक्षिप्त और सीधा"
+      },
+      "noActions": "अभी तक कोई कार्रवाई नहीं",
+      "successResult": "सफल",
+      "actionLabels": {
+        "auto_reply": "स्वतः उत्तर",
+        "evaluate_offer": "पेशकश मूल्यांकन",
+        "daily_summary": "दैनिक सारांश"
+      }
+    },
     "decisionLog": "निर्णय लॉग",
     "toasts": {
       "saveFailed": "सेटिंग्स सहेजने में विफल",
@@ -1355,6 +1387,167 @@
       "noMeeting": "💬 मुझे ऑनलाइन बातचीत बेहतर लगती है",
       "firstMessage": "नमस्ते, मुझे इस अवसर में रुचि है और मैं अधिक जानना चाहता हूं।",
       "shortFirstMessage": "नमस्ते, मुझे इस अवसर में रुचि है"
+    },
+    "activeDealBadge": "इस लिस्टिंग पर आपका एक चालू सौदा है",
+    "goToNegotiation": "बातचीत पर जाएँ",
+    "dealStatusNegotiating": "बातचीत जारी",
+    "dealStatusFinalized": "लॉक्ड",
+    "authDialogTitle": "साइन इन करें",
+    "authDialogDesc": "विक्रेता से सीधे संपर्क के लिए साइन इन करें",
+    "authLogin": "लॉग इन",
+    "authRegister": "नया खाता बनाएँ",
+    "interestDialogDesc": "विक्रेता को पहला संदेश भेजें और बातचीत शुरू करें",
+    "firstMessageLabel": "आपका पहला संदेश",
+    "seoDefaultTitle": "लिस्टिंग विवरण",
+    "seoDefaultDesc": "Souq Taqbeel पर अधिग्रहण अवसर के विवरण देखें",
+    "seoBuilderSuffix": "विवरण देखें और Souq Taqbeel पर अपनी पेशकश दें",
+    "seoBuilderInPrefix": "में",
+    "seoBuilderPriced": "कीमत",
+    "seoCurrencyLabel": "SAR",
+    "sellerSchemaName": "Souq Taqbeel",
+    "defaultCity": "सऊदी अरब",
+    "deleteConfirm": "\"{{title}}\" हटाएँ? इसे यहाँ से पुनर्प्राप्त नहीं किया जा सकेगा।",
+    "deleteThisListing": "यह लिस्टिंग",
+    "statusToggleFailed": "लिस्टिंग स्थिति बदली नहीं जा सकी",
+    "listingPaused": "लिस्टिंग अस्थायी रूप से रोकी गई",
+    "listingResumed": "लिस्टिंग पुनः सक्रिय",
+    "deleteFailedFallback": "लिस्टिंग हटाई नहीं जा सकी",
+    "deleteSuccess": "लिस्टिंग हटा दी गई"
+  },
+  "editListing": {
+    "title": "लिस्टिंग संपादित करें",
+    "desc": "डेटा संपादित करें और सहेजें — सहेजने के बाद सौदे का स्वतः पुनः विश्लेषण होगा",
+    "tabs": {
+      "basic": "डेटा",
+      "photos": "तस्वीरें",
+      "docs": "दस्तावेज़",
+      "location": "स्थान",
+      "inventory": "इन्वेंटरी"
+    },
+    "fields": {
+      "listingTitle": "लिस्टिंग शीर्षक",
+      "titlePlaceholder": "कस्टम शीर्षक (वैकल्पिक)",
+      "description": "विवरण",
+      "descriptionPlaceholder": "परियोजना का विस्तृत विवरण...",
+      "businessActivity": "व्यावसायिक गतिविधि *",
+      "businessActivityPlaceholder": "फास्ट फूड रेस्तरां",
+      "city": "शहर *",
+      "cityPlaceholder": "रियाद",
+      "areaSqm": "क्षेत्रफल (m²)",
+      "areaPlaceholder": "150",
+      "price": "मांगा गया मूल्य *",
+      "pricePlaceholder": "180000",
+      "annualRent": "वार्षिक किराया",
+      "annualRentPlaceholder": "45000",
+      "leaseDuration": "पट्टे की अवधि",
+      "leaseDurationPlaceholder": "3 वर्ष",
+      "leaseRemaining": "पट्टे का शेष",
+      "leaseRemainingPlaceholder": "1.5 वर्ष",
+      "liabilities": "वित्तीय देनदारियाँ",
+      "liabilitiesPlaceholder": "कोई नहीं",
+      "overdueSalaries": "बकाया वेतन",
+      "overdueSalariesPlaceholder": "कोई नहीं",
+      "overdueRent": "बकाया किराया",
+      "overdueRentPlaceholder": "कोई नहीं",
+      "municipalityLicense": "नगर पालिका लाइसेंस",
+      "civilDefenseLicense": "नागरिक सुरक्षा",
+      "surveillanceCameras": "निगरानी कैमरे"
+    },
+    "selectPlaceholder": "चुनें...",
+    "licenseStatus": {
+      "active": "वैध",
+      "expired": "समाप्त",
+      "unavailable": "उपलब्ध नहीं"
+    },
+    "cameraStatus": {
+      "availableCompliant": "उपलब्ध और अनुपालित",
+      "availableNonCompliant": "उपलब्ध, गैर-अनुपालित",
+      "unavailable": "उपलब्ध नहीं"
+    },
+    "photos": {
+      "groups": {
+        "interior": "अंदरूनी",
+        "exterior": "बाहरी",
+        "signage": "साइनेज",
+        "equipment": "उपकरण",
+        "other": "अन्य"
+      },
+      "addBtn": "तस्वीरें जोड़ें",
+      "dropHint": "तस्वीरें यहाँ खींचें या \"तस्वीरें जोड़ें\" दबाएँ"
+    },
+    "docs": {
+      "dropHint": "दस्तावेज़ यहाँ खींचें या चुनने के लिए दबाएँ",
+      "types": "PDF, Excel, तस्वीरें, और अधिक",
+      "filesCount": "{{count}} फ़ाइलें",
+      "defaultName": "दस्तावेज़ {{n}}"
+    },
+    "location": {
+      "hint": "स्थान खोजें या मानचित्र पर दबाएँ या सटीक स्थान सेट करने के लिए पिन खींचें"
+    },
+    "inventory": {
+      "empty": "इन्वेंटरी में कोई आइटम नहीं",
+      "name": "नाम",
+      "quantity": "मात्रा",
+      "price": "मूल्य",
+      "addItem": "आइटम जोड़ें",
+      "defaultProject": "परियोजना"
+    },
+    "actions": {
+      "delete": "हटाएँ",
+      "cancel": "रद्द करें",
+      "save": "परिवर्तन सहेजें"
+    },
+    "toasts": {
+      "requiredFields": "कृपया आवश्यक फ़ील्ड पूरे करें: गतिविधि, शहर और मूल्य",
+      "uploadFailed": "{{name}} अपलोड विफल",
+      "photosUploaded": "{{count}} तस्वीर अपलोड",
+      "docsUploaded": "{{count}} दस्तावेज़ अपलोड",
+      "saved": "परिवर्तन सफलतापूर्वक सहेजे गए",
+      "reanalyzing": "स्मार्ट पुनर्विश्लेषण चल रहा है...",
+      "reanalyzed": "स्मार्ट विश्लेषण सफलतापूर्वक अपडेट",
+      "deleteConfirm": "क्या आप वाकई इस लिस्टिंग को हटाना चाहते हैं? यह कार्रवाई पूर्ववत नहीं की जा सकती।",
+      "deleteFailed": "लिस्टिंग हटाने में विफल",
+      "deleted": "लिस्टिंग सफलतापूर्वक हटाई गई"
+    }
+  },
+  "promoteListing": {
+    "title": "लिस्टिंग को बढ़ावा दें",
+    "desc": "\"{{title}}\" को मार्केटप्लेस में शीर्ष पर \"फीचर्ड\" बैज के साथ दिखाएँ",
+    "defaultTitle": "आपकी लिस्टिंग",
+    "duration": {
+      "days3": "3 दिन",
+      "days7": "1 सप्ताह",
+      "days30": "पूरा महीना"
+    },
+    "benefits": {
+      "top": "आपकी लिस्टिंग मार्केटप्लेस परिणामों के शीर्ष पर दिखती है",
+      "badge": "लिस्टिंग पर सुनहरा \"फीचर्ड\" बैज",
+      "priority": "स्मार्ट खोज परिणामों में प्राथमिकता"
+    },
+    "cancel": "रद्द करें",
+    "promoteNow": "अभी बढ़ावा दें",
+    "promoting": "बढ़ावा दिया जा रहा है...",
+    "success": "लिस्टिंग को {{label}} के लिए बढ़ावा दिया गया",
+    "failed": "बढ़ावा विफल"
+  },
+  "sellerOffers": {
+    "title": "मूल्य पेशकशें ({{count}})",
+    "newBadge": "{{count}} नई",
+    "activeDeal": "चालू सौदा",
+    "highest": "उच्चतम",
+    "acceptedTag": "स्वीकृत — चालू सौदा",
+    "goToNegotiation": "बातचीत पर जाएँ",
+    "pendingHint": "अन्य पेशकशें वर्तमान सौदे के पूरा होने या रद्द होने तक प्रतीक्षारत हैं। यदि सौदा नहीं हुआ तो आप वापस आकर दूसरी पेशकश स्वीकार कर सकते हैं।",
+    "pending": "प्रतीक्षारत",
+    "acceptStart": "स्वीकारें और बातचीत शुरू करें",
+    "reject": "अस्वीकारें",
+    "rejected": "अस्वीकृत",
+    "toasts": {
+      "alreadyAccepted": "एक पेशकश पहले से स्वीकृत है — पहले वर्तमान सौदा पूरा करें या रद्द करें",
+      "acceptFailed": "पेशकश स्वीकार करने में विफल",
+      "accepted": "पेशकश स्वीकृत ✅",
+      "rejectFailed": "पेशकश अस्वीकार करने में विफल",
+      "rejectedToast": "पेशकश अस्वीकृत"
     }
   }
 }

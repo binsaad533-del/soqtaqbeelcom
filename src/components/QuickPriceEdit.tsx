@@ -26,16 +26,16 @@ const QuickPriceEdit = ({ listingId, currentPrice, onUpdated, className }: Quick
   const handleSave = async () => {
     const numPrice = Number(price);
     if (!price || isNaN(numPrice) || numPrice <= 0) {
-      toast.error("يرجى إدخال سعر صالح");
+      toast.error(t("listing.priceUpdate.invalidPrice"));
       return;
     }
     setSaving(true);
     const { error } = await updateListing(listingId, { price: numPrice } as never);
     setSaving(false);
     if (error) {
-      toast.error("فشل تحديث السعر");
+      toast.error(t("listing.priceUpdate.updateFailed"));
     } else {
-      toast.success("تم تحديث السعر بنجاح");
+      toast.success(t("listing.priceUpdate.updateSuccess"));
       setEditing(false);
       queryClient.invalidateQueries({ queryKey: ["listing", listingId] });
       queryClient.invalidateQueries({ queryKey: ["listings"] });
@@ -72,7 +72,7 @@ const QuickPriceEdit = ({ listingId, currentPrice, onUpdated, className }: Quick
           }}
           autoFocus
           className="w-full px-3 py-1.5 rounded-lg border border-primary/30 bg-background text-sm focus:outline-none focus:ring-1 focus:ring-primary/20"
-          placeholder="السعر الجديد"
+          placeholder={t("listing.priceUpdate.newPricePlaceholder")}
         />
         <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground"><SarSymbol size={10} /></span>
       </div>

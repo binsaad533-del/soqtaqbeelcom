@@ -98,9 +98,9 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
   };
 
   const actionLabels: Record<string, string> = {
-    auto_reply: "رد تلقائي",
-    evaluate_offer: "تقييم عرض",
-    daily_summary: "ملخص يومي",
+    auto_reply: t("moqbilAgent.settings.actionLabels.auto_reply"),
+    evaluate_offer: t("moqbilAgent.settings.actionLabels.evaluate_offer"),
+    daily_summary: t("moqbilAgent.settings.actionLabels.daily_summary"),
   };
 
   return (
@@ -135,7 +135,7 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
             view === "settings" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
           )}
         >
-          <Settings size={11} className="inline mr-1" /> {t("moqbilAgent.settings")}
+          <Settings size={11} className="inline mr-1" /> {t("moqbilAgent.settings.label")}
         </button>
         <button
           onClick={() => { setView("history"); loadActions(); }}
@@ -152,8 +152,8 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
           {/* Auto reply */}
           <div className="flex items-center justify-between p-2.5 rounded-xl border border-border/30">
             <div>
-              <span className="text-xs font-medium">الرد التلقائي على الاستفسارات</span>
-              <p className="text-[10px] text-muted-foreground">مقبل يرد على الرسائل بالنيابة عنك</p>
+              <span className="text-xs font-medium">{t("moqbilAgent.settings.autoReplyTitle")}</span>
+              <p className="text-[10px] text-muted-foreground">{t("moqbilAgent.settings.autoReplyDesc")}</p>
             </div>
             <Switch
               checked={settings.auto_reply_inquiries}
@@ -164,8 +164,8 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
           {/* Auto evaluate offers */}
           <div className="flex items-center justify-between p-2.5 rounded-xl border border-border/30">
             <div>
-              <span className="text-xs font-medium">تقييم العروض تلقائياً</span>
-              <p className="text-[10px] text-muted-foreground">مقبل يحلل كل عرض ويعطيك توصية</p>
+              <span className="text-xs font-medium">{t("moqbilAgent.settings.autoEvaluateTitle")}</span>
+              <p className="text-[10px] text-muted-foreground">{t("moqbilAgent.settings.autoEvaluateDesc")}</p>
             </div>
             <Switch
               checked={settings.auto_evaluate_offers}
@@ -175,13 +175,13 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
 
           {/* Min price */}
           <div className="p-2.5 rounded-xl border border-border/30 space-y-1.5">
-            <span className="text-xs font-medium">الحد الأدنى المقبول (ر.س)</span>
+            <span className="text-xs font-medium">{t("moqbilAgent.settings.minPriceLabel")}</span>
             <input
               type="number"
               value={settings.min_acceptable_price || ""}
               onChange={(e) => setSettings({ ...settings, min_acceptable_price: e.target.value ? Number(e.target.value) : null })}
               onBlur={() => saveSettings({ min_acceptable_price: settings.min_acceptable_price })}
-              placeholder="مثال: 100000"
+              placeholder={t("moqbilAgent.settings.minPricePlaceholder")}
               className="w-full px-2.5 py-1.5 rounded-lg border border-border/50 bg-background text-xs"
             />
           </div>
@@ -189,8 +189,8 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
           {/* Auto reject */}
           <div className="flex items-center justify-between p-2.5 rounded-xl border border-border/30">
             <div>
-              <span className="text-xs font-medium">رفض تلقائي تحت الحد الأدنى</span>
-              <p className="text-[10px] text-muted-foreground">رفض العروض الأقل من الحد بشكل تلقائي</p>
+              <span className="text-xs font-medium">{t("moqbilAgent.settings.autoRejectTitle")}</span>
+              <p className="text-[10px] text-muted-foreground">{t("moqbilAgent.settings.autoRejectDesc")}</p>
             </div>
             <Switch
               checked={settings.auto_reject_below_min}
@@ -201,8 +201,8 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
           {/* Daily summary */}
           <div className="flex items-center justify-between p-2.5 rounded-xl border border-border/30">
             <div>
-              <span className="text-xs font-medium">ملخص يومي</span>
-              <p className="text-[10px] text-muted-foreground">مقبل يرسلك ملخص كل يوم</p>
+              <span className="text-xs font-medium">{t("moqbilAgent.settings.dailySummaryTitle")}</span>
+              <p className="text-[10px] text-muted-foreground">{t("moqbilAgent.settings.dailySummaryDesc")}</p>
             </div>
             <Switch
               checked={settings.daily_summary}
@@ -212,7 +212,7 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
 
           {/* Response tone */}
           <div className="p-2.5 rounded-xl border border-border/30 space-y-1.5">
-            <span className="text-xs font-medium">أسلوب الرد</span>
+            <span className="text-xs font-medium">{t("moqbilAgent.settings.replyToneLabel")}</span>
             <Select
               dir="rtl"
               value={settings.preferred_response_tone}
@@ -222,10 +222,10 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="professional">مهني واحترافي</SelectItem>
-                <SelectItem value="friendly">ودود وبسيط</SelectItem>
-                <SelectItem value="formal">رسمي</SelectItem>
-                <SelectItem value="brief">مختصر ومباشر</SelectItem>
+                <SelectItem value="professional">{t("moqbilAgent.settings.tone.professional")}</SelectItem>
+                <SelectItem value="friendly">{t("moqbilAgent.settings.tone.friendly")}</SelectItem>
+                <SelectItem value="formal">{t("moqbilAgent.settings.tone.formal")}</SelectItem>
+                <SelectItem value="brief">{t("moqbilAgent.settings.tone.brief")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -235,7 +235,7 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
       {view === "history" && (
         <div className="space-y-2 max-h-[300px] overflow-y-auto">
           {actions.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">لا توجد إجراءات بعد</p>
+            <p className="text-xs text-muted-foreground text-center py-4">{t("moqbilAgent.settings.noActions")}</p>
           ) : (
             actions.map((action) => (
               <div key={action.id} className="p-2.5 rounded-xl border border-border/30 text-[11px]">
@@ -250,13 +250,13 @@ const MoqbilAgentPanel = ({ listingId, className }: Props) => {
                 <p className="text-muted-foreground">
                   {action.action_type === "auto_reply" && action.action_details?.reply?.slice(0, 80)}
                   {action.action_type === "evaluate_offer" && action.action_details?.recommendation}
-                  {action.action_type === "daily_summary" && `عروض: ${action.action_details?.new_offers || 0} | رسائل: ${action.action_details?.new_messages || 0}`}
+                  {action.action_type === "daily_summary" && `${action.action_details?.new_offers || 0} / ${action.action_details?.new_messages || 0}`}
                 </p>
                 <span className={cn(
                   "text-[9px] px-1.5 py-0.5 rounded-full mt-1 inline-block",
                   action.result === "success" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                 )}>
-                  {action.result === "success" ? "تم بنجاح" : action.result}
+                  {action.result === "success" ? t("moqbilAgent.settings.successResult") : action.result}
                 </span>
               </div>
             ))

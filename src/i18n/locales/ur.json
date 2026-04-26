@@ -132,7 +132,13 @@
     "area": "رقبہ:",
     "sqm": "مربع میٹر",
     "editPrice": "قیمت میں ترمیم کریں",
-    "editListing": "اشتہار میں ترمیم کریں"
+    "editListing": "اشتہار میں ترمیم کریں",
+    "priceUpdate": {
+      "invalidPrice": "براہ کرم درست قیمت درج کریں",
+      "updateFailed": "قیمت اپڈیٹ ناکام",
+      "updateSuccess": "قیمت کامیابی سے اپڈیٹ",
+      "newPricePlaceholder": "نئی قیمت"
+    }
   },
   "deal": {
     "mainOption": "بنیادی آپشن",
@@ -1209,7 +1215,33 @@
     "title": "Moqbil ایجنٹ",
     "statusInactive": "اس اشتہار کے لیے فعال نہیں",
     "statusActive": "فعال — اس اشتہار پر کام کر رہا ہے",
-    "settings": "ترتیبات",
+    "settings": {
+      "label": "ترتیبات",
+      "autoReplyTitle": "استفسار کا خودکار جواب",
+      "autoReplyDesc": "Moqbil آپ کی طرف سے پیغامات کا جواب دیتا ہے",
+      "autoEvaluateTitle": "پیشکشوں کی خودکار تشخیص",
+      "autoEvaluateDesc": "Moqbil ہر پیشکش کا تجزیہ کر کے سفارش دیتا ہے",
+      "minPriceLabel": "کم از کم قابلِ قبول قیمت (SAR)",
+      "minPricePlaceholder": "مثال: 100000",
+      "autoRejectTitle": "کم از کم سے کم پر خودکار رد",
+      "autoRejectDesc": "کم از کم سے کم پیشکشیں خودکار رد کریں",
+      "dailySummaryTitle": "روزانہ خلاصہ",
+      "dailySummaryDesc": "Moqbil آپ کو روزانہ خلاصہ بھیجتا ہے",
+      "replyToneLabel": "جواب کا انداز",
+      "tone": {
+        "professional": "پیشہ ورانہ",
+        "friendly": "دوستانہ اور سادہ",
+        "formal": "رسمی",
+        "brief": "مختصر اور دو ٹوک"
+      },
+      "noActions": "ابھی تک کوئی کارروائی نہیں",
+      "successResult": "کامیاب",
+      "actionLabels": {
+        "auto_reply": "خودکار جواب",
+        "evaluate_offer": "پیشکش کی تشخیص",
+        "daily_summary": "روزانہ خلاصہ"
+      }
+    },
     "decisionLog": "فیصلہ لاگ",
     "toasts": {
       "saveFailed": "ترتیبات محفوظ کرنے میں ناکامی",
@@ -1355,6 +1387,167 @@
       "noMeeting": "💬 مجھے آن لائن گفتگو پسند ہے",
       "firstMessage": "السلام علیکم، مجھے اس موقع میں دلچسپی ہے اور میں مزید جاننا چاہتا ہوں۔",
       "shortFirstMessage": "السلام علیکم، مجھے اس موقع میں دلچسپی ہے"
+    },
+    "activeDealBadge": "اس اشتہار پر آپ کا ایک جاری سودا ہے",
+    "goToNegotiation": "مذاکرات پر جائیں",
+    "dealStatusNegotiating": "مذاکرات جاری",
+    "dealStatusFinalized": "مقفل",
+    "authDialogTitle": "سائن ان کریں",
+    "authDialogDesc": "بیچنے والے سے براہِ راست رابطے کے لیے سائن ان کریں",
+    "authLogin": "لاگ ان",
+    "authRegister": "نیا اکاؤنٹ بنائیں",
+    "interestDialogDesc": "بیچنے والے کو پہلا پیغام بھیجیں اور مذاکرات شروع کریں",
+    "firstMessageLabel": "آپ کا پہلا پیغام",
+    "seoDefaultTitle": "اشتہار کی تفصیلات",
+    "seoDefaultDesc": "Souq Taqbeel پر اقتدار حاصل کرنے کے موقع کی تفصیلات دیکھیں",
+    "seoBuilderSuffix": "تفصیلات دیکھیں اور Souq Taqbeel پر اپنی پیشکش جمع کرائیں",
+    "seoBuilderInPrefix": "میں",
+    "seoBuilderPriced": "قیمت",
+    "seoCurrencyLabel": "SAR",
+    "sellerSchemaName": "Souq Taqbeel",
+    "defaultCity": "سعودی عرب",
+    "deleteConfirm": "\"{{title}}\" کو حذف کریں؟ یہاں سے بحال نہیں ہو سکے گا۔",
+    "deleteThisListing": "یہ اشتہار",
+    "statusToggleFailed": "اشتہار کی حیثیت تبدیل نہیں ہو سکی",
+    "listingPaused": "اشتہار عارضی طور پر روک دیا گیا",
+    "listingResumed": "اشتہار دوبارہ فعال ہوگیا",
+    "deleteFailedFallback": "اشتہار حذف نہیں ہو سکا",
+    "deleteSuccess": "اشتہار حذف ہو گیا"
+  },
+  "editListing": {
+    "title": "اشتہار میں ترمیم کریں",
+    "desc": "ڈیٹا میں ترمیم کر کے محفوظ کریں — محفوظ کرنے کے بعد سودے کا خودکار دوبارہ تجزیہ ہوگا",
+    "tabs": {
+      "basic": "ڈیٹا",
+      "photos": "تصاویر",
+      "docs": "دستاویزات",
+      "location": "مقام",
+      "inventory": "انوینٹری"
+    },
+    "fields": {
+      "listingTitle": "اشتہار کا عنوان",
+      "titlePlaceholder": "حسبِ ضرورت عنوان (اختیاری)",
+      "description": "تفصیل",
+      "descriptionPlaceholder": "منصوبے کی تفصیلی وضاحت...",
+      "businessActivity": "کاروباری سرگرمی *",
+      "businessActivityPlaceholder": "فاسٹ فوڈ ریسٹورنٹ",
+      "city": "شہر *",
+      "cityPlaceholder": "ریاض",
+      "areaSqm": "رقبہ (m²)",
+      "areaPlaceholder": "150",
+      "price": "مطلوبہ قیمت *",
+      "pricePlaceholder": "180000",
+      "annualRent": "سالانہ کرایہ",
+      "annualRentPlaceholder": "45000",
+      "leaseDuration": "اجارے کی مدت",
+      "leaseDurationPlaceholder": "3 سال",
+      "leaseRemaining": "اجارے کی بقیہ مدت",
+      "leaseRemainingPlaceholder": "1.5 سال",
+      "liabilities": "مالی واجبات",
+      "liabilitiesPlaceholder": "کوئی نہیں",
+      "overdueSalaries": "بقایا تنخواہیں",
+      "overdueSalariesPlaceholder": "کوئی نہیں",
+      "overdueRent": "بقایا کرایہ",
+      "overdueRentPlaceholder": "کوئی نہیں",
+      "municipalityLicense": "بلدیہ کا لائسنس",
+      "civilDefenseLicense": "سول ڈیفنس",
+      "surveillanceCameras": "نگرانی کیمرے"
+    },
+    "selectPlaceholder": "منتخب کریں...",
+    "licenseStatus": {
+      "active": "موثر",
+      "expired": "ختم",
+      "unavailable": "دستیاب نہیں"
+    },
+    "cameraStatus": {
+      "availableCompliant": "دستیاب اور موافق",
+      "availableNonCompliant": "دستیاب، غیر موافق",
+      "unavailable": "دستیاب نہیں"
+    },
+    "photos": {
+      "groups": {
+        "interior": "اندرونی",
+        "exterior": "بیرونی",
+        "signage": "سائن بورڈ",
+        "equipment": "سامان",
+        "other": "دیگر"
+      },
+      "addBtn": "تصاویر شامل کریں",
+      "dropHint": "تصاویر یہاں کھینچیں یا \"تصاویر شامل کریں\" دبائیں"
+    },
+    "docs": {
+      "dropHint": "دستاویزات یہاں کھینچیں یا منتخب کرنے کے لیے دبائیں",
+      "types": "PDF، Excel، تصاویر اور دیگر",
+      "filesCount": "{{count}} فائلیں",
+      "defaultName": "دستاویز {{n}}"
+    },
+    "location": {
+      "hint": "مقام تلاش کریں یا نقشے پر دبائیں یا مقام مقرر کرنے کے لیے پن گھسیٹیں"
+    },
+    "inventory": {
+      "empty": "انوینٹری میں کوئی آئٹم نہیں",
+      "name": "نام",
+      "quantity": "تعداد",
+      "price": "قیمت",
+      "addItem": "آئٹم شامل کریں",
+      "defaultProject": "منصوبہ"
+    },
+    "actions": {
+      "delete": "حذف کریں",
+      "cancel": "منسوخ",
+      "save": "تبدیلیاں محفوظ کریں"
+    },
+    "toasts": {
+      "requiredFields": "براہِ کرم لازمی فیلڈز مکمل کریں: سرگرمی، شہر اور قیمت",
+      "uploadFailed": "{{name}} اپلوڈ ناکام",
+      "photosUploaded": "{{count}} تصاویر اپلوڈ ہوئیں",
+      "docsUploaded": "{{count}} دستاویزات اپلوڈ ہوئیں",
+      "saved": "تبدیلیاں کامیابی سے محفوظ ہو گئیں",
+      "reanalyzing": "ذہین دوبارہ تجزیہ جاری ہے...",
+      "reanalyzed": "ذہین تجزیہ کامیابی سے اپڈیٹ ہوا",
+      "deleteConfirm": "کیا آپ واقعی یہ اشتہار حذف کرنا چاہتے ہیں؟ یہ کارروائی واپس نہیں ہو سکتی۔",
+      "deleteFailed": "اشتہار حذف کرنے میں ناکام",
+      "deleted": "اشتہار کامیابی سے حذف ہو گیا"
+    }
+  },
+  "promoteListing": {
+    "title": "اشتہار کو فروغ دیں",
+    "desc": "\"{{title}}\" کو مارکیٹ پلیس کے سب سے اوپر \"نمایاں\" بیج کے ساتھ دکھائیں",
+    "defaultTitle": "آپ کا اشتہار",
+    "duration": {
+      "days3": "3 دن",
+      "days7": "1 ہفتہ",
+      "days30": "پورا مہینہ"
+    },
+    "benefits": {
+      "top": "آپ کا اشتہار مارکیٹ پلیس نتائج میں سب سے اوپر دکھائی دیتا ہے",
+      "badge": "اشتہار پر سنہری \"نمایاں\" بیج",
+      "priority": "ذہین تلاش کے نتائج میں ترجیح"
+    },
+    "cancel": "منسوخ",
+    "promoteNow": "ابھی فروغ دیں",
+    "promoting": "فروغ دیا جا رہا ہے...",
+    "success": "اشتہار {{label}} کے لیے فروغ دیا گیا",
+    "failed": "فروغ ناکام"
+  },
+  "sellerOffers": {
+    "title": "قیمت کی پیشکشیں ({{count}})",
+    "newBadge": "{{count}} نئی",
+    "activeDeal": "جاری سودا",
+    "highest": "بلند ترین",
+    "acceptedTag": "قبول — جاری سودا",
+    "goToNegotiation": "مذاکرات پر جائیں",
+    "pendingHint": "دیگر پیشکشیں موجودہ سودے کے مکمل ہونے یا منسوخ ہونے تک منتظر ہیں۔ اگر سودا نہ ہو سکا تو آپ واپس آ کر دوسری پیشکش قبول کر سکتے ہیں۔",
+    "pending": "زیرِ التواء",
+    "acceptStart": "قبول کریں اور مذاکرات شروع کریں",
+    "reject": "رد کریں",
+    "rejected": "رد شدہ",
+    "toasts": {
+      "alreadyAccepted": "ایک پیشکش پہلے ہی قبول ہے — پہلے موجودہ سودا مکمل یا منسوخ کریں",
+      "acceptFailed": "پیشکش قبول کرنے میں ناکام",
+      "accepted": "پیشکش قبول ہو گئی ✅",
+      "rejectFailed": "پیشکش رد کرنے میں ناکام",
+      "rejectedToast": "پیشکش رد ہو گئی"
     }
   }
 }
